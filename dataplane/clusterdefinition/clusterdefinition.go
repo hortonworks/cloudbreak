@@ -127,20 +127,20 @@ func FetchClusterDefinition(workspace int64, name string, client GetClusterDefin
 	return resp.Payload
 }
 
-func DeleteClusterDefinition(c *cli.Context) {
-	defer utils.TimeTrack(time.Now(), "delete cluster definition")
+func DeleteClusterDefinitions(c *cli.Context) {
+	defer utils.TimeTrack(time.Now(), "delete cluster definitions")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	deleteClusterDefinitionsImpl(cbClient.Cloudbreak.V4WorkspaceIDClusterDefinitions, c.Int64(fl.FlWorkspaceOptional.Name), c.String(fl.FlName.Name))
+	deleteClusterDefinitionsImpl(cbClient.Cloudbreak.V4WorkspaceIDClusterDefinitions, c.Int64(fl.FlWorkspaceOptional.Name), c.StringSlice(fl.FlNames.Name))
 }
 
-func deleteClusterDefinitionsImpl(client clusterDefinitionClient, workspace int64, name string) {
-	log.Infof("[deleteClusterDefinitionsImpl] sending delete cluster definition request with name: %s", name)
-	_, err := client.DeleteClusterDefinitionInWorkspace(v4bp.NewDeleteClusterDefinitionInWorkspaceParams().WithWorkspaceID(workspace).WithName(name))
+func deleteClusterDefinitionsImpl(client clusterDefinitionClient, workspace int64, names []string) {
+	log.Infof("[deleteClusterDefinitionsImpl] sending delete cluster definition request with names: %s", names)
+	_, err := client.DeleteClusterDefinitionsInWorkspace(v4bp.NewDeleteClusterDefinitionsInWorkspaceParams().WithWorkspaceID(workspace).WithBody(names))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	log.Infof("[deleteClusterDefinitionsImpl] cluster definition deleted, name: %s", name)
+	log.Infof("[deleteClusterDefinitionsImpl] cluster definitions deleted, names: %s", names)
 }
 
 func ListClusterDefinitions(c *cli.Context) {
@@ -155,7 +155,7 @@ func ListClusterDefinitions(c *cli.Context) {
 type clusterDefinitionClient interface {
 	CreateClusterDefinitionInWorkspace(params *v4bp.CreateClusterDefinitionInWorkspaceParams) (*v4bp.CreateClusterDefinitionInWorkspaceOK, error)
 	ListClusterDefinitionsByWorkspace(params *v4bp.ListClusterDefinitionsByWorkspaceParams) (*v4bp.ListClusterDefinitionsByWorkspaceOK, error)
-	DeleteClusterDefinitionInWorkspace(params *v4bp.DeleteClusterDefinitionInWorkspaceParams) (*v4bp.DeleteClusterDefinitionInWorkspaceOK, error)
+	DeleteClusterDefinitionsInWorkspace(params *v4bp.DeleteClusterDefinitionsInWorkspaceParams) (*v4bp.DeleteClusterDefinitionsInWorkspaceOK, error)
 }
 
 func listClusterDefinitionsImpl(workspace int64, client clusterDefinitionClient, writer func([]string, []utils.Row)) {

@@ -44,12 +44,12 @@ func init() {
 			},
 			{
 				Name:   "delete",
-				Usage:  "deletes a cluster definition",
-				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName).AddAuthenticationFlags().Build(),
+				Usage:  "deletes one or more cluster definitions",
+				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlNames).AddAuthenticationFlags().Build(),
 				Before: cf.CheckConfigAndCommandFlags,
-				Action: bp.DeleteClusterDefinition,
+				Action: bp.DeleteClusterDefinitions,
 				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName).AddAuthenticationFlags().Build() {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlNames).AddAuthenticationFlags().Build() {
 						fl.PrintFlagCompletion(f)
 					}
 				},

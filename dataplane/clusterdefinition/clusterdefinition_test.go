@@ -35,7 +35,7 @@ func (*mockClusterDefinitionsClient) CreateClusterDefinitionInWorkspace(params *
 	return &v4bp.CreateClusterDefinitionInWorkspaceOK{Payload: &model.ClusterDefinitionV4Response{ID: int64(1)}}, nil
 }
 
-func (*mockClusterDefinitionsClient) DeleteClusterDefinitionInWorkspace(params *v4bp.DeleteClusterDefinitionInWorkspaceParams) (*v4bp.DeleteClusterDefinitionInWorkspaceOK, error) {
+func (*mockClusterDefinitionsClient) DeleteClusterDefinitionsInWorkspace(params *v4bp.DeleteClusterDefinitionsInWorkspaceParams) (*v4bp.DeleteClusterDefinitionsInWorkspaceOK, error) {
 	return nil, nil
 }
 

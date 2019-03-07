@@ -87,6 +87,13 @@ var (
 			Usage: "name of resource",
 		},
 	}
+	FlNames = StringSliceFlag{
+		RequiredFlag: REQUIRED,
+		StringSliceFlag: cli.StringSliceFlag{
+			Name:  "name",
+			Usage: "name of resource (provide option once for each name)",
+		},
+	}
 	FlClusterToUpgrade = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
@@ -1171,6 +1178,11 @@ type StringFlag struct {
 	RequiredFlag
 }
 
+type StringSliceFlag struct {
+	cli.StringSliceFlag
+	RequiredFlag
+}
+
 type BoolFlag struct {
 	cli.BoolFlag
 	RequiredFlag
@@ -1218,8 +1230,15 @@ func CheckRequiredFlagsAndArguments(c *cli.Context) error {
 func checkRequiredFlags(c *cli.Context) error {
 	missingFlags := make([]string, 0)
 	for _, f := range c.Command.Flags {
-		if isRequired(f) && len(c.String(f.GetName())) == 0 {
-			missingFlags = append(missingFlags, f.GetName())
+		if isRequired(f) {
+			strf, ok := f.(StringFlag)
+			if ok && len(c.String(strf.GetName())) == 0 {
+				missingFlags = append(missingFlags, f.GetName())
+			}
+			strslf, ok := f.(StringSliceFlag)
+			if ok && len(c.StringSlice(strslf.GetName())) == 0 {
+				missingFlags = append(missingFlags, f.GetName())
+			}
 		}
 	}
 	if len(missingFlags) > 0 {
