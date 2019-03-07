@@ -2,39 +2,49 @@ package com.sequenceiq.cloudbreak.converter.v2;
 
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.convert.ConversionService;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.ambarirepository.AmbariRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
@@ -44,6 +54,7 @@ import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
@@ -54,11 +65,8 @@ import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ClusterV4RequestToClusterConverterTest {
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     @InjectMocks
     private ClusterV4RequestToClusterConverter underTest;
@@ -89,7 +97,7 @@ public class ClusterV4RequestToClusterConverterTest {
 
     private Workspace workspace;
 
-    @Before
+    @BeforeEach
     public void before() {
 
         workspace = new Workspace();
@@ -99,7 +107,7 @@ public class ClusterV4RequestToClusterConverterTest {
 
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
 
-        when(cloudStorageValidationUtil.isCloudStorageConfigured(any(CloudStorageV4Request.class))).thenReturn(false);
+        when(cloudStorageValidationUtil.isCloudStorageConfigured(nullable(CloudStorageV4Request.class))).thenReturn(false);
     }
 
     @Test
@@ -174,10 +182,8 @@ public class ClusterV4RequestToClusterConverterTest {
 
         source.setDatabases(rdsConfigNames);
 
-        expectedException.expect(NotFoundException.class);
-        expectedException.expectMessage("RDS config names dont exists");
-
-        underTest.convert(source);
+        Exception exception = assertThrows(NotFoundException.class, () -> underTest.convert(source));
+        assertEquals("RDS config names dont exists", exception.getMessage());
 
         verify(rdsConfigService, times(1)).findByNamesInWorkspace(rdsConfigNames, workspace.getId());
     }
@@ -198,6 +204,8 @@ public class ClusterV4RequestToClusterConverterTest {
 
     @Test
     public void testConvertWheClusterDefinitionDoesNotExists() {
+        Mockito.reset(cloudStorageValidationUtil);
+
         String clusterDefinitionName = "bp-name";
 
         ClusterV4Request source = new ClusterV4Request();
@@ -209,10 +217,8 @@ public class ClusterV4RequestToClusterConverterTest {
 
         when(clusterDefinitionService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(clusterDefinitionName, workspace)).thenReturn(null);
 
-        expectedException.expect(NotFoundException.class);
-        expectedException.expectMessage("Cluster definition does not exists by name: bp-name");
-
-        underTest.convert(source);
+        Exception exception = assertThrows(NotFoundException.class, () -> underTest.convert(source));
+        assertEquals("Cluster definition does not exists by name: bp-name", exception.getMessage());
     }
 
     @Test
@@ -309,5 +315,83 @@ public class ClusterV4RequestToClusterConverterTest {
         assertThat(actual.getGateway(), is(gateway));
 
         verify(conversionService, times(1)).convert(gatewayJson, Gateway.class);
+    }
+
+    @Test
+    public void testConvertWhenMultipleClusterManagersProvided() {
+        ClusterV4Request request = new ClusterV4Request();
+        request.setAmbari(new AmbariV4Request());
+        request.setCm(new ClouderaManagerV4Request());
+
+        Exception exception = assertThrows(BadRequestException.class, () -> underTest.convert(request));
+        assertEquals("Cannot determine cluster manager. More than one provided", exception.getMessage());
+    }
+
+    @Test
+    public void testConvertClouderaManagerRequestWithNullProductList() throws JsonProcessingException {
+        ClusterV4Request request = new ClusterV4Request();
+        ClouderaManagerV4Request cm = new ClouderaManagerV4Request();
+
+        ClouderaManagerRepositoryV4Request repository = new ClouderaManagerRepositoryV4Request();
+        repository.setBaseUrl("base.url");
+        repository.setVersion("1.0");
+        repository.setGpgKeyUrl("gpg.key.url");
+        cm.setRepository(repository);
+        request.setCm(cm);
+
+        Cluster cluster = underTest.convert(request);
+
+        assertFalse(cluster.getComponents().isEmpty());
+        assertEquals(1, cluster.getComponents().size());
+
+        ClusterComponent component = cluster.getComponents().iterator().next();
+        assertEquals(ComponentType.CM_REPO_DETAILS, component.getComponentType());
+
+        Json expectedRepoJson = new Json(repository);
+        assertEquals(expectedRepoJson, component.getAttributes());
+    }
+
+    @Test
+    public void testConvertClouderaManagerRequestWithNullRepo() throws JsonProcessingException {
+        ClusterV4Request request = new ClusterV4Request();
+        ClouderaManagerV4Request cm = new ClouderaManagerV4Request();
+
+        ClouderaManagerProductV4Request cdp = new ClouderaManagerProductV4Request();
+        cdp.setName("cdp");
+        cdp.setParcel("cdp.parcel");
+        cdp.setVersion("cdp.version");
+
+        ClouderaManagerProductV4Request cdf = new ClouderaManagerProductV4Request();
+        cdf.setName("cdf");
+        cdf.setParcel("cdf.parcel");
+        cdf.setVersion("cdf.version");
+
+        List<ClouderaManagerProductV4Request> products = List.of(cdp, cdf);
+        cm.setProducts(products);
+        request.setCm(cm);
+
+        Cluster cluster = underTest.convert(request);
+        assertFalse(cluster.getComponents().isEmpty());
+        assertEquals(2, cluster.getComponents().size());
+
+        assertAll(cluster.getComponents()
+                .stream()
+                .map(component -> () -> assertEquals(ComponentType.CDH_PRODUCT_DETAILS, component.getComponentType())));
+
+        List<Json> cdps = cluster.getComponents()
+                .stream().map(ClusterComponent::getAttributes).filter(attr -> attr.getValue().contains("cdp")).collect(Collectors.toList());
+
+        Json cdpJson = new Json(cdp);
+        assertAll(
+                () -> assertEquals(1, cdps.size()),
+                () -> assertEquals(cdpJson, cdps.iterator().next()));
+
+        List<Json> cdfs = cluster.getComponents()
+                .stream().map(ClusterComponent::getAttributes).filter(attr -> attr.getValue().contains("cdf")).collect(Collectors.toList());
+
+        Json cdfJson = new Json(cdf);
+        assertAll(
+                () -> assertEquals(1, cdfs.size()),
+                () -> assertEquals(cdfJson, cdfs.iterator().next()));
     }
 }

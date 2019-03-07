@@ -1,20 +1,17 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager;
 
-import org.springframework.stereotype.Component;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+public final class ClouderaManagerProductV4RequestToClouderaManagerProductConverter {
 
-@Component
-public class ClouderaManagerProductV4RequestToClouderaManagerProductConverter
-        extends AbstractConversionServiceAwareConverter<ClouderaManagerRepositoryV4Request, ClouderaManagerRepo> {
+    private ClouderaManagerProductV4RequestToClouderaManagerProductConverter() {
+    }
 
-    @Override
-    public ClouderaManagerRepo convert(ClouderaManagerRepositoryV4Request request) {
-        return new ClouderaManagerRepo()
-                .withBaseUrl(request.getBaseUrl())
-                .withGpgKeyUrl(request.getGpgKeyUrl())
+    public static ClouderaManagerProduct convert(ClouderaManagerProductV4Request request) {
+        return new ClouderaManagerProduct()
+                .withName(request.getName())
+                .withParcel(request.getParcel())
                 .withVersion(request.getVersion());
     }
 }
