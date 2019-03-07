@@ -28,8 +28,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.A
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.customcontainer.CustomContainerV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -37,6 +35,8 @@ import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.ClouderaManagerProductV4RequestToClouderaManagerProductConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.ClouderaManagerRepositoryV4RequestToClouderaManagerRepoConverter;
 import com.sequenceiq.cloudbreak.domain.ClusterAttributes;
 import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -122,6 +122,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         }
         updateDatabases(source, cluster, workspace);
         convertAmbariSpecificPart(source, cluster);
+        extractClusterManagerAndHdpRepoConfig(cluster, source);
         cluster.setProxyConfig(getProxyConfig(source.getProxyName(), workspace));
         cluster.setLdapConfig(getLdap(source.getLdapName(), workspace));
         return cluster;
@@ -131,7 +132,6 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         if (source.getAmbari() != null) {
             cluster.setConfigStrategy(source.getAmbari().getConfigStrategy());
             cluster.setAmbariSecurityMasterKey(source.getAmbari().getSecurityMasterKey());
-            extractClusterManagerAndHdpRepoConfig(cluster, source);
         }
     }
 
@@ -193,7 +193,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
 
         Optional.ofNullable(clouderaManagerV4Request)
                 .map(ClouderaManagerV4Request::getRepository)
-                .map(cmRepoRequest -> getConversionService().convert(cmRepoRequest, ClouderaManagerRepo.class))
+                .map(ClouderaManagerRepositoryV4RequestToClouderaManagerRepoConverter::convert)
                 .map(toJsonWrapException())
                 .map(cmRepoJson -> new ClusterComponent(ComponentType.CM_REPO_DETAILS, cmRepoJson, cluster))
                 .ifPresent(components::add);
@@ -202,7 +202,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
                 .map(ClouderaManagerV4Request::getProducts)
                 .orElseGet(List::of)
                 .stream()
-                .map(cmProductRequest -> getConversionService().convert(cmProductRequest, ClouderaManagerProduct.class))
+                .map(ClouderaManagerProductV4RequestToClouderaManagerProductConverter::convert)
                 .map(toJsonWrapException())
                 .map(cmRepoJson -> new ClusterComponent(ComponentType.CDH_PRODUCT_DETAILS, cmRepoJson, cluster))
                 .forEach(components::add);
