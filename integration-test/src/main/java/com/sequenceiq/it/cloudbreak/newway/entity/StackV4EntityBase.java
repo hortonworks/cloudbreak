@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AwsStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.GcpStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.MockStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -238,6 +239,11 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
 
     public StackV4EntityBase<T> withAws(AwsStackV4Parameters aws) {
         getRequest().setAws(aws);
+        return this;
+    }
+
+    public StackV4EntityBase<T> withGcp(GcpStackV4Parameters gcp) {
+        getRequest().setGcp(gcp);
         return this;
     }
 

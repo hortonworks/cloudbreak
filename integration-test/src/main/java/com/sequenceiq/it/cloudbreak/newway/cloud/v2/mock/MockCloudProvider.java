@@ -1,6 +1,6 @@
-package com.sequenceiq.it.cloudbreak.newway.cloud.v2.provider;
+package com.sequenceiq.it.cloudbreak.newway.cloud.v2.mock;
 
-import static com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.CommonCloudParameters.CREDENTIAL_DEFAULT_DESCRIPTION;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters.CREDENTIAL_DEFAULT_DESCRIPTION;
 
 import java.util.Collections;
 import java.util.Set;
@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.M
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.MockStackV4Parameters;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.MockParameters;
+import com.sequenceiq.it.cloudbreak.newway.cloud.v2.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogTestDto;
@@ -191,8 +191,6 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     private MockStackV4Parameters mockStackParameters() {
-        MockStackV4Parameters mockStackV4Parameters = new MockStackV4Parameters();
-        mockStackV4Parameters.getCloudPlatform();
-        return mockStackV4Parameters;
+        return new MockStackV4Parameters();
     }
 }

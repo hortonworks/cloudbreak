@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter;
+package com.sequenceiq.it.cloudbreak.newway.cloud.v2.mock;
 
 public class MockParameters {
 

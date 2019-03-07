@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.newway.entity;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.YarnNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
@@ -36,6 +37,11 @@ public class NetworkV2Entity extends AbstractCloudbreakEntity<NetworkV4Request, 
 
     public NetworkV2Entity withAws(AwsNetworkV4Parameters aws) {
         getRequest().setAws(aws);
+        return this;
+    }
+
+    public NetworkV2Entity withGcp(GcpNetworkV4Parameters gcp) {
+        getRequest().setGcp(gcp);
         return this;
     }
 

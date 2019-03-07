@@ -1,6 +1,4 @@
-package com.sequenceiq.it.cloudbreak.newway.cloud.v2.provider;
-
-import static com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.CommonCloudParameters.CREDENTIAL_DEFAULT_DESCRIPTION;
+package com.sequenceiq.it.cloudbreak.newway.cloud.v2.yarn;
 
 import org.springframework.stereotype.Component;
 
@@ -10,8 +8,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.Y
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.YarnInstanceTemplateV4Parameters;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.CommonCloudParameters;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.YarnParameters;
+import com.sequenceiq.it.cloudbreak.newway.cloud.v2.AbstractCloudProvider;
+import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackAuthenticationEntity;
@@ -42,7 +40,7 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     @Override
     public CredentialTestDto credential(CredentialTestDto credential) {
         return credential
-                .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
+                .withDescription(CommonCloudParameters.CREDENTIAL_DEFAULT_DESCRIPTION)
                 .withCloudPlatform(CloudPlatform.YARN.name())
                 .withYarnParameters(yarnCredentialParameters());
     }
@@ -101,7 +99,7 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     public String getQueue() {
-        return getTestParameter().getWithDefault(YarnParameters.Queue.YARN_QUEUE, DEFAULT_QUEUE);
+        return getTestParameter().getWithDefault(YarnParameters.YARN_QUEUE, DEFAULT_QUEUE);
     }
 
     public Integer getCPUCount() {

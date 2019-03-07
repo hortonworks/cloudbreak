@@ -1,6 +1,6 @@
-package com.sequenceiq.it.cloudbreak.newway.cloud.v2.provider;
+package com.sequenceiq.it.cloudbreak.newway.cloud.v2.aws;
 
-import static com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.CommonCloudParameters.CREDENTIAL_DEFAULT_DESCRIPTION;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters.CREDENTIAL_DEFAULT_DESCRIPTION;
 
 import org.springframework.stereotype.Component;
 
@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.KeyB
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.RoleBasedCredentialParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AwsStackV4Parameters;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.AwsParameters;
+import com.sequenceiq.it.cloudbreak.newway.cloud.v2.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackAuthenticationEntity;
@@ -158,8 +158,6 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     private AwsStackV4Parameters awsStackParameters() {
-        AwsStackV4Parameters awsStackV4Parameters = new AwsStackV4Parameters();
-        awsStackV4Parameters.getCloudPlatform();
-        return awsStackV4Parameters;
+        return new AwsStackV4Parameters();
     }
 }

@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.newway.cloud.v2.provider;
+package com.sequenceiq.it.cloudbreak.newway.cloud.v2;
 
 import java.util.Collections;
 
@@ -6,7 +6,6 @@ import javax.inject.Inject;
 
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.CommonCloudParameters;
 import com.sequenceiq.it.cloudbreak.newway.entity.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackV4EntityBase;

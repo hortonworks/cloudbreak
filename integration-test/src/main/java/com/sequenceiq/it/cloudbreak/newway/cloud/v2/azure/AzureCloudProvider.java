@@ -1,6 +1,6 @@
-package com.sequenceiq.it.cloudbreak.newway.cloud.v2.provider;
+package com.sequenceiq.it.cloudbreak.newway.cloud.v2.azure;
 
-import static com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.CommonCloudParameters.CREDENTIAL_DEFAULT_DESCRIPTION;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters.CREDENTIAL_DEFAULT_DESCRIPTION;
 
 import org.springframework.stereotype.Component;
 
@@ -9,9 +9,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.Ap
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AzureCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.AwsParameters;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.AzureParameters;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.CommonCloudParameters;
+import com.sequenceiq.it.cloudbreak.newway.cloud.v2.AbstractCloudProvider;
+import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters;
+import com.sequenceiq.it.cloudbreak.newway.cloud.v2.aws.AwsParameters;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackAuthenticationEntity;
@@ -71,9 +71,8 @@ public class AzureCloudProvider extends AbstractCloudProvider {
         AzureNetworkV4Parameters parameters = new AzureNetworkV4Parameters();
         parameters.setNoPublicIp(false);
         parameters.setNoFirewallRules(false);
-        network.withAzure(parameters);
-        network.withSubnetCIDR(getSubnetCIDR());
-        return network;
+        return network.withAzure(parameters)
+                .withSubnetCIDR(getSubnetCIDR());
     }
 
     @Override
@@ -89,8 +88,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public StackAuthenticationEntity stackAuthentication(StackAuthenticationEntity stackAuthenticationEntity) {
         String sshPublicKey = getTestParameter().getWithDefault(CommonCloudParameters.SSH_PUBLIC_KEY, CommonCloudParameters.DEFAULT_SSH_PUBLIC_KEY);
-        stackAuthenticationEntity.withPublicKey(sshPublicKey);
-        return stackAuthenticationEntity;
+        return stackAuthenticationEntity.withPublicKey(sshPublicKey);
     }
 
     @Override
@@ -99,8 +97,6 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     private AzureStackV4Parameters azureStackParameters() {
-        AzureStackV4Parameters azureStackV4Parameters = new AzureStackV4Parameters();
-        azureStackV4Parameters.getCloudPlatform();
-        return azureStackV4Parameters;
+        return new AzureStackV4Parameters();
     }
 }

@@ -1,7 +1,6 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-
-import static com.sequenceiq.it.cloudbreak.newway.cloud.v2.parameter.CommonCloudParameters.CLOUD_PROVIDER;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters.CLOUD_PROVIDER;
 
 import javax.inject.Inject;
 

@@ -1,6 +1,4 @@
 name: "yarn-smoke-tests"
-parameters:
-  cloudProvider: YARN
 
 tests:
   - name: "YARN smoke tests"
