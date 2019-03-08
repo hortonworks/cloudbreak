@@ -67,7 +67,14 @@ public class YarnCloudProvider extends AbstractCloudProvider {
 
     @Override
     public StackV4EntityBase stack(StackV4EntityBase stack) {
-        return stack.withYarn(yarnStackParameters());
+        return stack.withYarn(stackParameters());
+    }
+
+    @Override
+    public YarnStackV4Parameters stackParameters() {
+        YarnStackV4Parameters yarnStackV4Parameters = new YarnStackV4Parameters();
+        yarnStackV4Parameters.setYarnQueue(getQueue());
+        return yarnStackV4Parameters;
     }
 
     @Override
@@ -78,7 +85,7 @@ public class YarnCloudProvider extends AbstractCloudProvider {
 
     @Override
     public NetworkV2Entity network(NetworkV2Entity network) {
-        return network.withYarn(networkParameters());
+        return network.withYarn(networkParameters()).withSubnetCIDR(getSubnetCIDR());
     }
 
     @Override
@@ -89,8 +96,7 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     @Override
     public StackAuthenticationEntity stackAuthentication(StackAuthenticationEntity stackAuthenticationEntity) {
         String sshPublicKey = getTestParameter().getWithDefault(CommonCloudParameters.SSH_PUBLIC_KEY, CommonCloudParameters.DEFAULT_SSH_PUBLIC_KEY);
-        stackAuthenticationEntity.withPublicKey(sshPublicKey);
-        return stackAuthenticationEntity;
+        return stackAuthenticationEntity.withPublicKey(sshPublicKey);
     }
 
     @Override
@@ -128,11 +134,5 @@ public class YarnCloudProvider extends AbstractCloudProvider {
         YarnNetworkV4Parameters yarnNetworkV4Parameters = new YarnNetworkV4Parameters();
         yarnNetworkV4Parameters.getCloudPlatform();
         return yarnNetworkV4Parameters;
-    }
-
-    public YarnStackV4Parameters yarnStackParameters() {
-        YarnStackV4Parameters yarnStackV4Parameters = new YarnStackV4Parameters();
-        yarnStackV4Parameters.setYarnQueue(getQueue());
-        return yarnStackV4Parameters;
     }
 }

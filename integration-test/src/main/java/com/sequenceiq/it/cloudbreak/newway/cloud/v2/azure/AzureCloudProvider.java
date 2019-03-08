@@ -38,7 +38,12 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Override
     public StackV4EntityBase stack(StackV4EntityBase stack) {
-        return stack.withAzure(azureStackParameters());
+        return stack.withAzure(stackParameters());
+    }
+
+    @Override
+    public AzureStackV4Parameters stackParameters() {
+        return new AzureStackV4Parameters();
     }
 
     @Override
@@ -94,9 +99,5 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public String getDefaultClusterDefinitionName() {
         return AzureParameters.DEFAULT_CLUSTER_DEFINTION_NAME;
-    }
-
-    private AzureStackV4Parameters azureStackParameters() {
-        return new AzureStackV4Parameters();
     }
 }
