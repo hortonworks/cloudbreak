@@ -100,7 +100,6 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         cluster.setUserName(source.getUserName());
         cluster.setPassword(source.getPassword());
         cluster.setExecutorType(source.getExecutorType());
-        convertGateway(source, cluster);
 
         if (source.getKerberosName() != null) {
             KerberosConfig kerberosConfig = kerberosService.getByNameForWorkspaceId(source.getKerberosName(), workspace.getId());
@@ -111,6 +110,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         cluster.setDpAmbariUser(dpUsername);
         cluster.setDpAmbariPassword(PasswordUtil.generatePassword());
         cluster.setClusterDefinition(getClusterDefinition(source.getClusterDefinitionName(), workspace));
+        convertGateway(source, cluster);
         if (cloudStorageValidationUtil.isCloudStorageConfigured(source.getCloudStorage())) {
             cluster.setFileSystem(getConversionService().convert(source.getCloudStorage(), FileSystem.class));
         }
@@ -137,7 +137,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
     }
 
     private void convertGateway(ClusterV4Request source, Cluster cluster) {
-        if (source.getGateway() != null) {
+        if (source.getGateway() != null && clusterDefinitionService.isAmbariBlueprint(cluster.getClusterDefinition())) {
             if (StringUtils.isEmpty(source.getGateway().getPath())) {
                 source.getGateway().setPath(source.getName());
             }

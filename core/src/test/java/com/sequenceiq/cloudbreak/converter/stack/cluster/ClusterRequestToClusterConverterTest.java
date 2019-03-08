@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.stack.cluster;
 
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -52,12 +54,16 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     private RdsConfigService rdsConfigService;
 
     @Mock
+    private ClusterDefinitionService clusterDefinitionService;
+
+    @Mock
     private Workspace workspace;
 
     @Before
     public void setUp() {
         Whitebox.setInternalState(underTest, "ambariUserName", "cloudbreak");
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
+        when(clusterDefinitionService.isAmbariBlueprint(any())).thenReturn(Boolean.TRUE);
     }
 
     @Test

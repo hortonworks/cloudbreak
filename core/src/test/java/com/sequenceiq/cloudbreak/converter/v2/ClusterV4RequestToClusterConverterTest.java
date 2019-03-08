@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -309,6 +310,7 @@ public class ClusterV4RequestToClusterConverterTest {
         Gateway gateway = new Gateway();
 
         when(conversionService.convert(gatewayJson, Gateway.class)).thenReturn(gateway);
+        when(clusterDefinitionService.isAmbariBlueprint(any())).thenReturn(Boolean.TRUE);
 
         Cluster actual = underTest.convert(source);
 

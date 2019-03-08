@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.ambari;
 
+import static java.util.Optional.ofNullable;
+
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.ambari.client.services.ClusterService;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
@@ -29,7 +32,7 @@ public class AmbariClusterTemplateGenerator {
     String generateClusterTemplate(Cluster cluster, Map<String, List<Map<String, String>>> hostGroupMappings,
             ClusterService ambariClient) {
         String blueprintName = cluster.getClusterDefinition().getStackName();
-        String configStrategy = cluster.getConfigStrategy().name();
+        String configStrategy = ofNullable(cluster.getConfigStrategy()).orElse(ConfigStrategy.ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES).name();
         String clusterTemplate;
 
         String repositoryVersion = ambariRepositoryVersionService.getRepositoryVersion(cluster.getId());
