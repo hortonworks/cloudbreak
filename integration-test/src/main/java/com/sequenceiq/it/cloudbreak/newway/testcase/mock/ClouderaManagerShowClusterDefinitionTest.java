@@ -14,6 +14,7 @@ import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.ClouderaManagerEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
@@ -55,8 +56,8 @@ public class ClouderaManagerShowClusterDefinitionTest extends AbstractClouderaMa
         String clusterName = getNameGenerator().getRandomNameForResource();
         String clusterDefinitionName = testContext.get(ClusterDefinitionTestDto.class).getRequest().getName();
         testContext
-                .given("cm", AmbariEntity.class)
-                .given("cmcluster", ClusterEntity.class).withAmbari("cm")
+                .given("cm", ClouderaManagerEntity.class)
+                .given("cmcluster", ClusterEntity.class).withClouderaManager("cm")
                 .withClusterDefinitionName(clusterDefinitionName).withValidateClusterDefinition(Boolean.FALSE)
                 .given(StackTestDto.class).withCluster("cmcluster")
                 .withName(clusterName)

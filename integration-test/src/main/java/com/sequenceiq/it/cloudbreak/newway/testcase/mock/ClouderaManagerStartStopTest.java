@@ -11,11 +11,11 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.ClouderaManagerEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.mock.model.SPIMock;
 import com.sequenceiq.it.spark.StatefulRoute;
 import com.sequenceiq.it.spark.spi.CloudVmInstanceStatuses;
@@ -29,8 +29,9 @@ public class ClouderaManagerStartStopTest extends AbstractClouderaManagerTest {
         mockSpi(testContext);
         String name = testContext.get(ClusterDefinitionTestDto.class).getRequest().getName();
         testContext
-                .given("cm", AmbariEntity.class)
-                .given("cmcluster", ClusterEntity.class).withValidateClusterDefinition(Boolean.FALSE).withClusterDefinitionName(name).withAmbari("cm")
+                .given("cm", ClouderaManagerEntity.class)
+                .given("cmcluster", ClusterEntity.class)
+                .withValidateClusterDefinition(Boolean.FALSE).withClusterDefinitionName(name).withClouderaManager("cm")
                 .given(StackTestDto.class).withCluster("cmcluster")
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)

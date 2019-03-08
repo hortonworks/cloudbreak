@@ -69,6 +69,22 @@ public class ClusterEntity extends AbstractCloudbreakEntity<ClusterV4Request, Cl
         return this;
     }
 
+    public ClusterEntity withClouderaManager() {
+        ClouderaManagerEntity clouderaManager = getTestContext().get(ClouderaManagerEntity.class);
+        return withClouderaManager(clouderaManager);
+    }
+
+    public ClusterEntity withClouderaManager(String key) {
+        ClouderaManagerEntity clouderaManager = getTestContext().get(key);
+        return withClouderaManager(clouderaManager);
+    }
+
+    public ClusterEntity withClouderaManager(ClouderaManagerEntity clouderaManagerEntity) {
+        getRequest().setCm(clouderaManagerEntity.getRequest());
+        getRequest().setAmbari(null);
+        return this;
+    }
+
     public ClusterEntity withLdapConfig() {
         LdapConfigTestDto ldap = getTestContext().get(LdapConfigTestDto.class);
         getRequest().setLdapName(ldap.getName());
