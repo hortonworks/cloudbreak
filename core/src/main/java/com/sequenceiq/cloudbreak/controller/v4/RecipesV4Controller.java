@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Reques
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Responses;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Recipe;
@@ -32,9 +33,9 @@ public class RecipesV4Controller extends NotificationController implements Recip
     private ConverterUtil converterUtil;
 
     @Override
-    public RecipeV4Responses list(Long workspaceId) {
+    public RecipeViewV4Responses list(Long workspaceId) {
         Set<RecipeView> allViewByWorkspaceId = recipeService.findAllViewByWorkspaceId(workspaceId);
-        return new RecipeV4Responses(converterUtil.convertAllAsSet(allViewByWorkspaceId, RecipeViewV4Response.class));
+        return new RecipeViewV4Responses(converterUtil.convertAllAsSet(allViewByWorkspaceId, RecipeViewV4Response.class));
     }
 
     @Override
@@ -55,6 +56,13 @@ public class RecipesV4Controller extends NotificationController implements Recip
         Recipe deleted = recipeService.deleteByNameFromWorkspace(name, workspaceId);
         notify(ResourceEvent.RECIPE_DELETED);
         return converterUtil.convert(deleted, RecipeV4Response.class);
+    }
+
+    @Override
+    public RecipeV4Responses deleteMultiple(Long workspaceId, Set<String> names) {
+        Set<Recipe> deleted = recipeService.deleteMultipleByNameFromWorkspace(names, workspaceId);
+        notify(ResourceEvent.RECIPE_DELETED);
+        return new RecipeV4Responses(converterUtil.convertAllAsSet(deleted, RecipeV4Response.class));
     }
 
     @Override
