@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
@@ -44,6 +43,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
@@ -68,6 +68,8 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @ExtendWith(MockitoExtension.class)
 public class ClusterV4RequestToClusterConverterTest {
+
+    private static final String CLUSTER_DEFINITION = "my-cluster-definition";
 
     @InjectMocks
     private ClusterV4RequestToClusterConverter underTest;
@@ -98,8 +100,13 @@ public class ClusterV4RequestToClusterConverterTest {
 
     private Workspace workspace;
 
+    private ClusterDefinition clusterDefinition;
+
     @BeforeEach
     public void before() {
+
+        clusterDefinition = new ClusterDefinition();
+        clusterDefinition.setStackType(StackType.HDP.name());
 
         workspace = new Workspace();
         workspace.setId(100L);
@@ -136,6 +143,8 @@ public class ClusterV4RequestToClusterConverterTest {
         source.setProxyName(proxyName);
         source.setLdapName(ldapName);
         source.setAmbari(new AmbariV4Request());
+        source.setClusterDefinitionName(CLUSTER_DEFINITION);
+        when(clusterDefinitionService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(eq(CLUSTER_DEFINITION), any())).thenReturn(clusterDefinition);
 
         when(cloudStorageValidationUtil.isCloudStorageConfigured(cloudStorageRequest)).thenReturn(true);
         when(conversionService.convert(cloudStorageRequest, FileSystem.class)).thenReturn(fileSystem);
@@ -163,7 +172,8 @@ public class ClusterV4RequestToClusterConverterTest {
     public void testConvertWhenNoRdsConfig() {
         ClusterV4Request source = new ClusterV4Request();
         source.setAmbari(new AmbariV4Request());
-
+        source.setClusterDefinitionName(CLUSTER_DEFINITION);
+        when(clusterDefinitionService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(eq(CLUSTER_DEFINITION), any())).thenReturn(clusterDefinition);
         Set<String> rdsConfigNames = emptySet();
 
         Cluster actual = underTest.convert(source);
@@ -187,20 +197,6 @@ public class ClusterV4RequestToClusterConverterTest {
         assertEquals("RDS config names dont exists", exception.getMessage());
 
         verify(rdsConfigService, times(1)).findByNamesInWorkspace(rdsConfigNames, workspace.getId());
-    }
-
-    @Test
-    public void testConvertWhenNoBlueprint() {
-        ClusterV4Request source = new ClusterV4Request();
-
-        AmbariV4Request ambariV4Request = new AmbariV4Request();
-        source.setAmbari(ambariV4Request);
-
-        Cluster actual = underTest.convert(source);
-
-        assertThat(actual.getClusterDefinition(), is(nullValue()));
-
-        verify(clusterDefinitionService, times(0)).getByNameForWorkspace(anyString(), eq(workspace));
     }
 
     @Test
@@ -250,6 +246,8 @@ public class ClusterV4RequestToClusterConverterTest {
         String baseUrl = "base-url";
 
         ClusterV4Request source = new ClusterV4Request();
+        source.setClusterDefinitionName(CLUSTER_DEFINITION);
+        when(clusterDefinitionService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(eq(CLUSTER_DEFINITION), any())).thenReturn(clusterDefinition);
         AmbariRepositoryV4Request ambariRepoDetailsJson = new AmbariRepositoryV4Request();
         AmbariRepo ambariRepo = new AmbariRepo();
         ambariRepo.setBaseUrl(baseUrl);
@@ -276,6 +274,8 @@ public class ClusterV4RequestToClusterConverterTest {
         String version = "2.6";
 
         ClusterV4Request source = new ClusterV4Request();
+        source.setClusterDefinitionName(CLUSTER_DEFINITION);
+        when(clusterDefinitionService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(eq(CLUSTER_DEFINITION), any())).thenReturn(clusterDefinition);
         StackRepositoryV4Request ambariStackDetailsJson = new StackRepositoryV4Request();
         StackRepoDetails stackRepoDetails = new StackRepoDetails();
         stackRepoDetails.setHdpVersion(version);
@@ -307,6 +307,8 @@ public class ClusterV4RequestToClusterConverterTest {
         GatewayV4Request gatewayJson = new GatewayV4Request();
         source.setGateway(gatewayJson);
         source.setAmbari(ambariV4Request);
+        source.setClusterDefinitionName(CLUSTER_DEFINITION);
+        when(clusterDefinitionService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(eq(CLUSTER_DEFINITION), any())).thenReturn(clusterDefinition);
         Gateway gateway = new Gateway();
 
         when(conversionService.convert(gatewayJson, Gateway.class)).thenReturn(gateway);
@@ -332,6 +334,9 @@ public class ClusterV4RequestToClusterConverterTest {
     @Test
     public void testConvertClouderaManagerRequestWithNullProductList() throws JsonProcessingException {
         ClusterV4Request request = new ClusterV4Request();
+        request.setClusterDefinitionName(CLUSTER_DEFINITION);
+        clusterDefinition.setStackType(StackType.CDH.name());
+        when(clusterDefinitionService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(eq(CLUSTER_DEFINITION), any())).thenReturn(clusterDefinition);
         ClouderaManagerV4Request cm = new ClouderaManagerV4Request();
 
         ClouderaManagerRepositoryV4Request repository = new ClouderaManagerRepositoryV4Request();
@@ -356,6 +361,9 @@ public class ClusterV4RequestToClusterConverterTest {
     @Test
     public void testConvertClouderaManagerRequestWithNullRepo() throws JsonProcessingException {
         ClusterV4Request request = new ClusterV4Request();
+        request.setClusterDefinitionName(CLUSTER_DEFINITION);
+        clusterDefinition.setStackType(StackType.CDH.name());
+        when(clusterDefinitionService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(eq(CLUSTER_DEFINITION), any())).thenReturn(clusterDefinition);
         ClouderaManagerV4Request cm = new ClouderaManagerV4Request();
 
         ClouderaManagerProductV4Request cdp = new ClouderaManagerProductV4Request();

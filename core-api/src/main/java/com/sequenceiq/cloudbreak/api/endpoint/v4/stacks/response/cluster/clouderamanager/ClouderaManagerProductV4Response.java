@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager;
 
 import javax.validation.constraints.NotNull;
 
@@ -13,7 +13,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ClouderaManagerProductV4Request implements JsonEntity {
+public class ClouderaManagerProductV4Response implements JsonEntity {
 
     @NotNull
     @ApiModelProperty(ModelDescriptions.ClouderaManagerProductDescription.NAME)
@@ -49,17 +49,17 @@ public class ClouderaManagerProductV4Request implements JsonEntity {
         this.parcel = parcel;
     }
 
-    public ClouderaManagerProductV4Request withName(String name) {
+    public ClouderaManagerProductV4Response withName(String name) {
         setName(name);
         return this;
     }
 
-    public ClouderaManagerProductV4Request withVersion(String version) {
+    public ClouderaManagerProductV4Response withVersion(String version) {
         setVersion(version);
         return this;
     }
 
-    public ClouderaManagerProductV4Request withParcel(String parcel) {
+    public ClouderaManagerProductV4Response withParcel(String parcel) {
         setParcel(parcel);
         return this;
     }

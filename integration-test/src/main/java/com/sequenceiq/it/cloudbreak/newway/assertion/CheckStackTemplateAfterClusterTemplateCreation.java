@@ -38,7 +38,7 @@ public class CheckStackTemplateAfterClusterTemplateCreation implements Assertion
             throw new IllegalArgumentException("Ambari password should be empty!");
         }
 
-        if (!StringUtils.isEmpty(stackTemplate.getCluster().getPassword())) {
+        if (!StringUtils.isEmpty(stackTemplate.getCluster().getUserName())) {
             throw new IllegalArgumentException("Ambari username should be empty!");
         }
 

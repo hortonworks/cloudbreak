@@ -12,4 +12,19 @@ import io.swagger.annotations.ApiModel;
 @JsonInclude(Include.NON_NULL)
 public class ClouderaManagerRepositoryV4Response extends RepositoryV4Response {
 
+    public ClouderaManagerRepositoryV4Response withVersion(String version) {
+        setVersion(version);
+        return this;
+    }
+
+    public ClouderaManagerRepositoryV4Response withBaseUrl(String baseUrl) {
+        setBaseUrl(baseUrl);
+        return this;
+    }
+
+    public ClouderaManagerRepositoryV4Response withGpgKeyUrl(String gpgKeyUrl) {
+        setGpgKeyUrl(gpgKeyUrl);
+        return this;
+    }
+
 }
