@@ -118,14 +118,14 @@ public class UpscaleTest extends AbstractIntegrationTest {
     }
 
     private void mockAmbariClusterDefinitionFail(MockedTestContext testContext) {
-        Route customResponse2 = (request, response) -> {
+        Route customResponse = (request, response) -> {
             response.type("text/plain");
             response.status(400);
             response.body("Bad cluster definition format");
             return "";
         };
         testContext.getModel().getAmbariMock().getDynamicRouteStack().clearPost(CLUSTER_DEFINITIONS);
-        testContext.getModel().getAmbariMock().getDynamicRouteStack().post(CLUSTER_DEFINITIONS, customResponse2);
+        testContext.getModel().getAmbariMock().getDynamicRouteStack().post(CLUSTER_DEFINITIONS, customResponse);
     }
 
 }
