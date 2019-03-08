@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+import "google/protobuf/descriptor.proto";
+
+package options;
+
+option java_package = "com.cloudera.thunderhead.service.common.options";
+option java_outer_classname = "Options";
+
+extend google.protobuf.FieldOptions {
+  // The field is sensitive. It will not be logged and may receive other special
+  // handling in the future.
+  bool sensitive = 50000;
+  // The field should not be logged. This may be useful on fields that have very
+  // large values.
+  bool skipLogging = 50001;
+}

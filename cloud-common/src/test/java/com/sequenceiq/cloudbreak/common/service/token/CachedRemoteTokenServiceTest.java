@@ -15,6 +15,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.client.CaasClient;
 import com.sequenceiq.cloudbreak.client.CaasUser;
 import com.sequenceiq.cloudbreak.client.IdentityClient;
@@ -35,6 +36,9 @@ public class CachedRemoteTokenServiceTest {
     @Mock
     private CaasClient caasClient;
 
+    @Mock
+    private GrpcUmsClient umsClient;
+
     public CachedRemoteTokenServiceTest() throws IOException {
         token = FileReaderUtils.readFileFromClasspath("sso_token.txt");
     }
@@ -43,7 +47,8 @@ public class CachedRemoteTokenServiceTest {
     public void testLoadAuthenticationWithoutAudience() {
         thrown.expect(InvalidTokenException.class);
         thrown.expectMessage("No 'tenant_name' claim in token");
-        CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret", "http://localhost:8089", caasClient, identityClient);
+        CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret",
+                "http://localhost:8089", umsClient, caasClient, identityClient);
         tokenService.loadAuthentication(token);
     }
 
@@ -60,7 +65,8 @@ public class CachedRemoteTokenServiceTest {
         when(caasClient.introSpect(anyString())).thenReturn(introspectResponse);
 
         String ssoToken = FileReaderUtils.readFileFromClasspath("sso_token_mac_signed.txt");
-        CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret", "http://localhost:8089", caasClient, identityClient);
+        CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret",
+                "http://localhost:8089", umsClient, caasClient, identityClient);
         OAuth2Authentication oAuth2Authentication = tokenService.loadAuthentication(ssoToken);
         Object principal = oAuth2Authentication.getPrincipal();
         Assert.assertEquals("admin@example.com", principal);
@@ -78,7 +84,8 @@ public class CachedRemoteTokenServiceTest {
         when(caasClient.introSpect(anyString())).thenReturn(introspectResponse);
 
         String ssoToken = FileReaderUtils.readFileFromClasspath("sso_token_mac_signed.txt");
-        CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret", "http://localhost:8089", caasClient, identityClient);
+        CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret",
+                "http://localhost:8089", umsClient, caasClient, identityClient);
         OAuth2Authentication oAuth2Authentication = tokenService.loadAuthentication(ssoToken);
         Object principal = oAuth2Authentication.getPrincipal();
         Assert.assertEquals("admin@example.com", principal);
@@ -90,14 +97,16 @@ public class CachedRemoteTokenServiceTest {
         thrown.expectMessage("invalid_token");
         String oauthToken = FileReaderUtils.readFileFromClasspath("oauth_token.txt");
         when(identityClient.loadAuthentication(oauthToken, "clientSecret")).thenThrow(new InvalidTokenException("invalid_token"));
-        CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret", "http://localhost:8089", caasClient, identityClient);
+        CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret",
+                "http://localhost:8089", umsClient, caasClient, identityClient);
         tokenService.loadAuthentication(oauthToken);
     }
 
     @Test
     public void testLoadAuthenticationWithOauthValidKey() throws IOException {
         String oauthToken = FileReaderUtils.readFileFromClasspath("oauth_token.txt");
-        CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret", "http://localhost:8089", caasClient, identityClient);
+        CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret",
+                "http://localhost:8089", umsClient, caasClient, identityClient);
         tokenService.loadAuthentication(oauthToken);
     }
 

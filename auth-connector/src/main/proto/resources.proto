@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package resources;
+
+option java_package = "com.cloudera.thunderhead.service.common.resources";
+option java_outer_classname = "Resources";
+
+// A simple name and ID pair used to identify a Resource.
+//
+// The semantics of the name here depend on the resource. For some resources
+// this is the user-defined name, for others it may be the same as the ID. For
+// others it may be something else entirely. The name must be able to be turned
+// into the hash key for the resource in our store in the context of the request
+// though.
+//
+// The ID generally referes to a resource UUID that immutably and uniquely
+// defines the resource. The ID is generally not front and center in front of
+// the user, but is generally part of the resource portion of a CRN.
+//
+// See the Resources interface for more information.
+message Id {
+  string name = 1;
+  string id = 2;
+}
+
+// A simple object holding an account ID and a set of IDs to be used within that
+// account context.
+//
+// Note that this object is generally only useful in the context of an operation
+// that operates across account boundries, which is rare. For operations that
+// operate within an account, it's generally better to just put the account ID
+// in the top level messages.
+message IdsWithinAccount {
+  string accountId = 1;
+  repeated resources.Id id = 2;
+}

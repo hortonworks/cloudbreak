@@ -21,8 +21,11 @@ import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConv
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.client.CaasClient;
 import com.sequenceiq.cloudbreak.client.CaasUser;
 import com.sequenceiq.cloudbreak.client.IdentityClient;
@@ -36,6 +39,8 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
 
     private final IdentityClient identityClient;
 
+    private final GrpcUmsClient umsClient;
+
     private final CaasClient caasClient;
 
     private final ObjectMapper objectMapper;
@@ -44,13 +49,16 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
 
     private final JwtAccessTokenConverter jwtAccessTokenConverter;
 
-    public CachedRemoteTokenService(String clientId, String clientSecret, String identityServerUrl, CaasClient caasClient, IdentityClient identityClient) {
-        this(clientId, clientSecret, identityServerUrl, caasClient, null, identityClient);
+    public CachedRemoteTokenService(String clientId, String clientSecret, String identityServerUrl,
+            GrpcUmsClient umsClient, CaasClient caasClient, IdentityClient identityClient) {
+        this(clientId, clientSecret, identityServerUrl, umsClient, caasClient, null, identityClient);
     }
 
-    public CachedRemoteTokenService(String clientId, String clientSecret, String identityServerUrl, CaasClient caasClient, String jwtSignKey,
+    public CachedRemoteTokenService(String clientId, String clientSecret, String identityServerUrl,
+            GrpcUmsClient umsClient, CaasClient caasClient, String jwtSignKey,
             IdentityClient identityClient) {
         this.identityClient = identityClient;
+        this.umsClient = umsClient;
         this.caasClient = caasClient;
         this.clientSecret = clientSecret;
         objectMapper = new ObjectMapper();
@@ -67,6 +75,9 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
     @Override
     @Cacheable(cacheNames = "tokenCache", key = "#accessToken")
     public OAuth2Authentication loadAuthentication(String accessToken) throws AuthenticationException, InvalidTokenException {
+        if (umsClient.isConfigured()) {
+            return getUmsAuthentication(accessToken);
+        }
         Jwt jwtToken;
         try {
             jwtToken = JwtHelper.decode(accessToken);
@@ -80,6 +91,21 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
             LOGGER.error("Token does not claim anything", e);
             throw new InvalidTokenException("Invalid JWT token, does not claim anything", e);
         }
+    }
+
+    private OAuth2Authentication getUmsAuthentication(String crn) {
+        UserManagementProto.User user = umsClient.getUserDetails(crn, crn);
+        Map<String, Object> tokenMap = new HashMap<>();
+        tokenMap.put("tenant", Crn.getAccountId(crn));
+        tokenMap.put("crn", user.getCrn());
+        tokenMap.put("user_id", user.getUserId());
+        tokenMap.put("user_name", user.getEmail());
+        tokenMap.put("scope", Arrays.asList("cloudbreak.networks.read", "periscope.cluster", "cloudbreak.usages.user", "cloudbreak.recipes", "openid",
+                "cloudbreak.templates.read", "cloudbreak.usages.account", "cloudbreak.events", "cloudbreak.stacks.read",
+                "cloudbreak.blueprints", "cloudbreak.networks", "cloudbreak.templates", "cloudbreak.credentials.read",
+                "cloudbreak.securitygroups.read", "cloudbreak.securitygroups", "cloudbreak.stacks", "cloudbreak.credentials",
+                "cloudbreak.recipes.read", "cloudbreak.blueprints.read"));
+        return tokenConverter.extractAuthentication(tokenMap);
     }
 
     private OAuth2Authentication getOAuth2Authentication(String accessToken) {
@@ -110,10 +136,10 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
             tokenMap.put("user_id", userInfo.getId());
             tokenMap.put("user_name", userInfo.getPreferredUsername());
             tokenMap.put("scope", Arrays.asList("cloudbreak.networks.read", "periscope.cluster", "cloudbreak.usages.user", "cloudbreak.recipes", "openid",
-                "cloudbreak.templates.read", "cloudbreak.usages.account", "cloudbreak.events", "cloudbreak.stacks.read",
-                "cloudbreak.blueprints", "cloudbreak.networks", "cloudbreak.templates", "cloudbreak.credentials.read",
-                "cloudbreak.securitygroups.read", "cloudbreak.securitygroups", "cloudbreak.stacks", "cloudbreak.credentials",
-                "cloudbreak.recipes.read", "cloudbreak.blueprints.read"));
+                    "cloudbreak.templates.read", "cloudbreak.usages.account", "cloudbreak.events", "cloudbreak.stacks.read",
+                    "cloudbreak.blueprints", "cloudbreak.networks", "cloudbreak.templates", "cloudbreak.credentials.read",
+                    "cloudbreak.securitygroups.read", "cloudbreak.securitygroups", "cloudbreak.stacks", "cloudbreak.credentials",
+                    "cloudbreak.recipes.read", "cloudbreak.blueprints.read"));
 
             OAuth2AccessToken oAuth2AccessToken = jwtAccessTokenConverter.extractAccessToken(accessToken, tokenMap);
             if (oAuth2AccessToken.isExpired()) {

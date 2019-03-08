@@ -14,14 +14,13 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 
 @Service
 public class ScimAccountGroupReaderFilter extends OncePerRequestFilter {
 
     @Inject
-    private ConverterUtil converterUtil;
+    private AuthUserService authUserService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -29,7 +28,7 @@ public class ScimAccountGroupReaderFilter extends OncePerRequestFilter {
         if (authentication != null) {
             OAuth2Authentication oauth = (OAuth2Authentication) authentication;
             if (oauth.getUserAuthentication() != null) {
-                CloudbreakUser user = converterUtil.convert(oauth, CloudbreakUser.class);
+                CloudbreakUser user = authUserService.getUserWithCaasFallback(oauth);
                 request.setAttribute("user", user);
             }
         }

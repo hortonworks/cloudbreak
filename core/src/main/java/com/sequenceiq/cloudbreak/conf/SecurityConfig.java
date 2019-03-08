@@ -22,6 +22,7 @@ import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecur
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
+import com.sequenceiq.cloudbreak.auth.altus.CrnTokenExtractor;
 import com.sequenceiq.cloudbreak.service.security.ScimAccountGroupReaderFilter;
 import com.sequenceiq.cloudbreak.service.security.TenantBasedPermissionEvaluator;
 
@@ -80,6 +81,7 @@ public class SecurityConfig {
         public void configure(ResourceServerSecurityConfigurer resources) {
             resources.resourceId("cloudbreak");
             resources.tokenServices(resourceServerTokenServices);
+            resources.tokenExtractor(new CrnTokenExtractor());
         }
 
         @Override
