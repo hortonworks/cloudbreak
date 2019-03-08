@@ -47,7 +47,7 @@ func NewListRecipesByWorkspaceOK() *ListRecipesByWorkspaceOK {
 successful operation
 */
 type ListRecipesByWorkspaceOK struct {
-	Payload *model.RecipeV4Responses
+	Payload *model.RecipeViewV4Responses
 }
 
 func (o *ListRecipesByWorkspaceOK) Error() string {
@@ -56,7 +56,7 @@ func (o *ListRecipesByWorkspaceOK) Error() string {
 
 func (o *ListRecipesByWorkspaceOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(model.RecipeV4Responses)
+	o.Payload = new(model.RecipeViewV4Responses)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

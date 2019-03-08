@@ -119,17 +119,17 @@ func DescribeRecipe(c *cli.Context) {
 	}
 }
 
-func DeleteRecipe(c *cli.Context) {
-	defer utils.TimeTrack(time.Now(), "delete recipe")
+func DeleteRecipes(c *cli.Context) {
+	defer utils.TimeTrack(time.Now(), "delete recipes")
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	name := c.String(fl.FlName.Name)
+	names := c.StringSlice(fl.FlNames.Name)
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	log.Infof("[DeleteRecipe] sending delete recipe request with name: %s", name)
-	if _, err := cbClient.Cloudbreak.V4WorkspaceIDRecipes.DeleteRecipeInWorkspace(v4recipe.NewDeleteRecipeInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(name)); err != nil {
+	log.Infof("[DeleteRecipes] sending delete recipe request with names: %s", names)
+	if _, err := cbClient.Cloudbreak.V4WorkspaceIDRecipes.DeleteRecipesInWorkspace(v4recipe.NewDeleteRecipesInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(names)); err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	log.Infof("[DeleteRecipe] recipe deleted, name: %s", name)
+	log.Infof("[DeleteRecipes] recipes deleted, names: %s", names)
 }
 
 func ListRecipes(c *cli.Context) {

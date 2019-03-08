@@ -14,16 +14,16 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// RecipeV4Responses recipe v4 responses
-// swagger:model RecipeV4Responses
-type RecipeV4Responses struct {
+// RecipeViewV4Responses recipe view v4 responses
+// swagger:model RecipeViewV4Responses
+type RecipeViewV4Responses struct {
 
 	// responses
-	Responses []*RecipeV4Response `json:"responses"`
+	Responses []*RecipeViewV4Response `json:"responses"`
 }
 
-// Validate validates this recipe v4 responses
-func (m *RecipeV4Responses) Validate(formats strfmt.Registry) error {
+// Validate validates this recipe view v4 responses
+func (m *RecipeViewV4Responses) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateResponses(formats); err != nil {
@@ -36,7 +36,7 @@ func (m *RecipeV4Responses) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *RecipeV4Responses) validateResponses(formats strfmt.Registry) error {
+func (m *RecipeViewV4Responses) validateResponses(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Responses) { // not required
 		return nil
@@ -62,7 +62,7 @@ func (m *RecipeV4Responses) validateResponses(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *RecipeV4Responses) MarshalBinary() ([]byte, error) {
+func (m *RecipeViewV4Responses) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -70,8 +70,8 @@ func (m *RecipeV4Responses) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *RecipeV4Responses) UnmarshalBinary(b []byte) error {
-	var res RecipeV4Responses
+func (m *RecipeViewV4Responses) UnmarshalBinary(b []byte) error {
+	var res RecipeViewV4Responses
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

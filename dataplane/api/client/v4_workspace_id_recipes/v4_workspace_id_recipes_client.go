@@ -85,6 +85,36 @@ func (a *Client) DeleteRecipeInWorkspace(params *DeleteRecipeInWorkspaceParams) 
 }
 
 /*
+DeleteRecipesInWorkspace deletes multiple recipes by name in workspace
+
+Recipes are basically script extensions to a cluster that run on a set of nodes before or after the Ambari cluster installation.
+*/
+func (a *Client) DeleteRecipesInWorkspace(params *DeleteRecipesInWorkspaceParams) (*DeleteRecipesInWorkspaceOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteRecipesInWorkspaceParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteRecipesInWorkspace",
+		Method:             "DELETE",
+		PathPattern:        "/v4/{workspaceId}/recipes",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteRecipesInWorkspaceReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DeleteRecipesInWorkspaceOK), nil
+
+}
+
+/*
 GetRecipeInWorkspace gets recipe by name in workspace
 
 Recipes are basically script extensions to a cluster that run on a set of nodes before or after the Ambari cluster installation.

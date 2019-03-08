@@ -32,12 +32,12 @@ func init() {
 			},
 			{
 				Name:   "delete",
-				Usage:  "deletes a recipe",
-				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
+				Usage:  "deletes one or more recipes",
+				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlNames).AddOutputFlag().AddAuthenticationFlags().Build(),
 				Before: cf.CheckConfigAndCommandFlags,
-				Action: recipe.DeleteRecipe,
+				Action: recipe.DeleteRecipes,
 				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlNames).AddOutputFlag().AddAuthenticationFlags().Build() {
 						fl.PrintFlagCompletion(f)
 					}
 				},
