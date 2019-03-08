@@ -131,7 +131,8 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
             String clusterDefinitionText = clusterDefinition.getClusterDefinitionText();
             ClusterDefinitionStackInfo clusterDefinitionStackInfo = stackInfoService.clusterDefinitionStackInfo(clusterDefinitionText);
             Set<HostgroupView> hostgroupViews = getHostgroupViews(source);
-            Gateway gateway = source.getCluster().getGateway() == null ? null : getConversionService().convert(source, Gateway.class);
+            Gateway gateway = source.getCluster().getGateway() == null || clusterDefinitionService.isClouderaManagerTemplate(clusterDefinition)
+                    ? null : getConversionService().convert(source, Gateway.class);
             ClusterDefinitionView clusterDefinitionView = new ClusterDefinitionView(clusterDefinition.getClusterDefinitionText(),
                     clusterDefinitionStackInfo.getVersion(), clusterDefinitionStackInfo.getType());
             GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, cloudbreakUser.getEmail(),
