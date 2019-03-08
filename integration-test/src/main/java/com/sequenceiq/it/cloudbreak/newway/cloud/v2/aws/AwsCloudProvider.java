@@ -30,7 +30,12 @@ public class AwsCloudProvider extends AbstractCloudProvider {
 
     @Override
     public StackV4EntityBase stack(StackV4EntityBase stack) {
-        return stack.withAws(awsStackParameters());
+        return stack.withAws(stackParameters());
+    }
+
+    @Override
+    public AwsStackV4Parameters stackParameters() {
+        return new AwsStackV4Parameters();
     }
 
     @Override
@@ -155,9 +160,5 @@ public class AwsCloudProvider extends AbstractCloudProvider {
         keyBasedCredentialParameters.setAccessKey(getTestParameter().get(AwsParameters.Credential.ACCESS_KEY_ID));
         parameters.setKeyBased(keyBasedCredentialParameters);
         return parameters;
-    }
-
-    private AwsStackV4Parameters awsStackParameters() {
-        return new AwsStackV4Parameters();
     }
 }

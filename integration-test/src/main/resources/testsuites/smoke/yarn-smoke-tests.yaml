@@ -1,11 +1,6 @@
 name: "yarn-smoke-tests"
-
 tests:
   - name: "YARN smoke tests"
-    parameters:
-      clusterDefinitionName: "Data Science: Apache Spark 2, Apache Zeppelin"
-      preScript: touch /pre-install-fingerprint,
-      postScript: touch /post-install-fingerprint
     classes:
       - com.sequenceiq.it.cloudbreak.newway.testcase.smoke.YarnSmokeTest
     packages:

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.StackV4ParameterBase;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
@@ -129,5 +130,10 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public String getDefaultClusterDefinitionName() {
         return delegate.getDefaultClusterDefinitionName();
+    }
+
+    @Override
+    public StackV4ParameterBase stackParameters()  {
+        return delegate.stackParameters();
     }
 }

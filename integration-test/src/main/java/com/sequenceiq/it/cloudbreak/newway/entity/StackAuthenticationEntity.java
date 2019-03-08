@@ -21,7 +21,7 @@ public class StackAuthenticationEntity extends AbstractCloudbreakEntity<StackAut
     }
 
     public StackAuthenticationEntity valid() {
-        return withPublicKeyId("publicKeyId");
+        return getCloudProvider().stackAuthentication(this);
     }
 
     public StackAuthenticationEntity withPublicKey(String publicKey) {

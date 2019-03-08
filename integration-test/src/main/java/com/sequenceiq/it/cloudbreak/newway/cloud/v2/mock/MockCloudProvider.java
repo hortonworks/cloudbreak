@@ -77,7 +77,12 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public StackV4EntityBase stack(StackV4EntityBase stack) {
-        return stack.withMock(mockStackParameters());
+        return stack.withMock(stackParameters());
+    }
+
+    @Override
+    public MockStackV4Parameters stackParameters() {
+        return new MockStackV4Parameters();
     }
 
     @Override
@@ -186,6 +191,8 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public StackAuthenticationEntity stackAuthentication(StackAuthenticationEntity stackAuthenticationEntity) {
+        String publicKeyId = getTestParameter().getWithDefault(MockParameters.DEFAULT_PUBLIC_KEY_ID, "publicKeyId");
+        stackAuthenticationEntity.withPublicKeyId(publicKeyId);
         return stackAuthenticationEntity;
     }
 
@@ -198,9 +205,5 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     public String getDefaultClusterDefinitionName() {
         return MockParameters.DEFAULT_CLUSTER_DEFINTION_NAME;
-    }
-
-    private MockStackV4Parameters mockStackParameters() {
-        return new MockStackV4Parameters();
     }
 }

@@ -64,7 +64,12 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public StackV4EntityBase stack(StackV4EntityBase stack) {
-        return stack.withGcp(gcpStackParameters());
+        return stack.withGcp(stackParameters());
+    }
+
+    @Override
+    public GcpStackV4Parameters stackParameters() {
+        return new GcpStackV4Parameters();
     }
 
     @Override
@@ -102,9 +107,5 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     @Override
     public String getDefaultClusterDefinitionName() {
         return GcpParameters.DEFAULT_CLUSTER_DEFINTION_NAME;
-    }
-
-    private GcpStackV4Parameters gcpStackParameters() {
-        return new GcpStackV4Parameters();
     }
 }
