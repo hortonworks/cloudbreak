@@ -239,6 +239,29 @@ public class StackRepositoryV4ValidatorTest {
     }
 
     @Test
+    public void testWithoutRepositorySpecificationSpecifiedAndWithManagementPackDetailsSetToEmpty() {
+        StackRepositoryV4Request ambariStackDetailsJson = new StackRepositoryV4Request();
+        ambariStackDetailsJson.setStack("HDP");
+        ambariStackDetailsJson.setVersion("3.0");
+        ambariStackDetailsJson.setVersionDefinitionFileUrl("https://myversiondefitionfile");
+
+        boolean result = ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext);
+        assertTrue(result);
+    }
+
+    @Test
+    public void testWithoutRepositorySpecificationSpecifiedAndWithManagementPackDetailsSetToNull() {
+        StackRepositoryV4Request ambariStackDetailsJson = new StackRepositoryV4Request();
+        ambariStackDetailsJson.setStack("HDP");
+        ambariStackDetailsJson.setVersion("3.0");
+        ambariStackDetailsJson.setVersionDefinitionFileUrl("https://myversiondefitionfile");
+        ambariStackDetailsJson.setMpacks(null);
+
+        boolean result = ambariStackValidator.isValid(ambariStackDetailsJson, constraintValidatorContext);
+        assertTrue(result);
+    }
+
+    @Test
     public void testWithoutRepositorySpecificationSpecifiedAndWithManagementPackDetailsRequestSpecified() {
         StackRepositoryV4Request ambariStackDetailsJson = new StackRepositoryV4Request();
         ambariStackDetailsJson.setStack("HDP");
