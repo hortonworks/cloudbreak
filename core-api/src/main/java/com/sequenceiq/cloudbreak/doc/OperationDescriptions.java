@@ -93,6 +93,7 @@ public class OperationDescriptions {
         public static final String GET_BY_NAME_IN_WORKSPACE = "get recipe by name in workspace";
         public static final String CREATE_IN_WORKSPACE = "create recipe in workspace";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete recipe by name in workspace";
+        public static final String DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE = "delete multiple recipes by name in workspace";
     }
 
     public static class WorkspaceOpDescription {

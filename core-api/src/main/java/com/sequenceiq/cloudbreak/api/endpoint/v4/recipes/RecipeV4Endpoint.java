@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.recipes;
 
+import java.util.Set;
+
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -13,6 +15,7 @@ import javax.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Responses;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -31,7 +34,7 @@ public interface RecipeV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = RecipeOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
             nickname = "listRecipesByWorkspace")
-    RecipeV4Responses list(@PathParam("workspaceId") Long workspaceId);
+    RecipeViewV4Responses list(@PathParam("workspaceId") Long workspaceId);
 
     @GET
     @Path("{name}")
@@ -53,6 +56,13 @@ public interface RecipeV4Endpoint {
     @ApiOperation(value = RecipeOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
             nickname = "deleteRecipeInWorkspace")
     RecipeV4Response delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+
+    @DELETE
+    @Path("")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = RecipeOpDescription.DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON,
+            notes = Notes.RECIPE_NOTES, nickname = "deleteRecipesInWorkspace")
+    RecipeV4Responses deleteMultiple(@PathParam("workspaceId") Long workspaceId, Set<String> names);
 
     @GET
     @Path("{name}/request")
