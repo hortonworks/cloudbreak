@@ -285,6 +285,25 @@ Gradle is used for build and dependency management. Gradle wrapper is added to C
 ./gradlew clean build
 ```
 
+## How to use with DPS
+
+Clone DPS repository from hortonworks/dps-platform
+
+Put dps-platform path into your Profile:
+```
+export DPS_REPO=/Users/YOUR_USERNAME/DPS_PROJECT_DIR
+```
+By default it will build docker images from your dps-platform directory, but if you want to use a 
+specific version of DPS you can put DPS_VERSION env variable into your Profile file. 
+In this case it will download images from repository instead of build them.
+```
+export DPS_VERSION=2.0.0.0-132
+```
+If you want to force build the project with docker build use FORCE_BUILD env variable.
+```
+export FORCE_BUILD=true
+```
+
 ## Additional infos:
 
 > * [Retrieve OAuth Bearer Token via Cloudbreak REST API](https://github.com/hortonworks/cloudbreak/blob/master/docs/common/retrieve_oauth_token.md)
