@@ -4,6 +4,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
@@ -41,7 +42,7 @@ public class StackRepositoryV4Validator implements ConstraintValidator<ValidAmba
     private boolean repositorySpecificationFieldsExist(StackRepositoryV4Request stackRepo, ConstraintValidatorContext context) {
         boolean vdfFileSpecified = StringUtils.isNoneEmpty(stackRepo.getVersionDefinitionFileUrl());
         boolean mpackSpecified = StringUtils.isNoneEmpty(stackRepo.getMpackUrl())
-                || !stackRepo.getMpacks().isEmpty();
+                || !CollectionUtils.isEmpty(stackRepo.getMpacks());
         boolean repositoriesSpecified = stackRepo.getRepository() != null && StringUtils.isNoneEmpty(stackRepo.getRepository().getBaseUrl())
                 && StringUtils.isNoneEmpty(stackRepo.getUtilsBaseURL())
                 && StringUtils.isNoneEmpty(stackRepo.getUtilsRepoId());
