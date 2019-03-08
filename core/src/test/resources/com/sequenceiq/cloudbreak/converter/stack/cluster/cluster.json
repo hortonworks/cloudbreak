@@ -1,7 +1,7 @@
 {
   "name": "mycluster",
   "emailNeeded": true,
-  "clusterDefinitionId": 50,
+  "clusterDefinitionName": "my-cluster-definition",
   "description": "my cluster description",
   "ambari": {
     "userName": "user",

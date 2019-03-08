@@ -43,4 +43,14 @@ public class ClouderaManagerV4Request implements JsonEntity {
     public void setProducts(List<ClouderaManagerProductV4Request> products) {
         this.products = products;
     }
+
+    public ClouderaManagerV4Request withRepository(ClouderaManagerRepositoryV4Request repository) {
+        setRepository(repository);
+        return this;
+    }
+
+    public ClouderaManagerV4Request withProducts(List<ClouderaManagerProductV4Request> products) {
+        setProducts(products);
+        return this;
+    }
 }

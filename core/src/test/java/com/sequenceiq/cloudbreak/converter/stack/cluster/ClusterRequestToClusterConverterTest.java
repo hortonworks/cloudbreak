@@ -19,9 +19,11 @@ import org.powermock.reflect.Whitebox;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ClusterV4RequestToClusterConverter;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -71,6 +73,9 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         // GIVEN
         ClusterV4Request request = getRequest("cluster.json");
 
+        ClusterDefinition clusterDefinition = new ClusterDefinition();
+        clusterDefinition.setStackType(StackType.HDP.name());
+        given(clusterDefinitionService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(eq("my-cluster-definition"), any())).willReturn(clusterDefinition);
         given(conversionService.convert(request.getGateway(), Gateway.class)).willReturn(new Gateway());
         // WHEN
         Cluster result = underTest.convert(request);
@@ -89,6 +94,9 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         given(kerberosService.getByNameForWorkspaceId(eq("somename"), anyLong())).willReturn(new KerberosConfig());
         given(conversionService.convert(request.getCloudStorage(), FileSystem.class)).willReturn(new FileSystem());
         given(cloudStorageValidationUtil.isCloudStorageConfigured(request.getCloudStorage())).willReturn(true);
+        ClusterDefinition clusterDefinition = new ClusterDefinition();
+        clusterDefinition.setStackType(StackType.HDP.name());
+        given(clusterDefinitionService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(eq("my-cluster-definition"), any())).willReturn(clusterDefinition);
         // WHEN
         Cluster result = underTest.convert(request);
         // THEN
@@ -100,6 +108,9 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     @Test
     public void testNoGateway() {
         // GIVEN
+        ClusterDefinition clusterDefinition = new ClusterDefinition();
+        clusterDefinition.setStackType(StackType.HDP.name());
+        given(clusterDefinitionService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(eq("my-cluster-definition"), any())).willReturn(clusterDefinition);
         // WHEN
         ClusterV4Request clusterRequest = getRequest("cluster-no-gateway.json");
         Cluster result = underTest.convert(clusterRequest);
