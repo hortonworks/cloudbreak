@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.Cloud
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.customcontainer.CustomContainerV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
@@ -175,6 +176,12 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         ClouderaManagerV4Request clouderaManagerV4Request = clusterRequest.getCm();
         if (Objects.nonNull(ambariRequest) && Objects.nonNull(clouderaManagerV4Request)) {
             throw new BadRequestException("Cannot determine cluster manager. More than one provided");
+        }
+        if (Objects.nonNull(ambariRequest) && StackType.CDH.name().equals(cluster.getClusterDefinition().getStackType())) {
+            throw new BadRequestException("Cannot process the provided cluster definition template with Ambari");
+        }
+        if (Objects.nonNull(clouderaManagerV4Request) && !StackType.CDH.name().equals(cluster.getClusterDefinition().getStackType())) {
+            throw new BadRequestException("Cannot process the provided Ambari blueprint with Cloudera Manager");
         }
 
         Optional.ofNullable(ambariRequest)
