@@ -67,7 +67,8 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
                 throw new CloudbreakException("Can't find original admin user");
             }
         } catch (ApiException e) {
-            throw new CloudbreakException("Can't replace original admin user");
+            LOGGER.info("Can't replace original admin user due to: ", e);
+            throw new CloudbreakException("Can't replace original admin user due to: " + e.getMessage());
         }
     }
 
@@ -87,7 +88,8 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
                 throw new CloudbreakException("Can't find admin user");
             }
         } catch (ApiException e) {
-            throw new CloudbreakException("Can't replace admin password");
+            LOGGER.info("Can't replace admin password due to: ", e);
+            throw new CloudbreakException("Can't replace admin password due to: " + e.getMessage());
         }
     }
 
@@ -127,7 +129,8 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
                 throw new CloudbreakException("Can't find original admin user");
             }
         } catch (ApiException e) {
-            throw new CloudbreakException("Can't replace original admin user");
+            LOGGER.info("Can't replace original admin user due to: ", e);
+            throw new CloudbreakException("Can't replace original admin user due to: " + e.getMessage());
         }
     }
 

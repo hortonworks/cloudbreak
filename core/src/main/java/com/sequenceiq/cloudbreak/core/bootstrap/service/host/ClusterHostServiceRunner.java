@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
@@ -222,7 +223,7 @@ public class ClusterHostServiceRunner {
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
 
         if (clusterDefinitionService.isClouderaManagerTemplate(cluster.getClusterDefinition())) {
-            decoratePillarWithClouderaManagerRepo(stack.getId(), servicePillar);
+            decoratePillarWithClouderaManagerRepo(stack.getId(), cluster.getId(), servicePillar);
             decoratePillarWithClouderaManagerDatabase(cluster, servicePillar);
         } else {
             AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(cluster.getId());
@@ -320,14 +321,17 @@ public class ClusterHostServiceRunner {
                 new SaltPillarProperties("/cloudera-manager/database.sls", singletonMap("cloudera-manager", singletonMap("database", rdsView))));
     }
 
-    private void decoratePillarWithClouderaManagerRepo(Long stackId, Map<String, SaltPillarProperties> servicePillar)
+    private void decoratePillarWithClouderaManagerRepo(Long stackId, Long clusterId, Map<String, SaltPillarProperties> servicePillar)
             throws CloudbreakOrchestratorFailedException {
         try {
             String osType = componentConfigProvider.getImage(stackId).getOsType();
+            ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(clusterId);
+
             servicePillar.put("cloudera-manager-repo", new SaltPillarProperties("/cloudera-manager/repo.sls",
-                    singletonMap("cloudera-manager", singletonMap("repo", clouderaManagerRepoService.getDefault(osType)))));
+                    singletonMap("cloudera-manager", singletonMap("repo", Objects.nonNull(clouderaManagerRepo)
+                            ? clouderaManagerRepo : clouderaManagerRepoService.getDefault(osType)))));
         } catch (CloudbreakImageNotFoundException e) {
-            throw new CloudbreakOrchestratorFailedException("Cannot determine image of stack, thus osType and repository informations cannot be provided.");
+            throw new CloudbreakOrchestratorFailedException("Cannot determine image of stack, thus osType and repository information cannot be provided.");
         }
     }
 
