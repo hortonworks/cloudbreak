@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -43,12 +46,36 @@ public class ClusterComponentConfigProvider {
         return componentRepository.findComponentByClusterIdComponentTypeName(clusterId, componentType, name);
     }
 
+    public Set<ClusterComponent> getComponentList(Long clusterId, ComponentType componentType) {
+        return componentRepository.findComponentsByClusterIdComponentTypeName(clusterId, componentType, componentType.name());
+    }
+
     public ClusterComponentView getComponentView(Long clusterId, ComponentType componentType) {
         return getComponentView(clusterId, componentType, componentType.name());
     }
 
     public ClusterComponentView getComponentView(Long clusterId, ComponentType componentType, String name) {
         return componentViewRepository.findOneByClusterIdAndComponentTypeAndName(clusterId, componentType, name);
+    }
+
+    public ClouderaManagerRepo getClouderaManagerRepoDetails(Long clusterId) {
+        try {
+            ClusterComponent component = getComponent(clusterId, ComponentType.CM_REPO_DETAILS);
+            return component == null ? null : component.getAttributes().get(ClouderaManagerRepo.class);
+        } catch (IOException e) {
+            throw new CloudbreakServiceException("Failed to read Cloudera Manager repo", e);
+        }
+    }
+
+    public List<ClouderaManagerProduct> getClouderaManagerProductDetails(Long clusterId) {
+        Set<ClusterComponent> components = getComponentList(clusterId, ComponentType.CDH_PRODUCT_DETAILS);
+        return Optional.of(components.stream().map(component -> {
+            try {
+                return component.getAttributes().get(ClouderaManagerProduct.class);
+            } catch (IOException e) {
+                throw new CloudbreakServiceException("Failed to read Cloudera Product details", e);
+            }
+        }).collect(Collectors.toList())).orElse(null);
     }
 
     public StackRepoDetails getHDPRepo(Long clusterId) {

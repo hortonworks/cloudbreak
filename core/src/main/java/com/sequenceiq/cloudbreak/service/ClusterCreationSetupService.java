@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.CUSTOM_VDF_REPO_KEY;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.VDF_REPO_KEY_PREFIX;
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,8 +26,10 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.ambarirepository.AmbariRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.AmbariStackDescriptorV4Response;
@@ -35,8 +38,12 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.AmbariDefaultStackRepoDetails;
+import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHEntries;
+import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPEntries;
@@ -114,6 +121,9 @@ public class ClusterCreationSetupService {
     private DefaultHDFEntries defaultHDFEntries;
 
     @Inject
+    private DefaultCDHEntries defaultCDHEntries;
+
+    @Inject
     private ClusterDefinitionService clusterDefinitionService;
 
     @Inject
@@ -121,6 +131,9 @@ public class ClusterCreationSetupService {
 
     @Inject
     private DefaultAmbariRepoService defaultAmbariRepoService;
+
+    @Inject
+    private DefaultClouderaManagerRepoService defaultClouderaManagerRepoService;
 
     @Inject
     private StackMatrixService stackMatrixService;
@@ -203,25 +216,9 @@ public class ClusterCreationSetupService {
 
         if (clusterDefinition != null) {
             if (clusterDefinitionService.isAmbariBlueprint(clusterDefinition)) {
-                AmbariRepositoryV4Request repoDetailsJson = request.getAmbari().getRepository();
-                ClusterComponent ambariRepoConfig = determineAmbariRepoConfig(stackAmbariRepoConfig, repoDetailsJson, stackImageComponent, cluster);
-                components.add(ambariRepoConfig);
-                ClusterComponent hdpRepoConfig = determineHDPRepoConfig(clusterDefinition,
-                        stack.getId(), stackHdpRepoConfig, request, cluster, stack.getWorkspace(),
-                        stackImageComponent);
-                components.add(hdpRepoConfig);
-                checkRepositories(ambariRepoConfig, hdpRepoConfig, stackImageComponent.get());
-                checkVDFFile(ambariRepoConfig, hdpRepoConfig, cluster);
+                components = prepareAmbariCluster(request, stack, clusterDefinition, cluster, stackAmbariRepoConfig, stackHdpRepoConfig, stackImageComponent);
             } else if (clusterDefinitionService.isClouderaManagerTemplate(clusterDefinition)) {
-                ClouderaManagerRepositoryV4Request repoDetailsJson = request.getCm().getRepository();
-                ClusterComponent cmRepoConfig = determineCmRepoConfig(repoDetailsJson, stackImageComponent, cluster);
-                components.add(cmRepoConfig);
-
-                List<ClouderaManagerProductV4Request> products = request.getCm().getProducts();
-                ClusterComponent cdhProductRepoConfig = determineCdhRepoConfig(clusterDefinition,
-                        stack.getId(), products, cluster, stack.getWorkspace(),
-                        stackImageComponent);
-                components.add(cdhProductRepoConfig);
+                components = prepareClouderaManagerCluster(request, cluster, stackImageComponent);
             }
         }
         LOGGER.debug("Cluster components saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
@@ -231,6 +228,42 @@ public class ClusterCreationSetupService {
         LOGGER.debug("Cluster object creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
         return savedCluster;
+    }
+
+    private List<ClusterComponent> prepareAmbariCluster(ClusterV4Request request, Stack stack, ClusterDefinition clusterDefinition, Cluster cluster,
+            Optional<Component> stackAmbariRepoConfig,
+            Optional<Component> stackHdpRepoConfig,
+            Optional<Component> stackImageComponent) throws IOException, CloudbreakImageNotFoundException {
+        List<ClusterComponent> components = new ArrayList<>();
+        AmbariRepositoryV4Request repoDetailsJson = Optional.ofNullable(request.getAmbari()).map(AmbariV4Request::getRepository).orElse(null);
+        ClusterComponent ambariRepoConfig = determineAmbariRepoConfig(stackAmbariRepoConfig, repoDetailsJson, stackImageComponent, cluster);
+        components.add(ambariRepoConfig);
+        ClusterComponent hdpRepoConfig = determineHDPRepoConfig(clusterDefinition,
+                stack.getId(), stackHdpRepoConfig, request, cluster, stack.getWorkspace(),
+                stackImageComponent);
+        components.add(hdpRepoConfig);
+        checkRepositories(ambariRepoConfig, hdpRepoConfig, stackImageComponent.get());
+        checkVDFFile(ambariRepoConfig, hdpRepoConfig, cluster);
+        return components;
+    }
+
+    private List<ClusterComponent> prepareClouderaManagerCluster(ClusterV4Request request, Cluster cluster,
+            Optional<Component> stackImageComponent) throws IOException {
+        List<ClusterComponent> components = new ArrayList<>();
+        ClouderaManagerRepositoryV4Request repoDetailsJson = Optional.ofNullable(
+                request.getCm()).map(ClouderaManagerV4Request::getRepository).orElse(null);
+        if (repoDetailsJson == null) {
+            ClusterComponent cmRepoConfig = determineDefaultCmRepoConfig(stackImageComponent, cluster);
+            components.add(cmRepoConfig);
+        }
+        List<ClouderaManagerProductV4Request> products = Optional.ofNullable(request.getCm()).map(ClouderaManagerV4Request::getProducts).orElse(null);
+
+        if (products == null || products.size() == 0) {
+            ClusterComponent cdhProductRepoConfig = determineDefaultCdhRepoConfig(cluster, stackImageComponent);
+            components.add(cdhProductRepoConfig);
+        }
+        components.addAll(cluster.getComponents());
+        return components;
     }
 
     private void decorateHostGroupWithConstraint(Stack stack, Cluster cluster) {
@@ -322,7 +355,7 @@ public class ClusterCreationSetupService {
             ClusterV4Request request, Cluster cluster, Workspace workspace, Optional<Component> stackImageComponent)
             throws IOException, CloudbreakImageNotFoundException {
         Json stackRepoDetailsJson;
-        StackRepositoryV4Request ambariStackDetails = request.getAmbari().getStackRepository();
+        StackRepositoryV4Request ambariStackDetails = request.getAmbari() == null ? null : request.getAmbari().getStackRepository();
         if (!stackHdpRepoConfig.isPresent()) {
             if (ambariStackDetails != null && (stackRepoDetailsConverter.isBaseRepoRequiredFieldsExists(ambariStackDetails)
                     || stackRepoDetailsConverter.isVdfRequiredFieldsExists(ambariStackDetails))) {
@@ -361,14 +394,33 @@ public class ClusterCreationSetupService {
         }
     }
 
-    private ClusterComponent determineCmRepoConfig(ClouderaManagerRepositoryV4Request repoDetailsJson,
-            Optional<Component> stackImageComponent, Cluster cluster) {
-        return null;
+    private ClusterComponent determineDefaultCmRepoConfig(Optional<Component> stackImageComponent, Cluster cluster) throws IOException {
+        ClouderaManagerRepo clouderaManagerRepo = defaultClouderaManagerRepoService.getDefault(getOsType(stackImageComponent));
+        if (clouderaManagerRepo == null) {
+            throw new BadRequestException(String.format("Couldn't determine Cloudera Manager repo for the stack: %s", cluster.getStack().getName()));
+        }
+        Json json = new Json(clouderaManagerRepo);
+        return new ClusterComponent(ComponentType.CM_REPO_DETAILS, json, cluster);
     }
 
-    private ClusterComponent determineCdhRepoConfig(ClusterDefinition clusterDefinition, Long id,
-            List<ClouderaManagerProductV4Request> request, Cluster cluster, Workspace workspace, Optional<Component> stackImageComponent) {
-        return null;
+    private ClusterComponent determineDefaultCdhRepoConfig(Cluster cluster, Optional<Component> stackImageComponent) throws IOException {
+        String osType = getOsType(stackImageComponent);
+
+        Entry<String, DefaultCDHInfo> defaultCDHInfoEntry = defaultCDHEntries.
+                getEntries().
+                entrySet().
+                stream().
+                filter(entry -> Objects.nonNull(entry.getValue().getRepo().getStack().get(osType))).
+                max(DefaultCDHEntries.CDH_ENTRY_COMPARATOR).
+                orElseThrow(notFound("Default Product Info with OS type:", osType));
+        ClouderaManagerProduct cmProduct = new ClouderaManagerProduct();
+        DefaultCDHInfo defaultCDHInfo = defaultCDHInfoEntry.getValue();
+        cmProduct.
+                withVersion(defaultCDHInfo.getVersion()).
+                withName(defaultCDHInfo.getRepo().getStack().get("repoid")).
+                withParcel(defaultCDHInfo.getRepo().getStack().get(osType));
+        Json json = new Json(cmProduct);
+        return new ClusterComponent(ComponentType.CDH_PRODUCT_DETAILS, json, cluster);
     }
 
     private StackRepoDetails createStackRepoDetails(AmbariDefaultStackRepoDetails stackRepoDetails, String osType) {

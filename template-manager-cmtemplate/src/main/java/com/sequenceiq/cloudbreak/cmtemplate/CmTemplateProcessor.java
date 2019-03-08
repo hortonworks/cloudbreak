@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -100,6 +101,14 @@ public class CmTemplateProcessor implements ClusterDefinitionTextProcessor {
         hostGroupMappings.forEach((hostGroup, hostAttributes) -> hostAttributes.forEach(
                 attr -> cmTemplate.getInstantiator().addHostsItem(new ApiClusterTemplateHostInfo().hostName(attr.get("fqdn")).hostTemplateRefName(hostGroup))
         ));
+    }
+
+    public void resetProducts() {
+        cmTemplate.setProducts(new ArrayList<>());
+    }
+
+    public void resetRepositories() {
+        cmTemplate.setRepositories(new ArrayList<>());
     }
 
     public void addProduct(String product, String version) {

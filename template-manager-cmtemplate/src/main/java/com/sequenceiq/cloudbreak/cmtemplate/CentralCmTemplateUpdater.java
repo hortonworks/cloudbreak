@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cmtemplate;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -12,6 +13,9 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.template.ClusterDefinitionProcessingException;
 import com.sequenceiq.cloudbreak.template.ClusterDefinitionUpdater;
@@ -33,10 +37,13 @@ public class CentralCmTemplateUpdater implements ClusterDefinitionUpdater {
     @Inject
     private CmTemplateComponentConfigProcessor cmTemplateComponentConfigProcessor;
 
-    public ApiClusterTemplate getCmTemplate(TemplatePreparationObject source, Map<String, List<Map<String, String>>> hostGroupMappings) {
+    public ApiClusterTemplate getCmTemplate(TemplatePreparationObject source, Map<String, List<Map<String, String>>> hostGroupMappings,
+            ClouderaManagerRepo clouderaManagerRepoDetails, List<ClouderaManagerProduct> clouderaManagerProductDetails) {
         try {
-            CmTemplateProcessor cmTemplate = updateCmTemplateConfiguration(source, hostGroupMappings);
-            return cmTemplate.getTemplate();
+            CmTemplateProcessor processor = getCmTemplateProcessor(source);
+            updateCmTemplateRepoDetails(processor, clouderaManagerRepoDetails, clouderaManagerProductDetails);
+            updateCmTemplateConfiguration(processor, source, hostGroupMappings);
+            return processor.getTemplate();
         } catch (IOException e) {
             String message = String.format("Unable to update cmTemplate with default properties which was: %s",
                     source.getClusterDefinitionView().getClusterDefinitionText());
@@ -45,20 +52,15 @@ public class CentralCmTemplateUpdater implements ClusterDefinitionUpdater {
         }
     }
 
-    private CmTemplateProcessor updateCmTemplateConfiguration(TemplatePreparationObject source, Map<String, List<Map<String, String>>> hostGroupMappings)
-            throws IOException {
+    public CmTemplateProcessor getCmTemplateProcessor(TemplatePreparationObject source) throws IOException {
         String cmTemplate = source.getClusterDefinitionView().getClusterDefinitionText();
         cmTemplate = templateProcessor.process(cmTemplate, source, Maps.newHashMap());
-        CmTemplateProcessor processor = cmTemplateProcessorFactory.get(cmTemplate);
-        processor.addInstantiator(source.getGeneralClusterConfigs().getClusterName());
-        processor.addHosts(hostGroupMappings);
-        processor = cmTemplateComponentConfigProcessor.process(processor, source);
-        return processor;
+        return cmTemplateProcessorFactory.get(cmTemplate);
     }
 
     @Override
     public String getClusterDefinitionText(TemplatePreparationObject source) {
-        ApiClusterTemplate template = getCmTemplate(source, Map.of());
+        ApiClusterTemplate template = getCmTemplate(source, Map.of(), null, null);
         return JsonUtil.writeValueAsStringSilent(template);
     }
 
@@ -66,4 +68,41 @@ public class CentralCmTemplateUpdater implements ClusterDefinitionUpdater {
     public String getVariant() {
         return ClusterApi.CLOUDERA_MANAGER;
     }
+
+    private CmTemplateProcessor updateCmTemplateConfiguration(CmTemplateProcessor processor, TemplatePreparationObject source,
+            Map<String, List<Map<String, String>>> hostGroupMappings) {
+
+        processor.addInstantiator(source.getGeneralClusterConfigs().getClusterName());
+        processor.addHosts(hostGroupMappings);
+        processor = cmTemplateComponentConfigProcessor.process(processor, source);
+        return processor;
+    }
+
+    private void updateCmTemplateRepoDetails(CmTemplateProcessor cmTemplateProcessor, ClouderaManagerRepo clouderaManagerRepoDetails,
+            List<ClouderaManagerProduct> clouderaManagerProductDetails) {
+        if (Objects.nonNull(clouderaManagerRepoDetails)) {
+            cmTemplateProcessor.setCmVersion(clouderaManagerRepoDetails.getVersion());
+        }
+        if (Objects.nonNull(clouderaManagerProductDetails) && !clouderaManagerProductDetails.isEmpty()) {
+            cmTemplateProcessor.resetProducts();
+            cmTemplateProcessor.resetRepositories();
+            clouderaManagerProductDetails.stream().forEach(product -> {
+                String version = product.getVersion();
+                String name = product.getName();
+                String parcel = product.getParcel();
+                cmTemplateProcessor.addProduct(name, version);
+                cmTemplateProcessor.addRepositoryItem(parcel);
+                if (Objects.nonNull(name) && StackType.CDH.name().equals(name)) {
+                    cmTemplateProcessor.setCdhVersion(parsteDistroVersion(version));
+                }
+            });
+        }
+    }
+
+    // longVersion example: 6.1.0-1.cdh6.1.0.p0.770702
+    // return value: 6.1.0
+    private String parsteDistroVersion(String longVersion) {
+        return longVersion.split("-")[0];
+    }
+
 }

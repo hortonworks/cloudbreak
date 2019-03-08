@@ -21,8 +21,11 @@ import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralCmTemplateUpdater;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -52,6 +55,9 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Inject
     private CentralCmTemplateUpdater cmTemplateUpdater;
+
+    @Inject
+    private ClusterComponentConfigProvider clusterComponentProvider;
 
     private final Stack stack;
 
@@ -90,9 +96,9 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         try {
             Map<String, List<Map<String, String>>> hostGroupMappings = hostGroupAssociationBuilder.buildHostGroupAssociations(instanceMetaDataByHostGroup);
 
-            ApiClusterTemplate apiClusterTemplate = cmTemplateUpdater.getCmTemplate(templatePreparationObject, hostGroupMappings);
+            ApiClusterTemplate apiClusterTemplate = injectCustomClusterTemplateFragments(templatePreparationObject, cluster.getId(), hostGroupMappings);
             cluster.setExtendedClusterDefinitionText(getExtendedClusterDefinitionText(apiClusterTemplate));
-            LOGGER.debug("Generated Cloudera cluster template: {}", cluster.getExtendedClusterDefinitionText());
+            LOGGER.info("Generated Cloudera cluster template: {}", cluster.getExtendedClusterDefinitionText());
 
             ClouderaManagerResourceApi clouderaManagerResourceApi = new ClouderaManagerResourceApi(client);
             ApiCommand apiCommand = clouderaManagerResourceApi.importClusterTemplate(true, apiClusterTemplate);
@@ -106,6 +112,13 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
         return cluster;
+    }
+
+    private ApiClusterTemplate injectCustomClusterTemplateFragments(TemplatePreparationObject templatePreparationObject,
+            Long clusterId, Map<String, List<Map<String, String>>> hostGroupMappings) {
+        ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(clusterId);
+        List<ClouderaManagerProduct> clouderaManagerProductDetails = clusterComponentProvider.getClouderaManagerProductDetails(clusterId);
+        return cmTemplateUpdater.getCmTemplate(templatePreparationObject, hostGroupMappings, clouderaManagerRepoDetails, clouderaManagerProductDetails);
     }
 
     private ApiClusterTemplate convertStringJsonToTemplate(String json) {
