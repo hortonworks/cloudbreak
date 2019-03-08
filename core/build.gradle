@@ -231,6 +231,7 @@ dependencies {
   runtime project(':cloud-cumulus-yarn')
   runtime project(':cluster-ambari')
   runtime project(':cluster-cm')
+  runtime project(':auth-connector')
 
 
   runtime group: 'activation',                    name: 'activation'

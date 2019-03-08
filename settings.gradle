@@ -29,6 +29,7 @@ include 'template-manager-cmtemplate'
 include 'cluster-api'
 include 'cluster-ambari'
 include 'cluster-cm'
+include 'auth-connector'
 
 rootProject.name = 'cloudbreak'
 include 'mock-caas'

@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package paging;
+
+option java_package = "com.cloudera.thunderhead.service.common.paging";
+option java_outer_classname = "PagingProto";
+
+
+// Generally an RPC supporting paging will contain an integer page size and a
+// PageToken pageToken as arguments with a PageToken nextPageToken in the
+// response.
+//
+// An initial request for a first page of results would specify no input page
+// token. The page size specified will be used if possible. If the page size
+// argument is zero, the server will choose a page size.
+//
+// If a nextPageToken is set in the response, more results are available. This
+// value should be returned as the page token for a subsequent call to get the
+// next page of results.
+message PageToken {
+  // The maps below are the result of Dynamo's QueryResultPage.getLastEvaluatedKey encoded
+  // into string maps. There is one map for string attributes and one for numeric attributes.
+  // See DynamoUtils for utility encoding and decoding methods.
+  map<string, string> exclusiveStartKeyStringAttrs = 1;
+  map<string, string> exclusiveStartKeyNumAttrs = 2;
+}

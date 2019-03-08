@@ -46,6 +46,7 @@ dependencies {
   testCompile group: 'com.openpojo',              name: 'openpojo',                       version: '0.8.10'
 
   compile project(':structuredevent-model')
+  compile project(':auth-connector')
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {

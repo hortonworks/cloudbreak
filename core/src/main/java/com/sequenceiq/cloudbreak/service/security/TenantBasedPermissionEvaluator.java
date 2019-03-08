@@ -10,7 +10,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -29,8 +28,7 @@ public class TenantBasedPermissionEvaluator implements PermissionEvaluator {
     private static final Logger LOGGER = LoggerFactory.getLogger(TenantBasedPermissionEvaluator.class);
 
     @Inject
-    @Lazy
-    private ConversionService conversionService;
+    private AuthUserService userService;
 
     @Override
     public boolean hasPermission(Authentication authentication, Object target, Object permission) {
@@ -46,7 +44,7 @@ public class TenantBasedPermissionEvaluator implements PermissionEvaluator {
             return oauth.getOAuth2Request().getScope().contains(SpecialScopes.AUTO_SCALE.getScope());
         }
 
-        CloudbreakUser user = conversionService.convert(oauth, CloudbreakUser.class);
+        CloudbreakUser user = userService.getUserWithCaasFallback(oauth);
         Collection<?> targets = target instanceof Collection ? (Collection<?>) target : Collections.singleton(target);
         return targets.stream().allMatch(t -> hasPermission(user, p, t));
     }

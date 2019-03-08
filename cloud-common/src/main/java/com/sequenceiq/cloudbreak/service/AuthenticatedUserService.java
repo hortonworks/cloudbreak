@@ -15,9 +15,9 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.service.token.CachedRemoteTokenService.MapTypeReference;
+import com.sequenceiq.cloudbreak.service.security.AuthUserService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
@@ -26,14 +26,14 @@ public class AuthenticatedUserService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticatedUserService.class);
 
     @Inject
-    private ConverterUtil converterUtil;
+    private AuthUserService userService;
 
     public CloudbreakUser getCbUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof OAuth2Authentication) {
             OAuth2Authentication oauth = (OAuth2Authentication) authentication;
             if (oauth.getUserAuthentication() != null) {
-                return converterUtil.convert(oauth, CloudbreakUser.class);
+                return userService.getUserWithCaasFallback(oauth);
             }
         }
         return null;
