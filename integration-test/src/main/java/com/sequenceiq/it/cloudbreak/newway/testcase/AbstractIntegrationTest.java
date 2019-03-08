@@ -5,6 +5,7 @@ import java.lang.reflect.Parameter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -96,27 +97,25 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
                     .given(declaredAnnotation.given())
                     .when(declaredAnnotation.when())
                     .then(declaredAnnotation.then());
-            ((TestContext) params[0]).withDescription(testCaseDescription);
-        }
-        if (testCaseDescription == null) {
+            ((TestContext) params[0]).addDescription(testCaseDescription);
+        } else if (method.getParameters().length == params.length) {
             Parameter[] parameters = method.getParameters();
             for (int i = 1; i < parameters.length; i++) {
                 if (parameters[i].getAnnotation(Description.class) != null) {
                     Object param = params[i];
-                    if (param instanceof TestCaseDescription) {
-                        testCaseDescription = (TestCaseDescription) param;
-                        ((TestContext) params[0]).withDescription(testCaseDescription);
-                    } else {
+                    if (!(param instanceof TestCaseDescription)) {
                         throw new IllegalArgumentException("The param annotated with @Description but the type is should be "
                                 + TestCaseDescription.class.getSimpleName());
                     }
+                    testCaseDescription = (TestCaseDescription) param;
+                    ((TestContext) params[0]).addDescription(testCaseDescription);
+                    break;
                 }
             }
         }
-        if (testCaseDescription == null || Strings.isNullOrEmpty(testCaseDescription.getValue())) {
-            throw new TestCaseDescriptionMissingException();
-        }
-        return testCaseDescription;
+        return Optional.ofNullable(testCaseDescription)
+                .filter(d -> Strings.isNullOrEmpty(d.getValue()))
+                .orElseThrow(TestCaseDescriptionMissingException::new);
     }
 
     @BeforeClass
