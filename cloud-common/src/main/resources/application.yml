@@ -227,11 +227,11 @@ cb:
   clouderamanager:
     entries:
       6.1:
-        version: 6.1.0
+        version: 6.1.1
         repo:
           redhat7:
-            baseurl: https://archive.cloudera.com/cm6/6.1.0/redhat7/yum/
-            gpgkey: https://archive.cloudera.com/cm6/6.1.0/redhat7/yum/RPM-GPG-KEY-cloudera
+            baseurl: https://archive.cloudera.com/cm6/6.1.1/redhat7/yum/
+            gpgkey: https://archive.cloudera.com/cm6/6.1.1/redhat7/yum/RPM-GPG-KEY-cloudera
 
   cdh:
     entries:
