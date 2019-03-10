@@ -6,16 +6,6 @@
   "blueprint": {
     "cdhVersion": "6.1.1",
     "displayName": "datalake",
-    "cmVersion": "6.1.0",
-    "repositories": [
-      "https://archive.cloudera.com/cdh6/6.1.1/parcels/"
-    ],
-    "products": [
-      {
-        "version": "6.1.1-1.cdh6.1.1.p0.875250",
-        "product": "CDH"
-      }
-    ],
     "services": [
       {
         "refName": "zookeeper",
