@@ -19,7 +19,7 @@ public class StackInfoService {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackInfoService.class);
 
     @Inject
-    private ClusterTemplateUtils clusterTemplateUtils;
+    private ClusterDefinitionUtils clusterDefinitionUtils;
 
     public boolean isHdfCluster(String blueprintText) {
         boolean hdfCluster;
@@ -34,7 +34,7 @@ public class StackInfoService {
     public ClusterDefinitionStackInfo clusterDefinitionStackInfo(String blueprintText) {
         try {
             JsonNode root = JsonUtil.readTree(blueprintText);
-            return new ClusterDefinitionStackInfo(clusterTemplateUtils.getBlueprintStackVersion(root), clusterTemplateUtils.getBlueprintStackName(root));
+            return new ClusterDefinitionStackInfo(clusterDefinitionUtils.getBlueprintStackVersion(root), clusterDefinitionUtils.getBlueprintStackName(root));
         } catch (IOException e) {
             String message = String.format("Unable to detect ClusterDefinitionStackInfo from the source cluster definition which was: %s.", blueprintText);
             LOGGER.warn(message);

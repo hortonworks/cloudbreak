@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cluster.service;
 
+import static java.util.Optional.ofNullable;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
@@ -59,48 +62,31 @@ public class ClusterComponentConfigProvider {
     }
 
     public ClouderaManagerRepo getClouderaManagerRepoDetails(Long clusterId) {
-        try {
-            ClusterComponent component = getComponent(clusterId, ComponentType.CM_REPO_DETAILS);
-            return component == null ? null : component.getAttributes().get(ClouderaManagerRepo.class);
-        } catch (IOException e) {
-            throw new CloudbreakServiceException("Failed to read Cloudera Manager repo", e);
-        }
+        ClusterComponent component = getComponent(clusterId, ComponentType.CM_REPO_DETAILS);
+        return retrieveFromAttribute(component, ClouderaManagerRepo.class);
     }
 
     public List<ClouderaManagerProduct> getClouderaManagerProductDetails(Long clusterId) {
         Set<ClusterComponent> components = getComponentList(clusterId, ComponentType.CDH_PRODUCT_DETAILS);
-        return Optional.of(components.stream().map(component -> {
-            try {
-                return component.getAttributes().get(ClouderaManagerProduct.class);
-            } catch (IOException e) {
-                throw new CloudbreakServiceException("Failed to read Cloudera Product details", e);
-            }
-        }).collect(Collectors.toList())).orElse(null);
+        return Optional.of(components.stream().map(component ->
+                retrieveFromAttribute(component, ClouderaManagerProduct.class))
+                .collect(Collectors.toList())).orElse(null);
     }
 
     public StackRepoDetails getHDPRepo(Long clusterId) {
-        try {
-            ClusterComponentView component = getComponentView(clusterId, ComponentType.HDP_REPO_DETAILS);
-            return component == null ? null : component.getAttributes().get(StackRepoDetails.class);
-        } catch (IOException e) {
-            throw new CloudbreakServiceException("Failed to read HDP repo details.", e);
-        }
+        ClusterComponentView component = getComponentView(clusterId, ComponentType.HDP_REPO_DETAILS);
+        return retrieveFromAttribute(component, StackRepoDetails.class);
     }
 
     public StackRepoDetails getStackRepoDetails(Long clusterId) {
-        ClusterComponent component = Optional.ofNullable(getComponent(clusterId, ComponentType.HDP_REPO_DETAILS))
+        ClusterComponent component = ofNullable(getComponent(clusterId, ComponentType.HDP_REPO_DETAILS))
                 .orElse(getComponent(clusterId, ComponentType.HDF_REPO_DETAILS));
-        try {
-            return component.getAttributes().get(StackRepoDetails.class);
-        } catch (IOException e) {
-            LOGGER.error("Failed to read repo component for cluster: [{}]", clusterId, e);
-            throw new CloudbreakServiceException("Failed to read HDP repo details.", e);
-        }
+        return retrieveFromAttribute(component, StackRepoDetails.class);
     }
 
     public StackRepoDetails getStackRepo(Iterable<ClusterComponent> clusterComponents) {
         try {
-            return Optional.ofNullable(getComponent(Lists.newArrayList(clusterComponents), StackRepoDetails.class, ComponentType.HDP_REPO_DETAILS))
+            return ofNullable(getComponent(Lists.newArrayList(clusterComponents), StackRepoDetails.class, ComponentType.HDP_REPO_DETAILS))
                     .orElse(getComponent(Lists.newArrayList(clusterComponents), StackRepoDetails.class, ComponentType.HDF_REPO_DETAILS));
         } catch (Exception e) {
             throw new CloudbreakServiceException("Failed to read HDP repo details.", e);
@@ -108,12 +94,8 @@ public class ClusterComponentConfigProvider {
     }
 
     public AmbariRepo getAmbariRepo(Long clusterId) {
-        try {
-            ClusterComponent component = getComponent(clusterId, ComponentType.AMBARI_REPO_DETAILS);
-            return component == null ? null : component.getAttributes().get(AmbariRepo.class);
-        } catch (IOException e) {
-            throw new CloudbreakServiceException("Failed to read Ambari repo", e);
-        }
+        ClusterComponent component = getComponent(clusterId, ComponentType.AMBARI_REPO_DETAILS);
+        return retrieveFromAttribute(component, AmbariRepo.class);
     }
 
     public AmbariRepo getAmbariRepo(Iterable<ClusterComponent> clusterComponents) {
@@ -152,5 +134,32 @@ public class ClusterComponentConfigProvider {
 
     public Set<ClusterComponent> findByComponentType(ComponentType componentType) {
         return componentRepository.findByComponentType(componentType);
+    }
+
+    private <T> T retrieveFromAttribute(ClusterComponentView componentView, Class<T> clazz) {
+        if (componentView == null) {
+            return null;
+        }
+        return retrieveFromAttributeJson(componentView.getAttributes(), clazz);
+    }
+
+    private <T> T retrieveFromAttribute(ClusterComponent component, Class<T> clazz) {
+        if (component == null) {
+            return null;
+        }
+        return retrieveFromAttributeJson(component.getAttributes(), clazz);
+    }
+
+    private <T> T retrieveFromAttributeJson(Json attributes, Class<T> clazz) {
+        if (attributes == null) {
+            return null;
+        }
+        try {
+            return attributes.get(clazz);
+        } catch (IOException e) {
+            String message = String.format("Failed to read attributes json into class: %s", clazz);
+            LOGGER.debug(message);
+            throw new CloudbreakServiceException(message, e);
+        }
     }
 }

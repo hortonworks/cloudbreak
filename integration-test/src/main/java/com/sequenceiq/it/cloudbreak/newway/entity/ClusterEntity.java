@@ -70,17 +70,17 @@ public class ClusterEntity extends AbstractCloudbreakEntity<ClusterV4Request, Cl
     }
 
     public ClusterEntity withClouderaManager() {
-        ClouderaManagerEntity clouderaManager = getTestContext().get(ClouderaManagerEntity.class);
+        ClouderaManagerTestDto clouderaManager = getTestContext().get(ClouderaManagerTestDto.class);
         return withClouderaManager(clouderaManager);
     }
 
     public ClusterEntity withClouderaManager(String key) {
-        ClouderaManagerEntity clouderaManager = getTestContext().get(key);
+        ClouderaManagerTestDto clouderaManager = getTestContext().get(key);
         return withClouderaManager(clouderaManager);
     }
 
-    public ClusterEntity withClouderaManager(ClouderaManagerEntity clouderaManagerEntity) {
-        getRequest().setCm(clouderaManagerEntity.getRequest());
+    public ClusterEntity withClouderaManager(ClouderaManagerTestDto clouderaManagerTestDto) {
+        getRequest().setCm(clouderaManagerTestDto.getRequest());
         getRequest().setAmbari(null);
         return this;
     }

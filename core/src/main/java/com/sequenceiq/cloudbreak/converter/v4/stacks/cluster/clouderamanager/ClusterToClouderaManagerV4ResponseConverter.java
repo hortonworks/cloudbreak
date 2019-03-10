@@ -23,14 +23,16 @@ public final class ClusterToClouderaManagerV4ResponseConverter {
     }
 
     public static ClouderaManagerV4Response convert(Cluster cluster) {
+        Predicate<ClusterComponent> cmRepoFilter = component -> ComponentType.CM_REPO_DETAILS.equals(component.getComponentType());
+
         Set<ClusterComponent> components = cluster.getComponents();
-        if (components.stream().noneMatch(cmRepoDetailsFilter())) {
+        if (components.stream().noneMatch(cmRepoFilter)) {
             return null;
         }
 
         return new ClouderaManagerV4Response()
                 .withRepository(components.stream()
-                        .filter(cmRepoDetailsFilter())
+                        .filter(cmRepoFilter)
                         .map(ClusterComponent::getAttributes)
                         .map(toAttributeClass(ClouderaManagerRepo.class))
                         .map(ClouderaManagerRepoToClouderaManagerRepositoryV4Response::convert)
@@ -42,10 +44,6 @@ public final class ClusterToClouderaManagerV4ResponseConverter {
                         .map(toAttributeClass(ClouderaManagerProduct.class))
                         .map(ClouderaManagerProductToClouderaManagerProductV4Response::convert)
                         .collect(Collectors.toList()));
-    }
-
-    private static Predicate<ClusterComponent> cmRepoDetailsFilter() {
-        return component -> ComponentType.CM_REPO_DETAILS.equals(component.getComponentType());
     }
 
     private static <T> Function<Json, T> toAttributeClass(Class<T> attributeClass) {

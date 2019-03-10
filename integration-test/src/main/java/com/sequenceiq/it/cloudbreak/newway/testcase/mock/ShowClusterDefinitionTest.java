@@ -1,12 +1,10 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
-import java.io.IOException;
-
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
@@ -59,18 +57,8 @@ public class ShowClusterDefinitionTest extends AbstractIntegrationTest {
     private static void validateGeneratedClusterDefinition(String extendedClusterDefinitionText) {
         if (Strings.isNullOrEmpty(extendedClusterDefinitionText)) {
             throw new TestFailException("Generated Cluster Definition does not exist");
-        } else if (!isJSONValid(extendedClusterDefinitionText)) {
+        } else if (!JsonUtil.isValid(extendedClusterDefinitionText)) {
             throw new TestFailException("Generated Cluster Definition is not a valid json");
-        }
-    }
-
-    public static boolean isJSONValid(String jsonInString) {
-        try {
-            final ObjectMapper mapper = new ObjectMapper();
-            mapper.readTree(jsonInString);
-            return true;
-        } catch (IOException e) {
-            return false;
         }
     }
 }
