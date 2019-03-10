@@ -65,7 +65,7 @@ import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
-import com.sequenceiq.cloudbreak.clusterdefinition.utils.ClusterTemplateUtils;
+import com.sequenceiq.cloudbreak.clusterdefinition.utils.ClusterDefinitionUtils;
 import com.sequenceiq.cloudbreak.clusterdefinition.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
@@ -200,7 +200,7 @@ public class ClusterService {
     private TransactionService transactionService;
 
     @Inject
-    private ClusterTemplateUtils clusterTemplateUtils;
+    private ClusterDefinitionUtils clusterDefinitionUtils;
 
     @Inject
     private ResourceRepository resourceRepository;
@@ -1043,7 +1043,7 @@ public class ClusterService {
             Map<String, String> categories =
                     clusterApiConnectors.getConnector(stack).clusterModificationService().getComponentsByCategory(blueprintName, hostGroup);
             for (Entry<String, String> entry : categories.entrySet()) {
-                if (entry.getValue().equalsIgnoreCase(MASTER_CATEGORY) && !clusterTemplateUtils.isSharedServiceReadyBlueprint(clusterDefinition)) {
+                if (entry.getValue().equalsIgnoreCase(MASTER_CATEGORY) && !clusterDefinitionUtils.isSharedServiceReadyBlueprint(clusterDefinition)) {
                     throw new BadRequestException(
                             String.format("Cannot downscale the '%s' hostGroupAdjustment group, because it contains a '%s' component", hostGroup,
                                     entry.getKey()));

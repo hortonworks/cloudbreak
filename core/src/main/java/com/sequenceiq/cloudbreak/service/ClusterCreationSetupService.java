@@ -52,7 +52,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
-import com.sequenceiq.cloudbreak.clusterdefinition.utils.ClusterTemplateUtils;
+import com.sequenceiq.cloudbreak.clusterdefinition.utils.ClusterDefinitionUtils;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
@@ -112,7 +112,7 @@ public class ClusterCreationSetupService {
     private ComponentConfigProvider componentConfigProvider;
 
     @Inject
-    private ClusterTemplateUtils clusterTemplateUtils;
+    private ClusterDefinitionUtils clusterDefinitionUtils;
 
     @Inject
     private DefaultHDPEntries defaultHDPEntries;
@@ -258,7 +258,7 @@ public class ClusterCreationSetupService {
         }
         List<ClouderaManagerProductV4Request> products = Optional.ofNullable(request.getCm()).map(ClouderaManagerV4Request::getProducts).orElse(null);
 
-        if (products == null || products.size() == 0) {
+        if (products == null || products.isEmpty()) {
             ClusterComponent cdhProductRepoConfig = determineDefaultCdhRepoConfig(cluster, stackImageComponent);
             components.add(cdhProductRepoConfig);
         }
@@ -336,8 +336,8 @@ public class ClusterCreationSetupService {
         if (!stackAmbariRepoConfig.isPresent()) {
             String clusterDefinitionText = cluster.getClusterDefinition().getClusterDefinitionText();
             JsonNode bluePrintJson = JsonUtil.readTree(clusterDefinitionText);
-            String stackVersion = clusterTemplateUtils.getBlueprintStackVersion(bluePrintJson);
-            String stackName = clusterTemplateUtils.getBlueprintStackName(bluePrintJson);
+            String stackVersion = clusterDefinitionUtils.getBlueprintStackVersion(bluePrintJson);
+            String stackName = clusterDefinitionUtils.getBlueprintStackName(bluePrintJson);
             AmbariRepo ambariRepo = ambariRepoDetailsJson != null
                     ? converterUtil.convert(ambariRepoDetailsJson, AmbariRepo.class)
                     : defaultAmbariRepoService.getDefault(getOsType(stackImageComponent), stackName, stackVersion);
@@ -467,8 +467,8 @@ public class ClusterCreationSetupService {
         try {
             JsonNode root = getClusterDefinitionJsonNode(clusterDefinition, request, workspace);
             if (root != null) {
-                String stackVersion = clusterTemplateUtils.getBlueprintStackVersion(root);
-                String stackName = clusterTemplateUtils.getBlueprintStackName(root);
+                String stackVersion = clusterDefinitionUtils.getBlueprintStackVersion(root);
+                String stackName = clusterDefinitionUtils.getBlueprintStackName(root);
                 if ("HDF".equalsIgnoreCase(stackName)) {
                     LOGGER.debug("Stack name is HDF, use the default HDF repo for version: " + stackVersion);
                     for (Entry<String, DefaultHDFInfo> entry : defaultHDFEntries.getEntries().entrySet()) {

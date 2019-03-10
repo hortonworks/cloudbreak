@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.ClouderaManagerEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.ClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
@@ -29,7 +29,7 @@ public class ClouderaManagerStartStopTest extends AbstractClouderaManagerTest {
         mockSpi(testContext);
         String name = testContext.get(ClusterDefinitionTestDto.class).getRequest().getName();
         testContext
-                .given("cm", ClouderaManagerEntity.class)
+                .given("cm", ClouderaManagerTestDto.class)
                 .given("cmcluster", ClusterEntity.class)
                 .withValidateClusterDefinition(Boolean.FALSE).withClusterDefinitionName(name).withClouderaManager("cm")
                 .given(StackTestDto.class).withCluster("cmcluster")

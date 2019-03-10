@@ -6,7 +6,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.clusterdefinition.utils.ClusterTemplateUtils;
+import com.sequenceiq.cloudbreak.clusterdefinition.utils.ClusterDefinitionUtils;
 import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -19,7 +19,7 @@ public class SharedServiceConfigsViewProvider {
     private static final String DEFAULT_RANGER_PORT = "6080";
 
     @Inject
-    private ClusterTemplateUtils clusterTemplateUtils;
+    private ClusterDefinitionUtils clusterDefinitionUtils;
 
     @Inject
     private ServiceDescriptorDataProvider serviceDescriptorDataProvider;
@@ -38,7 +38,7 @@ public class SharedServiceConfigsViewProvider {
             sharedServiceConfigsView.setDatalakeComponents(datalakeResource.getDatalakeComponentSet());
             sharedServiceConfigsView.setRangerAdminPort(rangerPort);
             sharedServiceConfigsView.setRangerAdminHost(serviceDescriptorDataProvider.getRangerAdminHost(datalakeResource));
-        } else if (clusterTemplateUtils.isSharedServiceReadyBlueprint(clusterDefinition)) {
+        } else if (clusterDefinitionUtils.isSharedServiceReadyBlueprint(clusterDefinition)) {
             sharedServiceConfigsView.setRangerAdminPassword(ambariPassword);
             sharedServiceConfigsView.setAttachedCluster(false);
             sharedServiceConfigsView.setDatalakeCluster(true);

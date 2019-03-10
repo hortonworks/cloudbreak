@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
-public class ClusterTemplateUtils {
+public class ClusterDefinitionUtils {
 
     public static final String BLUEPRINTS_JSON_NODE_TEXT = "Blueprints";
 

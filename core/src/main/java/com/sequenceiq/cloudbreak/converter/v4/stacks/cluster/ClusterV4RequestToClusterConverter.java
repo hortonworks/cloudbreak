@@ -173,14 +173,14 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         Set<ClusterComponent> components = new HashSet<>();
 
         AmbariV4Request ambariRequest = clusterRequest.getAmbari();
-        ClouderaManagerV4Request clouderaManagerV4Request = clusterRequest.getCm();
-        if (Objects.nonNull(ambariRequest) && Objects.nonNull(clouderaManagerV4Request)) {
+        ClouderaManagerV4Request clouderaManagerRequest = clusterRequest.getCm();
+        if (Objects.nonNull(ambariRequest) && Objects.nonNull(clouderaManagerRequest)) {
             throw new BadRequestException("Cannot determine cluster manager. More than one provided");
         }
         if (Objects.nonNull(ambariRequest) && StackType.CDH.name().equals(cluster.getClusterDefinition().getStackType())) {
             throw new BadRequestException("Cannot process the provided cluster definition template with Ambari");
         }
-        if (Objects.nonNull(clouderaManagerV4Request) && !StackType.CDH.name().equals(cluster.getClusterDefinition().getStackType())) {
+        if (Objects.nonNull(clouderaManagerRequest) && !StackType.CDH.name().equals(cluster.getClusterDefinition().getStackType())) {
             throw new BadRequestException("Cannot process the provided Ambari blueprint with Cloudera Manager");
         }
 
@@ -198,14 +198,14 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
                 .map(ambariRepoJson -> new ClusterComponent(ComponentType.HDP_REPO_DETAILS, ambariRepoJson, cluster))
                 .ifPresent(components::add);
 
-        Optional.ofNullable(clouderaManagerV4Request)
+        Optional.ofNullable(clouderaManagerRequest)
                 .map(ClouderaManagerV4Request::getRepository)
                 .map(ClouderaManagerRepositoryV4RequestToClouderaManagerRepoConverter::convert)
                 .map(toJsonWrapException())
                 .map(cmRepoJson -> new ClusterComponent(ComponentType.CM_REPO_DETAILS, cmRepoJson, cluster))
                 .ifPresent(components::add);
 
-        Optional.ofNullable(clouderaManagerV4Request)
+        Optional.ofNullable(clouderaManagerRequest)
                 .map(ClouderaManagerV4Request::getProducts)
                 .orElseGet(List::of)
                 .stream()

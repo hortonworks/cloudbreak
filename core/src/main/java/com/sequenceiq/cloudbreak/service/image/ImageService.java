@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
-import com.sequenceiq.cloudbreak.clusterdefinition.utils.ClusterTemplateUtils;
+import com.sequenceiq.cloudbreak.clusterdefinition.utils.ClusterDefinitionUtils;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -72,7 +72,7 @@ public class ImageService {
     private ConversionService conversionService;
 
     @Inject
-    private ClusterTemplateUtils clusterTemplateUtils;
+    private ClusterDefinitionUtils clusterDefinitionUtils;
 
     @Inject
     private StackMatrixService stackMatrixService;
@@ -119,12 +119,12 @@ public class ImageService {
         if (clusterDefinition != null) {
             try {
                 JsonNode root = JsonUtil.readTree(clusterDefinition.getClusterDefinitionText());
-                if (clusterTemplateUtils.isAmbariBlueprint(clusterDefinition.getClusterDefinitionText())) {
-                    clusterType = clusterTemplateUtils.getBlueprintStackName(root);
-                    clusterVersion = clusterTemplateUtils.getBlueprintStackVersion(root);
+                if (clusterDefinitionUtils.isAmbariBlueprint(clusterDefinition.getClusterDefinitionText())) {
+                    clusterType = clusterDefinitionUtils.getBlueprintStackName(root);
+                    clusterVersion = clusterDefinitionUtils.getBlueprintStackVersion(root);
                 } else {
                     clusterType = "CDH";
-                    clusterVersion = clusterTemplateUtils.getCDHStackVersion(root);
+                    clusterVersion = clusterDefinitionUtils.getCDHStackVersion(root);
                 }
             } catch (IOException ex) {
                 LOGGER.warn("Can not initiate default hdp info: ", ex);

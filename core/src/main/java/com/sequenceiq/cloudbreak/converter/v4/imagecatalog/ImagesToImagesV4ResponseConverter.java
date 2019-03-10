@@ -62,9 +62,9 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
         List<BaseImageV4Response> baseImages = getBaseImageResponses(source);
         res.setBaseImages(baseImages);
 
-        List<ImageV4Response> hdpImages = setBaseImages(source.getHdpImages());
-        List<ImageV4Response> hdfImages = setBaseImages(source.getHdfImages());
-        List<ImageV4Response> cdhImages = setBaseImages(source.getCdhImages());
+        List<ImageV4Response> hdpImages = convertImages(source.getHdpImages());
+        List<ImageV4Response> hdfImages = convertImages(source.getHdfImages());
+        List<ImageV4Response> cdhImages = convertImages(source.getCdhImages());
 
         res.setHdpImages(hdpImages);
         res.setHdfImages(hdfImages);
@@ -73,15 +73,13 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
         return res;
     }
 
-    private List<ImageV4Response> setBaseImages(List<Image> source) {
-        List<ImageV4Response> images = new ArrayList<>();
-        for (Image img : source) {
+    private List<ImageV4Response> convertImages(List<Image> source) {
+        return source.stream().map(img -> {
             ImageV4Response imgJson = new ImageV4Response();
             copyImageFieldsToJson(img, imgJson);
             imgJson.setStackDetails(convertStackDetailsToJson(img.getStackDetails(), img.getOsType()));
-            images.add(imgJson);
-        }
-        return images;
+            return imgJson;
+        }).collect(Collectors.toList());
     }
 
     private List<BaseImageV4Response> getBaseImageResponses(Images source) {
@@ -106,8 +104,7 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
                         ambariRepoJson.setVersion(ambariRepo.getVersion());
                         ambariRepoJson.setGpgKeyUrl(ambariRepo.getGpgKeyUrl());
                         imgJson.setAmbariRepo(ambariRepoJson);
-                    }
-                    if (clouderaManagerRepo != null) {
+                    } else if (clouderaManagerRepo != null) {
                         ClouderaManagerRepositoryV4Response clouderaManagerRepoJson = new ClouderaManagerRepositoryV4Response();
                         clouderaManagerRepoJson.setBaseUrl(clouderaManagerRepo.getBaseUrl());
                         clouderaManagerRepoJson.setVersion(clouderaManagerRepo.getVersion());

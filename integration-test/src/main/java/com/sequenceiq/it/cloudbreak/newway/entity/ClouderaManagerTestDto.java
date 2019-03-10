@@ -7,26 +7,26 @@ import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
-public class ClouderaManagerEntity extends AbstractCloudbreakEntity<ClouderaManagerV4Request, Response, ClouderaManagerEntity> {
+public class ClouderaManagerTestDto extends AbstractCloudbreakEntity<ClouderaManagerV4Request, Response, ClouderaManagerTestDto> {
 
-    public ClouderaManagerEntity(TestContext testContex) {
+    public ClouderaManagerTestDto(TestContext testContex) {
         super(new ClouderaManagerV4Request(), testContex);
     }
 
-    public ClouderaManagerEntity() {
-        super(ClouderaManagerEntity.class.getSimpleName().toUpperCase());
+    public ClouderaManagerTestDto() {
+        super(ClouderaManagerTestDto.class.getSimpleName().toUpperCase());
     }
 
-    public ClouderaManagerEntity valid() {
+    public ClouderaManagerTestDto valid() {
         return this;
     }
 
-    public ClouderaManagerEntity withClouderaManagerRepository(String key) {
+    public ClouderaManagerTestDto withClouderaManagerRepository(String key) {
         ClouderaManagerRepositoryEntity repositoryEntity = getTestContext().get(key);
         return withStackRepository(repositoryEntity);
     }
 
-    public ClouderaManagerEntity withStackRepository(ClouderaManagerRepositoryEntity clouderaManagerRepositoryEntity) {
+    public ClouderaManagerTestDto withStackRepository(ClouderaManagerRepositoryEntity clouderaManagerRepositoryEntity) {
         getRequest().setRepository(clouderaManagerRepositoryEntity.getRequest());
         return this;
     }
