@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
+package com.sequenceiq.cloudbreak.ambari;
 
 import java.util.ArrayList;
 import java.util.Arrays;

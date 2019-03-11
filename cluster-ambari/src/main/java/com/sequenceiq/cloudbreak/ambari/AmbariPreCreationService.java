@@ -5,12 +5,15 @@ import static com.sequenceiq.cloudbreak.ambari.AmbariRepositoryVersionService.AM
 import static com.sequenceiq.cloudbreak.cluster.api.ClusterApi.AMBARI;
 import static com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService.BEAN_POST_TAG;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
 @Service(AMBARI + BEAN_POST_TAG)
@@ -21,6 +24,9 @@ public class AmbariPreCreationService implements ClusterPreCreationApi {
 
     @Inject
     private AmbariSecurityConfigProvider ambariSecurityConfigProvider;
+
+    @Inject
+    private AmbariBlueprintPortConfigCollector ambariBlueprintPortConfigCollector;
 
     @Override
     public boolean isVdfReady(AmbariRepo ambariRepo) {
@@ -75,5 +81,10 @@ public class AmbariPreCreationService implements ClusterPreCreationApi {
     @Override
     public String getMasterKey(Cluster cluster) {
         return ambariSecurityConfigProvider.getMasterKey(cluster);
+    }
+
+    @Override
+    public Map<String, Integer> getServicePorts(ClusterDefinition clusterDefinition) {
+        return ambariBlueprintPortConfigCollector.getServicePorts(clusterDefinition);
     }
 }

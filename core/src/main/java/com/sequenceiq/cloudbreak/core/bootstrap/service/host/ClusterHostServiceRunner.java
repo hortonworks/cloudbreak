@@ -127,9 +127,6 @@ public class ClusterHostServiceRunner {
     private RecipeEngine recipeEngine;
 
     @Inject
-    private AmbariBlueprintPortConfigCollector ambariBlueprintPortConfigCollector;
-
-    @Inject
     private ServiceProviderConnectorAdapter connector;
 
     @Inject
@@ -219,10 +216,10 @@ public class ClusterHostServiceRunner {
         servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.cloudPlatform())));
         servicePillar.put("metadata", new SaltPillarProperties("/metadata/init.sls",
                 singletonMap("cluster", singletonMap("name", stack.getCluster().getName()))));
-        saveGatewayPillar(primaryGatewayConfig, cluster, servicePillar);
+        ClusterPreCreationApi connector = clusterApiConnectors.getConnector(cluster);
+        saveGatewayPillar(primaryGatewayConfig, cluster, servicePillar, connector);
 
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
-        ClusterPreCreationApi connector = clusterApiConnectors.getConnector(cluster);
 
         if (clusterDefinitionService.isClouderaManagerTemplate(cluster.getClusterDefinition())) {
             decoratePillarWithClouderaManagerRepo(stack.getId(), servicePillar);
@@ -383,7 +380,8 @@ public class ClusterHostServiceRunner {
         return stackViewRepository.findById(datalakeId).orElseThrow(notFound("Stack view", datalakeId));
     }
 
-    private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Map<String, SaltPillarProperties> servicePillar) throws IOException {
+    private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Map<String, SaltPillarProperties> servicePillar,
+            ClusterPreCreationApi connector) throws IOException {
         Map<String, Object> gateway = new HashMap<>();
         gateway.put("address", gatewayConfig.getPublicAddress());
         gateway.put("username", cluster.getUserName());
@@ -405,7 +403,7 @@ public class ClusterHostServiceRunner {
             List<Map<String, Object>> topologies = getTopologies(clusterGateway);
             gateway.put("topologies", topologies);
             if (cluster.getClusterDefinition() != null) {
-                Map<String, Integer> servicePorts = ambariBlueprintPortConfigCollector.getServicePorts(cluster.getClusterDefinition());
+                Map<String, Integer> servicePorts = connector.getServicePorts(cluster.getClusterDefinition());
                 gateway.put("ports", servicePorts);
             }
         }
