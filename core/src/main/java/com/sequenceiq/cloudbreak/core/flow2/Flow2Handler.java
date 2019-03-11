@@ -155,9 +155,14 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                     Flow flow = runningFlows.get(flowId);
                     if (flow != null) {
                         transactionService.required(() -> {
-                            flowLogService.updateLastFlowLogStatus(flow.getFlowId(), failHandledEvents.contains(key));
-                            flowLogService.save(flow.getFlowId(), flowChainId, key, payload, flow.getVariables(),
-                                    flow.getFlowConfigClass(), flow.getCurrentState());
+                            FlowLog lastFlowLog = flowLogService.getLastFlowLog(flow.getFlowId());
+                            if (flowLogService.repeatedFlowState(lastFlowLog, key)) {
+                                flowLogService.updateLastFlowLogPayload(lastFlowLog, payload, flow.getVariables());
+                            } else {
+                                flowLogService.updateLastFlowLogStatus(lastFlowLog, failHandledEvents.contains(key));
+                                flowLogService.save(flow.getFlowId(), flowChainId, key, payload, flow.getVariables(),
+                                        flow.getFlowConfigClass(), flow.getCurrentState());
+                            }
                             return null;
                         });
                         flow.sendEvent(key, payload);
