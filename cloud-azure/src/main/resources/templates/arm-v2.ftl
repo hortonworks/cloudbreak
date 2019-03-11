@@ -124,14 +124,14 @@
                     </#list>
                  ],
                  </#if>
-                 <#if userDefinedTags?? && userDefinedTags?has_content>
                  "tags": {
-                      "cb-resource-type": "${network_resource}",
-                      <#list userDefinedTags?keys as key>
-                      "${key}": "${userDefinedTags[key]}"<#if (key_index + 1) != userDefinedTags?size>,</#if>
+                <#if userDefinedTags?? && userDefinedTags?has_content>
+                    <#list userDefinedTags?keys as key>
+                      "${key}": "${userDefinedTags[key]}",
                       </#list>
-                 },
-                 </#if>
+                </#if>
+                    "cb-resource-type": "${network_resource}"
+                },
                  "name": "[parameters('virtualNetworkNamePrefix')]",
                  "location": "[parameters('region')]",
                  "properties": {
@@ -159,14 +159,15 @@
                "type": "Microsoft.Network/networkSecurityGroups",
                "name": "[variables('${group.compressedName}secGroupName')]",
                "location": "[parameters('region')]",
-               <#if userDefinedTags?? && userDefinedTags?has_content>
                "tags": {
-                    "cb-resource-type": "${network_resource}",
-                    <#list userDefinedTags?keys as key>
-                    "${key}": "${userDefinedTags[key]}"<#if (key_index + 1) != userDefinedTags?size>,</#if>
+
+                 <#if userDefinedTags?? && userDefinedTags?has_content>
+                     <#list userDefinedTags?keys as key>
+                    "${key}": "${userDefinedTags[key]}",
                     </#list>
+                 </#if>
+                    "cb-resource-type": "${network_resource}"
                },
-               </#if>
                "properties": {
                "securityRules": [
                    {
@@ -211,14 +212,14 @@
                    "type": "Microsoft.Network/publicIPAddresses",
                    "name": "[concat(parameters('publicIPNamePrefix'), '${instance.instanceId}')]",
                    "location": "[parameters('region')]",
-                   <#if userDefinedTags?? && userDefinedTags?has_content>
                    "tags": {
-                        "cb-resource-type": "${ipaddress_resource}",
-                        <#list userDefinedTags?keys as key>
-                        "${key}": "${userDefinedTags[key]}"<#if (key_index + 1) != userDefinedTags?size>,</#if>
+                     <#if userDefinedTags?? && userDefinedTags?has_content>
+                         <#list userDefinedTags?keys as key>
+                        "${key}": "${userDefinedTags[key]}",
                         </#list>
-                   },
-                   </#if>
+                     </#if>
+                        "cb-resource-type": "${ipaddress_resource}"
+                     },
                    "properties": {
                        <#if instanceGroup == "GATEWAY">
                        "publicIPAllocationMethod": "Static"
@@ -233,14 +234,14 @@
                    "type": "Microsoft.Network/networkInterfaces",
                    "name": "[concat(parameters('nicNamePrefix'), '${instance.instanceId}')]",
                    "location": "[parameters('region')]",
-                   <#if userDefinedTags?? && userDefinedTags?has_content>
                    "tags": {
-                        "cb-resource-type": "${network_resource}",
-                        <#list userDefinedTags?keys as key>
-                        "${key}": "${userDefinedTags[key]}"<#if (key_index + 1) != userDefinedTags?size>,</#if>
+                 <#if userDefinedTags?? && userDefinedTags?has_content>
+                     <#list userDefinedTags?keys as key>
+                        "${key}": "${userDefinedTags[key]}",
                         </#list>
-                   },
-                   </#if>
+                 </#if>
+                        "cb-resource-type": "${network_resource}"
+                    },
                    "dependsOn": [
                        <#if !noFirewallRules>
                        <#if ! securityGroups[instance.groupName]?? || ! securityGroups[instance.groupName]?has_content>
@@ -305,14 +306,15 @@
                     </#if>
                        "[concat('Microsoft.Network/networkInterfaces/', parameters('nicNamePrefix'), '${instance.instanceId}')]"
                    ],
-                   <#if userDefinedTags?? && userDefinedTags?has_content>
                    "tags": {
-                        "cb-resource-type": "${instance_resource}",
+
+                    <#if userDefinedTags?? && userDefinedTags?has_content>
                         <#list userDefinedTags?keys as key>
-                        "${key}": "${userDefinedTags[key]}"<#if (key_index + 1) != userDefinedTags?size>,</#if>
+                        "${key}": "${userDefinedTags[key]}",
                         </#list>
-                   },
-                   </#if>
+                    </#if>
+                        "cb-resource-type": "${instance_resource}"
+                    },
                    "properties": {
                         <#if instance.availabilitySetName?? && instance.availabilitySetName?has_content>
                         "availabilitySet": {

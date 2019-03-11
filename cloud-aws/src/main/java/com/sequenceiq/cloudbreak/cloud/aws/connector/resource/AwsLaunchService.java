@@ -1,13 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
-import static com.amazonaws.services.cloudformation.model.Capability.CAPABILITY_IAM;
 import static com.amazonaws.services.cloudformation.model.StackStatus.CREATE_COMPLETE;
 import static com.amazonaws.services.cloudformation.model.StackStatus.CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConstants.ERROR_STATUSES;
-import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,20 +19,13 @@ import org.springframework.stereotype.Service;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
-import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
-import com.amazonaws.services.cloudformation.model.OnFailure;
-import com.amazonaws.services.cloudformation.model.Parameter;
 import com.amazonaws.services.ec2.AmazonEC2Client;
-import com.amazonaws.services.ec2.model.DescribeImagesRequest;
-import com.amazonaws.services.ec2.model.DescribeImagesResult;
 import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
-import com.amazonaws.services.ec2.model.Image;
 import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.AdjustmentType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsTagPreparationService;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsStackRequestHelper;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelContext;
@@ -89,7 +79,7 @@ public class AwsLaunchService {
     private AwsPollTaskFactory awsPollTaskFactory;
 
     @Inject
-    private AwsTagPreparationService awsTagPreparationService;
+    private AwsStackRequestHelper awsStackRequestHelper;
 
     @Inject
     private AwsComputeResourceService awsComputeResourceService;
@@ -140,7 +130,7 @@ public class AwsLaunchService {
                     .withEncryptedAMIByGroupName(encryptedImageCopyService.createEncryptedImages(ac, stack, resourceNotifier));
             String cfTemplate = cloudFormationTemplateBuilder.build(modelContext);
             LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
-            cfRetryClient.createStack(createCreateStackRequest(ac, stack, cFStackName, subnet, cfTemplate));
+            cfRetryClient.createStack(awsStackRequestHelper.createCreateStackRequest(ac, stack, cFStackName, subnet, cfTemplate));
         }
         LOGGER.debug("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", cFStackName, ac.getCloudContext().getId());
 
@@ -222,54 +212,6 @@ public class AwsLaunchService {
         return existingVPC && !existingSubnet && cidr == null;
     }
 
-    private CreateStackRequest createCreateStackRequest(AuthenticatedContext ac, CloudStack stack, String cFStackName, String subnet, String cfTemplate) {
-        return new CreateStackRequest()
-                .withStackName(cFStackName)
-                .withOnFailure(OnFailure.DO_NOTHING)
-                .withTemplateBody(cfTemplate)
-                .withTags(awsTagPreparationService.prepareCloudformationTags(ac, stack.getTags()))
-                .withCapabilities(CAPABILITY_IAM)
-                .withParameters(getStackParameters(ac, stack, cFStackName, subnet));
-    }
-
-    private Collection<Parameter> getStackParameters(AuthenticatedContext ac, CloudStack stack, String stackName, String newSubnetCidr) {
-        AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
-        AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack);
-        String keyPairName = awsClient.getKeyPairName(ac);
-        if (awsClient.existingKeyPairNameSpecified(stack.getInstanceAuthentication())) {
-            keyPairName = awsClient.getExistingKeyPairName(stack.getInstanceAuthentication());
-        }
-
-        Collection<Parameter> parameters = new ArrayList<>(asList(
-                new Parameter().withParameterKey("CBUserData").withParameterValue(stack.getImage().getUserDataByType(InstanceGroupType.CORE)),
-                new Parameter().withParameterKey("CBGateWayUserData").withParameterValue(stack.getImage().getUserDataByType(InstanceGroupType.GATEWAY)),
-                new Parameter().withParameterKey("StackName").withParameterValue(stackName),
-                new Parameter().withParameterKey("StackOwner").withParameterValue(String.valueOf(ac.getCloudContext().getUserName())),
-                new Parameter().withParameterKey("KeyName").withParameterValue(keyPairName),
-                new Parameter().withParameterKey("AMI").withParameterValue(stack.getImage().getImageName()),
-                new Parameter().withParameterKey("RootDeviceName").withParameterValue(getRootDeviceName(ac, stack))
-        ));
-        if (awsInstanceProfileView.isInstanceProfileAvailable()) {
-            parameters.add(new Parameter().withParameterKey("InstanceProfile").withParameterValue(awsInstanceProfileView.getInstanceProfile()));
-        }
-        if (ac.getCloudContext().getLocation().getAvailabilityZone().value() != null) {
-            parameters.add(new Parameter().withParameterKey("AvailabilitySet")
-                    .withParameterValue(ac.getCloudContext().getLocation().getAvailabilityZone().value()));
-        }
-        if (awsNetworkView.isExistingVPC()) {
-            parameters.add(new Parameter().withParameterKey("VPCId").withParameterValue(awsNetworkView.getExistingVPC()));
-            if (awsNetworkView.isExistingIGW()) {
-                parameters.add(new Parameter().withParameterKey("InternetGatewayId").withParameterValue(awsNetworkView.getExistingIGW()));
-            }
-            if (awsNetworkView.isExistingSubnet()) {
-                parameters.add(new Parameter().withParameterKey("SubnetId").withParameterValue(awsNetworkView.getExistingSubnet()));
-            } else {
-                parameters.add(new Parameter().withParameterKey("SubnetCIDR").withParameterValue(newSubnetCidr));
-            }
-        }
-        return parameters;
-    }
-
     private List<CloudResource> saveGeneratedSubnet(AuthenticatedContext ac, CloudStack stack, String cFStackName, AmazonCloudFormationRetryClient client,
             PersistenceNotifier resourceNotifier) {
         List<CloudResource> resources = new ArrayList<>();
@@ -319,20 +261,6 @@ public class AwsLaunchService {
             String outputKeyNotFound = String.format("Subnet could not be found in the Cloudformation stack('%s') output.", cFStackName);
             throw new CloudConnectorException(outputKeyNotFound);
         }
-    }
-
-    private String getRootDeviceName(AuthenticatedContext ac, CloudStack cloudStack) {
-        AmazonEC2Client ec2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
-                ac.getCloudContext().getLocation().getRegion().value());
-        DescribeImagesResult images = ec2Client.describeImages(new DescribeImagesRequest().withImageIds(cloudStack.getImage().getImageName()));
-        if (images.getImages().isEmpty()) {
-            throw new CloudConnectorException(String.format("AMI is not available: '%s'.", cloudStack.getImage().getImageName()));
-        }
-        Image image = images.getImages().get(0);
-        if (image == null) {
-            throw new CloudConnectorException(String.format("Couldn't describe AMI '%s'.", cloudStack.getImage().getImageName()));
-        }
-        return image.getRootDeviceName();
     }
 
     private void suspendAutoscalingGoupsWhenNewInstancesAreReady(AuthenticatedContext ac, CloudStack stack) {
