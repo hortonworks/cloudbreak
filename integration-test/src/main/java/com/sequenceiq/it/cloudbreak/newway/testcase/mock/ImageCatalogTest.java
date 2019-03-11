@@ -17,23 +17,17 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.UpdateIma
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
-import com.sequenceiq.it.cloudbreak.newway.Environment;
-import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
-import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.action.imagecatalog.ImageCatalogDeleteAction;
-import com.sequenceiq.it.cloudbreak.newway.action.imagecatalog.ImageCatalogGetByNameAction;
-import com.sequenceiq.it.cloudbreak.newway.action.imagecatalog.ImageCatalogGetImagesByNameAction;
-import com.sequenceiq.it.cloudbreak.newway.action.imagecatalog.ImageCatalogGetImagesFromDefaultCatalogAction;
-import com.sequenceiq.it.cloudbreak.newway.action.imagecatalog.ImageCatalogPostAction;
-import com.sequenceiq.it.cloudbreak.newway.action.imagecatalog.ImageCatalogPostWithoutNameLoggingAction;
-import com.sequenceiq.it.cloudbreak.newway.action.imagecatalog.ImageCatalogSetAsDefaultAction;
+import com.sequenceiq.it.cloudbreak.newway.action.v4.imagecatalog.ImageCatalogGetImagesByNameAction;
+import com.sequenceiq.it.cloudbreak.newway.client.EnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.ImageCatalogTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
-import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
 public class ImageCatalogTest extends AbstractIntegrationTest {
 
@@ -47,7 +41,13 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
     private static final String CB_DEFAULT_IMG_CATALOG_NAME = "cloudbreak-default";
 
     @Inject
-    private LongStringGeneratorUtil longStringGeneratorUtil;
+    private ImageCatalogTestClient imageCatalogTestClient;
+
+    @Inject
+    private StackTestClient stackTestClient;
+
+    @Inject
+    private EnvironmentTestClient environmentTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -72,8 +72,8 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
                 .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
-                .when(new ImageCatalogPostAction())
-                .when(new ImageCatalogGetByNameAction(Boolean.FALSE))
+                .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
+                .when(imageCatalogTestClient.getV4(Boolean.FALSE), key(imgCatalogName))
                 .validate();
     }
 
@@ -89,7 +89,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
                 .withUrl(IMG_CATALOG_URL)
-                .when(new ImageCatalogPostAction(), key(imgCatalogName))
+                .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
                 .expect(BadRequestException.class, key(imgCatalogName)
                         .withExpectedMessage(".*The length of the credential's name has to be in range of 5 to 100"))
                 .validate();
@@ -101,13 +101,13 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             when = "calling create image catalog with that URL and name",
             then = "getting a BadRequestException")
     public void testImageCatalogCreationWhenNameIsTooLong(TestContext testContext) {
-        String imgCatalogName = getNameGenerator().getRandomNameForResource().concat(longStringGeneratorUtil.stringGenerator(100));
+        String imgCatalogName = getNameGenerator().getRandomNameForResource().concat(getLongNameGenerator().stringGenerator(100));
 
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
                 .withUrl(IMG_CATALOG_URL)
-                .when(new ImageCatalogPostAction(), key(imgCatalogName))
+                .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
                 .expect(BadRequestException.class, key(imgCatalogName)
                         .withExpectedMessage(".*The length of the credential's name has to be in range of 5 to 100"))
                 .validate();
@@ -125,7 +125,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
                 .withUrl(IMG_CATALOG_URL)
-                .when(new ImageCatalogPostWithoutNameLoggingAction(), key(imgCatalogName))
+                .when(imageCatalogTestClient.createWithoutNameV4(), key(imgCatalogName))
                 .expect(BadRequestException.class, key(imgCatalogName))
                 .validate();
     }
@@ -143,7 +143,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
                 .withUrl(invalidURL)
-                .when(new ImageCatalogPostAction(), key(imgCatalogName))
+                .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
                 .expect(BadRequestException.class, key(imgCatalogName)
                         .withExpectedMessage("A valid image catalog must be available on the given URL"))
                 .validate();
@@ -161,7 +161,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
                 .withUrl(IMG_CATALOG_URL + "/notanimagecatalog")
-                .when(new ImageCatalogPostAction(), key(imgCatalogName))
+                .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
                 .expect(BadRequestException.class, key(imgCatalogName)
                         .withExpectedMessage(".*A valid image catalog must be available on the given URL.*"))
                 .validate();
@@ -179,7 +179,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
                 .withUrl(INVALID_IMAGECATALOG_JSON_URL)
-                .when(new ImageCatalogPostAction(), key(imgCatalogName))
+                .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
                 .expect(BadRequestException.class, key(imgCatalogName)
                         .withExpectedMessage("A valid image catalog must be available on the given URL"))
                 .validate();
@@ -198,11 +198,11 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
                 .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
-                .when(new ImageCatalogPostAction())
-                .select(imgCatalog -> imgCatalog.getResponse().getId())
-                .when(new ImageCatalogDeleteAction())
-                .when(new ImageCatalogPostAction())
-                .when(new ImageCatalogGetByNameAction(Boolean.FALSE))
+                .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
+                .select(imgCatalog -> imgCatalog.getResponse().getId(), key(imgCatalogName))
+                .when(imageCatalogTestClient.deleteV4(), key(imgCatalogName))
+                .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
+                .when(imageCatalogTestClient.getV4(Boolean.FALSE), key(imgCatalogName))
                 .then((testContext1, entity, cloudbreakClient) -> {
                     Long firstPostEntityId = testContext1.getSelected(imgCatalogName);
                     if (entity.getResponse().getId().equals(firstPostEntityId)) {
@@ -227,11 +227,11 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
                 .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
-                .when(new ImageCatalogPostAction(), key(catalogKey))
-                .when(new ImageCatalogDeleteAction(), key(catalogKey))
-                .when(new ImageCatalogGetByNameAction(), key(imgCatalogName))
+                .when(imageCatalogTestClient.createV4(), key(catalogKey))
+                .when(imageCatalogTestClient.deleteV4(), key(catalogKey))
+                .when(imageCatalogTestClient.getImagesByNameV4(), key(imgCatalogName))
                 .expect(ForbiddenException.class, key(imgCatalogName)
-                        .withExpectedMessage("No imagecatalog found with name"))
+                        .withExpectedMessage("catalog does not exist or does not belongs to your account"))
                 .validate();
     }
 
@@ -248,8 +248,8 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
                 .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
-                .when(new ImageCatalogPostAction())
-                .when(new ImageCatalogGetImagesByNameAction())
+                .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
+                .when(imageCatalogTestClient.getImagesByNameV4(), key(imgCatalogName))
                 .then((testContext1, entity, cloudbreakClient) -> {
                     ImagesV4Response catalog = entity.getResponseByProvider();
                     if (catalog.getBaseImages().isEmpty() && catalog.getHdpImages().isEmpty() && catalog.getHdfImages().isEmpty()) {
@@ -273,8 +273,8 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
                 .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
-                .when(new ImageCatalogPostAction())
-                .when(new ImageCatalogGetImagesByNameAction(CloudPlatform.AWS))
+                .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
+                .when(new ImageCatalogGetImagesByNameAction(CloudPlatform.AWS), key(imgCatalogName))
                 .then((testContext1, entity, cloudbreakClient) -> {
                     ImagesV4Response catalog = entity.getResponseByProvider();
                     if (!(catalog.getBaseImages().isEmpty() && catalog.getHdpImages().isEmpty() && catalog.getHdfImages().isEmpty())) {
@@ -298,7 +298,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
                 .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
-                .when(new ImageCatalogGetImagesByNameAction(), key(imgCatalogName))
+                .when(imageCatalogTestClient.getImagesByNameV4(), key(imgCatalogName))
                 .expect(ForbiddenException.class, key(imgCatalogName))
                 .validate();
     }
@@ -316,8 +316,8 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
                 .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
-                .when(new ImageCatalogPostAction())
-                .when(new ImageCatalogGetImagesFromDefaultCatalogAction(CloudPlatform.AWS))
+                .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
+                .when(imageCatalogTestClient.getImagesFromDefaultCatalog(CloudPlatform.AWS), key(imgCatalogName))
                 .then((testContext1, entity, cloudbreakClient) -> {
                     ImagesV4Response catalog = entity.getResponseByProvider();
                     if (catalog.getBaseImages().isEmpty() && catalog.getHdpImages().isEmpty() && catalog.getHdfImages().isEmpty()) {
@@ -341,41 +341,12 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
                 .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
-                .when(new ImageCatalogPostAction())
-                .when(new ImageCatalogGetImagesFromDefaultCatalogAction())
+                .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
+                .when(imageCatalogTestClient.getImagesFromDefaultCatalog(), key(imgCatalogName))
                 .then((testContext1, entity, cloudbreakClient) -> {
                     ImagesV4Response catalog = entity.getResponseByProvider();
                     if (!(catalog.getBaseImages().isEmpty() && catalog.getHdpImages().isEmpty() && catalog.getHdfImages().isEmpty())) {
                         throw new IllegalArgumentException("The Images response should NOT contain results for MOCK provider.");
-                    }
-                    return entity;
-                })
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "image catalog create with a new catalog without default=true",
-            when = "calling create with default=false flag",
-            then = "the image catalog should contains same default as before")
-    public void testAPreviouslyCreatedDefaultImageCatalogSetAsNotDefault(TestContext testContext) {
-        String imgCatalogName = getNameGenerator().getRandomNameForResource();
-        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
-
-        testContext
-                .given(imgCatalogName, ImageCatalogTestDto.class)
-                .withName(imgCatalogName)
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
-                .when(new ImageCatalogPostAction())
-                .when(new ImageCatalogSetAsDefaultAction())
-                .withName(CB_DEFAULT_IMG_CATALOG_NAME)
-                .when(new ImageCatalogSetAsDefaultAction())
-                .withName(imgCatalogName)
-                .when(new ImageCatalogGetByNameAction())
-                .then((testContext1, entity, cloudbreakClient) -> {
-                    ImageCatalogV4Response catalog = entity.getResponse();
-                    if (catalog.isUsedAsDefault()) {
-                        throw new IllegalArgumentException(format("The catalog should not have been set as default with name: '%s'", imgCatalogName));
                     }
                     return entity;
                 })
@@ -395,8 +366,8 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
                 .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
-                .when(new ImageCatalogPostAction())
-                .select(ImageCatalogTestDto::getRequest)
+                .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
+                .select(ImageCatalogTestDto::getRequest, key(imgCatalogName))
                 .when((testContext1, entity, cloudbreakClient) -> {
                     ImageCatalogV4Request request = cloudbreakClient
                             .getCloudbreakClient()
@@ -428,7 +399,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
                 .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
-                .when(new ImageCatalogPostAction(), key(imgCatalogName))
+                .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
                 .select(ImageCatalogTestDto::getResponse, key(imgCatalogName))
                 .when((testContext1, entity, cloudbreakClient) -> {
                     ImageCatalogV4Response originalResponse = entity.getResponse();
@@ -493,18 +464,18 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .given(ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
                 .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getPreWarmedImageCatalogUrl())
-                .when(new ImageCatalogPostAction())
-                .when(new ImageCatalogSetAsDefaultAction())
-                .given(EnvironmentEntity.class)
-                .when(Environment::post, key(environmentName))
+                .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
+                .when(imageCatalogTestClient.setAsDefault(), key(imgCatalogName))
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.createV4(), key(environmentName))
                 .given(StackTestDto.class)
                 .withCatalog(ImageCatalogTestDto.class)
-                .withEnvironment(EnvironmentEntity.class)
+                .withEnvironment(EnvironmentTestDto.class)
                 .withName(stackName)
-                .when(Stack.postV4())
+                .when(stackTestClient.createV4(), key(imgCatalogName))
                 .await(STACK_AVAILABLE)
                 .given(ImageCatalogTestDto.class)
-                .when(new ImageCatalogGetImagesByNameAction(stackName))
+                .when(imageCatalogTestClient.getImagesByNameV4(stackName), key(imgCatalogName))
                 .then((testContext1, entity, cloudbreakClient) -> {
                     ImagesV4Response catalog = entity.getResponseByProvider();
                     if (catalog.getBaseImages().isEmpty() && catalog.getHdpImages().isEmpty() && catalog.getHdfImages().isEmpty()) {

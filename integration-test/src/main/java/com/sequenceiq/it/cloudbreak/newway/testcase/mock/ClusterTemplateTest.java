@@ -16,36 +16,30 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.Environment;
-import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
-import com.sequenceiq.it.cloudbreak.newway.action.clustertemplate.ClusterTemplateGetAction;
-import com.sequenceiq.it.cloudbreak.newway.action.clustertemplate.ClusterTemplateV4CreateAction;
-import com.sequenceiq.it.cloudbreak.newway.action.clustertemplate.ClusterTemplateV4DeleteAction;
-import com.sequenceiq.it.cloudbreak.newway.action.clustertemplate.ClusterTemplateV4ListAction;
-import com.sequenceiq.it.cloudbreak.newway.action.clustertemplate.DeleteClusterFromTemplateAction;
-import com.sequenceiq.it.cloudbreak.newway.action.clustertemplate.LaunchClusterFromTemplateAction;
-import com.sequenceiq.it.cloudbreak.newway.action.database.DatabaseCreateIfNotExistsAction;
-import com.sequenceiq.it.cloudbreak.newway.action.mpack.MpackTestAction;
-import com.sequenceiq.it.cloudbreak.newway.action.recipe.RecipeTestClient;
+import com.sequenceiq.it.cloudbreak.newway.action.v4.database.DatabaseCreateIfNotExistsAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckClusterTemplateGetResponse;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckClusterTemplateType;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckStackTemplateAfterClusterTemplateCreation;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckStackTemplateAfterClusterTemplateCreationWithProperties;
-import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.ClusterTemplateTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.EnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.LdapTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.MpackTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.mock.MockCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.ClusterTemplateEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.EnvironmentSettingsV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackTemplateEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.clustertemplate.ClusterTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.mpack.MPackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
-import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
 public class ClusterTemplateTest extends AbstractIntegrationTest {
 
@@ -56,10 +50,19 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
     private static final String INVALID_SHORT_CT_NAME = "";
 
     @Inject
-    private LdapConfigTestClient ldapConfigTestClient;
+    private LdapTestClient ldapTestClient;
 
     @Inject
-    private LongStringGeneratorUtil longStringGeneratorUtil;
+    private ClusterTemplateTestClient clusterTemplateTestClient;
+
+    @Inject
+    private RecipeTestClient recipeTestClient;
+
+    @Inject
+    private MpackTestClient mpackTestClient;
+
+    @Inject
+    private EnvironmentTestClient environmentTestClient;
 
     @BeforeMethod
     public void beforeMethod(Method method, Object[] data) {
@@ -81,17 +84,17 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         String stackTemplate = getNameGenerator().getRandomNameForResource();
 
         testContext
-                .given(EnvironmentEntity.class)
-                .when(Environment::post)
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.createV4())
                 .given(stackTemplate, StackTemplateEntity.class)
-                .withEnvironment(EnvironmentEntity.class)
-                .given(ClusterTemplateEntity.class)
+                .withEnvironment(EnvironmentTestDto.class)
+                .given(ClusterTemplateTestDto.class)
                 .withStackTemplate(stackTemplate)
-                .when(new ClusterTemplateV4CreateAction(), key(generatedKey))
-                .when(new ClusterTemplateGetAction(), key(generatedKey))
+                .when(clusterTemplateTestClient.createV4(), key(generatedKey))
+                .when(clusterTemplateTestClient.getV4(), key(generatedKey))
                 .then(new CheckClusterTemplateGetResponse(), key(generatedKey))
                 .then(new CheckStackTemplateAfterClusterTemplateCreation(), key(generatedKey))
-                .when(new ClusterTemplateV4DeleteAction(), key(generatedKey))
+                .when(clusterTemplateTestClient.deleteV4(), key(generatedKey))
                 .validate();
     }
 
@@ -107,18 +110,18 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         String stackTemplate = getNameGenerator().getRandomNameForResource();
 
         testContext
-                .given(environment, EnvironmentEntity.class)
+                .given(environment, EnvironmentTestDto.class)
                 .withRegions(VALID_REGION)
                 .withLocation(LONDON)
-                .when(Environment::post)
+                .when(environmentTestClient.createV4())
                 .given(stackTemplate, StackTemplateEntity.class)
                 .withEnvironmentKey(environment)
-                .given(ClusterTemplateEntity.class)
+                .given(ClusterTemplateTestDto.class)
                 .withType(SPARK)
                 .withStackTemplate(stackTemplate)
-                .capture(ClusterTemplateEntity::count, key(generatedKey))
-                .when(new ClusterTemplateV4CreateAction(), key(generatedKey))
-                .when(new ClusterTemplateV4ListAction(), key(generatedKey))
+                .capture(ClusterTemplateTestDto::count, key(generatedKey))
+                .when(clusterTemplateTestClient.createV4(), key(generatedKey))
+                .when(clusterTemplateTestClient.listV4(), key(generatedKey))
                 .then(new CheckClusterTemplateType(SPARK), key(generatedKey))
                 .validate();
     }
@@ -134,18 +137,18 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         String environment = getNameGenerator().getRandomNameForResource();
 
         testContext
-                .given(environment, EnvironmentEntity.class)
+                .given(environment, EnvironmentTestDto.class)
                 .withRegions(VALID_REGION)
                 .withLocation(LONDON)
-                .when(Environment::post, key(generatedKey))
+                .when(environmentTestClient.createV4(), key(generatedKey))
                 .given(generatedKey, StackTemplateEntity.class)
                 .withEnvironmentKey(environment)
-                .given(ClusterTemplateEntity.class)
+                .given(ClusterTemplateTestDto.class)
                 .withStackTemplate(generatedKey)
-                .when(new ClusterTemplateV4CreateAction(), key(generatedKey))
-                .when(new LaunchClusterFromTemplateAction(generatedKey), key(generatedKey))
+                .when(clusterTemplateTestClient.createV4(), key(generatedKey))
+                .when(clusterTemplateTestClient.launchCluster(generatedKey), key(generatedKey))
                 .await(STACK_AVAILABLE, key(generatedKey))
-                .when(new DeleteClusterFromTemplateAction(generatedKey), key(generatedKey))
+                .when(clusterTemplateTestClient.deleteCluster(generatedKey), key(generatedKey))
                 .await(STACK_DELETED, key(generatedKey))
                 .validate();
     }
@@ -162,9 +165,9 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
 
         testContext
                 .given(stackTemplate, StackTemplateEntity.class)
-                .given(ClusterTemplateEntity.class)
+                .given(ClusterTemplateTestDto.class)
                 .withStackTemplate(stackTemplate)
-                .when(new ClusterTemplateV4CreateAction(), key(generatedKey))
+                .when(clusterTemplateTestClient.createV4(), key(generatedKey))
                 .expect(BadRequestException.class, key(generatedKey)
                         .withExpectedMessage("The environment name cannot be null."))
                 .validate();
@@ -184,9 +187,9 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .withName(null)
                 .given(stackTemplate, StackTemplateEntity.class)
                 .withEnvironmentSettings()
-                .given(ClusterTemplateEntity.class)
+                .given(ClusterTemplateTestDto.class)
                 .withStackTemplate(stackTemplate)
-                .when(new ClusterTemplateV4CreateAction(), key(generatedKey))
+                .when(clusterTemplateTestClient.createV4(), key(generatedKey))
                 .expect(BadRequestException.class, key(generatedKey)
                         .withExpectedMessage("The environment name cannot be null."))
                 .validate();
@@ -203,29 +206,32 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         testContext.getModel().getAmbariMock().postSyncLdap();
         testContext.getModel().getAmbariMock().putConfigureSso();
         testContext
-                .given(LdapConfigTestDto.class).withName("mock-test-ldap")
-                .when(ldapConfigTestClient.createIfNotExists())
-                .given(RecipeTestDto.class).withName("mock-test-recipe")
-                .when(RecipeTestClient::postV4)
-                .given(DatabaseEntity.class).withName("mock-test-rds")
+                .given(LdapTestDto.class)
+                .withName("mock-test-ldap")
+                .when(ldapTestClient.createV4())
+                .given(RecipeTestDto.class)
+                .withName("mock-test-recipe")
+                .when(recipeTestClient.createV4())
+                .given(DatabaseTestDto.class)
+                .withName("mock-test-rds")
                 .when(new DatabaseCreateIfNotExistsAction())
                 .given("mpack", MPackTestDto.class).withName("mock-test-mpack")
-                .when(MpackTestAction::create)
-                .given("environment", EnvironmentEntity.class)
+                .when(mpackTestClient.createV4())
+                .given("environment", EnvironmentTestDto.class)
                 .withRegions(VALID_REGION)
                 .withLocation(LONDON)
-                .when(Environment::post)
+                .when(environmentTestClient.createV4())
                 .given("stackTemplate", StackTemplateEntity.class)
                 .withEnvironmentKey("environment")
                 .withEveryProperties()
-                .given(ClusterTemplateEntity.class)
+                .given(ClusterTemplateTestDto.class)
                 .withStackTemplate("stackTemplate")
-                .when(new ClusterTemplateV4CreateAction())
-                .when(new ClusterTemplateGetAction())
+                .when(clusterTemplateTestClient.createV4())
+                .when(clusterTemplateTestClient.getV4())
                 .then(new CheckStackTemplateAfterClusterTemplateCreationWithProperties())
-                .when(new LaunchClusterFromTemplateAction("stackTemplate"))
+                .when(clusterTemplateTestClient.launchCluster("stackTemplate"))
                 .await(STACK_AVAILABLE, key("stackTemplate"))
-                .when(new DeleteClusterFromTemplateAction("stackTemplate"), force())
+                .when(clusterTemplateTestClient.deleteCluster("stackTemplate"), force())
                 .await(STACK_DELETED, key("stackTemplate").withSkipOnFail(false))
                 .validate();
     }
@@ -240,9 +246,9 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         String generatedKey = getNameGenerator().getRandomNameForResource();
 
         testContext
-                .given(ClusterTemplateEntity.class)
+                .given(ClusterTemplateTestDto.class)
                 .withName(ILLEGAL_CT_NAME)
-                .when(new ClusterTemplateV4CreateAction(), key(generatedKey))
+                .when(clusterTemplateTestClient.createV4(), key(generatedKey))
                 .expect(BadRequestException.class, key(generatedKey)
                         .withExpectedMessage("The length of the cluster template's name has to be in range of 1 to 100 and should not contain semicolon"))
                 .validate();
@@ -260,14 +266,14 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         String name = StringUtils.substring(getNameGenerator().getRandomNameForResource(), 0, 40 - SPECIAL_CT_NAME.length()) + SPECIAL_CT_NAME;
 
         testContext
-                .given(EnvironmentEntity.class)
-                .when(Environment::post, key(generatedKey))
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.createV4(), key(generatedKey))
                 .given(stackTemplate, StackTemplateEntity.class)
-                .withEnvironment(EnvironmentEntity.class)
-                .given(ClusterTemplateEntity.class)
+                .withEnvironment(EnvironmentTestDto.class)
+                .given(ClusterTemplateTestDto.class)
                 .withStackTemplate(stackTemplate)
                 .withName(name)
-                .when(new ClusterTemplateV4CreateAction(), key(generatedKey))
+                .when(clusterTemplateTestClient.createV4(), key(generatedKey))
                 .validate();
     }
 
@@ -281,9 +287,9 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         String generatedKey = getNameGenerator().getRandomNameForResource();
 
         testContext
-                .given(ClusterTemplateEntity.class)
-                .withName(longStringGeneratorUtil.stringGenerator(2))
-                .when(new ClusterTemplateV4CreateAction(), key(generatedKey))
+                .given(ClusterTemplateTestDto.class)
+                .withName(getLongNameGenerator().stringGenerator(2))
+                .when(clusterTemplateTestClient.createV4(), key(generatedKey))
                 .expect(BadRequestException.class, key(generatedKey)
                         .withExpectedMessage("The length of the cluster's name has to be in range of 5 to 40")
                 )
@@ -300,19 +306,19 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         String generatedKey = getNameGenerator().getRandomNameForResource();
 
         testContext
-                .given("environment", EnvironmentEntity.class)
+                .given("environment", EnvironmentTestDto.class)
                 .withRegions(VALID_REGION)
                 .withLocation(LONDON)
-                .when(Environment::post, key(generatedKey))
+                .when(environmentTestClient.createV4(), key(generatedKey))
                 .given("placementSettings", PlacementSettingsEntity.class)
                 .withRegion(MockCloudProvider.EUROPE)
                 .given("stackTemplate", StackTemplateEntity.class)
                 .withEnvironmentKey("environment")
                 .withPlacement("placementSettings")
-                .given(ClusterTemplateEntity.class)
+                .given(ClusterTemplateTestDto.class)
                 .withStackTemplate("stackTemplate")
-                .when(new ClusterTemplateV4CreateAction(), key(generatedKey))
-                .when(new ClusterTemplateV4CreateAction(), key(generatedKey))
+                .when(clusterTemplateTestClient.createV4(), key(generatedKey))
+                .when(clusterTemplateTestClient.createV4(), key(generatedKey))
                 .expect(BadRequestException.class, key(generatedKey)
                         .withExpectedMessage("^clustertemplate already exists with name.*"))
                 .validate();
@@ -327,15 +333,15 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
     public void testCreateLongDescriptionClusterTemplate(TestContext testContext) {
         String generatedKey = getNameGenerator().getRandomNameForResource();
         String environment = getNameGenerator().getRandomNameForResource();
-        String invalidLongDescripton = longStringGeneratorUtil.stringGenerator(1001);
+        String invalidLongDescripton = getLongNameGenerator().stringGenerator(1001);
         testContext
-                .given(environment, EnvironmentEntity.class)
+                .given(environment, EnvironmentTestDto.class)
                 .withRegions(VALID_REGION)
                 .withLocation(LONDON)
-                .when(Environment::post, key(generatedKey))
-                .given(ClusterTemplateEntity.class)
+                .when(environmentTestClient.createV4(), key(generatedKey))
+                .given(ClusterTemplateTestDto.class)
                 .withDescription(invalidLongDescripton)
-                .when(new ClusterTemplateV4CreateAction(), key(generatedKey))
+                .when(clusterTemplateTestClient.createV4(), key(generatedKey))
                 .expect(BadRequestException.class, key(generatedKey)
                         .withExpectedMessage("size must be between 0 and 1000"))
                 .validate();
@@ -350,9 +356,9 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
     public void testCreateEmptyStackTemplateClusterTemplateException(TestContext testContext) {
         String generatedKey = getNameGenerator().getRandomNameForResource();
 
-        testContext.given(ClusterTemplateEntity.class)
+        testContext.given(ClusterTemplateTestDto.class)
                 .withoutStackTemplate()
-                .when(new ClusterTemplateV4CreateAction(), key(generatedKey))
+                .when(clusterTemplateTestClient.createV4(), key(generatedKey))
                 .expect(BadRequestException.class, key(generatedKey)
                         .withExpectedMessage("must not be null"))
                 .validate();
@@ -369,12 +375,12 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         String generatedKey2 = getNameGenerator().getRandomNameForResource();
 
         testContext
-                .given(ClusterTemplateEntity.class)
+                .given(ClusterTemplateTestDto.class)
                 .withName(null)
-                .when(new ClusterTemplateV4CreateAction(), key(generatedKey1))
-                .given(ClusterTemplateEntity.class)
+                .when(clusterTemplateTestClient.createV4(), key(generatedKey1))
+                .given(ClusterTemplateTestDto.class)
                 .withName("")
-                .when(new ClusterTemplateV4CreateAction(), key(generatedKey2)
+                .when(clusterTemplateTestClient.createV4(), key(generatedKey2)
                         .withSkipOnFail(false))
                 .expect(BadRequestException.class, key(generatedKey1).withExpectedMessage("must not be null"))
                 .expect(BadRequestException.class, key(generatedKey2)

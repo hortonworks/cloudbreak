@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription.TestCaseDescriptionBuilder.createWithGiven;
 
+import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 
@@ -10,17 +11,23 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.action.sshkeys.PlatformSshKeysTestAction;
+import com.sequenceiq.it.cloudbreak.newway.client.ConnectorTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.connector.PlatformSshKeysTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.sshkeys.PlatformSshKeysTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class SSHKeysTest extends AbstractIntegrationTest {
+
+    @Inject
+    private ConnectorTestClient connectorTestClient;
+
+    @Inject
+    private CredentialTestClient credentialTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -36,10 +43,10 @@ public class SSHKeysTest extends AbstractIntegrationTest {
         testContext
                 .given(CredentialTestDto.class)
                 .withName(credentialName)
-                .when(CredentialTestClient::create)
+                .when(credentialTestClient.createV4())
                 .given(PlatformSshKeysTestDto.class)
                 .withCredentialName(credentialName)
-                .when(PlatformSshKeysTestAction::getSSHKeys)
+                .when(connectorTestClient.sshKeys())
                 .validate();
     }
 
@@ -53,7 +60,7 @@ public class SSHKeysTest extends AbstractIntegrationTest {
         testContext
                 .given(PlatformSshKeysTestDto.class)
                 .withCredentialName(credentialName)
-                .when(PlatformSshKeysTestAction::getSSHKeys, key(exceptionKey))
+                .when(connectorTestClient.sshKeys(), key(exceptionKey))
                 .expect(exception, key(exceptionKey))
                 .validate();
     }

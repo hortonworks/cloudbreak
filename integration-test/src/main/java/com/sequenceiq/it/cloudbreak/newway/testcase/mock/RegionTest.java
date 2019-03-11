@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 
+import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 
@@ -9,17 +10,23 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.action.region.RegionTestAction;
+import com.sequenceiq.it.cloudbreak.newway.client.ConnectorTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.connector.PlatformRegionTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.region.RegionTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class RegionTest extends AbstractIntegrationTest {
+
+    @Inject
+    private ConnectorTestClient connectorTestClient;
+
+    @Inject
+    private CredentialTestClient credentialTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -36,10 +43,10 @@ public class RegionTest extends AbstractIntegrationTest {
         testContext
                 .given(CredentialTestDto.class)
                 .withName(credentialName)
-                .when(CredentialTestClient::create)
-                .given(RegionTestDto.class)
+                .when(credentialTestClient.createV4())
+                .given(PlatformRegionTestDto.class)
                 .withCredentialName(credentialName)
-                .when(RegionTestAction::getRegions);
+                .when(connectorTestClient.regions());
     }
 
     @Test(dataProvider = "contextWithCredentialNameAndException")
@@ -50,9 +57,9 @@ public class RegionTest extends AbstractIntegrationTest {
             @Description TestCaseDescription testCaseDescription) {
         String exceptionKey = getNameGenerator().getRandomNameForResource();
         testContext
-                .given(RegionTestDto.class)
+                .given(PlatformRegionTestDto.class)
                 .withCredentialName(credentialName)
-                .when(RegionTestAction::getRegions, key(exceptionKey))
+                .when(connectorTestClient.regions(), key(exceptionKey))
                 .expect(exception, key(exceptionKey))
                 .validate();
     }

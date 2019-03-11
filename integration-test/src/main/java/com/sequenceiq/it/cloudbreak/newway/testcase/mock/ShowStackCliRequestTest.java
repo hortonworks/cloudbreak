@@ -1,11 +1,13 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
+import javax.inject.Inject;
+
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.Stack;
+import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -13,6 +15,9 @@ import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class ShowStackCliRequestTest extends AbstractIntegrationTest {
+
+    @Inject
+    private StackTestClient stackTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -34,9 +39,9 @@ public class ShowStackCliRequestTest extends AbstractIntegrationTest {
         testContext
                 .given(StackTestDto.class).valid()
                 .withName(clusterName)
-                .when(Stack.postV4())
+                .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
-                .when(Stack.getCli())
+                .when(stackTestClient.requestV4())
                 .then(ShowStackCliRequestTest::checkCliSkeleton)
                 .validate();
     }

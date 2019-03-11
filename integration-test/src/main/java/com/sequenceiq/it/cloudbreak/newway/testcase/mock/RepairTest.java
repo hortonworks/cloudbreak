@@ -5,6 +5,8 @@ import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
@@ -15,19 +17,19 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.ActiveDirectoryKerberosDescriptor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
-import com.sequenceiq.it.cloudbreak.newway.Environment;
-import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
-import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.action.ClusterRepairAction;
-import com.sequenceiq.it.cloudbreak.newway.action.database.DatabaseCreateIfNotExistsAction;
-import com.sequenceiq.it.cloudbreak.newway.action.kerberos.KerberosTestAction;
+import com.sequenceiq.it.cloudbreak.newway.action.v4.database.DatabaseCreateIfNotExistsAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
+import com.sequenceiq.it.cloudbreak.newway.client.EnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.KerberosTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
@@ -53,6 +55,15 @@ public class RepairTest extends AbstractIntegrationTest {
     private static final String AMBARI_CLUSTER_REQUESTS = "/api/v1/clusters/:cluster/requests";
 
     private final Set<String> components = Set.of("component-new-liga", "component-liga-client", "component-yellow-submarine");
+
+    @Inject
+    private KerberosTestClient kerberosTestAction;
+
+    @Inject
+    private StackTestClient stackTestClient;
+
+    @Inject
+    private EnvironmentTestClient environmentTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -84,7 +95,7 @@ public class RepairTest extends AbstractIntegrationTest {
                 .given(StackTestDto.class)
                 .withName(clusterName)
                 .withCluster(getCluster(testContext, null, ambariRdsName))
-                .when(Stack.postV4())
+                .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .select(s -> s.getInstanceMetaData(HostGroupType.MASTER.getName())
                         .stream()
@@ -134,12 +145,12 @@ public class RepairTest extends AbstractIntegrationTest {
         addAmbariMocks(testContext, clusterName);
         testContext
                 .given(KerberosTestDto.class).withRequest(kerberosRequest).withName(kerberosRequest.getName())
-                .when(KerberosTestAction::post)
+                .when(kerberosTestAction.createV4())
                 .given(StackTestDto.class)
                 .withName(clusterName)
                 .withGatewayPort(testContext.getSparkServer().getPort())
                 .withCluster(getCluster(testContext, kerberosRequest.getName(), ambariRdsName))
-                .when(Stack.postV4())
+                .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .select(s -> s.getInstanceMetaData(HostGroupType.MASTER.getName()).stream().findFirst().get().getDiscoveryFQDN(), key("hostname"));
 
@@ -178,11 +189,11 @@ public class RepairTest extends AbstractIntegrationTest {
     }
 
     private void createEnvWithResources(MockedTestContext testContext, String ambariRdsName) {
-        testContext.given(EnvironmentEntity.class)
+        testContext.given(EnvironmentTestDto.class)
                 .withRdsConfigs(createAmbariRdsConfig(testContext, ambariRdsName))
                 .withLdapConfigs(createDefaultLdapConfig(testContext))
                 .withProxyConfigs(createDefaultProxyConfig(testContext))
-                .when(Environment::post);
+                .when(environmentTestClient.createV4());
     }
 
     private ClusterEntity getCluster(MockedTestContext testContext, String kerberosConfigName, String ambariRdsName) {
@@ -200,7 +211,7 @@ public class RepairTest extends AbstractIntegrationTest {
     private Set<String> createAmbariRdsConfig(MockedTestContext testContext, String ambariRdsName) {
 
         testContext
-                .given(DatabaseEntity.class)
+                .given(DatabaseTestDto.class)
                 .withType(DatabaseType.AMBARI.name())
                 .withName(ambariRdsName)
                 .when(new DatabaseCreateIfNotExistsAction());
@@ -210,15 +221,15 @@ public class RepairTest extends AbstractIntegrationTest {
     }
 
     private String getRdsConfigName(MockedTestContext testContext) {
-        return testContext.get(DatabaseEntity.class).getName();
+        return testContext.get(DatabaseTestDto.class).getName();
     }
 
     private String getEnvironmentName(MockedTestContext testContext) {
-        return testContext.get(EnvironmentEntity.class).getName();
+        return testContext.get(EnvironmentTestDto.class).getName();
     }
 
     private String getEnvironmentRegion(MockedTestContext testContext) {
-        return testContext.get(EnvironmentEntity.class).getRequest().getRegions().iterator().next();
+        return testContext.get(EnvironmentTestDto.class).getRequest().getRegions().iterator().next();
     }
 
     private void addAmbariMocks(MockedTestContext testContext, String clusterName) {

@@ -1,16 +1,21 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
+import javax.inject.Inject;
+
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.action.platformdisk.PlatformDisksTestAction;
+import com.sequenceiq.it.cloudbreak.newway.client.ConnectorTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.disk.PlatformDiskTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.connector.PlatformDiskTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class DisksTest extends AbstractIntegrationTest {
+
+    @Inject
+    private ConnectorTestClient connectorTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -25,7 +30,7 @@ public class DisksTest extends AbstractIntegrationTest {
     public void testGetPlatformDisks(MockedTestContext testContext) {
         testContext
                 .given(PlatformDiskTestDto.class)
-                .when(PlatformDisksTestAction::getDiskTypes)
+                .when(connectorTestClient.disks())
                 .validate();
     }
 

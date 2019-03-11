@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 
+import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 
@@ -11,8 +12,8 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.response.ManagementPackV4Response;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.newway.action.mpack.MpackTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
+import com.sequenceiq.it.cloudbreak.newway.client.MpackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.mpack.MPackTestDto;
@@ -25,6 +26,9 @@ public class ManagementPackTest extends AbstractIntegrationTest {
     private static final String ANOTHER_MPACK = "ANOTHER_MANAGEMENTPACK";
 
     private static final String FORBIDDEN = "FORBIDDEN";
+
+    @Inject
+    private MpackTestClient mpackTestClient;
 
     @BeforeMethod
     public void prepareUser(Object[] objects) {
@@ -40,7 +44,7 @@ public class ManagementPackTest extends AbstractIntegrationTest {
         createDefaultUser(testContext);
         testContext
                 .given(MPackTestDto.class)
-                .when(MpackTestAction::create)
+                .when(mpackTestClient.createV4())
                 .then(assertMpackExist())
                 .validate();
 
@@ -59,10 +63,10 @@ public class ManagementPackTest extends AbstractIntegrationTest {
         testContext
                 .given(MPackTestDto.class)
                 .withName(name)
-                .when(MpackTestAction::create)
+                .when(mpackTestClient.createV4())
                 .given(MPackTestDto.class)
                 .withName(name)
-                .when(MpackTestAction::create, key(generatedKey))
+                .when(mpackTestClient.createV4(), key(generatedKey))
                 .expect(BadRequestException.class, key(generatedKey))
                 .validate();
     }
@@ -76,8 +80,8 @@ public class ManagementPackTest extends AbstractIntegrationTest {
         createDefaultUser(testContext);
         testContext
                 .given(MPackTestDto.class)
-                .when(MpackTestAction::create)
-                .when(MpackTestAction::delete)
+                .when(mpackTestClient.createV4())
+                .when(mpackTestClient.deleteV4())
                 .then(assertMpackNotExist())
                 .validate();
     }
@@ -93,7 +97,7 @@ public class ManagementPackTest extends AbstractIntegrationTest {
 
         testContext
                 .given(MPackTestDto.class)
-                .when(MpackTestAction::delete, key(generatedKey))
+                .when(mpackTestClient.deleteV4(), key(generatedKey))
                 .expect(ForbiddenException.class, key(generatedKey))
                 .validate();
     }
@@ -107,7 +111,7 @@ public class ManagementPackTest extends AbstractIntegrationTest {
         createDefaultUser(testContext);
         testContext
                 .given(MPackTestDto.class)
-                .when(MpackTestAction::list)
+                .when(mpackTestClient.listV4())
                 .validate();
     }
 

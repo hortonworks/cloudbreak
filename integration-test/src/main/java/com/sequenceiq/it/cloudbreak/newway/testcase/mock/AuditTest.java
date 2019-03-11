@@ -10,36 +10,37 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.ActiveDirectoryKerberosDescriptor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
-import com.sequenceiq.it.cloudbreak.newway.Environment;
-import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
-import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.action.audit.AuditTestAction;
-import com.sequenceiq.it.cloudbreak.newway.action.clustertemplate.ClusterTemplateV4CreateAction;
-import com.sequenceiq.it.cloudbreak.newway.action.imagecatalog.ImageCatalogPostAction;
-import com.sequenceiq.it.cloudbreak.newway.action.kerberos.KerberosTestAction;
-import com.sequenceiq.it.cloudbreak.newway.action.kubernetes.KubernetesTestAction;
-import com.sequenceiq.it.cloudbreak.newway.action.mpack.MpackTestAction;
-import com.sequenceiq.it.cloudbreak.newway.action.recipe.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.newway.assertion.audit.AuditTestAssertion;
+import com.sequenceiq.it.cloudbreak.newway.client.AuditTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.ClusterDefinitionTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.ClusterTemplateTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
-import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.DatabaseTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.EnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.ImageCatalogTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.KerberosTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.KubernetesTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.LdapTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.MpackTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.ProxyTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.RecipeTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.ClusterTemplateEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackTemplateEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.audit.AuditTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.clustertemplate.ClusterTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.kubernetes.KubernetesTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.mpack.MPackTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfig;
-import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfigEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
@@ -54,7 +55,46 @@ public class AuditTest extends AbstractIntegrationTest {
     private static final String IMG_CATALOG_URL = "https://cloudbreak-imagecatalog.s3.amazonaws.com/v2-prod-cb-image-catalog.json";
 
     @Inject
-    private LdapConfigTestClient ldapConfigTestClient;
+    private LdapTestClient ldapTestClient;
+
+    @Inject
+    private KerberosTestClient kerberosTestClient;
+
+    @Inject
+    private ClusterDefinitionTestClient clusterDefinitionTestClient;
+
+    @Inject
+    private ClusterTemplateTestClient clusterTemplateTestClient;
+
+    @Inject
+    private CredentialTestClient credentialTestClient;
+
+    @Inject
+    private RecipeTestClient recipeTestClient;
+
+    @Inject
+    private KubernetesTestClient kubernetesTestClient;
+
+    @Inject
+    private MpackTestClient mpackTestClient;
+
+    @Inject
+    private DatabaseTestClient databaseTestClient;
+
+    @Inject
+    private AuditTestClient auditTestClient;
+
+    @Inject
+    private ImageCatalogTestClient imageCatalogTestClient;
+
+    @Inject
+    private StackTestClient stackTestClient;
+
+    @Inject
+    private ProxyTestClient proxyTestClient;
+
+    @Inject
+    private EnvironmentTestClient environmentTestClient;
 
     @Override
     protected void minimalSetupForClusterCreation(TestContext testContext) {
@@ -86,12 +126,12 @@ public class AuditTest extends AbstractIntegrationTest {
         testContext
                 .given(RecipeTestDto.class)
                 .withName(recipeName)
-                .when(RecipeTestClient::postV4, key(recipeName))
+                .when(recipeTestClient.createV4(), key(recipeName))
                 .select(recipe -> recipe.getResponse().getId(), key(recipeName))
                 .given(AuditTestDto.class)
                 .withResourceIdByKey(recipeName)
                 .withResourceType("recipes")
-                .when(AuditTestAction::getAuditEvents, key(recipeName))
+                .when(auditTestClient.listV4(), key(recipeName))
                 .then(AuditTestAssertion.listContainsAtLeast(1), key(recipeName))
                 .validate();
     }
@@ -106,12 +146,12 @@ public class AuditTest extends AbstractIntegrationTest {
         testContext
                 .given(KubernetesTestDto.class)
                 .withName(kubernetesName)
-                .when(KubernetesTestAction::create, key(kubernetesName))
+                .when(kubernetesTestClient.createV4(), key(kubernetesName))
                 .select(kubernetes -> kubernetes.getResponse().getId(), key(kubernetesName))
                 .given(AuditTestDto.class)
                 .withResourceIdByKey(kubernetesName)
                 .withResourceType("kubernetes")
-                .when(AuditTestAction::getAuditEvents, key(kubernetesName))
+                .when(auditTestClient.listV4(), key(kubernetesName))
                 .then(AuditTestAssertion.listContainsAtLeast(1), key(kubernetesName))
                 .validate();
     }
@@ -127,12 +167,12 @@ public class AuditTest extends AbstractIntegrationTest {
                 .given(ClusterDefinitionTestDto.class)
                 .withName(blueprintName)
                 .withClusterDefinition(VALID_BP)
-                .when(ClusterDefinitionTestClient.postV4(), key(blueprintName))
+                .when(clusterDefinitionTestClient.createV4(), key(blueprintName))
                 .select(bp -> bp.getResponse().getId(), key(blueprintName))
                 .given(AuditTestDto.class)
                 .withResourceIdByKey(blueprintName)
                 .withResourceType("cluster_definitions")
-                .when(AuditTestAction::getAuditEvents, key(blueprintName))
+                .when(auditTestClient.listV4(), key(blueprintName))
                 .then(AuditTestAssertion.listContainsAtLeast(1), key(blueprintName))
                 .validate();
     }
@@ -145,19 +185,19 @@ public class AuditTest extends AbstractIntegrationTest {
     public void createValidClusterTemplateThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
         String clusterTemplateName = getNameGenerator().getRandomNameForResource();
         testContext
-                .given(EnvironmentEntity.class)
-                .when(Environment::post, key(clusterTemplateName))
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.createV4(), key(clusterTemplateName))
                 .given("stackTemplate", StackTemplateEntity.class)
-                .withEnvironment(EnvironmentEntity.class)
-                .given(ClusterTemplateEntity.class)
+                .withEnvironment(EnvironmentTestDto.class)
+                .given(ClusterTemplateTestDto.class)
                 .withStackTemplate("stackTemplate")
                 .withName(clusterTemplateName)
-                .when(new ClusterTemplateV4CreateAction(), key(clusterTemplateName))
+                .when(clusterTemplateTestClient.createV4(), key(clusterTemplateName))
                 .select(ct -> ct.getResponse().getId(), key(clusterTemplateName))
                 .given(AuditTestDto.class)
                 .withResourceIdByKey(clusterTemplateName)
                 .withResourceType("cluster_templates")
-                .when(AuditTestAction::getAuditEvents, key(clusterTemplateName))
+                .when(auditTestClient.listV4(), key(clusterTemplateName))
                 .then(AuditTestAssertion.listContainsAtLeast(1), key(clusterTemplateName))
                 .validate();
     }
@@ -172,12 +212,12 @@ public class AuditTest extends AbstractIntegrationTest {
         testContext
                 .given(CredentialTestDto.class)
                 .withName(credentialName)
-                .when(CredentialTestClient::create, key(credentialName))
+                .when(credentialTestClient.createV4(), key(credentialName))
                 .select(c -> c.getResponse().getId(), key(credentialName))
                 .given(AuditTestDto.class)
                 .withResourceIdByKey(credentialName)
                 .withResourceType("credentials")
-                .when(AuditTestAction::getAuditEvents, key(credentialName))
+                .when(auditTestClient.listV4(), key(credentialName))
                 .then(AuditTestAssertion.listContainsAtLeast(1), key(credentialName))
                 .validate();
     }
@@ -190,14 +230,14 @@ public class AuditTest extends AbstractIntegrationTest {
     public void createValidDatabaseThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
         String databaseName = getNameGenerator().getRandomNameForResource();
         testContext
-                .given(DatabaseEntity.class)
+                .given(DatabaseTestDto.class)
                 .withName(databaseName)
-                .when(DatabaseEntity.post(), key(databaseName))
+                .when(databaseTestClient.createV4(), key(databaseName))
                 .select(db -> db.getResponse().getId(), key(databaseName))
                 .given(AuditTestDto.class)
                 .withResourceIdByKey(databaseName)
                 .withResourceType("databases")
-                .when(AuditTestAction::getAuditEvents, key(databaseName))
+                .when(auditTestClient.listV4(), key(databaseName))
                 .then(AuditTestAssertion.listContainsAtLeast(1), key(databaseName))
                 .validate();
     }
@@ -210,14 +250,14 @@ public class AuditTest extends AbstractIntegrationTest {
     public void createValidEnvironmentThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
         String environmentName = getNameGenerator().getRandomNameForResource();
         testContext
-                .given(EnvironmentEntity.class)
+                .given(EnvironmentTestDto.class)
                 .withName(environmentName)
-                .when(Environment::post, key(environmentName))
+                .when(environmentTestClient.createV4(), key(environmentName))
                 .select(env -> env.getResponse().getId(), key(environmentName))
                 .given(AuditTestDto.class)
                 .withResourceIdByKey(environmentName)
                 .withResourceType("environments")
-                .when(AuditTestAction::getAuditEvents, key(environmentName))
+                .when(auditTestClient.listV4(), key(environmentName))
                 .then(AuditTestAssertion.listContainsAtLeast(1), key(environmentName))
                 .validate();
     }
@@ -245,12 +285,12 @@ public class AuditTest extends AbstractIntegrationTest {
                 .given(KerberosTestDto.class)
                 .withRequest(request)
                 .withName(kerberosName)
-                .when(KerberosTestAction::post, key(kerberosName))
+                .when(kerberosTestClient.createV4(), key(kerberosName))
                 .select(env -> env.getResponse().getId(), key(kerberosName))
                 .given(AuditTestDto.class)
                 .withResourceIdByKey(kerberosName)
                 .withResourceType("kerberos")
-                .when(AuditTestAction::getAuditEvents, key(kerberosName))
+                .when(auditTestClient.listV4(), key(kerberosName))
                 .then(AuditTestAssertion.listContainsAtLeast(1), key(kerberosName))
                 .validate();
     }
@@ -263,14 +303,14 @@ public class AuditTest extends AbstractIntegrationTest {
     public void createValidLdapThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
         String ldapName = getNameGenerator().getRandomNameForResource();
         testContext
-                .given(LdapConfigTestDto.class)
+                .given(LdapTestDto.class)
                 .withName(ldapName)
-                .when(ldapConfigTestClient.post(), key(ldapName))
+                .when(ldapTestClient.createV4(), key(ldapName))
                 .select(env -> env.getResponse().getId(), key(ldapName))
                 .given(AuditTestDto.class)
                 .withResourceIdByKey(ldapName)
                 .withResourceType("ldaps")
-                .when(AuditTestAction::getAuditEvents, key(ldapName))
+                .when(auditTestClient.listV4(), key(ldapName))
                 .then(AuditTestAssertion.listContainsAtLeast(1), key(ldapName))
                 .validate();
     }
@@ -285,12 +325,12 @@ public class AuditTest extends AbstractIntegrationTest {
         testContext
                 .given(MPackTestDto.class)
                 .withName(mpackName)
-                .when(MpackTestAction::create, key(mpackName))
+                .when(mpackTestClient.createV4(), key(mpackName))
                 .select(env -> env.getResponse().getId(), key(mpackName))
                 .given(AuditTestDto.class)
                 .withResourceIdByKey(mpackName)
                 .withResourceType("mpacks")
-                .when(AuditTestAction::getAuditEvents, key(mpackName))
+                .when(auditTestClient.listV4(), key(mpackName))
                 .then(AuditTestAssertion.listContainsAtLeast(1), key(mpackName))
                 .validate();
     }
@@ -303,14 +343,14 @@ public class AuditTest extends AbstractIntegrationTest {
     public void createValidProxyThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
         String proxyName = getNameGenerator().getRandomNameForResource();
         testContext
-                .given(ProxyConfigEntity.class)
+                .given(ProxyTestDto.class)
                 .withName(proxyName)
-                .when(ProxyConfig.postV4(), key(proxyName))
+                .when(proxyTestClient.createV4(), key(proxyName))
                 .select(p -> p.getResponse().getId(), key(proxyName))
                 .given(AuditTestDto.class)
                 .withResourceIdByKey(proxyName)
                 .withResourceType("proxies")
-                .when(AuditTestAction::getAuditEvents, key(proxyName))
+                .when(auditTestClient.listV4(), key(proxyName))
                 .then(AuditTestAssertion.listContainsAtLeast(1), key(proxyName))
                 .validate();
     }
@@ -324,16 +364,16 @@ public class AuditTest extends AbstractIntegrationTest {
         String stackName = getNameGenerator().getRandomNameForResource();
         String auditName = getNameGenerator().getRandomNameForResource();
         testContext
-                .given(EnvironmentEntity.class)
-                .when(Environment::post)
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.createV4())
                 .given(StackTestDto.class)
-                .when(Stack.postV4())
+                .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .select(env -> env.getResponse().getId(), key(stackName))
                 .given(AuditTestDto.class)
                 .withResourceIdByKey(stackName)
                 .withResourceType("stacks")
-                .when(AuditTestAction::getAuditEvents, key(auditName))
+                .when(auditTestClient.listV4(), key(auditName))
                 .then(AuditTestAssertion.listContainsAtLeast(1), key(auditName))
                 .validate();
     }
@@ -349,12 +389,12 @@ public class AuditTest extends AbstractIntegrationTest {
                 .given(ImageCatalogTestDto.class)
                 .withName(catalogName)
                 .withUrl(IMG_CATALOG_URL)
-                .when(new ImageCatalogPostAction(), key(catalogName))
+                .when(imageCatalogTestClient.createV4(), key(catalogName))
                 .select(r -> r.getResponse().getId(), key(catalogName))
                 .given(AuditTestDto.class)
                 .withResourceIdByKey(catalogName)
                 .withResourceType("image_catalogs")
-                .when(AuditTestAction::getAuditEvents, key(catalogName))
+                .when(auditTestClient.listV4(), key(catalogName))
                 .then(AuditTestAssertion.listContainsAtLeast(1), key(catalogName))
                 .validate();
     }

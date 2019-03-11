@@ -13,14 +13,12 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
+import com.sequenceiq.it.cloudbreak.newway.client.ProxyTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfig;
-import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfigEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
-import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
 public class ProxyConfigTest extends AbstractIntegrationTest {
 
@@ -43,10 +41,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
     private static final String HTTPS = "https";
 
     @Inject
-    private RandomNameCreator randomNameCreator;
-
-    @Inject
-    private LongStringGeneratorUtil longStringGeneratorUtil;
+    private ProxyTestClient proxyTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -64,9 +59,9 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             when = "calling create proxy",
             then = "getting back a list which contains the proxy object")
     public void testCreateValidProxy(TestContext testContext) {
-        String name = randomNameCreator.getRandomNameForResource();
+        String name = getNameGenerator().getRandomNameForResource();
         testContext
-                .given(ProxyConfigEntity.class)
+                .given(ProxyTestDto.class)
                 .withName(name)
                 .withDescription(PROXY_DESCRIPTION)
                 .withServerHost(PROXY_HOST)
@@ -74,7 +69,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withServerUser(PROXY_USER)
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
-                .when(ProxyConfig.postV4())
+                .when(proxyTestClient.createV4())
                 .then((tc, entity, cc) -> {
                     assertNotNull(entity);
                     assertNotNull(entity.getResponse());
@@ -89,9 +84,9 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             when = "calling create proxy",
             then = "getting back a list which contains the proxy object")
     public void testCreateValidHttpsProxy(TestContext testContext) {
-        String name = randomNameCreator.getRandomNameForResource();
+        String name = getNameGenerator().getRandomNameForResource();
         testContext
-                .given(ProxyConfigEntity.class)
+                .given(ProxyTestDto.class)
                 .withName(name)
                 .withDescription(PROXY_DESCRIPTION)
                 .withServerHost(PROXY_HOST)
@@ -99,7 +94,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withServerUser(PROXY_USER)
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTPS)
-                .when(ProxyConfig.postV4())
+                .when(proxyTestClient.createV4())
                 .then((tc, entity, cc) -> {
                     assertNotNull(entity);
                     assertNotNull(entity.getResponse());
@@ -114,9 +109,9 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             when = "calling create proxy",
             then = "getting back a BadRequestException")
     public void testCreateProxyWithTooLongName(TestContext testContext) {
-        String name = longStringGeneratorUtil.stringGenerator(101);
+        String name = getLongNameGenerator().stringGenerator(101);
         testContext
-                .given(ProxyConfigEntity.class)
+                .given(ProxyTestDto.class)
                 .withName(name)
                 .withDescription(PROXY_DESCRIPTION)
                 .withServerHost(PROXY_HOST)
@@ -124,7 +119,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withServerUser(PROXY_USER)
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
-                .when(ProxyConfig.postV4(), key(name))
+                .when(proxyTestClient.createV4(), key(name))
                 .expect(BadRequestException.class,
                         expectedMessage("The length of the name has to be in range of 4 to 100")
                                 .withKey(name))
@@ -139,7 +134,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
     public void testCreateProxyWithShortName(TestContext testContext) {
         String name = getNameGenerator().getRandomNameForResource();
         testContext
-                .given(ProxyConfigEntity.class)
+                .given(ProxyTestDto.class)
                 .withName(SHORT_PROXY_NAME)
                 .withDescription(PROXY_DESCRIPTION)
                 .withServerHost(PROXY_HOST)
@@ -147,7 +142,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withServerUser(PROXY_USER)
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
-                .when(ProxyConfig.postV4(), key(name))
+                .when(proxyTestClient.createV4(), key(name))
                 .expect(BadRequestException.class,
                         expectedMessage("The length of the name has to be in range of 4 to 100").withKey(name))
                 .validate();
@@ -160,7 +155,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             then = "getting back a BadRequestException")
     public void testCreateProxyWithInvalidName(TestContext testContext) {
         testContext
-                .given(ProxyConfigEntity.class)
+                .given(ProxyTestDto.class)
                 .withName(INVALID_PROXY_NAME)
                 .withDescription(PROXY_DESCRIPTION)
                 .withServerHost(PROXY_HOST)
@@ -168,7 +163,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withServerUser(PROXY_USER)
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
-                .when(ProxyConfig.postV4(), key(INVALID_PROXY_NAME))
+                .when(proxyTestClient.createV4(), key(INVALID_PROXY_NAME))
                 .expect(UnknownFormatConversionException.class,
                         expectedMessage("Conversion = '|'")
                                 .withKey(INVALID_PROXY_NAME))
@@ -183,7 +178,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
     public void testCreateProxyWithoutName(TestContext testContext) {
         String key = "noname";
         testContext
-                .given(ProxyConfigEntity.class)
+                .given(ProxyTestDto.class)
                 .withName("")
                 .withDescription(PROXY_DESCRIPTION)
                 .withServerHost(PROXY_HOST)
@@ -191,7 +186,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withServerUser(PROXY_USER)
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
-                .when(ProxyConfig.postV4(), key(key))
+                .when(proxyTestClient.createV4(), key(key))
                 .expect(BadRequestException.class,
                         expectedMessage("The length of the name has to be in range of 4 to 100")
                                 .withKey(key))
@@ -204,10 +199,10 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             when = "calling create proxy",
             then = "getting back a BadRequestException")
     public void testCreateProxyLongDesc(TestContext testContext) {
-        String name = randomNameCreator.getRandomNameForResource();
-        String longDescription = longStringGeneratorUtil.stringGenerator(1001);
+        String name = getNameGenerator().getRandomNameForResource();
+        String longDescription = getLongNameGenerator().stringGenerator(1001);
         testContext
-                .given(ProxyConfigEntity.class)
+                .given(ProxyTestDto.class)
                 .withName(name)
                 .withDescription(longDescription)
                 .withServerHost(PROXY_HOST)
@@ -215,7 +210,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withServerUser(PROXY_USER)
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTPS)
-                .when(ProxyConfig.postV4(), key(name))
+                .when(proxyTestClient.createV4(), key(name))
                 .expect(BadRequestException.class,
                         expectedMessage("The length of the description cannot be longer than 1000 character")
                                 .withKey(name))
@@ -228,10 +223,10 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             when = "calling create proxy",
             then = "getting back a BadRequestException")
     public void testCreateProxyWithoutHost(TestContext testContext) {
-        String name = randomNameCreator.getRandomNameForResource();
+        String name = getNameGenerator().getRandomNameForResource();
         String key = "nohost";
         testContext
-                .given(ProxyConfigEntity.class)
+                .given(ProxyTestDto.class)
                 .withName(name)
                 .withDescription(PROXY_DESCRIPTION)
                 .withServerHost("")
@@ -239,7 +234,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withServerUser(PROXY_USER)
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
-                .when(ProxyConfig.postV4(), key(key))
+                .when(proxyTestClient.createV4(), key(key))
                 .expect(BadRequestException.class,
                         expectedMessage("The length of the server host has to be in range of 1 to 255")
                                 .withKey(key))
@@ -252,10 +247,10 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             when = "calling create proxy",
             then = "getting back a BadRequestException")
     public void testCreateProxyWithoutPort(TestContext testContext) {
-        String name = randomNameCreator.getRandomNameForResource();
+        String name = getNameGenerator().getRandomNameForResource();
         String key = "noport";
         testContext
-                .given(ProxyConfigEntity.class)
+                .given(ProxyTestDto.class)
                 .withName(name)
                 .withDescription(PROXY_DESCRIPTION)
                 .withServerHost(PROXY_HOST)
@@ -263,7 +258,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withServerUser(PROXY_USER)
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
-                .when(ProxyConfig.postV4(), key(key))
+                .when(proxyTestClient.createV4(), key(key))
                 .expect(BadRequestException.class,
                         expectedMessage("Server port is required")
                                 .withKey(key))
@@ -276,9 +271,9 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             when = "calling create proxy then delete that and create again",
             then = "getting back list with proxy which contains the proxy object")
     public void testCreateDeleteCreateAgain(TestContext testContext) {
-        String name = randomNameCreator.getRandomNameForResource();
+        String name = getNameGenerator().getRandomNameForResource();
         testContext
-                .given(name, ProxyConfigEntity.class)
+                .given(name, ProxyTestDto.class)
                 .withName(name)
                 .withDescription(PROXY_DESCRIPTION)
                 .withServerHost(PROXY_HOST)
@@ -286,9 +281,9 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withServerUser(PROXY_USER)
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
-                .when(ProxyConfig.postV4(), key(name))
-                .when(ProxyConfig.deleteV4(), key(name))
-                .when(ProxyConfig.postV4(), key(name))
+                .when(proxyTestClient.createV4(), key(name))
+                .when(proxyTestClient.deleteV4(), key(name))
+                .when(proxyTestClient.createV4(), key(name))
                 .then((tc, entity, cc) -> {
                     assertNotNull(entity);
                     assertNotNull(entity.getResponse());
@@ -304,9 +299,9 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             then = "getting a BadRequestException")
     public void testCreateProxyWithSameName(TestContext testContext) {
 
-        String name = randomNameCreator.getRandomNameForResource();
+        String name = getNameGenerator().getRandomNameForResource();
         testContext
-                .given(name, ProxyConfigEntity.class)
+                .given(name, ProxyTestDto.class)
                 .withName(name)
                 .withDescription(PROXY_DESCRIPTION)
                 .withServerHost(PROXY_HOST)
@@ -314,14 +309,14 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withServerUser(PROXY_USER)
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
-                .when(ProxyConfig.postV4(), key(name))
+                .when(proxyTestClient.createV4(), key(name))
                 .then((tc, entity, cc) -> {
                     assertNotNull(entity);
                     assertNotNull(entity.getResponse());
                     return entity;
                 }, key(name))
 
-                .given(name, ProxyConfigEntity.class)
+                .given(name, ProxyTestDto.class)
                 .withName(name)
                 .withDescription(PROXY_DESCRIPTION)
                 .withServerHost(PROXY_HOST)
@@ -329,7 +324,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
                 .withServerUser(PROXY_USER)
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
-                .when(ProxyConfig.postV4(), key(name))
+                .when(proxyTestClient.createV4(), key(name))
                 .expect(BadRequestException.class,
                         expectedMessage("proxy already exists with name")
                                 .withKey(name))

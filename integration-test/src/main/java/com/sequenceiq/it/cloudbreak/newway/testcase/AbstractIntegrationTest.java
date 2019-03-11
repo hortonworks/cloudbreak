@@ -31,16 +31,16 @@ import org.testng.annotations.DataProvider;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.exception.TestCaseDescriptionMissingException;
-import com.sequenceiq.it.cloudbreak.newway.Environment;
-import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
+import com.sequenceiq.it.cloudbreak.newway.client.EnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
-import com.sequenceiq.it.cloudbreak.newway.action.clusterdefinition.ClusterDefinitionGetListAction;
-import com.sequenceiq.it.cloudbreak.newway.action.database.DatabaseCreateIfNotExistsAction;
-import com.sequenceiq.it.cloudbreak.newway.action.imagecatalog.ImageCatalogPostAction;
-import com.sequenceiq.it.cloudbreak.newway.action.ldap.LdapConfigCreateIfNotExistsAction;
-import com.sequenceiq.it.cloudbreak.newway.action.proxy.ProxyConfigCreateIfNotExistsAction;
 import com.sequenceiq.it.cloudbreak.newway.actor.Actor;
+import com.sequenceiq.it.cloudbreak.newway.client.ClusterDefinitionTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.DatabaseTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.ImageCatalogTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.LdapTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.ProxyTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.PurgeGarbageService;
@@ -50,11 +50,12 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription.TestCaseD
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfigEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyTestDto;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
+import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
 @ContextConfiguration(classes = {IntegrationTestConfiguration.class}, initializers = ConfigFileApplicationContextInitializer.class)
 public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContextTests {
@@ -75,6 +76,30 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     @Inject
     private RandomNameCreator nameGenerator;
+
+    @Inject
+    private LongStringGeneratorUtil longStringGeneratorUtil;
+
+    @Inject
+    private CredentialTestClient credentialTestClient;
+
+    @Inject
+    private EnvironmentTestClient environmentTestClient;
+
+    @Inject
+    private ImageCatalogTestClient imageCatalogTestClient;
+
+    @Inject
+    private ProxyTestClient proxyTestClient;
+
+    @Inject
+    private ClusterDefinitionTestClient clusterDefinitionTestClient;
+
+    @Inject
+    private LdapTestClient ldapTestClient;
+
+    @Inject
+    private DatabaseTestClient databaseTestClient;
 
     private final List<AutoCloseable> closableBeans = new CopyOnWriteArrayList<>();
 
@@ -161,46 +186,50 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
         return nameGenerator;
     }
 
+    public LongStringGeneratorUtil getLongNameGenerator() {
+        return longStringGeneratorUtil;
+    }
+
     protected void createDefaultEnvironment(TestContext testContext) {
-        testContext.given(EnvironmentEntity.class)
-                .when(Environment::post);
+        testContext.given(EnvironmentTestDto.class)
+                .when(environmentTestClient.createV4());
     }
 
     protected void createDefaultCredential(TestContext testContext) {
         testContext.given(CredentialTestDto.class)
-                .when(CredentialTestClient::create);
+                .when(credentialTestClient.createV4());
     }
 
     protected void createDefaultImageCatalog(TestContext testContext) {
         testContext
                 .given(ImageCatalogTestDto.class)
-                .when(new ImageCatalogPostAction());
+                .when(imageCatalogTestClient.createV4());
     }
 
     protected Set<String> createDefaultProxyConfig(TestContext testContext) {
         testContext
-                .given(ProxyConfigEntity.class)
-                .when(new ProxyConfigCreateIfNotExistsAction());
+                .given(ProxyTestDto.class)
+                .when(proxyTestClient.createIfNotExistV4());
         Set<String> validProxy = new HashSet<>();
-        validProxy.add(testContext.get(ProxyConfigEntity.class).getName());
+        validProxy.add(testContext.get(ProxyTestDto.class).getName());
         return validProxy;
     }
 
     protected Set<String> createDefaultLdapConfig(TestContext testContext) {
         testContext
-                .given(LdapConfigTestDto.class)
-                .when(new LdapConfigCreateIfNotExistsAction());
+                .given(LdapTestDto.class)
+                .when(ldapTestClient.createIfNotExistV4());
         Set<String> validLdap = new HashSet<>();
-        validLdap.add(testContext.get(LdapConfigTestDto.class).getName());
+        validLdap.add(testContext.get(LdapTestDto.class).getName());
         return validLdap;
     }
 
     protected Set<String> createDefaultRdsConfig(TestContext testContext) {
         testContext
-                .given(DatabaseEntity.class)
-                .when(new DatabaseCreateIfNotExistsAction());
+                .given(DatabaseTestDto.class)
+                .when(databaseTestClient.createIfNotExistV4());
         Set<String> validRds = new HashSet<>();
-        validRds.add(testContext.get(DatabaseEntity.class).getName());
+        validRds.add(testContext.get(DatabaseTestDto.class).getName());
         return validRds;
     }
 
@@ -215,7 +244,7 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     protected void initializeDefaultClusterDefinitions(TestContext testContext) {
         testContext
                 .init(ClusterDefinitionTestDto.class)
-                .when(new ClusterDefinitionGetListAction());
+                .when(clusterDefinitionTestClient.listV4());
     }
 
     protected void minimalSetupForClusterCreation(TestContext testContext) {

@@ -2,6 +2,8 @@ package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
 import java.io.IOException;
 
+import javax.inject.Inject;
+
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -9,7 +11,8 @@ import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.Stack;
+import com.sequenceiq.it.cloudbreak.newway.client.ClusterDefinitionTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -22,9 +25,20 @@ import com.sequenceiq.it.cloudbreak.newway.util.ShowClusterDefinitionUtil;
 
 public class ClouderaManagerShowClusterDefinitionTest extends AbstractClouderaManagerTest {
 
+    @Inject
+    private ClusterDefinitionTestClient clusterDefinitionTestClient;
+
+    @Inject
+    private StackTestClient stackTestClient;
+
     @BeforeMethod
     public void beforeMethod(Object[] data) throws IOException {
         super.beforeMethod(data);
+    }
+
+    @Override
+    protected ClusterDefinitionTestClient clusterDefinitionTestClient() {
+        return clusterDefinitionTestClient;
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -44,9 +58,10 @@ public class ClouderaManagerShowClusterDefinitionTest extends AbstractClouderaMa
                 .withAmbari(cm)
                 .withClusterDefinitionName(clusterDefinitionName)
                 .withValidateClusterDefinition(Boolean.FALSE)
-                .given(StackTestDto.class).withCluster(cmcluster)
+                .given(StackTestDto.class)
+                .withCluster(cmcluster)
                 .withName(clusterName)
-                .when(Stack.generatedClusterDefinition())
+                .when(stackTestClient.clusterDefinitionRequestV4())
                 .then(ShowClusterDefinitionUtil::checkFutureClusterDefinition)
                 .then(this::checkValidFutureClouderaManagerTemplate)
                 .validate();
@@ -70,9 +85,9 @@ public class ClouderaManagerShowClusterDefinitionTest extends AbstractClouderaMa
                 .withValidateClusterDefinition(Boolean.FALSE)
                 .given(StackTestDto.class).withCluster(cmcluster)
                 .withName(clusterName)
-                .when(Stack.postV4())
+                .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
-                .when(Stack.getV4())
+                .when(stackTestClient.getV4())
                 .then(ShowClusterDefinitionUtil::checkGeneratedClusterDefinition)
                 .then(this::checkValidClouderaManagerTemplate)
                 .validate();
