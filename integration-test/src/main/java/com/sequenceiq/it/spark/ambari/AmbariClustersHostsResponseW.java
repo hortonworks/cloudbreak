@@ -30,7 +30,7 @@ public class AmbariClustersHostsResponseW extends ITResponse implements Stateful
     }
 
     @Override
-    public Object handle(Request request, Response response, DefaultModel model) throws Exception {
+    public Object handle(Request request, Response response, DefaultModel model) {
         this.instanceMap = model.getInstanceMap();
         return handle(request, response);
     }

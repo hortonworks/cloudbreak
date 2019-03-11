@@ -43,7 +43,7 @@ public class MockInstanceTerminationUnknownTest extends AbstractCloudbreakIntegr
     }
 
     @Test
-    public void testInstanceTermination() throws Exception {
+    public void testInstanceTermination() {
         // GIVEN
         // WHEN
         Long stackId = Long.parseLong(getItContext().getContextParam(CloudbreakITContextConstants.STACK_ID));

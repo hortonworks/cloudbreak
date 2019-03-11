@@ -16,7 +16,7 @@ public class AmbariRequestIdRespone extends ITResponse {
     }
 
     @Override
-    public Object handle(Request request, Response response) throws Exception {
+    public Object handle(Request request, Response response) {
 
         ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
         ObjectNode requests = rootNode.putObject("Requests");

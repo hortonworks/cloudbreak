@@ -1,5 +1,8 @@
 package com.sequenceiq.it.cloudbreak.scaling;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -30,7 +33,7 @@ public class ClusterAndStackDownscaleTest extends AbstractCloudbreakIntegrationT
 
     @Test
     @Parameters({ "instanceGroup", "scalingAdjustment" })
-    public void testClusterAndStackDownscale(@Optional("slave_1") String instanceGroup, int scalingAdjustment) {
+    public void testClusterAndStackDownscale(@Optional("slave_1") String instanceGroup, int scalingAdjustment) throws IOException, URISyntaxException {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);

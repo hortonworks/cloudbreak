@@ -5,6 +5,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Optional;
 
 import org.junit.Rule;
@@ -37,7 +39,7 @@ public class AmbariSmartSenseCapturerTest {
     private final AmbariSmartSenseCapturer underTest = new AmbariSmartSenseCapturer();
 
     @Test
-    public void testCaptureWhenNoTriggerNeedsToBeDone() {
+    public void testCaptureWhenNoTriggerNeedsToBeDone() throws IOException, URISyntaxException {
         Optional<SmartSenseSubscription> smartSenseSubscription = Optional.empty();
         AmbariClient ambariClient = Mockito.mock(AmbariClient.class);
 
@@ -50,7 +52,7 @@ public class AmbariSmartSenseCapturerTest {
     }
 
     @Test
-    public void testCaptureWheTriggerNeedsToBeDoneAndNoExceptionOccured() {
+    public void testCaptureWheTriggerNeedsToBeDoneAndNoExceptionOccured() throws IOException, URISyntaxException {
         Optional<SmartSenseSubscription> smartSenseSubscription = Optional.empty();
         AmbariClient ambariClient = Mockito.mock(AmbariClient.class);
 
@@ -64,7 +66,7 @@ public class AmbariSmartSenseCapturerTest {
     }
 
     @Test
-    public void testCaptureWheTriggerNeedsToBeDoneAndExceptionOccured() {
+    public void testCaptureWheTriggerNeedsToBeDoneAndExceptionOccured() throws IOException, URISyntaxException {
         Optional<SmartSenseSubscription> smartSenseSubscription = Optional.empty();
         AmbariClient ambariClient = Mockito.mock(AmbariClient.class);
 

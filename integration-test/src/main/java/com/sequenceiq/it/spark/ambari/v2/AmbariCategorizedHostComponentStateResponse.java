@@ -26,13 +26,13 @@ public class AmbariCategorizedHostComponentStateResponse extends ITResponse impl
     }
 
     @Override
-    public Object handle(Request request, Response response, DefaultModel model) throws Exception {
+    public Object handle(Request request, Response response, DefaultModel model) {
         this.instanceMap = model.getInstanceMap();
         return handle(request, response);
     }
 
     @Override
-    public Object handle(Request request, Response response) throws Exception {
+    public Object handle(Request request, Response response) {
         response.type("text/plain");
         ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
         rootNode.put("href", request.url() + "?fields=host_components/HostRoles/state,host_components/component/ServiceComponentInfo/category");

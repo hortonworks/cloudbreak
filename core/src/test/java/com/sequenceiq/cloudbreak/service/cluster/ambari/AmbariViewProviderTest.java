@@ -6,6 +6,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -34,7 +37,7 @@ public class AmbariViewProviderTest {
     private final AmbariViewProvider underTest = new AmbariViewProvider();
 
     @Test
-    public void testProvideViewInformationWhenEverythingWorksFine() {
+    public void testProvideViewInformationWhenEverythingWorksFine() throws IOException, URISyntaxException {
         Cluster cluster = TestUtil.cluster();
         AmbariClient ambariClient = mock(AmbariClient.class);
 
@@ -50,7 +53,7 @@ public class AmbariViewProviderTest {
     }
 
     @Test
-    public void testProvideViewInformationWhenExceptionOccuredThenNoSaveHappensOnRepository() {
+    public void testProvideViewInformationWhenExceptionOccuredThenNoSaveHappensOnRepository() throws IOException, URISyntaxException {
         Cluster cluster = TestUtil.cluster();
         AmbariClient ambariClient = mock(AmbariClient.class);
 

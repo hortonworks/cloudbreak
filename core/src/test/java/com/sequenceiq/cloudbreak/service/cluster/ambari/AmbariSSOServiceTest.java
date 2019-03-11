@@ -8,6 +8,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 import org.junit.Before;
@@ -53,7 +55,7 @@ public class AmbariSSOServiceTest {
     }
 
     @Test
-    public void setupSSOTest() {
+    public void setupSSOTest() throws IOException, URISyntaxException {
         Gateway gateway = new Gateway();
         gateway.setSsoProvider("/ssoprovider");
         gateway.setSsoType(SSOType.SSO_PROVIDER);
@@ -84,7 +86,7 @@ public class AmbariSSOServiceTest {
     }
 
     @Test
-    public void dontSetupSSOTest() {
+    public void dontSetupSSOTest() throws IOException, URISyntaxException {
         Gateway gateway = new Gateway();
 
         Cluster cluster = new Cluster();

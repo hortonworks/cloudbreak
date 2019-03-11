@@ -12,6 +12,8 @@ import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationTy
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.HostGroupAssociationBuilder.FQDN;
 import static java.util.Collections.singletonMap;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -140,6 +142,8 @@ public class AmbariClusterModificationService implements ClusterModificationServ
             }
         } catch (AmbariConnectionException ignored) {
             LOGGER.debug("Ambari not running on the gateway machine, no need to stop it.");
+        } catch (IOException | URISyntaxException e) {
+            throw new CloudbreakException("Failed to stop Hadoop services.", e);
         }
     }
 
@@ -162,7 +166,12 @@ public class AmbariClusterModificationService implements ClusterModificationServ
         LOGGER.info("Start all Hadoop services");
         eventService
                 .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_SERVICES_STARTING.code()));
-        int requestId = ambariClient.startAllServices();
+        int requestId;
+        try {
+            requestId = ambariClient.startAllServices();
+        } catch (URISyntaxException | IOException e) {
+            throw new CloudbreakException("Failed to start Hadoop services.", e);
+        }
         if (requestId == -1) {
             LOGGER.error("Failed to start Hadoop services.");
             throw new CloudbreakException("Failed to start Hadoop services.");
@@ -192,6 +201,8 @@ public class AmbariClusterModificationService implements ClusterModificationServ
                 String errorMessage = AmbariClientExceptionUtil.getErrorMessage(e);
                 throw new CloudbreakServiceException("Ambari could not install services. " + errorMessage, e);
             }
+        } catch (IOException | URISyntaxException e) {
+            throw new CloudbreakServiceException("Ambari could not install services. " + e.getMessage(), e);
         }
     }
 

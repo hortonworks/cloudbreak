@@ -2,6 +2,8 @@ package com.sequenceiq.it.cloudbreak;
 
 import static java.lang.Boolean.FALSE;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -166,7 +168,7 @@ public class CloudbreakUtil {
     }
 
     public static void checkClusterAvailability(StackEndpoint stackV2Endpoint, String port, String stackId, String ambariUser, String ambariPassowrd,
-            boolean checkAmbari) {
+            boolean checkAmbari) throws IOException, URISyntaxException {
         StackResponse stackResponse = stackV2Endpoint.get(Long.valueOf(stackId), new HashSet<>());
         checkClusterAvailability(stackResponse, port, stackId, ambariUser, ambariPassowrd, checkAmbari);
     }
@@ -182,7 +184,7 @@ public class CloudbreakUtil {
     }
 
     private static void checkClusterAvailability(StackResponse stackResponse, String port, String stackId, String ambariUser, String ambariPassowrd,
-            boolean checkAmbari) {
+            boolean checkAmbari) throws IOException, URISyntaxException {
         checkStackStatusForClusterAvailability(stackResponse);
 
         String ambariIp = stackResponse.getCluster().getAmbariServerIp();

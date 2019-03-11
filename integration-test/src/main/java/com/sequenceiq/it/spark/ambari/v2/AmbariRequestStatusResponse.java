@@ -21,7 +21,7 @@ public class AmbariRequestStatusResponse extends ITResponse {
     }
 
     @Override
-    public Object handle(Request request, Response response) throws Exception {
+    public Object handle(Request request, Response response) {
         response.type("text/plain");
         ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
         Requests requests = new Requests(requestId, "SUCCESSFUL", percentage);

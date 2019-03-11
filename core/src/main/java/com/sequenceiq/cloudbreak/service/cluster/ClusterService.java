@@ -115,10 +115,7 @@ import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
-
-import groovyx.net.http.HttpResponseException;
 
 @Service
 public class ClusterService {
@@ -360,53 +357,35 @@ public class ClusterService {
     }
 
     public String getClusterJson(String ambariIp, Long stackId) {
-        try {
-            AmbariClient ambariClient = getAmbariClient(stackId);
-            String clusterJson = ambariClient.getClusterAsJson();
-            if (clusterJson == null) {
-                throw new BadRequestException(String.format("Cluster response coming from Ambari server was null. [Ambari Server IP: '%s']", ambariIp));
-            }
-            return clusterJson;
-        } catch (HttpResponseException e) {
-            if ("Not Found".equals(e.getMessage())) {
-                throw new NotFoundException("Ambari validation not found.", e);
-            } else {
-                String errorMessage = AmbariClientExceptionUtil.getErrorMessage(e);
-                throw new CloudbreakServiceException("Could not get Cluster from Ambari as JSON: " + errorMessage, e);
-            }
+        AmbariClient ambariClient = getAmbariClient(stackId);
+        String clusterJson = ambariClient.getClusterAsJson();
+        if (clusterJson == null) {
+            throw new BadRequestException(String.format("Cluster response coming from Ambari server was null. [Ambari Server IP: '%s']", ambariIp));
         }
+        return clusterJson;
     }
 
     public String getStackRepositoryJson(Long stackId) {
-        try {
-            AmbariClient ambariClient = getAmbariClient(stackId);
-            Stack stack = stackService.getById(stackId);
-            Cluster cluster = stack.getCluster();
-            if (cluster == null) {
-                throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stack.getName()));
-            }
-            StackRepoDetails repoDetails = clusterComponentConfigProvider.getStackRepoDetails(cluster.getId());
-            String stackRepoId = repoDetails.getStack().get(REPO_ID_TAG);
-            String osType = ambariRepositoryVersionService.getOsTypeForStackRepoDetails(repoDetails);
-            if (osType != null && osType.isEmpty()) {
-                LOGGER.info(String.format("The stored HDP repo details (%s) do not contain OS information for stack '%s'.", repoDetails, stack.getName()));
-                return null;
-            }
-
-            String stackRepositoryJson = ambariClient.getLatestStackRepositoryAsJson(cluster.getName(), osType, stackRepoId);
-            if (stackRepositoryJson == null) {
-                throw new BadRequestException(String.format("Stack Repository response coming from Ambari server was null "
-                        + "for cluster '%s' and repo url '%s'.", cluster.getName(), stackRepoId));
-            }
-            return stackRepositoryJson;
-        } catch (HttpResponseException e) {
-            if ("Not Found".equals(e.getMessage())) {
-                throw new NotFoundException("Ambari validation not found.", e);
-            } else {
-                String errorMessage = AmbariClientExceptionUtil.getErrorMessage(e);
-                throw new CloudbreakServiceException("Could not get Stack Repository from Ambari as JSON: " + errorMessage, e);
-            }
+        AmbariClient ambariClient = getAmbariClient(stackId);
+        Stack stack = stackService.getById(stackId);
+        Cluster cluster = stack.getCluster();
+        if (cluster == null) {
+            throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stack.getName()));
         }
+        StackRepoDetails repoDetails = clusterComponentConfigProvider.getStackRepoDetails(cluster.getId());
+        String stackRepoId = repoDetails.getStack().get(REPO_ID_TAG);
+        String osType = ambariRepositoryVersionService.getOsTypeForStackRepoDetails(repoDetails);
+        if (osType != null && osType.isEmpty()) {
+            LOGGER.info(String.format("The stored HDP repo details (%s) do not contain OS information for stack '%s'.", repoDetails, stack.getName()));
+            return null;
+        }
+
+        String stackRepositoryJson = ambariClient.getLatestStackRepositoryAsJson(cluster.getName(), osType, stackRepoId);
+        if (stackRepositoryJson == null) {
+            throw new BadRequestException(String.format("Stack Repository response coming from Ambari server was null "
+                    + "for cluster '%s' and repo url '%s'.", cluster.getName(), stackRepoId));
+        }
+        return stackRepositoryJson;
     }
 
     public void updateHosts(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {

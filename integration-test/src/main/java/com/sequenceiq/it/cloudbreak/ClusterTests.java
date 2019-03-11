@@ -298,7 +298,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
     }
 
     @DataProvider(name = "providernamehostgroupdesiredno")
-    public Object[][] providerAndHostgroup() throws Exception {
+    public Object[][] providerAndHostgroup() {
         String hostgroupName = getTestParameter().get("instancegroupName");
         String provider = getTestParameter().get("provider").toLowerCase();
         CloudProvider cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
@@ -309,7 +309,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
     }
 
     @DataProvider(name = "providername")
-    public Object[][] providerClusterName() throws Exception {
+    public Object[][] providerClusterName() {
         String provider = getTestParameter().get("provider").toLowerCase();
         CloudProvider cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
         String clusterName = getTestParameter().get("clusterName");
@@ -319,7 +319,7 @@ public class ClusterTests extends CloudbreakClusterTestConfiguration {
     }
 
     @DataProvider(name = "providernamekerberos")
-    public Object[][] providerClusterNameWithKerberos() throws Exception {
+    public Object[][] providerClusterNameWithKerberos() {
         String provider = getTestParameter().get("provider").toLowerCase();
         CloudProvider cloudProvider = CloudProviderHelper.providerFactory(provider, getTestParameter());
         String clusterName = getTestParameter().get("clusterName");

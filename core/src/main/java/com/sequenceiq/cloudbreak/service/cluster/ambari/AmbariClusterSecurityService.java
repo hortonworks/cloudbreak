@@ -7,6 +7,8 @@ import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationTy
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationType.PREPARE_DEKERBERIZING;
 import static java.util.Collections.singletonMap;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -70,9 +72,13 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
             AmbariClient ambariClient = clientFactory.getAmbariClient(stack, stack.getCluster());
             Map<String, Integer> operationRequests = new HashMap<>();
             Stream.of("ZOOKEEPER", "HDFS", "YARN", "MAPREDUCE2", "KERBEROS").forEach(s -> {
-                int opId = "ZOOKEEPER".equals(s) ? ambariClient.startService(s) : stopServiceIfAvailable(ambariClient, s);
-                if (opId != -1) {
-                    operationRequests.put(s + "_SERVICE_STATE", opId);
+                try {
+                    int opId = "ZOOKEEPER".equals(s) ? ambariClient.startService(s) : stopServiceIfAvailable(ambariClient, s);
+                    if (opId != -1) {
+                        operationRequests.put(s + "_SERVICE_STATE", opId);
+                    }
+                } catch (URISyntaxException | IOException e) {
+                    throw new RuntimeException(e);
                 }
             });
             if (operationRequests.isEmpty()) {
@@ -91,14 +97,14 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
     private int stopServiceIfAvailable(AmbariClient ambariClient, String s) {
         try {
             return ambariClient.stopService(s);
-        } catch (Exception e) {
-            //because groovy does not declare the throws
-            if (e instanceof HttpResponseException && ((HttpResponseException) e).getResponse().getStatus() == HttpStatus.NOT_FOUND.value()) {
+        } catch (HttpResponseException e) {
+            if (e.getResponse().getStatus() == HttpStatus.NOT_FOUND.value()) {
                 LOGGER.info("Cannot stop service [{}], becasue it does not exists.", s);
                 return -1;
-            } else {
-                throw e;
             }
+            throw new AmbariOperationFailedException("Failed to stop services", e);
+        } catch (IOException | URISyntaxException e) {
+            throw new AmbariOperationFailedException("Failed to connect Ambari server", e);
         }
     }
 
@@ -125,7 +131,11 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
     public void replaceUserNamePassword(Stack stack, String newUserName, String newPassword) throws CloudbreakException {
         AmbariClient ambariClient = clientFactory.getAmbariClient(stack, stack.getCluster().getUserName(), stack.getCluster().getPassword());
         ambariClient = ambariUserHandler.createAmbariUser(newUserName, newPassword, stack, ambariClient);
-        ambariClient.deleteUser(stack.getCluster().getUserName());
+        try {
+            ambariClient.deleteUser(stack.getCluster().getUserName());
+        } catch (URISyntaxException | IOException e) {
+            throw new CloudbreakException(e);
+        }
     }
 
     @Override
@@ -149,7 +159,11 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
             }
         } else {
             client = ambariUserHandler.createAmbariUser(cluster.getUserName(), cluster.getPassword(), stack, client);
-            client.deleteUser(ADMIN);
+            try {
+                client.deleteUser(ADMIN);
+            } catch (URISyntaxException | IOException e) {
+                throw new CloudbreakException(e);
+            }
         }
     }
 }

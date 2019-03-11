@@ -11,6 +11,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -39,8 +41,6 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-
-import groovyx.net.http.HttpResponseException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariClusterModificationServiceTest {
@@ -79,7 +79,7 @@ public class AmbariClusterModificationServiceTest {
     private AmbariClusterModificationService ambariClusterModificationService;
 
     @Test
-    public void testRackUpdate() throws CloudbreakException, HttpResponseException {
+    public void testRackUpdate() throws CloudbreakException, IOException, URISyntaxException {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster();
         stack.setCluster(cluster);
@@ -124,7 +124,7 @@ public class AmbariClusterModificationServiceTest {
     }
 
     @Test
-    public void testRackUpdateIfNewAmbari() throws CloudbreakException, HttpResponseException {
+    public void testRackUpdateIfNewAmbari() throws CloudbreakException, IOException, URISyntaxException {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster();
         stack.setCluster(cluster);
@@ -169,7 +169,7 @@ public class AmbariClusterModificationServiceTest {
     }
 
     @Test
-    public void testRackUpdateIfRackIsNull() throws CloudbreakException, HttpResponseException {
+    public void testRackUpdateIfRackIsNull() throws CloudbreakException, IOException, URISyntaxException {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster();
         stack.setCluster(cluster);

@@ -37,7 +37,7 @@ public class AmbariClusterResponse extends ITResponse implements StatefulRoute {
     }
 
     @Override
-    public Object handle(Request request, Response response, DefaultModel model) throws Exception {
+    public Object handle(Request request, Response response, DefaultModel model) {
         clusterName = model.getClusterName();
         instanceMap = model.getInstanceMap();
         return handle(request, response);
