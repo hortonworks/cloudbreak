@@ -3,13 +3,10 @@ package com.sequenceiq.cloudbreak;
 import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
 import static org.junit.Assert.assertThat;
 
-import javax.inject.Inject;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
@@ -21,9 +18,6 @@ import com.sequenceiq.cloudbreak.PropertiesTest.TestAppContext;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestAppContext.class)
 public class PropertiesTest {
-
-    @Inject
-    private ApplicationContext applicationContext;
 
     @Value("${cb.enabledplatforms}")
     private String enabledPlatforms;
