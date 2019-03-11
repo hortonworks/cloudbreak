@@ -1,16 +1,22 @@
 package com.sequenceiq.cloudbreak.service.flowlog;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.when;
+
+import java.util.Map;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.powermock.reflect.internal.WhiteboxImpl;
 
+import com.cedarsoftware.util.io.JsonWriter;
+import com.sequenceiq.cloudbreak.cloud.event.Payload;
+import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageRequest;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.domain.StateStatus;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
@@ -41,10 +47,42 @@ public class FlowLogServiceTest {
     private void runUpdateLastFlowLogStatusTest(boolean failureEvent, StateStatus successful) throws Exception {
         FlowLog flowLog = new FlowLog();
         flowLog.setId(ID);
-        when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLog);
 
-        WhiteboxImpl.invokeMethod(underTest, "updateLastFlowLogStatus", FLOW_ID, failureEvent);
+        underTest.updateLastFlowLogStatus(flowLog, failureEvent);
 
         verify(flowLogRepository, times(1)).updateLastLogStatusInFlow(ID, successful);
+    }
+
+    @Test
+    public void getLastFlowLog() {
+        FlowLog flowLog = new FlowLog();
+        flowLog.setId(ID);
+
+        when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLog);
+
+        FlowLog lastFlowLog = underTest.getLastFlowLog(FLOW_ID);
+        assertEquals(flowLog, lastFlowLog);
+    }
+
+    @Test
+    public void updateLastFlowLogPayload() {
+        FlowLog flowLog = new FlowLog();
+        flowLog.setId(ID);
+
+        Payload payload = new CheckImageRequest<>(null, null, null, null);
+        Map<Object, Object> variables = Map.of("repeated", 2);
+
+        underTest.updateLastFlowLogPayload(flowLog, payload, variables);
+
+        ArgumentCaptor<FlowLog> flowLogCaptor = ArgumentCaptor.forClass(FlowLog.class);
+        verify(flowLogRepository, times(1)).save(flowLogCaptor.capture());
+
+        FlowLog savedFlowLog = flowLogCaptor.getValue();
+        assertEquals(flowLog.getId(), savedFlowLog.getId());
+
+        String payloadJson = JsonWriter.objectToJson(payload, Map.of());
+        String variablesJson = JsonWriter.objectToJson(variables, Map.of());
+        assertEquals(payloadJson, savedFlowLog.getPayload());
+        assertEquals(variablesJson, savedFlowLog.getVariables());
     }
 }
