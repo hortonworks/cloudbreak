@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 
+import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 
@@ -9,18 +10,24 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.action.accessconfig.PlatformAccessConfigsTestAction;
+import com.sequenceiq.it.cloudbreak.newway.client.ConnectorTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription.TestCaseDescriptionBuilder;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.accessconfig.PlatformAccessConfigsTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.connector.PlatformAccessConfigsTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class AccessConfigsTest extends AbstractIntegrationTest {
+
+    @Inject
+    private ConnectorTestClient connectorTestClient;
+
+    @Inject
+    private CredentialTestClient credentialTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -37,10 +44,10 @@ public class AccessConfigsTest extends AbstractIntegrationTest {
         testContext
                 .given(CredentialTestDto.class)
                 .withName(credentialName)
-                .when(CredentialTestClient::create, key(credentialName))
+                .when(credentialTestClient.createV4(), key(credentialName))
                 .given(PlatformAccessConfigsTestDto.class)
                 .withCredentialName(credentialName)
-                .when(PlatformAccessConfigsTestAction::getAccessConfigs, key(credentialName))
+                .when(connectorTestClient.accessConfigs(), key(credentialName))
                 .validate();
     }
 
@@ -54,7 +61,7 @@ public class AccessConfigsTest extends AbstractIntegrationTest {
         testContext
                 .given(PlatformAccessConfigsTestDto.class)
                 .withCredentialName(credentialName)
-                .when(PlatformAccessConfigsTestAction::getAccessConfigs, key(generatedKey))
+                .when(connectorTestClient.accessConfigs(), key(generatedKey))
                 .expect(exception, key(generatedKey))
                 .validate();
     }

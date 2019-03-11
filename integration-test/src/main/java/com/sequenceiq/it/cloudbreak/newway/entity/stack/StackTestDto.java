@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,15 +20,15 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedClusterDefinitionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
-import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
+import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.CloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackV4EntityBase;
+import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.v3.StackActionV4;
 
 @Prototype
@@ -37,6 +39,9 @@ public class StackTestDto extends StackV4EntityBase<StackTestDto> implements Pur
     private static final Logger LOGGER = LoggerFactory.getLogger(StackTestDto.class);
 
     private GeneratedClusterDefinitionV4Response generatedClusterDefinition;
+
+    @Inject
+    private StackTestClient stackTestClient;
 
     StackTestDto(String newId) {
         super(newId);
@@ -57,7 +62,7 @@ public class StackTestDto extends StackV4EntityBase<StackTestDto> implements Pur
 
     @Override
     public StackV4EntityBase<StackTestDto> valid() {
-        return super.valid().withEnvironment(EnvironmentEntity.class);
+        return super.valid().withEnvironment(EnvironmentTestDto.class);
     }
 
     @Override
@@ -96,7 +101,7 @@ public class StackTestDto extends StackV4EntityBase<StackTestDto> implements Pur
 
     @Override
     public CloudbreakEntity refresh(TestContext context, CloudbreakClient cloudbreakClient) {
-        return when(StackTestAction::refresh, key("refresh-stack-" + getName()));
+        return when(stackTestClient.refreshV4(), key("refresh-stack-" + getName()));
     }
 
     @Override

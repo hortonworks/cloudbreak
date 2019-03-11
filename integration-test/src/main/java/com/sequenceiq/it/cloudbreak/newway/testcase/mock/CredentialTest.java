@@ -18,7 +18,6 @@ import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
-import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
 public class CredentialTest extends AbstractIntegrationTest {
 
@@ -27,7 +26,7 @@ public class CredentialTest extends AbstractIntegrationTest {
     private static final String INVALID_ATTRIBUTE_PROVIDER = "credentialInvalidAttirbutesTestProvider";
 
     @Inject
-    private LongStringGeneratorUtil longStringGeneratorUtil;
+    private CredentialTestClient credentialTestClient;
 
     @AfterMethod(alwaysRun = true)
     public void tearDown(Object[] data) {
@@ -51,8 +50,8 @@ public class CredentialTest extends AbstractIntegrationTest {
         testContext
                 .given(CredentialTestDto.class)
                 .withName(credentialName)
-                .when(CredentialTestClient::create)
-                .when(CredentialTestClient::list)
+                .when(credentialTestClient.createV4())
+                .when(credentialTestClient.listV4())
                 .then(CredentialTestAssertion.listContains(credentialName, 1))
                 .validate();
     }
@@ -68,14 +67,14 @@ public class CredentialTest extends AbstractIntegrationTest {
         testContext
                 .given(CredentialTestDto.class)
                 .withName(credentialName)
-                .when(CredentialTestClient::create)
-                .when(CredentialTestClient::list)
+                .when(credentialTestClient.createV4())
+                .when(credentialTestClient.listV4())
                 .then(CredentialTestAssertion.listContains(credentialName, 1))
-                .when(CredentialTestClient::delete)
-                .when(CredentialTestClient::list)
+                .when(credentialTestClient.deleteV4())
+                .when(credentialTestClient.listV4())
                 .then(CredentialTestAssertion.listContains(credentialName, 0))
-                .when(CredentialTestClient::create)
-                .when(CredentialTestClient::list)
+                .when(credentialTestClient.createV4())
+                .when(credentialTestClient.listV4())
                 .then(CredentialTestAssertion.listContains(credentialName, 1))
                 .validate();
     }
@@ -91,11 +90,11 @@ public class CredentialTest extends AbstractIntegrationTest {
         testContext
                 .given(CredentialTestDto.class)
                 .withName(credentialName)
-                .when(CredentialTestClient::create)
-                .when(CredentialTestClient::list)
+                .when(credentialTestClient.createV4())
+                .when(credentialTestClient.listV4())
                 .then(CredentialTestAssertion.listContains(credentialName, 1))
                 .withName(credentialName)
-                .when(CredentialTestClient::create, key(BAD_REQUEST_KEY))
+                .when(credentialTestClient.createV4(), key(BAD_REQUEST_KEY))
                 .expect(BadRequestException.class, key(BAD_REQUEST_KEY))
                 .validate();
     }
@@ -103,7 +102,7 @@ public class CredentialTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a previously created credential",
-            when = "a modify credential request is sent for that credential",
+            when = "a modifyV4 credential request is sent for that credential",
             then = "the credential is modified"
     )
     public void testModifyCredential(MockedTestContext testContext) {
@@ -112,13 +111,13 @@ public class CredentialTest extends AbstractIntegrationTest {
         testContext
                 .given(CredentialTestDto.class)
                 .withName(credentialName)
-                .when(CredentialTestClient::create)
-                .when(CredentialTestClient::list)
+                .when(credentialTestClient.createV4())
+                .when(credentialTestClient.listV4())
                 .then(CredentialTestAssertion.listContains(credentialName, 1))
                 .withName(credentialName)
                 .withDescription(modifiedDescription)
-                .when(CredentialTestClient::modify)
-                .when(CredentialTestClient::list)
+                .when(credentialTestClient.modifyV4())
+                .when(credentialTestClient.listV4())
                 .then(CredentialTestAssertion.validateModifcation(modifiedDescription))
                 .validate();
     }
@@ -133,7 +132,7 @@ public class CredentialTest extends AbstractIntegrationTest {
         testContext
                 .given(CredentialTestDto.class)
                 .withName(credentialName)
-                .when(CredentialTestClient::create, key(requestKey))
+                .when(credentialTestClient.createV4(), key(requestKey))
                 .expect(BadRequestException.class, expectedMessage(expectedExceptionMessage).withKey(requestKey))
                 .validate();
     }
@@ -143,7 +142,7 @@ public class CredentialTest extends AbstractIntegrationTest {
         return new Object[][]{
                 {
                         getBean(MockedTestContext.class),
-                        longStringGeneratorUtil.stringGenerator(101),
+                        getLongNameGenerator().stringGenerator(101),
                         "The length of the credential's name has to be in range of 5 to 100",
                         new TestCaseDescription.TestCaseDescriptionBuilder()
                                 .given("a credential with too long name")

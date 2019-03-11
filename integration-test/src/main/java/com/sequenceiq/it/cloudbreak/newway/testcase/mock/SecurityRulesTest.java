@@ -1,23 +1,28 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
+import javax.inject.Inject;
+
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.action.securityrule.SecurityRulesTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CommonAssert;
 import com.sequenceiq.it.cloudbreak.newway.assertion.securityrule.SecurityRulesAssertions;
+import com.sequenceiq.it.cloudbreak.newway.client.UtilTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription.TestCaseDescriptionBuilder;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.securityrule.SecurityRulesTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.util.SecurityRulesTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class SecurityRulesTest extends AbstractIntegrationTest {
 
     private static final String DATA_PROVIDER_FOR_SECURITY_RULES_TEST = "contextAndBoolean";
+
+    @Inject
+    private UtilTestClient utilTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -32,7 +37,7 @@ public class SecurityRulesTest extends AbstractIntegrationTest {
         testContext
                 .given(SecurityRulesTestDto.class)
                 .withKnoxEnabled(knoxEnabled)
-                .when(SecurityRulesTestAction::getDefaultSecurityRules)
+                .when(utilTestClient.securityRulesV4())
                 .then(CommonAssert::responseExists)
                 .then(SecurityRulesAssertions::coreIsNotEmpty)
                 .then(SecurityRulesAssertions::gatewayIsNotEmpty)

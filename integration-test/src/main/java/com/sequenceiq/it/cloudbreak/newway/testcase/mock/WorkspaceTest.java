@@ -13,23 +13,22 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
-import com.sequenceiq.it.cloudbreak.newway.Credential;
-import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.action.imagecatalog.ImageCatalogGetByNameAction;
-import com.sequenceiq.it.cloudbreak.newway.action.imagecatalog.ImageCatalogPostAction;
-import com.sequenceiq.it.cloudbreak.newway.action.kerberos.KerberosTestAction;
-import com.sequenceiq.it.cloudbreak.newway.action.recipe.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.ClusterDefinitionTestClient;
-import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.ImageCatalogTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.KerberosTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.LdapTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.ProxyTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.RecipeTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfig;
-import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfigEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
@@ -46,7 +45,28 @@ public class WorkspaceTest extends AbstractIntegrationTest {
             + "}],\"cardinality\":\"1\"}]}";
 
     @Inject
-    private LdapConfigTestClient ldapConfigTestClient;
+    private LdapTestClient ldapTestClient;
+
+    @Inject
+    private KerberosTestClient kerberosTestClient;
+
+    @Inject
+    private ClusterDefinitionTestClient clusterDefinitionTestClient;
+
+    @Inject
+    private CredentialTestClient credentialTestClient;
+
+    @Inject
+    private RecipeTestClient recipeTestClient;
+
+    @Inject
+    private ImageCatalogTestClient imageCatalogTestClient;
+
+    @Inject
+    private ProxyTestClient proxyTestClient;
+
+    @Inject
+    private StackTestClient stackTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -63,9 +83,9 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     public void testCreateAStackAndGetOtherUser(MockedTestContext testContext) {
         testContext
                 .given(StackTestDto.class)
-                .when(Stack.postV4())
+                .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
-                .when(Stack::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
+                .when(stackTestClient.getV4(), key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
@@ -74,7 +94,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     public void testCreateACredentialAndGetOtherUser(TestContext testContext) {
         testContext
                 .given(CredentialTestDto.class)
-                .when(Credential::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
+                .when(credentialTestClient.getV4(), key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
@@ -82,9 +102,10 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testCreateAClusterDefinitionAndGetOtherUser(TestContext testContext) {
         testContext
-                .given(ClusterDefinitionTestDto.class).withClusterDefinition(CLUSTER_DEFINITION_TEXT)
-                .when(ClusterDefinitionTestClient.postV4())
-                .when(ClusterDefinitionTestClient::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
+                .given(ClusterDefinitionTestDto.class)
+                .withClusterDefinition(CLUSTER_DEFINITION_TEXT)
+                .when(clusterDefinitionTestClient.createV4())
+                .when(clusterDefinitionTestClient.getV4(), key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
@@ -93,8 +114,8 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     public void testCreateARecipeAndGetOtherUser(TestContext testContext) {
         testContext
                 .given(RecipeTestDto.class)
-                .when(RecipeTestClient::postV4)
-                .when(RecipeTestClient::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
+                .when(recipeTestClient.createV4())
+                .when(recipeTestClient.getV4(), key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
@@ -102,9 +123,9 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testCreateAnLdapAndGetOtherUser(TestContext testContext) {
         testContext
-                .given(LdapConfigTestDto.class)
-                .when(ldapConfigTestClient.post())
-                .when(ldapConfigTestClient::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
+                .given(LdapTestDto.class)
+                .when(ldapTestClient.createV4())
+                .when(ldapTestClient.getV4(), key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
@@ -113,8 +134,8 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     public void testCreateAnImageCatalogWithImagesAndGetOtherUser(TestContext testContext) {
         testContext
                 .given(ImageCatalogTestDto.class)
-                .when(new ImageCatalogPostAction())
-                .when(new ImageCatalogGetByNameAction(), key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
+                .when(imageCatalogTestClient.createV4())
+                .when(imageCatalogTestClient.getImagesByNameV4(), key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
@@ -123,8 +144,8 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     public void testCreateAnImageCatalogWithoutImagesAndGetOtherUser(TestContext testContext) {
         testContext
                 .given(ImageCatalogTestDto.class)
-                .when(new ImageCatalogPostAction())
-                .when(new ImageCatalogGetByNameAction(Boolean.FALSE), key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
+                .when(imageCatalogTestClient.createV4())
+                .when(imageCatalogTestClient.getV4(Boolean.FALSE), key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
@@ -132,9 +153,9 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     public void testCreateAProxyConfigAndGetOtherUser(TestContext testContext) {
         testContext
-                .given(ProxyConfigEntity.class)
-                .when(ProxyConfig.postV4())
-                .when(ProxyConfig::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
+                .given(ProxyTestDto.class)
+                .when(proxyTestClient.createV4())
+                .when(proxyTestClient.getV4(), key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
@@ -143,8 +164,8 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     public void testCreateKerberosConfigAndGetOtherUser(TestContext testContext) {
         testContext
                 .given(KerberosTestDto.class)
-                .when(KerberosTestAction::post)
-                .when(this::getByName, key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
+                .when(kerberosTestClient.createV4())
+                .when(kerberosTestClient.getV4(), key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }

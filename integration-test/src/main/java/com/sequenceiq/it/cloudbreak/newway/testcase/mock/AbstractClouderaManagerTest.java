@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefin
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.util.ResourceUtil;
 
-public class AbstractClouderaManagerTest extends AbstractIntegrationTest {
+public abstract class AbstractClouderaManagerTest extends AbstractIntegrationTest {
     @BeforeMethod
     public void beforeMethod(Object[] data) throws IOException {
         MockedTestContext testContext = (MockedTestContext) data[0];
@@ -19,7 +19,7 @@ public class AbstractClouderaManagerTest extends AbstractIntegrationTest {
         testContext.given(ClusterDefinitionTestDto.class)
                 .withName(getNameGenerator().getRandomNameForResource())
                 .withClusterDefinition(ResourceUtil.readResourceAsString(applicationContext, "classpath:/clusterdefinition/clouderamanager.bp"))
-                .when(ClusterDefinitionTestClient.postV4());
+                .when(clusterDefinitionTestClient().createV4());
     }
 
     @AfterMethod(alwaysRun = true)
@@ -27,4 +27,6 @@ public class AbstractClouderaManagerTest extends AbstractIntegrationTest {
         MockedTestContext testContext = (MockedTestContext) data[0];
         testContext.cleanupTestContextEntity();
     }
+
+    protected abstract ClusterDefinitionTestClient clusterDefinitionTestClient();
 }

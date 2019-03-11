@@ -1,9 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog;
 
-import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
 
-import java.io.IOException;
 import java.util.Collection;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageCatalogV4Request;
@@ -64,15 +62,6 @@ public class ImageCatalogTestDto extends AbstractCloudbreakEntity<ImageCatalogV4
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
         delete(context, getResponse(), cloudbreakClient);
-    }
-
-    public static ImageCatalogTestDto putSetDefaultByName(TestContext testContext, ImageCatalogTestDto entity, CloudbreakClient cloudbreakClient)
-            throws IOException {
-        entity.setResponse(
-                cloudbreakClient.getCloudbreakClient()
-                        .imageCatalogV4Endpoint().setDefault(cloudbreakClient.getWorkspaceId(), entity.getRequest().getName()));
-        logJSON(LOGGER, "ImageCatalog set to default: ", entity.getResponse());
-        return entity;
     }
 
     @Override

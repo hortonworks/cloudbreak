@@ -9,11 +9,12 @@ import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.OK;
 
+import javax.inject.Inject;
+
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
+import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -28,6 +29,9 @@ import spark.Route;
 public class AmbariPasswordUpdateTest extends AbstractIntegrationTest {
 
     private static final String CLOUD_INSTANCE_STATUSES = MOCK_ROOT + SPIMock.CLOUD_INSTANCE_STATUSES;
+
+    @Inject
+    private StackTestClient stackTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -57,9 +61,9 @@ public class AmbariPasswordUpdateTest extends AbstractIntegrationTest {
                 .given(generatedKey, StackTestDto.class)
                 .valid()
                 .withName(clusterName)
-                .when(Stack.postV4(), key(generatedKey))
+                .when(stackTestClient.createV4(), key(generatedKey))
                 .await(STACK_AVAILABLE, key(generatedKey))
-                .when(StackTestAction::modifyAmbariPassword, key(generatedKey))
+                .when(stackTestClient.modifyAmbariPasswordV4(), key(generatedKey))
                 .await(STACK_AVAILABLE, key(generatedKey))
                 .validate();
     }

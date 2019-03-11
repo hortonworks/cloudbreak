@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Reque
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
-import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.SecurityRulesEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -101,7 +101,7 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
         return this;
     }
 
-    public StackV4EntityBase<T> withEnvironment(Class<EnvironmentEntity> environmentKey) {
+    public StackV4EntityBase<T> withEnvironment(Class<EnvironmentTestDto> environmentKey) {
         return withEnvironmentKey(environmentKey.getSimpleName());
     }
 
@@ -115,7 +115,7 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
     }
 
     public StackV4EntityBase<T> withEnvironmentKey(String environmentKey) {
-        EnvironmentEntity env = getTestContext().get(environmentKey);
+        EnvironmentTestDto env = getTestContext().get(environmentKey);
         if (env == null) {
             throw new IllegalArgumentException("Env is null with given key: " + environmentKey);
         }

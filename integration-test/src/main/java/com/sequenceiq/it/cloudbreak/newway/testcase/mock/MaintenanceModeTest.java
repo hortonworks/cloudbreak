@@ -2,26 +2,29 @@ package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
+import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackRepositoryEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
-import com.sequenceiq.it.cloudbreak.newway.v4.ChangeImageAction;
 import com.sequenceiq.it.cloudbreak.newway.v4.MaintenanceModePostAction;
 import com.sequenceiq.it.cloudbreak.newway.v4.UpdateStackDataAction;
 
 public class MaintenanceModeTest extends AbstractIntegrationTest {
 
     private static final Map<String, Status> CLUSTER_MAINTENANCE_MODE = Map.of("status", Status.AVAILABLE, "clusterStatus", Status.MAINTENANCE_MODE_ENABLED);
+
+    @Inject
+    private StackTestClient stackTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -41,15 +44,15 @@ public class MaintenanceModeTest extends AbstractIntegrationTest {
     public void testMaintenanceMode(TestContext testContext) {
         testContext
                 .given(StackTestDto.class)
-                .when(Stack.postV4())
+                .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .given(StackTestDto.class)
                 .when(MaintenanceModePostAction.enable())
                 .await(CLUSTER_MAINTENANCE_MODE)
                 .given(StackTestDto.class)
-                .when(ChangeImageAction.valid())
+                .when(stackTestClient.changeImage())
                 .await(CLUSTER_MAINTENANCE_MODE)
-                .when(StackTestAction::sync)
+                .when(stackTestClient.syncV4())
                 .await(CLUSTER_MAINTENANCE_MODE)
 
                 .given(StackRepositoryEntity.class)

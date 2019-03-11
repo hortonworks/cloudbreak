@@ -22,19 +22,18 @@ import org.testng.annotations.Test;
 
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
-import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
-import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.action.recipe.RecipeTestClient;
-import com.sequenceiq.it.cloudbreak.newway.action.stack.StackScalePostAction;
+import com.sequenceiq.it.cloudbreak.newway.action.v4.stack.StackScalePostAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
-import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.LdapTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.RecipeTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceGroupEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
@@ -52,10 +51,13 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
     private static final String RECIPE_CONTENT = Base64.encodeBase64String("#!/bin/bash\necho ALMAA".getBytes());
 
     @Inject
-    private LdapConfigTestClient ldapConfigTestClient;
+    private LdapTestClient ldapTestClient;
 
     @Inject
-    private RandomNameCreator creator;
+    private RecipeTestClient recipeTestClient;
+
+    @Inject
+    private StackTestClient stackTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -74,23 +76,23 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
             int executionTime,
             @Description TestCaseDescription testCaseDescription) {
         LOGGER.info("testing recipe execution for type: {}", type.name());
-        String recipeName = creator.getRandomNameForResource();
-        String stackName = creator.getRandomNameForResource();
-        String instanceGroupName = creator.getRandomNameForResource();
+        String recipeName = getNameGenerator().getRandomNameForResource();
+        String stackName = getNameGenerator().getRandomNameForResource();
+        String instanceGroupName = getNameGenerator().getRandomNameForResource();
 
         testContext
                 .given(recipeName, RecipeTestDto.class)
                 .withName(recipeName)
                 .withContent(RECIPE_CONTENT)
                 .withRecipeType(type)
-                .when(RecipeTestClient::postV4, key(recipeName))
+                .when(recipeTestClient.createV4(), key(recipeName))
                 .given(instanceGroupName, InstanceGroupEntity.class)
                 .withHostGroup(WORKER)
                 .withNodeCount(NODE_COUNT)
                 .withRecipes(recipeName)
                 .given(stackName, StackTestDto.class)
                 .replaceInstanceGroups(instanceGroupName)
-                .when(Stack.postV4(), key(stackName))
+                .when(stackTestClient.createV4(), key(stackName))
                 .await(STACK_AVAILABLE, key(stackName))
                 .then(MockVerification.verify(HttpMethod.POST, SALT_RUN).bodyContains(HIGHSTATE).atLeast(executionTime), key(stackName))
                 .validate();
@@ -102,23 +104,23 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
             when = "calling termination",
             then = "the pretermination highstate has to called on pretermination recipes")
     public void testRecipePreTerminationRecipeHasGotHighStateOnCluster(TestContext testContext) {
-        String recipeName = creator.getRandomNameForResource();
+        String recipeName = getNameGenerator().getRandomNameForResource();
         testContext
                 .given(RecipeTestDto.class)
                 .withName(recipeName)
                 .withContent(RECIPE_CONTENT)
                 .withRecipeType(PRE_TERMINATION)
-                .when(RecipeTestClient::postV4)
+                .when(recipeTestClient.createV4())
                 .given(INSTANCE_GROUP_ID, InstanceGroupEntity.class)
                 .withHostGroup(WORKER)
                 .withNodeCount(NODE_COUNT)
                 .withRecipes(recipeName)
                 .given(StackTestDto.class)
                 .replaceInstanceGroups(INSTANCE_GROUP_ID)
-                .when(Stack.postV4())
+                .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .then(MockVerification.verify(HttpMethod.POST, SALT_RUN).bodyContains(HIGHSTATE).exactTimes(2))
-                .when(Stack.deleteV4())
+                .when(stackTestClient.deleteV4())
                 .await(STACK_DELETED)
                 .then(MockVerification.verify(HttpMethod.POST, SALT_RUN).bodyContains(HIGHSTATE).exactTimes(3))
                 .validate();
@@ -130,17 +132,17 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
             when = "creating cluster",
             then = "the LDAP sync is hooked for this salt state in the top.sls")
     public void testWhenThereIsNoRecipeButLdapHasAttachedThenThePostAmbariRecipeShouldRunWhichResultThreeHighStateCall(MockedTestContext testContext) {
-        String ldapName = creator.getRandomNameForResource();
         testContext.getModel().getAmbariMock().postSyncLdap();
         testContext.getModel().getAmbariMock().putConfigureLdap();
+        String ldapName = getNameGenerator().getRandomNameForResource();
         testContext
-                .given(LdapConfigTestDto.class)
+                .given(LdapTestDto.class)
                 .withName(ldapName)
-                .when(ldapConfigTestClient.post())
+                .when(ldapTestClient.createV4())
                 .given(ClusterEntity.class)
                 .withLdapConfigName(ldapName)
                 .given(StackTestDto.class)
-                .when(Stack.postV4())
+                .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .then(MockVerification.verify(HttpMethod.POST, SALT_RUN).bodyContains(HIGHSTATE).exactTimes(3))
                 .validate();
@@ -152,20 +154,20 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
             when = "upscaling cluster",
             then = "the post recipe should run on the new nodes as well")
     public void testWhenClusterGetUpScaledThenPostClusterInstallRecipeShouldBeExecuted(TestContext testContext) {
-        String recipeName = creator.getRandomNameForResource();
+        String recipeName = getNameGenerator().getRandomNameForResource();
         testContext
                 .given(RecipeTestDto.class)
                 .withName(recipeName)
                 .withContent(RECIPE_CONTENT)
                 .withRecipeType(POST_CLUSTER_INSTALL)
-                .when(RecipeTestClient::postV4)
+                .when(recipeTestClient.createV4())
                 .given(INSTANCE_GROUP_ID, InstanceGroupEntity.class)
                 .withHostGroup(WORKER)
                 .withNodeCount(NODE_COUNT)
                 .withRecipes(recipeName)
                 .given(StackTestDto.class)
                 .replaceInstanceGroups(INSTANCE_GROUP_ID)
-                .when(Stack.postV4())
+                .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(2))
                 .await(STACK_AVAILABLE)
@@ -180,20 +182,20 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
             then = "the post recipe should not run on the new nodes because those recipe not configured on the upscaled hostgroup")
     public void testWhenRecipeProvidedToHostGroupAndAnotherHostGroupGetUpScaledThenThereIsNoFurtherRecipeExecutionOnTheNewNodeBesideTheDefaultOnes(
             TestContext testContext) {
-        String recipeName = creator.getRandomNameForResource();
+        String recipeName = getNameGenerator().getRandomNameForResource();
         testContext
                 .given(RecipeTestDto.class)
                 .withName(recipeName)
                 .withContent(RECIPE_CONTENT)
                 .withRecipeType(POST_AMBARI_START)
-                .when(RecipeTestClient::postV4)
+                .when(recipeTestClient.createV4())
                 .given(INSTANCE_GROUP_ID, InstanceGroupEntity.class)
                 .withHostGroup(COMPUTE)
                 .withNodeCount(NODE_COUNT)
                 .withRecipes(recipeName)
                 .given(StackTestDto.class)
                 .replaceInstanceGroups(INSTANCE_GROUP_ID)
-                .when(Stack.postV4())
+                .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(2))
                 .await(STACK_AVAILABLE)
@@ -207,18 +209,19 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
             when = "delete attached recipe",
             then = "getting BadRequestException")
     public void testTryToDeleteAttachedRecipe(TestContext testContext) {
-        String recipeName = creator.getRandomNameForResource();
+        String recipeName = getNameGenerator().getRandomNameForResource();
+        String key = getNameGenerator().getRandomNameForResource();
+
         testContext
                 .given(RecipeTestDto.class).withName(recipeName).withContent(RECIPE_CONTENT).withRecipeType(POST_AMBARI_START)
-                .when(RecipeTestClient::postV4)
+                .when(recipeTestClient.createV4())
                 .given(INSTANCE_GROUP_ID, InstanceGroupEntity.class).withRecipes(recipeName)
                 .given(StackTestDto.class).replaceInstanceGroups(INSTANCE_GROUP_ID)
-                .when(Stack.postV4())
+                .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
-
                 .given(RecipeTestDto.class)
-                .when(RecipeTestClient::deleteV4, key("delete-failed-recipe"))
-                .expect(BadRequestException.class, key("delete-failed-recipe")
+                .when(recipeTestClient.deleteV4(), key(key))
+                .expect(BadRequestException.class, key(key)
                         .withExpectedMessage("There is a cluster \\['.*'\\] which uses recipe '.*'. "
                                 + "Please remove this cluster before deleting the recipe"))
                 .validate();

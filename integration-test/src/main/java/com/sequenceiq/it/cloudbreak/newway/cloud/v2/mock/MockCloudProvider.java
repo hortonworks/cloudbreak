@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.mock.MockCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.MockStackV4Parameters;
-import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.AbstractCloudProvider;
@@ -177,7 +177,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public EnvironmentEntity environment(EnvironmentEntity environment) {
+    public EnvironmentTestDto environment(EnvironmentTestDto environment) {
         return environment
                 .withRegions(VALID_REGION)
                 .withLocation(LONDON);

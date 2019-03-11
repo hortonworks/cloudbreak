@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.StackV4ParameterBase;
-import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
@@ -23,6 +22,7 @@ import com.sequenceiq.it.cloudbreak.newway.entity.StackAuthenticationEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackV4EntityBase;
 import com.sequenceiq.it.cloudbreak.newway.entity.VolumeV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
 
 @Component
@@ -108,7 +108,7 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
-    public EnvironmentEntity environment(EnvironmentEntity environment) {
+    public EnvironmentTestDto environment(EnvironmentTestDto environment) {
         return delegate.environment(environment);
     }
 

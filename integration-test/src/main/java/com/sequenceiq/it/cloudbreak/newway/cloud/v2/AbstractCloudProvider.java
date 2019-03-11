@@ -4,7 +4,7 @@ import java.util.Collections;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
@@ -36,7 +36,7 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     }
 
     @Override
-    public EnvironmentEntity environment(EnvironmentEntity environment) {
+    public EnvironmentTestDto environment(EnvironmentTestDto environment) {
         return environment.withRegions(Collections.singleton(region()))
                 .withLocation(location());
     }

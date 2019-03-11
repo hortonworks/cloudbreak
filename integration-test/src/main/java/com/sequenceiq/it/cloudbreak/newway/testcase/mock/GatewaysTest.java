@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 
+import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 
@@ -9,17 +10,23 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.action.gateway.PlatformGatewaysTestAction;
+import com.sequenceiq.it.cloudbreak.newway.client.ConnectorTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.connector.PlatformGatewaysTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.gateway.PlatformGatewaysTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class GatewaysTest extends AbstractIntegrationTest {
+
+    @Inject
+    private ConnectorTestClient connectorTestClient;
+
+    @Inject
+    private CredentialTestClient credentialTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -36,10 +43,10 @@ public class GatewaysTest extends AbstractIntegrationTest {
         testContext
                 .given(CredentialTestDto.class)
                 .withName(credentialName)
-                .when(CredentialTestClient::create)
+                .when(credentialTestClient.createV4())
                 .given(PlatformGatewaysTestDto.class)
                 .withCredentialName(credentialName)
-                .when(PlatformGatewaysTestAction::getGateways);
+                .when(connectorTestClient.gateways());
     }
 
     @Test(dataProvider = "contextWithCredentialNameAndException")
@@ -49,7 +56,7 @@ public class GatewaysTest extends AbstractIntegrationTest {
         testContext
                 .given(PlatformGatewaysTestDto.class)
                 .withCredentialName(credentialName)
-                .when(PlatformGatewaysTestAction::getGateways, key(exceptionKey))
+                .when(connectorTestClient.gateways(), key(exceptionKey))
                 .expect(exception, key(exceptionKey))
                 .validate();
     }

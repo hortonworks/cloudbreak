@@ -11,16 +11,16 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.Stack;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
-import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.LdapTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariRepositoryV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.mock.model.AmbariMock;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
@@ -28,7 +28,10 @@ import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 public class LdapClusterTest extends AbstractIntegrationTest {
 
     @Inject
-    private LdapConfigTestClient ldapConfigTestClient;
+    private LdapTestClient ldapTestClient;
+
+    @Inject
+    private StackTestClient stackTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -48,8 +51,8 @@ public class LdapClusterTest extends AbstractIntegrationTest {
     public void testCreateClusterWithLdap(MockedTestContext testContext) {
         testContext.getModel().getAmbariMock().postSyncLdap();
         testContext.getModel().getAmbariMock().putConfigureLdap();
-        testContext.given(LdapConfigTestDto.class)
-                .when(ldapConfigTestClient.post())
+        testContext.given(LdapTestDto.class)
+                .when(ldapTestClient.createV4())
                 .given(AmbariRepositoryV4Entity.class)
                 .given(AmbariEntity.class)
                 .withAmbariRepoDetails()
@@ -58,7 +61,7 @@ public class LdapClusterTest extends AbstractIntegrationTest {
                 .withAmbari()
                 .given(StackTestDto.class)
                 .withCluster()
-                .when(Stack.postV4())
+                .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .then(MockVerification.verify(HttpMethod.POST, AmbariMock.LDAP_SYNC_EVENTS))
                 .then(MockVerification.verify(HttpMethod.PUT, AmbariMock.LDAP_CONFIGURATION))
@@ -78,8 +81,8 @@ public class LdapClusterTest extends AbstractIntegrationTest {
         String deleteFail = getNameGenerator().getRandomNameForResource();
         String ldapName = getNameGenerator().getRandomNameForResource();
 
-        testContext.given(LdapConfigTestDto.class).withName(ldapName)
-                .when(ldapConfigTestClient.post())
+        testContext.given(LdapTestDto.class).withName(ldapName)
+                .when(ldapTestClient.createV4())
                 .given(AmbariRepositoryV4Entity.class)
                 .given(AmbariEntity.class)
                 .withAmbariRepoDetails()
@@ -89,9 +92,9 @@ public class LdapClusterTest extends AbstractIntegrationTest {
                 .given(StackTestDto.class)
                 .withCluster()
                 .withName(stackName)
-                .when(Stack.postV4())
-                .given(LdapConfigTestDto.class)
-                .when(ldapConfigTestClient.delete(), key(deleteFail))
+                .when(stackTestClient.createV4())
+                .given(LdapTestDto.class)
+                .when(ldapTestClient.deleteV4(), key(deleteFail))
                 .expect(BadRequestException.class, expectedMessage(String.format("LDAP config '%s' cannot be deleted "
                         + "because there are clusters associated with it: \\[%s\\].", ldapName, stackName)).withKey(deleteFail))
                 .validate();

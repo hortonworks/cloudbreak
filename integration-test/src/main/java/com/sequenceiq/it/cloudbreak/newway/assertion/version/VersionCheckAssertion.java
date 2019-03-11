@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.version.VersionCheckTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.util.VersionCheckTestDto;
 
 public class VersionCheckAssertion {
 

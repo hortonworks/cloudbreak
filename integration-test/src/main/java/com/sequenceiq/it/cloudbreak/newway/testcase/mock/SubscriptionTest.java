@@ -2,27 +2,30 @@ package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 
+import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.action.subscription.SubscriptionTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CommonAssert;
 import com.sequenceiq.it.cloudbreak.newway.assertion.subscription.SubscriptionAssertion;
+import com.sequenceiq.it.cloudbreak.newway.client.UtilTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.subscription.SubscriptionTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.util.SubscriptionTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class SubscriptionTest extends AbstractIntegrationTest {
-
     private static final String DATA_PROVIDER_FOR_VALID_SUBSCRIPTION_TEST = "contextAndValidUrl";
 
     private static final String DATA_PROVIDER_FOR_INVALID_SUBSCRIPTION_TEST = "contextAndInvalidUrl";
+
+    @Inject
+    private UtilTestClient utilTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -32,12 +35,13 @@ public class SubscriptionTest extends AbstractIntegrationTest {
     @Test(dataProvider = DATA_PROVIDER_FOR_VALID_SUBSCRIPTION_TEST, enabled = false)
     public void testGetSubscription(MockedTestContext testContext, String endpointUrl,
             @Description TestCaseDescription testCaseDescription) {
+        String subscriptionKey = getNameGenerator().getRandomNameForResource();
         testContext
                 .given(SubscriptionTestDto.class)
                 .withEndpointUrl(endpointUrl)
-                .when(SubscriptionTestAction::getSubscribe)
-                .then(CommonAssert::responseExists)
-                .then(SubscriptionAssertion::idExists)
+                .when(utilTestClient.subscriptionV4(), key(subscriptionKey))
+                .then(CommonAssert::responseExists, key(subscriptionKey))
+                .then(SubscriptionAssertion::idExists, key(subscriptionKey))
                 .validate();
     }
 
@@ -50,7 +54,7 @@ public class SubscriptionTest extends AbstractIntegrationTest {
         testContext
                 .given(SubscriptionTestDto.class)
                 .withEndpointUrl(endpointUrl)
-                .when(SubscriptionTestAction::getSubscribe, key(subscriptionKey))
+                .when(utilTestClient.subscriptionV4(), key(subscriptionKey))
                 .expect(BadRequestException.class, key(subscriptionKey))
                 .validate();
     }

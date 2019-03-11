@@ -18,14 +18,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.it.cloudbreak.newway.assertion.database.DatabaseExistsAssertion;
 import com.sequenceiq.it.cloudbreak.newway.assertion.database.DatabaseTestAccessDeniedAssertion;
+import com.sequenceiq.it.cloudbreak.newway.client.DatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseTestEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseTestTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
-import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
 public class DatabaseTest extends AbstractIntegrationTest {
 
@@ -44,7 +44,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
     private static final Class<MockedTestContext> TEST_CONTEXT_CLASS = MockedTestContext.class;
 
     @Inject
-    private LongStringGeneratorUtil longStringGeneratorUtil;
+    private DatabaseTestClient databaseTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -67,16 +67,16 @@ public class DatabaseTest extends AbstractIntegrationTest {
     public void createAndDeleteAndCreateWithSameNameThenShouldRecreatedDatabase(TestContext testContext) {
         String databaseName = getNameGenerator().getRandomNameForResource();
         testContext
-                .given(DatabaseEntity.class)
+                .given(DatabaseTestDto.class)
                 .withName(databaseName)
-                .when(DatabaseEntity.post(), key(databaseName))
-                .when(DatabaseEntity.list(), key(databaseName))
+                .when(databaseTestClient.createV4(), key(databaseName))
+                .when(databaseTestClient.listV4(), key(databaseName))
                 .then(DatabaseExistsAssertion.getAssertion(databaseName, 1), key(databaseName))
-                .when(DatabaseEntity.deleteV2(), key(databaseName))
-                .when(DatabaseEntity.list(), key(databaseName))
+                .when(databaseTestClient.deleteV4(), key(databaseName))
+                .when(databaseTestClient.listV4(), key(databaseName))
                 .then(DatabaseExistsAssertion.getAssertion(databaseName, 0), key(databaseName))
-                .when(DatabaseEntity.post(), key(databaseName))
-                .when(DatabaseEntity.list(), key(databaseName))
+                .when(databaseTestClient.createV4(), key(databaseName))
+                .when(databaseTestClient.listV4(), key(databaseName))
                 .then(DatabaseExistsAssertion.getAssertion(databaseName, 1), key(databaseName))
                 .validate();
     }
@@ -89,12 +89,12 @@ public class DatabaseTest extends AbstractIntegrationTest {
     public void createAndCreateWithSameNameThenShouldThrowBadRequestException(TestContext testContext) {
         String databaseName = getNameGenerator().getRandomNameForResource();
         testContext
-                .given(DatabaseEntity.class)
+                .given(DatabaseTestDto.class)
                 .withName(databaseName)
-                .when(DatabaseEntity.post())
-                .when(DatabaseEntity.list())
-                .then(DatabaseExistsAssertion.getAssertion(databaseName, 1))
-                .when(DatabaseEntity.post(), key(databaseName))
+                .when(databaseTestClient.createV4(), key(databaseName))
+                .when(databaseTestClient.listV4(), key(databaseName))
+                .then(DatabaseExistsAssertion.getAssertion(databaseName, 1), key(databaseName))
+                .when(databaseTestClient.createV4(), key(databaseName))
                 .expect(BadRequestException.class, key(databaseName))
                 .validate();
     }
@@ -106,15 +106,15 @@ public class DatabaseTest extends AbstractIntegrationTest {
             @Description TestCaseDescription testCaseDescription) {
         String databaseName = getNameGenerator().getRandomNameForResource();
         testContext
-                .given(DatabaseEntity.class)
+                .given(DatabaseTestDto.class)
                 .withType(type.name())
                 .withName(databaseName)
-                .when(DatabaseEntity.post())
-                .when(DatabaseEntity.list())
-                .then(DatabaseExistsAssertion.getAssertion(databaseName, 1))
-                .given(DatabaseTestEntity.class)
+                .when(databaseTestClient.createV4(), key(databaseName))
+                .when(databaseTestClient.listV4(), key(databaseName))
+                .then(DatabaseExistsAssertion.getAssertion(databaseName, 1), key(databaseName))
+                .given(DatabaseTestTestDto.class)
                 .withExistingName(databaseName)
-                .when(DatabaseTestEntity.testConnection())
+                .when(databaseTestClient.testV4(), key(databaseName))
                 .validate();
     }
 
@@ -129,12 +129,12 @@ public class DatabaseTest extends AbstractIntegrationTest {
             @Description TestCaseDescription testCaseDescription) {
         String generatedKey = getNameGenerator().getRandomNameForResource();
         testContext
-                .given(DatabaseEntity.class)
+                .given(DatabaseTestDto.class)
                 .withName(databaseName)
                 .withConnectionUserName(username)
                 .withConnectionPassword(password)
                 .withConnectionURL(connectionUrl)
-                .when(DatabaseEntity.post(), key(generatedKey))
+                .when(databaseTestClient.createV4(), key(generatedKey))
                 .expect(BadRequestException.class,
                         expectedMessage(expectedErrorMessage)
                                 .withKey(generatedKey))
@@ -153,14 +153,14 @@ public class DatabaseTest extends AbstractIntegrationTest {
         String generatedKey = getNameGenerator().getRandomNameForResource();
 
         testContext
-                .given(DatabaseTestEntity.class)
+                .given(DatabaseTestTestDto.class)
                 .withRequest(new DatabaseV4Request())
                 .withName(databaseName)
                 .withConnectionUserName(username)
                 .withConnectionPassword(password)
                 .withConnectionURL(connectionUrl)
                 .withType("HIVE")
-                .when(DatabaseTestEntity.testConnection(), key(generatedKey))
+                .when(databaseTestClient.testV4(), key(generatedKey))
                 .expect(BadRequestException.class,
                         expectedMessage(expectedErrorMessage)
                                 .withKey(generatedKey))
@@ -173,11 +173,13 @@ public class DatabaseTest extends AbstractIntegrationTest {
             when = "calling test database endpoint with a non-existent database name",
             then = "the test connection should return access denied")
     public void testDatabaseTestConnectionWithNonExistingDbName(TestContext testContext) {
+        String generatedKey = getNameGenerator().getRandomNameForResource();
+
         testContext
-                .given(DatabaseTestEntity.class)
+                .given(DatabaseTestTestDto.class)
                 .withExistingName("aNonExistentDb")
-                .when(DatabaseTestEntity.testConnection())
-                .then(DatabaseTestAccessDeniedAssertion.getAssertion())
+                .when(databaseTestClient.testV4(), key(generatedKey))
+                .then(DatabaseTestAccessDeniedAssertion.getAssertion(), key(generatedKey))
                 .validate();
     }
 
@@ -203,7 +205,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
         return new Object[][]{
                 {
                         getBean(TEST_CONTEXT_CLASS),
-                        longStringGeneratorUtil.stringGenerator(51),
+                        getLongNameGenerator().stringGenerator(51),
                         DATABASE_USERNAME, DATABASE_PASSWORD,
                         DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
                         "The length of the name has to be in range of 4 to 50",

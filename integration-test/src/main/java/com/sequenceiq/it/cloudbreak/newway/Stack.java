@@ -34,13 +34,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.i
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.SshService;
 import com.sequenceiq.it.cloudbreak.SshUtil;
-import com.sequenceiq.it.cloudbreak.newway.action.Action;
-import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.v3.CloudbreakV3Util;
 import com.sequenceiq.it.cloudbreak.newway.v3.StackActionV4;
-import com.sequenceiq.it.cloudbreak.newway.v3.StackPostV3Strategy;
 
 public class Stack extends StackTestDto {
 
@@ -75,34 +72,6 @@ public class Stack extends StackTestDto {
         return stack;
     }
 
-    public static Action<StackTestDto> postV4() {
-        return StackTestAction::create;
-    }
-
-    public static Action<StackTestDto> getV4() {
-        return StackTestAction::get;
-    }
-
-    public static Action<StackTestDto> getCli() {
-        return StackTestAction::getCli;
-    }
-
-    public static Action<StackTestDto> generatedClusterDefinition() {
-        return StackTestAction::getClusterDefinitionByRequest;
-    }
-
-    public static ResourceAction<Stack> postV3(String key) {
-        return new ResourceAction<>(getTestContextStack(key), new StackPostV3Strategy());
-    }
-
-    public static ResourceAction<Stack> post(Strategy strategy) {
-        return new ResourceAction<>(getTestContextStack(STACK), strategy);
-    }
-
-    public static ResourceAction<Stack> postV3() {
-        return postV3(STACK);
-    }
-
     public static ResourceAction<Stack> get(String key) {
         return new ResourceAction<>(getTestContextStack(key), StackActionV4::get);
     }
@@ -121,10 +90,6 @@ public class Stack extends StackTestDto {
 
     public static ResourceAction<Stack> delete(String key, Strategy strategy) {
         return new ResourceAction<>(getTestContextStack(key), strategy);
-    }
-
-    public static Action<StackTestDto> deleteV4() {
-        return StackTestAction::delete;
     }
 
     public static ResourceAction<Stack> delete(String key) {

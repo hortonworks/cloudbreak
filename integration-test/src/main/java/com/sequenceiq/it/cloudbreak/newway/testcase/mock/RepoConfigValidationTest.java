@@ -2,22 +2,27 @@ package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 
+import javax.inject.Inject;
+
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.action.repoconfig.RepoConfigValidationTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.repoconfig.RepoConfigValidationTestData;
+import com.sequenceiq.it.cloudbreak.newway.client.UtilTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.repoconfig.RepoConfigValidationTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.util.RepoConfigValidationTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class RepoConfigValidationTest extends AbstractIntegrationTest {
 
     private static final String DATA_PROVIDER_FOR_REPO_CONFIG_TEST = "contextAndTestData";
+
+    @Inject
+    private UtilTestClient utilTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -34,7 +39,7 @@ public class RepoConfigValidationTest extends AbstractIntegrationTest {
         testContext
                 .given(generatedKey, RepoConfigValidationTestDto.class)
                 .withRequest(testData.request())
-                .when(RepoConfigValidationTestAction::postRepositoryConfigValidation, key(generatedKey))
+                .when(utilTestClient.repoConfigValidationV4(), key(generatedKey))
                 .then(testData::resultValidation, key(generatedKey))
                 .validate();
     }

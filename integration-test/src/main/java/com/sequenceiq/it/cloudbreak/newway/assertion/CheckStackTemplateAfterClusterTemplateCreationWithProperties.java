@@ -19,14 +19,14 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.ClusterTemplateEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.clustertemplate.ClusterTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
 
-public class CheckStackTemplateAfterClusterTemplateCreationWithProperties implements AssertionV2<ClusterTemplateEntity> {
+public class CheckStackTemplateAfterClusterTemplateCreationWithProperties implements AssertionV2<ClusterTemplateTestDto> {
 
     @Override
-    public ClusterTemplateEntity doAssertion(TestContext testContext, ClusterTemplateEntity entity, CloudbreakClient client) {
-        ClusterTemplateEntity clusterTemplate = testContext.get(ClusterTemplateEntity.class);
+    public ClusterTemplateTestDto doAssertion(TestContext testContext, ClusterTemplateTestDto entity, CloudbreakClient client) {
+        ClusterTemplateTestDto clusterTemplate = testContext.get(ClusterTemplateTestDto.class);
         Optional<ClusterTemplateV4Response> first = entity.getResponses().stream().filter(ct -> ct.getName().equals(clusterTemplate.getName())).findFirst();
         if (!first.isPresent()) {
             throw new IllegalArgumentException("No element in the result");

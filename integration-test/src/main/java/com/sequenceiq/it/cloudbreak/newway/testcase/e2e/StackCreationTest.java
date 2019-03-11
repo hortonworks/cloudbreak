@@ -1,16 +1,21 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.e2e;
 
+import javax.inject.Inject;
+
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
+import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractE2ETest;
 
 public class StackCreationTest extends AbstractE2ETest {
+
+    @Inject
+    private StackTestClient stackTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -25,7 +30,7 @@ public class StackCreationTest extends AbstractE2ETest {
             then = "the stack should become available")
     public void testCreateWorkloadCluster(TestContext testContext) {
         testContext.given(StackTestDto.class)
-                .when(StackTestAction::create)
+                .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .validate();
     }

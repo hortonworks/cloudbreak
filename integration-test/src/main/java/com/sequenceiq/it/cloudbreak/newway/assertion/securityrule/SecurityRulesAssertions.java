@@ -5,7 +5,7 @@ import static org.junit.Assert.assertNotNull;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.securityrule.SecurityRulesTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.util.SecurityRulesTestDto;
 
 public class SecurityRulesAssertions {
 

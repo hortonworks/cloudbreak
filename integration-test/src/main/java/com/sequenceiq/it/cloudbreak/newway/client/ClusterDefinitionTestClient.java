@@ -1,44 +1,35 @@
 package com.sequenceiq.it.cloudbreak.newway.client;
 
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
-import com.sequenceiq.it.cloudbreak.newway.action.clusterdefinition.ClusterDefinitionDeleteAction;
-import com.sequenceiq.it.cloudbreak.newway.action.clusterdefinition.ClusterDefinitionGetAction;
-import com.sequenceiq.it.cloudbreak.newway.action.clusterdefinition.ClusterDefinitionGetListAction;
-import com.sequenceiq.it.cloudbreak.newway.action.clusterdefinition.ClusterDefinitionPostAction;
-import com.sequenceiq.it.cloudbreak.newway.action.clusterdefinition.ClusterDefinitionRequestAction;
-import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.action.v4.clusterdefinition.ClusterDefinitionDeleteAction;
+import com.sequenceiq.it.cloudbreak.newway.action.v4.clusterdefinition.ClusterDefinitionGetAction;
+import com.sequenceiq.it.cloudbreak.newway.action.v4.clusterdefinition.ClusterDefinitionListAction;
+import com.sequenceiq.it.cloudbreak.newway.action.v4.clusterdefinition.ClusterDefinitionCreateAction;
+import com.sequenceiq.it.cloudbreak.newway.action.v4.clusterdefinition.ClusterDefinitionRequestAction;
 import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
 
+@Service
 public class ClusterDefinitionTestClient {
 
-    private ClusterDefinitionTestClient() {
+    public Action<ClusterDefinitionTestDto> createV4() {
+        return new ClusterDefinitionCreateAction();
     }
 
-    public static ClusterDefinitionTestDto getByName(TestContext testContext, ClusterDefinitionTestDto entity, CloudbreakClient cloudbreakClient) {
-        entity.setResponse(
-                cloudbreakClient.getCloudbreakClient().clusterDefinitionV4Endpoint().get(cloudbreakClient.getWorkspaceId(), entity.getName())
-        );
-        return entity;
-    }
-
-    public static Action<ClusterDefinitionTestDto> postV4() {
-        return new ClusterDefinitionPostAction();
-    }
-
-    public static Action<ClusterDefinitionTestDto> listV4() {
-        return new ClusterDefinitionGetListAction();
-    }
-
-    public static Action<ClusterDefinitionTestDto> getV4() {
+    public Action<ClusterDefinitionTestDto> getV4() {
         return new ClusterDefinitionGetAction();
     }
 
-    public static Action<ClusterDefinitionTestDto> deleteV4() {
+    public Action<ClusterDefinitionTestDto> listV4() {
+        return new ClusterDefinitionListAction();
+    }
+
+    public Action<ClusterDefinitionTestDto> deleteV4() {
         return new ClusterDefinitionDeleteAction();
     }
 
-    public static Action<ClusterDefinitionTestDto> requestV4() {
+    public Action<ClusterDefinitionTestDto> requestV4() {
         return new ClusterDefinitionRequestAction();
     }
 }

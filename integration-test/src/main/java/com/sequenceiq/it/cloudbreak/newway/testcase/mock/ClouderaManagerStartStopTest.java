@@ -8,10 +8,12 @@ import static com.sequenceiq.it.spark.ITResponse.MOCK_ROOT;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.OK;
 
+import javax.inject.Inject;
+
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
+import com.sequenceiq.it.cloudbreak.newway.client.ClusterDefinitionTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClouderaManagerTestDto;
@@ -25,6 +27,12 @@ import com.sequenceiq.it.spark.spi.CloudVmInstanceStatuses;
 public class ClouderaManagerStartStopTest extends AbstractClouderaManagerTest {
 
     private static final String CLOUD_INSTANCE_STATUSES = MOCK_ROOT + SPIMock.CLOUD_INSTANCE_STATUSES;
+
+    @Inject
+    private ClusterDefinitionTestClient clusterDefinitionTestClient;
+
+    @Inject
+    private StackTestClient stackTestClient;
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
@@ -48,11 +56,11 @@ public class ClouderaManagerStartStopTest extends AbstractClouderaManagerTest {
                 .withClouderaManager(cm)
                 .given(stack, StackTestDto.class)
                 .withCluster(cmcluster)
-                .when(Stack.postV4(), key(stack))
+                .when(stackTestClient.createV4(), key(stack))
                 .await(STACK_AVAILABLE, key(stack))
-                .when(StackTestAction::stop, key(stack))
+                .when(stackTestClient.stopV4(), key(stack))
                 .await(STACK_STOPPED, key(stack))
-                .when(StackTestAction::start, key(stack))
+                .when(stackTestClient.startV4(), key(stack))
                 .await(STACK_AVAILABLE, key(stack))
                 .validate();
     }
@@ -86,5 +94,10 @@ public class ClouderaManagerStartStopTest extends AbstractClouderaManagerTest {
         testContext.getModel().getSpiMock().getDynamicRouteStack().post(CLOUD_INSTANCE_STATUSES, okState);
         testContext.getModel().getSpiMock().getDynamicRouteStack().post(CLOUD_INSTANCE_STATUSES, startedStateSpi);
         testContext.getModel().getSpiMock().getDynamicRouteStack().post(CLOUD_INSTANCE_STATUSES, stoppedStateSpi);
+    }
+
+    @Override
+    protected ClusterDefinitionTestClient clusterDefinitionTestClient() {
+        return clusterDefinitionTestClient;
     }
 }

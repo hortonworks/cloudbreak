@@ -8,21 +8,16 @@ import javax.ws.rs.BadRequestException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
-import com.sequenceiq.it.cloudbreak.newway.action.recipe.RecipeTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
-import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
 public class RecipeTest extends AbstractIntegrationTest {
 
     @Inject
-    private LongStringGeneratorUtil longStringGenerator;
-
-    @Inject
-    private RandomNameCreator randomNameCreator;
+    private RecipeTestClient recipeTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -35,8 +30,9 @@ public class RecipeTest extends AbstractIntegrationTest {
             when = "create recipe",
             then = "recipe created")
     public void testCreateValidRecipe(TestContext testContext) {
-        testContext.given(RecipeTestDto.class)
-                .when(RecipeTestClient::postV4)
+        testContext
+                .given(RecipeTestDto.class)
+                .when(recipeTestClient.createV4())
                 .validate();
     }
 
@@ -46,10 +42,11 @@ public class RecipeTest extends AbstractIntegrationTest {
             when = "create recipe and then delete and create again",
             then = "recipe created")
     public void testCreateDeleteValidCreateAgain(TestContext testContext) {
-        testContext.given(RecipeTestDto.class)
-                .when(RecipeTestClient::postV4)
-                .when(RecipeTestClient::deleteV4)
-                .when(RecipeTestClient::postV4)
+        testContext
+                .given(RecipeTestDto.class)
+                .when(recipeTestClient.createV4())
+                .when(recipeTestClient.deleteV4())
+                .when(recipeTestClient.createV4())
                 .validate();
     }
 
@@ -59,10 +56,11 @@ public class RecipeTest extends AbstractIntegrationTest {
             when = "create recipe",
             then = "getting a BadRequestException")
     public void testCreateSpecialNameRecipe(TestContext testContext) {
-        String spacialName = randomNameCreator.getRandomNameForResource();
-        testContext.given(RecipeTestDto.class)
+        String spacialName = getNameGenerator().getRandomNameForResource();
+        testContext
+                .given(RecipeTestDto.class)
                 .withName(getNameGenerator().getInvalidRandomNameForResource())
-                .when(RecipeTestClient::postV4, key(spacialName))
+                .when(recipeTestClient.createV4(), key(spacialName))
                 .expect(BadRequestException.class, key(spacialName)
                         .withExpectedMessage("The recipe's name can only contain lowercase alphanumeric characters and hyphens and has start "
                                 + "with an alphanumeric character"))
@@ -75,10 +73,10 @@ public class RecipeTest extends AbstractIntegrationTest {
             when = "create recipe twice",
             then = "getting a BadRequestException")
     public void testCreateAgainRecipe(TestContext testContext) {
-        String againName = randomNameCreator.getRandomNameForResource();
+        String againName = getNameGenerator().getRandomNameForResource();
         testContext.given(RecipeTestDto.class)
-                .when(RecipeTestClient::postV4)
-                .when(RecipeTestClient::postV4, key(againName))
+                .when(recipeTestClient.createV4())
+                .when(recipeTestClient.createV4(), key(againName))
                 .expect(BadRequestException.class, key(againName)
                         .withExpectedMessage("recipe already exists with name '"))
                 .validate();
@@ -90,10 +88,11 @@ public class RecipeTest extends AbstractIntegrationTest {
             when = "create recipe",
             then = "getting a BadRequestException")
     public void testCreateInvalidRecipeShortName(TestContext testContext) {
-        String shortName = randomNameCreator.getRandomNameForResource();
-        testContext.given(RecipeTestDto.class)
-                .withName(longStringGenerator.stringGenerator(3))
-                .when(RecipeTestClient::postV4, key(shortName))
+        String shortName = getNameGenerator().getRandomNameForResource();
+        testContext
+                .given(RecipeTestDto.class)
+                .withName(getLongNameGenerator().stringGenerator(3))
+                .when(recipeTestClient.createV4(), key(shortName))
                 .expect(BadRequestException.class, key(shortName)
                         .withExpectedMessage("The length of the recipe's name has to be in range of 5 to 100"))
                 .validate();
@@ -105,10 +104,11 @@ public class RecipeTest extends AbstractIntegrationTest {
             when = "create recipe",
             then = "getting a BadRequestException")
     public void testCreateInvalidRecipeLongName(TestContext testContext) {
-        String longName = randomNameCreator.getRandomNameForResource();
-        testContext.given(RecipeTestDto.class)
-                .withName(longStringGenerator.stringGenerator(101))
-                .when(RecipeTestClient::postV4, key(longName))
+        String longName = getNameGenerator().getRandomNameForResource();
+        testContext
+                .given(RecipeTestDto.class)
+                .withName(getLongNameGenerator().stringGenerator(101))
+                .when(recipeTestClient.createV4(), key(longName))
                 .expect(BadRequestException.class, key(longName)
                         .withExpectedMessage("The length of the recipe's name has to be in range of 5 to 100"))
                 .validate();
@@ -121,10 +121,11 @@ public class RecipeTest extends AbstractIntegrationTest {
             when = "create recipe",
             then = "getting a BadRequestException")
     public void testCreateInvalidRecipeLongDescription(TestContext testContext) {
-        String longDesc = randomNameCreator.getRandomNameForResource();
-        testContext.given(RecipeTestDto.class)
-                .withDescription(longStringGenerator.stringGenerator(1001))
-                .when(RecipeTestClient::postV4, key(longDesc))
+        String longDesc = getNameGenerator().getRandomNameForResource();
+        testContext
+                .given(RecipeTestDto.class)
+                .withDescription(getLongNameGenerator().stringGenerator(1001))
+                .when(recipeTestClient.createV4(), key(longDesc))
                 .expect(BadRequestException.class, key(longDesc)
                         .withExpectedMessage("size must be between 0 and 1000"))
                 .validate();

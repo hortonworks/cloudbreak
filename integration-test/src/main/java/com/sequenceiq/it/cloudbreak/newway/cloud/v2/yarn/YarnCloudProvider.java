@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.yarn.Yar
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.YarnNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.YarnInstanceTemplateV4Parameters;
-import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
@@ -46,7 +46,7 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public EnvironmentEntity environment(EnvironmentEntity environment) {
+    public EnvironmentTestDto environment(EnvironmentTestDto environment) {
         return environment
                 .withLocation(DEFAULT_LOCATION);
     }

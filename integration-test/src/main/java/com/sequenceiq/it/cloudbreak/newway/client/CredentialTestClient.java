@@ -1,90 +1,41 @@
 package com.sequenceiq.it.cloudbreak.newway.client;
 
-import static com.sequenceiq.it.cloudbreak.newway.log.Log.log;
-import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
-import static java.lang.String.format;
+import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
-import com.sequenceiq.it.cloudbreak.exception.ProxyMethodInvocationException;
-import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.action.Action;
+import com.sequenceiq.it.cloudbreak.newway.action.v4.credential.CredentialCreateAction;
+import com.sequenceiq.it.cloudbreak.newway.action.v4.credential.CredentialCreateIfNotExistAction;
+import com.sequenceiq.it.cloudbreak.newway.action.v4.credential.CredentialDeleteAction;
+import com.sequenceiq.it.cloudbreak.newway.action.v4.credential.CredentialGetAction;
+import com.sequenceiq.it.cloudbreak.newway.action.v4.credential.CredentialListAction;
+import com.sequenceiq.it.cloudbreak.newway.action.v4.credential.CredentialModifyAction;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 
+@Service
 public class CredentialTestClient {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialTestClient.class);
-
-    private CredentialTestClient() {
-
+    public Action<CredentialTestDto> createV4() {
+        return new CredentialCreateAction();
     }
 
-    public static CredentialTestDto createIfNotExist(TestContext testContext, CredentialTestDto entity, CloudbreakClient client) throws Exception {
-        LOGGER.info("Create Credential with name: {}", entity.getRequest().getName());
-        try {
-            entity.setResponse(
-                    client.getCloudbreakClient().credentialV4Endpoint().post(client.getWorkspaceId(), entity.getRequest())
-            );
-            logJSON(LOGGER, "Credential created successfully: ", entity.getRequest());
-        } catch (ProxyMethodInvocationException e) {
-            LOGGER.info("Cannot create Credential, fetch existed one: {}", entity.getRequest().getName());
-            entity.setResponse(
-                    client.getCloudbreakClient().credentialV4Endpoint()
-                            .get(client.getWorkspaceId(), entity.getRequest().getName()));
-        }
-        if (entity.getResponse() == null) {
-            throw new IllegalStateException("Credential could not be created.");
-        }
-        return entity;
+    public Action<CredentialTestDto> deleteV4() {
+        return new CredentialDeleteAction();
     }
 
-    public static CredentialTestDto list(TestContext testContext, CredentialTestDto entity, CloudbreakClient client) throws Exception {
-        Collection<CredentialV4Response> responses = client.getCloudbreakClient()
-                .credentialV4Endpoint()
-                .list(client.getWorkspaceId())
-                .getResponses();
-        entity.setResponses(responses.stream().collect(Collectors.toSet()));
-        logJSON(LOGGER, " Credential listed successfully:\n", entity.getResponses());
-        return entity;
+    public Action<CredentialTestDto> listV4() {
+        return new CredentialListAction();
     }
 
-    public static CredentialTestDto delete(TestContext testContext, CredentialTestDto entity, CloudbreakClient client) throws Exception {
-        log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
-        logJSON(LOGGER, " Credential delete request:\n", entity.getRequest());
-        entity.setResponse(
-                client.getCloudbreakClient()
-                        .credentialV4Endpoint()
-                        .delete(client.getWorkspaceId(), entity.getName()));
-        logJSON(LOGGER, " Credential deleted successfully:\n", entity.getResponse());
-        return entity;
+    public Action<CredentialTestDto> createIfNotExistV4() {
+        return new CredentialCreateIfNotExistAction();
     }
 
-    public static CredentialTestDto create(TestContext testContext, CredentialTestDto entity, CloudbreakClient client) throws Exception {
-        logJSON(LOGGER, " Credential create request:\n", entity.getRequest());
-        entity.setResponse(
-                client.getCloudbreakClient()
-                        .credentialV4Endpoint()
-                        .post(client.getWorkspaceId(), entity.getRequest()));
-        logJSON(LOGGER, " Credential created successfully:\n", entity.getResponse());
-        log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
-
-        return entity;
+    public Action<CredentialTestDto> modifyV4() {
+        return new CredentialModifyAction();
     }
 
-    public static CredentialTestDto modify(TestContext testContext, CredentialTestDto entity, CloudbreakClient client) throws Exception {
-        logJSON(LOGGER, " Credential modify request:\n", entity.getRequest());
-        entity.setResponse(
-                client.getCloudbreakClient()
-                        .credentialV4Endpoint()
-                        .put(client.getWorkspaceId(), entity.getRequest()));
-        logJSON(LOGGER, " Credential modified successfully:\n", entity.getResponse());
-        log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
-
-        return entity;
+    public Action<CredentialTestDto> getV4() {
+        return new CredentialGetAction();
     }
+
 }

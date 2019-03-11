@@ -1,11 +1,14 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
 
+import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.newway.mock.model.AmbariMock.CLUSTER_DEFINITIONS;
 import static com.sequenceiq.it.spark.ITResponse.AMBARI_API_ROOT;
 import static com.sequenceiq.it.spark.ITResponse.MOCK_ROOT;
 import static com.sequenceiq.it.spark.ITResponse.SALT_API_ROOT;
 import static com.sequenceiq.it.spark.ITResponse.SALT_BOOT_ROOT;
+
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,10 +17,9 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.action.stack.StackScalePostAction;
-import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
+import com.sequenceiq.it.cloudbreak.newway.action.v4.stack.StackScalePostAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
+import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -29,6 +31,9 @@ import spark.Route;
 public class UpscaleTest extends AbstractIntegrationTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpscaleTest.class);
+
+    @Inject
+    private StackTestClient stackTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -49,14 +54,16 @@ public class UpscaleTest extends AbstractIntegrationTest {
             when = "upscale to 15 after it downscale to 6",
             then = "stack is running")
     public void testStackScaling(TestContext testContext) {
+        String stackName = getNameGenerator().getRandomNameForResource();
+
         testContext
-                .given(StackTestDto.class)
-                .when(StackTestAction::create)
-                .await(STACK_AVAILABLE)
-                .when(StackScalePostAction.valid().withDesiredCount(15))
-                .await(STACK_AVAILABLE)
-                .when(StackScalePostAction.valid().withDesiredCount(6))
-                .await(STACK_AVAILABLE)
+                .given(stackName, StackTestDto.class)
+                .when(stackTestClient.createV4(), key(stackName))
+                .await(STACK_AVAILABLE, key(stackName))
+                .when(StackScalePostAction.valid().withDesiredCount(15), key(stackName))
+                .await(STACK_AVAILABLE, key(stackName))
+                .when(StackScalePostAction.valid().withDesiredCount(6), key(stackName))
+                .await(STACK_AVAILABLE, key(stackName))
                 .validate();
     }
 
@@ -73,7 +80,7 @@ public class UpscaleTest extends AbstractIntegrationTest {
         testContext.given(StackTestDto.class)
                 .withName(clusterName)
                 .withGatewayPort(testContext.getSparkServer().getPort())
-                .when(Stack.postV4())
+                .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(desiredWorkedCount))
                 .await(StackTestDto.class, STACK_AVAILABLE)
@@ -103,12 +110,13 @@ public class UpscaleTest extends AbstractIntegrationTest {
             when = "ambari is failing",
             then = "stack state is failed")
     public void testAmbariFailure(MockedTestContext testContext) {
+        String stackName = getNameGenerator().getRandomNameForResource();
         mockAmbariClusterDefinitionFail(testContext);
         testContext
-                .given(StackTestDto.class)
-                .when(Stack.postV4())
-                .await(STACK_FAILED)
-                .then(MockVerification.verify(HttpMethod.POST, "/api/v1/blueprints/").atLeast(1))
+                .given(stackName, StackTestDto.class)
+                .when(stackTestClient.createV4(), key(stackName))
+                .await(STACK_FAILED, key(stackName))
+                .then(MockVerification.verify(HttpMethod.POST, "/api/v1/blueprints/").atLeast(1), key(stackName))
                 .validate();
     }
 

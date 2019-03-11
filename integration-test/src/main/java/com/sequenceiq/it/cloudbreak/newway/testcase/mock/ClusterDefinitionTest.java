@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 import org.testng.annotations.AfterMethod;
@@ -32,6 +33,9 @@ public class ClusterDefinitionTest extends AbstractIntegrationTest {
             + ":[{\"recovery_settings\":[]},{\"service_settings\":[]},{\"component_settings\":[]}],\"configurations\":[],\"host_groups\":[{\"name\":\"master\""
             + ",\"configurations\":[],\"components\":[{\"name\":\"HIVE_METASTORE\"}],\"cardinality\":\"1"
             + "\"}]}";
+
+    @Inject
+    private ClusterDefinitionTestClient clusterDefinitionTestClient;
 
     @Override
     protected void minimalSetupForClusterCreation(TestContext testContext) {
@@ -63,7 +67,7 @@ public class ClusterDefinitionTest extends AbstractIntegrationTest {
                 .withDescription(clusterDefinitionName)
                 .withTag(keys, values)
                 .withClusterDefinition(VALID_CD)
-                .when(ClusterDefinitionTestClient.postV4(), key(clusterDefinitionName))
+                .when(clusterDefinitionTestClient.createV4(), key(clusterDefinitionName))
                 .then((tc, entity, cc) -> {
                     assertEquals(clusterDefinitionName, entity.getName());
                     assertEquals(clusterDefinitionName, entity.getDescription());
@@ -84,7 +88,7 @@ public class ClusterDefinitionTest extends AbstractIntegrationTest {
         testContext.given(ClusterDefinitionTestDto.class)
                 .withName(clusterDefinitionName)
                 .withClusterDefinition(VALID_CD)
-                .when(ClusterDefinitionTestClient.postV4(), key(clusterDefinitionName))
+                .when(clusterDefinitionTestClient.createV4(), key(clusterDefinitionName))
                 .expect(BadRequestException.class, expectedMessage("must match ").withKey(clusterDefinitionName))
                 .validate();
     }
@@ -99,7 +103,7 @@ public class ClusterDefinitionTest extends AbstractIntegrationTest {
         testContext.given(ClusterDefinitionTestDto.class)
                 .withName(clusterDefinitionName)
                 .withClusterDefinition("apple-tree")
-                .when(ClusterDefinitionTestClient.postV4(), key(clusterDefinitionName))
+                .when(clusterDefinitionTestClient.createV4(), key(clusterDefinitionName))
                 .expect(BadRequestException.class, expectedMessage("Failed to parse JSON").withKey(clusterDefinitionName))
                 .validate();
     }
@@ -111,7 +115,7 @@ public class ClusterDefinitionTest extends AbstractIntegrationTest {
             then = "returns with cluster definition list")
     public void testListClusterDefinition(TestContext testContext) {
         testContext.given(ClusterDefinitionTestDto.class)
-                .when(ClusterDefinitionTestClient.listV4())
+                .when(clusterDefinitionTestClient.listV4())
                 .then(ClusterDefinitionTest::checkDefaultClusterDefinitionsIsListed)
                 .validate();
     }
@@ -126,8 +130,8 @@ public class ClusterDefinitionTest extends AbstractIntegrationTest {
         testContext.given(ClusterDefinitionTestDto.class)
                 .withName(clusterDefinitionName)
                 .withClusterDefinition(VALID_CD)
-                .when(ClusterDefinitionTestClient.postV4(), key(clusterDefinitionName))
-                .when(ClusterDefinitionTestClient.getV4(), key(clusterDefinitionName))
+                .when(clusterDefinitionTestClient.createV4(), key(clusterDefinitionName))
+                .when(clusterDefinitionTestClient.getV4(), key(clusterDefinitionName))
                 .then((tc, entity, cc) -> {
                     assertEquals(clusterDefinitionName, entity.getName());
                     return entity;
@@ -145,13 +149,13 @@ public class ClusterDefinitionTest extends AbstractIntegrationTest {
         testContext.given(ClusterDefinitionTestDto.class)
                 .withName(clusterDefinitionName)
                 .withClusterDefinition(VALID_CD)
-                .when(ClusterDefinitionTestClient.postV4(), key(clusterDefinitionName))
-                .when(ClusterDefinitionTestClient.deleteV4(), key(clusterDefinitionName))
+                .when(clusterDefinitionTestClient.createV4(), key(clusterDefinitionName))
+                .when(clusterDefinitionTestClient.deleteV4(), key(clusterDefinitionName))
                 .then((tc, entity, cc) -> {
                     assertEquals(clusterDefinitionName, entity.getName());
                     return entity;
                 })
-                .when(ClusterDefinitionTestClient.listV4())
+                .when(clusterDefinitionTestClient.listV4())
                 .then(ClusterDefinitionTest::checkClusterDefinitionDoesNotExistInTheList)
                 .validate();
     }
@@ -172,11 +176,12 @@ public class ClusterDefinitionTest extends AbstractIntegrationTest {
             then = "the valid request for thet cluster definition is returned")
     public void testRequestSpecificClusterDefinitionRequest(TestContext testContext) {
         String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
-        testContext.given(ClusterDefinitionTestDto.class)
+        testContext
+                .given(ClusterDefinitionTestDto.class)
                 .withName(clusterDefinitionName)
                 .withClusterDefinition(VALID_CD)
-                .when(ClusterDefinitionTestClient.postV4(), key(clusterDefinitionName))
-                .when(ClusterDefinitionTestClient.requestV4(), key(clusterDefinitionName))
+                .when(clusterDefinitionTestClient.createV4(), key(clusterDefinitionName))
+                .when(clusterDefinitionTestClient.requestV4(), key(clusterDefinitionName))
                 .then((tc, entity, cc) -> {
                     assertEquals(entity.getRequest().getClusterDefinition(), VALID_CD);
                     assertEquals(clusterDefinitionName, entity.getName());

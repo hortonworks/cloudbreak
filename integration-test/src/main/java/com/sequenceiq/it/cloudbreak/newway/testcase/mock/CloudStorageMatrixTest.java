@@ -2,18 +2,23 @@ package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 
+import javax.inject.Inject;
+
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.action.storagematrix.CloudStorageMatrixTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CommonAssert;
 import com.sequenceiq.it.cloudbreak.newway.assertion.storagematrix.CloudStorageMatrixAssertion;
+import com.sequenceiq.it.cloudbreak.newway.client.UtilTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.storagematrix.CloudStorageMatrixTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.util.CloudStorageMatrixTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class CloudStorageMatrixTest extends AbstractIntegrationTest {
+
+    @Inject
+    private UtilTestClient utilTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -30,7 +35,7 @@ public class CloudStorageMatrixTest extends AbstractIntegrationTest {
 
         testContext
                 .given(CloudStorageMatrixTestDto.class)
-                .when(CloudStorageMatrixTestAction::getCloudStorageMatrix, key(generatedKey))
+                .when(utilTestClient.cloudStorageMatrix(), key(generatedKey))
                 .then(CommonAssert::responsesExists, key(generatedKey))
                 .then(CloudStorageMatrixAssertion::matrixIsNotEmpty, key(generatedKey))
                 .validate();

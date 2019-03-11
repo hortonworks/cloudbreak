@@ -2,10 +2,10 @@ package com.sequenceiq.it.cloudbreak.newway.assertion.database;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
-import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
-public class DatabaseExistsAssertion implements AssertionV2<DatabaseEntity> {
+public class DatabaseExistsAssertion implements AssertionV2<DatabaseTestDto> {
 
     private String databaseName;
 
@@ -21,7 +21,7 @@ public class DatabaseExistsAssertion implements AssertionV2<DatabaseEntity> {
     }
 
     @Override
-    public DatabaseEntity doAssertion(TestContext testContext, DatabaseEntity entity, CloudbreakClient cloudbreakClient) {
+    public DatabaseTestDto doAssertion(TestContext testContext, DatabaseTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
         boolean countCorrect = entity.getResponses()
                 .stream()
                 .filter(databaseV4Response -> databaseV4Response.getName().contentEquals(databaseName))

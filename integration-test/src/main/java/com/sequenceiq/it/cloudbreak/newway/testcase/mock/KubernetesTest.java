@@ -11,15 +11,14 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.action.kubernetes.KubernetesTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.kubernetes.KubernetesTestAssertion;
+import com.sequenceiq.it.cloudbreak.newway.client.KubernetesTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.kubernetes.KubernetesTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
-import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
 public class KubernetesTest extends AbstractIntegrationTest {
 
@@ -30,7 +29,7 @@ public class KubernetesTest extends AbstractIntegrationTest {
     private static final String KUBERNETES_CONTENT = "content";
 
     @Inject
-    private LongStringGeneratorUtil longStringGeneratorUtil;
+    private KubernetesTestClient kubernetesTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -53,8 +52,8 @@ public class KubernetesTest extends AbstractIntegrationTest {
         testContext
                 .given(KubernetesTestDto.class)
                 .withName(kubernetesName)
-                .when(KubernetesTestAction::create)
-                .when(KubernetesTestAction::list)
+                .when(kubernetesTestClient.createV4())
+                .when(kubernetesTestClient.listV4())
                 .then(KubernetesTestAssertion.listContains(kubernetesName, 1))
                 .validate();
     }
@@ -69,16 +68,16 @@ public class KubernetesTest extends AbstractIntegrationTest {
         testContext
                 .given(KubernetesTestDto.class)
                 .withName(kubernetesName)
-                .when(KubernetesTestAction::create)
-                .when(KubernetesTestAction::list)
+                .when(kubernetesTestClient.createV4())
+                .when(kubernetesTestClient.listV4())
                 .then(KubernetesTestAssertion.listContains(kubernetesName, 1))
                 .withName(kubernetesName)
-                .when(KubernetesTestAction::delete)
-                .when(KubernetesTestAction::list)
+                .when(kubernetesTestClient.deleteV4())
+                .when(kubernetesTestClient.listV4())
                 .then(KubernetesTestAssertion.listContains(kubernetesName, 0))
                 .withName(kubernetesName)
-                .when(KubernetesTestAction::create)
-                .when(KubernetesTestAction::list)
+                .when(kubernetesTestClient.createV4())
+                .when(kubernetesTestClient.listV4())
                 .then(KubernetesTestAssertion.listContains(kubernetesName, 1))
                 .validate();
     }
@@ -93,10 +92,10 @@ public class KubernetesTest extends AbstractIntegrationTest {
         testContext
                 .given(KubernetesTestDto.class)
                 .withName(kubernetesName)
-                .when(KubernetesTestAction::create)
-                .when(KubernetesTestAction::list)
+                .when(kubernetesTestClient.createV4())
+                .when(kubernetesTestClient.listV4())
                 .then(KubernetesTestAssertion.listContains(kubernetesName, 1))
-                .when(KubernetesTestAction::create, key(BAD_REQUEST_KEY))
+                .when(kubernetesTestClient.createV4(), key(BAD_REQUEST_KEY))
                 .expect(BadRequestException.class, key(BAD_REQUEST_KEY))
                 .validate();
     }
@@ -113,7 +112,7 @@ public class KubernetesTest extends AbstractIntegrationTest {
                 .given(KubernetesTestDto.class)
                 .withName(kubernetesName)
                 .withContent(content)
-                .when(KubernetesTestAction::create, key(badRequestKey))
+                .when(kubernetesTestClient.createV4(), key(badRequestKey))
                 .expect(BadRequestException.class, expectedMessage(expectedErrorMessage).withKey(badRequestKey))
                 .validate();
     }
@@ -123,7 +122,7 @@ public class KubernetesTest extends AbstractIntegrationTest {
         return new Object[][]{
                 {
                         getBean(TestContext.class),
-                        longStringGeneratorUtil.stringGenerator(101),
+                        getLongNameGenerator().stringGenerator(101),
                         KUBERNETES_CONTENT,
                         "The length of the config's name has to be in range of 5 to 100",
                         new TestCaseDescription.TestCaseDescriptionBuilder()

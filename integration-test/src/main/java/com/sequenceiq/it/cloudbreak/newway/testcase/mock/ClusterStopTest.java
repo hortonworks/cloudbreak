@@ -9,12 +9,13 @@ import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.OK;
 
+import javax.inject.Inject;
+
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
+import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
@@ -28,6 +29,9 @@ import spark.Route;
 public class ClusterStopTest extends AbstractIntegrationTest {
 
     private static final String CLOUD_INSTANCE_STATUSES = MOCK_ROOT + SPIMock.CLOUD_INSTANCE_STATUSES;
+
+    @Inject
+    private StackTestClient stackTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -53,9 +57,9 @@ public class ClusterStopTest extends AbstractIntegrationTest {
         testContext
                 .given(clusterName, StackTestDto.class)
                 .withName(clusterName)
-                .when(Stack.postV4(), key(clusterName))
+                .when(stackTestClient.createV4(), key(clusterName))
                 .await(STACK_AVAILABLE, key(clusterName))
-                .when(StackTestAction::stop, key(clusterName))
+                .when(stackTestClient.stopV4(), key(clusterName))
                 .await(STACK_STOPPED, key(clusterName))
                 .validate();
     }

@@ -16,11 +16,11 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.Credential;
-import com.sequenceiq.it.cloudbreak.newway.Environment;
-import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
-import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.DatabaseTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.EnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.LdapTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
@@ -30,8 +30,9 @@ import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceGroupEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
@@ -48,7 +49,19 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
     private static final String BP_NAME_WL = "Data Science: Apache Spark 2, Apache Zeppelin";
 
     @Inject
-    private LdapConfigTestClient ldapConfigTestClient;
+    private LdapTestClient ldapTestClient;
+
+    @Inject
+    private StackTestClient stackTestClient;
+
+    @Inject
+    private DatabaseTestClient databaseTestClient;
+
+    @Inject
+    private EnvironmentTestClient environmentTestClient;
+
+    @Inject
+    private CredentialTestClient credentialTestClient;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -68,34 +81,34 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         String hivedb = getNameGenerator().getRandomNameForResource();
         String rangerdb = getNameGenerator().getRandomNameForResource();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
-        testContext.given(EnvironmentEntity.class)
+        testContext.given(EnvironmentTestDto.class)
                 .withRegions(VALID_REGION)
                 .withLocation(VALID_LOCATION)
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
-                .when(Environment::post)
+                .when(environmentTestClient.createV4())
                 .given(ClusterEntity.class).valid()
                 .withRdsConfigNames(rdsList)
                 .withClusterDefinitionName(BP_NAME_DL)
                 .withAmbari(testContext.given(AmbariEntity.class))
-                .withLdapConfigName(testContext.get(LdapConfigTestDto.class).getName())
+                .withLdapConfigName(testContext.get(LdapTestDto.class).getName())
                 .given("placement", PlacementSettingsEntity.class)
 
                 .given(StackTestDto.class).withPlacement("placement")
-                .withEnvironment(EnvironmentEntity.class)
+                .withEnvironment(EnvironmentTestDto.class)
                 .withInstanceGroupsEntity(setInstanceGroup(testContext))
 
-                .when(Stack.postV4())
-                .when(Stack.deleteV4(), withoutLogError())
+                .when(stackTestClient.createV4())
+                .when(stackTestClient.deleteV4(), withoutLogError())
                 .await(AbstractIntegrationTest.STACK_DELETED)
 
-                .given(EnvironmentEntity.class)
-                .withName(testContext.get(EnvironmentEntity.class).getName())
+                .given(EnvironmentTestDto.class)
+                .withName(testContext.get(EnvironmentTestDto.class).getName())
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
 
-                .when(Environment::putDetachResources)
-                .when(Environment::get)
+                .when(environmentTestClient.detachV4())
+                .when(environmentTestClient.getV4())
                 .then(EnvironmentClusterTest::checkEnvHasNoRds)
                 .then(EnvironmentClusterTest::checkEnvHasNoLdap)
                 .validate();
@@ -111,26 +124,26 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         String hivedb = getNameGenerator().getRandomNameForResource();
         String rangerdb = getNameGenerator().getRandomNameForResource();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
-        testContext.given(EnvironmentEntity.class)
+        testContext.given(EnvironmentTestDto.class)
                 .withRegions(VALID_REGION)
                 .withLocation(VALID_LOCATION)
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
-                .when(Environment::post)
+                .when(environmentTestClient.createV4())
                 .given(ClusterEntity.class).valid()
                 .withRdsConfigNames(rdsList)
                 .withClusterDefinitionName(BP_NAME_DL)
                 .withAmbari(testContext.given(AmbariEntity.class))
-                .withLdapConfigName(testContext.get(LdapConfigTestDto.class).getName())
+                .withLdapConfigName(testContext.get(LdapTestDto.class).getName())
                 .given("placement", PlacementSettingsEntity.class)
                 .given(StackTestDto.class).withPlacement("placement")
-                .withEnvironment(EnvironmentEntity.class)
+                .withEnvironment(EnvironmentTestDto.class)
                 .withInstanceGroupsEntity(setInstanceGroup(testContext))
-                .when(Stack.postV4())
-                .deleteGiven(LdapConfigTestDto.class, ldapConfigTestClient.delete(), key(forbiddenKey))
-                .deleteGiven(DatabaseEntity.class, DatabaseEntity::delete, key(forbiddenKey))
-                .deleteGiven(CredentialTestDto.class, Credential::delete, key(forbiddenKey))
-                .deleteGiven(EnvironmentEntity.class, Environment::delete, key(forbiddenKey))
+                .when(stackTestClient.createV4())
+                .deleteGiven(LdapTestDto.class, ldapTestClient.deleteV4(), key(forbiddenKey))
+                .deleteGiven(DatabaseTestDto.class, databaseTestClient.deleteV4(), key(forbiddenKey))
+                .deleteGiven(CredentialTestDto.class, credentialTestClient.deleteV4(), key(forbiddenKey))
+                .deleteGiven(EnvironmentTestDto.class, environmentTestClient.deleteV4(), key(forbiddenKey))
                 .validate();
     }
 
@@ -143,10 +156,10 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         String hivedb = getNameGenerator().getRandomNameForResource();
         String rangerdb = getNameGenerator().getRandomNameForResource();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
-        testContext.given(EnvironmentEntity.class)
+        testContext.given(EnvironmentTestDto.class)
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
-                .when(Environment::post)
+                .when(environmentTestClient.createV4())
                 .validate();
         createDatalake(testContext, rdsList, BP_NAME_DL);
         createDatalake(testContext, rdsList, BP_NAME_DL);
@@ -162,19 +175,19 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         String hivedb = getNameGenerator().getRandomNameForResource();
         String rangerdb = getNameGenerator().getRandomNameForResource();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
-        testContext.given(EnvironmentEntity.class)
+        testContext.given(EnvironmentTestDto.class)
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
-                .when(Environment::post)
+                .when(environmentTestClient.createV4())
                 .validate();
         createDatalake(testContext, rdsList, BP_NAME_DL);
         testContext
                 .given("newCred", CredentialTestDto.class).withDescription("Change credential")
-                .given(EnvironmentEntity.class)
-                .withName(testContext.get(EnvironmentEntity.class).getName())
+                .given(EnvironmentTestDto.class)
+                .withName(testContext.get(EnvironmentTestDto.class).getName())
                 .withCredentialName(null)
                 .withCredential("newCred")
-                .when(Environment::changeCredential, key(forbiddenKey))
+                .when(environmentTestClient.changeCredential(), key(forbiddenKey))
                 .expect(BadRequestException.class, key(forbiddenKey))
                 .validate();
     }
@@ -189,16 +202,16 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         String hivedb = getNameGenerator().getRandomNameForResource();
         String rangerdb = getNameGenerator().getRandomNameForResource();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
-        testContext.given(EnvironmentEntity.class)
+        testContext.given(EnvironmentTestDto.class)
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
-                .when(Environment::post)
+                .when(environmentTestClient.createV4())
                 .validate();
         createDatalake(testContext, rdsList, BP_NAME_DL);
-        testContext.given(EnvironmentEntity.class)
+        testContext.given(EnvironmentTestDto.class)
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
-                .when(Environment::putDetachResources, key(forbiddenKey))
+                .when(environmentTestClient.detachV4(), key(forbiddenKey))
                 .expect(BadRequestException.class, key(forbiddenKey))
                 .validate();
     }
@@ -213,17 +226,16 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         String hivedb = getNameGenerator().getRandomNameForResource();
         String rangerdb = getNameGenerator().getRandomNameForResource();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
-        testContext.given(EnvironmentEntity.class)
+        testContext.given(EnvironmentTestDto.class)
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
-                .when(Environment::post)
-
+                .when(environmentTestClient.createV4())
                 .given("placement", PlacementSettingsEntity.class)
                 .given(StackTestDto.class)
                 .withName(dlName)
                 .withPlacement("placement")
-                .withEnvironment(EnvironmentEntity.class)
-                .when(Stack.postV4())
+                .withEnvironment(EnvironmentTestDto.class)
+                .when(stackTestClient.createV4())
                 .validate();
         createDatalake(testContext, rdsList, BP_NAME_DL);
     }
@@ -234,18 +246,19 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
             when = "call create cluster",
             then = "will drop ForbiddenException")
     public void testCreateDalalakeWithoutResourcesFails(TestContext testContext) {
-        testContext.given(EnvironmentEntity.class)
+        testContext.given(EnvironmentTestDto.class)
                 .withRegions(VALID_REGION)
                 .withLocation(VALID_LOCATION)
-                .when(Environment::post)
+                .when(environmentTestClient.createV4())
                 .given(ClusterEntity.class).valid()
                 .withClusterDefinitionName(BP_NAME_DL)
                 .withAmbari(testContext.given(AmbariEntity.class))
                 .given("placement", PlacementSettingsEntity.class)
-                .given(StackTestDto.class).withPlacement("placement")
-                .withEnvironment(EnvironmentEntity.class)
+                .given(StackTestDto.class)
+                .withPlacement("placement")
+                .withEnvironment(EnvironmentTestDto.class)
                 .withInstanceGroupsEntity(setInstanceGroup(testContext))
-                .when(Stack.postV4(), key(FORBIDDEN_KEY))
+                .when(stackTestClient.createV4(), key(FORBIDDEN_KEY))
                 .expect(BadRequestException.class, key(FORBIDDEN_KEY))
                 .validate();
     }
@@ -262,13 +275,13 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withRdsConfigNames(rdsList)
                 .withClusterDefinitionName(BP_NAME_DL)
                 .withAmbari(testContext.given(AmbariEntity.class))
-                .withLdapConfigName(testContext.get(LdapConfigTestDto.class).getName())
+                .withLdapConfigName(testContext.get(LdapTestDto.class).getName())
                 .given(StackTestDto.class)
                 .withName(getNameGenerator().getRandomNameForResource())
                 .withPlacement("placement")
-                .withEnvironment(EnvironmentEntity.class)
+                .withEnvironment(EnvironmentTestDto.class)
                 .withInstanceGroupsEntity(setInstanceGroup(testContext))
-                .when(Stack.postV4())
+                .when(stackTestClient.createV4())
                 .validate();
     }
 
@@ -281,12 +294,12 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
     private Set<String> createDatalakeResources(TestContext testContext, String hiveDb, String rangerDb) {
         createDefaultLdapConfig(testContext);
         testContext
-                .given(DatabaseEntity.class)
+                .given(DatabaseTestDto.class)
                 .withName(hiveDb)
-                .when(DatabaseEntity.post())
+                .when(databaseTestClient.createV4())
                 .withName(rangerDb)
                 .withType("RANGER")
-                .when(DatabaseEntity.post());
+                .when(databaseTestClient.createV4());
         Set<String> rdsSet = new HashSet<>();
         rdsSet.add(hiveDb);
         rdsSet.add(rangerDb);
@@ -294,11 +307,11 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
     }
 
     private Set<String> getLdapAsList(TestContext testContext) {
-        return new HashSet<>(Collections.singletonList(testContext.get(LdapConfigTestDto.class).getName()));
+        return new HashSet<>(Collections.singletonList(testContext.get(LdapTestDto.class).getName()));
     }
 
     private Set<String> getRdsAsList(TestContext testContext) {
-        return new HashSet<>(Collections.singletonList(testContext.get(DatabaseEntity.class).getName()));
+        return new HashSet<>(Collections.singletonList(testContext.get(DatabaseTestDto.class).getName()));
     }
 
     private Collection<InstanceGroupEntity> setInstanceGroup(TestContext testContext) {
