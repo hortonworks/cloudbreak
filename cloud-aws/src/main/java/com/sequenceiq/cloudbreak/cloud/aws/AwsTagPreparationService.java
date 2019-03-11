@@ -73,5 +73,4 @@ public class AwsTagPreparationService {
     private com.amazonaws.services.ec2.model.Tag prepareEc2Tag(String key, String value) {
         return new com.amazonaws.services.ec2.model.Tag().withKey(key).withValue(value);
     }
-
 }

@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetSt
 import static java.util.Collections.emptyList;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,6 +36,7 @@ import org.mockito.Spy;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -64,12 +67,15 @@ import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.CloudbreakResourceType;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 import com.sequenceiq.cloudbreak.util.Version;
 
 import freemarker.template.Configuration;
 
 @RunWith(Parameterized.class)
 public class AzureTemplateBuilderTest {
+
+    private static final String V16 = "1.16";
 
     private static final String USER_ID = "horton@hortonworks.com";
 
@@ -226,7 +232,7 @@ public class AzureTemplateBuilderTest {
     }
 
     @Test
-    public void buildNoPublicIpNoFirewallWithTags() {
+    public void buildNoPublicIpNoFirewallWithTags() throws IOException {
         //GIVEN
         Network network = new Network(new Subnet("testSubnet"));
         when(azureUtils.isPrivateIp(any())).then(invocation -> true);
@@ -254,8 +260,14 @@ public class AzureTemplateBuilderTest {
         gson.fromJson(templateString, Map.class);
         assertFalse(templateString.contains("publicIPAddress"));
         assertFalse(templateString.contains("networkSecurityGroups"));
-        assertTrue(templateString.contains("testtagkey"));
-        assertTrue(templateString.contains("testtagvalue"));
+        assertTrue(templateString.contains("\"testtagkey1\": \"testtagvalue1\""));
+        assertTrue(templateString.contains("\"testtagkey2\": \"testtagvalue2\""));
+        // Only 2.x version have cb-resource-type
+        if (!templatePath.contains(V16)) {
+            JsonNode jsonNode = JsonUtil.readTree(templateString);
+            assertNotNull("Missing cb-resource-type from tags",
+                    jsonNode.findPath("resources").iterator().next().findPath("tags").get("cb-resource-type"));
+        }
     }
 
     @Test
@@ -322,7 +334,7 @@ public class AzureTemplateBuilderTest {
     }
 
     @Test
-    public void buildWithPublicIpAndFirewall() {
+    public void buildWithPublicIpAndFirewall() throws IOException {
         //GIVEN
         Network network = new Network(new Subnet("testSubnet"));
         when(azureUtils.isPrivateIp(any())).then(invocation -> false);
@@ -348,6 +360,12 @@ public class AzureTemplateBuilderTest {
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("publicIPAddress"));
         assertTrue(templateString.contains("networkSecurityGroups"));
+        // On older version cb-resource-type was added only when there was user defined tag
+        if (templatePath.equalsIgnoreCase(LATEST_TEMPLATE_PATH)) {
+            JsonNode jsonNode = JsonUtil.readTree(templateString);
+            assertNotNull("Missing cb-resource-type from tags",
+                    jsonNode.findPath("resources").iterator().next().findPath("tags").get("cb-resource-type"));
+        }
     }
 
     private String base64EncodedUserData(String data) {

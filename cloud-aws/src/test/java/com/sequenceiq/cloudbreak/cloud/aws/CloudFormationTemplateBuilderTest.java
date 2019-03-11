@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -67,6 +68,8 @@ import freemarker.template.Configuration;
 
 @RunWith(Parameterized.class)
 public class CloudFormationTemplateBuilderTest {
+
+    private static final String V16 = "1.16";
 
     private static final String USER_ID = "horton@hortonworks.com";
 
@@ -161,11 +164,12 @@ public class CloudFormationTemplateBuilderTest {
         defaultTags.put(CloudbreakResourceType.SECURITY.templateVariable(), CloudbreakResourceType.SECURITY.key());
         defaultTags.put(CloudbreakResourceType.STORAGE.templateVariable(), CloudbreakResourceType.STORAGE.key());
         defaultTags.put(CloudbreakResourceType.TEMPLATE.templateVariable(), CloudbreakResourceType.TEMPLATE.key());
+        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
         cloudStack = createDefaultCloudStack(groups, getDefaultCloudStackParameters(), getDefaultCloudStackTags());
     }
 
     @Test
-    public void buildTestInstanceGroupsAndRootVolumeSize() {
+    public void buildTestInstanceGroupsAndRootVolumeSize() throws IOException {
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -177,8 +181,6 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
                 .withTemplate(awsCloudFormationTemplate);
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
         Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
@@ -188,6 +190,12 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, not(containsString("testtagkey")));
         assertThat(templateString, not(containsString("testtagvalue")));
         assertThat(templateString, containsString(Integer.toString(ROOT_VOLUME_SIZE)));
+        if (!templatePath.contains(V16)) {
+            JsonNode jsonNode = JsonUtil.readTree(templateString);
+            jsonNode.findValues("Tags").forEach(jsonNode1 -> {
+                assertTrue(jsonNode1.findValues("Key").stream().anyMatch(jsonNode2 -> "cb-resource-type".equals(jsonNode2.textValue())));
+            });
+        }
     }
 
     @Test
@@ -209,8 +217,6 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
                 .withTemplate(awsCloudFormationTemplate);
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
 
         //THEN
@@ -240,8 +246,6 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
                 .withTemplate(awsCloudFormationTemplate);
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
 
         //THEN
@@ -266,8 +270,6 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
                 .withTemplate(awsCloudFormationTemplate);
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
         Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
@@ -295,8 +297,6 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(true)
                 .withTemplate(awsCloudFormationTemplate);
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
         Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
@@ -324,8 +324,6 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(false)
                 .withTemplate(awsCloudFormationTemplate);
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
         Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
@@ -353,8 +351,6 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(false)
                 .withTemplate(awsCloudFormationTemplate);
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
         Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
@@ -382,8 +378,6 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
                 .withTemplate(awsCloudFormationTemplate);
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
         Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
@@ -411,8 +405,6 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(true)
                 .withTemplate(awsCloudFormationTemplate);
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
         Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
@@ -440,8 +432,6 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(false)
                 .withTemplate(awsCloudFormationTemplate);
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
         Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
@@ -469,8 +459,6 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(false)
                 .withTemplate(awsCloudFormationTemplate);
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
         Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
@@ -498,8 +486,6 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
                 .withTemplate(awsCloudFormationTemplate);
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
         Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
@@ -527,8 +513,6 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(true)
                 .withTemplate(awsCloudFormationTemplate);
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
         Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
@@ -556,8 +540,6 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(false)
                 .withTemplate(awsCloudFormationTemplate);
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
         Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
@@ -585,8 +567,6 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(false)
                 .withTemplate(awsCloudFormationTemplate);
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
         Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
@@ -614,8 +594,6 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
                 .withTemplate(awsCloudFormationTemplate);
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
         Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
@@ -643,8 +621,6 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(false)
                 .withTemplate(awsCloudFormationTemplate);
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
         Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
@@ -672,8 +648,6 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(true)
                 .withTemplate(awsCloudFormationTemplate);
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
         Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
@@ -691,9 +665,7 @@ public class CloudFormationTemplateBuilderTest {
     @Test
     public void buildTestWithoutVPCAndIGWAndPublicIpOnLaunchAndInstanceProfileAndRole() {
         //GIVEN
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-
-        //WHEN
+//WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
@@ -704,8 +676,6 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(false)
                 .withTemplate(awsCloudFormationTemplate);
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
         Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
@@ -723,7 +693,6 @@ public class CloudFormationTemplateBuilderTest {
     @Test
     public void buildTestWithVPCAndIGWAndSingleSG() {
         //GIVEN
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
         List<Group> groups = new ArrayList<>();
         Security security = new Security(emptyList(), singletonList("single-sg-id"));
         groups.add(new Group(name, InstanceGroupType.CORE, emptyList(), security, instance,
@@ -740,8 +709,6 @@ public class CloudFormationTemplateBuilderTest {
                 .withStack(cloudStack)
                 .mapPublicIpOnLaunch(false)
                 .withTemplate(awsCloudFormationTemplate);
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
         // older templates are invalids
@@ -755,7 +722,6 @@ public class CloudFormationTemplateBuilderTest {
     @Test
     public void buildTestWithVPCAndIGWAndSingleSGAndMultiGroup() {
         //GIVEN
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
         List<Group> groups = new ArrayList<>();
         Security security = new Security(emptyList(), singletonList("single-sg-id"));
         groups.add(new Group(name, InstanceGroupType.GATEWAY, emptyList(), security, instance,
@@ -774,8 +740,6 @@ public class CloudFormationTemplateBuilderTest {
                 .withStack(cloudStack)
                 .mapPublicIpOnLaunch(false)
                 .withTemplate(awsCloudFormationTemplate);
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
         // older templates are invalids
@@ -789,7 +753,6 @@ public class CloudFormationTemplateBuilderTest {
     @Test
     public void buildTestWithVPCAndIGWAndMultiSG() {
         //GIVEN
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
         List<Group> groups = new ArrayList<>();
         Security security = new Security(emptyList(), List.of("multi-sg-id1", "multi-sg-id2"));
         groups.add(new Group(name, InstanceGroupType.CORE, emptyList(), security, instance,
@@ -806,8 +769,6 @@ public class CloudFormationTemplateBuilderTest {
                 .withStack(cloudStack)
                 .mapPublicIpOnLaunch(false)
                 .withTemplate(awsCloudFormationTemplate);
-        when(defaultCostTaggingService.prepareAllTagsForTemplate()).thenReturn(defaultTags);
-
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
         // older templates are invalids
