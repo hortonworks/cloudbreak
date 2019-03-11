@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
+package com.sequenceiq.cloudbreak.ambari;
 
 import static org.junit.Assert.assertEquals;
 
@@ -10,8 +10,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.FileReaderUtil;
+import com.sequenceiq.cloudbreak.ambari.AmbariBlueprintPortConfigCollector.PortConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.host.AmbariBlueprintPortConfigCollector.PortConfig;
 import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 
 public class AmbariBlueprintPortConfigCollectorTest {
