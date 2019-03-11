@@ -13,7 +13,7 @@ public class AssertStatusReasonMessage<T extends CloudbreakEntity> implements As
     }
 
     @Override
-    public T doAssertion(TestContext testContext, T entity, CloudbreakClient cloudbreakClient) throws Exception {
+    public T doAssertion(TestContext testContext, T entity, CloudbreakClient cloudbreakClient) {
         String statusReason = testContext.getStatuses().get("statusReason");
         if (!message.equals(statusReason)) {
             throw new IllegalStateException("statusReason is mismatch: actual: " + statusReason);

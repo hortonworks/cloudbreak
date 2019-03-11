@@ -14,6 +14,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -77,7 +79,7 @@ public class AmbariClusterSecurityServiceTest {
     private final AmbariClusterSecurityService underTest = new AmbariClusterSecurityService();
 
     @Test
-    public void testApiReplaceUserNamePasswordWhenEverythingWorks() throws CloudbreakException {
+    public void testApiReplaceUserNamePasswordWhenEverythingWorks() throws CloudbreakException, IOException, URISyntaxException {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster();
         stack.setCluster(cluster);
@@ -144,7 +146,7 @@ public class AmbariClusterSecurityServiceTest {
 
     @Test
     public void testChangeOriginalAmbariCredentialsAndCreateCloudbreakUserWhenEverythingworksFineThenChangeDefaultUserNameAndPassword()
-            throws CloudbreakException {
+            throws CloudbreakException, IOException, URISyntaxException {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster();
         cluster.setUserName("admin1");
@@ -171,7 +173,8 @@ public class AmbariClusterSecurityServiceTest {
     }
 
     @Test
-    public void testChangeOriginalAmbariCredentialsAndCreateCloudbreakUserWhenAdminIsTheDefinedUserThenDefaultUserDoesNotChange() throws CloudbreakException {
+    public void testChangeOriginalAmbariCredentialsAndCreateCloudbreakUserWhenAdminIsTheDefinedUserThenDefaultUserDoesNotChange()
+            throws CloudbreakException, IOException, URISyntaxException {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster();
         cluster.setUserName("admin");
@@ -197,7 +200,7 @@ public class AmbariClusterSecurityServiceTest {
 
     @Test
     public void testChangeOriginalAmbariCredentialsAndCreateCloudbreakUserWhenAdminIsTheDefinedUserAndPasswordIsNotAdminThenTryToChangeDefaultUser()
-            throws CloudbreakException {
+            throws CloudbreakException, IOException, URISyntaxException {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster();
         cluster.setUserName("admin");
@@ -221,7 +224,7 @@ public class AmbariClusterSecurityServiceTest {
     }
 
     @Test
-    public void testPrepareSecurityWhenEverythingWorks() throws CloudbreakException {
+    public void testPrepareSecurityWhenEverythingWorks() throws CloudbreakException, IOException, URISyntaxException {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster();
         stack.setCluster(cluster);
@@ -251,7 +254,8 @@ public class AmbariClusterSecurityServiceTest {
     }
 
     @Test
-    public void testPrepareSecurityWhenCancellationExceptionOccursThenShouldThrowCancellationException() throws CloudbreakException {
+    public void testPrepareSecurityWhenCancellationExceptionOccursThenShouldThrowCancellationException()
+            throws CloudbreakException, IOException, URISyntaxException {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster();
         stack.setCluster(cluster);
@@ -283,7 +287,8 @@ public class AmbariClusterSecurityServiceTest {
     }
 
     @Test
-    public void testPrepareSecurityWhenExceptionOccursWhichNotCancellationThenShouldThrowAmbariOperationFailedException() throws CloudbreakException {
+    public void testPrepareSecurityWhenExceptionOccursWhichNotCancellationThenShouldThrowAmbariOperationFailedException()
+            throws CloudbreakException, IOException, URISyntaxException {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster();
         stack.setCluster(cluster);
@@ -317,7 +322,7 @@ public class AmbariClusterSecurityServiceTest {
     }
 
     @Test
-    public void testDisableSecurityWhenEverythingWorks() throws CloudbreakException {
+    public void testDisableSecurityWhenEverythingWorks() throws CloudbreakException, IOException, URISyntaxException {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster();
         stack.setCluster(cluster);
@@ -342,7 +347,8 @@ public class AmbariClusterSecurityServiceTest {
     }
 
     @Test
-    public void testDisableSecurityWhenCancellationExceptionOccursThenShouldThrowCancellationException() throws CloudbreakException {
+    public void testDisableSecurityWhenCancellationExceptionOccursThenShouldThrowCancellationException()
+            throws CloudbreakException, IOException, URISyntaxException {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster();
         stack.setCluster(cluster);
@@ -367,7 +373,8 @@ public class AmbariClusterSecurityServiceTest {
     }
 
     @Test
-    public void testDisableSecurityWhenExceptionOccursWhichNotCancellationThenShouldThrowAmbariOperationFailedException() throws CloudbreakException {
+    public void testDisableSecurityWhenExceptionOccursWhichNotCancellationThenShouldThrowAmbariOperationFailedException()
+            throws CloudbreakException, IOException, URISyntaxException {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster();
         stack.setCluster(cluster);

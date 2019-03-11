@@ -43,7 +43,7 @@ public class UpscaleTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = "testContext")
-    public void testStackScaling(TestContext testContext) throws Exception {
+    public void testStackScaling(TestContext testContext) {
         // GIVEN
         testContext.given(Stack.class)
                 .when(new StackPostAction())

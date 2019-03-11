@@ -13,7 +13,7 @@ public class PostCredentialWithNameFromMockStrategy implements Strategy {
     private static final Logger LOGGER = LoggerFactory.getLogger(PostCredentialWithNameFromMockStrategy.class);
 
     @Override
-    public void doAction(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
+    public void doAction(IntegrationTestContext integrationTestContext, Entity entity) {
         CredentialEntity credentialEntity = (CredentialEntity) entity;
         CloudbreakClient client;
         Mock mock;

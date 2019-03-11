@@ -14,7 +14,7 @@ public class StackDeleteInstanceAction implements ActionV2<StackEntity> {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackDeleteInstanceAction.class);
 
     @Override
-    public StackEntity action(TestContext testContext, StackEntity entity, CloudbreakClient client) throws Exception {
+    public StackEntity action(TestContext testContext, StackEntity entity, CloudbreakClient client) {
         String instanceId = testContext.getRequiredSelected(INSTANCE_ID);
         Boolean forced = testContext.getSelected("forced");
         client.getCloudbreakClient()

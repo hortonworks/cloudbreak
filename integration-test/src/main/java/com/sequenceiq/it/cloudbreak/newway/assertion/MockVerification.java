@@ -156,7 +156,7 @@ public class MockVerification implements AssertionV2<StackEntity> {
     }
 
     @Override
-    public StackEntity doAssertion(TestContext testContext, StackEntity entity, CloudbreakClient cloudbreakClient) throws Exception {
+    public StackEntity doAssertion(TestContext testContext, StackEntity entity, CloudbreakClient cloudbreakClient) {
         Map<Call, Response> requestResponseMap = testContext.getSparkServer().getRequestResponseMap();
         int matchesCount = getTimesMatched(requestResponseMap);
         logVerify();

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,7 +31,7 @@ public class AmbariSSOService {
     @Inject
     private GatewayConfigService gatewayConfigService;
 
-    public void setupSSO(Stack stack, Cluster cluster) {
+    public void setupSSO(Stack stack, Cluster cluster) throws IOException, URISyntaxException {
         AmbariClient ambariClient = clientFactory.getAmbariClient(stack, cluster);
         Gateway gateway = cluster.getGateway();
         if (cluster.hasGateway() && SSOType.SSO_PROVIDER == cluster.getGateway().getSsoType()) {
@@ -46,5 +48,4 @@ public class AmbariSSOService {
             ambariClient.configureSSO(ssoConfigs);
         }
     }
-
 }

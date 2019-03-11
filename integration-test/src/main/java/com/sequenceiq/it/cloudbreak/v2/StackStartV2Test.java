@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.v2;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,7 +28,7 @@ public class StackStartV2Test extends AbstractCloudbreakIntegrationTest {
     }
 
         @Test
-        public void testStackStart() {
+        public void testStackStart() throws IOException, URISyntaxException {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackName = itContext.getContextParam(CloudbreakV2Constants.STACK_NAME);

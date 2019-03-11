@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.reactor.handler.ldap;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -67,7 +70,7 @@ public class LdapSSOConfigurationHandler implements ReactorEventHandler<LdapSSOC
                 LOGGER.info("Can not setup LDAP and SSO on API, Ambari too old");
             }
             response = new LdapSSOConfigurationSuccess(stackId);
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | IOException | URISyntaxException e) {
             LOGGER.error("Error during LDAP configuration, stackId: " + stackId, e);
             response = new LdapSSOConfigurationFailed(stackId, e);
         }

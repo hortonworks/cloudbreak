@@ -14,7 +14,7 @@ public class ImageCatalogCreateIfNotExistsAction implements ActionV2<ImageCatalo
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogCreateIfNotExistsAction.class);
 
     @Override
-    public ImageCatalogEntity action(TestContext testContext, ImageCatalogEntity entity, CloudbreakClient client) throws Exception {
+    public ImageCatalogEntity action(TestContext testContext, ImageCatalogEntity entity, CloudbreakClient client) {
         LOGGER.info("Create Imagecatalog with name: {}", entity.getRequest().getName());
         try {
             entity.setResponse(

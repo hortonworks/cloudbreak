@@ -26,7 +26,7 @@ public class AmbariHostResponse extends ITResponse {
     }
 
     @Override
-    public Object handle(Request request, Response response) throws Exception {
+    public Object handle(Request request, Response response) {
         response.type("text/plain");
         ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
         rootNode.putObject("Hosts").put("host_status", hostStatus);

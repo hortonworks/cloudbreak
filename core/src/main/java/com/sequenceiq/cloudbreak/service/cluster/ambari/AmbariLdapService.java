@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariRepositoryVersionService.AMBARI_VERSION_2_7_2_0;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,7 +33,7 @@ public class AmbariLdapService {
     @Inject
     private AmbariRepositoryVersionService ambariRepositoryVersionService;
 
-    public void setupLdap(Stack stack, Cluster cluster, AmbariRepo ambariRepo) {
+    public void setupLdap(Stack stack, Cluster cluster, AmbariRepo ambariRepo) throws IOException, URISyntaxException {
         AmbariClient ambariClient = clientFactory.getAmbariClient(stack, cluster);
         LdapConfig ldapConfig = cluster.getLdapConfig();
         if (ldapConfig != null) {
@@ -68,7 +70,7 @@ public class AmbariLdapService {
         }
     }
 
-    public void syncLdap(Stack stack, Cluster cluster) {
+    public void syncLdap(Stack stack, Cluster cluster) throws IOException, URISyntaxException {
         LOGGER.info("Sync LDAP on Ambari API for stack: {}", stack.getId());
         AmbariClient ambariClient = clientFactory.getAmbariClient(stack, cluster);
         ambariClient.syncLdap();
