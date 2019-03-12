@@ -18,7 +18,7 @@ public class CheckClusterTemplateResponses implements AssertionV2<ClusterTemplat
     }
 
     @Override
-    public ClusterTemplateEntity doAssertion(TestContext testContext, ClusterTemplateEntity entity, CloudbreakClient client) throws Exception {
+    public ClusterTemplateEntity doAssertion(TestContext testContext, ClusterTemplateEntity entity, CloudbreakClient client) {
         if (entity.getResponses().size() != expectedSize) {
             throw new IllegalArgumentException(String.format("expected size is %s but got %s", expectedSize, entity.getResponses().size()));
         }

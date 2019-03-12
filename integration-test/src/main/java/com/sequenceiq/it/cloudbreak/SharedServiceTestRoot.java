@@ -171,7 +171,7 @@ public abstract class SharedServiceTestRoot extends CloudbreakTest {
                 : String.format("%s-%s", String.format(ATTACHED_CLUSTER_NAME, implementation), optionalClusterPostfix);
     }
 
-    private void cleanUpLdap() throws Exception {
+    private void cleanUpLdap() {
 //        given(CloudbreakClient.created());
 //        when(LdapConfig.getAll());
 //        then(LdapConfig.assertThis((ldapConfig, testContext) -> {

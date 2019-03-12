@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.template.views;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
@@ -12,7 +11,7 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 public class GatewayViewTest {
 
     @Test
-    public void testInitializeGatewayView() throws JsonProcessingException {
+    public void testInitializeGatewayView() {
         GatewayView gatewayView = new GatewayView(TestUtil.gatewayEnabled(), "/cb/secret/signkey");
 
         Assert.assertEquals("/path", gatewayView.getPath());

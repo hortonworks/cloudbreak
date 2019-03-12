@@ -8,7 +8,7 @@ import org.springframework.security.access.AccessDeniedException;
 public class ExceptionMessageFormatterUtilTest {
 
     @Test
-    public void formatAccessDeniedMessage() throws Exception {
+    public void formatAccessDeniedMessage() {
         Long id = 1L;
         String resourceName = "resourceName";
         String expected = "Access to resourceName '1' is denied or resourceName doesn't exist.";

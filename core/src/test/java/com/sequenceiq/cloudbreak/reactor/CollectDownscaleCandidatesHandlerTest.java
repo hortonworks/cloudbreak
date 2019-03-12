@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCandidatesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCandidatesResult;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import reactor.bus.Event;
@@ -47,7 +46,7 @@ public class CollectDownscaleCandidatesHandlerTest {
     private CollectDownscaleCandidatesHandler testedClass;
 
     @Test
-    public void testFlowWithPrivateIds() throws CloudbreakException {
+    public void testFlowWithPrivateIds() {
         //given
         Stack stack = generateStackData();
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);

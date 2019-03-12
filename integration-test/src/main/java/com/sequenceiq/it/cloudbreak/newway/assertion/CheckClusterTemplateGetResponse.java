@@ -19,7 +19,7 @@ public class CheckClusterTemplateGetResponse implements AssertionV2<ClusterTempl
     private static final Logger LOGGER = LoggerFactory.getLogger(CheckClusterTemplateGetResponse.class);
 
     @Override
-    public ClusterTemplateEntity doAssertion(TestContext testContext, ClusterTemplateEntity entity, CloudbreakClient client) throws Exception {
+    public ClusterTemplateEntity doAssertion(TestContext testContext, ClusterTemplateEntity entity, CloudbreakClient client) {
         Optional<ClusterTemplateV4Response> first = entity.getResponses().stream().filter(f -> f.getName().equals(entity.getName())).findFirst();
         if (!first.isPresent()) {
             throw new IllegalArgumentException("No element in the result");

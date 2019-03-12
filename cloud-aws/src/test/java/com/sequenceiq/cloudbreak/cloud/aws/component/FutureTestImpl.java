@@ -1,9 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.component;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,13 +34,13 @@ public class FutureTestImpl<T> implements Future<T> {
     }
 
     @Override
-    public T get() throws InterruptedException, ExecutionException {
+    public T get() {
         LOGGER.info("get called - returning result");
         return result;
     }
 
     @Override
-    public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+    public T get(long timeout, TimeUnit unit) {
         LOGGER.info("get called - returning result");
         return result;
     }

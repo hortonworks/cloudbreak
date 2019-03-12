@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.ambari;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,7 +24,7 @@ public class AmbariSSOService {
     @Value("${cb.knox.port}")
     private String knoxPort;
 
-    public void setupSSO(AmbariClient ambariClient, Cluster cluster, String primaryGatewayPublicAddress) {
+    public void setupSSO(AmbariClient ambariClient, Cluster cluster, String primaryGatewayPublicAddress) throws IOException, URISyntaxException {
         Gateway gateway = cluster.getGateway();
         if (cluster.hasGateway() && SSOType.SSO_PROVIDER == cluster.getGateway().getSsoType()) {
             LOGGER.debug("Setup gateway on Ambari API for cluster: {}", cluster.getId());

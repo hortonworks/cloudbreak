@@ -11,6 +11,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,8 +41,6 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
-
-import groovyx.net.http.HttpResponseException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariClusterModificationServiceTest {
@@ -77,7 +77,7 @@ public class AmbariClusterModificationServiceTest {
     private AmbariClusterModificationService ambariClusterModificationService = new AmbariClusterModificationService(stack, clientConfig);
 
     @Test
-    public void testRackUpdate() throws CloudbreakException, HttpResponseException {
+    public void testRackUpdate() throws CloudbreakException, IOException, URISyntaxException {
         Cluster cluster = TestUtil.cluster();
         stack.setCluster(cluster);
 
@@ -119,7 +119,7 @@ public class AmbariClusterModificationServiceTest {
     }
 
     @Test
-    public void testRackUpdateIfNewAmbari() throws CloudbreakException, HttpResponseException {
+    public void testRackUpdateIfNewAmbari() throws CloudbreakException, IOException, URISyntaxException {
         Cluster cluster = TestUtil.cluster();
         stack.setCluster(cluster);
 
@@ -161,7 +161,7 @@ public class AmbariClusterModificationServiceTest {
     }
 
     @Test
-    public void testRackUpdateIfRackIsNull() throws CloudbreakException, HttpResponseException {
+    public void testRackUpdateIfRackIsNull() throws CloudbreakException, IOException, URISyntaxException {
         Cluster cluster = TestUtil.cluster();
         stack.setCluster(cluster);
 

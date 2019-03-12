@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.autoscaling;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -34,7 +36,7 @@ public class AutoScalingPrometheusTest extends AbstractCloudbreakIntegrationTest
     @Parameters({ "cooldown", "clusterMinSize", "clusterMaxSize", "policyName", "operator", "alertRuleName", "period", "threshold", "hostGroup",
             "scalingAdjustment"})
     public void testAutoscaling(int cooldown, int clusterMinSize, int clusterMaxSize, String policyName, String operator, String alertRuleName, int period,
-            Double threshold, String hostGroup, int scalingAdjustment) {
+            Double threshold, String hostGroup, int scalingAdjustment) throws IOException, URISyntaxException {
         // GIVEN
         itContext = getItContext();
         String stackName = itContext.getContextParam(CloudbreakITContextConstants.STACK_NAME);

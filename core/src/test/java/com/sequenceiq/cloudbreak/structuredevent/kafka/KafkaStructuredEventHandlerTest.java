@@ -19,7 +19,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.util.concurrent.ListenableFuture;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.conf.StructuredEventSenderConfig;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
@@ -55,7 +54,7 @@ public class KafkaStructuredEventHandlerTest {
     }
 
     @Test
-    public void checkIfPropertiesGetFilteredWithCustomMapper() throws JsonProcessingException {
+    public void checkIfPropertiesGetFilteredWithCustomMapper() {
         StructuredRestCallEvent restEvent = createDummyStructuredRestEvent();
 
         classIntest.sanitizeSensitiveRestData(restEvent);

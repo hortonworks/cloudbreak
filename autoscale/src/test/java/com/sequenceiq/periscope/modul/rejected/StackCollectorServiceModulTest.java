@@ -6,6 +6,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -98,7 +100,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
     }
 
     @Test
-    public void testCollectStackDetailsWhenClusterStateRunning() {
+    public void testCollectStackDetailsWhenClusterStateRunning() throws IOException, URISyntaxException {
         AutoscaleStackV4Response stack = new AutoscaleStackV4Response();
         stack.setStackId(1L);
         stack.setClusterStatus(Status.AVAILABLE);
@@ -120,7 +122,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
     }
 
     @Test
-    public void testCollectStackDetailsWhenAmbariNotRunning() {
+    public void testCollectStackDetailsWhenAmbariNotRunning() throws IOException, URISyntaxException {
         AutoscaleStackV4Response stack = new AutoscaleStackV4Response();
         stack.setStackId(1L);
         stack.setClusterStatus(Status.AVAILABLE);
@@ -140,7 +142,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
     }
 
     @Test
-    public void testCollectStackDetailsWhenRejected() {
+    public void testCollectStackDetailsWhenRejected() throws IOException, URISyntaxException {
         Cluster cluster = new Cluster();
         cluster.setState(ClusterState.RUNNING);
 
@@ -168,7 +170,7 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
 
     @Test
     @Ignore("@Topolyai Gergely should take care of this random failing test.")
-    public void testCollectStackDetailsWhenRejectedAndRemoveIt() {
+    public void testCollectStackDetailsWhenRejectedAndRemoveIt() throws IOException, URISyntaxException {
         Cluster cluster = new Cluster();
         cluster.setState(ClusterState.RUNNING);
 

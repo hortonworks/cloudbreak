@@ -10,7 +10,7 @@ public class IpPoolV4Action {
 
     }
 
-    public static void get(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
+    public static void get(IntegrationTestContext integrationTestContext, Entity entity) {
         throw new NotImplementedException("Should figure out how to obtain the following values: region, availabilityZone, credentialName, platformVariant");
         /*IpPool ipPool = (IpPool) entity;
         CloudbreakClient client;

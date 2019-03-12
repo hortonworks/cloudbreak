@@ -40,7 +40,7 @@ public class CachedRemoteTokenServiceTest {
     }
 
     @Test
-    public void testLoadAuthenticationWithoutAudience() throws IOException {
+    public void testLoadAuthenticationWithoutAudience() {
         thrown.expect(InvalidTokenException.class);
         thrown.expectMessage("No 'tenant_name' claim in token");
         CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret", "http://localhost:8089", caasClient, identityClient);

@@ -21,7 +21,7 @@ public class DatabaseExistsAssertion implements AssertionV2<DatabaseEntity> {
     }
 
     @Override
-    public DatabaseEntity doAssertion(TestContext testContext, DatabaseEntity entity, CloudbreakClient cloudbreakClient) throws Exception {
+    public DatabaseEntity doAssertion(TestContext testContext, DatabaseEntity entity, CloudbreakClient cloudbreakClient) {
         boolean countCorrect = entity.getResponses()
                 .stream()
                 .filter(databaseV4Response -> databaseV4Response.getName().contentEquals(databaseName))

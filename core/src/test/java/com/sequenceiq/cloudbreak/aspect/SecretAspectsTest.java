@@ -139,7 +139,7 @@ public class SecretAspectsTest {
     }
 
     @Test
-    public void testproceedDeleteEntityPathIsNull() throws Exception {
+    public void testproceedDeleteEntityPathIsNull() {
         DummyEntity dummyEntity = new DummyEntity(null);
         when(proceedingJoinPoint.getArgs()).thenReturn(new Object[] { dummyEntity });
 
@@ -149,7 +149,7 @@ public class SecretAspectsTest {
     }
 
     @Test
-    public void testproceedDeleteEntitySecretIsNull() throws Exception {
+    public void testproceedDeleteEntitySecretIsNull() {
         DummyEntity dummyEntity = new DummyEntity(new Secret(null, null));
         when(proceedingJoinPoint.getArgs()).thenReturn(new Object[] { dummyEntity });
 
@@ -159,7 +159,7 @@ public class SecretAspectsTest {
     }
 
     @Test
-    public void testproceedDeleteEntity() throws Exception {
+    public void testproceedDeleteEntity() {
         DummyEntity dummyEntity = new DummyEntity(new Secret(null, "path"));
         when(proceedingJoinPoint.getArgs()).thenReturn(new Object[] { dummyEntity });
 
@@ -169,7 +169,7 @@ public class SecretAspectsTest {
     }
 
     @Test
-    public void testproceedDeleteAllEntity() throws Exception {
+    public void testproceedDeleteAllEntity() {
         DummyEntity dummyEntity = new DummyEntity(new Secret(null, "path"));
         when(proceedingJoinPoint.getArgs()).thenReturn(new Object[] { List.of(dummyEntity) });
 

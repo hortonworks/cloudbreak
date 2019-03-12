@@ -14,7 +14,7 @@ public class RepairNodeStrategy implements Strategy {
     }
 
     @Override
-    public void doAction(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
+    public void doAction(IntegrationTestContext integrationTestContext, Entity entity) {
         Stack stack = (Stack) entity;
         var response = Objects.requireNonNull(stack.getResponse(), "Stack response is null; should get it before");
         Long workspaceId = Objects.requireNonNull(response.getWorkspace().getId());

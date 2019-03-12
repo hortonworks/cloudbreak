@@ -203,7 +203,7 @@ public class Mock extends SparkMockEntity {
         }
 
         @Override
-        public void doAction(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
+        public void doAction(IntegrationTestContext integrationTestContext, Entity entity) {
             Mock mock = (Mock) entity;
 
             MockModel model = this.model;

@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,7 +31,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 public class SyncAllRunnerTest {
 
     @Test
-    public void submit() throws IOException {
+    public void submit() {
         Set<String> targets = new HashSet<>();
         targets.add("10.0.0.1");
         targets.add("10.0.0.2");

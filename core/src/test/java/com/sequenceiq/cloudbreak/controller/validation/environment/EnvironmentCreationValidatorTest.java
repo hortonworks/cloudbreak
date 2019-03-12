@@ -8,7 +8,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
 
@@ -41,7 +40,7 @@ public class EnvironmentCreationValidatorTest {
     private EnvironmentCreationValidator environmentCreationValidator;
 
     @Test
-    public void testValidationWithMultipleErrors() throws IOException {
+    public void testValidationWithMultipleErrors() {
         assertNotNull(environmentRegionValidator);
         Credential credential = new Credential();
 
@@ -126,7 +125,7 @@ public class EnvironmentCreationValidatorTest {
     }
 
     @Test
-    public void testValidationWhenRegionsAreSupportedOnCloudProviderButNotProvided() throws IOException {
+    public void testValidationWhenRegionsAreSupportedOnCloudProviderButNotProvided() {
         // GIVEN
         Credential credential = new Credential();
         Environment environment = new Environment();
@@ -155,7 +154,7 @@ public class EnvironmentCreationValidatorTest {
     }
 
     @Test
-    public void testSuccessfulValidationWithRegions() throws IOException {
+    public void testSuccessfulValidationWithRegions() {
         // GIVEN
         Credential credential = new Credential();
 

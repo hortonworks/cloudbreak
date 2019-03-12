@@ -16,7 +16,7 @@ public class ClusterRepairAction implements Action<StackTestDto> {
     }
 
     @Override
-    public StackTestDto action(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
+    public StackTestDto action(TestContext testContext, StackTestDto entity, CloudbreakClient client) {
 
         client.getCloudbreakClient()
                 .stackV4Endpoint()

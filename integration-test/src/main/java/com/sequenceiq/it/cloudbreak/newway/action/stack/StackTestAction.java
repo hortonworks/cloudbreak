@@ -75,7 +75,7 @@ public class StackTestAction {
         return entity;
     }
 
-    public static StackTestDto refresh(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
+    public static StackTestDto refresh(TestContext testContext, StackTestDto entity, CloudbreakClient client) {
         entity.setResponse(
                 client.getCloudbreakClient().stackV4Endpoint().get(client.getWorkspaceId(), entity.getName(), Collections.emptySet())
         );

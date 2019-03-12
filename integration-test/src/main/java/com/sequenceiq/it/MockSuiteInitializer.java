@@ -63,7 +63,7 @@ public class MockSuiteInitializer extends AbstractTestNGSpringContextTests {
 
     @BeforeSuite(dependsOnMethods = "initContext")
     @Parameters("mockPort")
-    public void initSuiteMap(ITestContext testContext, @Optional("9443") int mockPort) throws Exception {
+    public void initSuiteMap(ITestContext testContext, @Optional("9443") int mockPort) {
         CloudbreakClient cloudbreakClient = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
 
@@ -92,7 +92,7 @@ public class MockSuiteInitializer extends AbstractTestNGSpringContextTests {
         }
     }
 
-    private void createMockImageCatalog(ImageCatalogV4Endpoint endpoint, Long workspaceId) throws Exception {
+    private void createMockImageCatalog(ImageCatalogV4Endpoint endpoint, Long workspaceId) {
         ImageCatalogV4Request imageCatalogRequest = new ImageCatalogV4Request();
         imageCatalogRequest.setName(MOCK_IMAGE_CATALOG_NAME);
         imageCatalogRequest.setUrl(imageCatalogUrl);

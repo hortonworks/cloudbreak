@@ -9,7 +9,7 @@ public class NetworksV3Action {
     private NetworksV3Action() {
     }
 
-    public static void getNetworks(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
+    public static void getNetworks(IntegrationTestContext integrationTestContext, Entity entity) {
         throw new NotImplementedException("Should figure out how to obtain the following values: region, availabilityZone, credentialName, platformVariant");
         /*Networks networkEntity = (Networks) entity;
         CloudbreakClient client;

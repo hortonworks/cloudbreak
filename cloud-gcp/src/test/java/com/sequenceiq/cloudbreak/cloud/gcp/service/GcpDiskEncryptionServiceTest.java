@@ -95,7 +95,7 @@ public class GcpDiskEncryptionServiceTest extends LocalServerTestBase {
     }
 
     @Test
-    public void rsaEncryptedKeyWithRestException() throws Exception {
+    public void rsaEncryptedKeyWithRestException() {
         final String baseURL = "http://localhost:0000/google/cert";
         ReflectionTestUtils.setField(underTest, "googlePublicCertUrl", baseURL);
 

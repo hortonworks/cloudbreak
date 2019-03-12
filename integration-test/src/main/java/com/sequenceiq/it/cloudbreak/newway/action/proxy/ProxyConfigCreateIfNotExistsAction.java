@@ -14,7 +14,7 @@ public class ProxyConfigCreateIfNotExistsAction implements Action<ProxyConfigEnt
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyConfigCreateIfNotExistsAction.class);
 
     @Override
-    public ProxyConfigEntity action(TestContext testContext, ProxyConfigEntity entity, CloudbreakClient client) throws Exception {
+    public ProxyConfigEntity action(TestContext testContext, ProxyConfigEntity entity, CloudbreakClient client) {
         LOGGER.info("Create ProxyConfig with name: {}", entity.getRequest().getName());
         try {
             entity.setResponse(

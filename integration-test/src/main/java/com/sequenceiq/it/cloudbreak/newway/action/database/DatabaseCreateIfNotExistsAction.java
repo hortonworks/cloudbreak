@@ -14,7 +14,7 @@ public class DatabaseCreateIfNotExistsAction implements Action<DatabaseEntity> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseCreateIfNotExistsAction.class);
 
     @Override
-    public DatabaseEntity action(TestContext testContext, DatabaseEntity entity, CloudbreakClient client) throws Exception {
+    public DatabaseEntity action(TestContext testContext, DatabaseEntity entity, CloudbreakClient client) {
         LOGGER.info("Create Database with name: {}", entity.getRequest().getName());
         try {
             entity.setResponse(

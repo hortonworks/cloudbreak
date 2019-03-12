@@ -16,7 +16,7 @@ public class AmbariStrRequestIdRespone extends ITResponse {
     }
 
     @Override
-    public Object handle(Request request, Response response) throws Exception {
+    public Object handle(Request request, Response response) {
 
         ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
         rootNode.put("str", "{\"Requests\":{\"id\":" + requestId + ",\"status\":\"Accepted\"}}");

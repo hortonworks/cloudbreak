@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.flowlog;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 
@@ -82,7 +83,7 @@ public class FlowLogService {
     private FlowLog finalize(Long stackId, String flowId, String state) throws TransactionExecutionException {
         return transactionService.required(() -> {
             flowLogRepository.finalizeByFlowId(flowId);
-            updateLastFlowLogStatus(flowId, false);
+            updateLastFlowLogStatus(getLastFlowLog(flowId), false);
             FlowLog flowLog = new FlowLog(stackId, flowId, state, Boolean.TRUE, StateStatus.SUCCESSFUL);
             flowLog.setCloudbreakNodeId(cloudbreakNodeConfig.getId());
             return flowLogRepository.save(flowLog);
@@ -95,14 +96,32 @@ public class FlowLogService {
         flowChainLogRepository.save(chainLog);
     }
 
-    public void updateLastFlowLogStatus(String flowId, boolean failureEvent) {
+    public void updateLastFlowLogStatus(FlowLog lastFlowLog, boolean failureEvent) {
         StateStatus stateStatus = failureEvent ? StateStatus.FAILED : StateStatus.SUCCESSFUL;
-        FlowLog lastFlowLog = flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(flowId);
         flowLogRepository.updateLastLogStatusInFlow(lastFlowLog.getId(), stateStatus);
     }
 
     public boolean isOtherFlowRunning(Long stackId) {
         Set<String> flowIds = flowLogRepository.findAllRunningNonTerminationFlowIdsByStackId(stackId);
         return !flowIds.isEmpty();
+    }
+
+    public boolean repeatedFlowState(FlowLog lastFlowLog, String event) {
+        return lastFlowLog.getNextEvent().equalsIgnoreCase(event);
+    }
+
+    public void updateLastFlowLogPayload(FlowLog lastFlowLog, Payload payload, Map<Object, Object> variables) {
+        String payloadJson = JsonWriter.objectToJson(payload, writeOptions);
+        String variablesJson = JsonWriter.objectToJson(variables, writeOptions);
+        Optional.ofNullable(lastFlowLog)
+                .ifPresent(flowLog -> {
+                    flowLog.setPayload(payloadJson);
+                    flowLog.setVariables(variablesJson);
+                    flowLogRepository.save(flowLog);
+                });
+    }
+
+    public FlowLog getLastFlowLog(String flowId) {
+        return flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(flowId);
     }
 }

@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.ambari.status;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -70,7 +72,7 @@ public class AmbariClusterStatusFactoryTest {
     }
 
     @Test
-    public void testCreateClusterStatusShouldReturnAmbariServerNotRunningStatusWhenAmbariServerIsNotRunning() {
+    public void testCreateClusterStatusShouldReturnAmbariServerNotRunningStatusWhenAmbariServerIsNotRunning() throws IOException, URISyntaxException {
         // GIVEN
         BDDMockito.given(ambariClient.healthCheck()).willThrow(new RuntimeException());
         // WHEN
@@ -80,7 +82,7 @@ public class AmbariClusterStatusFactoryTest {
     }
 
     @Test
-    public void testCreateClusterStatusShouldReturnPendingStatusWhenThereAreInProgressOperations() {
+    public void testCreateClusterStatusShouldReturnPendingStatusWhenThereAreInProgressOperations() throws IOException, URISyntaxException {
         // GIVEN
         BDDMockito.given(ambariClient.healthCheck()).willReturn("RUNNING");
         BDDMockito.given(ambariClient.getRequests("IN_PROGRESS", "PENDING")).willReturn(Collections.singletonMap("IN_PROGRESS",
@@ -92,7 +94,7 @@ public class AmbariClusterStatusFactoryTest {
     }
 
     @Test
-    public void testCreateClusterStatusShouldReturnAmbariRunningStatusWhenNoBlueprintGiven() {
+    public void testCreateClusterStatusShouldReturnAmbariRunningStatusWhenNoBlueprintGiven() throws IOException, URISyntaxException {
         // GIVEN
         BDDMockito.given(ambariClient.healthCheck()).willReturn("RUNNING");
         // WHEN
@@ -104,7 +106,7 @@ public class AmbariClusterStatusFactoryTest {
     }
 
     @Test
-    public void testCreateClusterStatusShouldReturnAvailabelStackWithStoppedClusterWhenAllServerComponentsAreInstalled() {
+    public void testCreateClusterStatusShouldReturnAvailabelStackWithStoppedClusterWhenAllServerComponentsAreInstalled() throws IOException, URISyntaxException {
         // GIVEN
         BDDMockito.given(ambariClient.healthCheck()).willReturn("RUNNING");
         BDDMockito.given(ambariClient.getHostComponentsStatesCategorized()).willReturn(createHostComponentsStates("INSTALLED"));
@@ -117,7 +119,7 @@ public class AmbariClusterStatusFactoryTest {
     }
 
     @Test
-    public void testCreateClusterStatusShouldReturnAvailableClusterWhenAllServerComponentsAreStarted() {
+    public void testCreateClusterStatusShouldReturnAvailableClusterWhenAllServerComponentsAreStarted() throws IOException, URISyntaxException {
         // GIVEN
         BDDMockito.given(ambariClient.healthCheck()).willReturn("RUNNING");
         BDDMockito.given(ambariClient.getHostComponentsStatesCategorized()).willReturn(createHostComponentsStates("STARTED"));
@@ -130,7 +132,7 @@ public class AmbariClusterStatusFactoryTest {
     }
 
     @Test
-    public void testCreateClusterStatusShouldReturnInstallingStatusWhenOneServerComponentIsBeingInstalled() {
+    public void testCreateClusterStatusShouldReturnInstallingStatusWhenOneServerComponentIsBeingInstalled() throws IOException, URISyntaxException {
         // GIVEN
         BDDMockito.given(ambariClient.healthCheck()).willReturn("RUNNING");
         BDDMockito.given(ambariClient.getHostComponentsStatesCategorized()).willReturn(createInstallingHostComponentsStates());
@@ -141,7 +143,7 @@ public class AmbariClusterStatusFactoryTest {
     }
 
     @Test
-    public void testCreateClusterStatusShouldReturnAmbiguousWhenThereAreStartedAndInstalledComps() {
+    public void testCreateClusterStatusShouldReturnAmbiguousWhenThereAreStartedAndInstalledComps() throws IOException, URISyntaxException {
         // GIVEN
         BDDMockito.given(ambariClient.healthCheck()).willReturn("RUNNING");
         BDDMockito.given(ambariClient.getHostComponentsStatesCategorized()).willReturn(createInstalledAndStartedHostComponentsStates());
@@ -152,7 +154,7 @@ public class AmbariClusterStatusFactoryTest {
     }
 
     @Test
-    public void testCreateClusterStatusShouldReturnAmbiguousStatusWhenThereAreCompsInUnsupportedStates() {
+    public void testCreateClusterStatusShouldReturnAmbiguousStatusWhenThereAreCompsInUnsupportedStates() throws IOException, URISyntaxException {
         // GIVEN
         BDDMockito.given(ambariClient.healthCheck()).willReturn("RUNNING");
         BDDMockito.given(ambariClient.getHostComponentsStatesCategorized()).willReturn(createHostComponentsStates("Unsupported"));
@@ -163,7 +165,7 @@ public class AmbariClusterStatusFactoryTest {
     }
 
     @Test
-    public void testCreateClusterStatusShouldReturnUnknownWhenAmbariThrowsException() {
+    public void testCreateClusterStatusShouldReturnUnknownWhenAmbariThrowsException() throws IOException, URISyntaxException {
         // GIVEN
         BDDMockito.given(ambariClient.healthCheck()).willReturn("RUNNING");
         BDDMockito.given(ambariClient.getHostComponentsStatesCategorized()).willThrow(new RuntimeException());

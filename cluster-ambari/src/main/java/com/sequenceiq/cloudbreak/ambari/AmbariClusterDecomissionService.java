@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.ambari;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -69,12 +71,20 @@ public class AmbariClusterDecomissionService implements ClusterDecomissionServic
     }
 
     @Override
-    public Set<HostMetadata> decommissionClusterNodes(Map<String, HostMetadata> hostsToRemove) throws CloudbreakException {
-        return ambariDecommissioner.decommissionAmbariNodes(stack, hostsToRemove, ambariClient);
+    public Set<HostMetadata> decommissionClusterNodes(Map<String, HostMetadata> hostsToRemove) {
+        try {
+            return ambariDecommissioner.decommissionAmbariNodes(stack, hostsToRemove, ambariClient);
+        } catch (IOException | URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public boolean deleteHostFromCluster(HostMetadata data) {
-        return ambariDecommissioner.deleteHostFromAmbari(stack, data, ambariClient);
+        try {
+            return ambariDecommissioner.deleteHostFromAmbari(stack, data, ambariClient);
+        } catch (IOException | URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

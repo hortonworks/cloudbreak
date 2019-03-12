@@ -40,7 +40,7 @@ public class AzurePlatformParametersTest {
     private AzurePlatformParameters underTest;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         initMocks(this);
     }
 

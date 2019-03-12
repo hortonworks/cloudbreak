@@ -9,6 +9,8 @@ import static com.sequenceiq.cloudbreak.ambari.AmbariRepositoryVersionService.AM
 import static java.util.Collections.singletonMap;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -94,7 +96,12 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
         try {
             Map<String, Integer> operationRequests = new HashMap<>();
             Stream.of("ZOOKEEPER", "HDFS", "YARN", "MAPREDUCE2", "KERBEROS").forEach(s -> {
-                int opId = "ZOOKEEPER".equals(s) ? ambariClient.startService(s) : stopServiceIfAvailable(ambariClient, s);
+                int opId = 0;
+                try {
+                    opId = "ZOOKEEPER".equals(s) ? ambariClient.startService(s) : stopServiceIfAvailable(ambariClient, s);
+                } catch (URISyntaxException | IOException e) {
+                    throw new RuntimeException(e);
+                }
                 if (opId != -1) {
                     operationRequests.put(s + "_SERVICE_STATE", opId);
                 }
@@ -115,14 +122,14 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
     private int stopServiceIfAvailable(AmbariClient ambariClient, String s) {
         try {
             return ambariClient.stopService(s);
-        } catch (Exception e) {
-            //because groovy does not declare the throws
-            if (e instanceof HttpResponseException && ((HttpResponseException) e).getResponse().getStatus() == HttpStatus.NOT_FOUND.value()) {
+        }  catch (HttpResponseException e) {
+            if (e.getResponse().getStatus() == HttpStatus.NOT_FOUND.value()) {
                 LOGGER.debug("Cannot stop service [{}], becasue it does not exists.", s);
                 return -1;
-            } else {
-                throw e;
             }
+            throw new AmbariOperationFailedException("Failed to stop services", e);
+        } catch (IOException | URISyntaxException e) {
+            throw new AmbariOperationFailedException("Failed to connect Ambari server", e);
         }
     }
 
@@ -149,7 +156,11 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
         Cluster cluster = stack.getCluster();
         String userName = cluster.getUserName();
         ambariClient = ambariUserHandler.createAmbariUser(newUserName, newPassword, stack, ambariClient, clientConfig);
-        ambariClient.deleteUser(userName);
+        try {
+            ambariClient.deleteUser(userName);
+        } catch (URISyntaxException | IOException e) {
+            throw new CloudbreakException(e);
+        }
     }
 
     @Override
@@ -181,7 +192,11 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
             }
         } else {
             client = ambariUserHandler.createAmbariUser(userName, password, stack, client, clientConfig);
-            client.deleteUser(ADMIN);
+            try {
+                client.deleteUser(ADMIN);
+            } catch (URISyntaxException | IOException e) {
+                throw new CloudbreakException(e);
+            }
         }
     }
 
@@ -189,9 +204,13 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
     public void setupLdapAndSSO(AmbariRepo ambariRepo, String primaryGatewayPublicAddress) {
         if (ambariRepositoryVersionService.setupLdapAndSsoOnApi(ambariRepo)) {
             LOGGER.debug("Setup LDAP and SSO on API");
-            ambariLdapService.setupLdap(stack, stack.getCluster(), ambariRepo, ambariClient);
-            ambariLdapService.syncLdap(stack, ambariClient);
-            ambariSSOService.setupSSO(ambariClient, stack.getCluster(), primaryGatewayPublicAddress);
+            try {
+                ambariLdapService.setupLdap(stack, stack.getCluster(), ambariRepo, ambariClient);
+                ambariLdapService.syncLdap(stack, ambariClient);
+                ambariSSOService.setupSSO(ambariClient, stack.getCluster(), primaryGatewayPublicAddress);
+            } catch (IOException | URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
         } else {
             LOGGER.debug("Can not setup LDAP and SSO on API, Ambari too old");
         }

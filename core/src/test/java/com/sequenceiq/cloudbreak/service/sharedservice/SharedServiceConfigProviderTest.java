@@ -120,7 +120,7 @@ public class SharedServiceConfigProviderTest {
     }
 
     @Test
-    public void testConfigureClusterWithDl() throws IOException {
+    public void testConfigureClusterWithDl() {
         Cluster requestedCluster = createBarelyConfiguredRequestedCluster();
         DatalakeResources datalakeResources = new DatalakeResources();
         datalakeResources.setLdapConfig(ldapConfig);
@@ -139,7 +139,7 @@ public class SharedServiceConfigProviderTest {
     }
 
     @Test
-    public void testConfigureClusterIfSourceClusterContainsDifferentResourceStatusThenTheDefaultOnesWouldNotBeStoredInTheReturnCluster() throws IOException {
+    public void testConfigureClusterIfSourceClusterContainsDifferentResourceStatusThenTheDefaultOnesWouldNotBeStoredInTheReturnCluster() {
         Cluster requestedCluster = createBarelyConfiguredRequestedCluster();
         DatalakeResources datalakeResources = new DatalakeResources();
         datalakeResources.setRdsConfigs(createRdsConfigs(DEFAULT, DEFAULT_DELETED, USER_MANAGED));

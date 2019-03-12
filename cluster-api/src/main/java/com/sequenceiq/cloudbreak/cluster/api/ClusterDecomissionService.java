@@ -19,7 +19,7 @@ public interface ClusterDecomissionService {
 
     Map<String, HostMetadata> collectHostsToRemove(HostGroup hostGroup, Set<String> hostNames);
 
-    Set<HostMetadata> decommissionClusterNodes(Map<String, HostMetadata> hostsToRemove) throws CloudbreakException;
+    Set<HostMetadata> decommissionClusterNodes(Map<String, HostMetadata> hostsToRemove);
 
     boolean deleteHostFromCluster(HostMetadata data);
 }

@@ -16,7 +16,6 @@ import com.sequenceiq.ambari.client.services.ClusterService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariClusterTemplateGeneratorTest {
@@ -37,7 +36,7 @@ public class AmbariClusterTemplateGeneratorTest {
     }
 
     @Test
-    public void testDefaultPasswordIsUserProvided() throws CloudbreakException {
+    public void testDefaultPasswordIsUserProvided() {
         // GIVEN
         Cluster cluster = TestUtil.cluster();
         cluster.setPassword("UserProvidedPassword");
@@ -53,7 +52,7 @@ public class AmbariClusterTemplateGeneratorTest {
     }
 
     @Test
-    public void testDefaultPasswordIsUserProvidedSecure() throws CloudbreakException {
+    public void testDefaultPasswordIsUserProvidedSecure() {
         // GIVEN
         Cluster cluster = TestUtil.cluster();
         cluster.setPassword("UserProvidedPassword");

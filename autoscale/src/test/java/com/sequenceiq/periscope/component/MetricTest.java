@@ -294,7 +294,7 @@ public class MetricTest {
     }
 
     @Test
-    public void testMetricsWhenAutofailSuspendsCluster() throws InterruptedException {
+    public void testMetricsWhenAutofailSuspendsCluster() {
         metricService.submit(MetricType.CLUSTER_STATE_ACTIVE, 2);
         when(clusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(getACluster(ClusterState.RUNNING)));
         when(clusterRepository.save(any())).thenAnswer(this::saveCluster);

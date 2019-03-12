@@ -15,7 +15,7 @@ public class ClusterTemplateV4DeleteAction implements Action<ClusterTemplateEnti
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTemplateV4DeleteAction.class);
 
     @Override
-    public ClusterTemplateEntity action(TestContext testContext, ClusterTemplateEntity entity, CloudbreakClient client) throws Exception {
+    public ClusterTemplateEntity action(TestContext testContext, ClusterTemplateEntity entity, CloudbreakClient client) {
         log(LOGGER, "ClusterTemplateEntity delete, name: " + entity.getRequest().getName());
         client.getCloudbreakClient()
                 .clusterTemplateV4EndPoint()

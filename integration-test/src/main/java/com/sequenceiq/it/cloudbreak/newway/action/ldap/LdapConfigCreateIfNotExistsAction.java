@@ -14,7 +14,7 @@ public class LdapConfigCreateIfNotExistsAction implements Action<LdapConfigTestD
     private static final Logger LOGGER = LoggerFactory.getLogger(LdapConfigCreateIfNotExistsAction.class);
 
     @Override
-    public LdapConfigTestDto action(TestContext testContext, LdapConfigTestDto entity, CloudbreakClient client) throws Exception {
+    public LdapConfigTestDto action(TestContext testContext, LdapConfigTestDto entity, CloudbreakClient client) {
         LOGGER.info("Create LdapConfig with name: {}", entity.getRequest().getName());
         try {
             entity.setResponse(

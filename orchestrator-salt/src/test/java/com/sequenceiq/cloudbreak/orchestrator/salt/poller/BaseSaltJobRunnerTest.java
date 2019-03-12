@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -109,7 +108,7 @@ public class BaseSaltJobRunnerTest {
     }
 
     @Test
-    public void collectNodesTest() throws IOException {
+    public void collectNodesTest() {
         Set<Node> allNode = allNodeWithPostFix();
         baseSaltJobRunner = new BaseSaltJobRunner(targets, allNode) {
             @Override

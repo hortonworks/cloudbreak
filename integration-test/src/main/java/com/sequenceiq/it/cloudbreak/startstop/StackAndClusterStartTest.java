@@ -1,5 +1,8 @@
 package com.sequenceiq.it.cloudbreak.startstop;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Optional;
@@ -27,7 +30,7 @@ public class StackAndClusterStartTest extends AbstractCloudbreakIntegrationTest 
 
     @Test
     @Parameters("waitOn")
-    public void testStackAndClusterStart(@Optional(NOWAIT) Boolean waitOn) {
+    public void testStackAndClusterStart(@Optional(NOWAIT) Boolean waitOn) throws IOException, URISyntaxException {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackName = itContext.getContextParam(CloudbreakITContextConstants.STACK_NAME);

@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.scaling;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -48,13 +50,13 @@ public class ScalingUtil {
     }
 
     public static void checkClusterScaled(StackV4Endpoint stackV4Endpoint, String port, Long workspaceId, String stackName, String ambariUser,
-            String ambariPassword, int expectedNodeCount, IntegrationTestContext itContext) {
+            String ambariPassword, int expectedNodeCount, IntegrationTestContext itContext) throws IOException, URISyntaxException {
         StackV4Response stackResponse = stackV4Endpoint.get(workspaceId, stackName, new HashSet<>());
         checkClusterScaled(CloudbreakUtil.getAmbariIp(stackResponse, itContext), port, ambariUser, ambariPassword, expectedNodeCount, stackResponse);
     }
 
     private static void checkClusterScaled(String ambariIp, String port, String ambariUser, String ambariPassword, int expectedNodeCount,
-            StackV4Response stackResponse) {
+            StackV4Response stackResponse) throws IOException, URISyntaxException {
         Assert.assertEquals(stackResponse.getCluster().getStatus(), Status.AVAILABLE, "The cluster hasn't been started!");
         Assert.assertEquals(stackResponse.getStatus(), Status.AVAILABLE, "The stack hasn't been started!");
 

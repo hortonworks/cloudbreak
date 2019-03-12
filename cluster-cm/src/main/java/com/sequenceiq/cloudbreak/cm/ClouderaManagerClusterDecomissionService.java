@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @Service
 @Scope("prototype")
@@ -52,7 +51,7 @@ public class ClouderaManagerClusterDecomissionService implements ClusterDecomiss
 
     @Override
     public Set<String> collectDownscaleCandidates(HostGroup hostGroup, Integer scalingAdjustment, int defaultRootVolumeSize,
-            Set<InstanceMetaData> instanceMetaDatasInStack) throws CloudbreakException {
+            Set<InstanceMetaData> instanceMetaDatasInStack) {
         return Collections.emptySet();
     }
 
@@ -62,7 +61,7 @@ public class ClouderaManagerClusterDecomissionService implements ClusterDecomiss
     }
 
     @Override
-    public Set<HostMetadata> decommissionClusterNodes(Map<String, HostMetadata> hostsToRemove) throws CloudbreakException {
+    public Set<HostMetadata> decommissionClusterNodes(Map<String, HostMetadata> hostsToRemove) {
         return Collections.emptySet();
     }
 

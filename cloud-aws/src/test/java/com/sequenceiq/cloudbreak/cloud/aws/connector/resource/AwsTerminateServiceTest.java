@@ -129,7 +129,7 @@ public class AwsTerminateServiceTest {
     }
 
     @Test
-    public void testTerminateShouldCleanupEncryptedResourcesWhenCloudformationStackDoesNotExist() throws Exception {
+    public void testTerminateShouldCleanupEncryptedResourcesWhenCloudformationStackDoesNotExist() {
         when(awsClient.createCloudFormationRetryClient(any(), any())).thenReturn(cloudFormationRetryClient);
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
         when(cfStackUtil.getCloudFormationStackResource(any())).thenReturn(null);

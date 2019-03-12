@@ -19,6 +19,8 @@ import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isTimeout;
 import static java.util.Collections.singletonMap;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -178,6 +180,8 @@ public class AmbariClusterModificationService implements ClusterModificationServ
             }
         } catch (AmbariConnectionException ignored) {
             LOGGER.debug("Ambari not running on the gateway machine, no need to stop it.");
+        } catch (IOException | URISyntaxException e) {
+            throw new CloudbreakException("Failed to stop Hadoop services.", e);
         }
     }
 
@@ -198,7 +202,12 @@ public class AmbariClusterModificationService implements ClusterModificationServ
         LOGGER.debug("Start all Hadoop services");
         eventService
                 .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_SERVICES_STARTING.code()));
-        int requestId = ambariClient.startAllServices();
+        int requestId;
+        try {
+            requestId = ambariClient.startAllServices();
+        } catch (URISyntaxException | IOException e) {
+            throw new CloudbreakException("Failed to start Hadoop services.", e);
+        }
         if (requestId == -1) {
             LOGGER.info("Failed to start Hadoop services.");
             throw new CloudbreakException("Failed to start Hadoop services.");
@@ -236,7 +245,7 @@ public class AmbariClusterModificationService implements ClusterModificationServ
         try {
             Map<String, Integer> operationRequests = ambariClient.initComponentsOnHost(hostname, collectMasterSlaveComponents(components));
             waitForOperation(stack, ambariClient, operationRequests, INIT_SERVICES_AMBARI_PROGRESS_STATE, AMBARI_CLUSTER_SERVICES_INIT_FAILED);
-        } catch (RuntimeException | HttpResponseException e) {
+        } catch (RuntimeException | URISyntaxException | IOException e) {
             throw new CloudbreakException("Failed to init Hadoop services.", e);
         }
     }
@@ -267,7 +276,7 @@ public class AmbariClusterModificationService implements ClusterModificationServ
             Integer ambariTaskId = ambariClient.generateKeytabs(false);
             waitForOperation(stack, ambariClient, Map.of("KerberosRegenerateKeytabs", ambariTaskId), START_SERVICES_AMBARI_PROGRESS_STATE,
                     AMBARI_CLUSTER_SERVICES_START_FAILED);
-        } catch (ClusterException e) {
+        } catch (ClusterException | URISyntaxException | IOException e) {
             throw new CloudbreakException("Error regenerating keytabs on ambari", e);
         }
     }
@@ -278,7 +287,7 @@ public class AmbariClusterModificationService implements ClusterModificationServ
             try {
                 Map<String, Integer> operationRequests = ambariClient.startComponentsOnHost(hostname, collectMasterSlaveComponents(components));
                 waitForOperation(stack, ambariClient, operationRequests, START_SERVICES_AMBARI_PROGRESS_STATE, AMBARI_CLUSTER_SERVICES_START_FAILED);
-            } catch (RuntimeException | HttpResponseException e) {
+            } catch (RuntimeException | URISyntaxException | IOException e) {
                 LOGGER.error("Error starting components on ambari", e);
                 throw new RecoverableAmbariException(e);
             } catch (ClusterException e) {
@@ -298,7 +307,7 @@ public class AmbariClusterModificationService implements ClusterModificationServ
                 Integer operationId = ambariClient.restartAllServices(stack.getCluster().getName());
                 Map<String, Integer> operationRequests = Map.of("restartAllServices", operationId);
                 waitForOperation(stack, ambariClient, operationRequests, START_SERVICES_AMBARI_PROGRESS_STATE, AMBARI_CLUSTER_SERVICES_START_FAILED);
-            } catch (RuntimeException e) {
+            } catch (RuntimeException | URISyntaxException | IOException e) {
                 LOGGER.error("Error starting components on ambari", e);
                 throw new RecoverableAmbariException(e);
             } catch (ClusterException e) {
@@ -351,7 +360,7 @@ public class AmbariClusterModificationService implements ClusterModificationServ
                     waitForOperation(stack, ambariClient, operationRequests, operationParameters.getAmbariOperationType(),
                             operationParameters.getOperationFailedMessage());
                 }
-            } catch (RuntimeException | HttpResponseException e) {
+            } catch (RuntimeException | URISyntaxException | IOException e) {
                 LOGGER.error("Error stopping components on ambari", e);
                 throw new RecoverableAmbariException(e);
             } catch (ClusterException e) {
@@ -424,6 +433,8 @@ public class AmbariClusterModificationService implements ClusterModificationServ
                 String errorMessage = AmbariClientExceptionUtil.getErrorMessage(e);
                 throw new CloudbreakServiceException("Ambari could not install services. " + errorMessage, e);
             }
+        } catch (IOException | URISyntaxException e) {
+            throw new CloudbreakServiceException("Ambari could not install services. " + e.getMessage(), e);
         }
     }
 
@@ -442,12 +453,11 @@ public class AmbariClusterModificationService implements ClusterModificationServ
                         + "for cluster '%s' and repo url '%s'.", stack.getCluster().getName(), stackRepoId));
             }
             return stackRepositoryJson;
-        } catch (HttpResponseException e) {
+        } catch (AmbariConnectionException e) {
             if ("Not Found".equals(e.getMessage())) {
                 throw new AmbariNotFoundException("Ambari validation not found.", e);
             } else {
-                String errorMessage = AmbariClientExceptionUtil.getErrorMessage(e);
-                throw new CloudbreakServiceException("Could not get Stack Repository from Ambari as JSON: " + errorMessage, e);
+                throw new CloudbreakServiceException("Could not get Stack Repository from Ambari as JSON: " + e.getMessage(), e);
             }
         }
     }

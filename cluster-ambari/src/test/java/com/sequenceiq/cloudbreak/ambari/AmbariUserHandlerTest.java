@@ -7,6 +7,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 import javax.inject.Inject;
 
 import org.junit.Assert;
@@ -40,7 +43,7 @@ public class AmbariUserHandlerTest {
     private HttpClientConfig clientConfig = new HttpClientConfig("1.1.1.1");
 
     @Test
-    public void testCreateAmbariUserWhenNoExceptionOccuredThenEverythingShouldWorksFine() throws CloudbreakException {
+    public void testCreateAmbariUserWhenNoExceptionOccuredThenEverythingShouldWorksFine() throws CloudbreakException, IOException, URISyntaxException {
         String newUserName = "newUserName";
         String newPassword = "newPassword";
         Stack stack = TestUtil.stack();
@@ -60,7 +63,8 @@ public class AmbariUserHandlerTest {
     }
 
     @Test
-    public void testCreateAmbariUserWhenExceptionOccuredThenTryingToCreateNewAmbariClientAndQueryUser() throws CloudbreakException {
+    public void testCreateAmbariUserWhenExceptionOccuredThenTryingToCreateNewAmbariClientAndQueryUser()
+            throws CloudbreakException, IOException, URISyntaxException {
         String newUserName = "newUserName";
         String newPassword = "newPassword";
         Stack stack = TestUtil.stack();
@@ -82,7 +86,7 @@ public class AmbariUserHandlerTest {
 
     @Test
     public void testCreateAmbariUserWhenExceptionOccuredThenTryingToCreateNewClientAndQueryUserAndThrowExceptionThenShouldThrowCloudbreakException()
-            throws CloudbreakException {
+            throws CloudbreakException, IOException, URISyntaxException {
         String newUserName = "newUserName";
         String newPassword = "newPassword";
         Stack stack = TestUtil.stack();
@@ -105,7 +109,7 @@ public class AmbariUserHandlerTest {
     }
 
     @Test
-    public void testChangeAmbariPasswordWhenNoExceptionOccuredThenEverythingShouldWorksFine() throws CloudbreakException {
+    public void testChangeAmbariPasswordWhenNoExceptionOccuredThenEverythingShouldWorksFine() throws CloudbreakException, IOException, URISyntaxException {
         String userName = "cloudbreak";
         String oldPassword = "oldPassword";
         String newPassword = "newPassword";
@@ -126,7 +130,8 @@ public class AmbariUserHandlerTest {
     }
 
     @Test
-    public void testChangeAmbariPasswordWhenExceptionOccuredThenTryingToCreateNewAmbariClientAndQueryUser() throws CloudbreakException {
+    public void testChangeAmbariPasswordWhenExceptionOccuredThenTryingToCreateNewAmbariClientAndQueryUser()
+            throws CloudbreakException, IOException, URISyntaxException {
         String userName = "cloudbreak";
         String oldPassword = "oldPassword";
         String newPassword = "newPassword";
@@ -149,7 +154,7 @@ public class AmbariUserHandlerTest {
 
     @Test
     public void testChangeAmbariPasswordWhenExceptionOccuredThenTryingToCreateNewClientAndQueryUserAndThrowExceptionThenShouldThrowCloudbreakException()
-            throws CloudbreakException {
+            throws CloudbreakException, IOException, URISyntaxException {
         String userName = "cloudbreak";
         String oldPassword = "oldPassword";
         String newPassword = "newPassword";

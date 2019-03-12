@@ -15,7 +15,7 @@ public class ImageCatalogSetAsDefaultAction implements Action<ImageCatalogTestDt
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogSetAsDefaultAction.class);
 
     @Override
-    public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
+    public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto entity, CloudbreakClient cloudbreakClient) {
         LOGGER.info("Set Imagecatalog as default within workspace with name: {}", entity.getRequest().getName());
         try {
             entity.setResponse(

@@ -12,7 +12,7 @@ public class DatabaseTestAccessDeniedAssertion implements AssertionV2<DatabaseTe
     }
 
     @Override
-    public DatabaseTestEntity doAssertion(TestContext testContext, DatabaseTestEntity entity, CloudbreakClient cloudbreakClient) throws Exception {
+    public DatabaseTestEntity doAssertion(TestContext testContext, DatabaseTestEntity entity, CloudbreakClient cloudbreakClient) {
         if (!entity.getResponse().getResult().contains("access is denied")) {
             throw new IllegalArgumentException("Database test connection result is not as expected.");
         }

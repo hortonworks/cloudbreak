@@ -6,6 +6,8 @@ import static com.sequenceiq.it.cloudbreak.newway.v3.CloudbreakV3Util.waitAndExp
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -208,13 +210,17 @@ public class Stack extends StackTestDto {
     public static Assertion<?> checkClusterHasAmbariRunning(String ambariPort, String ambariUser, String ambariPassword) {
         return assertThis((stack, t) -> {
             CloudbreakClient client = CloudbreakClient.getTestContextCloudbreakClient().apply(t);
-            CloudbreakV3Util.checkClusterAvailability(client.getCloudbreakClient().stackV4Endpoint(),
-                    ambariPort,
-                    stack.getResponse().getWorkspace().getId(),
-                    stack.getResponse().getName(),
-                    ambariUser,
-                    ambariPassword,
-                    true);
+            try {
+                CloudbreakV3Util.checkClusterAvailability(client.getCloudbreakClient().stackV4Endpoint(),
+                        ambariPort,
+                        stack.getResponse().getWorkspace().getId(),
+                        stack.getResponse().getName(),
+                        ambariUser,
+                        ambariPassword,
+                        true);
+            } catch (IOException | URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
         });
     }
 

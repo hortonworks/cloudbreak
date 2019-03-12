@@ -8,6 +8,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 import org.junit.Before;
@@ -84,7 +86,7 @@ public class AmbariLdapServiceTest {
     }
 
     @Test
-    public void setupLdap() {
+    public void setupLdap() throws IOException, URISyntaxException {
         AmbariRepo ambariRepo = mock(AmbariRepo.class);
         when(ambariRepositoryVersionService.isVersionNewerOrEqualThanLimited(any(), any())).thenReturn(false);
         ambariLdapService.setupLdap(stack, cluster, ambariRepo, ambariClient);
@@ -115,7 +117,7 @@ public class AmbariLdapServiceTest {
     }
 
     @Test
-    public void setupLdapWithAmbari2720() {
+    public void setupLdapWithAmbari2720() throws IOException, URISyntaxException {
         AmbariRepo ambariRepo = mock(AmbariRepo.class);
         when(ambariRepositoryVersionService.isVersionNewerOrEqualThanLimited(any(), any())).thenReturn(true);
         ambariLdapService.setupLdap(stack, cluster, ambariRepo, ambariClient);
@@ -146,7 +148,7 @@ public class AmbariLdapServiceTest {
     }
 
     @Test
-    public void syncLdap() {
+    public void syncLdap() throws IOException, URISyntaxException {
         ambariLdapService.syncLdap(stack, ambariClient);
         verify(ambariClient, times(1)).syncLdap();
     }

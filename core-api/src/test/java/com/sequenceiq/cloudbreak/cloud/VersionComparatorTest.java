@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.cloud;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.IOException;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,7 +68,7 @@ public class VersionComparatorTest {
     }
 
     @Test
-    public void testSmallerNonEqualLength() throws IOException {
+    public void testSmallerNonEqualLength() {
         Assert.assertEquals(-1, underTest.compare(new VersionString("2.4.0.0"), new VersionString("2.5.0.0-770")));
     }
 

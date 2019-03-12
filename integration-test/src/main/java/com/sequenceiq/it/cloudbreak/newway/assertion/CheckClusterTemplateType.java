@@ -17,7 +17,7 @@ public class CheckClusterTemplateType implements AssertionV2<ClusterTemplateEnti
     }
 
     @Override
-    public ClusterTemplateEntity doAssertion(TestContext testContext, ClusterTemplateEntity entity, CloudbreakClient cloudbreakClient) throws Exception {
+    public ClusterTemplateEntity doAssertion(TestContext testContext, ClusterTemplateEntity entity, CloudbreakClient cloudbreakClient) {
         ClusterTemplateEntity clusterTemplate = testContext.get(ClusterTemplateEntity.class);
         Optional<ClusterTemplateV4Response> first = entity.getResponses().stream().filter(ct -> ct.getName().equals(clusterTemplate.getName())).findFirst();
         if (!first.isPresent()) {

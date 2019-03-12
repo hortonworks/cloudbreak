@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.ambari;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,8 @@ public class AmbariClusterTemplateSubmitter {
                 String msg = String.format("Ambari client failed to apply cluster creation template! Reason: %s", reason);
                 LOGGER.info(msg, exception);
                 throw new AmbariServiceException(msg, exception);
+            } catch (IOException | URISyntaxException e) {
+                throw new AmbariServiceException(e.getMessage(), e);
             }
         } else {
             LOGGER.debug("Ambari cluster already exists: {}", clusterName);

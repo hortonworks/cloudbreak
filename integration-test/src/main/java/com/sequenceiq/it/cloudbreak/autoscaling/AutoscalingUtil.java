@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.autoscaling;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -137,7 +139,7 @@ public class AutoscalingUtil extends AbstractCloudbreakIntegrationTest {
     }
 
     static void checkScaling(IntegrationTestContext itContext, CloudbreakClient cloudbreakClient, Long workspaceId, int scalingAdjustment, String stackName,
-            int expectedNodeCountStack, int expectedNodeCountCluster) {
+            int expectedNodeCountStack, int expectedNodeCountCluster) throws IOException, URISyntaxException {
 
         String ambariUser = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID);
         String ambariPassword = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID);

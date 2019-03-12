@@ -12,6 +12,8 @@ import static com.sequenceiq.cloudbreak.polling.PollingResult.isSuccess;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isTimeout;
 import static java.util.Collections.singletonMap;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -194,6 +196,8 @@ public class AmbariClusterSetupService implements ClusterSetupService {
             } else {
                 throw new CloudbreakServiceException("Ambari blueprint could not be added: " + AmbariClientExceptionUtil.getErrorMessage(hre), hre);
             }
+        } catch (URISyntaxException | IOException e) {
+            throw new CloudbreakServiceException("Ambari blueprint could not be added: " + e.getMessage(), e);
         }
     }
 

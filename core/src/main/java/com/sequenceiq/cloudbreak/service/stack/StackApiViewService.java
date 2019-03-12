@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -63,6 +64,17 @@ public class StackApiViewService {
                     : getAllByWorkspaceAndEnvironment(workspaceId, environmentName);
             stackViewResponses = filterDatalakes(dataLakeOnly, stackViewResponses);
             return stackViewResponses;
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
+    public StackViewV4Response retrieveById(Long stackId) {
+        try {
+            return transactionService.required(() -> {
+                Optional<StackApiView> byId = stackApiViewRepository.findById(stackId);
+                return converterUtil.convert(byId.orElse(null), StackViewV4Response.class);
+            });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }

@@ -13,7 +13,7 @@ public class CheckEnvironmentCredential implements AssertionV2<EnvironmentEntity
     }
 
     @Override
-    public EnvironmentEntity doAssertion(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) throws Exception {
+    public EnvironmentEntity doAssertion(TestContext testContext, EnvironmentEntity environment, CloudbreakClient cloudbreakClient) {
         String credentialName = environment.getResponse().getCredentialName();
         if (!credentialName.equals(expectedCredentialName)) {
             throw new TestFailException("Credential is not attached to environment");

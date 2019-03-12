@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,7 +36,7 @@ public class GrainAddRunnerTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     @Test
-    public void submitTest() throws SaltJobFailedException, IOException {
+    public void submitTest() throws SaltJobFailedException {
         Set<String> targets = new HashSet<>();
         targets.add("10.0.0.1");
         targets.add("10.0.0.2");
@@ -70,7 +69,7 @@ public class GrainAddRunnerTest {
     }
 
     @Test
-    public void submitTestWithMissingNode() throws SaltJobFailedException, IOException {
+    public void submitTestWithMissingNode() throws SaltJobFailedException {
         Set<String> targets = new HashSet<>();
         targets.add("10.0.0.1");
         targets.add("10.0.0.2");

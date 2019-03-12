@@ -11,7 +11,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -89,7 +88,7 @@ public class StackImageFilterServiceTest {
     }
 
     @Test
-    public void testGetApplicableImagesHdp() throws CloudbreakImageCatalogException, IOException, CloudbreakImageNotFoundException {
+    public void testGetApplicableImagesHdp() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         Stack stack = getStack(Status.AVAILABLE, Status.AVAILABLE);
         setupLoggedInUser();
         when(imageCatalogService.getImages(anyLong(), anyString(), anyString())).thenReturn(getStatedImages());
@@ -111,7 +110,7 @@ public class StackImageFilterServiceTest {
     }
 
     @Test
-    public void testGetApplicableImagesHdf() throws CloudbreakImageCatalogException, IOException, CloudbreakImageNotFoundException {
+    public void testGetApplicableImagesHdf() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         Stack stack = getStack(Status.AVAILABLE, Status.AVAILABLE);
         setupLoggedInUser();
         when(imageCatalogService.getImages(anyLong(), anyString(), anyString())).thenReturn(getStatedImages());
@@ -133,7 +132,7 @@ public class StackImageFilterServiceTest {
     }
 
     @Test
-    public void testGetApplicableImagesFiltersCurrentImage() throws CloudbreakImageCatalogException, IOException, CloudbreakImageNotFoundException {
+    public void testGetApplicableImagesFiltersCurrentImage() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         Stack stack = getStack(Status.AVAILABLE, Status.AVAILABLE);
         setupLoggedInUser();
         when(imageCatalogService.getImages(anyLong(), anyString(), anyString())).thenReturn(getStatedImages());
@@ -177,7 +176,7 @@ public class StackImageFilterServiceTest {
     }
 
     @Test
-    public void testGetApplicableImagesWhenStackNotInAvailableState() throws CloudbreakImageCatalogException, IOException {
+    public void testGetApplicableImagesWhenStackNotInAvailableState() throws CloudbreakImageCatalogException {
         Stack stack = getStack(Status.CREATE_IN_PROGRESS, Status.AVAILABLE);
         when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(stack);
         setupLoggedInUser();
@@ -188,7 +187,7 @@ public class StackImageFilterServiceTest {
     }
 
     @Test
-    public void testGetApplicableImagesWhenClusterNotInAvailableState() throws CloudbreakImageCatalogException, IOException {
+    public void testGetApplicableImagesWhenClusterNotInAvailableState() throws CloudbreakImageCatalogException {
         Stack stack = getStack(Status.AVAILABLE, Status.UPDATE_FAILED);
         when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(stack);
         setupLoggedInUser();

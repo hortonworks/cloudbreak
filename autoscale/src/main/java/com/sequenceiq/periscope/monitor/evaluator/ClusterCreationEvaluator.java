@@ -4,6 +4,9 @@ import static com.sequenceiq.periscope.api.model.ClusterState.PENDING;
 import static com.sequenceiq.periscope.api.model.ClusterState.RUNNING;
 import static com.sequenceiq.periscope.api.model.ClusterState.SUSPENDED;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
@@ -77,8 +80,8 @@ public class ClusterCreationEvaluator extends EvaluatorExecutor {
                 clusterService.validateClusterUniqueness(resolvedAmbari);
                 createCluster(stack, resolvedAmbari);
             }
-        } catch (AmbariHealtCheckException ahf) {
-            LOGGER.info("Ambari health check failed for Cloudbreak stack: {} (ID:{}). Original message: {}", stack.getName(), stack.getStackId(),
+        } catch (AmbariHealthCheckException ahf) {
+            LOGGER.info("Ambari health check failed for Cloudbreak stack: {} (ID:{}). Original message: {}", stack.getStackId(), stack.getName(),
                     ahf.getMessage());
         } catch (TlsConfigurationException ex) {
             LOGGER.error("Could not prepare TLS configuration for Cloudbreak stack: {} (ID:{}). Original message: {}", stack.getStackId(), stack.getName(),
@@ -131,23 +134,27 @@ public class ClusterCreationEvaluator extends EvaluatorExecutor {
         String host = ambariStack.getAmbari().getHost();
         try {
             AmbariClient client = ambariClientProvider.createAmbariClient(new Cluster(ambariStack));
-            String healthCheckResult = ambariRequestLogging.logging(client::healthCheck, "healthCheck");
+            String healthCheckResult = ambariRequestLogging.logging(() -> {
+                try {
+                    return client.healthCheck();
+                } catch (IOException | URISyntaxException e) {
+                    throw new AmbariHealthCheckException("Failed to connect Ambari host", e);
+                }
+            }, "healthCheck");
             if (!"RUNNING".equals(healthCheckResult)) {
-                throw new AmbariHealtCheckException(String.format("Ambari on host '%s' is not in 'RUNNING' state, got state: %s", host, healthCheckResult));
+                throw new AmbariHealthCheckException(String.format("Ambari on host '%s' is not in 'RUNNING' state.", host));
             }
-        } catch (AmbariHealtCheckException ex) {
-            throw ex;
         } catch (Exception ex) {
-            throw new AmbariHealtCheckException(String.format("Health check failed on host '%s', original message: %s", host, ex.getMessage()), ex);
+            throw new AmbariHealthCheckException(String.format("Health check failed on host '%s':", host), ex);
         }
     }
 
-    private static class AmbariHealtCheckException extends RuntimeException {
-        AmbariHealtCheckException(String message) {
+    private static class AmbariHealthCheckException extends RuntimeException {
+        AmbariHealthCheckException(String message) {
             super(message);
         }
 
-        AmbariHealtCheckException(String message, Throwable cause) {
+        AmbariHealthCheckException(String message, Throwable cause) {
             super(message, cause);
         }
     }

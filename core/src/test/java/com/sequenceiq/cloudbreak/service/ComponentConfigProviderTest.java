@@ -12,7 +12,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
@@ -33,7 +32,7 @@ public class ComponentConfigProviderTest {
     }
 
     @Test
-    public void replaceImageComponentWithNew() throws JsonProcessingException {
+    public void replaceImageComponentWithNew() {
         Stack stack = new Stack();
         stack.setId(1L);
         Component original = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json("asdf"), stack);

@@ -4,6 +4,8 @@ package com.sequenceiq.cloudbreak.ambari;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.CUSTOM_VDF_REPO_KEY;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.VDF_REPO_KEY_PREFIX;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +79,9 @@ public class AmbariRepositoryVersionService {
                 String exceptionErrorMsg = AmbariClientExceptionUtil.getErrorMessage(e);
                 String msg = String.format("Cannot use the specified Ambari stack: %s. Error: %s", stackRepoDetails.toString(), exceptionErrorMsg);
                 throw new AmbariServiceException(msg, e);
+            } catch (IOException | URISyntaxException e) {
+                String msg = String.format("Cannot use the specified Ambari stack: %s. Error: %s", stackRepoDetails.toString(), e.getMessage());
+                throw new AmbariServiceException(msg, e);
             }
         } else {
             LOGGER.debug("Using latest HDP repository");
@@ -105,7 +110,7 @@ public class AmbariRepositoryVersionService {
         return clusterComponentConfigProvider.getHDPRepo(clusterId);
     }
 
-    private void setRepositoryVersionOnApi(StackService ambariClient, StackRepoDetails stackRepoDetails) throws HttpResponseException {
+    private void setRepositoryVersionOnApi(StackService ambariClient, StackRepoDetails stackRepoDetails) throws IOException, URISyntaxException {
         LOGGER.debug("Set repository versions in Ambari via old API calls.");
         Map<String, String> stackRepo = stackRepoDetails.getStack();
         Map<String, String> utilRepo = stackRepoDetails.getUtil();
@@ -135,11 +140,12 @@ public class AmbariRepositoryVersionService {
     }
 
     private void addRepository(StackService client, String stack, String version, String os,
-            String repoId, String repoUrl, boolean verify) throws HttpResponseException {
+            String repoId, String repoUrl, boolean verify) throws IOException, URISyntaxException {
         client.addStackRepository(stack, version, os, repoId, repoUrl, verify);
     }
 
-    private void addVersionDefinitionFileToAmbari(String stackName, ClusterService ambariClient, StackRepoDetails stackRepoDetails) {
+    private void addVersionDefinitionFileToAmbari(String stackName, ClusterService ambariClient, StackRepoDetails stackRepoDetails)
+            throws IOException, URISyntaxException {
         Optional<String> vdfUrl = Optional.ofNullable(stackRepoDetails.getStack().get(CUSTOM_VDF_REPO_KEY));
         if (!vdfUrl.isPresent()) {
             String message = String.format("Couldn't determine any VDF file for the stack: %s", stackName);

@@ -21,7 +21,7 @@ public class AmbariHostComponentStateResponse extends ITResponse {
     }
 
     @Override
-    public Object handle(Request request, Response response) throws Exception {
+    public Object handle(Request request, Response response) {
         response.type("text/plain");
         ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
         rootNode.put("href", request.url() + "?fields=host_components/HostRoles/state/*");
