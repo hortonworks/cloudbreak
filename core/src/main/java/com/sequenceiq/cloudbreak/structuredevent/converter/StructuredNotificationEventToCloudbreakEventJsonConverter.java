@@ -1,13 +1,10 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.structuredevent.event.LdapNotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.NotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
@@ -17,9 +14,6 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEve
 @Component
 public class StructuredNotificationEventToCloudbreakEventJsonConverter
         extends AbstractConversionServiceAwareConverter<StructuredNotificationEvent, CloudbreakEventV4Response> {
-
-    @Inject
-    private StackApiViewService stackApiViewService;
 
     @Override
     public CloudbreakEventV4Response convert(StructuredNotificationEvent source) {
