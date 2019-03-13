@@ -196,7 +196,7 @@ public class ClusterDefinitionTest extends AbstractIntegrationTest {
         return clusterDefinition;
     }
 
-    private  <O extends Object> boolean assertList(Collection<O> result, Collection<O> expected) {
+    private <O extends Object> boolean assertList(Collection<O> result, Collection<O> expected) {
         return result.containsAll(expected) && result.size() == expected.size();
     }
 }

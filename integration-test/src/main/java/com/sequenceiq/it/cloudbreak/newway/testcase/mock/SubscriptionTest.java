@@ -32,13 +32,12 @@ public class SubscriptionTest extends AbstractIntegrationTest {
     @Test(dataProvider = DATA_PROVIDER_FOR_VALID_SUBSCRIPTION_TEST, enabled = false)
     public void testGetSubscription(MockedTestContext testContext, String endpointUrl,
             @Description TestCaseDescription testCaseDescription) {
-        String subscriptionKey = getNameGenerator().getRandomNameForResource();
         testContext
                 .given(SubscriptionTestDto.class)
                 .withEndpointUrl(endpointUrl)
-                .when(SubscriptionTestAction::getSubscribe, key(subscriptionKey))
-                .then(CommonAssert::responseExists, key(subscriptionKey))
-                .then(SubscriptionAssertion::idExists, key(subscriptionKey))
+                .when(SubscriptionTestAction::getSubscribe)
+                .then(CommonAssert::responseExists)
+                .then(SubscriptionAssertion::idExists)
                 .validate();
     }
 
@@ -46,7 +45,7 @@ public class SubscriptionTest extends AbstractIntegrationTest {
     public void testGetSubscriptionWithInvalidData(
             MockedTestContext testContext,
             String endpointUrl,
-        @Description TestCaseDescription testCaseDescription) {
+            @Description TestCaseDescription testCaseDescription) {
         String subscriptionKey = getNameGenerator().getRandomNameForResource();
         testContext
                 .given(SubscriptionTestDto.class)
@@ -56,7 +55,7 @@ public class SubscriptionTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @DataProvider(name = DATA_PROVIDER_FOR_VALID_SUBSCRIPTION_TEST, parallel = true)
+    @DataProvider(name = DATA_PROVIDER_FOR_VALID_SUBSCRIPTION_TEST)
     public Object[][] provideValidAttributes() {
         var testContext = getBean(MockedTestContext.class);
         return new Object[][]{
@@ -87,7 +86,7 @@ public class SubscriptionTest extends AbstractIntegrationTest {
         };
     }
 
-    @DataProvider(name = DATA_PROVIDER_FOR_INVALID_SUBSCRIPTION_TEST, parallel = true)
+    @DataProvider(name = DATA_PROVIDER_FOR_INVALID_SUBSCRIPTION_TEST)
     public Object[][] provideInvalidAttributes() {
         var testContext = getBean(MockedTestContext.class);
         return new Object[][]{

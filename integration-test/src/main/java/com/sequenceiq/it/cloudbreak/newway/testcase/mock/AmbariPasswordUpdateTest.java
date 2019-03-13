@@ -44,9 +44,9 @@ public class AmbariPasswordUpdateTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-        given = "a stack with and Ambari cluster",
-        when = "password of the cluster is modified",
-        then = "the cluster should still be available")
+            given = "a stack with an Ambari cluster",
+            when = "password of the cluster is modified",
+            then = "the cluster should still be available")
     public void createAmbariClusterAndModifyThePasswordOnItThenNoExceptionOccursTheStackIsAvailable(MockedTestContext testContext) {
         String clusterName = getNameGenerator().getRandomNameForResource();
         String generatedKey = getNameGenerator().getRandomNameForResource();

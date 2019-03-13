@@ -10,8 +10,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.newway.action.sshkeys.PlatformSshKeysTestAction;
+import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription;
@@ -63,12 +63,12 @@ public class SSHKeysTest extends AbstractIntegrationTest {
         return new Object[][]{
                 {getBean(MockedTestContext.class), "", "badRequest", BadRequestException.class,
                         createWithGiven("platform ssh keys")
-                        .when("credential name is empty")
-                        .then("get bad request ecxeption")},
+                                .when("credential name is empty")
+                                .then("get bad request ecxeption")},
                 {getBean(MockedTestContext.class), null, "badRequest", BadRequestException.class,
                         createWithGiven("platform ssh keys")
-                        .when("credential name is null")
-                        .then("get bad request ecxeption")},
+                                .when("credential name is null")
+                                .then("get bad request ecxeption")},
                 {getBean(MockedTestContext.class), "andNowForSomethingCompletelyDifferent", "forbidden",
                         ForbiddenException.class, createWithGiven("platform ssh keys")
                         .when("credential name is not exists")

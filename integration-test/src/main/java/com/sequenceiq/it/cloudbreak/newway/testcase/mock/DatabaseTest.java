@@ -91,9 +91,9 @@ public class DatabaseTest extends AbstractIntegrationTest {
         testContext
                 .given(DatabaseEntity.class)
                 .withName(databaseName)
-                .when(DatabaseEntity.post(), key(databaseName))
-                .when(DatabaseEntity.list(), key(databaseName))
-                .then(DatabaseExistsAssertion.getAssertion(databaseName, 1), key(databaseName))
+                .when(DatabaseEntity.post())
+                .when(DatabaseEntity.list())
+                .then(DatabaseExistsAssertion.getAssertion(databaseName, 1))
                 .when(DatabaseEntity.post(), key(databaseName))
                 .expect(BadRequestException.class, key(databaseName))
                 .validate();
@@ -106,16 +106,15 @@ public class DatabaseTest extends AbstractIntegrationTest {
             @Description TestCaseDescription testCaseDescription) {
         String databaseName = getNameGenerator().getRandomNameForResource();
         testContext
-                .withDescription(testCaseDescription)
                 .given(DatabaseEntity.class)
                 .withType(type.name())
                 .withName(databaseName)
-                .when(DatabaseEntity.post(), key(databaseName))
-                .when(DatabaseEntity.list(), key(databaseName))
-                .then(DatabaseExistsAssertion.getAssertion(databaseName, 1), key(databaseName))
+                .when(DatabaseEntity.post())
+                .when(DatabaseEntity.list())
+                .then(DatabaseExistsAssertion.getAssertion(databaseName, 1))
                 .given(DatabaseTestEntity.class)
                 .withExistingName(databaseName)
-                .when(DatabaseTestEntity.testConnection(), key(databaseName))
+                .when(DatabaseTestEntity.testConnection())
                 .validate();
     }
 
@@ -130,7 +129,6 @@ public class DatabaseTest extends AbstractIntegrationTest {
             @Description TestCaseDescription testCaseDescription) {
         String generatedKey = getNameGenerator().getRandomNameForResource();
         testContext
-                .withDescription(testCaseDescription)
                 .given(DatabaseEntity.class)
                 .withName(databaseName)
                 .withConnectionUserName(username)
@@ -155,7 +153,6 @@ public class DatabaseTest extends AbstractIntegrationTest {
         String generatedKey = getNameGenerator().getRandomNameForResource();
 
         testContext
-                .withDescription(testCaseDescription)
                 .given(DatabaseTestEntity.class)
                 .withRequest(new DatabaseV4Request())
                 .withName(databaseName)
@@ -176,16 +173,15 @@ public class DatabaseTest extends AbstractIntegrationTest {
             when = "calling test database endpoint with a non-existent database name",
             then = "the test connection should return access denied")
     public void testDatabaseTestConnectionWithNonExistingDbName(TestContext testContext) {
-        String generatedKey = getNameGenerator().getRandomNameForResource();
         testContext
                 .given(DatabaseTestEntity.class)
                 .withExistingName("aNonExistentDb")
-                .when(DatabaseTestEntity.testConnection(), key(generatedKey))
-                .then(DatabaseTestAccessDeniedAssertion.getAssertion(), key(generatedKey))
+                .when(DatabaseTestEntity.testConnection())
+                .then(DatabaseTestAccessDeniedAssertion.getAssertion())
                 .validate();
     }
 
-    @DataProvider(name = DB_TYPE_PROVIDER, parallel = true)
+    @DataProvider(name = DB_TYPE_PROVIDER)
     public Object[][] provideTypes() {
         List<DatabaseType> databaseTypeList = Arrays.asList(DatabaseType.values());
         Object[][] objects = new Object[databaseTypeList.size()][3];
@@ -195,14 +191,14 @@ public class DatabaseTest extends AbstractIntegrationTest {
                     objects[databaseTypeList.indexOf(databaseType)][1] = databaseType;
                     objects[databaseTypeList.indexOf(databaseType)][2] =
                             new TestCaseDescription.TestCaseDescriptionBuilder()
-                            .given("there is a running cloudbreak")
-                            .when("sending database create request with databaseType '" + databaseType + '\'')
-                            .then("creation should be successful");
+                                    .given("there is a running cloudbreak")
+                                    .when("sending database create request with databaseType '" + databaseType + '\'')
+                                    .then("creation should be successful");
                 });
         return objects;
     }
 
-    @DataProvider(name = INVALID_ATTRIBUTE_PROVIDER, parallel = true)
+    @DataProvider(name = INVALID_ATTRIBUTE_PROVIDER)
     public Object[][] provideInvalidAttributes() {
         return new Object[][]{
                 {

@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
-import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
-
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.Stack;
@@ -16,32 +14,20 @@ public class ClouderaManagerStackCreationTest extends AbstractClouderaManagerTes
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-        given = "there is a running cloudbreak",
-        when = "a cluster with Cloudera Manager is created",
-        then = "the cluster should be available")
-    public void createRegularClouderaManagerClusterThenWaitForAvailableThenNoExceptionOccurs(TestContext testContext) {
+            given = "there is a running cloudbreak",
+            when = "a cluster with Cloudera Manager is created",
+            then = "the cluster should be available")
+    public void testCreateNewRegularCluster(TestContext testContext) {
         String name = testContext.get(ClusterDefinitionTestDto.class).getRequest().getName();
-        String cluster = getNameGenerator().getRandomNameForResource();
-        String cm = getNameGenerator().getRandomNameForResource();
-        String stack = getNameGenerator().getRandomNameForResource();
-
-        // TODO: fix this shit
+        String clouderaManager = "cm";
+        String cluster = "cmcluster";
         testContext
-                .given("cm", ClouderaManagerTestDto.class)
-                .given("cmcluster", ClusterEntity.class)
-                .withClusterDefinitionName(name).withValidateClusterDefinition(Boolean.FALSE).withClouderaManager("cm")
-                .given(StackTestDto.class).withCluster("cmcluster")
+                .given(clouderaManager, ClouderaManagerTestDto.class)
+                .given(cluster, ClusterEntity.class)
+                .withClusterDefinitionName(name).withValidateClusterDefinition(Boolean.FALSE).withClouderaManager(clouderaManager)
+                .given(StackTestDto.class).withCluster(cluster)
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
-                .given(cm, AmbariEntity.class)
-                .withClusterDefinitionName(name)
-                .withValidateClusterDefinition(Boolean.FALSE)
-                .given(cluster, ClusterEntity.class)
-                .withAmbari(cm)
-                .given(stack, StackTestDto.class)
-                .withCluster(cluster)
-                .when(Stack.postV4(), key(stack))
-                .await(STACK_AVAILABLE, key(stack))
                 .validate();
     }
 }

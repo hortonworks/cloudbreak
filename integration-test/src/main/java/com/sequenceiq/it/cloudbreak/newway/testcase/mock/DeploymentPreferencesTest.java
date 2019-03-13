@@ -21,9 +21,9 @@ public class DeploymentPreferencesTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-        given = "there is a running cloudbreak with MOCK deployment prefernces",
-        when = "calling the get deployment preferences endpoint",
-        then = "the deployment preferences should be returned")
+            given = "there is a running cloudbreak with MOCK deployment prefernces",
+            when = "calling the get deployment preferences endpoint",
+            then = "the deployment preferences should be returned")
     public void testGetDeploymentPreferences(MockedTestContext testContext) {
         testContext
                 .given(DeploymentPreferencesTestDto.class)

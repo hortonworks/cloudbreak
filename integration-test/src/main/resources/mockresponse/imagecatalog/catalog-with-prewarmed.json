@@ -13,7 +13,7 @@
         "os_type": "redhat7",
         "uuid": "f6e778fc-7f17-4535-9021-515351df3691",
         "package-versions": {
-          "ambari": "2.5.2.2",
+          "ambari": "2.7.100.0-266",
           "salt": "2017.7.5",
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
           "stack": "2.6.1.0"
@@ -39,9 +39,9 @@
           ]
         },
         "repo": {
-          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.5.2.2"
+          "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.7.100.0-266"
         },
-        "version": "2.5.2.2"
+        "version": "2.7.100.0-266"
       },
       {
         "date": "2017-10-17",
@@ -55,7 +55,7 @@
         "os_type": "redhat7",
         "uuid": "1a6eadd2-5B95-4EC9-B300-13dc43208b64",
         "package-versions": {
-          "ambari": "2.5.2.2",
+          "ambari": "2.7.100.0-266",
           "salt": "2017.7.5",
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
           "stack": "2.6.1.0"
@@ -81,9 +81,9 @@
           ]
         },
         "repo": {
-          "redhat7": "http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.5.2.2"
+          "redhat7": "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.7.100.0-266"
         },
-        "version": "2.5.2.2"
+        "version": "2.7.100.0-266"
       }
     ],
     "hdf-images": [],

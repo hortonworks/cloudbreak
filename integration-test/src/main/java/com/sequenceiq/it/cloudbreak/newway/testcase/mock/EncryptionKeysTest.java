@@ -9,8 +9,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.newway.action.encryptionkeys.PlatformEncryptionKeysTestAction;
+import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription;
@@ -28,9 +28,9 @@ public class EncryptionKeysTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-        given = "there is a prepared MOCK credential with encryption keys",
-        when = "calling get encryption keys endpoint",
-        then = "the MOCK related encryption keys should be returned")
+            given = "there is a prepared MOCK credential with encryption keys",
+            when = "calling get encryption keys endpoint",
+            then = "the MOCK related encryption keys should be returned")
     public void getPlatformEncryptionKeysWithMockCredentialThenReturnWithPlatformRelatedKeys(MockedTestContext testContext) {
         String credentialName = getNameGenerator().getRandomNameForResource();
         testContext
@@ -58,35 +58,35 @@ public class EncryptionKeysTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @DataProvider(name = "contextWithCredentialNameAndException", parallel = true)
+    @DataProvider(name = "contextWithCredentialNameAndException")
     public Object[][] provideInvalidAttributes() {
         return new Object[][]{
                 {
-                    getBean(MockedTestContext.class),
-                    "",
-                    BadRequestException.class,
-                    new TestCaseDescription.TestCaseDescriptionBuilder()
-                        .given("there is a running cloudbreak")
-                        .when("calling get encryption keys endpoint with empty credential name")
-                        .then("a BadRequestException should be returned")
+                        getBean(MockedTestContext.class),
+                        "",
+                        BadRequestException.class,
+                        new TestCaseDescription.TestCaseDescriptionBuilder()
+                                .given("there is a running cloudbreak")
+                                .when("calling get encryption keys endpoint with empty credential name")
+                                .then("a BadRequestException should be returned")
                 },
                 {
-                    getBean(MockedTestContext.class),
-                    null,
-                    BadRequestException.class,
-                    new TestCaseDescription.TestCaseDescriptionBuilder()
-                        .given("there is a running cloudbreak")
-                        .when("calling get encryption keys endpoint with 'null' credential name")
-                        .then("a BadRequestException should be returned")
+                        getBean(MockedTestContext.class),
+                        null,
+                        BadRequestException.class,
+                        new TestCaseDescription.TestCaseDescriptionBuilder()
+                                .given("there is a running cloudbreak")
+                                .when("calling get encryption keys endpoint with 'null' credential name")
+                                .then("a BadRequestException should be returned")
                 },
                 {
-                    getBean(MockedTestContext.class),
-                    "andNowForSomethingCompletelyDifferent",
-                    ForbiddenException.class,
-                    new TestCaseDescription.TestCaseDescriptionBuilder()
-                            .given("there is a running cloudbreak")
-                            .when("calling get encryption keys endpoint with a non-existent credential name")
-                            .then("a ForbiddenException should be returned")
+                        getBean(MockedTestContext.class),
+                        "andNowForSomethingCompletelyDifferent",
+                        ForbiddenException.class,
+                        new TestCaseDescription.TestCaseDescriptionBuilder()
+                                .given("there is a running cloudbreak")
+                                .when("calling get encryption keys endpoint with a non-existent credential name")
+                                .then("a ForbiddenException should be returned")
                 }
         };
     }

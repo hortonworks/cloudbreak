@@ -7,13 +7,15 @@ import javax.inject.Inject;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackV4EntityBase;
+import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
 
 public abstract class AbstractCloudProvider implements CloudProvider {
 
     private static final String DEFAULT_SUBNET_CIDR = "10.0.0.0/16";
+
+    private static final String CLOUDBREAK_DEFAULT = "cloudbreak-default";
 
     @Inject
     private TestParameter testParameter;
@@ -24,12 +26,12 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     @Override
     public ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog) {
-        return imageCatalog.withName("cloudbreak-default").withUrl(null);
+        return imageCatalog.withName(CLOUDBREAK_DEFAULT).withUrl(null);
     }
 
     @Override
     public ImageSettingsEntity imageSettings(ImageSettingsEntity imageSettings) {
-        imageSettings.withImageCatalog("default");
+        imageSettings.withImageCatalog(CLOUDBREAK_DEFAULT);
         return imageSettings;
     }
 

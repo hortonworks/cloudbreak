@@ -39,33 +39,33 @@ public class SecurityRulesTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @DataProvider(name = DATA_PROVIDER_FOR_SECURITY_RULES_TEST, parallel = true)
+    @DataProvider(name = DATA_PROVIDER_FOR_SECURITY_RULES_TEST)
     public Object[][] dataProvider() {
         var testContext = getBean(MockedTestContext.class);
-        return new Object[][] {
+        return new Object[][]{
                 {
-                    testContext,
-                    false,
-                    new TestCaseDescriptionBuilder()
-                        .given("Query default security rules for cluster which is NOT knox enabled")
-                        .when("calling get default security groups")
-                        .then("returns default security rules and knox port")
+                        testContext,
+                        false,
+                        new TestCaseDescriptionBuilder()
+                                .given("Query default security rules for cluster which is NOT knox enabled")
+                                .when("calling get default security groups")
+                                .then("returns default security rules and knox port")
                 },
                 {
-                    testContext,
-                    true,
-                    new TestCaseDescriptionBuilder()
-                        .given("Query default security rules for cluster which is knox enabled")
-                        .when("calling get default security groups")
-                        .then("returns default security rules without knox port")
+                        testContext,
+                        true,
+                        new TestCaseDescriptionBuilder()
+                                .given("Query default security rules for cluster which is knox enabled")
+                                .when("calling get default security groups")
+                                .then("returns default security rules without knox port")
                 },
                 {
-                    testContext,
-                    null,
-                    new TestCaseDescriptionBuilder()
-                        .given("Query default security rules for cluster with null")
-                        .when("calling get default security groups")
-                        .then("returns default security rules without knox port")
+                        testContext,
+                        null,
+                        new TestCaseDescriptionBuilder()
+                                .given("Query default security rules for cluster with null")
+                                .when("calling get default security groups")
+                                .then("returns default security rules without knox port")
                 }
         };
     }

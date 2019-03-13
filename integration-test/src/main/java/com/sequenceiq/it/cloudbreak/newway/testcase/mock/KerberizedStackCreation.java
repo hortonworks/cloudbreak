@@ -8,16 +8,16 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.context.Description;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.action.kerberos.KerberosTestAction;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
+import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.ActiveDirectoryKerberosDescriptorTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.FreeIPAKerberosDescriptorTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.mock.model.SaltMock;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 

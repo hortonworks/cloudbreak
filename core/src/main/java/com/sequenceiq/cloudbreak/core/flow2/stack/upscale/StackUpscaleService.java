@@ -156,7 +156,7 @@ public class StackUpscaleService {
             String errorReason = payload.getException().getMessage();
             stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_FAILED, "Stack update failed. " + errorReason);
             flowMessageService.fireEventAndLog(stackId, Msg.STACK_INFRASTRUCTURE_UPDATE_FAILED, UPDATE_FAILED.name(), errorReason);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             LOGGER.info("Exception during the handling of stack scaling failure: {}", e.getMessage());
         }
     }

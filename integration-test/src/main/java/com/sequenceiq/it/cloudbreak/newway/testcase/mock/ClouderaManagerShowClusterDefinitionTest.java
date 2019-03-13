@@ -29,9 +29,9 @@ public class ClouderaManagerShowClusterDefinitionTest extends AbstractClouderaMa
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "cm cluster",
-            when = "cluster does not exist",
-            then = "we should return with the future cluster definition")
+            given = "there is a running cloudbreak with a not alive cluster",
+            when = "the generated cluster definition is requested",
+            then = "the valid future cluster definition is returned")
     public void testGetClusterDefinitionWhenClusterIsNotAliveThenShouldReturnWithClusterDefinition(MockedTestContext testContext) {
         String clusterName = getNameGenerator().getRandomNameForResource();
         String clusterDefinitionName = testContext.get(ClusterDefinitionTestDto.class).getRequest().getName();
@@ -40,7 +40,10 @@ public class ClouderaManagerShowClusterDefinitionTest extends AbstractClouderaMa
 
         testContext
                 .given(cm, AmbariEntity.class)
-                .given(cmcluster, ClusterEntity.class).withAmbari(cm).withClusterDefinitionName(clusterDefinitionName).withValidateClusterDefinition(Boolean.FALSE)
+                .given(cmcluster, ClusterEntity.class)
+                .withAmbari(cm)
+                .withClusterDefinitionName(clusterDefinitionName)
+                .withValidateClusterDefinition(Boolean.FALSE)
                 .given(StackTestDto.class).withCluster(cmcluster)
                 .withName(clusterName)
                 .when(Stack.generatedClusterDefinition())
@@ -51,9 +54,9 @@ public class ClouderaManagerShowClusterDefinitionTest extends AbstractClouderaMa
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "a cm cluster",
-            when = "cluster exist",
-            then = "we should return with the generated cluster definition")
+            given = "there is a running cloudbreak with an alive cluster",
+            when = "the generated cluster definition is requested",
+            then = "the valid generated cluster definition is returned")
     public void testGetClusterDefinitionWhenClusterIsAliveThenShouldReturnWithClusterDefinition(MockedTestContext testContext) {
         String clusterName = getNameGenerator().getRandomNameForResource();
         String clusterDefinitionName = testContext.get(ClusterDefinitionTestDto.class).getRequest().getName();
@@ -61,7 +64,10 @@ public class ClouderaManagerShowClusterDefinitionTest extends AbstractClouderaMa
         String cm = getNameGenerator().getRandomNameForResource();
         testContext
                 .given(cm, ClouderaManagerTestDto.class)
-                .given(cmcluster, ClusterEntity.class).withClouderaManager(cm).withClusterDefinitionName(clusterDefinitionName).withValidateClusterDefinition(Boolean.FALSE)
+                .given(cmcluster, ClusterEntity.class)
+                .withClouderaManager(cm)
+                .withClusterDefinitionName(clusterDefinitionName)
+                .withValidateClusterDefinition(Boolean.FALSE)
                 .given(StackTestDto.class).withCluster(cmcluster)
                 .withName(clusterName)
                 .when(Stack.postV4())

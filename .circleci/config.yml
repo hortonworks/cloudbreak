@@ -24,7 +24,7 @@ jobs:
             - mock-caas/build/libs/mock-caas.jar
             - integration-test/build/libs/cloudbreak-integration-test.jar
 
-  code-quality-check-checkstyle-test:
+  checkstyle-test:
     docker:
       - image: circleci/openjdk:10-jdk
     environment:
@@ -48,7 +48,7 @@ jobs:
       - store_artifacts:
           path: ~/checkstyle-test
 
-  code-quality-check-checkstyle-main:
+  checkstyle-main:
     docker:
       - image: circleci/openjdk:10-jdk
     environment:
@@ -72,7 +72,7 @@ jobs:
       - store_artifacts:
           path: ~/checkstyle
 
-  code-quality-check-spotbugs-main:
+  spotbugs-main:
     docker:
       - image: circleci/openjdk:10-jdk
     environment:
@@ -96,7 +96,7 @@ jobs:
       - store_artifacts:
           path: ~/spotbugs-main
 
-  code-quality-check-spotbugs-test:
+  spotbugs-test:
     docker:
       - image: circleci/openjdk:10-jdk
     environment:
@@ -206,16 +206,16 @@ workflows:
   build_and_test:
     jobs:
       - build
-      - code-quality-check-spotbugs-main:
+      - spotbugs-main:
           requires:
             - build
-      - code-quality-check-spotbugs-test:
+      - spotbugs-test:
           requires:
             - build
-      - code-quality-check-checkstyle-main:
+      - checkstyle-main:
           requires:
             - build
-      - code-quality-check-checkstyle-test:
+      - checkstyle-test:
           requires:
             - build
       - unit-test:

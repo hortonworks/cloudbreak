@@ -19,9 +19,9 @@ public class DisksTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-        given = "there is a running cloudbreak",
-        when = "calling get disk types endpoint",
-        then = "the disk types should be returned")
+            given = "there is a running cloudbreak",
+            when = "calling get disk types endpoint",
+            then = "the disk types should be returned")
     public void testGetPlatformDisks(MockedTestContext testContext) {
         testContext
                 .given(PlatformDiskTestDto.class)

@@ -59,35 +59,35 @@ public class AccessConfigsTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @DataProvider(name = "contextWithCredentialNameAndException", parallel = true)
+    @DataProvider(name = "contextWithCredentialNameAndException")
     public Object[][] provideInvalidAttributes() {
         return new Object[][]{
                 {
-                    getBean(MockedTestContext.class),
-                    "",
-                    BadRequestException.class,
-                    new TestCaseDescriptionBuilder()
-                        .given("a working Cloudbreak")
-                        .when("get access config is called with empty credential name")
-                        .then("returns with BadRequestException for MOCK")
+                        getBean(MockedTestContext.class),
+                        "",
+                        BadRequestException.class,
+                        new TestCaseDescriptionBuilder()
+                                .given("a working Cloudbreak")
+                                .when("get access config is called with empty credential name")
+                                .then("returns with BadRequestException for MOCK")
                 },
                 {
-                    getBean(MockedTestContext.class),
-                    null,
-                    BadRequestException.class,
-                    new TestCaseDescriptionBuilder()
-                        .given("a working Cloudbreak")
-                        .when("get access config is called with null credential name")
-                        .then("returns with BadRequestException for MOCK")
+                        getBean(MockedTestContext.class),
+                        null,
+                        BadRequestException.class,
+                        new TestCaseDescriptionBuilder()
+                                .given("a working Cloudbreak")
+                                .when("get access config is called with null credential name")
+                                .then("returns with BadRequestException for MOCK")
                 },
                 {
-                    getBean(MockedTestContext.class),
-                    "andNowForSomethingCompletelyDifferent",
-                    ForbiddenException.class,
-                    new TestCaseDescriptionBuilder()
-                        .given("a working Cloudbreak")
-                        .when("get access config is called with not existing credential name")
-                        .then("returns with ForbiddenException for MOCK")}
+                        getBean(MockedTestContext.class),
+                        "andNowForSomethingCompletelyDifferent",
+                        ForbiddenException.class,
+                        new TestCaseDescriptionBuilder()
+                                .given("a working Cloudbreak")
+                                .when("get access config is called with not existing credential name")
+                                .then("returns with ForbiddenException for MOCK")}
         };
     }
 
