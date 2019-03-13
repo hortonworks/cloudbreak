@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cm;
+package com.sequenceiq.cloudbreak.cm.polling;
 
 import com.cloudera.api.swagger.client.ApiClient;
 import com.sequenceiq.cloudbreak.cluster.service.StackAware;

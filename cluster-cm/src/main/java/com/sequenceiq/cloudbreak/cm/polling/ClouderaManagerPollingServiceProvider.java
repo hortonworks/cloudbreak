@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cm;
+package com.sequenceiq.cloudbreak.cm.polling;
 
 import java.math.BigDecimal;
 
@@ -9,6 +9,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.client.ApiClient;
+import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerHostStatusChecker;
+import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerKerberosConfigureListenerTask;
+import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerServiceStartListenerTask;
+import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerStartupListenerTask;
+import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerStopListenerTask;
+import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerTemplateInstallChecker;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
@@ -21,6 +27,8 @@ public class ClouderaManagerPollingServiceProvider {
     private static final int POLL_INTERVAL = 5000;
 
     private static final int MAX_ATTEMPT = 120;
+
+    private static final int INFINITE_ATTEMPT = -1;
 
     @Inject
     private PollingService<ClouderaManagerPollerObject> clouderaManagerPollerService;
@@ -43,7 +51,10 @@ public class ClouderaManagerPollingServiceProvider {
     @Inject
     private ClouderaManagerTemplateInstallChecker clouderaManagerTemplateInstallChecker;
 
-    PollingResult clouderaManagerStartupPollerObjectPollingService(Stack stack, ApiClient apiClient) {
+    @Inject
+    private ClouderaManagerKerberosConfigureListenerTask kerberosConfigureListenerTask;
+
+    public PollingResult clouderaManagerStartupPollerObjectPollingService(Stack stack, ApiClient apiClient) {
         LOGGER.debug("Waiting for Cloudera Manager startup. [Server address: {}]", stack.getAmbariIp());
         ClouderaManagerPollerObject clouderaManagerPollerObject = new ClouderaManagerPollerObject(stack, apiClient);
         return clouderaManagerPollerService.pollWithTimeoutSingleFailure(
@@ -71,7 +82,7 @@ public class ClouderaManagerPollingServiceProvider {
                 clouderaManagerTemplateInstallChecker,
                 clouderaManagerCommandPollerObject,
                 POLL_INTERVAL,
-                MAX_ATTEMPT);
+                INFINITE_ATTEMPT);
     }
 
     public PollingResult stopPollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
@@ -89,6 +100,16 @@ public class ClouderaManagerPollingServiceProvider {
         ClouderaManagerCommandPollerObject clouderaManagerPollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, commandId);
         return clouderaManagerCommandPollerObjectPollingService.pollWithTimeoutSingleFailure(
                 clouderaManagerServiceStartListenerTask,
+                clouderaManagerPollerObject,
+                POLL_INTERVAL,
+                MAX_ATTEMPT);
+    }
+
+    public PollingResult kerberosConfigurePollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
+        LOGGER.debug("Waiting for Cloudera Manager to configure kerberos. [Server address: {}]", stack.getAmbariIp());
+        ClouderaManagerCommandPollerObject clouderaManagerPollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, commandId);
+        return clouderaManagerCommandPollerObjectPollingService.pollWithTimeoutSingleFailure(
+                kerberosConfigureListenerTask,
                 clouderaManagerPollerObject,
                 POLL_INTERVAL,
                 MAX_ATTEMPT);

@@ -1,8 +1,11 @@
-package com.sequenceiq.cloudbreak.cm;
+package com.sequenceiq.cloudbreak.cm.polling.task;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
+import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 
 @Service
 public class ClouderaManagerTemplateInstallChecker extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
@@ -21,7 +24,7 @@ public class ClouderaManagerTemplateInstallChecker extends AbstractClouderaManag
     }
 
     @Override
-    String getCommandName() {
+    protected String getCommandName() {
         return "Template install";
     }
 }
