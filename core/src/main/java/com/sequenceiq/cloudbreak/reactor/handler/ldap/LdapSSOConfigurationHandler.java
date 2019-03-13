@@ -63,7 +63,7 @@ public class LdapSSOConfigurationHandler implements ReactorEventHandler<LdapSSOC
                 LOGGER.debug("Can not setup LDAP and SSO on API, because Ambari repo is not found");
             }
             response = new LdapSSOConfigurationSuccess(stackId);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             LOGGER.info("Error during LDAP configuration, stackId: " + stackId, e);
             response = new LdapSSOConfigurationFailed(stackId, e);
         }

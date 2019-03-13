@@ -49,9 +49,9 @@ public class RepoConfigValidationTest extends AbstractIntegrationTest {
             data[i][1] = testDataValues[i];
             data[i][2] =
                     new TestCaseDescription.TestCaseDescriptionBuilder()
-                    .given("a repository config with " + testDataValues[i])
-                    .when("calling validation endpoint")
-                    .then("the repository should be valid");
+                            .given("a repository config with " + testDataValues[i])
+                            .when("calling validation endpoint")
+                            .then("the repository should be valid");
         }
         return data;
     }

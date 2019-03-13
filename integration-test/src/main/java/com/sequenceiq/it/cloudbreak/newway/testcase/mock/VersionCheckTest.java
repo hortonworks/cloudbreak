@@ -24,7 +24,7 @@ public class VersionCheckTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = "contextWithTestContextAndInvalidVersionValue")
     public void testGetVersionByInvalidVersionNumber(MockedTestContext testContext, String invalidVersionValue,
-        @Description TestCaseDescription testCaseDescription) {
+            @Description TestCaseDescription testCaseDescription) {
         testContext
                 .given(VersionCheckTestDto.class)
                 .withVersion(invalidVersionValue)
@@ -38,14 +38,14 @@ public class VersionCheckTest extends AbstractIntegrationTest {
     public Object[][] provideInvalidAttributes() {
         return new Object[][]{
                 {
-                    getBean(MockedTestContext.class),
-                    "",
-                    description("a version check", "version is empty", "version is not ok")
+                        getBean(MockedTestContext.class),
+                        "",
+                        description("a version check", "version is empty", "version is not ok")
                 },
                 {
-                    getBean(MockedTestContext.class),
-                    "someOtherInvalidValue",
-                    description("a version check", "version is invalid", "version is not ok")
+                        getBean(MockedTestContext.class),
+                        "someOtherInvalidValue",
+                        description("a version check", "version is invalid", "version is not ok")
                 }
         };
     }

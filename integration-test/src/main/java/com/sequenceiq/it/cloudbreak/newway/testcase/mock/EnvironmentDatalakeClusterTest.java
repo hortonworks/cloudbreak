@@ -20,10 +20,9 @@ import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.context.Description;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
+import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
@@ -33,6 +32,7 @@ import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
@@ -174,7 +174,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withName(testContext.get(EnvironmentEntity.class).getName())
                 .withCredentialName(null)
                 .withCredential("newCred")
-                .when(Environment::changeCredential,  key(forbiddenKey))
+                .when(Environment::changeCredential, key(forbiddenKey))
                 .expect(BadRequestException.class, key(forbiddenKey))
                 .validate();
     }
@@ -225,7 +225,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withEnvironment(EnvironmentEntity.class)
                 .when(Stack.postV4())
                 .validate();
-                createDatalake(testContext, rdsList, BP_NAME_DL);
+        createDatalake(testContext, rdsList, BP_NAME_DL);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)

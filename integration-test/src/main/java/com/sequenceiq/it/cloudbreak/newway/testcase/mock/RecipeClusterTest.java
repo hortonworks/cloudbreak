@@ -129,8 +129,10 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
             given = "a created cluster with post ambari install recipe and ldap attached to the cluster",
             when = "creating cluster",
             then = "the LDAP sync is hooked for this salt state in the top.sls")
-    public void testWhenThereIsNoRecipeButLdapHasAttachedThenThePostAmbariRecipeShouldRunWhichResultThreeHighStateCall(TestContext testContext) {
+    public void testWhenThereIsNoRecipeButLdapHasAttachedThenThePostAmbariRecipeShouldRunWhichResultThreeHighStateCall(MockedTestContext testContext) {
         String ldapName = creator.getRandomNameForResource();
+        testContext.getModel().getAmbariMock().postSyncLdap();
+        testContext.getModel().getAmbariMock().putConfigureLdap();
         testContext
                 .given(LdapConfigTestDto.class)
                 .withName(ldapName)

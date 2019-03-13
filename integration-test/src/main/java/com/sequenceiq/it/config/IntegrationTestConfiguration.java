@@ -33,7 +33,7 @@ public class IntegrationTestConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationTestConfiguration.class);
 
-    @Value("${integrationtest.spark.sparkPoolSize:80}")
+    @Value("${integrationtest.spark.sparkPoolSize:300}")
     private int sparkPoolSize;
 
     @Bean

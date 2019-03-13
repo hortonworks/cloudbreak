@@ -32,7 +32,6 @@ import com.sequenceiq.it.cloudbreak.newway.assertion.CheckClusterTemplateType;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckStackTemplateAfterClusterTemplateCreation;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckStackTemplateAfterClusterTemplateCreationWithProperties;
 import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
-import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.mock.MockCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
@@ -65,7 +64,6 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
     @BeforeMethod
     public void beforeMethod(Method method, Object[] data) {
         MockedTestContext testContext = (MockedTestContext) data[0];
-
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
@@ -93,9 +91,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .when(new ClusterTemplateGetAction(), key(generatedKey))
                 .then(new CheckClusterTemplateGetResponse(), key(generatedKey))
                 .then(new CheckStackTemplateAfterClusterTemplateCreation(), key(generatedKey))
-                .capture(ClusterTemplateEntity::count, key(generatedKey))
                 .when(new ClusterTemplateV4DeleteAction(), key(generatedKey))
-                .capture(ct -> ct.count() - 1, key(generatedKey))
                 .validate();
     }
 
@@ -224,9 +220,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .withEveryProperties()
                 .given(ClusterTemplateEntity.class)
                 .withStackTemplate("stackTemplate")
-                .capture(ClusterTemplateEntity::count, key("ctSize"))
                 .when(new ClusterTemplateV4CreateAction())
-                .verify(ct -> ct.count() - 1, key("ctSize"))
                 .when(new ClusterTemplateGetAction())
                 .then(new CheckStackTemplateAfterClusterTemplateCreationWithProperties())
                 .when(new LaunchClusterFromTemplateAction("stackTemplate"))

@@ -6,11 +6,13 @@ import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
+import org.springframework.http.HttpMethod;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.Stack;
+import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
@@ -20,6 +22,7 @@ import com.sequenceiq.it.cloudbreak.newway.entity.AmbariRepositoryV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.mock.model.AmbariMock;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class LdapClusterTest extends AbstractIntegrationTest {
@@ -57,9 +60,8 @@ public class LdapClusterTest extends AbstractIntegrationTest {
                 .withCluster()
                 .when(Stack.postV4())
                 .await(STACK_AVAILABLE)
-                // TODO should be checked
-                //.then(MockVerification.verify(HttpMethod.POST, AmbariMock.LDAP_SYNC_EVENTS))
-                //.then(MockVerification.verify(HttpMethod.PUT, AmbariMock.LDAP_CONFIGURATION))
+                .then(MockVerification.verify(HttpMethod.POST, AmbariMock.LDAP_SYNC_EVENTS))
+                .then(MockVerification.verify(HttpMethod.PUT, AmbariMock.LDAP_CONFIGURATION))
                 .validate();
     }
 

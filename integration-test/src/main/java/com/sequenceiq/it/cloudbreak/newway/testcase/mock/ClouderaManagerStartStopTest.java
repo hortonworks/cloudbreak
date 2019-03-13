@@ -28,9 +28,9 @@ public class ClouderaManagerStartStopTest extends AbstractClouderaManagerTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-        given = "a Cloudera Manager cluster",
-        when = "the cluster is stoppend and started",
-        then = "the cluster should be available")
+            given = "a Cloudera Manager cluster",
+            when = "the cluster is stoppend and started",
+            then = "the cluster should be available")
     public void createRegularClouderaManagerClusterThenWaitForAvailableThenStopThenStartThenWaitForAvailableThenNoExceptionOccurs(
             MockedTestContext testContext) {
         mockSpi(testContext);
@@ -42,8 +42,12 @@ public class ClouderaManagerStartStopTest extends AbstractClouderaManagerTest {
         // TODO: maybe this is good
         testContext
                 .given(cm, ClouderaManagerTestDto.class)
-                .given(cmcluster, ClusterEntity.class).withValidateClusterDefinition(Boolean.FALSE).withClusterDefinitionName(name).withClouderaManager(cm)
-                .given(stack,StackTestDto.class).withCluster(cmcluster)
+                .given(cmcluster, ClusterEntity.class)
+                .withValidateClusterDefinition(Boolean.FALSE)
+                .withClusterDefinitionName(name)
+                .withClouderaManager(cm)
+                .given(stack, StackTestDto.class)
+                .withCluster(cmcluster)
                 .when(Stack.postV4(), key(stack))
                 .await(STACK_AVAILABLE, key(stack))
                 .when(StackTestAction::stop, key(stack))

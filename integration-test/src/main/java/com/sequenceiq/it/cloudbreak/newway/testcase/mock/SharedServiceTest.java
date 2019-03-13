@@ -86,13 +86,15 @@ public class SharedServiceTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(given = "a datalake cluster", when = "hive rds, ranger rds and ldap are attached", then = "the cluster will be available")
-    public void testCreateDatalakeCluster(TestContext testContext) {
+    public void testCreateDatalakeCluster(MockedTestContext testContext) {
         String hiveRdsName = creator.getRandomNameForResource();
         String rangerRdsName = creator.getRandomNameForResource();
         String ldapName = creator.getRandomNameForResource();
         String clusterDefinitionName = creator.getRandomNameForResource();
         DatabaseV4Request hiveRds = rdsRequest(DatabaseType.HIVE, hiveRdsName);
         DatabaseV4Request rangerRds = rdsRequest(DatabaseType.RANGER, rangerRdsName);
+        testContext.getModel().getAmbariMock().postSyncLdap();
+        testContext.getModel().getAmbariMock().putConfigureLdap();
         testContext
                 .given(HIVE, DatabaseEntity.class).withRequest(hiveRds).withName(hiveRdsName)
                 .when(DatabaseEntity.post())

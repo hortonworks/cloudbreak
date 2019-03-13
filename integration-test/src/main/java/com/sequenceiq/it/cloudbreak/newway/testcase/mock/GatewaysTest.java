@@ -9,8 +9,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.newway.action.gateway.PlatformGatewaysTestAction;
+import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription;
@@ -44,7 +44,7 @@ public class GatewaysTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = "contextWithCredentialNameAndException")
     public void testGetPlatformGatewaysByCredentialNameWhenCredentialIsInvalid(MockedTestContext testContext, String credentialName,
-        Class<Exception> exception, @Description TestCaseDescription testCaseDescription) {
+            Class<Exception> exception, @Description TestCaseDescription testCaseDescription) {
         String exceptionKey = getNameGenerator().getRandomNameForResource();
         testContext
                 .given(PlatformGatewaysTestDto.class)
@@ -58,31 +58,31 @@ public class GatewaysTest extends AbstractIntegrationTest {
     public Object[][] provideInvalidAttributes() {
         return new Object[][]{
                 {
-                    getBean(MockedTestContext.class),
-                    "",
-                    BadRequestException.class,
-                    new TestCaseDescription.TestCaseDescriptionBuilder()
-                        .given("created a MOCK credential")
-                        .when("calling gateways endpoint with a non existing credential for getting cloud gateways")
-                        .then("getting a BadRequestException")
+                        getBean(MockedTestContext.class),
+                        "",
+                        BadRequestException.class,
+                        new TestCaseDescription.TestCaseDescriptionBuilder()
+                                .given("created a MOCK credential")
+                                .when("calling gateways endpoint with a non existing credential for getting cloud gateways")
+                                .then("getting a BadRequestException")
                 },
                 {
-                    getBean(MockedTestContext.class),
-                    null,
-                    BadRequestException.class,
-                    new TestCaseDescription.TestCaseDescriptionBuilder()
-                        .given("Testing database with unsupported database type")
-                        .when("calling gateways endpoint with a 'null' credential for getting cloud gateways")
-                        .then("getting a BadRequestException")
+                        getBean(MockedTestContext.class),
+                        null,
+                        BadRequestException.class,
+                        new TestCaseDescription.TestCaseDescriptionBuilder()
+                                .given("Testing database with unsupported database type")
+                                .when("calling gateways endpoint with a 'null' credential for getting cloud gateways")
+                                .then("getting a BadRequestException")
                 },
                 {
-                    getBean(MockedTestContext.class),
-                    "andNowForSomethingCompletelyDifferent",
-                    ForbiddenException.class,
-                    new TestCaseDescription.TestCaseDescriptionBuilder()
-                        .given("Testing database with unsupported database type")
-                        .when("calling gateways endpoint with a credential which not related to that account for getting cloud gateways")
-                        .then("getting a  ForbiddenException")
+                        getBean(MockedTestContext.class),
+                        "andNowForSomethingCompletelyDifferent",
+                        ForbiddenException.class,
+                        new TestCaseDescription.TestCaseDescriptionBuilder()
+                                .given("Testing database with unsupported database type")
+                                .when("calling gateways endpoint with a credential which not related to that account for getting cloud gateways")
+                                .then("getting a  ForbiddenException")
                 }
         };
     }

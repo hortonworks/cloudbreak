@@ -73,8 +73,10 @@ public class AmbariLdapService {
     }
 
     public void syncLdap(Stack stack, AmbariClient ambariClient) throws IOException, URISyntaxException {
-        LOGGER.debug("Sync LDAP on Ambari API for stack: {}", stack.getId());
-        ambariClient.syncLdap();
+        if (stack.getCluster().getLdapConfig() != null) {
+            LOGGER.debug("Sync LDAP on Ambari API for stack: {}", stack.getId());
+            ambariClient.syncLdap();
+        }
     }
 
 }

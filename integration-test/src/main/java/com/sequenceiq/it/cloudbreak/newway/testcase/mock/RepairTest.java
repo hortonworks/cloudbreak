@@ -69,7 +69,7 @@ public class RepairTest extends AbstractIntegrationTest {
         testContext.cleanupTestContextEntity();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a MOCK cluster without kerberos",
             when = "repair the master node on the cluster",
@@ -121,7 +121,7 @@ public class RepairTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a MOCK cluster with kerberos",
             when = "repair the master node on the cluster",

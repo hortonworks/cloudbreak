@@ -22,23 +22,23 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Respon
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
-import com.sequenceiq.it.cloudbreak.newway.context.Description;
-import com.sequenceiq.it.cloudbreak.newway.entity.CloudbreakEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.Environment;
 import com.sequenceiq.it.cloudbreak.newway.EnvironmentEntity;
 import com.sequenceiq.it.cloudbreak.newway.Stack;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.client.LdapConfigTestClient;
+import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.CloudbreakEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.EnvironmentSettingsV4Entity;
+import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapConfigTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfig;
 import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyConfigEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.newway.util.EnvironmentTestUtils;
 import com.sequenceiq.it.cloudbreak.newway.v3.StackActionV4;
@@ -78,8 +78,10 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
             given = "there is an available environment with attached rds, ldap and proxy configs",
             when = "a cluster is created and deleted in the env and detach environment endpoint is called for the attached resources",
             then = "all of the three resources should be detached")
-    public void testDetachFromEnvWithDeletedCluster(TestContext testContext) {
+    public void testDetachFromEnvWithDeletedCluster(MockedTestContext testContext) {
         createEnvWithResources(testContext);
+        testContext.getModel().getAmbariMock().postSyncLdap();
+        testContext.getModel().getAmbariMock().putConfigureLdap();
         testContext
                 .given(ClusterEntity.class)
                 .withDatabase(testContext.get(DatabaseEntity.class).getName())
@@ -135,8 +137,10 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
             given = "there is an environment with a attached shared resources and a running cluster that is using these resources",
             when = "the resource delete endpoints and environment delete endpoints are called",
             then = "non of the operations should succeed")
-    public void testCreateWlClusterDeleteFails(TestContext testContext) {
+    public void testCreateWlClusterDeleteFails(MockedTestContext testContext) {
         createEnvWithResources(testContext);
+        testContext.getModel().getAmbariMock().postSyncLdap();
+        testContext.getModel().getAmbariMock().putConfigureLdap();
         testContext
                 .given(ClusterEntity.class)
                 .withDatabase(testContext.get(DatabaseEntity.class).getName())
@@ -170,8 +174,10 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
             given = "there is an environment with a attached shared resources and a running cluster that is using these resources",
             when = "the detach resources from environment endpoint is called",
             then = "the resources should not be detached from the environment")
-    public void testCreateWlClusterDetachFails(TestContext testContext) {
+    public void testCreateWlClusterDetachFails(MockedTestContext testContext) {
         createEnvWithResources(testContext);
+        testContext.getModel().getAmbariMock().postSyncLdap();
+        testContext.getModel().getAmbariMock().putConfigureLdap();
         testContext
                 .given(ClusterEntity.class)
                 .withDatabase(testContext.get(DatabaseEntity.class).getName())
@@ -398,7 +404,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     private ClusterEntity setResources(TestContext testContext, String rdsName, String ldapName, String proxyName) {
         Set<String> rdsSet = new LinkedHashSet<>();
         rdsSet.add(rdsName);
-        ClusterEntity cluster = new ClusterEntity(testContext)
+        ClusterEntity cluster = testContext.given(ClusterEntity.class)
                 .valid()
                 .withRdsConfigNames(rdsSet)
                 .withClusterDefinitionName(CD_NAME);

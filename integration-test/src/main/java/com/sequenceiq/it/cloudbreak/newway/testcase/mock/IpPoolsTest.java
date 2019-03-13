@@ -9,8 +9,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.newway.action.ip.PlatformIpPoolsTestAction;
+import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription;
@@ -59,31 +59,31 @@ public class IpPoolsTest extends AbstractIntegrationTest {
     public Object[][] provideInvalidAttributes() {
         return new Object[][]{
                 {
-                    getBean(MockedTestContext.class),
-                    "",
-                    BadRequestException.class,
-                    new TestCaseDescription.TestCaseDescriptionBuilder()
-                        .given("created a MOCK credential")
-                        .when("calling ip pools endpoint with an empty credential name")
-                        .then("getting a BadRequestException")
+                        getBean(MockedTestContext.class),
+                        "",
+                        BadRequestException.class,
+                        new TestCaseDescription.TestCaseDescriptionBuilder()
+                                .given("created a MOCK credential")
+                                .when("calling ip pools endpoint with an empty credential name")
+                                .then("getting a BadRequestException")
                 },
                 {
-                    getBean(MockedTestContext.class),
-                    null,
-                    BadRequestException.class,
-                    new TestCaseDescription.TestCaseDescriptionBuilder()
-                        .given("created a MOCK credential")
-                        .when("calling ip pools endpoint with a 'null' as credential name")
-                        .then("getting a BadRequestException")
+                        getBean(MockedTestContext.class),
+                        null,
+                        BadRequestException.class,
+                        new TestCaseDescription.TestCaseDescriptionBuilder()
+                                .given("created a MOCK credential")
+                                .when("calling ip pools endpoint with a 'null' as credential name")
+                                .then("getting a BadRequestException")
                 },
                 {
-                    getBean(MockedTestContext.class),
-                    "andNowForSomethingCompletelyDifferent",
-                    ForbiddenException.class,
-                    new TestCaseDescription.TestCaseDescriptionBuilder()
-                        .given("created a MOCK credential")
-                        .when("calling ip pools endpoint with a credential which is not in the same account")
-                        .then("getting a ForbiddenException")
+                        getBean(MockedTestContext.class),
+                        "andNowForSomethingCompletelyDifferent",
+                        ForbiddenException.class,
+                        new TestCaseDescription.TestCaseDescriptionBuilder()
+                                .given("created a MOCK credential")
+                                .when("calling ip pools endpoint with a credential which is not in the same account")
+                                .then("getting a ForbiddenException")
                 }
         };
     }

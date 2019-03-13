@@ -123,7 +123,7 @@ public class ManagementPackTest extends AbstractIntegrationTest {
             try {
                 response = cloudbreakClient.getCloudbreakClient().managementPackV4Endpoint().getByNameInWorkspace(workspaceId, entity.getName());
             } catch (Exception e) {
-                TestFailException testFailException =  new TestFailException("Couldn't find mpack");
+                TestFailException testFailException = new TestFailException("Couldn't find mpack");
                 testFailException.initCause(e);
                 throw testFailException;
             }
