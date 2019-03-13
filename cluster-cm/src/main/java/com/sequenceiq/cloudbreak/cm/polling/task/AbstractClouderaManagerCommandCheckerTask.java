@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cm;
+package com.sequenceiq.cloudbreak.cm.polling.task;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +8,8 @@ import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterBasedStatusCheckerTask;
+import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
+import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 
 public abstract class AbstractClouderaManagerCommandCheckerTask<T extends ClouderaManagerCommandPollerObject> extends ClusterBasedStatusCheckerTask<T> {
 
@@ -21,7 +23,7 @@ public abstract class AbstractClouderaManagerCommandCheckerTask<T extends Cloude
             ApiCommand apiCommand = commandsResourceApi.readCommand(pollerObject.getId());
 
             if (apiCommand.getActive()) {
-                LOGGER.debug("Command [" + getCommandName() + "] id " + pollerObject.getId() + " is active, so it hasn't finished yet");
+                LOGGER.debug("Command [" + getCommandName() + "] with id [" + pollerObject.getId() + "] is active, so it hasn't finished yet");
                 return false;
             } else if (apiCommand.getSuccess()) {
                 return true;
@@ -36,5 +38,5 @@ public abstract class AbstractClouderaManagerCommandCheckerTask<T extends Cloude
         }
     }
 
-    abstract String getCommandName();
+    protected abstract String getCommandName();
 }

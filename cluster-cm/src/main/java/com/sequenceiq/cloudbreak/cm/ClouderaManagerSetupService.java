@@ -26,6 +26,8 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralCmTemplateUpdater;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -58,6 +60,9 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Inject
     private ClusterComponentConfigProvider clusterComponentProvider;
+
+    @Inject
+    private ClouderaManagerKerberosService kerberosService;
 
     private final Stack stack;
 
@@ -105,6 +110,8 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             LOGGER.debug("Cloudera cluster template has been submitted, cluster install is in progress");
 
             clouderaManagerPollingServiceProvider.templateInstallCheckerService(stack, client, apiCommand.getId());
+
+            kerberosService.setupKerberos(client, clientConfig, stack);
         } catch (CancellationException cancellationException) {
             throw cancellationException;
         } catch (Exception e) {

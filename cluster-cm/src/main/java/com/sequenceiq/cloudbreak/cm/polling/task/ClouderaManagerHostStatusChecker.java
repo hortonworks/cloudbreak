@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cm;
+package com.sequenceiq.cloudbreak.cm.polling.task;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,6 +13,8 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterBasedStatusCheckerTask;
+import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
+import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
 @Service

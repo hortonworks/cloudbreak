@@ -26,6 +26,7 @@ packages_install:
       - realmd
       - krb5-workstation
       - samba-common-tools
+      - openldap-clients
 {% endif %}
 
 join_domain:

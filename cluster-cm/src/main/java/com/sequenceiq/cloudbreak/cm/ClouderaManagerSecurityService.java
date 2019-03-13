@@ -20,6 +20,7 @@ import com.cloudera.api.swagger.model.ApiUser2List;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSecurityService;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -35,6 +36,9 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
 
     @Inject
     private ClouderaManagerSecurityConfigProvider securityConfigProvider;
+
+    @Inject
+    private ClouderaManagerKerberosService kerberosService;
 
     private final Stack stack;
 
@@ -100,7 +104,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
 
     @Override
     public void disableSecurity() {
-
+        kerberosService.deleteCredentials(clouderaManagerClientFactory.getClient(stack, stack.getCluster(), clientConfig), clientConfig, stack);
     }
 
     @Override

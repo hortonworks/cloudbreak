@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cm;
+package com.sequenceiq.cloudbreak.cm.client;
 
 import javax.inject.Inject;
 

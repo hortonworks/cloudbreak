@@ -1,6 +1,9 @@
-package com.sequenceiq.cloudbreak.cm;
+package com.sequenceiq.cloudbreak.cm.polling.task;
 
 import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
+import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 
 @Service
 public class ClouderaManagerServiceStartListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
@@ -16,7 +19,7 @@ public class ClouderaManagerServiceStartListenerTask extends AbstractClouderaMan
     }
 
     @Override
-    String getCommandName() {
+    protected String getCommandName() {
         return "Service start";
     }
 }
