@@ -104,7 +104,8 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
                         ambariRepoJson.setVersion(ambariRepo.getVersion());
                         ambariRepoJson.setGpgKeyUrl(ambariRepo.getGpgKeyUrl());
                         imgJson.setAmbariRepo(ambariRepoJson);
-                    } else if (clouderaManagerRepo != null) {
+                    }
+                    if (clouderaManagerRepo != null) {
                         ClouderaManagerRepositoryV4Response clouderaManagerRepoJson = new ClouderaManagerRepositoryV4Response();
                         clouderaManagerRepoJson.setBaseUrl(clouderaManagerRepo.getBaseUrl());
                         clouderaManagerRepoJson.setVersion(clouderaManagerRepo.getVersion());
