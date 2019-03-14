@@ -6,16 +6,15 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.action.stack.StackTestAction;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
-import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
-import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
+import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractE2ETest;
 
-public class StackCreationTest extends AbstractIntegrationTest {
+public class StackCreationTest extends AbstractE2ETest {
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
-        MockedTestContext testContext = (MockedTestContext) data[0];
+        TestContext testContext = (TestContext) data[0];
         minimalSetupForClusterCreation(testContext);
     }
 
@@ -33,7 +32,7 @@ public class StackCreationTest extends AbstractIntegrationTest {
 
     @AfterMethod(alwaysRun = true)
     public void teardown(Object[] data) {
-        MockedTestContext testContext = (MockedTestContext) data[0];
+        TestContext testContext = (TestContext) data[0];
         testContext.cleanupTestContextEntity();
     }
 }
