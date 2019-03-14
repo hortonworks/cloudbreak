@@ -15,7 +15,9 @@ public class AnonymizerUtil {
                     + "credential=|credential\":\"|credential:|credential "
                     + ")(?=\\S*)[^\\s'\"]*", REPLACEMENT),
             //WASB
-            new ReplacePattern("(?i)(?<=\\.blob\\.core\\.windows\\.net\":\")(?=\\S*)[^\\s'\"]*", REPLACEMENT)
+            new ReplacePattern("(?i)(?<=\\.blob\\.core\\.windows\\.net\":\")(?=\\S*)[^\\s'\"]*", REPLACEMENT),
+            //CM
+            new ReplacePattern("(?<=\"name\":\\s{0,100}\"[^\"]{0,100}password\",\\s{0,100}\"value\":\\s{0,100}\")[^\\s'\"]*", REPLACEMENT)
     };
 
     private AnonymizerUtil() {

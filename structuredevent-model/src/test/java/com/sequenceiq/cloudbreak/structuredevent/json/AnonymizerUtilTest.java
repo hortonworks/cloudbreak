@@ -94,4 +94,24 @@ public class AnonymizerUtilTest {
                 anonymize(testData));
     }
 
+    @Test
+    public void testCmTemplatePassword() {
+        String testData = "{\n"
+                + "        \"name\": \"hive-hive_metastore_database_password\",\n"
+                + "        \"value\": \"Horton01\"\n"
+                + "      },";
+        String expectedData = "{\n"
+                + "        \"name\": \"hive-hive_metastore_database_password\",\n"
+                + "        \"value\": \"" + AnonymizerUtil.REPLACEMENT + "\"\n"
+                + "      },";
+        Assert.assertEquals(expectedData, anonymize(testData));
+    }
+
+    @Test
+    public void testCmTemplatePasswordOneLine() {
+        String testData = "{\"name\": \"hive-hive_metastore_database_password\",\"value\": \"Horton01\"},";
+        String expectedData = "{\"name\": \"hive-hive_metastore_database_password\",\"value\": \"" + AnonymizerUtil.REPLACEMENT + "\"},";
+        Assert.assertEquals(expectedData, anonymize(testData));
+
+    }
 }

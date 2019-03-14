@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static com.sequenceiq.cloudbreak.structuredevent.json.AnonymizerUtil.anonymize;
+
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -234,7 +236,7 @@ public class StackCommonService {
 
         String clusterDefinitionText = clusterDefinitionUpdaterConnectors.getClusterDefinitionText(templatePreparationObject);
         GeneratedClusterDefinitionV4Response response = new GeneratedClusterDefinitionV4Response();
-        response.setClusterDefinitionText(clusterDefinitionText);
+        response.setClusterDefinitionText(anonymize(clusterDefinitionText));
         return response;
     }
 
