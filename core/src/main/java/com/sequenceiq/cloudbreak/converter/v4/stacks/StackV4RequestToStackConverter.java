@@ -243,7 +243,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         try {
             TagsV4Request tags = source.getTags();
             if (tags == null) {
-                return new Json(new StackTags(new HashMap<>(), new HashMap<>(), new HashMap<>()));
+                return new Json(new StackTags(new HashMap<>(), new HashMap<>(), getDefaultTags(cloudPlatform)));
             }
             return new Json(new StackTags(tags.getUserDefined(), tags.getApplication(), getDefaultTags(cloudPlatform)));
         } catch (Exception ignored) {
