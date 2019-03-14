@@ -4,6 +4,28 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters;
 
 public class YarnParameters {
 
+    public static final String DEFAULT_LOCATION = "Frankfurt";
+
+    public static final String DEFAULT_REGION = "default";
+
+    public static final String DEFAULT_QUEUE = "HDP_2_6_0_0-integration-tests";
+
+    public static final String DEFAULT_VOLUME_SIZE = "0";
+
+    public static final String DEFAULT_VOLUME_COUNT = "0";
+
+    public static final String DEFAULT_CPU_COUNT = "4";
+
+    public static final String DEFAULT_MEMORY_SIZE = "8192";
+
+    public static final String DEFAULT_IMAGE_CATALOG_URL = "https://cloudbreak-imagecatalog.s3.amazonaws.com/v2-dev-cb-image-catalog.json";
+
+    public static final String DEFAULT_IMAGE_ID = "6c005903-57ca-4acf-bec7-6275069db34a";
+
+    public static final String DEFAULT_ENDPOINT = "http://yprod001.l42scl.hortonworks.com:9191";
+
+    public static final String DEFAULT_AMBARI_USER = "admin";
+
     public static final String DEFAULT_CLUSTER_DEFINTION_NAME = "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin";
 
     private static final String PREFIX = CommonCloudParameters.PREFIX + "yarn.";
@@ -30,6 +52,17 @@ public class YarnParameters {
         public static final String VOLUME_SIZE = PREFIX + "volumeSize";
 
         public static final String VOLUME_COUNT = PREFIX + "volumeCount";
+    }
+
+    public static class Image {
+
+        private static final String PREFIX = YarnParameters.PREFIX + "image.";
+
+        public static final String CATALOG = PREFIX + "catalog";
+
+        public static final String CATALOG_URL = CATALOG + "url";
+
+        public static final String ID = PREFIX + "id";
     }
 
     public static class Credential {

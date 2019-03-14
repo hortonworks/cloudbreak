@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.newway.cloud.v2;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.StackV4ParameterBase;
 import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
@@ -33,6 +34,8 @@ public interface CloudProvider {
 
     StackV4EntityBase stack(StackV4EntityBase stack);
 
+    ClusterEntity cluster(ClusterEntity cluster);
+
     String getSubnetCIDR();
 
     CloudPlatform getCloudPlatform();
@@ -47,7 +50,7 @@ public interface CloudProvider {
 
     Integer gatewayPort(StackV4EntityBase stackEntity);
 
-    String getDefaultClusterDefinitionName();
+    String getClusterDefinitionName();
 
     StackV4ParameterBase stackParameters();
 }

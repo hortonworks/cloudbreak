@@ -17,8 +17,10 @@ import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto
 import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.AbstractCloudProvider;
+import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
@@ -78,6 +80,13 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     public StackV4EntityBase stack(StackV4EntityBase stack) {
         return stack.withMock(stackParameters());
+    }
+
+    @Override
+    public ClusterEntity cluster(ClusterEntity cluster) {
+        return cluster
+                .withValidateClusterDefinition(Boolean.TRUE)
+                .withClusterDefinitionName(getClusterDefinitionName());
     }
 
     @Override
@@ -203,7 +212,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getDefaultClusterDefinitionName() {
-        return MockParameters.DEFAULT_CLUSTER_DEFINTION_NAME;
+    public String getClusterDefinitionName() {
+        return getTestParameter().getWithDefault(CommonCloudParameters.CLUSTER_DEFINITION_NAME, MockParameters.DEFAULT_CLUSTER_DEFINTION_NAME);
     }
 }

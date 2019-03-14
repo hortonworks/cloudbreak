@@ -95,8 +95,12 @@ integrationtest:
         cpus:
         memory:
       queue:
+      image:
+        catalog:
+          url:
+        id:
 
-# ---------- old test parameters: ---------- #
+  # ---------- old test parameters: ---------- #
 
     outputdir: .
 
