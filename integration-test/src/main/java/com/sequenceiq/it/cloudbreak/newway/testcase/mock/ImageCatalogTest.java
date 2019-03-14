@@ -71,7 +71,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .withUrl(mockedTestContext.getImageCatalogMockServer().getImageCatalogUrl())
                 .when(new ImageCatalogPostAction())
                 .when(new ImageCatalogGetByNameAction(Boolean.FALSE))
                 .validate();
@@ -197,7 +197,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .withUrl(mockedTestContext.getImageCatalogMockServer().getImageCatalogUrl())
                 .when(new ImageCatalogPostAction())
                 .select(imgCatalog -> imgCatalog.getResponse().getId())
                 .when(new ImageCatalogDeleteAction())
@@ -226,7 +226,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .withUrl(mockedTestContext.getImageCatalogMockServer().getImageCatalogUrl())
                 .when(new ImageCatalogPostAction(), key(catalogKey))
                 .when(new ImageCatalogDeleteAction(), key(catalogKey))
                 .when(new ImageCatalogGetByNameAction(), key(imgCatalogName))
@@ -247,7 +247,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .withUrl(mockedTestContext.getImageCatalogMockServer().getImageCatalogUrl())
                 .when(new ImageCatalogPostAction())
                 .when(new ImageCatalogGetImagesByNameAction())
                 .then((testContext1, entity, cloudbreakClient) -> {
@@ -272,7 +272,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .withUrl(mockedTestContext.getImageCatalogMockServer().getImageCatalogUrl())
                 .when(new ImageCatalogPostAction())
                 .when(new ImageCatalogGetImagesByNameAction(CloudPlatform.AWS))
                 .then((testContext1, entity, cloudbreakClient) -> {
@@ -297,7 +297,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .withUrl(mockedTestContext.getImageCatalogMockServer().getImageCatalogUrl())
                 .when(new ImageCatalogGetImagesByNameAction(), key(imgCatalogName))
                 .expect(ForbiddenException.class, key(imgCatalogName))
                 .validate();
@@ -315,7 +315,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .withUrl(mockedTestContext.getImageCatalogMockServer().getImageCatalogUrl())
                 .when(new ImageCatalogPostAction())
                 .when(new ImageCatalogGetImagesFromDefaultCatalogAction(CloudPlatform.AWS))
                 .then((testContext1, entity, cloudbreakClient) -> {
@@ -340,7 +340,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .withUrl(mockedTestContext.getImageCatalogMockServer().getImageCatalogUrl())
                 .when(new ImageCatalogPostAction())
                 .when(new ImageCatalogGetImagesFromDefaultCatalogAction())
                 .then((testContext1, entity, cloudbreakClient) -> {
@@ -365,7 +365,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .withUrl(mockedTestContext.getImageCatalogMockServer().getImageCatalogUrl())
                 .when(new ImageCatalogPostAction())
                 .when(new ImageCatalogSetAsDefaultAction())
                 .withName(CB_DEFAULT_IMG_CATALOG_NAME)
@@ -394,7 +394,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .withUrl(mockedTestContext.getImageCatalogMockServer().getImageCatalogUrl())
                 .when(new ImageCatalogPostAction())
                 .select(ImageCatalogTestDto::getRequest)
                 .when((testContext1, entity, cloudbreakClient) -> {
@@ -427,7 +427,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .withUrl(mockedTestContext.getImageCatalogMockServer().getImageCatalogUrl())
                 .when(new ImageCatalogPostAction(), key(imgCatalogName))
                 .select(ImageCatalogTestDto::getResponse, key(imgCatalogName))
                 .when((testContext1, entity, cloudbreakClient) -> {
@@ -492,7 +492,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         testContext
                 .given(ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getPreWarmedImageCatalogUrl())
+                .withUrl(mockedTestContext.getImageCatalogMockServer().getPreWarmedImageCatalogUrl())
                 .when(new ImageCatalogPostAction())
                 .when(new ImageCatalogSetAsDefaultAction())
                 .given(EnvironmentEntity.class)

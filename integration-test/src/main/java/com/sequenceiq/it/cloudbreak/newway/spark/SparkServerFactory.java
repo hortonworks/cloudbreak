@@ -7,9 +7,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
-
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,32 +30,20 @@ public class SparkServerFactory {
     @Value("${mock.server.request.response.print:false}")
     private boolean printRequestBody;
 
-    @Inject
-    private SparkServerPool sparkServerPool;
-
     public SparkServer construct() {
         long start = System.currentTimeMillis();
         int port = NEXT_PORT.incrementAndGet();
         String endpoint = "https://" + mockServerAddress + ':' + port;
 
-        LOGGER.info("Try to setup with endpoint: {}", endpoint);
-        SparkServer sparkServer = sparkServerPool.pop();
-        sparkServer.reset(endpoint, createKeystoreTempFile(), port, printRequestBody);
+        LOGGER.info("Trying to setup with endpoint: {}", endpoint);
+        SparkServer sparkServer = new SparkServer();
+        sparkServer.start(endpoint, createKeystoreTempFile(), port, printRequestBody);
         sparkServer.init();
         sparkServer.awaitInitialization();
         LOGGER.info("Spark has been initalized in {}ms", System.currentTimeMillis() - start);
         LOGGER.info("SparkServer has been started on {}", endpoint);
 
         return sparkServer;
-    }
-
-    public void release(@Nonnull SparkServer sparkServer) {
-        new Thread(() -> {
-            sparkServer.stop();
-            sparkServer.awaitStop();
-            LOGGER.info("spark server has cleared.");
-            sparkServerPool.put(sparkServer);
-        }).start();
     }
 
     private static File createKeystoreTempFile() {

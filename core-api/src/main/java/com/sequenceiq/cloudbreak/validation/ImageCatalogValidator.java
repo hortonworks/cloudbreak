@@ -20,9 +20,9 @@ import com.sequenceiq.cloudbreak.api.helper.HttpHelper;
 
 public class ImageCatalogValidator implements ConstraintValidator<ValidImageCatalog, String> {
 
-    public static final String FAILED_TO_GET_BY_FAMILY_TYPE = "Failed to get response by the specified URL '%s' due to: '%s'!";
+    public static final String FAILED_TO_GET_BY_FAMILY_TYPE = "Failed to get response on the specified URL '%s' due to: '%s'!";
 
-    public static final String FAILED_TO_GET_WITH_EXCEPTION = "Failed to get response by the specified URL!";
+    public static final String FAILED_TO_GET_WITH_EXCEPTION = "Failed to get response on the specified URL!";
 
     public static final String INVALID_JSON_IN_RESPONSE = "The file on the specified URL couldn't be parsed as JSON!";
 

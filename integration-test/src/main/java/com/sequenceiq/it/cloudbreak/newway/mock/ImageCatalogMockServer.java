@@ -25,9 +25,9 @@ import com.sequenceiq.it.cloudbreak.newway.spark.SparkServerFactory;
 import com.sequenceiq.it.spark.ITResponse;
 
 @Prototype
-public class ImageCatalogMockServerSetup implements AutoCloseable {
+public class ImageCatalogMockServer implements AutoCloseable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogMockServerSetup.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogMockServer.class);
 
     @Inject
     private SparkServerFactory sparkServerFactory;
@@ -93,7 +93,7 @@ public class ImageCatalogMockServerSetup implements AutoCloseable {
 
     @Override
     public void close() {
-        sparkServerFactory.release(sparkServer);
-        LOGGER.info("ImageCatalog has stopped");
+        LOGGER.info("ImageCatalog is being stopped");
+        sparkServer.release();
     }
 }

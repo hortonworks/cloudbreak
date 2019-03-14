@@ -143,7 +143,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     public ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog) {
         MockedTestContext mockedTestContext = (MockedTestContext) imageCatalog.getTestContext();
-        imageCatalog.withUrl(mockedTestContext.getImageCatalogMockServerSetup().getPreWarmedImageCatalogUrl());
+        imageCatalog.withUrl(mockedTestContext.getImageCatalogMockServer().getPreWarmedImageCatalogUrl());
         return imageCatalog;
     }
 

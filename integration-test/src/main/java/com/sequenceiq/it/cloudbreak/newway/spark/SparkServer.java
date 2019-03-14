@@ -34,7 +34,7 @@ public class SparkServer {
         sparkService = Service.ignite();
     }
 
-    public void reset(String endpoint, File keystoreFile, int port, boolean printRequestBody) {
+    public void start(String endpoint, File keystoreFile, int port, boolean printRequestBody) {
         this.endpoint = endpoint;
         this.port = port;
         sparkService.port(port);
@@ -89,5 +89,12 @@ public class SparkServer {
 
     public void stop() {
         sparkService.stop();
+    }
+
+    public void release() {
+        new Thread(() -> {
+            stop();
+            LOGGER.info("Spark server has been stopped.");
+        }).start();
     }
 }

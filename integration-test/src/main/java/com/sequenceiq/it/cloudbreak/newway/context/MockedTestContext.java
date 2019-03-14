@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.mock.DefaultModel;
-import com.sequenceiq.it.cloudbreak.newway.mock.ImageCatalogMockServerSetup;
+import com.sequenceiq.it.cloudbreak.newway.mock.ImageCatalogMockServer;
 import com.sequenceiq.it.cloudbreak.newway.spark.SparkServer;
 import com.sequenceiq.it.cloudbreak.newway.spark.SparkServerFactory;
 import com.sequenceiq.it.spark.DynamicRouteStack;
@@ -26,7 +26,7 @@ public class MockedTestContext extends TestContext implements AutoCloseable {
     private SparkServerFactory sparkServerFactory;
 
     @Inject
-    private ImageCatalogMockServerSetup imageCatalogMockServerSetup;
+    private ImageCatalogMockServer imageCatalogMockServer;
 
     private SparkServer sparkServer;
 
@@ -35,7 +35,7 @@ public class MockedTestContext extends TestContext implements AutoCloseable {
     @PostConstruct
     private void init() {
         sparkServer = sparkServerFactory.construct();
-        imageCatalogMockServerSetup.configureImgCatalogMock();
+        imageCatalogMockServer.configureImgCatalogMock();
         model = new DefaultModel();
         model.startModel(sparkServer.getSparkService(), mockServerAddress);
     }
@@ -48,8 +48,8 @@ public class MockedTestContext extends TestContext implements AutoCloseable {
         return sparkServer;
     }
 
-    public ImageCatalogMockServerSetup getImageCatalogMockServerSetup() {
-        return imageCatalogMockServerSetup;
+    public ImageCatalogMockServer getImageCatalogMockServer() {
+        return imageCatalogMockServer;
     }
 
     public DynamicRouteStack dynamicRouteStack() {
@@ -58,8 +58,8 @@ public class MockedTestContext extends TestContext implements AutoCloseable {
 
     @Override
     public void close() {
-        sparkServerFactory.release(sparkServer);
-        imageCatalogMockServerSetup.close();
+        sparkServer.release();
+        imageCatalogMockServer.close();
         setShutdown(true);
     }
 }

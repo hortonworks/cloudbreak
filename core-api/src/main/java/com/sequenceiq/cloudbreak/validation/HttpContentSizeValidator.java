@@ -15,11 +15,11 @@ public class HttpContentSizeValidator implements ConstraintValidator<ValidHttpCo
 
     public static final int MAX_IN_BYTES = 5 * 1024 * 1024;
 
-    public static final String FAILED_TO_GET_BY_FAMILY_TYPE = "Failed to get response by the specified URL '%s' due to: '%s'!";
+    public static final String FAILED_TO_GET_BY_FAMILY_TYPE = "Failed to get response on the specified URL '%s' due to: '%s'!";
 
     public static final String INVALID_URL_MSG = "The value should be a valid URL and start with 'http(s)'!";
 
-    public static final String FAILED_TO_GET_WITH_EXCEPTION = "Failed to get response by the specified URL!";
+    public static final String FAILED_TO_GET_WITH_EXCEPTION = "Failed to get response on the specified URL!";
 
     private HttpHelper httpHelper = HttpHelper.getInstance();
 

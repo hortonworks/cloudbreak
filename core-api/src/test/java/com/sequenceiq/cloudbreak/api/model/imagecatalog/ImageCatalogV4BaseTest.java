@@ -41,7 +41,7 @@ import com.sequenceiq.cloudbreak.validation.ImageCatalogValidator;
 @RunWith(MockitoJUnitRunner.class)
 public class ImageCatalogV4BaseTest {
 
-    public static final String FAILED_TO_GET_BY_FAMILY_TYPE = "Failed to get response by the specified URL '%s' due to: '%s'!";
+    public static final String FAILED_TO_GET_BY_FAMILY_TYPE = "Failed to get response on the specified URL '%s' due to: '%s'!";
 
     private static final String INVALID_MESSAGE = "A valid image catalog must be available on the given URL";
 

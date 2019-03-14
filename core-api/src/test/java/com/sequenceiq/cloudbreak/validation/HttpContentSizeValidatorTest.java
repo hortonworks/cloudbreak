@@ -75,7 +75,7 @@ public class HttpContentSizeValidatorTest {
         assertFalse(underTest.isValid("http://valid.url.com", constraintValidatorContext));
 
         verify(constraintValidatorContext, times(1))
-                .buildConstraintViolationWithTemplate(eq("Failed to get response by the specified URL 'http://valid.url.com' due to: 'not available'!"));
+                .buildConstraintViolationWithTemplate(eq("Failed to get response on the specified URL 'http://valid.url.com' due to: 'not available'!"));
         verify(constraintViolationBuilder, times(1)).addConstraintViolation();
     }
 
@@ -86,7 +86,7 @@ public class HttpContentSizeValidatorTest {
         assertFalse(underTest.isValid("http://content.not.available.com", constraintValidatorContext));
 
         verify(constraintValidatorContext, times(1))
-                .buildConstraintViolationWithTemplate(eq("Failed to get response by the specified URL!"));
+                .buildConstraintViolationWithTemplate(eq("Failed to get response on the specified URL!"));
         verify(constraintViolationBuilder, times(1)).addConstraintViolation();
     }
 
