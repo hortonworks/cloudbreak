@@ -12,10 +12,10 @@ import (
 	"github.com/urfave/cli"
 )
 
-var showClustersPreferencesHeader = []string{"Show terminated clusters", "Source of config", "Timeout (days)", "Timeout (hours)", "Timeout (minutes)", "Timeout (seconds)"}
+var showClustersPreferencesHeader = []string{"Show terminated clusters", "Source of config", "Timeout (days)", "Timeout (hours)", "Timeout (minutes)"}
 
 type showClustersPreferencesOut struct {
-	ShowTerminatedClustersActive bool   `json:"Show terminated active" yaml:"Show terminated active"`
+	ShowTerminatedClustersActive bool   `json:"Show terminated clusters" yaml:"Show terminated clusters"`
 	Source                       string `json:"Source of config" yaml:"Source of config"`
 	TimeoutDays                  int32  `json:"Show terminated clusters timeout (days)" yaml:"Show terminated clusters timeout (days)"`
 	TimeoutHours                 int32  `json:"Show terminated clusters timeout (hours)" yaml:"Show terminated clusters timeout (hours)"`

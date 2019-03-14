@@ -13,12 +13,12 @@ func init() {
 		Usage: "user profile related operations",
 		Subcommands: []cli.Command{
 			{
-				Name:  "show-terminated-clusters",
+				Name:  "config-terminated-clusters",
 				Usage: "operations related to showing terminated clusters",
 				Subcommands: []cli.Command{
 					{
 						Name:   "describe",
-						Usage:  "describe settings for showing terminated clusters",
+						Usage:  "describe user config for showing terminated clusters",
 						Flags:  fl.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build(),
 						Before: cf.CheckConfigAndCommandFlags,
 						Action: userprofile.GetShowTerminatedClustersPreferences,
@@ -29,8 +29,8 @@ func init() {
 						},
 					},
 					{
-						Name:   "on",
-						Usage:  "turn on showing terminated clusters and set user timeout",
+						Name:   "enable",
+						Usage:  "enable showing terminated clusters and set user timeout",
 						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlTimeoutMinutes, fl.FlTimeoutHours, fl.FlTimeoutDays).AddAuthenticationFlags().Build(),
 						Before: cf.CheckConfigAndCommandFlags,
 						Action: userprofile.ActivateShowTerminatedClusters,
@@ -41,8 +41,8 @@ func init() {
 						},
 					},
 					{
-						Name:   "off",
-						Usage:  "turn off showing terminated clusters for user",
+						Name:   "disable",
+						Usage:  "disable showing terminated clusters for user",
 						Flags:  fl.NewFlagBuilder().AddAuthenticationFlags().Build(),
 						Before: cf.CheckConfigAndCommandFlags,
 						Action: userprofile.DectivateShowTerminatedClusters,
@@ -54,7 +54,7 @@ func init() {
 					},
 					{
 						Name:   "delete",
-						Usage:  "delete user preference for showing terminated clusters",
+						Usage:  "delete user config for showing terminated clusters",
 						Flags:  fl.NewFlagBuilder().AddAuthenticationFlags().Build(),
 						Before: cf.CheckConfigAndCommandFlags,
 						Action: userprofile.DeleteShowTerminatedClustersPreferences,
