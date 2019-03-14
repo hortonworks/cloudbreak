@@ -172,7 +172,9 @@ public abstract class StackV4EntityBase<T extends StackV4EntityBase<T>> extends 
     public StackV4EntityBase<T> withImageSettings(ImageSettingsEntity imageSettings) {
         getRequest().setImage(imageSettings.getRequest());
         ImageCatalogTestDto imageCatalogTestDto = getTestContext().get(ImageCatalogTestDto.class);
-        getRequest().getImage().setCatalog(imageCatalogTestDto.getName());
+        if (imageCatalogTestDto != null) {
+            getRequest().getImage().setCatalog(imageCatalogTestDto.getName());
+        }
         return this;
     }
 
