@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.G
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.GcpStackV4Parameters;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters;
+import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackAuthenticationEntity;
@@ -67,6 +68,13 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public ClusterEntity cluster(ClusterEntity cluster) {
+        return cluster
+                .withValidateClusterDefinition(Boolean.TRUE)
+                .withClusterDefinitionName(getClusterDefinitionName());
+    }
+
+    @Override
     public GcpStackV4Parameters stackParameters() {
         return new GcpStackV4Parameters();
     }
@@ -104,7 +112,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getDefaultClusterDefinitionName() {
-        return GcpParameters.DEFAULT_CLUSTER_DEFINTION_NAME;
+    public String getClusterDefinitionName() {
+        return getTestParameter().getWithDefault(CommonCloudParameters.CLUSTER_DEFINITION_NAME, GcpParameters.DEFAULT_CLUSTER_DEFINTION_NAME);
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.StackV4ParameterBase;
 import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
+import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
@@ -83,6 +84,11 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public ClusterEntity cluster(ClusterEntity cluster) {
+        return delegate.cluster(cluster);
+    }
+
+    @Override
     public VolumeV4Entity attachedVolume(VolumeV4Entity volume) {
         return delegate.attachedVolume(volume);
     }
@@ -128,8 +134,8 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
-    public String getDefaultClusterDefinitionName() {
-        return delegate.getDefaultClusterDefinitionName();
+    public String getClusterDefinitionName() {
+        return delegate.getClusterDefinitionName();
     }
 
     @Override

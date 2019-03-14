@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.O
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.OpenStackStackV4Parameters;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters;
+import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackAuthenticationEntity;
@@ -66,6 +67,13 @@ public class OpenStackCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public ClusterEntity cluster(ClusterEntity cluster) {
+        return cluster
+                .withValidateClusterDefinition(Boolean.TRUE)
+                .withClusterDefinitionName(getClusterDefinitionName());
+    }
+
+    @Override
     public OpenStackStackV4Parameters stackParameters() {
         return new OpenStackStackV4Parameters();
     }
@@ -95,7 +103,7 @@ public class OpenStackCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getDefaultClusterDefinitionName() {
-        return OpenStackParameters.DEFAULT_CLUSTER_DEFINTION_NAME;
+    public String getClusterDefinitionName() {
+        return getTestParameter().getWithDefault(CommonCloudParameters.CLUSTER_DEFINITION_NAME, OpenStackParameters.DEFAULT_CLUSTER_DEFINTION_NAME);
     }
 }

@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.Azu
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.aws.AwsParameters;
+import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackAuthenticationEntity;
@@ -39,6 +40,13 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public StackV4EntityBase stack(StackV4EntityBase stack) {
         return stack.withAzure(stackParameters());
+    }
+
+    @Override
+    public ClusterEntity cluster(ClusterEntity cluster) {
+        return cluster
+                .withValidateClusterDefinition(Boolean.TRUE)
+                .withClusterDefinitionName(getClusterDefinitionName());
     }
 
     @Override
@@ -97,7 +105,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getDefaultClusterDefinitionName() {
-        return AzureParameters.DEFAULT_CLUSTER_DEFINTION_NAME;
+    public String getClusterDefinitionName() {
+        return getTestParameter().getWithDefault(CommonCloudParameters.CLUSTER_DEFINITION_NAME, AzureParameters.DEFAULT_CLUSTER_DEFINTION_NAME);
     }
 }
