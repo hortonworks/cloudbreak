@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes;
 
+import java.util.Set;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
@@ -65,6 +67,13 @@ public interface KubernetesV4Endpoint {
     @ApiOperation(value = KubernetesConfigOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.KUBERNETESCONFIG_NOTES,
             nickname = "deleteKubernetesConfigInWorkspace")
     KubernetesV4Response delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+
+    @DELETE
+    @Path("")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = KubernetesConfigOpDescription.DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.KUBERNETESCONFIG_NOTES,
+            nickname = "deleteKubernetesConfigsInWorkspace")
+    KubernetesV4Responses deleteMultiple(@PathParam("workspaceId") Long workspaceId, Set<String> names);
 
     @PUT
     @Path("{name}/attach")

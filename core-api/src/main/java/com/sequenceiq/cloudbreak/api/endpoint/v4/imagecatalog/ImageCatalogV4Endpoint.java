@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog;
 
 import static com.sequenceiq.cloudbreak.doc.Notes.IMAGE_CATALOG_NOTES;
 
+import java.util.Set;
+
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -60,6 +62,13 @@ public interface ImageCatalogV4Endpoint {
     @ApiOperation(value = ImageCatalogOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = IMAGE_CATALOG_NOTES,
             nickname = "deleteImageCatalogInWorkspace")
     ImageCatalogV4Response delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+
+    @DELETE
+    @Path("")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ImageCatalogOpDescription.DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = IMAGE_CATALOG_NOTES,
+            nickname = "deleteImageCatalogsInWorkspace")
+    ImageCatalogV4Responses deleteMultiple(@PathParam("workspaceId") Long workspaceId, Set<String> names);
 
     @PUT
     @Path("")

@@ -64,6 +64,13 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     }
 
     @Override
+    public ImageCatalogV4Responses deleteMultiple(Long workspaceId, Set<String> names) {
+        Set<ImageCatalog> deleted = imageCatalogService.deleteMultiple(workspaceId, names);
+        notify(ResourceEvent.IMAGE_CATALOG_DELETED);
+        return new ImageCatalogV4Responses(converterUtil.convertAllAsSet(deleted, ImageCatalogV4Response.class));
+    }
+
+    @Override
     public ImageCatalogV4Response update(Long workspaceId, UpdateImageCatalogV4Request request) {
         ImageCatalog imageCatalog = imageCatalogService.update(workspaceId, converterUtil.convert(request, ImageCatalog.class));
         return converterUtil.convert(imageCatalog, ImageCatalogV4Response.class);

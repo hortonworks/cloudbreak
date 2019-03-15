@@ -60,6 +60,13 @@ public class CredentialV4Controller extends NotificationController implements Cr
     }
 
     @Override
+    public CredentialV4Responses deleteMultiple(Long workspaceId, Set<String> names) {
+        Set<Credential> deleted = credentialService.deleteMultipleByNameFromWorkspace(names, workspaceId);
+        notify(ResourceEvent.CREDENTIAL_DELETED);
+        return new CredentialV4Responses(converterUtil.convertAllAsSet(deleted, CredentialV4Response.class));
+    }
+
+    @Override
     public CredentialV4Response put(Long workspaceId, CredentialV4Request credentialRequest) {
         return converterUtil.convert(credentialService.updateByWorkspaceId(
                 workspaceId, converterUtil.convert(credentialRequest, Credential.class)), CredentialV4Response.class);

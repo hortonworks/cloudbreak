@@ -59,6 +59,13 @@ public class ProxyV4Controller extends NotificationController implements ProxyV4
     }
 
     @Override
+    public ProxyV4Responses deleteMultiple(Long workspaceId, Set<String> names) {
+        Set<ProxyConfig> deleted = proxyConfigService.deleteMultipleByNameFromWorkspace(names, workspaceId);
+        notify(ResourceEvent.PROXY_CONFIG_DELETED);
+        return new ProxyV4Responses(converterUtil.convertAllAsSet(deleted, ProxyV4Response.class));
+    }
+
+    @Override
     public ProxyV4Response attach(Long workspaceId, String name, EnvironmentNames environmentNames) {
         return proxyConfigService.attachToEnvironmentsAndConvert(name, environmentNames.getEnvironmentNames(),
                 workspaceId, ProxyV4Response.class);

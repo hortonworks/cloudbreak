@@ -231,10 +231,28 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     public ImageCatalog delete(Long workspaceId, String name) {
-        User user = getLoggedInUser();
         if (isEnvDefault(name)) {
             throw new BadRequestException(String.format("%s cannot be deleted because it is an environment default image catalog.", name));
         }
+
+        return deleteNonDefault(workspaceId, name);
+    }
+
+    public Set<ImageCatalog> deleteMultiple(Long workspaceId, Set<String> names) {
+        Set<String> envDefaults = names.stream()
+            .filter(name -> isEnvDefault(name))
+            .collect(Collectors.toSet());
+        if (!envDefaults.isEmpty()) {
+            throw new BadRequestException(String.format("The following image catalogs cannot be deleted because they are environment defaults: %s", names));
+        }
+
+        return names.stream()
+            .map(name -> deleteNonDefault(workspaceId, name))
+            .collect(Collectors.toSet());
+    }
+
+    private ImageCatalog deleteNonDefault(Long workspaceId, String name) {
+        User user = getLoggedInUser();
         ImageCatalog imageCatalog = get(workspaceId, name);
         imageCatalog.setArchived(true);
         setImageCatalogAsDefault(null, user);
