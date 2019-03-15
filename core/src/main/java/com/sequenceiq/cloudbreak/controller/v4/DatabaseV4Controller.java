@@ -59,6 +59,13 @@ public class DatabaseV4Controller extends NotificationController implements Data
     }
 
     @Override
+    public DatabaseV4Responses deleteMultiple(Long workspaceId, Set<String> names) {
+        Set<RDSConfig> deleted = databaseService.deleteMultipleByNameFromWorkspace(names, workspaceId);
+        notify(ResourceEvent.LDAP_DELETED);
+        return new DatabaseV4Responses(converterUtil.convertAllAsSet(deleted, DatabaseV4Response.class));
+    }
+
+    @Override
     public DatabaseTestV4Response test(Long workspaceId, DatabaseTestV4Request databaseTestV4Request) {
         RDSConfig rdsConfig = converterUtil.convert(databaseTestV4Request.getDatabase(), RDSConfig.class);
         String connectionResult = databaseService.testRdsConnection(workspaceId, databaseTestV4Request.getExistingDatabaseName(), rdsConfig);

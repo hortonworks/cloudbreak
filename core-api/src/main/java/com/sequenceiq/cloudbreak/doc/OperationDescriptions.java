@@ -20,6 +20,7 @@ public class OperationDescriptions {
         public static final String GET_BY_NAME_IN_WORKSPACE = "get credential by name in workspace";
         public static final String CREATE_IN_WORKSPACE = "create credential in workspace";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete credential by name in workspace";
+        public static final String DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE = "delete multiple credentials by name in workspace";
         public static final String GET_PREREQUISTIES_BY_CLOUD_PROVIDER = "get credential prerequisites for cloud platform";
     }
 
@@ -85,6 +86,7 @@ public class OperationDescriptions {
         public static final String GET_BY_NAME_IN_WORKSPACE = "get cluster template by name in workspace";
         public static final String CREATE_IN_WORKSPACE = "create cluster template in workspace";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete cluster template by name in workspace";
+        public static final String DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE = "delete multiple cluster templates by name in workspace";
     }
 
     public static class RecipeOpDescription {
@@ -137,6 +139,7 @@ public class OperationDescriptions {
         public static final String GET_BY_NAME_IN_WORKSPACE = "get LDAP config by name in workspace";
         public static final String CREATE_IN_WORKSPACE = "create LDAP config in workspace";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete LDAP config by name in workspace";
+        public static final String DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE = "delete multiple LDAP configs by name in workspace";
         public static final String ATTACH_TO_ENVIRONMENTS = "attach ldap resource to environemnts";
         public static final String DETACH_FROM_ENVIRONMENTS = "detach ldap resource from environemnts";
     }
@@ -161,6 +164,7 @@ public class OperationDescriptions {
         public static final String GET_BY_NAME_IN_WORKSPACE = "get RDS config by name in workspace";
         public static final String CREATE_IN_WORKSPACE = "create RDS config in workspace";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete RDS config by name in workspace";
+        public static final String DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE = "delete multiple RDS configs by name in workspace";
         public static final String GET_REQUEST_IN_WORKSPACE = "get request in workspace";
         public static final String ATTACH_TO_ENVIRONMENTS = "attach RDS resource to environemnts";
         public static final String DETACH_FROM_ENVIRONMENTS = "detach RDS resource from environemnts";
@@ -171,6 +175,7 @@ public class OperationDescriptions {
         public static final String GET_BY_NAME_IN_WORKSPACE = "get proxy configuration by name in workspace";
         public static final String CREATE_IN_WORKSPACE = "create proxy configuration in workspace";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete proxy configuration by name in workspace";
+        public static final String DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE = "delete multiple proxy configurations by name in workspace";
         public static final String ATTACH_TO_ENVIRONMENTS = "attach proxy resource to environemnts";
         public static final String DETACH_FROM_ENVIRONMENTS = "detach proxy resource from environemnts";
         public static final String GET_REQUEST_BY_NAME = "get request by name";
@@ -191,6 +196,7 @@ public class OperationDescriptions {
         public static final String GET_BY_NAME_IN_WORKSPACE = "get management pack by name in workspace";
         public static final String CREATE_IN_WORKSPACE = "create management pack in workspace";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete management pack by name in workspace";
+        public static final String DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE = "delete multiple management packs by name in workspace";
     }
 
     public static class KubernetesConfigOpDescription {
@@ -199,6 +205,7 @@ public class OperationDescriptions {
         public static final String CREATE_IN_WORKSPACE = "create Kubernetes config in workspace";
         public static final String PUT_IN_WORKSPACE = "modify Kubernetes config in workspace";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete Kubernetes config by name in workspace";
+        public static final String DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE = "delete multiple Kubernetes configs by name in workspace";
         public static final String ATTACH_TO_ENVIRONMENTS = "attach Kubernetes resource to environemnts";
         public static final String DETACH_FROM_ENVIRONMENTS = "detach Kubernetes resource from environemnts";
     }
@@ -233,6 +240,7 @@ public class OperationDescriptions {
         public static final String GET_BY_NAME_IN_WORKSPACE = "get image catalog by name in workspace";
         public static final String CREATE_IN_WORKSPACE = "create image catalog in workspace";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete image catalog by name in workspace";
+        public static final String DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE = "delete multiple image catalogs by name in workspace";
     }
 
     public static class SecurityRuleOpDescription {
@@ -267,6 +275,7 @@ public class OperationDescriptions {
         public static final String GET_BY_NAME_IN_WORKSPACE = "get kerberos config by name in workspace";
         public static final String CREATE_IN_WORKSPACE = "create kerberos config in workspace";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete kerberos config by name in workspace";
+        public static final String DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE = "delete multiple kerberos configs by name in workspace";
         public static final String ATTACH_TO_ENVIRONMENTS = "attach kerberos config to environemnts";
         public static final String DETACH_FROM_ENVIRONMENTS = "detach kerberos config from environemnts";
         public static final String GET_REQUEST = "get request by name";

@@ -21,6 +21,8 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ManagementPackOpDescr
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+import java.util.Set;
+
 @Path("/v4/{workspaceId}/mpacks")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v4/{workspaceId}/mpacks", description = ControllerDescription.MANAGEMENT_PACK_V4_DESCRIPTION, protocols = "http,https")
@@ -53,4 +55,11 @@ public interface ManagementPackV4Endpoint {
     @ApiOperation(value = ManagementPackOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.MANAGEMENT_PACK_NOTES,
             nickname = "deleteManagementPackInWorkspace")
     ManagementPackV4Response deleteInWorkspace(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+
+    @DELETE
+    @Path("")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ManagementPackOpDescription.DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.MANAGEMENT_PACK_NOTES,
+            nickname = "deleteManagementPacksInWorkspace")
+    ManagementPackV4Responses deleteMultipleInWorkspace(@PathParam("workspaceId") Long workspaceId, Set<String> names);
 }

@@ -18,6 +18,8 @@ import com.sequenceiq.cloudbreak.service.mpack.ManagementPackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
+import java.util.Set;
+
 @Controller
 @WorkspaceEntityType(ManagementPack.class)
 public class ManagementPackV4Controller extends NotificationController implements ManagementPackV4Endpoint {
@@ -59,5 +61,12 @@ public class ManagementPackV4Controller extends NotificationController implement
         ManagementPack deleted = mpackService.deleteByNameFromWorkspace(name, workspaceId);
         notify(ResourceEvent.MANAGEMENT_PACK_DELETED);
         return converterUtil.convert(deleted, ManagementPackV4Response.class);
+    }
+
+    @Override
+    public ManagementPackV4Responses deleteMultipleInWorkspace(Long workspaceId, Set<String> names) {
+        Set<ManagementPack> deleted = mpackService.deleteMultipleByNameFromWorkspace(names, workspaceId);
+        notify(ResourceEvent.MANAGEMENT_PACK_DELETED);
+        return new ManagementPackV4Responses(converterUtil.convertAllAsSet(deleted, ManagementPackV4Response.class));
     }
 }

@@ -67,6 +67,13 @@ public class KubernetesV4Controller extends NotificationController implements Ku
     }
 
     @Override
+    public KubernetesV4Responses deleteMultiple(Long workspaceId, Set<String> names) {
+        Set<KubernetesConfig> deleted = kubernetesConfigService.deleteMultipleByNameFromWorkspace(names, workspaceId);
+        notify(ResourceEvent.KUBERNETES_CONFIG_DELETED);
+        return new KubernetesV4Responses(converterUtil.convertAllAsSet(deleted, KubernetesV4Response.class));
+    }
+
+    @Override
     public KubernetesV4Response attach(Long workspaceId, String name, EnvironmentNames environmentNames) {
         return kubernetesConfigService.attachToEnvironmentsAndConvert(name, environmentNames.getEnvironmentNames(), workspaceId, KubernetesV4Response.class);
     }

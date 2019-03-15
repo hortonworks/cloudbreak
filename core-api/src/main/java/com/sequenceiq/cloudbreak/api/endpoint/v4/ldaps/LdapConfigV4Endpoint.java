@@ -27,6 +27,8 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.LdapConfigOpDescripti
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+import java.util.Set;
+
 @Path("/v4/{workspaceId}/ldaps")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v4/{workspaceId}/ldaps", description = ControllerDescription.LDAP_V4_CONFIG_DESCRIPTION, protocols = "http,https")
@@ -58,8 +60,15 @@ public interface LdapConfigV4Endpoint {
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LdapConfigOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
-            nickname = "deleteLdapConfigsInWorkspace")
+            nickname = "deleteLdapConfigInWorkspace")
     LdapV4Response delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String ldapConfigName);
+
+    @DELETE
+    @Path("")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = LdapConfigOpDescription.DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
+            nickname = "deleteLdapConfigsInWorkspace")
+    LdapV4Responses deleteMultiple(@PathParam("workspaceId") Long workspaceId, Set<String> ldapConfigNames);
 
     @POST
     @Path("test")

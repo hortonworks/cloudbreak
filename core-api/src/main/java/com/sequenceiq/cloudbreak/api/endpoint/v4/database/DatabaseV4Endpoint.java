@@ -28,6 +28,8 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.DatabaseOpDescription
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+import java.util.Set;
+
 @Path("/v4/{workspaceId}/databases")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v4/{workspaceId}/databases", description = ControllerDescription.DATABASES_V4_DESCRIPTION, protocols = "http,https")
@@ -61,6 +63,13 @@ public interface DatabaseV4Endpoint {
     @ApiOperation(value = DatabaseOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.DATABASE_NOTES,
             nickname = "deleteDatabaseInWorkspace")
     DatabaseV4Response delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+
+    @DELETE
+    @Path("")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DatabaseOpDescription.DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.DATABASE_NOTES,
+            nickname = "deleteDatabasesInWorkspace")
+    DatabaseV4Responses deleteMultiple(@PathParam("workspaceId") Long workspaceId, Set<String> names);
 
     @GET
     @Path("{name}/request")

@@ -61,6 +61,13 @@ public class LdapV4Controller extends NotificationController implements LdapConf
     }
 
     @Override
+    public LdapV4Responses deleteMultiple(Long workspaceId, Set<String> names) {
+        Set<LdapConfig> deleted = ldapConfigService.deleteMultipleByNameFromWorkspace(names, workspaceId);
+        notify(ResourceEvent.LDAP_DELETED);
+        return new LdapV4Responses(converterUtil.convertAllAsSet(deleted, LdapV4Response.class));
+    }
+
+    @Override
     public LdapTestV4Response test(Long workspaceId, LdapTestV4Request ldapValidationRequest) {
         LdapTestV4Response ldapTestV4Response = new LdapTestV4Response();
         ldapTestV4Response.setResult(ldapConfigService.testConnection(workspaceId,

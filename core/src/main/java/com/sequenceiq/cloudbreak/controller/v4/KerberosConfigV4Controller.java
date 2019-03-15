@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.KerberosConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosViewV4Responses;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
@@ -55,6 +56,12 @@ public class KerberosConfigV4Controller extends NotificationController implement
     public KerberosV4Response delete(Long workspaceId, String name) {
         KerberosConfig deleted = kerberosService.deleteByNameFromWorkspace(name, workspaceId);
         return converterUtil.convert(deleted, KerberosV4Response.class);
+    }
+
+    @Override
+    public KerberosV4Responses deleteMultiple(Long workspaceId, Set<String> names) {
+        Set<KerberosConfig> deleted = kerberosService.deleteMultipleByNameFromWorkspace(names, workspaceId);
+        return new KerberosV4Responses(converterUtil.convertAllAsSet(deleted, KerberosV4Response.class));
     }
 
     @Override
