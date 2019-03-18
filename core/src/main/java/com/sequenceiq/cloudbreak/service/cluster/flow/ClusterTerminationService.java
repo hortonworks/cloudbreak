@@ -153,7 +153,6 @@ public class ClusterTerminationService {
         cluster.setProxyConfig(null);
         cluster.setStatus(DELETE_COMPLETED);
         cluster.setFileSystem(null);
-        cluster.setEnvironment(null);
         cluster.setKerberosConfig(null);
         transactionService.required(() -> {
             deleteClusterHostGroupsWithItsMetadata(cluster);
