@@ -12,7 +12,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.G
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.GcpStackV4Parameters;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.aws.AwsParameters;
 import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
 import com.sequenceiq.it.cloudbreak.newway.entity.StackAuthenticationEntity;
@@ -45,9 +44,9 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public VolumeV4Entity attachedVolume(VolumeV4Entity volume) {
-        int attachedVolumeSize = Integer.parseInt(getTestParameter().getWithDefault(AwsParameters.Instance.VOLUME_SIZE, "100"));
-        int attachedVolumeCount = Integer.parseInt(getTestParameter().getWithDefault(AwsParameters.Instance.VOLUME_COUNT, "1"));
-        String attachedVolumeType = getTestParameter().getWithDefault(AwsParameters.Instance.VOLUME_TYPE, "pd-standard");
+        int attachedVolumeSize = Integer.parseInt(getTestParameter().getWithDefault(GcpParameters.Instance.VOLUME_SIZE, "100"));
+        int attachedVolumeCount = Integer.parseInt(getTestParameter().getWithDefault(GcpParameters.Instance.VOLUME_COUNT, "1"));
+        String attachedVolumeType = getTestParameter().getWithDefault(GcpParameters.Instance.VOLUME_TYPE, "pd-standard");
         return volume.withSize(attachedVolumeSize)
                 .withCount(attachedVolumeCount)
                 .withType(attachedVolumeType);
