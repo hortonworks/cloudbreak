@@ -41,11 +41,11 @@ import com.sequenceiq.cloudbreak.notification.Notification;
 import com.sequenceiq.cloudbreak.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.repository.environment.EnvironmentViewRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
@@ -93,7 +93,7 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
     private CredentialPrerequisiteService credentialPrerequisiteService;
 
     @Inject
-    private EnvironmentViewRepository environmentViewRepository;
+    private EnvironmentViewService environmentViewService;
 
     @Inject
     private SecretService secretService;
@@ -308,7 +308,7 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
     }
 
     private void checkEnvironmentsForDeletion(Credential credential) {
-        Set<EnvironmentView> environments = environmentViewRepository.findAllByCredentialId(credential.getId());
+        Set<EnvironmentView> environments = environmentViewService.findAllByCredentialId(credential.getId());
         if (!environments.isEmpty()) {
             String environmentList = environments.stream().map(EnvironmentView::getName).collect(Collectors.joining(", "));
             String message = "Credential '%s' cannot be deleted because the following environments are using it: [%s].";

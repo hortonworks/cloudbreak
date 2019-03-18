@@ -13,6 +13,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Where;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -24,6 +26,7 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Entity
 @Table(name = "Environment")
+@Where(clause = "archived = false")
 public class EnvironmentView extends CompactView {
 
     @Column(nullable = false)
@@ -48,6 +51,9 @@ public class EnvironmentView extends CompactView {
 
     @Column(nullable = false)
     private Double latitude;
+
+    @Column(columnDefinition = "boolean default false")
+    private boolean archived;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "environment")
     private Set<DatalakeResources> datalakeResources = new HashSet<>();

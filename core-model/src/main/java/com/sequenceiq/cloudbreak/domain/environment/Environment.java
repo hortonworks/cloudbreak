@@ -20,9 +20,12 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Where;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.domain.ArchivableResource;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.KubernetesConfig;
@@ -39,8 +42,9 @@ import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Entity
+@Where(clause = "archived = false")
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
-public class Environment implements WorkspaceAwareResource {
+public class Environment implements WorkspaceAwareResource, ArchivableResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "environment_generator")
@@ -79,6 +83,11 @@ public class Environment implements WorkspaceAwareResource {
 
     @Column(nullable = false)
     private Double latitude;
+
+    @Column(columnDefinition = "boolean default false")
+    private boolean archived;
+
+    private Long deletionTimestamp = -1L;
 
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(name = "env_ldap", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "ldapid"))
@@ -136,6 +145,22 @@ public class Environment implements WorkspaceAwareResource {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public void setArchived(boolean archived) {
+        this.archived = archived;
+    }
+
+    @Override
+    public void unsetRelationsToEntitiesToBeDeleted() {
+        archived = true;
+        ldapConfigs = null;
+        rdsConfigs = null;
+        proxyConfigs = null;
+        kubernetesConfigs = null;
+        kerberosConfigs = null;
+        datalakeResources = null;
     }
 
     public String getDescription() {
@@ -288,5 +313,17 @@ public class Environment implements WorkspaceAwareResource {
 
     public void setKerberosConfigs(Set<KerberosConfig> kerberosConfigs) {
         this.kerberosConfigs = kerberosConfigs;
+    }
+
+    public boolean isArchived() {
+        return archived;
+    }
+
+    public Long getDeletionTimestamp() {
+        return deletionTimestamp;
+    }
+
+    public void setDeletionTimestamp(Long deletionTimestamp) {
+        this.deletionTimestamp = deletionTimestamp;
     }
 }

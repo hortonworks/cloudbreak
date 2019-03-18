@@ -20,6 +20,8 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
@@ -81,6 +83,8 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
 public class EnvironmentService extends AbstractWorkspaceAwareResourceService<Environment> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
 
     @Inject
     private RdsConfigService rdsConfigService;
@@ -146,6 +150,9 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
     @Inject
     private AmbariDatalakeConfigProvider ambariDatalakeConfigProvider;
 
+    @Inject
+    private EnvironmentArchivatorService archivatorService;
+
     public Set<SimpleEnvironmentV4Response> listByWorkspaceId(Long workspaceId) {
         Set<SimpleEnvironmentV4Response> environmentResponses = environmentViewService.findAllByWorkspaceId(workspaceId).stream()
                 .map(env -> conversionService.convert(env, SimpleEnvironmentV4Response.class))
@@ -177,7 +184,9 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
 
     public SimpleEnvironmentV4Response delete(String environmentName, Long workspaceId) {
         Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
-        delete(environment);
+        LOGGER.debug(String.format("Starting to delete environment [name: %s, workspace: %s]", environment.getName(), environment.getWorkspace().getName()));
+        prepareDeletion(environment);
+        archivatorService.archive(environment);
         return conversionService.convert(environment, SimpleEnvironmentV4Response.class);
     }
 
