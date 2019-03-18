@@ -98,7 +98,7 @@ RSpec.shared_context "shared cluster helpers", :a => :b do
   def get_node_count(cb, cluster_name, node_type)
     json = get_cluster_json(cb, cluster_name)
     json['instanceGroups'].each do |s|
-      if  s['group'] == node_type
+      if  s['name'] == node_type
         return s['nodeCount']
       end
     end

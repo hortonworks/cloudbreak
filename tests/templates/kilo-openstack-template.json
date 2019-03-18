@@ -142,16 +142,15 @@
   },
   "image": {
     "catalog": "cloudbreak-default",
-    "id": "f8146750-87aa-42bc-4003-c4abf4adacf8"
+    "id": "0907b59f-d38d-4325-6000-28d74e08158e"
   },
   "cluster": {
     "name": "d8d2a30e-9bac-4106-b25d-1e95aee2d212",
     "databases": [],
+    "clusterDefinitionName": "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin",
+    "userName": "admin",
+    "password": "Admin123!@#\"",
     "ambari": {
-      "clusterDefinitionName": "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin",
-      "userName": "admin",
-      "password": "Admin123!@#\"",
-      "validateRepositories": false
     },
     "executorType": "DEFAULT"
   },

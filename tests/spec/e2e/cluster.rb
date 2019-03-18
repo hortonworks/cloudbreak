@@ -130,6 +130,6 @@ RSpec.describe 'Custer operation test cases', :type => :aruba do
     result = cb.cluster.generate_reinstall_template.name(@os_cluster_name).cluster_definition_name(@default_clusterdefinition_name).build
     expect(result.exit_status).to eql 0 
     expect(result.stdout.empty?).to be_falsy 
-    expect(JSON.parse(result.stdout)["clusterdefinitionName"]).to eq(@default_clusterdefinition_name.gsub("'",""))
+    expect(JSON.parse(result.stdout)["clusterDefinition"]).to eq(@default_clusterdefinition_name.gsub("'",""))
   end           
 end
