@@ -80,6 +80,9 @@ public class Environment implements WorkspaceAwareResource {
     @Column(nullable = false)
     private Double latitude;
 
+    @Column(columnDefinition = "boolean default false")
+    private boolean archived;
+
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(name = "env_ldap", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "ldapid"))
     private Set<LdapConfig> ldapConfigs = new HashSet<>();
@@ -288,5 +291,13 @@ public class Environment implements WorkspaceAwareResource {
 
     public void setKerberosConfigs(Set<KerberosConfig> kerberosConfigs) {
         this.kerberosConfigs = kerberosConfigs;
+    }
+
+    public boolean isArchived() {
+        return archived;
+    }
+
+    public void setArchived(boolean archived) {
+        this.archived = archived;
     }
 }

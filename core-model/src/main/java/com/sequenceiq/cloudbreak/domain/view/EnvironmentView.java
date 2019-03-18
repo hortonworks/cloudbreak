@@ -49,6 +49,9 @@ public class EnvironmentView extends CompactView {
     @Column(nullable = false)
     private Double latitude;
 
+    @Column(columnDefinition = "boolean default false")
+    private boolean archived;
+
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "environment")
     private Set<DatalakeResources> datalakeResources = new HashSet<>();
 

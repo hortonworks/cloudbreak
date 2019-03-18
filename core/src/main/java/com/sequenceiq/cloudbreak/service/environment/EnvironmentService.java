@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.service.environment;
 
 import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.net.MalformedURLException;
@@ -20,6 +22,8 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
@@ -81,6 +85,8 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
 public class EnvironmentService extends AbstractWorkspaceAwareResourceService<Environment> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
 
     @Inject
     private RdsConfigService rdsConfigService;
@@ -165,20 +171,37 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
     public DetailedEnvironmentV4Response get(String environmentName, Long workspaceId) {
         try {
             return transactionService.required(() ->
-                    conversionService.convert(getByNameForWorkspaceId(environmentName, workspaceId), DetailedEnvironmentV4Response.class));
+                    conversionService.convert(
+                            environmentRepository.findByNameAndWorkspaceIdAndArchivedFalse(environmentName, workspaceId), DetailedEnvironmentV4Response.class));
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
     }
 
     public Set<Environment> findByNamesInWorkspace(Set<String> names, @NotNull Long workspaceId) {
-        return CollectionUtils.isEmpty(names) ? new HashSet<>() : environmentRepository.findAllByNameInAndWorkspaceId(names, workspaceId);
+        return CollectionUtils.isEmpty(names) ? new HashSet<>() : environmentRepository.findAllByNameInAndWorkspaceIdAndArchivedFalse(names, workspaceId);
     }
 
     public SimpleEnvironmentV4Response delete(String environmentName, Long workspaceId) {
-        Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
-        delete(environment);
+        Environment environment = Optional.ofNullable(
+                environmentRepository.findByNameAndWorkspaceIdAndArchivedFalse(environmentName, workspaceId))
+                .orElseThrow(notFound("Environment with name", environmentName));
+        LOGGER.debug(String.format("Starting to delete environment [name: %s, workspace: %s]", environment.getName(), environment.getWorkspace().getName()));
+        prepareDeletion(environment);
+        archiveEnvironment(environment);
         return conversionService.convert(environment, SimpleEnvironmentV4Response.class);
+    }
+
+    private void archiveEnvironment(Environment environment) {
+        environment.setName(generateArchiveName(environment.getName()));
+        environment.setArchived(true);
+        environment.setLdapConfigs(null);
+        environment.setRdsConfigs(null);
+        environment.setProxyConfigs(null);
+        environment.setKubernetesConfigs(null);
+        environment.setKerberosConfigs(null);
+        environment.setDatalakeResources(null);
+        environmentRepository.save(environment);
     }
 
     public DetailedEnvironmentV4Response createForLoggedInUser(EnvironmentV4Request request, @Nonnull Long workspaceId) {
@@ -218,7 +241,7 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
     }
 
     public DetailedEnvironmentV4Response edit(Long workspaceId, String environmentName, EnvironmentEditV4Request request) {
-        Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
+        Environment environment = environmentRepository.findByNameAndWorkspaceIdAndArchivedFalse(environmentName, workspaceId);
         if (StringUtils.isNotEmpty(request.getDescription())) {
             environment.setDescription(request.getDescription());
         }
@@ -322,7 +345,7 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
                 if (validationResult.hasError()) {
                     throw new BadRequestException(validationResult.getFormattedErrors());
                 }
-                Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
+                Environment environment = environmentRepository.findByNameAndWorkspaceIdAndArchivedFalse(environmentName, workspaceId);
                 environment = doAttach(ldapsToAttach, proxiesToAttach, rdssToAttach, kubesToAttach, kerberosConfigsToAttach, environment);
                 return conversionService.convert(environment, DetailedEnvironmentV4Response.class);
             });
@@ -350,7 +373,7 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
     public DetailedEnvironmentV4Response detachResources(String environmentName, EnvironmentDetachV4Request request, Long workspaceId) {
         try {
             return transactionService.required(() -> {
-                Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
+                Environment environment = environmentRepository.findByNameAndWorkspaceIdAndArchivedFalse(environmentName, workspaceId);
                 ValidationResult validationResult = validateAndDetachLdaps(request, environment);
                 validationResult = validateAndDetachProxies(request, environment, validationResult);
                 validationResult = validateAndDetachRdss(request, environment, validationResult);
@@ -417,7 +440,7 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
     public DetailedEnvironmentV4Response changeCredential(String environmentName, Long workspaceId, EnvironmentChangeCredentialV4Request request) {
         try {
             return transactionService.required(() -> {
-                Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
+                Environment environment = environmentRepository.findByNameAndWorkspaceIdAndArchivedFalse(environmentName, workspaceId);
                 Credential credential = environmentCredentialOperationService.validatePlatformAndGetCredential(request, environment, workspaceId);
                 Set<StackApiView> stacksCannotBeChanged = environment.getStacks().stream()
                         .filter(stackApiView -> !stackApiViewService.canChangeCredential(stackApiView))
@@ -444,7 +467,7 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
         try {
             return transactionService.required(() -> {
                 try {
-                    Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
+                    Environment environment = environmentRepository.findByNameAndWorkspaceIdAndArchivedFalse(environmentName, workspaceId);
                     EnvironmentView envView = environmentViewService.getByNameForWorkspaceId(environmentName, workspaceId);
                     ValidationResult validationResult = clusterCreationEnvironmentValidator.validate(registerDatalakeRequest, environment);
                     if (validationResult.hasError()) {

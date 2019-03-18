@@ -341,7 +341,7 @@ public class EnvironmentServiceTest {
 
         setCredential(environment);
 
-        when(environmentRepository.findByNameAndWorkspaceId(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(environment);
+        when(environmentRepository.findByNameAndWorkspaceIdAndArchivedFalse(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(environment);
         when(environmentRepository.save(any(Environment.class)))
                 .thenAnswer((Answer<Environment>) invocation -> (Environment) invocation.getArgument(0));
         mockConverters();
@@ -370,7 +370,7 @@ public class EnvironmentServiceTest {
     public void testChangeCredentialHappyPath() {
         Environment environment = new Environment();
         environment.setName(ENVIRONMENT_NAME);
-        when(environmentRepository.findByNameAndWorkspaceId(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(environment);
+        when(environmentRepository.findByNameAndWorkspaceIdAndArchivedFalse(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(environment);
 
         String credentialName1 = "credential1";
         Credential credential1 = new Credential();
@@ -410,7 +410,7 @@ public class EnvironmentServiceTest {
     public void testChangeCredentialWithUnchangableStack() {
         Environment environment = new Environment();
         environment.setName(ENVIRONMENT_NAME);
-        when(environmentRepository.findByNameAndWorkspaceId(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(environment);
+        when(environmentRepository.findByNameAndWorkspaceIdAndArchivedFalse(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(environment);
 
         String credentialName1 = "credential1";
         Credential credential1 = new Credential();
@@ -439,7 +439,7 @@ public class EnvironmentServiceTest {
     public void testChangeCredentialWithInvalidCloudPlatform() {
         Environment environment = new Environment();
         environment.setName(ENVIRONMENT_NAME);
-        when(environmentRepository.findByNameAndWorkspaceId(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(environment);
+        when(environmentRepository.findByNameAndWorkspaceIdAndArchivedFalse(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(environment);
 
         String credentialName1 = "credential1";
         Credential credential1 = new Credential();
@@ -524,7 +524,7 @@ public class EnvironmentServiceTest {
         request.setDatabases(Sets.newHashSet(rdsName1));
         request.setKerberoses(Sets.newHashSet(kdcName1));
 
-        when(environmentRepository.findByNameAndWorkspaceId(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(environment);
+        when(environmentRepository.findByNameAndWorkspaceIdAndArchivedFalse(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(environment);
         when(environmentRepository.save(any(Environment.class)))
                 .thenAnswer((Answer<Environment>) invocation -> (Environment) invocation.getArgument(0));
         mockConverters();
@@ -616,7 +616,7 @@ public class EnvironmentServiceTest {
         request.setDatabases(Sets.newHashSet(rdsName1));
         request.setKerberoses(Sets.newHashSet(kdcName1));
 
-        when(environmentRepository.findByNameAndWorkspaceId(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(environment);
+        when(environmentRepository.findByNameAndWorkspaceIdAndArchivedFalse(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(environment);
         when(ldapConfigService.getClustersUsingResourceInEnvironment(ldap1, ENVIRONMENT_ID)).thenReturn(Sets.newHashSet(cluster1));
         when(ldapConfigService.getClustersUsingResourceInEnvironment(ldap2, ENVIRONMENT_ID)).thenReturn(Sets.newHashSet(cluster1, cluster2));
         when(proxyConfigService.getClustersUsingResourceInEnvironment(proxy1, ENVIRONMENT_ID)).thenReturn(Sets.newHashSet(cluster1));
@@ -653,7 +653,7 @@ public class EnvironmentServiceTest {
         environment.setDescription("original descreption");
         setCredential(environment);
 
-        when(environmentRepository.findByNameAndWorkspaceId(ENVIRONMENT_NAME, WORKSPACE_ID))
+        when(environmentRepository.findByNameAndWorkspaceIdAndArchivedFalse(ENVIRONMENT_NAME, WORKSPACE_ID))
                 .thenReturn(environment);
 
         CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions(Set.of(newLocation, newRegion1, newRegion2, "us-west-1", "us-west-2", "us-west-3"));
@@ -693,7 +693,7 @@ public class EnvironmentServiceTest {
         environment.setDescription("original descreption");
         setCredential(environment);
 
-        when(environmentRepository.findByNameAndWorkspaceId(ENVIRONMENT_NAME, WORKSPACE_ID))
+        when(environmentRepository.findByNameAndWorkspaceIdAndArchivedFalse(ENVIRONMENT_NAME, WORKSPACE_ID))
                 .thenReturn(environment);
 
         CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions(Set.of(newLocation, region1, region2));
@@ -729,7 +729,7 @@ public class EnvironmentServiceTest {
         environment.setDescription("original descreption");
         setCredential(environment);
 
-        when(environmentRepository.findByNameAndWorkspaceId(ENVIRONMENT_NAME, WORKSPACE_ID))
+        when(environmentRepository.findByNameAndWorkspaceIdAndArchivedFalse(ENVIRONMENT_NAME, WORKSPACE_ID))
                 .thenReturn(environment);
 
         CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions(Set.of(region1, region2, region3));

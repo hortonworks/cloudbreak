@@ -24,8 +24,14 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 public interface EnvironmentViewRepository extends WorkspaceResourceRepository<EnvironmentView, Long> {
 
     @CheckPermissionsByWorkspaceId(action = READ, workspaceIdIndex = 1)
-    Set<EnvironmentView> findAllByNameInAndWorkspaceId(Collection<String> names, Long workspaceId);
+    Set<EnvironmentView> findAllByNameInAndWorkspaceIdAndArchivedFalse(Collection<String> names, Long workspaceId);
 
     @DisableCheckPermissions
-    Set<EnvironmentView> findAllByCredentialId(Long credentialId);
+    Set<EnvironmentView> findAllByCredentialIdAndArchivedFalse(Long credentialId);
+
+    @CheckPermissionsByWorkspaceId(action = READ)
+    Set<EnvironmentView> findAllByWorkspaceIdAndArchivedFalse(Long workspaceid);
+
+    @CheckPermissionsByWorkspaceId(action = READ, workspaceIdIndex = 1)
+    EnvironmentView getByNameAndWorkspaceIdAndArchivedFalse(String name, Long workspaceid);
 }

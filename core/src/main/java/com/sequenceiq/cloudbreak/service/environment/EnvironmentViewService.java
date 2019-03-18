@@ -11,6 +11,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentViewRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
@@ -27,7 +28,7 @@ public class EnvironmentViewService extends AbstractWorkspaceAwareResourceServic
     }
 
     public Set<EnvironmentView> findByNamesInWorkspace(Set<String> names, @NotNull Long workspaceId) {
-        return CollectionUtils.isEmpty(names) ? new HashSet<>() : environmentViewRepository.findAllByNameInAndWorkspaceId(names, workspaceId);
+        return CollectionUtils.isEmpty(names) ? new HashSet<>() : environmentViewRepository.findAllByNameInAndWorkspaceIdAndArchivedFalse(names, workspaceId);
     }
 
     @Override
@@ -43,5 +44,19 @@ public class EnvironmentViewService extends AbstractWorkspaceAwareResourceServic
     @Override
     public WorkspaceResource resource() {
         return WorkspaceResource.ENVIRONMENT;
+    }
+
+    @Override
+    public Set<EnvironmentView> findAllByWorkspaceId(Long workspaceId) {
+        return environmentViewRepository.findAllByWorkspaceIdAndArchivedFalse(workspaceId);
+    }
+
+    @Override
+    public EnvironmentView getByNameForWorkspace(String name, Workspace workspace) {
+        return environmentViewRepository.getByNameAndWorkspaceIdAndArchivedFalse(name, workspace.getId());
+    }
+
+    public Set<EnvironmentView> findAllByCredentialId(Long credentialId) {
+        return environmentViewRepository.findAllByCredentialIdAndArchivedFalse(credentialId);
     }
 }
