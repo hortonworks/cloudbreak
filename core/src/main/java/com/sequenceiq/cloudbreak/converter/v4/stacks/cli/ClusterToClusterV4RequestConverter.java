@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
@@ -13,17 +15,24 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.cm.ClusterToClouderaManagerV4RequestConverter;
+import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 
 @Component
 public class ClusterToClusterV4RequestConverter extends AbstractConversionServiceAwareConverter<Cluster, ClusterV4Request> {
 
+    @Inject
+    private ClusterDefinitionService clusterDefinitionService;
+
+    @Inject
+    private ClusterToClouderaManagerV4RequestConverter clouderaManagerV4RequestConverter;
+
     @Override
     public ClusterV4Request convert(Cluster source) {
         ClusterV4Request clusterRequest = new ClusterV4Request();
-        clusterRequest.setAmbari(getConversionService().convert(source, AmbariV4Request.class));
-        clusterRequest.setCm(ClusterToClouderaManagerV4RequestConverter.convert(source));
+        convertClusterManager(source, clusterRequest);
         clusterRequest.setClusterDefinitionName(source.getClusterDefinition().getName());
         clusterRequest.setValidateClusterDefinition(null);
         clusterRequest.setExecutorType(source.getExecutorType());
@@ -55,6 +64,15 @@ public class ClusterToClusterV4RequestConverter extends AbstractConversionServic
         }
 
         return clusterRequest;
+    }
+
+    private void convertClusterManager(Cluster cluster, ClusterV4Request clusterRequest) {
+        ClusterDefinition clusterDefinition = cluster.getClusterDefinition();
+        if (clusterDefinitionService.isAmbariBlueprint(clusterDefinition)) {
+            clusterRequest.setAmbari(getConversionService().convert(cluster, AmbariV4Request.class));
+        } else {
+            clusterRequest.setCm(clouderaManagerV4RequestConverter.convert(cluster));
+        }
     }
 
 }

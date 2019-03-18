@@ -6,6 +6,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -15,12 +17,10 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 
-public final class ClusterToClouderaManagerV4RequestConverter {
+@Component
+public class ClusterToClouderaManagerV4RequestConverter {
 
-    private ClusterToClouderaManagerV4RequestConverter() {
-    }
-
-    public static ClouderaManagerV4Request convert(Cluster cluster) {
+    public ClouderaManagerV4Request convert(Cluster cluster) {
         Predicate<ClusterComponent> cmRepoFilter = component -> ComponentType.CM_REPO_DETAILS.equals(component.getComponentType());
 
         Set<ClusterComponent> components = cluster.getComponents();
@@ -44,7 +44,7 @@ public final class ClusterToClouderaManagerV4RequestConverter {
                         .collect(Collectors.toList()));
     }
 
-    private static <T> Function<Json, T> toAttributeClass(Class<T> attributeClass) {
+    private <T> Function<Json, T> toAttributeClass(Class<T> attributeClass) {
         return attribute -> {
             try {
                 return attribute.get(attributeClass);
