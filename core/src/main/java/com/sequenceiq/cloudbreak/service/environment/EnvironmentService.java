@@ -20,6 +20,8 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
@@ -60,7 +62,6 @@ import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.KubernetesConfigService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
@@ -78,9 +79,12 @@ import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeConfigApiConnecto
 import com.sequenceiq.cloudbreak.service.sharedservice.ServiceDescriptorDefinitionProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.AbstractArchivistService;
 
 @Service
-public class EnvironmentService extends AbstractWorkspaceAwareResourceService<Environment> {
+public class EnvironmentService extends AbstractArchivistService<Environment> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
 
     @Inject
     private RdsConfigService rdsConfigService;
@@ -177,6 +181,7 @@ public class EnvironmentService extends AbstractWorkspaceAwareResourceService<En
 
     public SimpleEnvironmentV4Response delete(String environmentName, Long workspaceId) {
         Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
+        LOGGER.debug(String.format("Starting to archive environment [name: %s, workspace: %s]", environment.getName(), environment.getWorkspace().getName()));
         delete(environment);
         return conversionService.convert(environment, SimpleEnvironmentV4Response.class);
     }

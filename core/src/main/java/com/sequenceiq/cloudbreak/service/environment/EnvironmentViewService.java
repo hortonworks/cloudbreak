@@ -44,4 +44,8 @@ public class EnvironmentViewService extends AbstractWorkspaceAwareResourceServic
     public WorkspaceResource resource() {
         return WorkspaceResource.ENVIRONMENT;
     }
+
+    public Set<EnvironmentView> findAllByCredentialId(Long credentialId) {
+        return environmentViewRepository.findAllByCredentialId(credentialId);
+    }
 }

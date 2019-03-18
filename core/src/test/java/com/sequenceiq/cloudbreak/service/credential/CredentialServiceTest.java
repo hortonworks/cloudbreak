@@ -48,10 +48,10 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.repository.environment.EnvironmentViewRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
@@ -123,7 +123,7 @@ public class CredentialServiceTest {
     private CredentialValidator credentialValidator;
 
     @Mock
-    private EnvironmentViewRepository environmentViewRepository;
+    private EnvironmentViewService environmentViewService;
 
     @Mock
     private CredentialPrerequisiteService credentialPrerequisiteService;
@@ -420,7 +420,7 @@ public class CredentialServiceTest {
         envs.add(env2);
         when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, WORKSPACE_ID, CLOUD_PLATFORMS)).thenReturn(credential);
         when(stackRepository.findByCredential(credential)).thenReturn(Collections.emptySet());
-        when(environmentViewRepository.findAllByCredentialId(credential.getId())).thenReturn(envs);
+        when(environmentViewService.findAllByCredentialId(credential.getId())).thenReturn(envs);
         // WHEN
         try {
             underTest.delete(TEST_CREDENTIAL_NAME, workspace);
@@ -431,7 +431,7 @@ public class CredentialServiceTest {
         }
         // THEN
         verify(stackRepository, times(1)).findByCredential(credential);
-        verify(environmentViewRepository, times(1)).findAllByCredentialId(credential.getId());
+        verify(environmentViewService, times(1)).findAllByCredentialId(credential.getId());
         verify(userProfileHandler, times(0)).destroyProfileCredentialPreparation(credential);
         verify(credentialRepository, times(0)).save(credential);
     }
@@ -445,7 +445,7 @@ public class CredentialServiceTest {
         credential.setWorkspace(workspace);
         when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, WORKSPACE_ID, CLOUD_PLATFORMS)).thenReturn(credential);
         when(stackRepository.findByCredential(credential)).thenReturn(Collections.emptySet());
-        when(environmentViewRepository.findAllByCredentialId(credential.getId())).thenReturn(Collections.emptySet());
+        when(environmentViewService.findAllByCredentialId(credential.getId())).thenReturn(Collections.emptySet());
 
         underTest.delete(TEST_CREDENTIAL_NAME, workspace);
 
