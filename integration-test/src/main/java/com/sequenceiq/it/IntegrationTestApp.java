@@ -70,7 +70,7 @@ public class IntegrationTestApp implements CommandLineRunner {
     @Value("${integrationtest.threadCount:2}")
     private int threadCount;
 
-    @Value("${integrationtest.parallel:METHODS}")
+    @Value("${integrationtest.parallel:FALSE}")
     private String parallel;
 
     @Inject
