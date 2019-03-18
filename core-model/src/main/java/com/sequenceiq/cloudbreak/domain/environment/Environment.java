@@ -23,6 +23,7 @@ import javax.persistence.UniqueConstraint;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.domain.ArchivableResource;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.KubernetesConfig;
@@ -40,7 +41,7 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
-public class Environment implements WorkspaceAwareResource {
+public class Environment implements WorkspaceAwareResource, ArchivableResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "environment_generator")
@@ -139,6 +140,11 @@ public class Environment implements WorkspaceAwareResource {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public void setArchived(boolean archived) {
+        this.archived = archived;
     }
 
     public String getDescription() {
@@ -295,9 +301,5 @@ public class Environment implements WorkspaceAwareResource {
 
     public boolean isArchived() {
         return archived;
-    }
-
-    public void setArchived(boolean archived) {
-        this.archived = archived;
     }
 }

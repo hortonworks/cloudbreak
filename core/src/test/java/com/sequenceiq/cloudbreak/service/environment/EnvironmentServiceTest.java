@@ -1,8 +1,12 @@
 package com.sequenceiq.cloudbreak.service.environment;
 
+import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -37,6 +41,7 @@ import org.springframework.core.convert.ConversionService;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentChangeCredentialV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentDetachV4Request;
@@ -46,7 +51,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.LocationV4
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.LocationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4ResponseBase;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.ProxyV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
@@ -67,11 +75,13 @@ import com.sequenceiq.cloudbreak.converter.v4.proxies.ProxyConfigToProxyV4Respon
 import com.sequenceiq.cloudbreak.converter.v4.stacks.view.StackApiViewToStackViewV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
+import com.sequenceiq.cloudbreak.domain.KubernetesConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -87,6 +97,7 @@ import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.util.EnvironmentUtils;
@@ -95,6 +106,8 @@ import com.sequenceiq.cloudbreak.util.EnvironmentUtils;
 public class EnvironmentServiceTest {
 
     private static final Long WORKSPACE_ID = 1L;
+
+    private static final String WORKSPACE_NAME = "workspaceName";
 
     private static final Long ENVIRONMENT_ID = 1L;
 
@@ -139,6 +152,9 @@ public class EnvironmentServiceTest {
     private StackApiViewService stackApiViewService;
 
     @Mock
+    private StackService stackService;
+
+    @Mock
     private ConversionService conversionService;
 
     @Mock
@@ -162,7 +178,7 @@ public class EnvironmentServiceTest {
     private final ArgumentCaptor<StackApiView> stackApiViewCaptor = ArgumentCaptor.forClass(StackApiView.class);
 
     @InjectMocks
-    private EnvironmentService environmentService;
+    private EnvironmentService underTest;
 
     private final Workspace workspace = new Workspace();
 
@@ -232,7 +248,7 @@ public class EnvironmentServiceTest {
         when(environmentCredentialOperationService.getCredentialFromRequest(any(), anyLong())).thenReturn(new Credential());
         CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions();
         when(platformParameterService.getRegionsByCredential(any())).thenReturn(cloudRegions);
-        DetailedEnvironmentV4Response response = environmentService.createForLoggedInUser(environmentV4Request, WORKSPACE_ID);
+        DetailedEnvironmentV4Response response = underTest.createForLoggedInUser(environmentV4Request, WORKSPACE_ID);
 
         assertNotNull(response);
     }
@@ -254,7 +270,7 @@ public class EnvironmentServiceTest {
         when(environmentCredentialOperationService.getCredentialFromRequest(any(), anyLong())).thenReturn(new Credential());
         CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions();
         when(platformParameterService.getRegionsByCredential(any())).thenReturn(cloudRegions);
-        DetailedEnvironmentV4Response response = environmentService.createForLoggedInUser(environmentV4Request, WORKSPACE_ID);
+        DetailedEnvironmentV4Response response = underTest.createForLoggedInUser(environmentV4Request, WORKSPACE_ID);
 
         assertNotNull(response);
     }
@@ -282,7 +298,7 @@ public class EnvironmentServiceTest {
         CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions();
         when(platformParameterService.getRegionsByCredential(any())).thenReturn(cloudRegions);
         // WHEN
-        DetailedEnvironmentV4Response response = environmentService.createForLoggedInUser(environmentV4Request, WORKSPACE_ID);
+        DetailedEnvironmentV4Response response = underTest.createForLoggedInUser(environmentV4Request, WORKSPACE_ID);
         // THEN
         assertNotNull(response);
         Set<com.sequenceiq.cloudbreak.domain.environment.Region> regions = envCaptor.getValue().getRegionSet();
@@ -353,17 +369,17 @@ public class EnvironmentServiceTest {
         detachRequest.getDatabases().add(rdsName1);
         detachRequest.getKerberoses().add(kdcName1);
 
-        DetailedEnvironmentV4Response detachResponse = environmentService.detachResources(ENVIRONMENT_NAME, detachRequest, WORKSPACE_ID);
+        DetailedEnvironmentV4Response detachResponse = underTest.detachResources(ENVIRONMENT_NAME, detachRequest, WORKSPACE_ID);
 
-        assertFalse(detachResponse.getLdaps().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(notAttachedLdap));
-        assertFalse(detachResponse.getLdaps().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(ldapName1));
-        assertFalse(detachResponse.getProxies().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(proxyName1));
-        assertFalse(detachResponse.getDatabases().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(rdsName1));
-        assertFalse(detachResponse.getKerberoses().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(kdcName1));
-        assertTrue(detachResponse.getLdaps().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(ldapName2));
-        assertTrue(detachResponse.getProxies().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(proxyName2));
-        assertTrue(detachResponse.getDatabases().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(rdsName2));
-        assertTrue(detachResponse.getKerberoses().stream().map(o -> o.getName()).collect(Collectors.toSet()).contains(kdcName2));
+        assertFalse(detachResponse.getLdaps().stream().map(LdapV4Base::getName).collect(Collectors.toSet()).contains(notAttachedLdap));
+        assertFalse(detachResponse.getLdaps().stream().map(LdapV4Base::getName).collect(Collectors.toSet()).contains(ldapName1));
+        assertFalse(detachResponse.getProxies().stream().map(ProxyV4Base::getName).collect(Collectors.toSet()).contains(proxyName1));
+        assertFalse(detachResponse.getDatabases().stream().map(DatabaseV4Base::getName).collect(Collectors.toSet()).contains(rdsName1));
+        assertFalse(detachResponse.getKerberoses().stream().map(KerberosV4ResponseBase::getName).collect(Collectors.toSet()).contains(kdcName1));
+        assertTrue(detachResponse.getLdaps().stream().map(LdapV4Base::getName).collect(Collectors.toSet()).contains(ldapName2));
+        assertTrue(detachResponse.getProxies().stream().map(ProxyV4Base::getName).collect(Collectors.toSet()).contains(proxyName2));
+        assertTrue(detachResponse.getDatabases().stream().map(DatabaseV4Base::getName).collect(Collectors.toSet()).contains(rdsName2));
+        assertTrue(detachResponse.getKerberoses().stream().map(KerberosV4ResponseBase::getName).collect(Collectors.toSet()).contains(kdcName2));
     }
 
     @Test
@@ -399,7 +415,7 @@ public class EnvironmentServiceTest {
         EnvironmentChangeCredentialV4Request request = new EnvironmentChangeCredentialV4Request();
         request.setCredentialName(credentialName2);
 
-        DetailedEnvironmentV4Response response = environmentService.changeCredential(ENVIRONMENT_NAME, WORKSPACE_ID, request);
+        DetailedEnvironmentV4Response response = underTest.changeCredential(ENVIRONMENT_NAME, WORKSPACE_ID, request);
 
         verify(stackApiViewService, times(2)).save(stackApiViewCaptor.capture());
         assertEquals(ENVIRONMENT_NAME, response.getName());
@@ -432,7 +448,7 @@ public class EnvironmentServiceTest {
         EnvironmentChangeCredentialV4Request request = new EnvironmentChangeCredentialV4Request();
         request.setCredentialName(credentialName2);
 
-        environmentService.changeCredential(ENVIRONMENT_NAME, WORKSPACE_ID, request);
+        underTest.changeCredential(ENVIRONMENT_NAME, WORKSPACE_ID, request);
     }
 
     @Test(expected = BadRequestException.class)
@@ -457,7 +473,7 @@ public class EnvironmentServiceTest {
         EnvironmentChangeCredentialV4Request request = new EnvironmentChangeCredentialV4Request();
         request.setCredentialName("credential2");
 
-        environmentService.changeCredential(ENVIRONMENT_NAME, WORKSPACE_ID, request);
+        underTest.changeCredential(ENVIRONMENT_NAME, WORKSPACE_ID, request);
     }
 
     @Test
@@ -529,7 +545,7 @@ public class EnvironmentServiceTest {
                 .thenAnswer((Answer<Environment>) invocation -> (Environment) invocation.getArgument(0));
         mockConverters();
 
-        DetailedEnvironmentV4Response result = environmentService.detachResources(ENVIRONMENT_NAME, request, WORKSPACE_ID);
+        DetailedEnvironmentV4Response result = underTest.detachResources(ENVIRONMENT_NAME, request, WORKSPACE_ID);
 
         assertEquals(1, result.getLdaps().size());
         assertEquals(1, result.getProxies().size());
@@ -635,7 +651,7 @@ public class EnvironmentServiceTest {
         exceptionRule.expectMessage(String.format("Kerberos Config '%s' cannot be detached from environment 'EnvName' "
                 + "because it is used by the following cluster(s): [%s]", kdcName1, clusterName1));
 
-        environmentService.detachResources(ENVIRONMENT_NAME, request, WORKSPACE_ID);
+        underTest.detachResources(ENVIRONMENT_NAME, request, WORKSPACE_ID);
     }
 
     @Test
@@ -667,7 +683,7 @@ public class EnvironmentServiceTest {
         when(conversionService.convert(any(Environment.class), eq(LocationV4Response.class)))
                 .thenAnswer((Answer<LocationV4Response>) invocation -> environmentToLocationResponseConverter.convert((Environment) invocation.getArgument(0)));
 
-        DetailedEnvironmentV4Response result = environmentService.edit(WORKSPACE_ID, ENVIRONMENT_NAME, editRequest);
+        DetailedEnvironmentV4Response result = underTest.edit(WORKSPACE_ID, ENVIRONMENT_NAME, editRequest);
 
         assertEquals(editedDescription, result.getDescription());
         assertEquals(newLocation, result.getLocation().getName());
@@ -707,7 +723,7 @@ public class EnvironmentServiceTest {
         when(conversionService.convert(any(Environment.class), eq(LocationV4Response.class)))
                 .thenAnswer((Answer<LocationV4Response>) invocation -> environmentToLocationResponseConverter.convert((Environment) invocation.getArgument(0)));
 
-        DetailedEnvironmentV4Response result = environmentService.edit(WORKSPACE_ID, ENVIRONMENT_NAME, editRequest);
+        DetailedEnvironmentV4Response result = underTest.edit(WORKSPACE_ID, ENVIRONMENT_NAME, editRequest);
 
         assertEquals(newLocation, result.getLocation().getName());
         assertTrue(result.getRegions().getRegions().contains(region1));
@@ -745,11 +761,43 @@ public class EnvironmentServiceTest {
         when(conversionService.convert(any(Environment.class), eq(LocationV4Response.class)))
                 .thenAnswer((Answer<LocationV4Response>) invocation -> environmentToLocationResponseConverter.convert((Environment) invocation.getArgument(0)));
 
-        DetailedEnvironmentV4Response result = environmentService.edit(WORKSPACE_ID, ENVIRONMENT_NAME, editRequest);
+        DetailedEnvironmentV4Response result = underTest.edit(WORKSPACE_ID, ENVIRONMENT_NAME, editRequest);
 
         assertEquals(region2, result.getLocation().getName());
         assertTrue(result.getRegions().getRegions().contains(region2));
         assertTrue(result.getRegions().getRegions().contains(region3));
+    }
+
+    @Test
+    public void testDelete() {
+        Workspace workspace = new Workspace();
+        workspace.setName(WORKSPACE_NAME);
+        Credential credential = new Credential();
+        Environment environment = new Environment();
+        environment.setWorkspace(workspace);
+        environment.setCredential(credential);
+        environment.setKerberosConfigs(Set.of(new KerberosConfig()));
+        environment.setDatalakeResources(Set.of(new DatalakeResources()));
+        environment.setKubernetesConfigs(Set.of(new KubernetesConfig()));
+        environment.setProxyConfigs(Set.of(new ProxyConfig()));
+        environment.setName(ENVIRONMENT_NAME);
+        when(environmentRepository.findByNameAndWorkspaceIdAndArchivedFalse(ENVIRONMENT_NAME, WORKSPACE_ID))
+                .thenReturn(environment);
+        when(stackService.countAliveByEnvironment(environment)).thenReturn(0L);
+
+        underTest.delete(ENVIRONMENT_NAME, 1L);
+
+        assertNull(environment.getKerberosConfigs());
+        assertNull(environment.getKubernetesConfigs());
+        assertNull(environment.getLdapConfigs());
+        assertNull(environment.getProxyConfigs());
+        assertNull(environment.getRdsConfigs());
+        assertTrue(environment.isArchived());
+        assertNotEquals(ENVIRONMENT_NAME, environment.getName());
+        assertThat(environment.getName(), containsString(ENVIRONMENT_NAME));
+        assertEquals(credential, environment.getCredential());
+        assertEquals(workspace, environment.getWorkspace());
+        verify(environmentRepository).save(environment);
     }
 
     private void setCredential(Environment environment) {
