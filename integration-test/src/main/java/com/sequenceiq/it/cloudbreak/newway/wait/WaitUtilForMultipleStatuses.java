@@ -20,9 +20,11 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 
 @Component
 public class WaitUtilForMultipleStatuses {
-    private static final Logger LOGGER = LoggerFactory.getLogger(WaitUtil.class);
 
-    private static final int MAX_RETRY = 360;
+    private static final Logger LOGGER = LoggerFactory.getLogger(WaitUtilForMultipleStatuses.class);
+
+    @Value("${integrationtest.testsuite.maxRetry:720}")
+    private int maxRetry;
 
     @Value("${integrationtest.testsuite.pollingInterval:1000}")
     private long pollingInterval;
@@ -87,7 +89,7 @@ public class WaitUtilForMultipleStatuses {
         Map<String, Status> currentStatuses = new HashMap<>();
 
         int retryCount = 0;
-        while (!checkStatuses(currentStatuses, desiredStatuses) && !checkFailedStatuses(currentStatuses) && retryCount < MAX_RETRY) {
+        while (!checkStatuses(currentStatuses, desiredStatuses) && !checkFailedStatuses(currentStatuses) && retryCount < maxRetry) {
             LOGGER.info("Waiting for status(es) {}, stack id: {}, current status(es) {} ...", desiredStatuses, stackName, currentStatuses);
 
             sleep();
@@ -119,7 +121,7 @@ public class WaitUtilForMultipleStatuses {
                 || checkNotExpectedDelete(currentStatuses, desiredStatuses)) {
             waitResult = WaitResult.FAILED;
             LOGGER.info("Desired status(es) are {} for {} but status(es) are {}", desiredStatuses, stackName, currentStatuses);
-        } else if (retryCount == MAX_RETRY) {
+        } else if (retryCount == maxRetry) {
             waitResult = WaitResult.TIMEOUT;
             LOGGER.info("Timeout: Desired tatus(es) are {} for {} but status(es) are {}", desiredStatuses, stackName, currentStatuses);
         } else {
