@@ -9,12 +9,13 @@ logging:
 
 integrationtest:
     cloudProvider: MOCK
+    sshPublicKey:
     subnetCidr:
     gatewayPort:
     clusterDefinitionName:
-    sshPublicKey:
+    testsuite.pollingInterval: 1000
 
-    # aws details
+    # aws parameters
     aws:
       availabilityZone:
       region:
@@ -32,7 +33,7 @@ integrationtest:
         volumeCount:
         volumeType:
 
-    # azure details
+    # azure parameters
     azure:
       availabilityZone:
       region:
@@ -49,7 +50,7 @@ integrationtest:
         volumeCount:
         volumeType:
 
-    # gcp details
+    # gcp parameters
     gcp:
       availabilityZone:
       region:
@@ -65,7 +66,25 @@ integrationtest:
         volumeCount:
         volumeType:
 
-    # yarn details
+    # openstack parameters
+    openstack:
+      availabilityZone:
+      region:
+      location:
+      publicNetId:
+      networkingOption:
+      instance:
+        type:
+        volumeSize:
+        volumeCount:
+        volumeType:
+      credential:
+        endpoint:
+        tenant:
+        userName:
+        password:
+
+    # yarn parameters
     yarn:
       availabilityZone:
         region:
@@ -207,9 +226,6 @@ integrationtest:
     ambariContainer: hortonworks/ambari-agent
 
     defaultPrivateKeyFile:
-
-    openstack:
-        publicNetId:
 
     testsuite:
         threadPoolSize: 3
