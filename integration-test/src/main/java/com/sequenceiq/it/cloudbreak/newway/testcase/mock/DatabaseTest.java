@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
+import static com.sequenceiq.it.cloudbreak.newway.assertion.database.DatabaseTestAssertion.containsDatabaseName;
+import static com.sequenceiq.it.cloudbreak.newway.assertion.database.DatabaseTestTestAssertion.validConnectionTest;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.expectedMessage;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 
@@ -16,8 +18,6 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
-import com.sequenceiq.it.cloudbreak.newway.assertion.database.DatabaseExistsAssertion;
-import com.sequenceiq.it.cloudbreak.newway.assertion.database.DatabaseTestAccessDeniedAssertion;
 import com.sequenceiq.it.cloudbreak.newway.client.DatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
@@ -71,13 +71,13 @@ public class DatabaseTest extends AbstractIntegrationTest {
                 .withName(databaseName)
                 .when(databaseTestClient.createV4(), key(databaseName))
                 .when(databaseTestClient.listV4(), key(databaseName))
-                .then(DatabaseExistsAssertion.getAssertion(databaseName, 1), key(databaseName))
+                .then(containsDatabaseName(databaseName, 1), key(databaseName))
                 .when(databaseTestClient.deleteV4(), key(databaseName))
                 .when(databaseTestClient.listV4(), key(databaseName))
-                .then(DatabaseExistsAssertion.getAssertion(databaseName, 0), key(databaseName))
+                .then(containsDatabaseName(databaseName, 0), key(databaseName))
                 .when(databaseTestClient.createV4(), key(databaseName))
                 .when(databaseTestClient.listV4(), key(databaseName))
-                .then(DatabaseExistsAssertion.getAssertion(databaseName, 1), key(databaseName))
+                .then(containsDatabaseName(databaseName, 1), key(databaseName))
                 .validate();
     }
 
@@ -93,7 +93,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
                 .withName(databaseName)
                 .when(databaseTestClient.createV4(), key(databaseName))
                 .when(databaseTestClient.listV4(), key(databaseName))
-                .then(DatabaseExistsAssertion.getAssertion(databaseName, 1), key(databaseName))
+                .then(containsDatabaseName(databaseName, 1), key(databaseName))
                 .when(databaseTestClient.createV4(), key(databaseName))
                 .expect(BadRequestException.class, key(databaseName))
                 .validate();
@@ -111,7 +111,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
                 .withName(databaseName)
                 .when(databaseTestClient.createV4(), key(databaseName))
                 .when(databaseTestClient.listV4(), key(databaseName))
-                .then(DatabaseExistsAssertion.getAssertion(databaseName, 1), key(databaseName))
+                .then(containsDatabaseName(databaseName, 1), key(databaseName))
                 .given(DatabaseTestTestDto.class)
                 .withExistingName(databaseName)
                 .when(databaseTestClient.testV4(), key(databaseName))
@@ -179,7 +179,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
                 .given(DatabaseTestTestDto.class)
                 .withExistingName("aNonExistentDb")
                 .when(databaseTestClient.testV4(), key(generatedKey))
-                .then(DatabaseTestAccessDeniedAssertion.getAssertion(), key(generatedKey))
+                .then(validConnectionTest(), key(generatedKey))
                 .validate();
     }
 

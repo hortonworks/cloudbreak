@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.newway.assertion.repoconfig;
+package com.sequenceiq.it.cloudbreak.newway.assertion.util;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -9,7 +9,7 @@ import com.sequenceiq.it.cloudbreak.newway.assertion.CommonAssert;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.util.RepoConfigValidationTestDto;
 
-public enum RepoConfigValidationTestData {
+public enum RepoConfigValidationTestAssertion {
 
     AMBARI_BASE_URL {
         @Override
