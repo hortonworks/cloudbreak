@@ -185,13 +185,20 @@ func convertResponseToClusterDefinition(bp *model.ClusterDefinitionV4ViewRespons
 
 func convertResponseWithContentAndIDToClusterDefinition(bp *model.ClusterDefinitionV4Response) *clusterDefinitionOutJsonDescribe {
 	jsonRoot := decodeAndParseToJson(bp.ClusterDefinition)
-	clusterDefinitionsNode := jsonRoot["Blueprints"].(map[string]interface{})
+	var stackName = "Undefined"
+	var stackVersion = "Undefined"
+
+	if blueprints, ok := jsonRoot["Blueprints"]; ok {
+		clusterDefinitionsNode := blueprints.(map[string]interface{})
+		stackName = clusterDefinitionsNode["stack_name"].(string)
+		stackVersion = clusterDefinitionsNode["stack_version"].(string)
+	}
 	return &clusterDefinitionOutJsonDescribe{
 		clusterDefinitionOut: &clusterDefinitionOut{
 			Name:           *bp.Name,
 			Description:    *bp.Description,
-			StackName:      fmt.Sprintf("%v", clusterDefinitionsNode["stack_name"]),
-			StackVersion:   fmt.Sprintf("%v", clusterDefinitionsNode["stack_version"]),
+			StackName:      fmt.Sprintf("%v", stackName),
+			StackVersion:   fmt.Sprintf("%v", stackVersion),
 			HostgroupCount: fmt.Sprint(bp.HostGroupCount),
 			Tags:           bp.Status,
 		},
