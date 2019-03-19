@@ -1,12 +1,14 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
+import static com.sequenceiq.it.cloudbreak.newway.assertion.util.DeploymentPreferencesTestAssertion.platformEnablementValid;
+import static com.sequenceiq.it.cloudbreak.newway.assertion.util.DeploymentPreferencesTestAssertion.supportedExternalDatabasesExists;
+
 import javax.inject.Inject;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.assertion.CommonAssert;
-import com.sequenceiq.it.cloudbreak.newway.assertion.deploymentpref.DeploymentPreferencesAssertion;
 import com.sequenceiq.it.cloudbreak.newway.client.UtilTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
@@ -34,8 +36,8 @@ public class DeploymentPreferencesTest extends AbstractIntegrationTest {
                 .given(DeploymentPreferencesTestDto.class)
                 .when(utilTestClient.deploymentPreferencesV4())
                 .then(CommonAssert::responseExists)
-                .then(DeploymentPreferencesAssertion::supportedExternalDatabasesExists)
-                .then(DeploymentPreferencesAssertion::platformEnablementValid)
+                .then(supportedExternalDatabasesExists())
+                .then(platformEnablementValid())
                 .validate();
     }
 

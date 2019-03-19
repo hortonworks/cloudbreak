@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
+import static com.sequenceiq.it.cloudbreak.newway.assertion.util.VersionCheckTestAssertion.versionIsNotOk;
+
 import javax.inject.Inject;
 
 import org.testng.annotations.BeforeMethod;
@@ -7,7 +9,6 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.assertion.CommonAssert;
-import com.sequenceiq.it.cloudbreak.newway.assertion.version.VersionCheckAssertion;
 import com.sequenceiq.it.cloudbreak.newway.client.UtilTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
@@ -35,7 +36,7 @@ public class VersionCheckTest extends AbstractIntegrationTest {
                 .withVersion(invalidVersionValue)
                 .when(utilTestClient.versionChecker())
                 .then(CommonAssert::responseExists)
-                .then(VersionCheckAssertion::versionIsNotOk)
+                .then(versionIsNotOk())
                 .validate();
     }
 

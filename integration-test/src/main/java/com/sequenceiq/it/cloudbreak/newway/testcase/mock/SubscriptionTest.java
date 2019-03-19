@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
+import static com.sequenceiq.it.cloudbreak.newway.assertion.util.SubscriptionTestAssertion.idExists;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 
 import javax.inject.Inject;
@@ -10,7 +11,6 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.assertion.CommonAssert;
-import com.sequenceiq.it.cloudbreak.newway.assertion.subscription.SubscriptionAssertion;
 import com.sequenceiq.it.cloudbreak.newway.client.UtilTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
@@ -41,7 +41,7 @@ public class SubscriptionTest extends AbstractIntegrationTest {
                 .withEndpointUrl(endpointUrl)
                 .when(utilTestClient.subscriptionV4(), key(subscriptionKey))
                 .then(CommonAssert::responseExists, key(subscriptionKey))
-                .then(SubscriptionAssertion::idExists, key(subscriptionKey))
+                .then(idExists(), key(subscriptionKey))
                 .validate();
     }
 

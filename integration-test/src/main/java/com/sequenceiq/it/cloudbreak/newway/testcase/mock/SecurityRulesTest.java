@@ -1,5 +1,8 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
+import static com.sequenceiq.it.cloudbreak.newway.assertion.util.SecurityRulesTestAssertion.coreIsNotEmpty;
+import static com.sequenceiq.it.cloudbreak.newway.assertion.util.SecurityRulesTestAssertion.gatewayIsNotEmpty;
+
 import javax.inject.Inject;
 
 import org.testng.annotations.BeforeMethod;
@@ -7,7 +10,6 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.assertion.CommonAssert;
-import com.sequenceiq.it.cloudbreak.newway.assertion.securityrule.SecurityRulesAssertions;
 import com.sequenceiq.it.cloudbreak.newway.client.UtilTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
@@ -39,8 +41,8 @@ public class SecurityRulesTest extends AbstractIntegrationTest {
                 .withKnoxEnabled(knoxEnabled)
                 .when(utilTestClient.securityRulesV4())
                 .then(CommonAssert::responseExists)
-                .then(SecurityRulesAssertions::coreIsNotEmpty)
-                .then(SecurityRulesAssertions::gatewayIsNotEmpty)
+                .then(coreIsNotEmpty())
+                .then(gatewayIsNotEmpty())
                 .validate();
     }
 

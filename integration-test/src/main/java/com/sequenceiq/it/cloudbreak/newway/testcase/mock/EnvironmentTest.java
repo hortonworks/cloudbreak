@@ -24,7 +24,7 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.newway.assertion.CheckEnvironmentCredential;
+import com.sequenceiq.it.cloudbreak.newway.assertion.environment.EnvironmentTestAssertion;
 import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
@@ -618,7 +618,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .given(EnvironmentTestDto.class)
                 .withCredentialName(cred1)
                 .when(environmentTestClient.changeCredential())
-                .then(new CheckEnvironmentCredential(cred1))
+                .then(new EnvironmentTestAssertion(cred1))
                 .validate();
     }
 
@@ -638,7 +638,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .withCredentialName(null)
                 .withCredential(cred1)
                 .when(environmentTestClient.changeCredential())
-                .then(new CheckEnvironmentCredential(cred1))
+                .then(new EnvironmentTestAssertion(cred1))
                 .validate();
     }
 

@@ -8,7 +8,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.assertion.repoconfig.RepoConfigValidationTestData;
+import com.sequenceiq.it.cloudbreak.newway.assertion.util.RepoConfigValidationTestAssertion;
 import com.sequenceiq.it.cloudbreak.newway.client.UtilTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
@@ -32,7 +32,7 @@ public class RepoConfigValidationTest extends AbstractIntegrationTest {
     @Test(dataProvider = DATA_PROVIDER_FOR_REPO_CONFIG_TEST)
     public void testPostRepositoryConfigValidationAgainstDifferentlyParameterizedRequest(
             MockedTestContext testContext,
-            RepoConfigValidationTestData testData,
+            RepoConfigValidationTestAssertion testData,
             @Description TestCaseDescription testCaseDescription) {
         String generatedKey = getNameGenerator().getRandomNameForResource();
 
@@ -46,7 +46,7 @@ public class RepoConfigValidationTest extends AbstractIntegrationTest {
 
     @DataProvider(name = DATA_PROVIDER_FOR_REPO_CONFIG_TEST)
     public Object[][] dataProvider() {
-        var testDataValues = RepoConfigValidationTestData.values();
+        var testDataValues = RepoConfigValidationTestAssertion.values();
         var data = new Object[testDataValues.length][3];
         var testContext = getBean(MockedTestContext.class);
         for (int i = 0; i < testDataValues.length; i++) {
