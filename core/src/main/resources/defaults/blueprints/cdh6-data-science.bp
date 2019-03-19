@@ -3,6 +3,10 @@
   "blueprint": {
     "cdhVersion": "6.1.1",
     "displayName": "datascience",
+    "Blueprints": {
+      "stack_name": "CDH",
+      "stack_version": "6.1.1"
+    },
     "services": [
       {
         "refName": "isilon",
