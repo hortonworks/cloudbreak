@@ -317,6 +317,7 @@ func CreateLdapUser(c *cli.Context) error {
 	password := c.String(fl.FlLdapUserToCreatePassword.Name)
 	email := c.String(fl.FlLdapUserToCreateEmail.Name)
 	baseDn := c.String(fl.FlLdapUserToCreateBase.Name)
+	domain := c.String(fl.FlLdapDomain.Name)
 	groups := c.String(fl.FlLdapUserToCreateGroups.Name)
 	ldaps := c.Bool(fl.FlLdapSecureOptional.Name)
 
@@ -336,6 +337,7 @@ func CreateLdapUser(c *cli.Context) error {
 		{Type: "givenName", Vals: []string{userName}},
 		{Type: "sn", Vals: []string{userName}},
 		{Type: "sAMAccountName", Vals: []string{userName}},
+		{Type: "userPrincipalName", Vals: []string{fmt.Sprintf("%s@%s", userName, strings.ToUpper(domain))}},
 		{Type: "userAccountControl", Vals: []string{accountControl}},
 		{Type: "unicodePwd", Vals: []string{utfLePassword}},
 		{Type: "mail", Vals: []string{email}},
