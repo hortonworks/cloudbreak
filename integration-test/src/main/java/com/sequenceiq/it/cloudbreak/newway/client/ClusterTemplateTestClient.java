@@ -9,7 +9,7 @@ import com.sequenceiq.it.cloudbreak.newway.action.v4.clustertemplate.ClusterTemp
 import com.sequenceiq.it.cloudbreak.newway.action.v4.clustertemplate.ClusterTemplateListAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.clustertemplate.DeleteClusterFromClusterTemplateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.clustertemplate.LaunchClusterFromClusterTemplateAction;
-import com.sequenceiq.it.cloudbreak.newway.entity.clustertemplate.ClusterTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.clustertemplate.ClusterTemplateTestDto;
 
 @Service
 public class ClusterTemplateTestClient {

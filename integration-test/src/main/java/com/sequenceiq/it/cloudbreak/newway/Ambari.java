@@ -4,8 +4,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.ambarirepository.AmbariRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
+import com.sequenceiq.it.cloudbreak.newway.dto.AbstractCloudbreakTestDto;
 
-public class Ambari extends Entity {
+public class Ambari extends AbstractCloudbreakTestDto {
 
     private static final String AMBARI_REQUEST = "AMBARI_REQUEST";
 

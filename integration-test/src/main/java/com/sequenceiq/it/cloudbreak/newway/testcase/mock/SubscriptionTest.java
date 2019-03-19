@@ -16,7 +16,7 @@ import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.util.SubscriptionTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.util.SubscriptionTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class SubscriptionTest extends AbstractIntegrationTest {

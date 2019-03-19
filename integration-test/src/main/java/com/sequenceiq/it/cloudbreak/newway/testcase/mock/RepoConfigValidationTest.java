@@ -14,7 +14,7 @@ import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.util.RepoConfigValidationTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.util.RepoConfigValidationTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class RepoConfigValidationTest extends AbstractIntegrationTest {

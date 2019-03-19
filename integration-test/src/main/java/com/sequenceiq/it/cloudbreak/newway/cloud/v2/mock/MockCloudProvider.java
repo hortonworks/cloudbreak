@@ -13,22 +13,22 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.mock.MockCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.MockStackV4Parameters;
-import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
+import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
-import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
-import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.StackAuthenticationEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.StackV4EntityBase;
-import com.sequenceiq.it.cloudbreak.newway.entity.VolumeV4Entity;
-import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.InstanceTemplateV4TestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.NetworkV2TestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.PlacementSettingsTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.StackAuthenticationTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDtoBase;
+import com.sequenceiq.it.cloudbreak.newway.dto.VolumeV4TestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
 
 @Component
 public class MockCloudProvider extends AbstractCloudProvider {
@@ -78,12 +78,12 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public StackV4EntityBase stack(StackV4EntityBase stack) {
+    public StackTestDtoBase stack(StackTestDtoBase stack) {
         return stack.withMock(stackParameters());
     }
 
     @Override
-    public ClusterEntity cluster(ClusterEntity cluster) {
+    public ClusterTestDto cluster(ClusterTestDto cluster) {
         return cluster
                 .withValidateClusterDefinition(Boolean.TRUE)
                 .withClusterDefinitionName(getClusterDefinitionName());
@@ -143,8 +143,8 @@ public class MockCloudProvider extends AbstractCloudProvider {
         return parameters;
     }
 
-    public NetworkV2Entity existingSubnet(TestContext testContext) {
-        var network = testContext.given(NetworkV2Entity.class);
+    public NetworkV2TestDto existingSubnet(TestContext testContext) {
+        var network = testContext.given(NetworkV2TestDto.class);
         network.getRequest().setMock((MockNetworkV4Parameters) subnetProperties());
         return network;
     }
@@ -157,18 +157,18 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public ImageSettingsEntity imageSettings(ImageSettingsEntity imageSettings) {
+    public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
         return imageSettings.withImageId("f6e778fc-7f17-4535-9021-515351df3691")
-                .withImageCatalog(imageSettings.getTestContext().given(ImageSettingsEntity.class).getName());
+                .withImageCatalog(imageSettings.getTestContext().given(ImageSettingsTestDto.class).getName());
     }
 
     @Override
-    public InstanceTemplateV4Entity template(InstanceTemplateV4Entity template) {
+    public InstanceTemplateV4TestDto template(InstanceTemplateV4TestDto template) {
         return template.withInstanceType("large");
     }
 
     @Override
-    public VolumeV4Entity attachedVolume(VolumeV4Entity volume) {
+    public VolumeV4TestDto attachedVolume(VolumeV4TestDto volume) {
         return volume
                 .withCount(1)
                 .withSize(100)
@@ -176,7 +176,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public NetworkV2Entity network(NetworkV2Entity network) {
+    public NetworkV2TestDto network(NetworkV2TestDto network) {
         return network.withSubnetCIDR(getSubnetCIDR());
     }
 
@@ -193,20 +193,20 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public PlacementSettingsEntity placement(PlacementSettingsEntity placement) {
+    public PlacementSettingsTestDto placement(PlacementSettingsTestDto placement) {
         return placement.withRegion(region())
                 .withAvailabilityZone(availabilityZone());
     }
 
     @Override
-    public StackAuthenticationEntity stackAuthentication(StackAuthenticationEntity stackAuthenticationEntity) {
+    public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
         String publicKeyId = getTestParameter().getWithDefault(MockParameters.DEFAULT_PUBLIC_KEY_ID, "publicKeyId");
         stackAuthenticationEntity.withPublicKeyId(publicKeyId);
         return stackAuthenticationEntity;
     }
 
     @Override
-    public Integer gatewayPort(StackV4EntityBase stackEntity) {
+    public Integer gatewayPort(StackTestDtoBase stackEntity) {
         MockedTestContext mockedTestContext = (MockedTestContext) stackEntity.getTestContext();
         return mockedTestContext.getSparkServer().getPort();
     }

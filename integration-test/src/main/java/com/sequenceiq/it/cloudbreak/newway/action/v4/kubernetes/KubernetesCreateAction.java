@@ -10,22 +10,22 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.kubernetes.KubernetesTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.kubernetes.KubernetesTestDto;
 
 public class KubernetesCreateAction implements Action<KubernetesTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesCreateAction.class);
 
     @Override
-    public KubernetesTestDto action(TestContext testContext, KubernetesTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
-        logJSON(LOGGER, " Kubernetes create request:\n", entity.getRequest());
-        entity.setResponse(
+    public KubernetesTestDto action(TestContext testContext, KubernetesTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
+        logJSON(LOGGER, " Kubernetes create request:\n", testDto.getRequest());
+        testDto.setResponse(
                 cloudbreakClient.getCloudbreakClient()
                         .kubernetesV4Endpoint()
-                        .post(cloudbreakClient.getWorkspaceId(), entity.getRequest()));
-        logJSON(LOGGER, " Kubernetes created successfully:\n", entity.getResponse());
-        log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
+                        .post(cloudbreakClient.getWorkspaceId(), testDto.getRequest()));
+        logJSON(LOGGER, " Kubernetes created successfully:\n", testDto.getResponse());
+        log(LOGGER, format(" ID: %s", testDto.getResponse().getId()));
 
-        return entity;
+        return testDto;
     }
 }

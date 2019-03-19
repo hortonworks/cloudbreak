@@ -13,11 +13,11 @@ public class SecurityRulesAction implements Action<SecurityRulesTestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityRulesAction.class);
 
     @Override
-    public SecurityRulesTestDto action(TestContext testContext, SecurityRulesTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
+    public SecurityRulesTestDto action(TestContext testContext, SecurityRulesTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
         String logInitMessage = "Obtaining default security rules";
         LOGGER.info("{}", logInitMessage);
-        entity.setResponse(cloudbreakClient.getCloudbreakClient().utilV4Endpoint().getDefaultSecurityRules(entity.getKnoxEnabled()));
+        testDto.setResponse(cloudbreakClient.getCloudbreakClient().utilV4Endpoint().getDefaultSecurityRules(testDto.getKnoxEnabled()));
         LOGGER.info("{} was successful", logInitMessage);
-        return entity;
+        return testDto;
     }
 }

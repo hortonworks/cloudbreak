@@ -9,7 +9,7 @@ import com.sequenceiq.it.cloudbreak.newway.client.ConnectorTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.connector.PlatformDiskTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.connector.PlatformDiskTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class DisksTest extends AbstractIntegrationTest {

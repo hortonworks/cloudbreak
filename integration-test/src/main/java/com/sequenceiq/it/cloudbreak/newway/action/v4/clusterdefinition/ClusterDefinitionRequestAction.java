@@ -7,7 +7,7 @@ import static java.lang.String.format;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.clusterdefinition.ClusterDefinitionTestDto;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -17,16 +17,16 @@ public class ClusterDefinitionRequestAction implements Action<ClusterDefinitionT
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterDefinitionRequestAction.class);
 
     @Override
-    public ClusterDefinitionTestDto action(TestContext testContext, ClusterDefinitionTestDto entity, CloudbreakClient client) throws Exception {
-        log(LOGGER, format(" Name: %s", entity.getName()));
-        logJSON(LOGGER, format(" Cluster definition request request:%n"), entity.getName());
-        entity.setRequest(
+    public ClusterDefinitionTestDto action(TestContext testContext, ClusterDefinitionTestDto testDto, CloudbreakClient client) throws Exception {
+        log(LOGGER, format(" Name: %s", testDto.getName()));
+        logJSON(LOGGER, format(" Cluster definition request request:%n"), testDto.getName());
+        testDto.setRequest(
                 client.getCloudbreakClient()
                         .clusterDefinitionV4Endpoint()
-                        .getRequest(client.getWorkspaceId(), entity.getName()));
-        logJSON(LOGGER, format(" Cluster definition requested successfully:%n"), entity.getRequest());
+                        .getRequest(client.getWorkspaceId(), testDto.getName()));
+        logJSON(LOGGER, format(" Cluster definition requested successfully:%n"), testDto.getRequest());
 
-        return entity;
+        return testDto;
     }
 
 }

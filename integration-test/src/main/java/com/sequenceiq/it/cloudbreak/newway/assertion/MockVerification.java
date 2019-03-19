@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.verification.Call;
@@ -159,14 +159,14 @@ public class MockVerification implements AssertionV2<StackTestDto> {
     }
 
     @Override
-    public StackTestDto doAssertion(TestContext testContext, StackTestDto entity, CloudbreakClient cloudbreakClient) {
+    public StackTestDto doAssertion(TestContext testContext, StackTestDto testDto, CloudbreakClient cloudbreakClient) {
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
         Map<Call, Response> requestResponseMap = mockedTestContext.getSparkServer().getRequestResponseMap();
         int matchesCount = getTimesMatched(requestResponseMap);
         logVerify();
         checkExactTimes(matchesCount);
         checkAtLeast(matchesCount);
-        return entity;
+        return testDto;
     }
 
     private String generateBodyTimesLog(Map<String, Integer> bodyContainsList) {

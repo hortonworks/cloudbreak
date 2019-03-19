@@ -30,16 +30,16 @@ import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.CloudbreakEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.EnvironmentSettingsV4Entity;
-import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.AmbariTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.CloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.EnvironmentSettingsV4TestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.database.DatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ldap.LdapTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.proxy.ProxyTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.newway.util.EnvironmentTestUtils;
 
@@ -98,12 +98,12 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         testContext.getModel().getAmbariMock().postSyncLdap();
         testContext.getModel().getAmbariMock().putConfigureLdap();
         testContext
-                .given(ClusterEntity.class)
+                .given(ClusterTestDto.class)
                 .withDatabase(testContext.get(DatabaseTestDto.class).getName())
                 .withLdapConfigName(testContext.get(LdapTestDto.class).getName())
                 .withProxyConfigName(testContext.get(ProxyTestDto.class).getName())
                 .withClusterDefinitionName(CD_NAME)
-                .withAmbari(testContext.given(AmbariEntity.class))
+                .withAmbari(testContext.given(AmbariTestDto.class))
                 .given(StackTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)
                 .when(stackTestClient.createV4())
@@ -187,9 +187,9 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         testContext.getModel().getAmbariMock().postSyncLdap();
         testContext.getModel().getAmbariMock().putConfigureLdap();
         testContext
-                .given(ClusterEntity.class)
+                .given(ClusterTestDto.class)
                 .withClusterDefinitionName(CD_NAME)
-                .withAmbari(testContext.given(AmbariEntity.class))
+                .withAmbari(testContext.given(AmbariTestDto.class))
                 .given(StackTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)
                 .withCluster(
@@ -246,16 +246,16 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .when(environmentTestClient.createV4())
                 .then(EnvironmentTestUtils::checkRdsAttachedToEnv)
 
-                .given(ClusterEntity.class)
+                .given(ClusterTestDto.class)
                 .withDatabase(testContext.get(DatabaseTestDto.class).getName())
                 .withClusterDefinitionName(CD_NAME)
-                .withAmbari(testContext.given(AmbariEntity.class))
+                .withAmbari(testContext.given(AmbariTestDto.class))
                 .given(StackTestDto.class)
-                .given(EnvironmentSettingsV4Entity.class)
-                .given(ClusterEntity.class)
+                .given(EnvironmentSettingsV4TestDto.class)
+                .given(ClusterTestDto.class)
                 .withDatabase(testContext.get(DatabaseTestDto.class).getName())
                 .withClusterDefinitionName(CD_NAME)
-                .withAmbari(testContext.given(AmbariEntity.class))
+                .withAmbari(testContext.given(AmbariTestDto.class))
                 .given(StackTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)
                 .when(stackTestClient.createV4())
@@ -283,10 +283,10 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .withRdsConfigs(validRds)
                 .when(environmentTestClient.createV4())
                 .then(EnvironmentTestUtils::checkRdsAttachedToEnv)
-                .given(ClusterEntity.class)
+                .given(ClusterTestDto.class)
                 .withDatabase(testContext.get(DatabaseTestDto.class).getName())
                 .withClusterDefinitionName(CD_NAME)
-                .withAmbari(testContext.given(AmbariEntity.class))
+                .withAmbari(testContext.given(AmbariTestDto.class))
                 .given(StackTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)
                 .withCluster(
@@ -375,7 +375,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         testContext
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.createV4())
-                .given("invalidEnvironmentSettingsRequest", EnvironmentSettingsV4Entity.class)
+                .given("invalidEnvironmentSettingsRequest", EnvironmentSettingsV4TestDto.class)
                 .withName(null)
                 .withCredentialName(null)
                 .given(StackTestDto.class)
@@ -414,10 +414,10 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         return new HashSet<>(Collections.singletonList(testContext.get(LdapTestDto.class).getName()));
     }
 
-    private ClusterEntity setResources(TestContext testContext, String rdsName, String ldapName, String proxyName) {
+    private ClusterTestDto setResources(TestContext testContext, String rdsName, String ldapName, String proxyName) {
         Set<String> rdsSet = new LinkedHashSet<>();
         rdsSet.add(rdsName);
-        ClusterEntity cluster = testContext.given(ClusterEntity.class)
+        ClusterTestDto cluster = testContext.given(ClusterTestDto.class)
                 .valid()
                 .withRdsConfigNames(rdsSet)
                 .withClusterDefinitionName(CD_NAME);
@@ -466,7 +466,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     }
 
     private static EnvironmentTestDto checkNewCredentialAttachedToEnv(TestContext testContext,
-        EnvironmentTestDto environment, CloudbreakClient cloudbreakClient) {
+            EnvironmentTestDto environment, CloudbreakClient cloudbreakClient) {
         String credentialName = environment.getResponse().getCredentialName();
         if (!credentialName.equals(testContext.get(NEW_CREDENTIAL_KEY).getName())) {
             throw new TestFailException("Credential is not attached to environment");
@@ -474,8 +474,8 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         return environment;
     }
 
-    private <T extends CloudbreakEntity> EnvironmentTestDto checkRdsDetachedFromEnv(TestContext testContext,
-        EnvironmentTestDto environment, Class<T> rdsKey, CloudbreakClient cloudbreakClient) {
+    private <T extends CloudbreakTestDto> EnvironmentTestDto checkRdsDetachedFromEnv(TestContext testContext,
+            EnvironmentTestDto environment, Class<T> rdsKey, CloudbreakClient cloudbreakClient) {
         String rdsName = testContext.get(rdsKey).getName();
         return checkRdsDetachedFromEnv(environment, rdsName);
     }

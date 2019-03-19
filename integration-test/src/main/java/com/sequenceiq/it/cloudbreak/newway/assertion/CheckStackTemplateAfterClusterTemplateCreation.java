@@ -10,15 +10,15 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.Clust
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.clustertemplate.ClusterTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.clustertemplate.ClusterTemplateTestDto;
 
 public class CheckStackTemplateAfterClusterTemplateCreation implements AssertionV2<ClusterTemplateTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CheckStackTemplateAfterClusterTemplateCreation.class);
 
     @Override
-    public ClusterTemplateTestDto doAssertion(TestContext testContext, ClusterTemplateTestDto entity, CloudbreakClient client) throws Exception {
-        Optional<ClusterTemplateV4Response> first = entity.getResponses().stream().filter(f -> f.getName().equals(entity.getName())).findFirst();
+    public ClusterTemplateTestDto doAssertion(TestContext testContext, ClusterTemplateTestDto testDto, CloudbreakClient client) throws Exception {
+        Optional<ClusterTemplateV4Response> first = testDto.getResponses().stream().filter(f -> f.getName().equals(testDto.getName())).findFirst();
         if (!first.isPresent()) {
             throw new IllegalArgumentException("No element in the result");
         }
@@ -42,6 +42,6 @@ public class CheckStackTemplateAfterClusterTemplateCreation implements Assertion
             throw new IllegalArgumentException("Ambari username should be empty!");
         }
 
-        return entity;
+        return testDto;
     }
 }

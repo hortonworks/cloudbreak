@@ -16,10 +16,10 @@ import com.sequenceiq.it.cloudbreak.newway.client.ClusterDefinitionTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.ClouderaManagerTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ClouderaManagerTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.clusterdefinition.ClusterDefinitionTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.mock.model.SPIMock;
 import com.sequenceiq.it.spark.StatefulRoute;
 import com.sequenceiq.it.spark.spi.CloudVmInstanceStatuses;
@@ -50,7 +50,7 @@ public class ClouderaManagerStartStopTest extends AbstractClouderaManagerTest {
         // TODO: maybe this is good
         testContext
                 .given(cm, ClouderaManagerTestDto.class)
-                .given(cmcluster, ClusterEntity.class)
+                .given(cmcluster, ClusterTestDto.class)
                 .withValidateClusterDefinition(Boolean.FALSE)
                 .withClusterDefinitionName(name)
                 .withClouderaManager(cm)

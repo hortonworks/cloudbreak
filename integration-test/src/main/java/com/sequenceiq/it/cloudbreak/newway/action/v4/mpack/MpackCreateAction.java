@@ -9,23 +9,23 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.mpack.MPackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.mpack.MPackTestDto;
 
 public class MpackCreateAction implements Action<MPackTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MpackCreateAction.class);
 
     @Override
-    public MPackTestDto action(TestContext testContext, MPackTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
-        log(LOGGER, "ManagementPack name: " + entity.getName());
-        logJSON(LOGGER, " ManagementPack post request:\n", entity.getRequest());
-        entity.setResponse(
+    public MPackTestDto action(TestContext testContext, MPackTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
+        log(LOGGER, "ManagementPack name: " + testDto.getName());
+        logJSON(LOGGER, " ManagementPack post request:\n", testDto.getRequest());
+        testDto.setResponse(
                 cloudbreakClient.getCloudbreakClient()
                         .managementPackV4Endpoint()
-                        .createInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getRequest()));
-        logJSON(LOGGER, " ManagementPack created  successfully:\n", entity.getResponse());
-        log(LOGGER, "ManagementPack ID: " + entity.getResponse().getId());
+                        .createInWorkspace(cloudbreakClient.getWorkspaceId(), testDto.getRequest()));
+        logJSON(LOGGER, " ManagementPack created  successfully:\n", testDto.getResponse());
+        log(LOGGER, "ManagementPack ID: " + testDto.getResponse().getId());
 
-        return entity;
+        return testDto;
     }
 }

@@ -10,7 +10,7 @@ import java.util.Set;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.util.DeploymentPreferencesTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.util.DeploymentPreferencesTestDto;
 
 public class DeploymentPreferencesAssertion {
 

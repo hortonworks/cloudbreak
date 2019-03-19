@@ -12,20 +12,20 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.responses.Kubernetes
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.kubernetes.KubernetesTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.kubernetes.KubernetesTestDto;
 
 public class KubernetesListAction implements Action<KubernetesTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesListAction.class);
 
     @Override
-    public KubernetesTestDto action(TestContext testContext, KubernetesTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
+    public KubernetesTestDto action(TestContext testContext, KubernetesTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
         Collection<KubernetesV4Response> responses = cloudbreakClient.getCloudbreakClient()
                 .kubernetesV4Endpoint()
                 .list(cloudbreakClient.getWorkspaceId(), null, Boolean.TRUE)
                 .getResponses();
-        entity.setResponses(responses.stream().collect(Collectors.toSet()));
-        logJSON(LOGGER, " Kubernetes listed successfully:\n", entity.getResponses());
-        return entity;
+        testDto.setResponses(responses.stream().collect(Collectors.toSet()));
+        logJSON(LOGGER, " Kubernetes listed successfully:\n", testDto.getResponses());
+        return testDto;
     }
 }

@@ -19,15 +19,15 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.clustertemplate.ClusterTemplateTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.clustertemplate.ClusterTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
 
 public class CheckStackTemplateAfterClusterTemplateCreationWithProperties implements AssertionV2<ClusterTemplateTestDto> {
 
     @Override
-    public ClusterTemplateTestDto doAssertion(TestContext testContext, ClusterTemplateTestDto entity, CloudbreakClient client) {
+    public ClusterTemplateTestDto doAssertion(TestContext testContext, ClusterTemplateTestDto testDto, CloudbreakClient client) {
         ClusterTemplateTestDto clusterTemplate = testContext.get(ClusterTemplateTestDto.class);
-        Optional<ClusterTemplateV4Response> first = entity.getResponses().stream().filter(ct -> ct.getName().equals(clusterTemplate.getName())).findFirst();
+        Optional<ClusterTemplateV4Response> first = testDto.getResponses().stream().filter(ct -> ct.getName().equals(clusterTemplate.getName())).findFirst();
         if (!first.isPresent()) {
             throw new IllegalArgumentException("No element in the result");
         }
@@ -90,7 +90,7 @@ public class CheckStackTemplateAfterClusterTemplateCreationWithProperties implem
             throw new IllegalArgumentException("Image catalog name is mismatch!");
         }
 
-        String clusterDefinitionName = entity.getTestParameter().getWithDefault(CommonCloudParameters.CLUSTER_DEFINITION_NAME,
+        String clusterDefinitionName = testDto.getTestParameter().getWithDefault(CommonCloudParameters.CLUSTER_DEFINITION_NAME,
                 CommonCloudParameters.DEFAULT_CLUSTER_DEFINITION_NAME);
 
         if (!clusterDefinitionName.equals(stackTemplate.getCluster().getClusterDefinitionName())) {
@@ -150,7 +150,7 @@ public class CheckStackTemplateAfterClusterTemplateCreationWithProperties implem
             throw new IllegalArgumentException("expose service name is mismatch!");
         }
 
-        return entity;
+        return testDto;
     }
 
     private InstanceGroupV4Request getInstanceGroup(List<InstanceGroupV4Request> instanceGroups, HostGroupType hostGroupType) {

@@ -2,17 +2,17 @@ package com.sequenceiq.it.cloudbreak.newway.cloud.v2;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.StackV4ParameterBase;
-import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
-import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
-import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.StackAuthenticationEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.StackV4EntityBase;
-import com.sequenceiq.it.cloudbreak.newway.entity.VolumeV4Entity;
-import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ImageSettingsTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.InstanceTemplateV4TestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.NetworkV2TestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.PlacementSettingsTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.StackAuthenticationTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDtoBase;
+import com.sequenceiq.it.cloudbreak.newway.dto.VolumeV4TestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
 
 public interface CloudProvider {
 
@@ -24,17 +24,17 @@ public interface CloudProvider {
 
     ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog);
 
-    ImageSettingsEntity imageSettings(ImageSettingsEntity imageSettings);
+    ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings);
 
-    InstanceTemplateV4Entity template(InstanceTemplateV4Entity template);
+    InstanceTemplateV4TestDto template(InstanceTemplateV4TestDto template);
 
-    VolumeV4Entity attachedVolume(VolumeV4Entity volume);
+    VolumeV4TestDto attachedVolume(VolumeV4TestDto volume);
 
-    NetworkV2Entity network(NetworkV2Entity network);
+    NetworkV2TestDto network(NetworkV2TestDto network);
 
-    StackV4EntityBase stack(StackV4EntityBase stack);
+    StackTestDtoBase stack(StackTestDtoBase stack);
 
-    ClusterEntity cluster(ClusterEntity cluster);
+    ClusterTestDto cluster(ClusterTestDto cluster);
 
     String getSubnetCIDR();
 
@@ -44,11 +44,11 @@ public interface CloudProvider {
 
     EnvironmentTestDto environment(EnvironmentTestDto environment);
 
-    PlacementSettingsEntity placement(PlacementSettingsEntity placement);
+    PlacementSettingsTestDto placement(PlacementSettingsTestDto placement);
 
-    StackAuthenticationEntity stackAuthentication(StackAuthenticationEntity stackAuthenticationEntity);
+    StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity);
 
-    Integer gatewayPort(StackV4EntityBase stackEntity);
+    Integer gatewayPort(StackTestDtoBase stackEntity);
 
     String getClusterDefinitionName();
 

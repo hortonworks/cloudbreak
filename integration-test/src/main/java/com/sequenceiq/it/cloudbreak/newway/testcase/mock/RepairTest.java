@@ -27,11 +27,11 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.database.DatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.kerberos.KerberosTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.spark.DynamicRouteStack;
 import com.sequenceiq.it.spark.ambari.AmbariClusterRequestResponse;
@@ -196,16 +196,16 @@ public class RepairTest extends AbstractIntegrationTest {
                 .when(environmentTestClient.createV4());
     }
 
-    private ClusterEntity getCluster(MockedTestContext testContext, String kerberosConfigName, String ambariRdsName) {
-        testContext.given(ClusterEntity.class)
+    private ClusterTestDto getCluster(MockedTestContext testContext, String kerberosConfigName, String ambariRdsName) {
+        testContext.given(ClusterTestDto.class)
                 .valid()
                 .withRdsConfigNames(ambariRdsName);
 
         if (kerberosConfigName != null && !kerberosConfigName.isEmpty()) {
-            testContext.given(ClusterEntity.class).withKerberos(kerberosConfigName);
+            testContext.given(ClusterTestDto.class).withKerberos(kerberosConfigName);
         }
 
-        return testContext.given(ClusterEntity.class);
+        return testContext.given(ClusterTestDto.class);
     }
 
     private Set<String> createAmbariRdsConfig(MockedTestContext testContext, String ambariRdsName) {

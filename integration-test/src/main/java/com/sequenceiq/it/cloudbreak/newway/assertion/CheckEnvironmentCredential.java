@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.newway.assertion;
 
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 public class CheckEnvironmentCredential implements AssertionV2<EnvironmentTestDto> {
@@ -13,11 +13,11 @@ public class CheckEnvironmentCredential implements AssertionV2<EnvironmentTestDt
     }
 
     @Override
-    public EnvironmentTestDto doAssertion(TestContext testContext, EnvironmentTestDto environment, CloudbreakClient cloudbreakClient) throws Exception {
-        String credentialName = environment.getResponse().getCredentialName();
+    public EnvironmentTestDto doAssertion(TestContext testContext, EnvironmentTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
+        String credentialName = testDto.getResponse().getCredentialName();
         if (!credentialName.equals(expectedCredentialName)) {
             throw new TestFailException("Credential is not attached to environment");
         }
-        return environment;
+        return testDto;
     }
 }

@@ -6,25 +6,25 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.connector.PlatformVmTypesTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.connector.PlatformVmTypesTestDto;
 
 public class PlatformVmTypesAction implements Action<PlatformVmTypesTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PlatformVmTypesAction.class);
 
     @Override
-    public PlatformVmTypesTestDto action(TestContext testContext, PlatformVmTypesTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
+    public PlatformVmTypesTestDto action(TestContext testContext, PlatformVmTypesTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
         String logInitMessage = "Obtaining vm types by credential";
         LOGGER.info("{}", logInitMessage);
-        entity.setResponse(
+        testDto.setResponse(
                 cloudbreakClient.getCloudbreakClient().connectorV4Endpoint().getVmTypesByCredential(
                         cloudbreakClient.getWorkspaceId(),
-                        entity.getCredentialName(),
-                        entity.getRegion(),
-                        entity.getPlatformVariant(),
-                        entity.getAvailabilityZone())
+                        testDto.getCredentialName(),
+                        testDto.getRegion(),
+                        testDto.getPlatformVariant(),
+                        testDto.getAvailabilityZone())
         );
         LOGGER.info("{} was successful", logInitMessage);
-        return entity;
+        return testDto;
     }
 }

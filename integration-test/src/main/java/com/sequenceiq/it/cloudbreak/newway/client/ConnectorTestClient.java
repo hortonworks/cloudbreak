@@ -13,16 +13,16 @@ import com.sequenceiq.it.cloudbreak.newway.action.v4.connector.PlatformRegionsAc
 import com.sequenceiq.it.cloudbreak.newway.action.v4.connector.PlatformSecurityGroupsAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.connector.PlatformSshKeysAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.connector.PlatformVmTypesAction;
-import com.sequenceiq.it.cloudbreak.newway.entity.connector.PlatformAccessConfigsTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.connector.PlatformDiskTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.connector.PlatformEncryptionKeysTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.connector.PlatformGatewaysTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.connector.PlatformIpPoolsTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.connector.PlatformNetworksTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.connector.PlatformRegionTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.connector.PlatformSecurityGroupsTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.connector.PlatformSshKeysTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.connector.PlatformVmTypesTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.connector.PlatformAccessConfigsTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.connector.PlatformDiskTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.connector.PlatformEncryptionKeysTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.connector.PlatformGatewaysTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.connector.PlatformIpPoolsTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.connector.PlatformNetworksTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.connector.PlatformRegionTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.connector.PlatformSecurityGroupsTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.connector.PlatformSshKeysTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.connector.PlatformVmTypesTestDto;
 
 @Service
 public class ConnectorTestClient {

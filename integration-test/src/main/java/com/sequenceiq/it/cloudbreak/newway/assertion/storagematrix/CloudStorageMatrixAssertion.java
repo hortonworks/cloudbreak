@@ -4,7 +4,7 @@ import static org.junit.Assert.assertFalse;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.util.CloudStorageMatrixTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.util.CloudStorageMatrixTestDto;
 
 public class CloudStorageMatrixAssertion {
 

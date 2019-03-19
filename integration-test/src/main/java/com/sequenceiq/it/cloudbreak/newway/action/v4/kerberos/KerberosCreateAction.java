@@ -10,21 +10,21 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.kerberos.KerberosTestDto;
 
 public class KerberosCreateAction implements Action<KerberosTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KerberosCreateAction.class);
 
-    public KerberosTestDto action(TestContext testContext, KerberosTestDto entity, CloudbreakClient client) throws Exception {
-        log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
-        logJSON(LOGGER, format(" Kerberos post request:%n"), entity.getRequest());
-        entity.setResponse(
+    public KerberosTestDto action(TestContext testContext, KerberosTestDto testDto, CloudbreakClient client) throws Exception {
+        log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
+        logJSON(LOGGER, format(" Kerberos post request:%n"), testDto.getRequest());
+        testDto.setResponse(
                 client.getCloudbreakClient()
                         .kerberosConfigV4Endpoint()
-                        .create(client.getWorkspaceId(), entity.getRequest()));
-        logJSON(LOGGER, format(" Kerberos created  successfully:%n"), entity.getResponse());
-        log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
-        return entity;
+                        .create(client.getWorkspaceId(), testDto.getRequest()));
+        logJSON(LOGGER, format(" Kerberos created  successfully:%n"), testDto.getResponse());
+        log(LOGGER, format(" ID: %s", testDto.getResponse().getId()));
+        return testDto;
     }
 }

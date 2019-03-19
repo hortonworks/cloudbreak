@@ -7,7 +7,7 @@ import static java.lang.String.format;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.clusterdefinition.ClusterDefinitionTestDto;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -17,16 +17,16 @@ public class ClusterDefinitionListAction implements Action<ClusterDefinitionTest
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterDefinitionListAction.class);
 
     @Override
-    public ClusterDefinitionTestDto action(TestContext testContext, ClusterDefinitionTestDto entity, CloudbreakClient client) throws Exception {
-        log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
-        logJSON(LOGGER, format(" Cluster definition list by workspace request:%n"), entity.getRequest());
-        entity.setViewResponses(
+    public ClusterDefinitionTestDto action(TestContext testContext, ClusterDefinitionTestDto testDto, CloudbreakClient client) throws Exception {
+        log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
+        logJSON(LOGGER, format(" Cluster definition list by workspace request:%n"), testDto.getRequest());
+        testDto.setViewResponses(
                 client.getCloudbreakClient()
                         .clusterDefinitionV4Endpoint()
                         .list(client.getWorkspaceId()).getResponses());
-        logJSON(LOGGER, format(" Cluster definition list has executed successfully:%n"), entity.getViewResponses());
+        logJSON(LOGGER, format(" Cluster definition list has executed successfully:%n"), testDto.getViewResponses());
 
-        return entity;
+        return testDto;
     }
 
 }

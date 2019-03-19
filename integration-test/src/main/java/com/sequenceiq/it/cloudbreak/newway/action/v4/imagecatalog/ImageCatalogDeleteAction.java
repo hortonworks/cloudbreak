@@ -10,22 +10,22 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
 
 public class ImageCatalogDeleteAction implements Action<ImageCatalogTestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogDeleteAction.class);
 
     @Override
-    public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
-        log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
-        logJSON(LOGGER, format(" Image catalog DELETE request:%n"), entity.getRequest());
-        entity.setResponse(
+    public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
+        log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
+        logJSON(LOGGER, format(" Image catalog DELETE request:%n"), testDto.getRequest());
+        testDto.setResponse(
                 cloudbreakClient.getCloudbreakClient()
                         .imageCatalogV4Endpoint()
-                        .delete(cloudbreakClient.getWorkspaceId(), entity.getName()));
-        logJSON(LOGGER, format(" Image catalog has been deleted successfully:%n"), entity.getResponse());
-        log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
+                        .delete(cloudbreakClient.getWorkspaceId(), testDto.getName()));
+        logJSON(LOGGER, format(" Image catalog has been deleted successfully:%n"), testDto.getResponse());
+        log(LOGGER, format(" ID: %s", testDto.getResponse().getId()));
 
-        return entity;
+        return testDto;
     }
 }

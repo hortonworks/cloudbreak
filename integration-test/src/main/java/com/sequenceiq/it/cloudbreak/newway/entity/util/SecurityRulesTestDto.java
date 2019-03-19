@@ -7,10 +7,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4R
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.AbstractCloudbreakEntity;
+import com.sequenceiq.it.cloudbreak.newway.dto.AbstractCloudbreakTestDto;
 
 @Prototype
-public class SecurityRulesTestDto extends AbstractCloudbreakEntity<Object, SecurityRulesV4Response, SecurityRulesTestDto> {
+public class SecurityRulesTestDto extends AbstractCloudbreakTestDto<Object, SecurityRulesV4Response, SecurityRulesTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityRulesTestDto.class);
 

@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4R
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 
 public class ClusterRepairAction implements Action<StackTestDto> {
 
@@ -16,12 +16,12 @@ public class ClusterRepairAction implements Action<StackTestDto> {
     }
 
     @Override
-    public StackTestDto action(TestContext testContext, StackTestDto entity, CloudbreakClient client) {
+    public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) {
 
         client.getCloudbreakClient()
                 .stackV4Endpoint()
-                .repairCluster(client.getWorkspaceId(), entity.getName(), getClusterRepairRequest(entity));
-        return entity;
+                .repairCluster(client.getWorkspaceId(), testDto.getName(), getClusterRepairRequest(testDto));
+        return testDto;
     }
 
     private ClusterRepairV4Request getClusterRepairRequest(StackTestDto entity) {

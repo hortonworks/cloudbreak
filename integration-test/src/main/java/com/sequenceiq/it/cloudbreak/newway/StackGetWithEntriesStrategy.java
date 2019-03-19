@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntries;
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
 public class StackGetWithEntriesStrategy implements Strategy {

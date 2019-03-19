@@ -6,7 +6,7 @@ import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.audit.AuditGetAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.audit.AuditListAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.audit.AuditListZipAction;
-import com.sequenceiq.it.cloudbreak.newway.entity.audit.AuditTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.audit.AuditTestDto;
 
 @Service
 public class AuditTestClient {

@@ -12,7 +12,7 @@ import com.sequenceiq.it.cloudbreak.newway.assertion.storagematrix.CloudStorageM
 import com.sequenceiq.it.cloudbreak.newway.client.UtilTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.util.CloudStorageMatrixTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.util.CloudStorageMatrixTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class CloudStorageMatrixTest extends AbstractIntegrationTest {

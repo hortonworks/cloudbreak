@@ -10,21 +10,21 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
 
 public class CredentialDeleteAction implements Action<CredentialTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialDeleteAction.class);
 
     @Override
-    public CredentialTestDto action(TestContext testContext, CredentialTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
-        log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
-        logJSON(LOGGER, " Credential delete request:\n", entity.getRequest());
-        entity.setResponse(
+    public CredentialTestDto action(TestContext testContext, CredentialTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
+        log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
+        logJSON(LOGGER, " Credential delete request:\n", testDto.getRequest());
+        testDto.setResponse(
                 cloudbreakClient.getCloudbreakClient()
                         .credentialV4Endpoint()
-                        .delete(cloudbreakClient.getWorkspaceId(), entity.getName()));
-        logJSON(LOGGER, " Credential deleted successfully:\n", entity.getResponse());
-        return entity;
+                        .delete(cloudbreakClient.getWorkspaceId(), testDto.getName()));
+        logJSON(LOGGER, " Credential deleted successfully:\n", testDto.getResponse());
+        return testDto;
     }
 }

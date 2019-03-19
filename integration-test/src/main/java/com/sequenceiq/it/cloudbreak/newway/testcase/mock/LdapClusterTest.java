@@ -17,11 +17,11 @@ import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.AmbariRepositoryV4Entity;
-import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.AmbariTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.AmbariRepositoryV4TestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ldap.LdapTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.mock.model.AmbariMock;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
@@ -53,10 +53,10 @@ public class LdapClusterTest extends AbstractIntegrationTest {
         testContext.getModel().getAmbariMock().putConfigureLdap();
         testContext.given(LdapTestDto.class)
                 .when(ldapTestClient.createV4())
-                .given(AmbariRepositoryV4Entity.class)
-                .given(AmbariEntity.class)
+                .given(AmbariRepositoryV4TestDto.class)
+                .given(AmbariTestDto.class)
                 .withAmbariRepoDetails()
-                .given(ClusterEntity.class)
+                .given(ClusterTestDto.class)
                 .withLdapConfig()
                 .withAmbari()
                 .given(StackTestDto.class)
@@ -83,10 +83,10 @@ public class LdapClusterTest extends AbstractIntegrationTest {
 
         testContext.given(LdapTestDto.class).withName(ldapName)
                 .when(ldapTestClient.createV4())
-                .given(AmbariRepositoryV4Entity.class)
-                .given(AmbariEntity.class)
+                .given(AmbariRepositoryV4TestDto.class)
+                .given(AmbariTestDto.class)
                 .withAmbariRepoDetails()
-                .given(ClusterEntity.class)
+                .given(ClusterTestDto.class)
                 .withLdapConfig()
                 .withAmbari()
                 .given(StackTestDto.class)

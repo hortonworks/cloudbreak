@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.it.cloudbreak.newway.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.recipe.RecipeTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class RecipeTest extends AbstractIntegrationTest {

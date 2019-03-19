@@ -13,23 +13,23 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.response.ManagementPackV
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.mpack.MPackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.mpack.MPackTestDto;
 
 public class MpackListAction implements Action<MPackTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MpackListAction.class);
 
     @Override
-    public MPackTestDto action(TestContext testContext, MPackTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
+    public MPackTestDto action(TestContext testContext, MPackTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
         log(LOGGER, "ManagementPack get all");
 
         Collection<ManagementPackV4Response> responses = cloudbreakClient.getCloudbreakClient()
                 .managementPackV4Endpoint()
                 .listByWorkspace(cloudbreakClient.getWorkspaceId()).getResponses();
 
-        entity.setResponses(new HashSet<>(responses));
-        logJSON(LOGGER, " ManagementPacks got successfully:\n", entity.getResponses());
+        testDto.setResponses(new HashSet<>(responses));
+        logJSON(LOGGER, " ManagementPacks got successfully:\n", testDto.getResponses());
 
-        return entity;
+        return testDto;
     }
 }

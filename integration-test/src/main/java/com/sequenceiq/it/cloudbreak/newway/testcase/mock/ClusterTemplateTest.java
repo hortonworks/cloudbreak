@@ -30,15 +30,15 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.v2.mock.MockCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.EnvironmentSettingsV4Entity;
-import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.StackTemplateEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.clustertemplate.ClusterTemplateTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.mpack.MPackTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.recipe.RecipeTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.EnvironmentSettingsV4TestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.PlacementSettingsTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.clustertemplate.ClusterTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.database.DatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ldap.LdapTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.mpack.MPackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class ClusterTemplateTest extends AbstractIntegrationTest {
@@ -86,7 +86,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         testContext
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.createV4())
-                .given(stackTemplate, StackTemplateEntity.class)
+                .given(stackTemplate, StackTemplateTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)
                 .given(ClusterTemplateTestDto.class)
                 .withStackTemplate(stackTemplate)
@@ -114,7 +114,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .withRegions(VALID_REGION)
                 .withLocation(LONDON)
                 .when(environmentTestClient.createV4())
-                .given(stackTemplate, StackTemplateEntity.class)
+                .given(stackTemplate, StackTemplateTestDto.class)
                 .withEnvironmentKey(environment)
                 .given(ClusterTemplateTestDto.class)
                 .withType(SPARK)
@@ -141,7 +141,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .withRegions(VALID_REGION)
                 .withLocation(LONDON)
                 .when(environmentTestClient.createV4(), key(generatedKey))
-                .given(generatedKey, StackTemplateEntity.class)
+                .given(generatedKey, StackTemplateTestDto.class)
                 .withEnvironmentKey(environment)
                 .given(ClusterTemplateTestDto.class)
                 .withStackTemplate(generatedKey)
@@ -164,7 +164,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         String stackTemplate = getNameGenerator().getRandomNameForResource();
 
         testContext
-                .given(stackTemplate, StackTemplateEntity.class)
+                .given(stackTemplate, StackTemplateTestDto.class)
                 .given(ClusterTemplateTestDto.class)
                 .withStackTemplate(stackTemplate)
                 .when(clusterTemplateTestClient.createV4(), key(generatedKey))
@@ -183,9 +183,9 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         String generatedKey = getNameGenerator().getRandomNameForResource();
         String stackTemplate = getNameGenerator().getRandomNameForResource();
 
-        testContext.given(EnvironmentSettingsV4Entity.class)
+        testContext.given(EnvironmentSettingsV4TestDto.class)
                 .withName(null)
-                .given(stackTemplate, StackTemplateEntity.class)
+                .given(stackTemplate, StackTemplateTestDto.class)
                 .withEnvironmentSettings()
                 .given(ClusterTemplateTestDto.class)
                 .withStackTemplate(stackTemplate)
@@ -221,7 +221,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .withRegions(VALID_REGION)
                 .withLocation(LONDON)
                 .when(environmentTestClient.createV4())
-                .given("stackTemplate", StackTemplateEntity.class)
+                .given("stackTemplate", StackTemplateTestDto.class)
                 .withEnvironmentKey("environment")
                 .withEveryProperties()
                 .given(ClusterTemplateTestDto.class)
@@ -268,7 +268,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         testContext
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.createV4(), key(generatedKey))
-                .given(stackTemplate, StackTemplateEntity.class)
+                .given(stackTemplate, StackTemplateTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)
                 .given(ClusterTemplateTestDto.class)
                 .withStackTemplate(stackTemplate)
@@ -310,9 +310,9 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .withRegions(VALID_REGION)
                 .withLocation(LONDON)
                 .when(environmentTestClient.createV4(), key(generatedKey))
-                .given("placementSettings", PlacementSettingsEntity.class)
+                .given("placementSettings", PlacementSettingsTestDto.class)
                 .withRegion(MockCloudProvider.EUROPE)
-                .given("stackTemplate", StackTemplateEntity.class)
+                .given("stackTemplate", StackTemplateTestDto.class)
                 .withEnvironmentKey("environment")
                 .withPlacement("placementSettings")
                 .given(ClusterTemplateTestDto.class)

@@ -7,7 +7,7 @@ import com.sequenceiq.it.cloudbreak.newway.action.v4.ldap.LdapCreateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.ldap.LdapCreateIfNotExistsAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.ldap.LdapDeleteAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.ldap.LdapGetAction;
-import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ldap.LdapTestDto;
 
 @Service
 public class LdapTestClient {

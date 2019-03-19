@@ -10,21 +10,21 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.kubernetes.KubernetesTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.kubernetes.KubernetesTestDto;
 
 public class KubernetesDeleteAction implements Action<KubernetesTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesDeleteAction.class);
 
     @Override
-    public KubernetesTestDto action(TestContext testContext, KubernetesTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
-        log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
-        logJSON(LOGGER, " Kubernetes delete request:\n", entity.getRequest());
-        entity.setResponse(
+    public KubernetesTestDto action(TestContext testContext, KubernetesTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
+        log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
+        logJSON(LOGGER, " Kubernetes delete request:\n", testDto.getRequest());
+        testDto.setResponse(
                 cloudbreakClient.getCloudbreakClient()
                         .kubernetesV4Endpoint()
-                        .delete(cloudbreakClient.getWorkspaceId(), entity.getName()));
-        logJSON(LOGGER, " Kubernetes deleted successfully:\n", entity.getResponse());
-        return entity;
+                        .delete(cloudbreakClient.getWorkspaceId(), testDto.getName()));
+        logJSON(LOGGER, " Kubernetes deleted successfully:\n", testDto.getResponse());
+        return testDto;
     }
 }

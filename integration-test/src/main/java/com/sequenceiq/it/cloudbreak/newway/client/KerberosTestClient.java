@@ -6,7 +6,7 @@ import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.kerberos.KerberosCreateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.kerberos.KerberosDeleteAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.kerberos.KerberosGetAction;
-import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.kerberos.KerberosTestDto;
 
 @Service
 public class KerberosTestClient {

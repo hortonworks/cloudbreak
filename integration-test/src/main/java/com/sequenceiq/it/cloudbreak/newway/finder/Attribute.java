@@ -1,9 +1,9 @@
 package com.sequenceiq.it.cloudbreak.newway.finder;
 
 
-import com.sequenceiq.it.cloudbreak.newway.entity.CloudbreakEntity;
+import com.sequenceiq.it.cloudbreak.newway.dto.CloudbreakTestDto;
 
-public interface Attribute<T extends CloudbreakEntity, O> {
+public interface Attribute<T extends CloudbreakTestDto, O> {
     O get(T entity);
 }
 

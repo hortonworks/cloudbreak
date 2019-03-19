@@ -7,10 +7,10 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
 
 public class ChangeImageAction implements Action<StackTestDto> {
 
@@ -32,7 +32,7 @@ public class ChangeImageAction implements Action<StackTestDto> {
     }
 
     @Override
-    public StackTestDto action(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
+    public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
         ImageCatalogTestDto imageCatalogTestDto = testContext.get(ImageCatalogTestDto.class);
         request.setImageCatalogName(imageCatalogTestDto.getName());
 
@@ -40,8 +40,8 @@ public class ChangeImageAction implements Action<StackTestDto> {
 
         client.getCloudbreakClient()
                 .stackV4Endpoint()
-                .changeImage(client.getWorkspaceId(), entity.getName(), request);
+                .changeImage(client.getWorkspaceId(), testDto.getName(), request);
 
-        return entity;
+        return testDto;
     }
 }

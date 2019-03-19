@@ -7,7 +7,7 @@ import org.testng.annotations.BeforeMethod;
 
 import com.sequenceiq.it.cloudbreak.newway.client.ClusterDefinitionTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.clusterdefinition.ClusterDefinitionTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.util.ResourceUtil;
 

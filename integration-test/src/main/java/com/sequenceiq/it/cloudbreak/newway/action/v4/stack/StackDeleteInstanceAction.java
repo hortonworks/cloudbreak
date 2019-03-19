@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 
 public class StackDeleteInstanceAction implements Action<StackTestDto> {
 
@@ -17,14 +17,14 @@ public class StackDeleteInstanceAction implements Action<StackTestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackDeleteInstanceAction.class);
 
     @Override
-    public StackTestDto action(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
-        logJSON(LOGGER, " Stack delete instance request:\n", entity.getRequest());
+    public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
+        logJSON(LOGGER, " Stack delete instance request:\n", testDto.getRequest());
         String instanceId = testContext.getRequiredSelected(INSTANCE_ID);
         Boolean forced = testContext.getSelected("forced");
         client.getCloudbreakClient()
                 .stackV4Endpoint()
-                .deleteInstance(client.getWorkspaceId(), entity.getName(), forced != null && forced, instanceId);
-        logJSON(LOGGER, " Stack delete instance was successful:\n", entity.getResponse());
-        return entity;
+                .deleteInstance(client.getWorkspaceId(), testDto.getName(), forced != null && forced, instanceId);
+        logJSON(LOGGER, " Stack delete instance was successful:\n", testDto.getResponse());
+        return testDto;
     }
 }

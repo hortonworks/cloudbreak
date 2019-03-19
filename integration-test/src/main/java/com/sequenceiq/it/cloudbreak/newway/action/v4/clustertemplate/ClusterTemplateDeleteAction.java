@@ -8,20 +8,20 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.clustertemplate.ClusterTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.clustertemplate.ClusterTemplateTestDto;
 
 public class ClusterTemplateDeleteAction implements Action<ClusterTemplateTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTemplateDeleteAction.class);
 
     @Override
-    public ClusterTemplateTestDto action(TestContext testContext, ClusterTemplateTestDto entity, CloudbreakClient client) throws Exception {
-        log(LOGGER, "ClusterTemplateEntity delete, name: " + entity.getRequest().getName());
+    public ClusterTemplateTestDto action(TestContext testContext, ClusterTemplateTestDto testDto, CloudbreakClient client) throws Exception {
+        log(LOGGER, "ClusterTemplateEntity delete, name: " + testDto.getRequest().getName());
         client.getCloudbreakClient()
                 .clusterTemplateV4EndPoint()
-                .delete(client.getWorkspaceId(), entity.getRequest().getName());
-        log(LOGGER, "ClusterTemplateEntity deleted successfully: " + entity.getResponse().getId());
+                .delete(client.getWorkspaceId(), testDto.getRequest().getName());
+        log(LOGGER, "ClusterTemplateEntity deleted successfully: " + testDto.getResponse().getId());
 
-        return entity;
+        return testDto;
     }
 }

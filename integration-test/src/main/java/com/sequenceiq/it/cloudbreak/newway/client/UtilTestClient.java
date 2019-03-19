@@ -11,14 +11,14 @@ import com.sequenceiq.it.cloudbreak.newway.action.v4.util.StackMatrixAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.util.SubscriptionAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.util.TagSpecificationsAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.util.VersionCheckAction;
-import com.sequenceiq.it.cloudbreak.newway.entity.util.CloudStorageMatrixTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.util.DeploymentPreferencesTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.util.RepoConfigValidationTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.util.CloudStorageMatrixTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.util.DeploymentPreferencesTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.util.RepoConfigValidationTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.util.StackMatrixTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.util.SubscriptionTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.util.TagSpecificationsTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.util.VersionCheckTestDto;
 import com.sequenceiq.it.cloudbreak.newway.entity.util.SecurityRulesTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.util.StackMatrixTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.util.SubscriptionTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.util.TagSpecificationsTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.util.VersionCheckTestDto;
 
 @Service
 public class UtilTestClient {

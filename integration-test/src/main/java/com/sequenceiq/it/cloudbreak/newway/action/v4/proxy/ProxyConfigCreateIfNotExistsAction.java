@@ -8,28 +8,28 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.proxy.ProxyTestDto;
 
 public class ProxyConfigCreateIfNotExistsAction implements Action<ProxyTestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyConfigCreateIfNotExistsAction.class);
 
     @Override
-    public ProxyTestDto action(TestContext testContext, ProxyTestDto entity, CloudbreakClient client) throws Exception {
-        LOGGER.info("Create ProxyConfig with name: {}", entity.getRequest().getName());
+    public ProxyTestDto action(TestContext testContext, ProxyTestDto testDto, CloudbreakClient client) throws Exception {
+        LOGGER.info("Create ProxyConfig with name: {}", testDto.getRequest().getName());
         try {
-            entity.setResponse(
-                    client.getCloudbreakClient().proxyConfigV4Endpoint().post(client.getWorkspaceId(), entity.getRequest())
+            testDto.setResponse(
+                    client.getCloudbreakClient().proxyConfigV4Endpoint().post(client.getWorkspaceId(), testDto.getRequest())
             );
-            logJSON(LOGGER, "ProxyConfig created successfully: ", entity.getRequest());
+            logJSON(LOGGER, "ProxyConfig created successfully: ", testDto.getRequest());
         } catch (Exception e) {
-            LOGGER.info("Cannot create ProxyConfig, fetch existed one: {}", entity.getRequest().getName());
-            entity.setResponse(
+            LOGGER.info("Cannot create ProxyConfig, fetch existed one: {}", testDto.getRequest().getName());
+            testDto.setResponse(
                     client.getCloudbreakClient().proxyConfigV4Endpoint()
-                            .get(client.getWorkspaceId(), entity.getRequest().getName()));
+                            .get(client.getWorkspaceId(), testDto.getRequest().getName()));
         }
-        if (entity.getResponse() == null) {
+        if (testDto.getResponse() == null) {
             throw new IllegalStateException("ProxyConfig could not be created.");
         }
-        return entity;
+        return testDto;
     }
 }

@@ -7,7 +7,7 @@ import com.sequenceiq.it.cloudbreak.newway.action.v4.proxy.ProxyConfigCreateActi
 import com.sequenceiq.it.cloudbreak.newway.action.v4.proxy.ProxyConfigCreateIfNotExistsAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.proxy.ProxyConfigDeleteAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.proxy.ProxyConfigGetAction;
-import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.proxy.ProxyTestDto;
 
 @Service
 public class ProxyTestClient {

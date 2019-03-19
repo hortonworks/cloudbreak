@@ -13,8 +13,8 @@ import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.StackRepositoryEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.StackRepositoryTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.newway.v4.MaintenanceModePostAction;
 import com.sequenceiq.it.cloudbreak.newway.v4.UpdateStackDataAction;
@@ -55,7 +55,7 @@ public class MaintenanceModeTest extends AbstractIntegrationTest {
                 .when(stackTestClient.syncV4())
                 .await(CLUSTER_MAINTENANCE_MODE)
 
-                .given(StackRepositoryEntity.class)
+                .given(StackRepositoryTestDto.class)
                 .withOsType("RHEL")
                 .withUtilsBaseURL("http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.7.5.0")
                 .withUtilsRepoId("HDP-2.7.5")

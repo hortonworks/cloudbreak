@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.newway.assertion.database;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
-import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseTestTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.database.DatabaseTestTestDto;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 public class DatabaseTestAccessDeniedAssertion implements AssertionV2<DatabaseTestTestDto> {
@@ -12,10 +12,10 @@ public class DatabaseTestAccessDeniedAssertion implements AssertionV2<DatabaseTe
     }
 
     @Override
-    public DatabaseTestTestDto doAssertion(TestContext testContext, DatabaseTestTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
-        if (!entity.getResponse().getResult().contains("access is denied")) {
+    public DatabaseTestTestDto doAssertion(TestContext testContext, DatabaseTestTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
+        if (!testDto.getResponse().getResult().contains("access is denied")) {
             throw new IllegalArgumentException("Database test connection result is not as expected.");
         }
-        return entity;
+        return testDto;
     }
 }

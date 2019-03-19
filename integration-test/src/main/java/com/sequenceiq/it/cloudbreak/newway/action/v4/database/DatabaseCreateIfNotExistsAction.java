@@ -8,28 +8,28 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.database.DatabaseTestDto;
 
 public class DatabaseCreateIfNotExistsAction implements Action<DatabaseTestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseCreateIfNotExistsAction.class);
 
     @Override
-    public DatabaseTestDto action(TestContext testContext, DatabaseTestDto entity, CloudbreakClient client) throws Exception {
-        LOGGER.info("Create Database with name: {}", entity.getRequest().getName());
+    public DatabaseTestDto action(TestContext testContext, DatabaseTestDto testDto, CloudbreakClient client) throws Exception {
+        LOGGER.info("Create Database with name: {}", testDto.getRequest().getName());
         try {
-            entity.setResponse(
-                    client.getCloudbreakClient().databaseV4Endpoint().create(client.getWorkspaceId(), entity.getRequest())
+            testDto.setResponse(
+                    client.getCloudbreakClient().databaseV4Endpoint().create(client.getWorkspaceId(), testDto.getRequest())
             );
-            logJSON(LOGGER, "Database created successfully: ", entity.getRequest());
+            logJSON(LOGGER, "Database created successfully: ", testDto.getRequest());
         } catch (Exception e) {
-            LOGGER.info("Cannot create Database, fetch existed one: {}", entity.getRequest().getName());
-            entity.setResponse(
+            LOGGER.info("Cannot create Database, fetch existed one: {}", testDto.getRequest().getName());
+            testDto.setResponse(
                     client.getCloudbreakClient().databaseV4Endpoint()
-                            .get(client.getWorkspaceId(), entity.getRequest().getName()));
+                            .get(client.getWorkspaceId(), testDto.getRequest().getName()));
         }
-        if (entity.getResponse() == null) {
+        if (testDto.getResponse() == null) {
             throw new IllegalStateException("Database could not be created.");
         }
-        return entity;
+        return testDto;
     }
 }

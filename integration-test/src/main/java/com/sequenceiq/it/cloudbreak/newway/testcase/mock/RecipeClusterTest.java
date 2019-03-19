@@ -31,11 +31,11 @@ import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.InstanceGroupEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.recipe.RecipeTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.InstanceGroupTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ldap.LdapTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.recipe.RecipeTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class RecipeClusterTest extends AbstractIntegrationTest {
@@ -86,7 +86,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .withContent(RECIPE_CONTENT)
                 .withRecipeType(type)
                 .when(recipeTestClient.createV4(), key(recipeName))
-                .given(instanceGroupName, InstanceGroupEntity.class)
+                .given(instanceGroupName, InstanceGroupTestDto.class)
                 .withHostGroup(WORKER)
                 .withNodeCount(NODE_COUNT)
                 .withRecipes(recipeName)
@@ -111,7 +111,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .withContent(RECIPE_CONTENT)
                 .withRecipeType(PRE_TERMINATION)
                 .when(recipeTestClient.createV4())
-                .given(INSTANCE_GROUP_ID, InstanceGroupEntity.class)
+                .given(INSTANCE_GROUP_ID, InstanceGroupTestDto.class)
                 .withHostGroup(WORKER)
                 .withNodeCount(NODE_COUNT)
                 .withRecipes(recipeName)
@@ -139,7 +139,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .given(LdapTestDto.class)
                 .withName(ldapName)
                 .when(ldapTestClient.createV4())
-                .given(ClusterEntity.class)
+                .given(ClusterTestDto.class)
                 .withLdapConfigName(ldapName)
                 .given(StackTestDto.class)
                 .when(stackTestClient.createV4())
@@ -161,7 +161,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .withContent(RECIPE_CONTENT)
                 .withRecipeType(POST_CLUSTER_INSTALL)
                 .when(recipeTestClient.createV4())
-                .given(INSTANCE_GROUP_ID, InstanceGroupEntity.class)
+                .given(INSTANCE_GROUP_ID, InstanceGroupTestDto.class)
                 .withHostGroup(WORKER)
                 .withNodeCount(NODE_COUNT)
                 .withRecipes(recipeName)
@@ -189,7 +189,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .withContent(RECIPE_CONTENT)
                 .withRecipeType(POST_AMBARI_START)
                 .when(recipeTestClient.createV4())
-                .given(INSTANCE_GROUP_ID, InstanceGroupEntity.class)
+                .given(INSTANCE_GROUP_ID, InstanceGroupTestDto.class)
                 .withHostGroup(COMPUTE)
                 .withNodeCount(NODE_COUNT)
                 .withRecipes(recipeName)
@@ -215,7 +215,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
         testContext
                 .given(RecipeTestDto.class).withName(recipeName).withContent(RECIPE_CONTENT).withRecipeType(POST_AMBARI_START)
                 .when(recipeTestClient.createV4())
-                .given(INSTANCE_GROUP_ID, InstanceGroupEntity.class).withRecipes(recipeName)
+                .given(INSTANCE_GROUP_ID, InstanceGroupTestDto.class).withRecipes(recipeName)
                 .given(StackTestDto.class).replaceInstanceGroups(INSTANCE_GROUP_ID)
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
