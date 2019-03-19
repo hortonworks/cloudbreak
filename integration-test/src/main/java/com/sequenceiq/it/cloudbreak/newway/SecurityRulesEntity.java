@@ -5,10 +5,10 @@ import java.util.Arrays;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4Response;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.AbstractCloudbreakEntity;
+import com.sequenceiq.it.cloudbreak.newway.dto.AbstractCloudbreakTestDto;
 
 @Prototype
-public class SecurityRulesEntity extends AbstractCloudbreakEntity<SecurityRuleV4Request, SecurityRulesV4Response, SecurityRules> {
+public class SecurityRulesEntity extends AbstractCloudbreakTestDto<SecurityRuleV4Request, SecurityRulesV4Response, SecurityRules> {
     public static final String SECURITYRULES = "SECURITYRULES";
 
     private SecurityRulesEntity(String newId) {

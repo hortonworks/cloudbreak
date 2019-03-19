@@ -17,8 +17,8 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.InstanceGroupEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.InstanceGroupTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class TerminationTest extends AbstractIntegrationTest {
@@ -47,7 +47,7 @@ public class TerminationTest extends AbstractIntegrationTest {
     public void testInstanceTermination(TestContext testContext) {
         testContext
                 // create stack
-                .given("ig", InstanceGroupEntity.class).withHostGroup(HostGroupType.WORKER).withNodeCount(3)
+                .given("ig", InstanceGroupTestDto.class).withHostGroup(HostGroupType.WORKER).withNodeCount(3)
                 .given(StackTestDto.class).replaceInstanceGroups("ig")
                 .when(stackTestClient.createV4(), key("stack-post"))
                 .await(STACK_AVAILABLE)
@@ -68,7 +68,7 @@ public class TerminationTest extends AbstractIntegrationTest {
     public void testInstanceTerminationReplicationError(TestContext testContext) {
         testContext
                 // create stack
-                .given("ig", InstanceGroupEntity.class).withHostGroup(HostGroupType.WORKER).withNodeCount(2)
+                .given("ig", InstanceGroupTestDto.class).withHostGroup(HostGroupType.WORKER).withNodeCount(2)
                 .given(StackTestDto.class).replaceInstanceGroups("ig")
                 .when(stackTestClient.createV4(), key("stack-post"))
                 .await(STACK_AVAILABLE)

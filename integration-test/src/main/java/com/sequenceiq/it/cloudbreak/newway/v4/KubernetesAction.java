@@ -10,7 +10,7 @@ import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Entity;
-import com.sequenceiq.it.cloudbreak.newway.entity.kubernetes.KubernetesTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.kubernetes.KubernetesTestDto;
 
 public class KubernetesAction {
     private KubernetesAction() {

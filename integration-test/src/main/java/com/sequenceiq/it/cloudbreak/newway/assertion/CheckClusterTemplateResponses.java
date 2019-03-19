@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.clustertemplate.ClusterTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.clustertemplate.ClusterTemplateTestDto;
 
 public class CheckClusterTemplateResponses implements AssertionV2<ClusterTemplateTestDto> {
 
@@ -18,10 +18,10 @@ public class CheckClusterTemplateResponses implements AssertionV2<ClusterTemplat
     }
 
     @Override
-    public ClusterTemplateTestDto doAssertion(TestContext testContext, ClusterTemplateTestDto entity, CloudbreakClient client) {
-        if (entity.getResponses().size() != expectedSize) {
-            throw new IllegalArgumentException(String.format("expected size is %s but got %s", expectedSize, entity.getResponses().size()));
+    public ClusterTemplateTestDto doAssertion(TestContext testContext, ClusterTemplateTestDto testDto, CloudbreakClient client) {
+        if (testDto.getResponses().size() != expectedSize) {
+            throw new IllegalArgumentException(String.format("expected size is %s but got %s", expectedSize, testDto.getResponses().size()));
         }
-        return entity;
+        return testDto;
     }
 }

@@ -12,9 +12,9 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.Entity;
-import com.sequenceiq.it.cloudbreak.newway.RecommendationEntity;
+import com.sequenceiq.it.cloudbreak.newway.dto.RecommendationTestDto;
 import com.sequenceiq.it.cloudbreak.newway.Region;
-import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.clusterdefinition.ClusterDefinitionTestDto;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
 public class RecommendationV4Action {
@@ -23,7 +23,7 @@ public class RecommendationV4Action {
     }
 
     public static void post(IntegrationTestContext integrationTestContext, Entity entity) throws IOException {
-        RecommendationEntity recommendationEntity = (RecommendationEntity) entity;
+        RecommendationTestDto recommendationEntity = (RecommendationTestDto) entity;
         CloudbreakClient client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
 

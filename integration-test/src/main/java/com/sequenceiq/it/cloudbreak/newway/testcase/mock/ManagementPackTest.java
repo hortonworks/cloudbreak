@@ -16,7 +16,7 @@ import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
 import com.sequenceiq.it.cloudbreak.newway.client.MpackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.mpack.MPackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.mpack.MPackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class ManagementPackTest extends AbstractIntegrationTest {

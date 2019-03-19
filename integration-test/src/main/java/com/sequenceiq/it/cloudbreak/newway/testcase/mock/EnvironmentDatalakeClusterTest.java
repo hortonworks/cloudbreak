@@ -25,15 +25,15 @@ import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.AmbariEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.InstanceGroupEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.AmbariTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.InstanceGroupTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.PlacementSettingsTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.database.DatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ldap.LdapTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
@@ -87,12 +87,12 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
                 .when(environmentTestClient.createV4())
-                .given(ClusterEntity.class).valid()
+                .given(ClusterTestDto.class).valid()
                 .withRdsConfigNames(rdsList)
                 .withClusterDefinitionName(BP_NAME_DL)
-                .withAmbari(testContext.given(AmbariEntity.class))
+                .withAmbari(testContext.given(AmbariTestDto.class))
                 .withLdapConfigName(testContext.get(LdapTestDto.class).getName())
-                .given("placement", PlacementSettingsEntity.class)
+                .given("placement", PlacementSettingsTestDto.class)
 
                 .given(StackTestDto.class).withPlacement("placement")
                 .withEnvironment(EnvironmentTestDto.class)
@@ -130,12 +130,12 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
                 .when(environmentTestClient.createV4())
-                .given(ClusterEntity.class).valid()
+                .given(ClusterTestDto.class).valid()
                 .withRdsConfigNames(rdsList)
                 .withClusterDefinitionName(BP_NAME_DL)
-                .withAmbari(testContext.given(AmbariEntity.class))
+                .withAmbari(testContext.given(AmbariTestDto.class))
                 .withLdapConfigName(testContext.get(LdapTestDto.class).getName())
-                .given("placement", PlacementSettingsEntity.class)
+                .given("placement", PlacementSettingsTestDto.class)
                 .given(StackTestDto.class).withPlacement("placement")
                 .withEnvironment(EnvironmentTestDto.class)
                 .withInstanceGroupsEntity(setInstanceGroup(testContext))
@@ -230,7 +230,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
                 .when(environmentTestClient.createV4())
-                .given("placement", PlacementSettingsEntity.class)
+                .given("placement", PlacementSettingsTestDto.class)
                 .given(StackTestDto.class)
                 .withName(dlName)
                 .withPlacement("placement")
@@ -250,10 +250,10 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withRegions(VALID_REGION)
                 .withLocation(VALID_LOCATION)
                 .when(environmentTestClient.createV4())
-                .given(ClusterEntity.class).valid()
+                .given(ClusterTestDto.class).valid()
                 .withClusterDefinitionName(BP_NAME_DL)
-                .withAmbari(testContext.given(AmbariEntity.class))
-                .given("placement", PlacementSettingsEntity.class)
+                .withAmbari(testContext.given(AmbariTestDto.class))
+                .given("placement", PlacementSettingsTestDto.class)
                 .given(StackTestDto.class)
                 .withPlacement("placement")
                 .withEnvironment(EnvironmentTestDto.class)
@@ -270,11 +270,11 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
     }
 
     private void createDatalake(TestContext testContext, Set<String> rdsList, String bpName) {
-        testContext.given("placement", PlacementSettingsEntity.class)
-                .given(ClusterEntity.class).valid()
+        testContext.given("placement", PlacementSettingsTestDto.class)
+                .given(ClusterTestDto.class).valid()
                 .withRdsConfigNames(rdsList)
                 .withClusterDefinitionName(BP_NAME_DL)
-                .withAmbari(testContext.given(AmbariEntity.class))
+                .withAmbari(testContext.given(AmbariTestDto.class))
                 .withLdapConfigName(testContext.get(LdapTestDto.class).getName())
                 .given(StackTestDto.class)
                 .withName(getNameGenerator().getRandomNameForResource())
@@ -314,10 +314,10 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         return new HashSet<>(Collections.singletonList(testContext.get(DatabaseTestDto.class).getName()));
     }
 
-    private Collection<InstanceGroupEntity> setInstanceGroup(TestContext testContext) {
-        Collection<InstanceGroupEntity> instanceGroupEntity = new ArrayList<>();
-        InstanceGroupEntity ig = InstanceGroupEntity.hostGroup(testContext, HostGroupType.MASTER);
-        instanceGroupEntity.add(ig);
-        return instanceGroupEntity;
+    private Collection<InstanceGroupTestDto> setInstanceGroup(TestContext testContext) {
+        Collection<InstanceGroupTestDto> instanceGroupTestDto = new ArrayList<>();
+        InstanceGroupTestDto ig = InstanceGroupTestDto.hostGroup(testContext, HostGroupType.MASTER);
+        instanceGroupTestDto.add(ig);
+        return instanceGroupTestDto;
     }
 }

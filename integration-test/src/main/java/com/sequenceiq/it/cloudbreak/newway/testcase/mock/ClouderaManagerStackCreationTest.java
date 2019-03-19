@@ -8,10 +8,10 @@ import com.sequenceiq.it.cloudbreak.newway.client.ClusterDefinitionTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.ClouderaManagerTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ClouderaManagerTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.clusterdefinition.ClusterDefinitionTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 
 public class ClouderaManagerStackCreationTest extends AbstractClouderaManagerTest {
 
@@ -32,7 +32,7 @@ public class ClouderaManagerStackCreationTest extends AbstractClouderaManagerTes
         String cluster = "cmcluster";
         testContext
                 .given(clouderaManager, ClouderaManagerTestDto.class)
-                .given(cluster, ClusterEntity.class)
+                .given(cluster, ClusterTestDto.class)
                 .withClusterDefinitionName(name)
                 .withValidateClusterDefinition(Boolean.FALSE)
                 .withClouderaManager(clouderaManager)

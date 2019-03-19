@@ -10,7 +10,7 @@ import com.sequenceiq.it.cloudbreak.newway.action.v4.environment.EnvironmentDele
 import com.sequenceiq.it.cloudbreak.newway.action.v4.environment.EnvironmentDetachAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.environment.EnvironmentGetAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.environment.EnvironmentListAction;
-import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
 
 @Service
 public class EnvironmentTestClient {

@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
-import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
 
 public class CredentialTestAssertion {
 

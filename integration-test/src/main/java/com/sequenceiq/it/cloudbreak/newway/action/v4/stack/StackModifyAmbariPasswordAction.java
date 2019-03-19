@@ -11,24 +11,24 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePassword
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 
 public class StackModifyAmbariPasswordAction implements Action<StackTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackModifyAmbariPasswordAction.class);
 
     @Override
-    public StackTestDto action(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
-        log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
-        logJSON(LOGGER, " Stack put ambari password request:\n", entity.getRequest());
+    public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
+        log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
+        logJSON(LOGGER, " Stack put ambari password request:\n", testDto.getRequest());
         UserNamePasswordV4Request userNamePasswordV4Request = new UserNamePasswordV4Request();
-        userNamePasswordV4Request.setOldPassword(entity.getRequest().getCluster().getPassword());
-        userNamePasswordV4Request.setUserName(entity.getRequest().getCluster().getUserName());
+        userNamePasswordV4Request.setOldPassword(testDto.getRequest().getCluster().getPassword());
+        userNamePasswordV4Request.setUserName(testDto.getRequest().getCluster().getUserName());
         userNamePasswordV4Request.setPassword("testnewambaripassword");
         client.getCloudbreakClient().stackV4Endpoint().putPassword(client.getWorkspaceId(),
-                entity.getName(), userNamePasswordV4Request);
-        logJSON(LOGGER, " Stack was modified ambari password successfully:\n", entity.getResponse());
-        log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
-        return entity;
+                testDto.getName(), userNamePasswordV4Request);
+        logJSON(LOGGER, " Stack was modified ambari password successfully:\n", testDto.getResponse());
+        log(LOGGER, format(" ID: %s", testDto.getResponse().getId()));
+        return testDto;
     }
 }

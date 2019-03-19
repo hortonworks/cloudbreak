@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidat
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CommonAssert;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.util.RepoConfigValidationTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.util.RepoConfigValidationTestDto;
 
 public enum RepoConfigValidationTestData {
 

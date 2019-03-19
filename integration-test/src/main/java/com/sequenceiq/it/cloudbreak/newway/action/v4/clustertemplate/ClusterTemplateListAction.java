@@ -12,20 +12,20 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.ClusterTemplateUtil;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.clustertemplate.ClusterTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.clustertemplate.ClusterTemplateTestDto;
 
 public class ClusterTemplateListAction implements Action<ClusterTemplateTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTemplateListAction.class);
 
     @Override
-    public ClusterTemplateTestDto action(TestContext testContext, ClusterTemplateTestDto entity, CloudbreakClient client) throws Exception {
-        logJSON(LOGGER, " ClusterTemplateEntity get request:\n", entity.getRequest());
+    public ClusterTemplateTestDto action(TestContext testContext, ClusterTemplateTestDto testDto, CloudbreakClient client) throws Exception {
+        logJSON(LOGGER, " ClusterTemplateEntity get request:\n", testDto.getRequest());
         Collection<ClusterTemplateViewV4Response> responses = client.getCloudbreakClient()
                 .clusterTemplateV4EndPoint()
                 .list(client.getWorkspaceId()).getResponses();
-        entity.setResponses(ClusterTemplateUtil.getResponseFromViews(responses));
+        testDto.setResponses(ClusterTemplateUtil.getResponseFromViews(responses));
         logJSON(LOGGER, " ClusterTemplateEntity list successfully:\n", responses);
-        return entity;
+        return testDto;
     }
 }

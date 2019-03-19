@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.connector.PlatformSecurityGroupsTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.connector.PlatformSecurityGroupsTestDto;
 
 public class PlatformSecurityGroupsAction implements Action<PlatformSecurityGroupsTestDto> {
 
@@ -14,19 +14,19 @@ public class PlatformSecurityGroupsAction implements Action<PlatformSecurityGrou
 
     @Override
     public PlatformSecurityGroupsTestDto action(TestContext testContext,
-                                                PlatformSecurityGroupsTestDto entity,
+                                                PlatformSecurityGroupsTestDto testDto,
                                                 CloudbreakClient cloudbreakClient) throws Exception {
         String logInitMessage = "Obtaining security groups by credential";
         LOGGER.info("{}", logInitMessage);
-        entity.setResponse(
+        testDto.setResponse(
                 cloudbreakClient.getCloudbreakClient().connectorV4Endpoint().getSecurityGroups(
                         cloudbreakClient.getWorkspaceId(),
-                        entity.getCredentialName(),
-                        entity.getRegion(),
-                        entity.getPlatformVariant(),
-                        entity.getAvailabilityZone())
+                        testDto.getCredentialName(),
+                        testDto.getRegion(),
+                        testDto.getPlatformVariant(),
+                        testDto.getAvailabilityZone())
         );
         LOGGER.info("{} was successful", logInitMessage);
-        return entity;
+        return testDto;
     }
 }

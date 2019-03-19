@@ -12,7 +12,7 @@ import com.sequenceiq.it.cloudbreak.newway.action.v4.imagecatalog.ImageCatalogGe
 import com.sequenceiq.it.cloudbreak.newway.action.v4.imagecatalog.ImageCatalogGetImagesByNameAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.imagecatalog.ImageCatalogGetImagesFromDefaultCatalogAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.imagecatalog.ImageCatalogSetAsDefaultAction;
-import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
 
 @Service
 public class ImageCatalogTestClient {

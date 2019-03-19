@@ -6,7 +6,7 @@ import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.mpack.MpackCreateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.mpack.MpackDeleteAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.mpack.MpackListAction;
-import com.sequenceiq.it.cloudbreak.newway.entity.mpack.MPackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.mpack.MPackTestDto;
 
 @Service
 public class MpackTestClient {

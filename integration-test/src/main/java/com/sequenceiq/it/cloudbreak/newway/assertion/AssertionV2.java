@@ -5,5 +5,5 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 public interface AssertionV2<T> {
 
-    T doAssertion(TestContext testContext, T entity, CloudbreakClient cloudbreakClient) throws Exception;
+    T doAssertion(TestContext testContext, T testDto, CloudbreakClient cloudbreakClient) throws Exception;
 }

@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
 
 public class ImageCatalogGetImagesFromDefaultCatalogAction implements Action<ImageCatalogTestDto> {
 
@@ -25,20 +25,20 @@ public class ImageCatalogGetImagesFromDefaultCatalogAction implements Action<Ima
     }
 
     @Override
-    public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
-        LOGGER.info("Get images of ImageCatalog within workspace by catalog name: {}", entity.getRequest().getName());
+    public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
+        LOGGER.info("Get images of ImageCatalog within workspace by catalog name: {}", testDto.getRequest().getName());
         try {
-            entity.setResponseByProvider(
+            testDto.setResponseByProvider(
                     cloudbreakClient
                             .getCloudbreakClient()
                             .imageCatalogV4Endpoint()
                             .getImages(cloudbreakClient.getWorkspaceId(), null, platform.name())
             );
-            logJSON(LOGGER, "images have been fetched successfully: ", entity.getRequest());
+            logJSON(LOGGER, "images have been fetched successfully: ", testDto.getRequest());
         } catch (Exception e) {
-            LOGGER.warn("Cannot get images of ImageCatalog : {}", entity.getRequest().getName());
+            LOGGER.warn("Cannot get images of ImageCatalog : {}", testDto.getRequest().getName());
             throw e;
         }
-        return entity;
+        return testDto;
     }
 }

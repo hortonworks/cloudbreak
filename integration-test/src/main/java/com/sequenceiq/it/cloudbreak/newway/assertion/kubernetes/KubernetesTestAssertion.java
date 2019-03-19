@@ -1,7 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.assertion.kubernetes;
 
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
-import com.sequenceiq.it.cloudbreak.newway.entity.kubernetes.KubernetesTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.kubernetes.KubernetesTestDto;
 
 public class KubernetesTestAssertion {
 

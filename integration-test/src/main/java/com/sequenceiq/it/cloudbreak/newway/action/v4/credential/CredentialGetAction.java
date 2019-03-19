@@ -10,21 +10,21 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
 
 public class CredentialGetAction implements Action<CredentialTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialGetAction.class);
 
     @Override
-    public CredentialTestDto action(TestContext testContext, CredentialTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
-        log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
-        logJSON(LOGGER, " Credential get request:\n", entity.getRequest());
-        entity.setResponse(
+    public CredentialTestDto action(TestContext testContext, CredentialTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
+        log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
+        logJSON(LOGGER, " Credential get request:\n", testDto.getRequest());
+        testDto.setResponse(
                 cloudbreakClient.getCloudbreakClient()
                         .credentialV4Endpoint()
-                        .get(cloudbreakClient.getWorkspaceId(), entity.getName()));
-        logJSON(LOGGER, " Credential get successfully:\n", entity.getResponse());
-        return entity;
+                        .get(cloudbreakClient.getWorkspaceId(), testDto.getName()));
+        logJSON(LOGGER, " Credential get successfully:\n", testDto.getResponse());
+        return testDto;
     }
 }

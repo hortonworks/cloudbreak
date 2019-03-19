@@ -8,8 +8,8 @@ import com.sequenceiq.it.cloudbreak.newway.action.v4.database.DatabaseCreateActi
 import com.sequenceiq.it.cloudbreak.newway.action.v4.database.DatabaseCreateIfNotExistsAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.database.DatabaseListAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.database.DatabaseTestConnectionAction;
-import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseTestTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.database.DatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.database.DatabaseTestTestDto;
 
 @Service
 public class DatabaseTestClient {

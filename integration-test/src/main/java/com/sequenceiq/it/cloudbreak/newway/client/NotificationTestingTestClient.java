@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.notificationtest.NotificationTestingAction;
-import com.sequenceiq.it.cloudbreak.newway.entity.util.NotificationTestingTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.util.NotificationTestingTestDto;
 
 @Service
 public class NotificationTestingTestClient {

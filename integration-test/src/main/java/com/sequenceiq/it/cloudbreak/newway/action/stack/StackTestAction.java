@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePassword
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedClusterDefinitionV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 
 public class StackTestAction {
 

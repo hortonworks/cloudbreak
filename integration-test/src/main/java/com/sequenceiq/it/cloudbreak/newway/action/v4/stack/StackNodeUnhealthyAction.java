@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.FailureRepor
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.actor.Actor;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -35,16 +35,16 @@ public class StackNodeUnhealthyAction implements Action<StackTestDto> {
     }
 
     @Override
-    public StackTestDto action(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
-        log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
-        logJSON(LOGGER, " Stack unhealthy request:\n", entity.getRequest());
+    public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
+        log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
+        logJSON(LOGGER, " Stack unhealthy request:\n", testDto.getRequest());
         FailureReportV4Request failureReport = new FailureReportV4Request();
-        failureReport.setFailedNodes(getNodes(getInstanceGroupResponse(entity)));
+        failureReport.setFailedNodes(getNodes(getInstanceGroupResponse(testDto)));
         CloudbreakClient autoscaleClient = testContext.as(Actor::secondUser).getCloudbreakClient(SECONDARY_REFRESH_TOKEN);
-        autoscaleClient.getCloudbreakClient().autoscaleEndpoint().failureReport(Objects.requireNonNull(entity.getResponse().getId()), failureReport);
-            logJSON(LOGGER, " Stack unhealthy was successful:\n", entity.getResponse());
-            log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
-            return entity;
+        autoscaleClient.getCloudbreakClient().autoscaleEndpoint().failureReport(Objects.requireNonNull(testDto.getResponse().getId()), failureReport);
+            logJSON(LOGGER, " Stack unhealthy was successful:\n", testDto.getResponse());
+            log(LOGGER, format(" ID: %s", testDto.getResponse().getId()));
+            return testDto;
 
     }
 

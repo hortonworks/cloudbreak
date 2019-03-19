@@ -6,18 +6,18 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.util.SubscriptionTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.util.SubscriptionTestDto;
 
 public class SubscriptionAction implements Action<SubscriptionTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SubscriptionAction.class);
 
     @Override
-    public SubscriptionTestDto action(TestContext testContext, SubscriptionTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
+    public SubscriptionTestDto action(TestContext testContext, SubscriptionTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
         String logInitMessage = "Subscribing";
         LOGGER.info("{}", logInitMessage);
-        entity.setResponse(cloudbreakClient.getCloudbreakClient().utilV4Endpoint().subscribe(entity.getRequest()));
+        testDto.setResponse(cloudbreakClient.getCloudbreakClient().utilV4Endpoint().subscribe(testDto.getRequest()));
         LOGGER.info("{} was successful", logInitMessage);
-        return entity;
+        return testDto;
     }
 }

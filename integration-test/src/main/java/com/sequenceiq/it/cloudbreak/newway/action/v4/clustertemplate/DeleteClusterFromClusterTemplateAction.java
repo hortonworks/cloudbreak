@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.clustertemplate.ClusterTemplateTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.StackTemplateEntity;
+import com.sequenceiq.it.cloudbreak.newway.dto.clustertemplate.ClusterTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTemplateTestDto;
 
 public class DeleteClusterFromClusterTemplateAction implements Action<ClusterTemplateTestDto> {
 
@@ -23,18 +23,18 @@ public class DeleteClusterFromClusterTemplateAction implements Action<ClusterTem
     }
 
     @Override
-    public ClusterTemplateTestDto action(TestContext testContext, ClusterTemplateTestDto entity, CloudbreakClient client) throws Exception {
-        if (entity.getResponse() == null)  {
-            logJSON(LOGGER, "Cluster response is null", entity.getRequest().getStackTemplate());
-            return entity;
+    public ClusterTemplateTestDto action(TestContext testContext, ClusterTemplateTestDto testDto, CloudbreakClient client) throws Exception {
+        if (testDto.getResponse() == null)  {
+            logJSON(LOGGER, "Cluster response is null", testDto.getRequest().getStackTemplate());
+            return testDto;
         }
-        logJSON(LOGGER, "Stack from template post request:\n", entity.getRequest().getStackTemplate());
-        StackTemplateEntity stackEntity = testContext.get(stackTemplateKey);
+        logJSON(LOGGER, "Stack from template post request:\n", testDto.getRequest().getStackTemplate());
+        StackTemplateTestDto stackEntity = testContext.get(stackTemplateKey);
         client.getCloudbreakClient()
                 .stackV4Endpoint()
                 .delete(client.getWorkspaceId(), stackEntity.getResponse().getName(), false, null);
-        logJSON(LOGGER, " Stack from template created  successfully:\n", entity.getResponse());
-        log(LOGGER, "Stack from template ID: " + entity.getResponse().getId());
-        return entity;
+        logJSON(LOGGER, " Stack from template created  successfully:\n", testDto.getResponse());
+        log(LOGGER, "Stack from template ID: " + testDto.getResponse().getId());
+        return testDto;
     }
 }

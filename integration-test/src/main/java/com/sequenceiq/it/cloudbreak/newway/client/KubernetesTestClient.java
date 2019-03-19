@@ -7,7 +7,7 @@ import com.sequenceiq.it.cloudbreak.newway.action.v4.kubernetes.KubernetesCreate
 import com.sequenceiq.it.cloudbreak.newway.action.v4.kubernetes.KubernetesCreateIfNotExistAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.kubernetes.KubernetesDeleteAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.kubernetes.KubernetesListAction;
-import com.sequenceiq.it.cloudbreak.newway.entity.kubernetes.KubernetesTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.kubernetes.KubernetesTestDto;
 
 @Service
 public class KubernetesTestClient {

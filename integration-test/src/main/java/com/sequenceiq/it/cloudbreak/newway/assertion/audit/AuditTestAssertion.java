@@ -1,7 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.assertion.audit;
 
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
-import com.sequenceiq.it.cloudbreak.newway.entity.audit.AuditTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.audit.AuditTestDto;
 
 public class AuditTestAssertion {
 

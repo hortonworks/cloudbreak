@@ -9,22 +9,22 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.mpack.MPackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.mpack.MPackTestDto;
 
 public class MpackDeleteAction implements Action<MPackTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MpackDeleteAction.class);
 
     @Override
-    public MPackTestDto action(TestContext testContext, MPackTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
-        log(LOGGER, "ManagementPack name: " + entity.getName());
+    public MPackTestDto action(TestContext testContext, MPackTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
+        log(LOGGER, "ManagementPack name: " + testDto.getName());
         log(LOGGER, " ManagementPack delete request");
-        entity.setResponse(
+        testDto.setResponse(
                 cloudbreakClient.getCloudbreakClient()
                         .managementPackV4Endpoint()
-                        .deleteInWorkspace(cloudbreakClient.getWorkspaceId(), entity.getName()));
-        logJSON(LOGGER, " ManagementPack deleted successfully:\n", entity.getResponse());
-        log(LOGGER, "ManagementPack ID: " + entity.getResponse().getId());
+                        .deleteInWorkspace(cloudbreakClient.getWorkspaceId(), testDto.getName()));
+        logJSON(LOGGER, " ManagementPack deleted successfully:\n", testDto.getResponse());
+        log(LOGGER, "ManagementPack ID: " + testDto.getResponse().getId());
 
-        return entity;    }
+        return testDto;    }
 }

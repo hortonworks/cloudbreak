@@ -19,9 +19,9 @@ import com.sequenceiq.it.cloudbreak.newway.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.InstanceGroupEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.recipe.RecipeTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.InstanceGroupTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.recipe.RecipeTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.newway.util.ShowClusterDefinitionUtil;
 
@@ -107,7 +107,7 @@ public class YarnSmokeTest extends AbstractE2ETest {
         testContext.given(RecipeTestDto.class)
                 .withName(recipeName).withContent(RECIPE_CONTENT).withRecipeType(PRE_TERMINATION)
                 .when(recipeTestClient.createV4())
-                .given(INSTANCE_GROUP_ID, InstanceGroupEntity.class)
+                .given(INSTANCE_GROUP_ID, InstanceGroupTestDto.class)
                 .withHostGroup(WORKER).withNodeCount(NODE_COUNT).withRecipes(recipeName)
                 .given(StackTestDto.class)
                 .replaceInstanceGroups(INSTANCE_GROUP_ID)
@@ -129,7 +129,7 @@ public class YarnSmokeTest extends AbstractE2ETest {
                 .withContent(RECIPE_CONTENT).withRecipeType(POST_CLUSTER_INSTALL).withRecipeType(PRE_AMBARI_START).withRecipeType(POST_AMBARI_START)
                 .withRecipeType(PRE_TERMINATION)
                 .when(recipeTestClient.createV4())
-                .given(INSTANCE_GROUP_ID, InstanceGroupEntity.class)
+                .given(INSTANCE_GROUP_ID, InstanceGroupTestDto.class)
                 .withHostGroup(WORKER).withNodeCount(NODE_COUNT)
                 .given(StackTestDto.class)
                 .replaceInstanceGroups(INSTANCE_GROUP_ID)

@@ -10,23 +10,23 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.proxy.ProxyTestDto;
 
 public class ProxyConfigGetAction implements Action<ProxyTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyConfigGetAction.class);
 
     @Override
-    public ProxyTestDto action(TestContext testContext, ProxyTestDto entity, CloudbreakClient client) throws Exception {
-        log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
-        logJSON(LOGGER, " Proxy config get request:\n", entity.getRequest());
-        entity.setResponse(
+    public ProxyTestDto action(TestContext testContext, ProxyTestDto testDto, CloudbreakClient client) throws Exception {
+        log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
+        logJSON(LOGGER, " Proxy config get request:\n", testDto.getRequest());
+        testDto.setResponse(
                 client.getCloudbreakClient()
                         .proxyConfigV4Endpoint()
-                        .get(client.getWorkspaceId(), entity.getName()));
-        logJSON(LOGGER, " Proxy config was get successfully:\n", entity.getResponse());
-        log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
-        return entity;
+                        .get(client.getWorkspaceId(), testDto.getName()));
+        logJSON(LOGGER, " Proxy config was get successfully:\n", testDto.getResponse());
+        log(LOGGER, format(" ID: %s", testDto.getResponse().getId()));
+        return testDto;
     }
 
 }

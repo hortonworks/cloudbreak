@@ -8,17 +8,17 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 
 public class StackRefreshAction implements Action<StackTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackRefreshAction.class);
 
     @Override
-    public StackTestDto action(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
-        entity.setResponse(
-                client.getCloudbreakClient().stackV4Endpoint().get(client.getWorkspaceId(), entity.getName(), Collections.emptySet())
+    public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
+        testDto.setResponse(
+                client.getCloudbreakClient().stackV4Endpoint().get(client.getWorkspaceId(), testDto.getName(), Collections.emptySet())
         );
-        return entity;
+        return testDto;
     }
 }

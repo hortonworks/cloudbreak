@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
 public class StackAction {
@@ -66,16 +66,6 @@ public class StackAction {
         Log.log(" delete: " + stackTestDto.getName());
         client.getCloudbreakClient().stackV4Endpoint()
                 .delete(stackTestDto.getResponse().getId(), stackTestDto.getName(), forced, false);
-    }
-
-    public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) throws Exception {
-        try {
-            get(integrationTestContext, entity);
-            // TODO: Exception class is too wide. A narrower exception should be caught (e.g. NotFound or something like that.)
-        } catch (Exception e) {
-            LOGGER.warn("Failed to get stack. Trying to create it.", e);
-            new StackPostStrategy().doAction(integrationTestContext, entity);
-        }
     }
 
     public static void determineNetworkAwsFromDatalakeStack(IntegrationTestContext integrationTestContext, Entity entity) {

@@ -10,23 +10,23 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.database.DatabaseTestDto;
 
 public class DatabaseCreateAction implements Action<DatabaseTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseCreateAction.class);
 
     @Override
-    public DatabaseTestDto action(TestContext testContext, DatabaseTestDto entity, CloudbreakClient client) throws Exception {
-        logJSON(LOGGER, " Database create request:\n", entity.getRequest());
-        entity.setResponse(
+    public DatabaseTestDto action(TestContext testContext, DatabaseTestDto testDto, CloudbreakClient client) throws Exception {
+        logJSON(LOGGER, " Database create request:\n", testDto.getRequest());
+        testDto.setResponse(
                 client.getCloudbreakClient()
                         .databaseV4Endpoint()
-                        .create(client.getWorkspaceId(), entity.getRequest()));
-        logJSON(LOGGER, " Database created successfully:\n", entity.getResponse());
-        log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
+                        .create(client.getWorkspaceId(), testDto.getRequest()));
+        logJSON(LOGGER, " Database created successfully:\n", testDto.getResponse());
+        log(LOGGER, format(" ID: %s", testDto.getResponse().getId()));
 
-        return entity;
+        return testDto;
     }
 
 }

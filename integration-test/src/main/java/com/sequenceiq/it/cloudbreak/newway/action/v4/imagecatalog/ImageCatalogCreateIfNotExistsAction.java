@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
@@ -15,22 +15,22 @@ public class ImageCatalogCreateIfNotExistsAction implements Action<ImageCatalogT
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogCreateIfNotExistsAction.class);
 
     @Override
-    public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto entity, CloudbreakClient client) {
-        LOGGER.info("Create Imagecatalog with name: {}", entity.getRequest().getName());
+    public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto testDto, CloudbreakClient client) {
+        LOGGER.info("Create Imagecatalog with name: {}", testDto.getRequest().getName());
         try {
-            entity.setResponse(
-                    client.getCloudbreakClient().imageCatalogV4Endpoint().create(client.getWorkspaceId(), entity.getRequest())
+            testDto.setResponse(
+                    client.getCloudbreakClient().imageCatalogV4Endpoint().create(client.getWorkspaceId(), testDto.getRequest())
             );
-            logJSON(LOGGER, "Imagecatalog created successfully: ", entity.getRequest());
+            logJSON(LOGGER, "Imagecatalog created successfully: ", testDto.getRequest());
         } catch (Exception e) {
-            LOGGER.info("Cannot create Imagecatalog, fetch existed one: {}", entity.getRequest().getName());
-            entity.setResponse(
+            LOGGER.info("Cannot create Imagecatalog, fetch existed one: {}", testDto.getRequest().getName());
+            testDto.setResponse(
                     client.getCloudbreakClient().imageCatalogV4Endpoint()
-                            .get(client.getWorkspaceId(), entity.getRequest().getName(), Boolean.FALSE));
+                            .get(client.getWorkspaceId(), testDto.getRequest().getName(), Boolean.FALSE));
         }
-        if (entity.getResponse() == null) {
+        if (testDto.getResponse() == null) {
             throw new IllegalStateException("ImageCatalog could not be created.");
         }
-        return entity;
+        return testDto;
     }
 }

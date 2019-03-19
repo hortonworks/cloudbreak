@@ -6,22 +6,22 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.Environmen
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
 
 public class EnvironmentAttachAction implements Action<EnvironmentTestDto> {
 
     @Override
-    public EnvironmentTestDto action(TestContext testContext, EnvironmentTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
+    public EnvironmentTestDto action(TestContext testContext, EnvironmentTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
         EnvironmentAttachV4Request environmentAttachV4Request = new EnvironmentAttachV4Request();
-        environmentAttachV4Request.setLdaps(entity.getRequest().getLdaps());
-        environmentAttachV4Request.setProxies(entity.getRequest().getProxies());
-        environmentAttachV4Request.setDatabases(entity.getRequest().getDatabases());
+        environmentAttachV4Request.setLdaps(testDto.getRequest().getLdaps());
+        environmentAttachV4Request.setProxies(testDto.getRequest().getProxies());
+        environmentAttachV4Request.setDatabases(testDto.getRequest().getDatabases());
 
-        entity.setResponse(
+        testDto.setResponse(
                 cloudbreakClient.getCloudbreakClient()
                         .environmentV4Endpoint()
-                        .attach(cloudbreakClient.getWorkspaceId(), entity.getName(), environmentAttachV4Request));
-        logJSON("Environment put attach response: ", entity.getResponse());
-        return entity;
+                        .attach(cloudbreakClient.getWorkspaceId(), testDto.getName(), environmentAttachV4Request));
+        logJSON("Environment put attach response: ", testDto.getResponse());
+        return testDto;
     }
 }

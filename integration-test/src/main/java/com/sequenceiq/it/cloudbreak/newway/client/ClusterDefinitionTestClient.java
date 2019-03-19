@@ -8,7 +8,7 @@ import com.sequenceiq.it.cloudbreak.newway.action.v4.clusterdefinition.ClusterDe
 import com.sequenceiq.it.cloudbreak.newway.action.v4.clusterdefinition.ClusterDefinitionListAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.clusterdefinition.ClusterDefinitionCreateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.clusterdefinition.ClusterDefinitionRequestAction;
-import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.clusterdefinition.ClusterDefinitionTestDto;
 
 @Service
 public class ClusterDefinitionTestClient {

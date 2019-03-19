@@ -17,7 +17,7 @@ import com.sequenceiq.it.cloudbreak.newway.action.v4.stack.StackScalePostAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.stack.StackStartAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.stack.StackStopAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.stack.StackSyncAction;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 
 @Service
 public class StackTestClient {
@@ -26,7 +26,7 @@ public class StackTestClient {
         return new StackNodeUnhealthyAction(hostgroup, nodeCount);
     }
 
-    public Action<StackTestDto> scalePostV4() {
+    public StackScalePostAction scalePostV4() {
         return new StackScalePostAction();
     }
 

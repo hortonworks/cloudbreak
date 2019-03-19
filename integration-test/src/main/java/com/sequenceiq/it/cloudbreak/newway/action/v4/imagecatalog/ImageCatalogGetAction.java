@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
 
 public class ImageCatalogGetAction implements Action<ImageCatalogTestDto> {
 
@@ -24,17 +24,17 @@ public class ImageCatalogGetAction implements Action<ImageCatalogTestDto> {
     }
 
     @Override
-    public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
-        LOGGER.info("Get Imagecatalog within workspace by name: {}", entity.getRequest().getName());
+    public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
+        LOGGER.info("Get Imagecatalog within workspace by name: {}", testDto.getRequest().getName());
         try {
-            entity.setResponse(
-                    cloudbreakClient.getCloudbreakClient().imageCatalogV4Endpoint().get(cloudbreakClient.getWorkspaceId(), entity.getName(), withImages)
+            testDto.setResponse(
+                    cloudbreakClient.getCloudbreakClient().imageCatalogV4Endpoint().get(cloudbreakClient.getWorkspaceId(), testDto.getName(), withImages)
             );
-            logJSON(LOGGER, "Imagecatalog has been fetched successfully: ", entity.getRequest());
+            logJSON(LOGGER, "Imagecatalog has been fetched successfully: ", testDto.getRequest());
         } catch (Exception e) {
-            LOGGER.warn("Cannot get Imagecatalog : {}", entity.getRequest().getName());
+            LOGGER.warn("Cannot get Imagecatalog : {}", testDto.getRequest().getName());
             throw e;
         }
-        return entity;
+        return testDto;
     }
 }

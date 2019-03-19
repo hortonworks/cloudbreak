@@ -10,7 +10,6 @@ import org.testng.Assert;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformNetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformNetworksV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.v3.NetworksV3Action;
 
 public class Networks extends Entity {
     private static final String NETWORKS = "NETWORKS";
@@ -61,10 +60,6 @@ public class Networks extends Entity {
 
     public PlatformResourceParameters getRequest() {
         return platformResourceParameters;
-    }
-
-    public static ResourceAction<Networks> post() {
-        return new ResourceAction<>(getTestContext(NETWORKS), NetworksV3Action::getNetworks);
     }
 
     private static Assertion<Networks> assertThis(BiConsumer<Networks, IntegrationTestContext> check) {

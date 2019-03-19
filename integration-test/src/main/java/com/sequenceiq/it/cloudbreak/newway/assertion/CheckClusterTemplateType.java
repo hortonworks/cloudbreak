@@ -6,7 +6,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.Clust
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.clustertemplate.ClusterTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.clustertemplate.ClusterTemplateTestDto;
 
 public class CheckClusterTemplateType implements AssertionV2<ClusterTemplateTestDto> {
 
@@ -17,9 +17,9 @@ public class CheckClusterTemplateType implements AssertionV2<ClusterTemplateTest
     }
 
     @Override
-    public ClusterTemplateTestDto doAssertion(TestContext testContext, ClusterTemplateTestDto entity, CloudbreakClient cloudbreakClient) {
+    public ClusterTemplateTestDto doAssertion(TestContext testContext, ClusterTemplateTestDto testDto, CloudbreakClient cloudbreakClient) {
         ClusterTemplateTestDto clusterTemplate = testContext.get(ClusterTemplateTestDto.class);
-        Optional<ClusterTemplateV4Response> first = entity.getResponses().stream().filter(ct -> ct.getName().equals(clusterTemplate.getName())).findFirst();
+        Optional<ClusterTemplateV4Response> first = testDto.getResponses().stream().filter(ct -> ct.getName().equals(clusterTemplate.getName())).findFirst();
         if (!first.isPresent()) {
             throw new IllegalArgumentException("No element in the result");
         }
@@ -30,6 +30,6 @@ public class CheckClusterTemplateType implements AssertionV2<ClusterTemplateTest
             throw new IllegalArgumentException(String
                     .format("Mismatch type result, %s expected but got %s", expectedType, clusterTemplateV4Response.getType()));
         }
-        return entity;
+        return testDto;
     }
 }

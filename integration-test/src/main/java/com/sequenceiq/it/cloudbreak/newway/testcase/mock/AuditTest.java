@@ -28,21 +28,21 @@ import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.StackTemplateEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.audit.AuditTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.clusterdefinition.ClusterDefinitionTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.clustertemplate.ClusterTemplateTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.kerberos.KerberosTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.kubernetes.KubernetesTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.mpack.MPackTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.recipe.RecipeTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.audit.AuditTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.clusterdefinition.ClusterDefinitionTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.clustertemplate.ClusterTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.database.DatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.kerberos.KerberosTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.kubernetes.KubernetesTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ldap.LdapTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.mpack.MPackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.proxy.ProxyTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.recipe.RecipeTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class AuditTest extends AbstractIntegrationTest {
@@ -187,7 +187,7 @@ public class AuditTest extends AbstractIntegrationTest {
         testContext
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.createV4(), key(clusterTemplateName))
-                .given("stackTemplate", StackTemplateEntity.class)
+                .given("stackTemplate", StackTemplateTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)
                 .given(ClusterTemplateTestDto.class)
                 .withStackTemplate("stackTemplate")

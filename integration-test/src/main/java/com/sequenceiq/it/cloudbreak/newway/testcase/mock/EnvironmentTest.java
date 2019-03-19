@@ -23,16 +23,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Respon
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.client.EnvironmentTestClient;
-import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.assertion.CheckEnvironmentCredential;
 import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.database.DatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ldap.LdapTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.newway.util.EnvironmentTestUtils;
 

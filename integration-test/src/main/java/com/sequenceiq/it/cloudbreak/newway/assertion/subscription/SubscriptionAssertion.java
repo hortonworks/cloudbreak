@@ -4,7 +4,7 @@ import static org.junit.Assert.assertNotNull;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.util.SubscriptionTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.util.SubscriptionTestDto;
 
 public class SubscriptionAssertion {
 

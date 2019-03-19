@@ -9,28 +9,28 @@ import com.sequenceiq.it.cloudbreak.exception.ProxyMethodInvocationException;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
 
 public class CredentialCreateIfNotExistAction implements Action<CredentialTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialCreateIfNotExistAction.class);
 
     @Override
-    public CredentialTestDto action(TestContext testContext, CredentialTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
-        LOGGER.info("Create Credential with name: {}", entity.getRequest().getName());
+    public CredentialTestDto action(TestContext testContext, CredentialTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
+        LOGGER.info("Create Credential with name: {}", testDto.getRequest().getName());
         try {
-            entity.setResponse(
-                    cloudbreakClient.getCloudbreakClient().credentialV4Endpoint().post(cloudbreakClient.getWorkspaceId(), entity.getRequest())
+            testDto.setResponse(
+                    cloudbreakClient.getCloudbreakClient().credentialV4Endpoint().post(cloudbreakClient.getWorkspaceId(), testDto.getRequest())
             );
-            logJSON(LOGGER, "Credential created successfully: ", entity.getRequest());
+            logJSON(LOGGER, "Credential created successfully: ", testDto.getRequest());
         } catch (ProxyMethodInvocationException e) {
-            LOGGER.info("Cannot create Credential, fetch existed one: {}", entity.getRequest().getName());
-            entity.setResponse(
+            LOGGER.info("Cannot create Credential, fetch existed one: {}", testDto.getRequest().getName());
+            testDto.setResponse(
                     cloudbreakClient.getCloudbreakClient().credentialV4Endpoint()
-                            .get(cloudbreakClient.getWorkspaceId(), entity.getRequest().getName()));
+                            .get(cloudbreakClient.getWorkspaceId(), testDto.getRequest().getName()));
         }
-        if (entity.getResponse() == null) {
+        if (testDto.getResponse() == null) {
             throw new IllegalStateException("Credential could not be created.");
         }
-        return entity;    }
+        return testDto;    }
 }

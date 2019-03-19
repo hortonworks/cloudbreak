@@ -17,7 +17,7 @@ import com.sequenceiq.it.cloudbreak.newway.client.ProxyTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.proxy.ProxyTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class ProxyConfigTest extends AbstractIntegrationTest {

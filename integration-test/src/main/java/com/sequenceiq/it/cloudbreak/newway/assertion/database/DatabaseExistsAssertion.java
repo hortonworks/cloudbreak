@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.newway.assertion.database;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
-import com.sequenceiq.it.cloudbreak.newway.entity.database.DatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.database.DatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 public class DatabaseExistsAssertion implements AssertionV2<DatabaseTestDto> {
@@ -21,14 +21,14 @@ public class DatabaseExistsAssertion implements AssertionV2<DatabaseTestDto> {
     }
 
     @Override
-    public DatabaseTestDto doAssertion(TestContext testContext, DatabaseTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
-        boolean countCorrect = entity.getResponses()
+    public DatabaseTestDto doAssertion(TestContext testContext, DatabaseTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
+        boolean countCorrect = testDto.getResponses()
                 .stream()
                 .filter(databaseV4Response -> databaseV4Response.getName().contentEquals(databaseName))
                 .count() == expectedCount;
         if (!countCorrect) {
             throw new IllegalArgumentException("Database count for " + databaseName + " is not as expected!");
         }
-        return entity;
+        return testDto;
     }
 }

@@ -12,20 +12,20 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.Credentia
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
 
 public class CredentialListAction implements Action<CredentialTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialListAction.class);
 
     @Override
-    public CredentialTestDto action(TestContext testContext, CredentialTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
+    public CredentialTestDto action(TestContext testContext, CredentialTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
         Collection<CredentialV4Response> responses = cloudbreakClient.getCloudbreakClient()
                 .credentialV4Endpoint()
                 .list(cloudbreakClient.getWorkspaceId())
                 .getResponses();
-        entity.setResponses(responses.stream().collect(Collectors.toSet()));
-        logJSON(LOGGER, " Credential listed successfully:\n", entity.getResponses());
-        return entity;
+        testDto.setResponses(responses.stream().collect(Collectors.toSet()));
+        logJSON(LOGGER, " Credential listed successfully:\n", testDto.getResponses());
+        return testDto;
     }
 }

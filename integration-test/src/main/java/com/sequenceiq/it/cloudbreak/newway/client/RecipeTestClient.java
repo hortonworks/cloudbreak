@@ -6,7 +6,7 @@ import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.recipe.RecipeCreateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.recipe.RecipeDeleteAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.recipe.RecipeGetAction;
-import com.sequenceiq.it.cloudbreak.newway.entity.recipe.RecipeTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.recipe.RecipeTestDto;
 
 @Service
 public class RecipeTestClient {

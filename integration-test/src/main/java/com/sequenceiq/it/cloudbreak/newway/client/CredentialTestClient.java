@@ -9,7 +9,7 @@ import com.sequenceiq.it.cloudbreak.newway.action.v4.credential.CredentialDelete
 import com.sequenceiq.it.cloudbreak.newway.action.v4.credential.CredentialGetAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.credential.CredentialListAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.credential.CredentialModifyAction;
-import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
 
 @Service
 public class CredentialTestClient {

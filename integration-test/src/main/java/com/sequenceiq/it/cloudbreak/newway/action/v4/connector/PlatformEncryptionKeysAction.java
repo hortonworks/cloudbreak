@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.connector.PlatformEncryptionKeysTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.connector.PlatformEncryptionKeysTestDto;
 
 public class PlatformEncryptionKeysAction implements Action<PlatformEncryptionKeysTestDto> {
 
@@ -14,19 +14,19 @@ public class PlatformEncryptionKeysAction implements Action<PlatformEncryptionKe
 
     @Override
     public PlatformEncryptionKeysTestDto action(TestContext testContext,
-                                                PlatformEncryptionKeysTestDto entity,
+                                                PlatformEncryptionKeysTestDto testDto,
                                                 CloudbreakClient cloudbreakClient) throws Exception {
         String logInitMessage = "Obtaining encryption keys by credential";
         LOGGER.info("{}", logInitMessage);
-        entity.setResponse(
+        testDto.setResponse(
                 cloudbreakClient.getCloudbreakClient().connectorV4Endpoint().getEncryptionKeys(
                         cloudbreakClient.getWorkspaceId(),
-                        entity.getCredentialName(),
-                        entity.getRegion(),
-                        entity.getPlatformVariant(),
-                        entity.getAvailabilityZone())
+                        testDto.getCredentialName(),
+                        testDto.getRegion(),
+                        testDto.getPlatformVariant(),
+                        testDto.getAvailabilityZone())
         );
         LOGGER.info("{} was successful", logInitMessage);
-        return entity;
+        return testDto;
     }
 }

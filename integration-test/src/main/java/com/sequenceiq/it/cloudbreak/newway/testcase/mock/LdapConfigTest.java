@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 import com.sequenceiq.it.cloudbreak.newway.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.ldap.LdapTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class LdapConfigTest extends AbstractIntegrationTest {

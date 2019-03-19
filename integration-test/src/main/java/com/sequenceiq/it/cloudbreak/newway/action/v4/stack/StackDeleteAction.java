@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 
 public class StackDeleteAction implements Action<StackTestDto> {
 
@@ -19,14 +19,14 @@ public class StackDeleteAction implements Action<StackTestDto> {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackDeleteAction.class);
 
     @Override
-    public StackTestDto action(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
-        log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
-        logJSON(LOGGER, " Stack delete request:\n", entity.getRequest());
+    public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
+        log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
+        logJSON(LOGGER, " Stack delete request:\n", testDto.getRequest());
         client.getCloudbreakClient()
                 .stackV4Endpoint()
-                .delete(client.getWorkspaceId(), entity.getName(), false, false);
-        logJSON(LOGGER, " Stack deletion was successful:\n", entity.getResponse());
-        log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
-        return entity;
+                .delete(client.getWorkspaceId(), testDto.getName(), false, false);
+        logJSON(LOGGER, " Stack deletion was successful:\n", testDto.getResponse());
+        log(LOGGER, format(" ID: %s", testDto.getResponse().getId()));
+        return testDto;
     }
 }

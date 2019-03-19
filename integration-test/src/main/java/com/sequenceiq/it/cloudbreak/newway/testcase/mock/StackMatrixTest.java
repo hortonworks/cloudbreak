@@ -13,7 +13,7 @@ import com.sequenceiq.it.cloudbreak.newway.client.UtilTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.util.StackMatrixTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.util.StackMatrixTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public class StackMatrixTest extends AbstractIntegrationTest {

@@ -10,23 +10,23 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
 
 public class ImageCatalogCreateWithoutNameLoggingAction implements Action<ImageCatalogTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogCreateWithoutNameLoggingAction.class);
 
     @Override
-    public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto entity, CloudbreakClient client) throws Exception {
-        logJSON(LOGGER, format(" Image catalog post request:%n"), entity.getRequest());
-        entity.setResponse(
+    public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto testDto, CloudbreakClient client) throws Exception {
+        logJSON(LOGGER, format(" Image catalog post request:%n"), testDto.getRequest());
+        testDto.setResponse(
                 client.getCloudbreakClient()
                         .imageCatalogV4Endpoint()
-                        .create(client.getWorkspaceId(), entity.getRequest()));
-        logJSON(LOGGER, format(" Image catalog created  successfully:%n"), entity.getResponse());
-        log(LOGGER, format(" ID: %s", entity.getResponse().getId()));
+                        .create(client.getWorkspaceId(), testDto.getRequest()));
+        logJSON(LOGGER, format(" Image catalog created  successfully:%n"), testDto.getResponse());
+        log(LOGGER, format(" ID: %s", testDto.getResponse().getId()));
 
-        return entity;
+        return testDto;
     }
 
 }

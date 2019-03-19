@@ -6,25 +6,25 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.connector.PlatformRegionTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.connector.PlatformRegionTestDto;
 
 public class PlatformRegionsAction implements Action<PlatformRegionTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PlatformRegionsAction.class);
 
     @Override
-    public PlatformRegionTestDto action(TestContext testContext, PlatformRegionTestDto entity, CloudbreakClient cloudbreakClient) throws Exception {
+    public PlatformRegionTestDto action(TestContext testContext, PlatformRegionTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
         String logInitMessage = "Obtaining regions by credential";
         LOGGER.info("{}", logInitMessage);
-        entity.setResponse(
+        testDto.setResponse(
                 cloudbreakClient.getCloudbreakClient().connectorV4Endpoint().getRegionsByCredential(
                         cloudbreakClient.getWorkspaceId(),
-                        entity.getCredentialName(),
-                        entity.getRegion(),
-                        entity.getPlatformVariant(),
-                        entity.getAvailabilityZone())
+                        testDto.getCredentialName(),
+                        testDto.getRegion(),
+                        testDto.getPlatformVariant(),
+                        testDto.getAvailabilityZone())
         );
         LOGGER.info("{} was successful", logInitMessage);
-        return entity;
+        return testDto;
     }
 }

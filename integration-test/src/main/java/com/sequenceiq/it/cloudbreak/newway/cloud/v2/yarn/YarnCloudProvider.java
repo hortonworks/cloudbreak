@@ -7,19 +7,19 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.yarn.Yar
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.YarnNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.YarnInstanceTemplateV4Parameters;
-import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ImageSettingsTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters;
-import com.sequenceiq.it.cloudbreak.newway.entity.ClusterEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.InstanceTemplateV4Entity;
-import com.sequenceiq.it.cloudbreak.newway.entity.NetworkV2Entity;
-import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.StackAuthenticationEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.StackV4EntityBase;
-import com.sequenceiq.it.cloudbreak.newway.entity.VolumeV4Entity;
-import com.sequenceiq.it.cloudbreak.newway.entity.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.InstanceTemplateV4TestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.NetworkV2TestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.PlacementSettingsTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.StackAuthenticationTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDtoBase;
+import com.sequenceiq.it.cloudbreak.newway.dto.VolumeV4TestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
 
 @Component
 public class YarnCloudProvider extends AbstractCloudProvider {
@@ -44,7 +44,7 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public PlacementSettingsEntity placement(PlacementSettingsEntity placement) {
+    public PlacementSettingsTestDto placement(PlacementSettingsTestDto placement) {
         return placement.withRegion(region());
     }
 
@@ -58,17 +58,17 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public InstanceTemplateV4Entity template(InstanceTemplateV4Entity template) {
+    public InstanceTemplateV4TestDto template(InstanceTemplateV4TestDto template) {
         return template.withYarn(instanceParameters());
     }
 
     @Override
-    public StackV4EntityBase stack(StackV4EntityBase stack) {
+    public StackTestDtoBase stack(StackTestDtoBase stack) {
         return stack.withYarn(stackParameters());
     }
 
     @Override
-    public ClusterEntity cluster(ClusterEntity cluster) {
+    public ClusterTestDto cluster(ClusterTestDto cluster) {
         return cluster
                 .withValidateClusterDefinition(Boolean.FALSE)
                 .withClusterDefinitionName(getClusterDefinitionName());
@@ -82,13 +82,13 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public VolumeV4Entity attachedVolume(VolumeV4Entity volume) {
+    public VolumeV4TestDto attachedVolume(VolumeV4TestDto volume) {
         return volume.withSize(Integer.parseInt(getTestParameter().getWithDefault(YarnParameters.Instance.VOLUME_SIZE, YarnParameters.DEFAULT_VOLUME_SIZE)))
                 .withCount(Integer.parseInt(getTestParameter().getWithDefault(YarnParameters.Instance.VOLUME_COUNT, YarnParameters.DEFAULT_VOLUME_COUNT)));
     }
 
     @Override
-    public NetworkV2Entity network(NetworkV2Entity network) {
+    public NetworkV2TestDto network(NetworkV2TestDto network) {
         return network.withYarn(networkParameters()).withSubnetCIDR(getSubnetCIDR());
     }
 
@@ -99,9 +99,9 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public ImageSettingsEntity imageSettings(ImageSettingsEntity imageSettings) {
+    public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
         return imageSettings.withImageId(getTestParameter().getWithDefault(YarnParameters.Image.ID, YarnParameters.DEFAULT_IMAGE_ID))
-                .withImageCatalog(imageSettings.getTestContext().given(ImageSettingsEntity.class).getName());
+                .withImageCatalog(imageSettings.getTestContext().given(ImageSettingsTestDto.class).getName());
     }
 
     @Override
@@ -110,7 +110,7 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public StackAuthenticationEntity stackAuthentication(StackAuthenticationEntity stackAuthenticationEntity) {
+    public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
         String sshPublicKey = getTestParameter().getWithDefault(CommonCloudParameters.SSH_PUBLIC_KEY, CommonCloudParameters.DEFAULT_SSH_PUBLIC_KEY);
         return stackAuthenticationEntity.withPublicKey(sshPublicKey);
     }

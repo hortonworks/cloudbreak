@@ -11,23 +11,23 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.entity.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 
 public class StackGetAction implements Action<StackTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackGetAction.class);
 
     @Override
-    public StackTestDto action(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
-        log(LOGGER, " Name: " + entity.getRequest().getName());
-        logJSON(LOGGER, " Stack get request:\n", entity.getRequest());
-        entity.setResponse(
+    public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
+        log(LOGGER, " Name: " + testDto.getRequest().getName());
+        logJSON(LOGGER, " Stack get request:\n", testDto.getRequest());
+        testDto.setResponse(
                 client.getCloudbreakClient()
                         .stackV4Endpoint()
-                        .get(client.getWorkspaceId(), entity.getName(), new HashSet<>()));
-        logJSON(LOGGER, " Stack get was successfully:\n", entity.getResponse());
-        log(LOGGER, " ID: " + entity.getResponse().getId());
+                        .get(client.getWorkspaceId(), testDto.getName(), new HashSet<>()));
+        logJSON(LOGGER, " Stack get was successfully:\n", testDto.getResponse());
+        log(LOGGER, " ID: " + testDto.getResponse().getId());
 
-        return entity;
+        return testDto;
     }
 }

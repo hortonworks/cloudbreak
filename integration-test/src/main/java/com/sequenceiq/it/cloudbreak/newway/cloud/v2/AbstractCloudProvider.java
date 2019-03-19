@@ -4,12 +4,12 @@ import java.util.Collections;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.it.cloudbreak.newway.entity.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.newway.ImageSettingsEntity;
+import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-import com.sequenceiq.it.cloudbreak.newway.entity.PlacementSettingsEntity;
-import com.sequenceiq.it.cloudbreak.newway.entity.StackV4EntityBase;
-import com.sequenceiq.it.cloudbreak.newway.entity.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.PlacementSettingsTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDtoBase;
+import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
 
 public abstract class AbstractCloudProvider implements CloudProvider {
 
@@ -30,7 +30,7 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     }
 
     @Override
-    public ImageSettingsEntity imageSettings(ImageSettingsEntity imageSettings) {
+    public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
         imageSettings.withImageCatalog(CLOUDBREAK_DEFAULT);
         return imageSettings;
     }
@@ -42,7 +42,7 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     }
 
     @Override
-    public PlacementSettingsEntity placement(PlacementSettingsEntity placement) {
+    public PlacementSettingsTestDto placement(PlacementSettingsTestDto placement) {
         return placement.withRegion(region())
                 .withAvailabilityZone(availabilityZone());
     }
@@ -54,7 +54,7 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     }
 
     @Override
-    public Integer gatewayPort(StackV4EntityBase stackEntity) {
+    public Integer gatewayPort(StackTestDtoBase stackEntity) {
         String gatewayPort = getTestParameter().getWithDefault(CommonCloudParameters.GATEWAY_PORT, null);
         if (gatewayPort == null) {
             return null;

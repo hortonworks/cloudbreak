@@ -6,7 +6,7 @@ import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.ClusterTemplateUtil;
-import com.sequenceiq.it.cloudbreak.newway.ClusterTemplateV4Entity;
+import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.newway.Entity;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
@@ -16,7 +16,7 @@ public class ClusterTemplateV4Action {
     }
 
     public static void post(IntegrationTestContext integrationTestContext, Entity entity) {
-        ClusterTemplateV4Entity clusterTemplateV4Entity = (ClusterTemplateV4Entity) entity;
+        ClusterTemplateV4TestDto clusterTemplateV4Entity = (ClusterTemplateV4TestDto) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
@@ -31,7 +31,7 @@ public class ClusterTemplateV4Action {
     }
 
     public static void get(IntegrationTestContext integrationTestContext, Entity entity) throws IOException {
-        ClusterTemplateV4Entity clusterTemplateV4Entity = (ClusterTemplateV4Entity) entity;
+        ClusterTemplateV4TestDto clusterTemplateV4Entity = (ClusterTemplateV4TestDto) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
@@ -46,7 +46,7 @@ public class ClusterTemplateV4Action {
     }
 
     public static void getAll(IntegrationTestContext integrationTestContext, Entity entity) {
-        ClusterTemplateV4Entity clusterTemplateV4Entity = (ClusterTemplateV4Entity) entity;
+        ClusterTemplateV4TestDto clusterTemplateV4Entity = (ClusterTemplateV4TestDto) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
@@ -59,7 +59,7 @@ public class ClusterTemplateV4Action {
     }
 
     public static void delete(IntegrationTestContext integrationTestContext, Entity entity) {
-        ClusterTemplateV4Entity clusterTemplateV4Entity = (ClusterTemplateV4Entity) entity;
+        ClusterTemplateV4TestDto clusterTemplateV4Entity = (ClusterTemplateV4TestDto) entity;
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class);
