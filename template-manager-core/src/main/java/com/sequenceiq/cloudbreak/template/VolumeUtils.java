@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.clusterdefinition;
+package com.sequenceiq.cloudbreak.template;
 
 public final class VolumeUtils {
 

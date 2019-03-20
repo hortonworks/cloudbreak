@@ -19,7 +19,6 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.sequenceiq.cloudbreak.clusterdefinition.VolumeUtils;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -29,6 +28,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConstraint.Builder;
 import com.sequenceiq.cloudbreak.orchestrator.model.port.TcpPortBinding;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.template.VolumeUtils;
 
 @Component
 public class ContainerConstraintFactory {

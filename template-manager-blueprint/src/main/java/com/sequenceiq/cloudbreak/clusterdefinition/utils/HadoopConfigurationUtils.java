@@ -4,9 +4,9 @@ import java.util.Collection;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.clusterdefinition.ConfigProperty;
-import com.sequenceiq.cloudbreak.clusterdefinition.VolumeUtils;
 import com.sequenceiq.cloudbreak.template.ClusterDefinitionProcessingException;
+import com.sequenceiq.cloudbreak.template.VolumeUtils;
+import com.sequenceiq.cloudbreak.template.model.ConfigProperty;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component

@@ -66,22 +66,41 @@ public class CmTemplateProcessor implements ClusterDefinitionTextProcessor {
         }
     }
 
-    public void addServiceConfigs(String serviceType, String roleType, List<ApiClusterTemplateConfig> configs) {
+    public void addServiceConfigs(String serviceType, List<String> roleTypes, List<ApiClusterTemplateConfig> configs) {
         getServiceByType(serviceType).ifPresent(service -> configs.forEach(service::addServiceConfigsItem));
     }
 
-    public boolean isRoleTypePresentInService(String serviceType, String roleType) {
-        return getServiceByType(serviceType).filter(acts -> isRoleTypePresent(acts, roleType)).isPresent();
-
+    public void addRoleConfigs(String serviceType, Map<String, List<ApiClusterTemplateConfig>> newConfigMap) {
+        Optional<ApiClusterTemplateService> serviceOpt = getServiceByType(serviceType);
+        if (serviceOpt.isPresent()) {
+            ApiClusterTemplateService service = serviceOpt.get();
+            newConfigMap.forEach((configRef, newConfigs) -> service.getRoleConfigGroups().stream().filter(rcg -> rcg.getRefName().equals(configRef))
+                    .findFirst().ifPresent(group -> addOrOverrideConfigs(group, newConfigs)));
+        }
     }
 
-    private boolean isRoleTypePresent(ApiClusterTemplateService apiClusterTemplateService, String roleType) {
-        for (ApiClusterTemplateRoleConfigGroup rcg : apiClusterTemplateService.getRoleConfigGroups()) {
-            if (roleType.equalsIgnoreCase(rcg.getRoleType())) {
-                return true;
+    private void addOrOverrideConfigs(ApiClusterTemplateRoleConfigGroup configGroup, List<ApiClusterTemplateConfig> newConfigs) {
+        for (ApiClusterTemplateConfig newConfig : newConfigs) {
+            List<ApiClusterTemplateConfig> preDefinedConfigs = Optional.ofNullable(configGroup.getConfigs()).orElse(new ArrayList<>());
+            Optional<ApiClusterTemplateConfig> existingConfOpt = preDefinedConfigs.stream().filter(pc -> pc.getName().equals(newConfig.getName())).findFirst();
+            if (existingConfOpt.isPresent()) {
+                ApiClusterTemplateConfig existingConf = existingConfOpt.get();
+                existingConf.setName(newConfig.getName());
+                existingConf.setVariable(newConfig.getVariable());
+                existingConf.setValue(newConfig.getValue());
+            } else {
+                configGroup.addConfigsItem(newConfig);
             }
         }
-        return false;
+    }
+
+    public boolean isRoleTypePresentInService(String serviceType, List<String> roleTypes) {
+        return getServiceByType(serviceType).filter(acts -> isAnyRoleTypePresent(acts, roleTypes)).isPresent();
+    }
+
+    private boolean isAnyRoleTypePresent(ApiClusterTemplateService apiClusterTemplateService, List<String> roleTypes) {
+        return apiClusterTemplateService.getRoleConfigGroups().stream()
+                .anyMatch(rcg -> roleTypes.stream().anyMatch(roleType -> roleType.equalsIgnoreCase(rcg.getRoleType())));
     }
 
     private Optional<ApiClusterTemplateService> getServiceByType(String serviceType) {

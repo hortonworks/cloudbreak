@@ -1,6 +1,8 @@
-package com.sequenceiq.cloudbreak.clusterdefinition;
+package com.sequenceiq.cloudbreak.template;
 
 import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.template.model.ConfigProperty;
 
 @Service
 public class VolumeConfigProvider {

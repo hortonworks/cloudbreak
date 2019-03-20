@@ -19,8 +19,8 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sequenceiq.cloudbreak.clusterdefinition.ConfigProperty;
 import com.sequenceiq.cloudbreak.clusterdefinition.ServiceConfig;
+import com.sequenceiq.cloudbreak.template.model.ConfigProperty;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;

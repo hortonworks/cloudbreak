@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,7 +32,7 @@ public class HiveMetastoreConfigProvider implements CmTemplateComponentConfigPro
     }
 
     @Override
-    public List<ApiClusterTemplateVariable> getVariables(TemplatePreparationObject source) {
+    public List<ApiClusterTemplateVariable> getServiceConfigVariables(TemplatePreparationObject source) {
         List<ApiClusterTemplateVariable> result = new ArrayList<>();
         RdsView hiveView = new RdsView(getFirstRDSConfigOptional(source).get());
         result.add(new ApiClusterTemplateVariable().name("hive-hive_metastore_database_host").value(hiveView.getHost()));
@@ -49,13 +50,13 @@ public class HiveMetastoreConfigProvider implements CmTemplateComponentConfigPro
     }
 
     @Override
-    public String getRoleType() {
-        return "HIVEMETASTORE";
+    public List<String> getRoleTypes() {
+        return Collections.singletonList("HIVEMETASTORE");
     }
 
     @Override
-    public boolean specialCondition(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        return getFirstRDSConfigOptional(source).isPresent() && cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleType());
+    public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
+        return getFirstRDSConfigOptional(source).isPresent() && cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes());
     }
 
     private Optional<RDSConfig> getFirstRDSConfigOptional(TemplatePreparationObject source) {
