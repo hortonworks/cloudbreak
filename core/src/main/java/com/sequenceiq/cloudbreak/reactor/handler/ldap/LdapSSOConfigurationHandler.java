@@ -7,8 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
-import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
@@ -35,9 +33,6 @@ public class LdapSSOConfigurationHandler implements ReactorEventHandler<LdapSSOC
     private EventBus eventBus;
 
     @Inject
-    private ClusterComponentConfigProvider clusterComponentConfigProvider;
-
-    @Inject
     private ClusterApiConnectors clusterApiConnectors;
 
     @Inject
@@ -54,14 +49,8 @@ public class LdapSSOConfigurationHandler implements ReactorEventHandler<LdapSSOC
         Selectable response;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-            AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(stack.getCluster().getId());
-            if (ambariRepo != null) {
-                GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-                clusterApiConnectors.getConnector(stack)
-                        .clusterSecurityService().setupLdapAndSSO(ambariRepo, primaryGatewayConfig.getPublicAddress());
-            } else {
-                LOGGER.debug("Can not setup LDAP and SSO on API, because Ambari repo is not found");
-            }
+            GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+            clusterApiConnectors.getConnector(stack).clusterSecurityService().setupLdapAndSSO(primaryGatewayConfig.getPublicAddress());
             response = new LdapSSOConfigurationSuccess(stackId);
         } catch (Exception e) {
             LOGGER.info("Error during LDAP configuration, stackId: " + stackId, e);

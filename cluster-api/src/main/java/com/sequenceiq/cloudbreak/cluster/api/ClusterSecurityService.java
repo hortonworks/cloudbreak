@@ -15,7 +15,7 @@ public interface ClusterSecurityService {
 
     void changeOriginalCredentialsAndCreateCloudbreakUser() throws CloudbreakException;
 
-    void setupLdapAndSSO(AmbariRepo ambariRepo, String primaryGatewayPublicAddress);
+    void setupLdapAndSSO(String primaryGatewayPublicAddress) throws CloudbreakException;
 
     boolean isLdapAndSSOReady(AmbariRepo ambariRepo);
 
