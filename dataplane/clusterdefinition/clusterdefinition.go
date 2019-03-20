@@ -192,7 +192,11 @@ func convertResponseWithContentAndIDToClusterDefinition(bp *model.ClusterDefinit
 		clusterDefinitionsNode := blueprints.(map[string]interface{})
 		stackName = clusterDefinitionsNode["stack_name"].(string)
 		stackVersion = clusterDefinitionsNode["stack_version"].(string)
+	} else if cdhVersion, ok := jsonRoot["cdhVersion"]; ok {
+		stackName = "CDH"
+		stackVersion = cdhVersion.(string)
 	}
+
 	return &clusterDefinitionOutJsonDescribe{
 		clusterDefinitionOut: &clusterDefinitionOut{
 			Name:           *bp.Name,
