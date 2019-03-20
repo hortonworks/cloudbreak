@@ -13,7 +13,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
-import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.stack.StackScalePostAction;
 import com.sequenceiq.it.cloudbreak.newway.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
@@ -31,10 +30,17 @@ public class YarnSmokeTest extends AbstractE2ETest {
 
     private static final String INSTANCE_GROUP_ID = "ig";
 
-    private static final String RECIPE_CONTENT = Base64.encodeBase64String("#!/bin/bash\necho TESZTELEK".getBytes());
+    private static final String POST_CLUSTER_INSTALL_RECIPE_CONTENT = Base64
+            .encodeBase64String("#!/bin/bash\ntouch /post-install\necho \"Hello Pre-Install\" >> /pre-install".getBytes());
 
-    @Inject
-    private RandomNameCreator randomNameCreator;
+    private static final String PRE_AMBARI_START_RECIPE_CONTENT = Base64
+            .encodeBase64String("#!/bin/bash\ntouch /post-install\necho \"Hello Pre-Ambari\" >> /pre-ambari".getBytes());
+
+    private static final String POST_AMBARI_STAR_RECIPE_CONTENT = Base64
+            .encodeBase64String("#!/bin/bash\ntouch /post-install\necho \"Hello Post-Ambari\" >> /post-ambari".getBytes());
+
+    private static final String PRE_TERMINATION_RECIPE_CONTENT = Base64
+            .encodeBase64String("#!/bin/bash\ntouch /post-install\necho \"Hello Pre-Termination\" >> /pre-termination".getBytes());
 
     @Inject
     private StackTestClient stackTestClient;
@@ -48,7 +54,7 @@ public class YarnSmokeTest extends AbstractE2ETest {
         minimalSetupForClusterCreation(testContext);
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT, enabled = false, description = "Gatekeeper only")
     @Description(
             given = "a valid YARN cluster",
             when = "checking the generated Cluster Definition",
@@ -103,12 +109,23 @@ public class YarnSmokeTest extends AbstractE2ETest {
             then = "the pre-termination highstate has to be called"
     )
     public void testWhenCreatedYARNClusterShouldPreTerminationRecipePresent(TestContext testContext) {
-        String recipeName = randomNameCreator.getRandomNameForResource();
+        String postClusterInstallRecipeName = getNameGenerator().getRandomNameForResource();
+        String preAmbariStartRecipeName = getNameGenerator().getRandomNameForResource();
+        String postAmbariStartRecipeName = getNameGenerator().getRandomNameForResource();
+        String preTerminationRecipeName = getNameGenerator().getRandomNameForResource();
+        String[] recipeNames = new String[]{postClusterInstallRecipeName, preAmbariStartRecipeName, postAmbariStartRecipeName, preTerminationRecipeName};
+
         testContext.given(RecipeTestDto.class)
-                .withName(recipeName).withContent(RECIPE_CONTENT).withRecipeType(PRE_TERMINATION)
+                .withName(postClusterInstallRecipeName).withContent(POST_CLUSTER_INSTALL_RECIPE_CONTENT).withRecipeType(POST_CLUSTER_INSTALL)
+                .when(recipeTestClient.createV4())
+                .withName(preAmbariStartRecipeName).withContent(PRE_AMBARI_START_RECIPE_CONTENT).withRecipeType(PRE_AMBARI_START)
+                .when(recipeTestClient.createV4())
+                .withName(postAmbariStartRecipeName).withContent(POST_AMBARI_STAR_RECIPE_CONTENT).withRecipeType(POST_AMBARI_START)
+                .when(recipeTestClient.createV4())
+                .withName(preTerminationRecipeName).withContent(PRE_TERMINATION_RECIPE_CONTENT).withRecipeType(PRE_TERMINATION)
                 .when(recipeTestClient.createV4())
                 .given(INSTANCE_GROUP_ID, InstanceGroupTestDto.class)
-                .withHostGroup(WORKER).withNodeCount(NODE_COUNT).withRecipes(recipeName)
+                .withHostGroup(WORKER).withNodeCount(NODE_COUNT).withRecipes(recipeNames)
                 .given(StackTestDto.class)
                 .replaceInstanceGroups(INSTANCE_GROUP_ID)
                 .when(stackTestClient.createV4())
@@ -125,12 +142,21 @@ public class YarnSmokeTest extends AbstractE2ETest {
             then = "the cluster should be available and scaled up successfully"
     )
     public void testWhenCreatedYARNClusterShouldBeUpScaledAlongWithAllTheRecipes(TestContext testContext) {
+        String postClusterInstallRecipeName = getNameGenerator().getRandomNameForResource();
+        String preAmbariStartRecipeName = getNameGenerator().getRandomNameForResource();
+        String postAmbariStartRecipeName = getNameGenerator().getRandomNameForResource();
+        String preTerminationRecipeName = getNameGenerator().getRandomNameForResource();
+        String[] recipeNames = new String[]{postClusterInstallRecipeName, preAmbariStartRecipeName, postAmbariStartRecipeName, preTerminationRecipeName};
+
         testContext.given(RecipeTestDto.class)
-                .withContent(RECIPE_CONTENT).withRecipeType(POST_CLUSTER_INSTALL).withRecipeType(PRE_AMBARI_START).withRecipeType(POST_AMBARI_START)
+                .withName(postClusterInstallRecipeName).withContent(POST_CLUSTER_INSTALL_RECIPE_CONTENT).withRecipeType(POST_CLUSTER_INSTALL)
+                .withName(preAmbariStartRecipeName).withContent(PRE_AMBARI_START_RECIPE_CONTENT).withRecipeType(PRE_AMBARI_START)
+                .withName(postAmbariStartRecipeName).withContent(POST_AMBARI_STAR_RECIPE_CONTENT).withRecipeType(POST_AMBARI_START)
+                .withName(preTerminationRecipeName).withContent(PRE_TERMINATION_RECIPE_CONTENT).withRecipeType(PRE_TERMINATION)
                 .withRecipeType(PRE_TERMINATION)
                 .when(recipeTestClient.createV4())
                 .given(INSTANCE_GROUP_ID, InstanceGroupTestDto.class)
-                .withHostGroup(WORKER).withNodeCount(NODE_COUNT)
+                .withHostGroup(WORKER).withNodeCount(NODE_COUNT).withRecipes(recipeNames)
                 .given(StackTestDto.class)
                 .replaceInstanceGroups(INSTANCE_GROUP_ID)
                 .when(stackTestClient.createV4())
