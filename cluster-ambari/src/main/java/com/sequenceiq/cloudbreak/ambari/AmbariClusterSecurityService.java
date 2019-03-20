@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSecurityService;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterConnectorPollingResultChecker;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -78,6 +79,9 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
 
     @Inject
     private AmbariRepositoryVersionService ambariRepositoryVersionService;
+
+    @Inject
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     private AmbariClient ambariClient;
 
@@ -201,8 +205,9 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
     }
 
     @Override
-    public void setupLdapAndSSO(AmbariRepo ambariRepo, String primaryGatewayPublicAddress) {
-        if (ambariRepositoryVersionService.setupLdapAndSsoOnApi(ambariRepo)) {
+    public void setupLdapAndSSO(String primaryGatewayPublicAddress) {
+        AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(stack.getCluster().getId());
+        if (ambariRepo != null && ambariRepositoryVersionService.setupLdapAndSsoOnApi(ambariRepo)) {
             LOGGER.debug("Setup LDAP and SSO on API");
             try {
                 ambariLdapService.setupLdap(stack, stack.getCluster(), ambariRepo, ambariClient);
@@ -212,7 +217,7 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
                 throw new RuntimeException(e);
             }
         } else {
-            LOGGER.debug("Can not setup LDAP and SSO on API, Ambari too old");
+            LOGGER.debug("Can not setup LDAP and SSO on API, Ambari too old or because Ambari repo is not found");
         }
     }
 

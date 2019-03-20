@@ -40,6 +40,9 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     @Inject
     private ClouderaManagerKerberosService kerberosService;
 
+    @Inject
+    private ClouderaManagerLdapService ldapService;
+
     private final Stack stack;
 
     private final HttpClientConfig clientConfig;
@@ -139,8 +142,12 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     }
 
     @Override
-    public void setupLdapAndSSO(AmbariRepo ambariRepo, String primaryGatewayPublicAddress) {
-
+    public void setupLdapAndSSO(String primaryGatewayPublicAddress) throws CloudbreakException {
+        try {
+            ldapService.setupLdap(clouderaManagerClientFactory.getClient(stack, stack.getCluster(), clientConfig), stack, stack.getCluster());
+        } catch (ApiException apiException) {
+            throw new CloudbreakException(apiException);
+        }
     }
 
     @Override
