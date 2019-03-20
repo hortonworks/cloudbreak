@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.clusterdefinition;
+package com.sequenceiq.cloudbreak.template.model;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;

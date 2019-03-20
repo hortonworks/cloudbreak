@@ -14,11 +14,13 @@ public class CmTemplateComponentConfigProcessor {
     @Inject
     private List<CmTemplateComponentConfigProvider> cmTemplateComponentConfigProviderList;
 
-    public CmTemplateProcessor process(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
+    public CmTemplateProcessor process(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject template) {
         for (CmTemplateComponentConfigProvider provider : cmTemplateComponentConfigProviderList) {
-            if (provider.specialCondition(cmTemplateProcessor, source)) {
-                cmTemplateProcessor.addServiceConfigs(provider.getServiceType(), provider.getRoleType(), provider.getServiceConfigs(source));
-                cmTemplateProcessor.addVariables(provider.getVariables(source));
+            if (provider.isConfigurationNeeded(cmTemplateProcessor, template)) {
+                cmTemplateProcessor.addServiceConfigs(provider.getServiceType(), provider.getRoleTypes(), provider.getServiceConfigs(template));
+                cmTemplateProcessor.addVariables(provider.getServiceConfigVariables(template));
+                cmTemplateProcessor.addRoleConfigs(provider.getServiceType(), provider.getRoleConfigs(cmTemplateProcessor, template));
+                cmTemplateProcessor.addVariables(provider.getRoleConfigVariables(cmTemplateProcessor, template));
             }
         }
         return cmTemplateProcessor;

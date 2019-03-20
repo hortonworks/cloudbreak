@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.clusterdefinition.utils.ConfigUtils;
 import com.sequenceiq.cloudbreak.clusterdefinition.utils.HadoopConfigurationUtils;
+import com.sequenceiq.cloudbreak.template.model.ConfigProperty;
 import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.clusterdefinition;
+package com.sequenceiq.cloudbreak.template;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -7,6 +7,8 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import com.sequenceiq.cloudbreak.template.model.ConfigProperty;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VolumeConfigProviderTest {
