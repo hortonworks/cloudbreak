@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.client.ApiClient;
-import com.cloudera.api.swagger.client.Configuration;
 import com.sequenceiq.cloudbreak.client.CertificateTrustManager;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.KeyStoreUtil;
@@ -22,7 +21,7 @@ public class ClouderaManagerClientProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerClientProvider.class);
 
     public ApiClient getClouderaManagerClient(HttpClientConfig clientConfig, Integer port, String userName, String password) {
-        ApiClient cmClient = Configuration.getDefaultApiClient();
+        ApiClient cmClient = new ApiClient();
         if (port != null) {
             cmClient.setBasePath("https://" + clientConfig.getApiAddress() + ':' + port + API_V_30);
         } else {
