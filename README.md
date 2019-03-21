@@ -16,13 +16,6 @@ As a prerequisite you need to have Java 10 installed. You can get it from [here]
 
 You'll need Docker. For Mac, use [Docker for mac](https://docs.docker.com/docker-for-mac/install/).
 
-## Obtaining the Docker Bridge Address (Linux Only)
-
-The Docker bridge can be found by listing the networks docker is aware of and inspecting the docker default, which for me is "bridge."
-You can find that by running `docker inspect bridge` and looking under the section "Gateway." It's possible that your setup is 
-different and "bridge" may not be the docker network that is being used in your setup. At this point, I would look at your Linux's
-network devices and verify.
-
 ## Cloudbreak Deployer
 
 The simplest way to setup the working environment to be able to start Cloudbreak on your local machine is to use the [Cloudbreak Deployer](https://github.com/hortonworks/cloudbreak-deployer).
@@ -88,16 +81,14 @@ If everything went well then Cloudbreak will be available on http://localhost. F
 
 The deployer has generated a `certs` directory under `cbd-local` directory which will be needed later on to set up IDEA properly.
 
-### Linux differences and obtaining the docker bridge address
+### Linux difference
 
-The profile section needs two extra configuration options:
+cbd is unable to determine the IP address on a Linux machine. Therefore, you must add in the public IP address manually to your Profile.
 
 ```
 export PUBLIC_IP=127.0.0.1
-export CB_LOCAL_DEV_BIND_ADDR=<DOCKER_BRIDGE_ADDRESS>
 ```
 
-As cbd is unable to determine these automatically. Please refer to the section above for determining the docker bridge address.
 
 ## IDEA
 
@@ -135,11 +126,12 @@ IntelliJ IDEA -> Preferences -> Editor -> Inspections -> Settings icon -> Import
 
 ### Running cloudbreak in IDEA
 
+
 To launch the Cloudbreak application execute the `com.sequenceiq.cloudbreak.CloudbreakApplication` class  (Set 'Use classpath of module' to `core_main`) with the following VM options:
 ```
 -Dcb.client.id=cloudbreak
 -Dcb.client.secret=CB_SECRET_GENERATED_BY_CBD
--Dcb.db.port.5432.tcp.addr=<DB_ADDRESS>
+-Dcb.db.port.5432.tcp.addr=localhost
 -Dcb.db.port.5432.tcp.port=5432
 -Dcb.identity.server.url=http://localhost:8089
 -Dspring.cloud.consul.host=YOUR_IP
@@ -148,8 +140,6 @@ To launch the Cloudbreak application execute the `com.sequenceiq.cloudbreak.Clou
 -Dvault.addr=localhost
 -Dvault.root.token=<TOKEN_FROM_PROFILE_FILE>
 ```
-
-The `-Dcb.db.port.5432.tcp.addr=<DB_ADDRESS>`, on Mac, should be set to `localhost`. On Linux, it should be set to the bridge address of Docker. Look above for information on how to retrieve that address.
 
 The `-Dcb.client.secret=CB_SECRET_GENERATED_BY_CBD` value has to be replaced with the value of UAA_DEFAULT_SECRET from the cdb-local/Profile file.
 The database migration scripts run automatically by Cloudbreak by default, this migration can be turned off with the `-Dcb.schema.migration.auto=false` VM option.
@@ -174,7 +164,7 @@ After having imported cloudbreak repo root you can launch Periscope application 
 -Dperiscope.client.id=periscope
 -Dperiscope.client.secret=PERISCOPE_SECRET_GENERATED_BY_CBD
 -Dperiscope.identity.server.url=http://localhost:8089
--Dperiscope.db.port.5432.tcp.addr=<DB_ADDRESS>
+-Dperiscope.db.port.5432.tcp.addr=localhost
 -Dperiscope.db.port.5432.tcp.port=5432
 -Dperiscope.cloudbreak.url=http://localhost:8080
 -Dserver.port=8085
@@ -182,8 +172,6 @@ After having imported cloudbreak repo root you can launch Periscope application 
 -Dvault.addr=localhost
 -Dvault.root.token=<TOKEN_FROM_PROFILE_FILE>
 ````
-
-The `-Dcb.db.port.5432.tcp.addr=<DB_ADDRESS>`, on Mac, should be set to `localhost`. On Linux, it should be set to the bridge address of Docker. Look above for information on how to retrieve that address.
 
 The -Dperiscope.client.secret=PERISCOPE_SECRET_GENERATED_BY_CBD value has to be replaced with the value of UAA_DEFAULT_SECRET from the cdb-local/Profile file.
 
@@ -205,7 +193,7 @@ To run Cloudbreak from command line, you have to list the JVM parameters from ab
 ```
 ./gradlew :core:buildInfo :core:bootRun -PjvmArgs="-Dcb.client.id=cloudbreak \
 -Dcb.client.secret=CB_SECRET_GENERATED_BY_CBD \
--Dcb.db.port.5432.tcp.addr=<DB_ADDRESS> \
+-Dcb.db.port.5432.tcp.addr=localhost \
 -Dcb.db.port.5432.tcp.port=5432 \
 -Dcb.identity.server.url=http://localhost:8089 \
 -Dcb.schema.scripts.location=$(pwd)/core/src/main/resources/schema
@@ -215,8 +203,6 @@ To run Cloudbreak from command line, you have to list the JVM parameters from ab
 -Dvault.root.token=<TOKEN_FROM_PROFILE_FILE>
 -Dspring.config.location=$(pwd)/cloud-common/src/main/resources/application.yml,$(pwd)/core/build/resources/main/application.properties"
 ```
-
-The `-Dcb.db.port.5432.tcp.addr=<DB_ADDRESS>`, on Mac, should be set to `localhost`. On Linux, it should be set to the bridge address of Docker. Look above for information on how to retrieve that address.
 
 The `-Dcb.client.secret=CB_SECRET_GENERATED_BY_CBD` value has to be replaced with the value of UAA_DEFAULT_SECRET from the cdb-local/Profile file.
 
@@ -229,7 +215,7 @@ To run periscope from command line you have to run the below gradle command with
 ./gradlew :autoscale:bootRun -PjvmArgs="-Dperiscope.client.id=periscope \
 -Dperiscope.client.secret=CB_SECRET_GENERATED_BY_CBD \
 -Dperiscope.identity.server.url=http://localhost:8089 \
--Dperiscope.db.port.5432.tcp.addr=<DB_ADDRESS> \
+-Dperiscope.db.port.5432.tcp.addr=localhost \
 -Dperiscope.db.port.5432.tcp.port=5432 \
 -Dperiscope.cloudbreak.url=http://localhost:8080 \
 -Dperiscope.schema.scripts.location=$(pwd)/autoscale/src/main/resources/schema
@@ -239,8 +225,6 @@ To run periscope from command line you have to run the below gradle command with
 -Dvault.root.token=<TOKEN_FROM_PROFILE_FILE>
 -Dspring.config.location=$(pwd)/autoscale/src/main/resources/application.yml,$(pwd)/autoscale/build/resources/main/application.properties"
 ```` 
-
-The `-Dcb.db.port.5432.tcp.addr=<DB_ADDRESS>`, on Mac, should be set to `localhost`. On Linux, it should be set to the bridge address of Docker. Look above for information on how to retrieve that address.
 
 The `-Dcb.client.secret=CB_SECRET_GENERATED_BY_CBD` value has to be replaced with the value of UAA_DEFAULT_SECRET from the cdb-local/Profile file.
 
