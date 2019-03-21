@@ -18,6 +18,7 @@ import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiConfigureForKerberosArguments;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -34,6 +35,9 @@ public class ClouderaManagerKerberosService {
     private static final String FREEIPA = "MIT KDC";
 
     @Inject
+    private ClouderaManagerClientFactory clouderaManagerClientFactory;
+
+    @Inject
     private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
 
     @Inject
@@ -42,7 +46,7 @@ public class ClouderaManagerKerberosService {
     public void setupKerberos(ApiClient client, HttpClientConfig clientConfig, Stack stack) throws ApiException, CloudbreakException {
         Cluster cluster = stack.getCluster();
         if (cluster.isAdJoinable() || cluster.isIpaJoinable()) {
-            ClouderaManagerResourceApi clouderaManagerResourceApi = getClouderaManagerResourceApi(client);
+            ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerClientFactory.getClouderaManagerResourceApi(client);
             KerberosConfig kerberosConfig = cluster.getKerberosConfig();
             ApiConfigList apiConfigList = new ApiConfigList()
                     .addItemsItem(new ApiConfig().name("security_realm").value(kerberosConfig.getRealm()))
@@ -60,7 +64,7 @@ public class ClouderaManagerKerberosService {
             clouderaManagerPollingServiceProvider.kerberosConfigurePollingService(stack, client, importAdminCredentials.getId());
             ClouderaManagerModificationService modificationService = applicationContext.getBean(ClouderaManagerModificationService.class, stack, clientConfig);
             modificationService.stopCluster();
-            ClustersResourceApi clustersResourceApi = getClustersResourceApi(client);
+            ClustersResourceApi clustersResourceApi = clouderaManagerClientFactory.getClustersResourceApi(client);
             ApiCommand configureForKerberos = clustersResourceApi.configureForKerberos(cluster.getName(), new ApiConfigureForKerberosArguments());
             clouderaManagerPollingServiceProvider.kerberosConfigurePollingService(stack, client, configureForKerberos.getId());
             ApiCommand generateCredentials = clouderaManagerResourceApi.generateCredentialsCommand();
@@ -69,16 +73,8 @@ public class ClouderaManagerKerberosService {
         }
     }
 
-    ClustersResourceApi getClustersResourceApi(ApiClient client) {
-        return new ClustersResourceApi(client);
-    }
-
-    ClouderaManagerResourceApi getClouderaManagerResourceApi(ApiClient client) {
-        return new ClouderaManagerResourceApi(client);
-    }
-
     public void deleteCredentials(ApiClient client, HttpClientConfig clientConfig, Stack stack) {
-        ClouderaManagerResourceApi apiInstance = getClouderaManagerResourceApi(client);
+        ClouderaManagerResourceApi apiInstance = clouderaManagerClientFactory.getClouderaManagerResourceApi(client);
         try {
             ClouderaManagerModificationService modificationService = applicationContext.getBean(ClouderaManagerModificationService.class, stack, clientConfig);
             modificationService.stopCluster();
