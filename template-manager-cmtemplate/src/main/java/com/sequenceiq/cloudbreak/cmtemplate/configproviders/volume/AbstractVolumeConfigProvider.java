@@ -102,11 +102,6 @@ public abstract class AbstractVolumeConfigProvider implements CmTemplateComponen
         return roleConfigGroup.getRefName().equals(roleConfigGroupsRefName) && roleConfigGroup.getRoleType().equals(roleType);
     }
 
-    private boolean isConfigDefined(List<ApiClusterTemplateConfig> roleConfigs, List<ApiClusterTemplateConfig> roleConfig) {
-        return roleConfigs.stream().anyMatch(existingRC -> roleConfig.stream()
-                .map(ApiClusterTemplateConfig::getName).anyMatch(name -> name.equals(existingRC.getName())));
-    }
-
     abstract List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView);
 
     abstract List<ApiClusterTemplateVariable> getVariables(String roleType, HostgroupView hostgroupView);

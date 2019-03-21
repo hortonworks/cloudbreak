@@ -46,11 +46,6 @@
       "serviceType": "HDFS",
       "roleConfigGroups": [
         {
-          "refName": "hdfs-SECONDARYNAMENODE-BASE",
-          "roleType": "SECONDARYNAMENODE",
-          "base": true
-        },
-        {
           "refName": "hdfs-BALANCER-BASE",
           "roleType": "BALANCER",
           "base": true
@@ -171,7 +166,6 @@
       "roleConfigGroupsRefNames": [
         "hbase-MASTER-BASE",
         "hdfs-BALANCER-BASE",
-        "hdfs-SECONDARYNAMENODE-BASE",
         "hive-GATEWAY-BASE",
         "hive-HIVEMETASTORE-BASE",
         "hive-HIVESERVER2-BASE",
