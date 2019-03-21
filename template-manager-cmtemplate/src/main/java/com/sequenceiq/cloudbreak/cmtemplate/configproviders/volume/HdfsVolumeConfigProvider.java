@@ -25,6 +25,9 @@ public class HdfsVolumeConfigProvider extends AbstractVolumeConfigProvider {
             case "NAMENODE":
                 roleConfigs.add(new ApiClusterTemplateConfig().name("dfs_name_dir_list").variable(variable));
                 break;
+            case "SECONDARYNAMENODE":
+                roleConfigs.add(new ApiClusterTemplateConfig().name("fs_checkpoint_dir_list").variable(variable));
+                break;
             default:
                 break;
         }
@@ -47,7 +50,7 @@ public class HdfsVolumeConfigProvider extends AbstractVolumeConfigProvider {
 
     @Override
     public List<String> getRoleTypes() {
-        return Arrays.asList("NAMENODE", "DATANODE");
+        return Arrays.asList("NAMENODE", "DATANODE", "SECONDARYNAMENODE");
     }
 
 }
