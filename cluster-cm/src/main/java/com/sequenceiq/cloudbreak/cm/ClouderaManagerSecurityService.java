@@ -139,7 +139,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     @Override
     public void setupLdapAndSSO(String primaryGatewayPublicAddress) throws CloudbreakException {
         try {
-            ldapService.setupLdap(clouderaManagerClientFactory.getClient(stack, stack.getCluster(), clientConfig), stack, stack.getCluster());
+            ldapService.setupLdap(stack, stack.getCluster(), clientConfig);
         } catch (ApiException apiException) {
             throw new CloudbreakException(apiException);
         }

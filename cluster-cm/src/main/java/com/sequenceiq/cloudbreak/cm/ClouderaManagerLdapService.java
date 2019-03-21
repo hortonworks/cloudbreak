@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cm;
 
 import java.util.Optional;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -9,7 +11,6 @@ import org.springframework.stereotype.Service;
 import com.cloudera.api.swagger.AuthRolesResourceApi;
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.ExternalUserMappingsResourceApi;
-import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiAuthRoleMetadata;
 import com.cloudera.api.swagger.model.ApiAuthRoleMetadataList;
@@ -19,6 +20,8 @@ import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiExternalUserMapping;
 import com.cloudera.api.swagger.model.ApiExternalUserMappingList;
 import com.cloudera.api.swagger.model.ApiExternalUserMappingType;
+import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -28,12 +31,15 @@ import com.sequenceiq.cloudbreak.template.views.LdapView;
 public class ClouderaManagerLdapService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerLdapService.class);
 
-    public void setupLdap(ApiClient client, Stack stack, Cluster cluster)  throws ApiException {
+    @Inject
+    private ClouderaManagerClientFactory clouderaManagerClientFactory;
+
+    public void setupLdap(Stack stack, Cluster cluster, HttpClientConfig clientConfig)  throws ApiException {
         LdapConfig ldapConfig = cluster.getLdapConfig();
         if (ldapConfig != null) {
             LOGGER.debug("Setup LDAP on ClouderaManager API for stack: {}", stack.getId());
             LdapView ldapView = new LdapView(ldapConfig, ldapConfig.getBindDn(), ldapConfig.getBindPassword());
-            ClouderaManagerResourceApi clouderaManagerResourceApi = getClouderaManagerResourceApi(client);
+            ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerClientFactory.getClouderaManagerResourceApi(stack, cluster, clientConfig);
             clouderaManagerResourceApi.beginTrial();
             ApiConfigList apiConfigList = new ApiConfigList()
                     .addItemsItem(new ApiConfig().name("auth_backend_order").value("DB_THEN_LDAP"))
@@ -50,8 +56,9 @@ public class ClouderaManagerLdapService {
                 apiConfigList.addItemsItem(new ApiConfig().name("ldap_type").value("LDAP"));
             }
             clouderaManagerResourceApi.updateConfig("Add LDAP configuration", apiConfigList);
-            ExternalUserMappingsResourceApi externalUserMappingsResourceApi = getExternalUserMappingsResourceApi(client);
-            AuthRolesResourceApi authRolesResourceApi = getAuthRolesResourceApi(client);
+            ExternalUserMappingsResourceApi externalUserMappingsResourceApi =
+                    clouderaManagerClientFactory.getExternalUserMappingsResourceApi(stack, cluster, clientConfig);
+            AuthRolesResourceApi authRolesResourceApi = clouderaManagerClientFactory.getAuthRolesResourceApi(stack, cluster, clientConfig);
             ApiAuthRoleMetadataList roleMetadataList = authRolesResourceApi.readAuthRolesMetadata(null);
             if (roleMetadataList.getItems() != null) {
                 Optional<ApiAuthRoleMetadata> roleMetadata = roleMetadataList.getItems().stream().filter(rm -> rm.getRole().equals("ROLE_ADMIN")).findFirst();
@@ -67,17 +74,5 @@ public class ClouderaManagerLdapService {
                 }
             }
         }
-    }
-
-    ClouderaManagerResourceApi getClouderaManagerResourceApi(ApiClient client) {
-        return new ClouderaManagerResourceApi(client);
-    }
-
-    ExternalUserMappingsResourceApi getExternalUserMappingsResourceApi(ApiClient client) {
-        return new ExternalUserMappingsResourceApi(client);
-    }
-
-    AuthRolesResourceApi getAuthRolesResourceApi(ApiClient client) {
-        return new AuthRolesResourceApi(client);
     }
 }

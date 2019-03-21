@@ -31,6 +31,7 @@ import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiConfigureForKerberosArguments;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -55,8 +56,11 @@ public class ClouderaManagerKerberosServiceTest {
     @Mock
     private ClustersResourceApi clustersResourceApi;
 
+    @Mock
+    private ClouderaManagerClientFactory clouderaManagerClientFactory;
+
     @InjectMocks
-    private ClouderaManagerKerberosService underTest = spy(new ClouderaManagerKerberosService());
+    private ClouderaManagerKerberosService underTest = new ClouderaManagerKerberosService();
 
     private Stack stack;
 
@@ -75,8 +79,8 @@ public class ClouderaManagerKerberosServiceTest {
         client = new ApiClient();
         clientConfig = new HttpClientConfig("1.2.3.4", null, null, null);
         MockitoAnnotations.initMocks(this);
-        when(underTest.getClouderaManagerResourceApi(any(ApiClient.class))).thenReturn(clouderaManagerResourceApi);
-        when(underTest.getClustersResourceApi(any(ApiClient.class))).thenReturn(clustersResourceApi);
+        when(clouderaManagerClientFactory.getClouderaManagerResourceApi(client)).thenReturn(clouderaManagerResourceApi);
+        when(clouderaManagerClientFactory.getClustersResourceApi(client)).thenReturn(clustersResourceApi);
         when(applicationContext.getBean(eq(ClouderaManagerModificationService.class), eq(stack), eq(clientConfig))).thenReturn(modificationService);
     }
 
