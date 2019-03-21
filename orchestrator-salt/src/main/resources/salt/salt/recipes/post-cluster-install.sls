@@ -30,7 +30,7 @@ run_post_cluster_install_script_{{ script_name }}:
 {% endfor %}
 
 {% if "manager_server" in grains.get('roles', []) %}
-{% if salt['pillar.get']('ldap') != None %}
+{% if salt['pillar.get']('ldap') is not defined %}
 
 stop_cmserver:
   service.dead:
