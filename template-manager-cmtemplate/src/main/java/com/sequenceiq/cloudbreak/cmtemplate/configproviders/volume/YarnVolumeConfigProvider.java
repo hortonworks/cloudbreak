@@ -10,20 +10,15 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
-public class HdfsVolumeConfigProvider extends AbstractVolumeConfigProvider {
+public class YarnVolumeConfigProvider extends AbstractVolumeConfigProvider {
     @Override
     List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView) {
         List<ApiClusterTemplateConfig> roleConfigs = new ArrayList<>();
         String variable = getRoleTypeVariableName(hostGroupView.getName(), roleType);
         switch (roleType) {
-            case "DATANODE":
-                roleConfigs.add(new ApiClusterTemplateConfig().name("dfs_data_dir_list").variable(variable));
-                break;
-            case "NAMENODE":
-                roleConfigs.add(new ApiClusterTemplateConfig().name("dfs_name_dir_list").variable(variable));
-                break;
-            case "SECONDARYNAMENODE":
-                roleConfigs.add(new ApiClusterTemplateConfig().name("fs_checkpoint_dir_list").variable(variable));
+            case "NODEMANAGER":
+                roleConfigs.add(new ApiClusterTemplateConfig().name("yarn_nodemanager_local_dirs").variable(variable));
+                roleConfigs.add(new ApiClusterTemplateConfig().name("yarn_nodemanager_log_dirs").variable(variable));
                 break;
             default:
                 break;
@@ -33,12 +28,11 @@ public class HdfsVolumeConfigProvider extends AbstractVolumeConfigProvider {
 
     @Override
     public String getServiceType() {
-        return "HDFS";
+        return "YARN";
     }
 
     @Override
     public List<String> getRoleTypes() {
-        return Arrays.asList("NAMENODE", "DATANODE", "SECONDARYNAMENODE");
+        return Arrays.asList("NODEMANAGER");
     }
-
 }

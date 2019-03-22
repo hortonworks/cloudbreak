@@ -17,6 +17,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.VolumeUtils;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 public abstract class AbstractVolumeConfigProvider implements CmTemplateComponentConfigProvider {
@@ -104,7 +105,13 @@ public abstract class AbstractVolumeConfigProvider implements CmTemplateComponen
 
     abstract List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView);
 
-    abstract List<ApiClusterTemplateVariable> getVariables(String roleType, HostgroupView hostgroupView);
+    List<ApiClusterTemplateVariable> getVariables(String roleType, HostgroupView hostGroupView) {
+        List<ApiClusterTemplateVariable> variables = new ArrayList<>();
+        String variable = getRoleTypeVariableName(hostGroupView.getName(), roleType);
+        String dirs = VolumeUtils.buildVolumePathString(hostGroupView.getVolumeCount(), roleType.toLowerCase());
+        variables.add(new ApiClusterTemplateVariable().name(variable).value(dirs));
+        return variables;
+    }
 
     String getRoleTypeVariableName(String hostGroup, String roleType) {
         return String.format("%s_%s", hostGroup, roleType);
