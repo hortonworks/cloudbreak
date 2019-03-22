@@ -27,7 +27,7 @@ public class VmType extends StringType {
     }
 
     public VolumeParameterConfig getVolumeParameterbyVolumeParameterType(VolumeParameterType volumeParameterType) {
-        return volumeParameterType.getVolumeParameterbyType(metaData);
+        return volumeParameterType.getVolumeParameterByType(metaData);
     }
 
     public Boolean getExtended() {
