@@ -513,7 +513,7 @@ public abstract class TestContext implements ApplicationContextAware {
         }
     }
 
-    public void cleanupTestContextEntity() {
+    public void cleanupTestContext() {
         if (!validated && initialized) {
             throw new IllegalStateException(
                     "Test context should be validated! Maybe do you forgot to call .validate() end of the test? See other tests as an example.");

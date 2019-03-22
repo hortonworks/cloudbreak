@@ -41,7 +41,7 @@ public class ClusterStopTest extends AbstractIntegrationTest {
 
     @AfterMethod(alwaysRun = true)
     public void tear(Object[] data) {
-        ((MockedTestContext) data[0]).cleanupTestContextEntity();
+        ((MockedTestContext) data[0]).cleanupTestContext();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)

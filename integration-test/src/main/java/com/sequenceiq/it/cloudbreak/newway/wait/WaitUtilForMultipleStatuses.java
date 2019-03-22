@@ -30,7 +30,7 @@ public class WaitUtilForMultipleStatuses {
     private long pollingInterval;
 
     public Map<String, String> waitAndCheckStatuses(CloudbreakClient cloudbreakClient, String stackName, Map<String, Status> desiredStatuses) {
-        Map<String, String> ret = new HashMap<>();
+        Map<String, String> errors = new HashMap<>();
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
             waitResult = waitForStatuses(cloudbreakClient, stackName, desiredStatuses);
@@ -46,12 +46,12 @@ public class WaitUtilForMultipleStatuses {
                 desiredStatuses.forEach((key, value) -> {
                     Status subStatus = getStatus(status, key);
                     if (subStatus != null) {
-                        ret.put(key, subStatus.name());
+                        errors.put(key, subStatus.name());
                     }
                 });
 
-                ret.forEach((key, value) -> {
-                    builder.append(key).append(',').append(value).append(System.lineSeparator());
+                errors.forEach((key, value) -> {
+                    builder.append(key).append(": ").append(value).append(System.lineSeparator());
                 });
                 builder.append("statusReason: ").append(status.getStatusReason());
             }
@@ -64,11 +64,11 @@ public class WaitUtilForMultipleStatuses {
             if (status != null) {
                 String statusReason = status.getStatusReason();
                 if (statusReason != null) {
-                    ret.put("statusReason", statusReason);
+                    errors.put("statusReason", statusReason);
                 }
             }
         }
-        return ret;
+        return errors;
     }
 
     private Status getStatus(StackStatusV4Response status, String fieldName) {

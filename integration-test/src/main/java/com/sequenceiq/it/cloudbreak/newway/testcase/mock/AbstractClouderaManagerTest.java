@@ -25,7 +25,7 @@ public abstract class AbstractClouderaManagerTest extends AbstractIntegrationTes
     @AfterMethod(alwaysRun = true)
     public void tearDown(Object[] data) {
         MockedTestContext testContext = (MockedTestContext) data[0];
-        testContext.cleanupTestContextEntity();
+        testContext.cleanupTestContext();
     }
 
     protected abstract ClusterDefinitionTestClient clusterDefinitionTestClient();
