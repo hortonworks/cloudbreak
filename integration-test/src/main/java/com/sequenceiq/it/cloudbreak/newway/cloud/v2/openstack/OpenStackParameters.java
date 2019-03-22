@@ -47,4 +47,46 @@ public class OpenStackParameters {
 
         public static final String VOLUME_TYPE = PREFIX + "volumeType";
     }
+
+    public static class PreWarmedTest {
+
+        public static final String DEFAULT_HDP_VERSION = "3.1";
+
+        public static final String DEFAULT_HDP_ENABLED = "true";
+
+        public static final String DEFAULT_HDP_SCALE_GROUP = "compute";
+
+        public static final String DEFAULT_HDP_GROUPS = "master,worker,compute";
+
+        public static final String DEFAULT_HDF_CLUSTER_DEFINITION = "3.3";
+
+        public static final String DEFAULT_HDF_ENABLED = "true";
+
+        public static final String DEFAULT_HDF_SCALE_GROUP = "compute";
+
+        public static final String DEFAULT_HDF_GROUPS = "master,worker,compute";
+
+        private static final String PREFIX = OpenStackParameters.PREFIX + "prewarmed.";
+
+        private static final String HDP = PREFIX + "hdp.";
+
+        public static final String HDP_VERSION = HDP + "version";
+
+        public static final String HDP_ENABLED = HDP + "enabled";
+
+        public static final String HDP_GROUPS = HDP + "groups";
+
+        public static final String HDP_SCALE_GROUP = HDP + "scaleGroup";
+
+        private static final String HDF = PREFIX + "hdf.";
+
+        public static final String HDF_CLUSTER_DEFINITION = HDF + "clusterDefinitionNames";
+
+        public static final String HDF_ENABLED = HDF + "enabled";
+
+        public static final String HDF_GROUPS = HDF + "groups";
+
+        public static final String HDF_SCALE_GROUP = HDF + "scaleGroup";
+
+    }
 }

@@ -1,8 +1,0 @@
-name: Imagecatalog_tests
-parameters:
-  cleanUp: false
-
-tests:
-  - name: imagecatalog_test
-    classes:
-      - com.sequenceiq.it.cloudbreak.ImageCatalogTests

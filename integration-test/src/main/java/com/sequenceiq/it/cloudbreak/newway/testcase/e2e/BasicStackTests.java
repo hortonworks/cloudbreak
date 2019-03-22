@@ -44,7 +44,7 @@ public class BasicStackTests extends AbstractE2ETest {
             given = "there is a running cloudbreak",
             when = "a valid stack create request is sent AND the stack is scaled",
             then = "the scaled stack should be available")
-    public void testCreateAndScaleluster(TestContext testContext) {
+    public void testCreateAndScaleCluster(TestContext testContext) {
         testContext.given(StackTestDto.class)
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)

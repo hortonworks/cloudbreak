@@ -46,7 +46,7 @@ public class InstanceGroupTestDto extends AbstractCloudbreakTestDto<InstanceGrou
                 .withGroup(hostGroupType.getName())
                 .withSecurityGroup(getTestContext().init(SecurityGroupTestDto.class))
                 .withType(hostGroupType.getInstanceGroupType())
-                .withName(hostGroupType.getName().toLowerCase())
+                .withName(hostGroupType.getName())
                 .withTemplate(getTestContext().given(InstanceTemplateV4TestDto.class));
     }
 
@@ -64,15 +64,24 @@ public class InstanceGroupTestDto extends AbstractCloudbreakTestDto<InstanceGrou
                 .collect(Collectors.toList());
     }
 
+    public static InstanceGroupTestDto withHostGroup(TestContext testContext, HostGroupType groupType, int nodeCount) {
+        return create(testContext, groupType, nodeCount);
+    }
+
     private static InstanceGroupTestDto create(TestContext testContext, HostGroupType hostGroupType) {
+        InstanceGroupTestDto entity = testContext.init(InstanceGroupTestDto.class);
+        return create(testContext, hostGroupType, hostGroupType.determineInstanceCount(entity.getTestParameter()));
+    }
+
+    private static InstanceGroupTestDto create(TestContext testContext, HostGroupType hostGroupType, int nodeCount) {
         InstanceGroupTestDto entity = testContext.init(InstanceGroupTestDto.class);
         return entity
                 .withRecoveryMode(entity.getRecoveryModeParam(hostGroupType))
-                .withNodeCount(hostGroupType.determineInstanceCount(entity.getTestParameter()))
+                .withNodeCount(nodeCount)
                 .withGroup(hostGroupType.getName())
                 .withSecurityGroup(testContext.init(SecurityGroupTestDto.class))
                 .withType(hostGroupType.getInstanceGroupType())
-                .withName(hostGroupType.getName().toLowerCase())
+                .withName(hostGroupType.getName())
                 .withTemplate(testContext.given(InstanceTemplateV4TestDto.class));
     }
 

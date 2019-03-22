@@ -8,6 +8,7 @@ public enum HostGroupType {
     WORKER("worker", InstanceGroupType.CORE, InstanceCountParameter.WORKER_INSTANCE_COUNT.getName()),
     COMPUTE("compute", InstanceGroupType.CORE, InstanceCountParameter.COMPUTE_INSTANCE_COUNT.getName()),
     SERVICES("Services", InstanceGroupType.GATEWAY, InstanceCountParameter.SERVICE_INSTANCE_COUNT.getName()),
+    MESSAGING("Messaging", InstanceGroupType.CORE, InstanceCountParameter.NIFI_INSTANCE_COUNT.getName()),
     NIFI("NiFi", InstanceGroupType.CORE, InstanceCountParameter.NIFI_INSTANCE_COUNT.getName()),
     ZOOKEEPER("ZooKeeper", InstanceGroupType.CORE, InstanceCountParameter.ZOOKEEPER_INSTANCE_COUNT.getName());
 
@@ -40,5 +41,14 @@ public enum HostGroupType {
             instanceCountInt = 1;
         }
         return instanceCountInt;
+    }
+
+    public static HostGroupType getByName(String name) {
+        for (HostGroupType value : HostGroupType.values()) {
+            if (value.name.equals(name)) {
+                return value;
+            }
+        }
+        return null;
     }
 }

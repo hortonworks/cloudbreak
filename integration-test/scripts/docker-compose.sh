@@ -2,7 +2,7 @@
 
 set -x
 
-: ${INTEGRATIONTEST_SUITEFILES:=file:/it/src/main/resources/testsuites/v2/mock/all-in-mock-package.yaml${ADDITIONAL_SUITEFILES+,$ADDITIONAL_SUITEFILES}}
+: ${INTEGRATIONTEST_SUITEFILES:=file:/it/src/main/resources/testsuites/v4/mock/all-in-mock-package.yaml${ADDITIONAL_SUITEFILES+,$ADDITIONAL_SUITEFILES}}
 : ${INTEGRATIONTEST_TESTSUITE_POLLINGINTERVAL:=1000}
 : ${INTEGCB_LOCATION?"integcb location"}
 

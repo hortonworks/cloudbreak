@@ -98,6 +98,17 @@ integrationtest:
         tenant:
         userName:
         password:
+      prewarmed:
+        hdp:
+          version: "3.1"
+          enabled: true
+          groups: "master,worker,compute"
+          scaleGroup: compute
+        hdf:
+          clusterDefinitionNames: "HDF-3.3 Messaging Management: Apache Kafka"
+          enabled: true
+          groups: "Services,ZooKeeper,Messaging"
+          scaleGroup: Messaging
 
     # yarn parameters
     yarn:
