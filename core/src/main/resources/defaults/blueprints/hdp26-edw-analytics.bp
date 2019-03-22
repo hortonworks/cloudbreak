@@ -1,4 +1,5 @@
 {
+  "inputs": [],
   "description": "Useful for EDW analytics using Hive LLAP",
   "blueprint": {
     "Blueprints": {
