@@ -1,9 +1,0 @@
-name: Rds_config_tests
-parallel: "instances"
-parameters:
-  cleanUp: false
-
-tests:
-  - name: rds_config_test
-    classes:
-      - com.sequenceiq.it.cloudbreak.RdsConfigTests

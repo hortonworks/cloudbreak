@@ -1,8 +1,0 @@
-name: Security_Rules_Tests
-parameters:
-  cleanUp: true
-
-tests:
-  - name: securityrule_test
-    classes:
-      - com.sequenceiq.it.cloudbreak.SecurityRulesTests

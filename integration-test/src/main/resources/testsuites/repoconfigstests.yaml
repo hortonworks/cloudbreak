@@ -1,8 +1,0 @@
-name: Repoconfigs_tests
-parameters:
-  cleanUp: false
-
-tests:
-  - name: repoconfigs_test
-    classes:
-      - com.sequenceiq.it.cloudbreak.RepositoryConfigsTests
