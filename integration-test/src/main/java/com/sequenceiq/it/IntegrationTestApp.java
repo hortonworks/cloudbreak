@@ -36,13 +36,14 @@ import org.testng.xml.XmlSuite;
 import org.uncommons.reportng.JUnitXMLReporter;
 
 import com.sequenceiq.it.cloudbreak.config.ITProps;
+import com.sequenceiq.it.cloudbreak.newway.cloud.v2.aws.AwsProperties;
 import com.sequenceiq.it.cloudbreak.newway.listener.ReportListener;
 import com.sequenceiq.it.cloudbreak.newway.logsearch.CustomHTMLReporter;
 
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class,
         HibernateJpaAutoConfiguration.class})
 @ComponentScan(basePackages = "com.sequenceiq.it")
-@EnableConfigurationProperties(ITProps.class)
+@EnableConfigurationProperties({ITProps.class, AwsProperties.class})
 public class IntegrationTestApp implements CommandLineRunner {
     private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestApp.class);
 

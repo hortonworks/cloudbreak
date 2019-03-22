@@ -50,7 +50,7 @@ public class ClusterDefinitionTest extends AbstractIntegrationTest {
 
     @AfterMethod(alwaysRun = true)
     public void tearDown(Object[] data) {
-        ((TestContext) data[0]).cleanupTestContextEntity();
+        ((TestContext) data[0]).cleanupTestContext();
     }
 
     @Test(dataProvider = TEST_CONTEXT)

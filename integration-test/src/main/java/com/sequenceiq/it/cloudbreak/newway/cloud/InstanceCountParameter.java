@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-enum InstanceCountParameter {
+public enum InstanceCountParameter {
     MASTER_INSTANCE_COUNT("masterInstanceCount"),
     WORKER_INSTANCE_COUNT("workerInstanceCount"),
     COMPUTE_INSTANCE_COUNT("computeInstanceCount"),

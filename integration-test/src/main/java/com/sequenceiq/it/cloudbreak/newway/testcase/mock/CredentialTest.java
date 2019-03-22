@@ -30,7 +30,7 @@ public class CredentialTest extends AbstractIntegrationTest {
 
     @AfterMethod(alwaysRun = true)
     public void tearDown(Object[] data) {
-        ((MockedTestContext) data[0]).cleanupTestContextEntity();
+        ((MockedTestContext) data[0]).cleanupTestContext();
     }
 
     @BeforeMethod

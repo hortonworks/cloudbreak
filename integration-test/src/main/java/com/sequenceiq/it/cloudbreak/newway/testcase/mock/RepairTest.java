@@ -77,7 +77,7 @@ public class RepairTest extends AbstractIntegrationTest {
     @AfterMethod(alwaysRun = true)
     public void tear(Object[] data) {
         TestContext testContext = (TestContext) data[0];
-        testContext.cleanupTestContextEntity();
+        testContext.cleanupTestContext();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)

@@ -266,7 +266,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
     @AfterMethod(alwaysRun = true)
     public void tearDown(Object[] data) {
         MockedTestContext testContext = (MockedTestContext) data[0];
-        testContext.cleanupTestContextEntity();
+        testContext.cleanupTestContext();
     }
 
     private void createDatalake(TestContext testContext, Set<String> rdsList, String bpName) {

@@ -11,14 +11,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.A
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.aws.AwsParameters;
 import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.NetworkV2TestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.StackAuthenticationTestDto;
-import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.newway.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDtoBase;
 
 @Component
 public class AzureCloudProvider extends AbstractCloudProvider {
@@ -71,9 +70,9 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Override
     public VolumeV4TestDto attachedVolume(VolumeV4TestDto volume) {
-        int attachedVolumeSize = Integer.parseInt(getTestParameter().getWithDefault(AwsParameters.Instance.VOLUME_SIZE, "100"));
-        int attachedVolumeCount = Integer.parseInt(getTestParameter().getWithDefault(AwsParameters.Instance.VOLUME_COUNT, "1"));
-        String attachedVolumeType = getTestParameter().getWithDefault(AwsParameters.Instance.VOLUME_TYPE, "Standard_LRS");
+        int attachedVolumeSize = Integer.parseInt(getTestParameter().getWithDefault(AzureParameters.Instance.VOLUME_SIZE, "100"));
+        int attachedVolumeCount = Integer.parseInt(getTestParameter().getWithDefault(AzureParameters.Instance.VOLUME_COUNT, "1"));
+        String attachedVolumeType = getTestParameter().getWithDefault(AzureParameters.Instance.VOLUME_TYPE, "Standard_LRS");
         return volume.withSize(attachedVolumeSize)
                 .withCount(attachedVolumeCount)
                 .withType(attachedVolumeType);

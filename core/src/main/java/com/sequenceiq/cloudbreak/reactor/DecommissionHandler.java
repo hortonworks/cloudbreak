@@ -107,6 +107,7 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
             }
             result = new DecommissionResult(request, decomissionedHostNames);
         } catch (Exception e) {
+            LOGGER.info("Exception occurred during decommissioning.", e);
             result = new DecommissionResult(e.getMessage(), e, request);
         }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));

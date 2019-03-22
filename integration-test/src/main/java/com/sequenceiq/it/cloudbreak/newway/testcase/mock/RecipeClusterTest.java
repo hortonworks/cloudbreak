@@ -66,7 +66,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
 
     @AfterMethod(alwaysRun = true)
     public void tear(Object[] data) {
-        ((TestContext) data[0]).cleanupTestContextEntity();
+        ((TestContext) data[0]).cleanupTestContext();
     }
 
     @Test(dataProvider = "dataProviderForNonPreTerminationRecipeTypes")

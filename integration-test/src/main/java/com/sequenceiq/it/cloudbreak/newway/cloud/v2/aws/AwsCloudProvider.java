@@ -2,6 +2,8 @@ package com.sequenceiq.it.cloudbreak.newway.cloud.v2.aws;
 
 import static com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters.CREDENTIAL_DEFAULT_DESCRIPTION;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
@@ -11,23 +13,25 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.Role
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AwsStackV4Parameters;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.AbstractCloudProvider;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters;
 import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.NetworkV2TestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.StackAuthenticationTestDto;
-import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.newway.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDtoBase;
 
 @Component
 public class AwsCloudProvider extends AbstractCloudProvider {
 
     private static final String KEY_BASED_CREDENTIAL = "key";
 
+    @Inject
+    private AwsProperties awsProperties;
+
     @Override
     public InstanceTemplateV4TestDto template(InstanceTemplateV4TestDto template) {
-        return template.withInstanceType(getTestParameter().getWithDefault(AwsParameters.Instance.TYPE, "m5.2xlarge"));
+        return template.withInstanceType(awsProperties.getInstance().getType());
     }
 
     @Override
@@ -49,9 +53,9 @@ public class AwsCloudProvider extends AbstractCloudProvider {
 
     @Override
     public VolumeV4TestDto attachedVolume(VolumeV4TestDto volume) {
-        int attachedVolumeSize = Integer.parseInt(getTestParameter().getWithDefault(AwsParameters.Instance.VOLUME_SIZE, "100"));
-        int attachedVolumeCount = Integer.parseInt(getTestParameter().getWithDefault(AwsParameters.Instance.VOLUME_COUNT, "1"));
-        String attachedVolumeType = getTestParameter().getWithDefault(AwsParameters.Instance.VOLUME_TYPE, "gp2");
+        int attachedVolumeSize = awsProperties.getInstance().getVolumeSize();
+        int attachedVolumeCount = awsProperties.getInstance().getVolumeCount();
+        String attachedVolumeType = awsProperties.getInstance().getVolumeType();
         return volume.withSize(attachedVolumeSize)
                 .withCount(attachedVolumeCount)
                 .withType(attachedVolumeType);
@@ -71,11 +75,11 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     public String getVpcId() {
-        return getTestParameter().getWithDefault(AwsParameters.VPC_ID, "vpc-5e68eb3a");
+        return awsProperties.getVpcId();
     }
 
     public String getSubnetId() {
-        return getTestParameter().getWithDefault(AwsParameters.SUBNET_ID, "subnet-87b729f1");
+        return awsProperties.getSubnetId();
     }
 
     @Override
@@ -85,7 +89,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
 
     @Override
     public CredentialTestDto credential(CredentialTestDto credential) {
-        String credentialType = getTestParameter().getWithDefault(AwsParameters.Credential.TYPE, KEY_BASED_CREDENTIAL);
+        String credentialType = awsProperties.getCredential().getType();
         AwsCredentialV4Parameters parameters;
         if (KEY_BASED_CREDENTIAL.equalsIgnoreCase(credentialType)) {
             parameters = awsCredentialDetailsKey();
@@ -100,44 +104,36 @@ public class AwsCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String region() {
-        return getTestParameter().getWithDefault(AwsParameters.REGION, "eu-west-1");
+        return awsProperties.getRegion();
     }
 
     @Override
     public String location() {
-        return getTestParameter().getWithDefault(AwsParameters.LOCATION, "eu-west-1");
+        return awsProperties.getLocation();
     }
 
     @Override
     public String availabilityZone() {
-        return getTestParameter().getWithDefault(AwsParameters.AVAILABILITY_ZONE, "eu-west-1a");
+        return awsProperties.getAvailabilityZone();
     }
 
     @Override
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
-        String publicKeyId = getTestParameter().getWithDefault(AwsParameters.PUBLIC_KEY_ID, "api-e2e-test");
+        String publicKeyId = awsProperties.getPublicKeyId();
         stackAuthenticationEntity.withPublicKeyId(publicKeyId);
         return stackAuthenticationEntity;
     }
 
     @Override
     public String getClusterDefinitionName() {
-        return getTestParameter().getWithDefault(CommonCloudParameters.CLUSTER_DEFINITION_NAME, AwsParameters.DEFAULT_CLUSTER_DEFINTION_NAME);
+        return awsProperties.getDefaultClusterDefinitionName();
     }
 
     public AwsCredentialV4Parameters awsCredentialDetailsArn() {
         AwsCredentialV4Parameters parameters = new AwsCredentialV4Parameters();
         RoleBasedCredentialParameters roleBasedCredentialParameters = new RoleBasedCredentialParameters();
-        String roleArn = getTestParameter().getRequired(AwsParameters.Credential.ROLE_ARN);
+        String roleArn = awsProperties.getCredential().getRoleArn();
         roleBasedCredentialParameters.setRoleArn(roleArn);
-        parameters.setRoleBased(roleBasedCredentialParameters);
-        return parameters;
-    }
-
-    public AwsCredentialV4Parameters awsCredentialDetailsInvalidArn() {
-        AwsCredentialV4Parameters parameters = new AwsCredentialV4Parameters();
-        RoleBasedCredentialParameters roleBasedCredentialParameters = new RoleBasedCredentialParameters();
-        roleBasedCredentialParameters.setRoleArn("arn:aws:iam::123456789012:role/fake");
         parameters.setRoleBased(roleBasedCredentialParameters);
         return parameters;
     }
@@ -145,28 +141,10 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     public AwsCredentialV4Parameters awsCredentialDetailsKey() {
         AwsCredentialV4Parameters parameters = new AwsCredentialV4Parameters();
         KeyBasedCredentialParameters keyBasedCredentialParameters = new KeyBasedCredentialParameters();
-        String accessKeyId = getTestParameter().getRequired(AwsParameters.Credential.ACCESS_KEY_ID);
+        String accessKeyId = awsProperties.getCredential().getAccessKeyId();
         keyBasedCredentialParameters.setAccessKey(accessKeyId);
-        String secretKey = getTestParameter().getRequired(AwsParameters.Credential.SECRET_KEY);
+        String secretKey = awsProperties.getCredential().getSecretKey();
         keyBasedCredentialParameters.setSecretKey(secretKey);
-        parameters.setKeyBased(keyBasedCredentialParameters);
-        return parameters;
-    }
-
-    public AwsCredentialV4Parameters awsCredentialDetailsInvalidAccessKey() {
-        AwsCredentialV4Parameters parameters = new AwsCredentialV4Parameters();
-        KeyBasedCredentialParameters keyBasedCredentialParameters = new KeyBasedCredentialParameters();
-        keyBasedCredentialParameters.setAccessKey("ABCDEFGHIJKLMNOPQRST");
-        keyBasedCredentialParameters.setSecretKey(getTestParameter().get(AwsParameters.Credential.SECRET_KEY));
-        parameters.setKeyBased(keyBasedCredentialParameters);
-        return parameters;
-    }
-
-    public AwsCredentialV4Parameters awsCredentialDetailsInvalidSecretKey() {
-        AwsCredentialV4Parameters parameters = new AwsCredentialV4Parameters();
-        KeyBasedCredentialParameters keyBasedCredentialParameters = new KeyBasedCredentialParameters();
-        keyBasedCredentialParameters.setSecretKey("123456789ABCDEFGHIJKLMNOP0123456789=ABC+");
-        keyBasedCredentialParameters.setAccessKey(getTestParameter().get(AwsParameters.Credential.ACCESS_KEY_ID));
         parameters.setKeyBased(keyBasedCredentialParameters);
         return parameters;
     }

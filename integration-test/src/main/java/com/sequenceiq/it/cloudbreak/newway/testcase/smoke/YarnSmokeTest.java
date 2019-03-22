@@ -21,7 +21,7 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
-import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractE2ETest;
+import com.sequenceiq.it.cloudbreak.newway.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.newway.util.ShowClusterDefinitionUtil;
 
 public class YarnSmokeTest extends AbstractE2ETest {
@@ -169,6 +169,6 @@ public class YarnSmokeTest extends AbstractE2ETest {
     @AfterMethod(alwaysRun = true)
     public void teardown(Object[] data) {
         TestContext testContext = (TestContext) data[0];
-        testContext.cleanupTestContextEntity();
+        testContext.cleanupTestContext();
     }
 }

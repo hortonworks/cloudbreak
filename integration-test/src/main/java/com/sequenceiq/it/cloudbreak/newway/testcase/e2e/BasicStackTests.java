@@ -10,7 +10,6 @@ import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
-import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractE2ETest;
 
 public class BasicStackTests extends AbstractE2ETest {
 
@@ -59,6 +58,6 @@ public class BasicStackTests extends AbstractE2ETest {
     @AfterMethod(alwaysRun = true)
     public void teardown(Object[] data) {
         TestContext testContext = (TestContext) data[0];
-        testContext.cleanupTestContextEntity();
+        testContext.cleanupTestContext();
     }
 }

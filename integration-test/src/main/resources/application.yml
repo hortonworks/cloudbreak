@@ -17,21 +17,36 @@ integrationtest:
 
     # aws parameters
     aws:
-      availabilityZone:
-      region:
-      vpcId:
-      subnetId:
-      publicKeyId:
+      region: eu-west-1
+      location: eu-west-1
+      availabilityZone: eu-west-1a
+      vpcId: vpc-5e68eb3a
+      subnetId: subnet-87b729f1
+      publicKeyId: api-e2e-test
+      defaultClusterDefinitionName: "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
       credential:
-        type:
+        type: key
         roleArn:
         accessKeyId:
         secretKey:
       instance:
-        type:
-        volumeSize:
-        volumeCount:
-        volumeType:
+        type: m5.2xlarge
+        volumeSize: 100
+        volumeCount: 1
+        volumeType: gp2
+      baseimage:
+        redhat7:
+          imageId: 963f81ae-efd1-4bfb-7f91-4aa357950c02
+          clusterDefinitions:
+            - "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
+        amazonlinux2:
+          imageId: 97b9e57d-8135-4d71-4f52-37a09d913e5e
+          clusterDefinitions:
+            - "HDP 3.1 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin"
+        sles12:
+          imageId: 1580eb06-e175-4d06-675a-c484b2c634f3
+          clusterDefinitions:
+            - "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
 
     # azure parameters
     azure:
