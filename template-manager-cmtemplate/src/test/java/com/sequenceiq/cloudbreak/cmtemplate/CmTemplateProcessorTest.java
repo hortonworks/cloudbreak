@@ -9,13 +9,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.cloudera.api.swagger.model.ApiClusterTemplateInstantiator;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
+import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroupInfo;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -139,6 +142,34 @@ public class CmTemplateProcessorTest {
         boolean present = underTest.isRoleTypePresentInService("HDFS", List.of("MYROLE"));
 
         assertFalse(present);
+    }
+
+    @Test
+    public void testAddInstantiatorWithBaseRoles() {
+        getClusterDefinitionText("input/clouderamanager.bp");
+        underTest = new CmTemplateProcessor(getClusterDefinitionText("input/clouderamanager.bp"));
+
+        underTest.addInstantiator("cluster");
+
+        ApiClusterTemplateInstantiator instantiator = underTest.getTemplate().getInstantiator();
+        List<ApiClusterTemplateRoleConfigGroupInfo> roleConfigGroups = instantiator.getRoleConfigGroups();
+        List<String> refNames = roleConfigGroups.stream().map(ApiClusterTemplateRoleConfigGroupInfo::getRcgRefName).collect(Collectors.toList());
+
+        assertEquals(2, refNames.size());
+        assertTrue(refNames.containsAll(List.of("yarn-NODEMANAGER-BASE", "hdfs-DATANODE-BASE")));
+    }
+
+    @Test
+    public void testAddInstantiatorWithoutBaseRoles() {
+        getClusterDefinitionText("input/clouderamanager.bp");
+        underTest = new CmTemplateProcessor(getClusterDefinitionText("input/clouderamanager-custom-ref.bp"));
+
+        underTest.addInstantiator("cluster");
+
+        ApiClusterTemplateInstantiator instantiator = underTest.getTemplate().getInstantiator();
+        List<ApiClusterTemplateRoleConfigGroupInfo> roleConfigGroups = instantiator.getRoleConfigGroups();
+
+        assertNull(roleConfigGroups);
     }
 
     private String getClusterDefinitionText(String path) {

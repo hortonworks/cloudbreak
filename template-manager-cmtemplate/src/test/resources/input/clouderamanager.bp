@@ -58,7 +58,7 @@
         {
           "refName": "hdfs-DATANODE-BASE",
           "roleType": "DATANODE",
-          "base": true
+          "base": false
         },
         {
           "refName": "hdfs-BALANCER-BASE",
@@ -106,7 +106,7 @@
         {
           "refName": "yarn-NODEMANAGER-BASE",
           "roleType": "NODEMANAGER",
-          "base": true
+          "base": false
         },
         {
           "refName": "yarn-JOBHISTORY-BASE",

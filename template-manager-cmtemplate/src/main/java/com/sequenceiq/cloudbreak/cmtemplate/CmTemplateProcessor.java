@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate;
 
+import static java.util.Optional.ofNullable;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
@@ -17,6 +20,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateHostInfo;
 import com.cloudera.api.swagger.model.ApiClusterTemplateHostTemplate;
 import com.cloudera.api.swagger.model.ApiClusterTemplateInstantiator;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
+import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroupInfo;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
 import com.cloudera.api.swagger.model.ApiProductVersion;
@@ -57,6 +61,16 @@ public class CmTemplateProcessor implements ClusterDefinitionTextProcessor {
             instantiator = new ApiClusterTemplateInstantiator();
             instantiator.setClusterName(clusterName);
         }
+        for (ApiClusterTemplateService service : cmTemplate.getServices()) {
+            List<String> nonBaseRefs = ofNullable(service.getRoleConfigGroups()).orElse(new ArrayList<>())
+                    .stream()
+                    .filter(rcg -> !rcg.getBase())
+                    .map(ApiClusterTemplateRoleConfigGroup::getRefName)
+                    .collect(Collectors.toList());
+            for (String nonBaseRef : nonBaseRefs) {
+                instantiator.addRoleConfigGroupsItem(new ApiClusterTemplateRoleConfigGroupInfo().rcgRefName(nonBaseRef));
+            }
+        }
         cmTemplate.setInstantiator(instantiator);
     }
 
@@ -81,7 +95,7 @@ public class CmTemplateProcessor implements ClusterDefinitionTextProcessor {
 
     private void addOrOverrideConfigs(ApiClusterTemplateRoleConfigGroup configGroup, List<ApiClusterTemplateConfig> newConfigs) {
         for (ApiClusterTemplateConfig newConfig : newConfigs) {
-            List<ApiClusterTemplateConfig> preDefinedConfigs = Optional.ofNullable(configGroup.getConfigs()).orElse(new ArrayList<>());
+            List<ApiClusterTemplateConfig> preDefinedConfigs = ofNullable(configGroup.getConfigs()).orElse(new ArrayList<>());
             Optional<ApiClusterTemplateConfig> existingConfOpt = preDefinedConfigs.stream().filter(pc -> pc.getName().equals(newConfig.getName())).findFirst();
             if (existingConfOpt.isPresent()) {
                 ApiClusterTemplateConfig existingConf = existingConfOpt.get();
