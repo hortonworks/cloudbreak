@@ -32,17 +32,39 @@
           {
             "refName": "hdfs-NAMENODE-BASE",
             "roleType": "NAMENODE",
-            "base": true
+            "base": true,
+            "configs": [
+              {
+                "name": "dfs_name_dir_list",
+                "value": "/hadoopfs/fs1/namenode"
+              }
+            ]
           },
           {
             "refName": "hdfs-SECONDARYNAMENODE-BASE",
             "roleType": "SECONDARYNAMENODE",
-            "base": true
+            "base": true,
+            "configs": [
+              {
+                "name": "fs_checkpoint_dir_list",
+                "value": "/hadoopfs/fs1/secondarynamenode"
+              }
+            ]
           },
           {
             "refName": "hdfs-DATANODE-BASE",
             "roleType": "DATANODE",
-            "base": true
+            "base": true,
+            "configs": [
+              {
+                "name": "dfs_data_dir_list",
+                "value": "/hadoopfs/fs1/datanode"
+              },
+              {
+                "name": "dfs_datanode_failed_volumes_tolerated",
+                "value": "0"
+              }
+            ]
           },
           {
             "refName": "hdfs-BALANCER-BASE",
@@ -88,9 +110,26 @@
             "base": true
           },
           {
-            "refName": "yarn-NODEMANAGER-BASE",
+            "refName": "yarn-NODEMANAGER-WORKER",
             "roleType": "NODEMANAGER",
-            "base": true
+            "base": false,
+            "configs": [
+              {
+                "name": "yarn_nodemanager_local_dirs",
+                "value": "/hadoopfs/fs1/nodemanager"
+              }
+            ]
+          },
+          {
+            "refName": "yarn-NODEMANAGER-COMPUTE",
+            "roleType": "NODEMANAGER",
+            "base": false,
+            "configs": [
+              {
+                "name": "yarn_nodemanager_local_dirs",
+                "value": "/hadoopfs/fs1/nodemanager"
+              }
+            ]
           },
           {
             "refName": "yarn-JOBHISTORY-BASE",
@@ -209,7 +248,15 @@
           "hive-GATEWAY-BASE",
           "impala-IMPALAD-BASE",
           "spark_on_yarn-GATEWAY-BASE",
-          "yarn-NODEMANAGER-BASE"
+          "yarn-NODEMANAGER-WORKER"
+        ]
+      },
+      {
+        "refName": "compute",
+        "roleConfigGroupsRefNames": [
+          "hive-GATEWAY-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
+          "yarn-NODEMANAGER-COMPUTE"
         ]
       }
     ]
