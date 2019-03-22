@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
@@ -42,6 +45,8 @@ public class AbstractWorkspaceAwareResourceServiceTest {
         // under test.
         when(underTest.delete(any(TestWorkspaceAwareResource.class))).thenCallRealMethod();
         when(underTest.delete(any(Set.class))).thenCallRealMethod();
+        when(underTest.deleteMultipleByNameFromWorkspace(any(Set.class), any(Long.class))).thenCallRealMethod();
+        when(underTest.getByNamesForWorkspaceId(any(Set.class), any(Long.class))).thenCallRealMethod();
     }
 
     @Test
@@ -65,6 +70,22 @@ public class AbstractWorkspaceAwareResourceServiceTest {
         verify(underTest).prepareDeletion(r2);
         verify(underTest.repository()).delete(r1);
         verify(underTest.repository()).delete(r2);
+    }
+
+    @Test
+    public void testMultiDeleteNotFound() {
+        try {
+            TestWorkspaceAwareResource r1 = new TestWorkspaceAwareResource(1L, workspace, "name2");
+            Set<String> names = ImmutableSet.of("badname1", "name2", "badname3");
+
+            when(testRepository.findByNameInAndWorkspaceId(names, 1L))
+                    .thenReturn(ImmutableSet.of(r1));
+            underTest.deleteMultipleByNameFromWorkspace(names, 1L);
+            fail();
+        } catch (NotFoundException e) {
+            assertTrue(e.getMessage().contains("badname1") && e.getMessage().contains("badname3")
+                    && !e.getMessage().contains("name2"));
+        }
     }
 
     private static class TestWorkspaceAwareResource implements WorkspaceAwareResource {

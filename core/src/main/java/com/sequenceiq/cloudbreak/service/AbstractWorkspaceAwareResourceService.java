@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -23,7 +24,8 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceAwareResourceService
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.util.ThrowableUtil;
 
-public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceAwareResource> implements WorkspaceAwareResourceService<T> {
+public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceAwareResource>
+        implements WorkspaceAwareResourceService<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractWorkspaceAwareResourceService.class);
 
@@ -77,6 +79,20 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
     }
 
     @Override
+    public Set<T> getByNamesForWorkspaceId(Set<String> names, Long workspaceId) {
+        Set<T> results = repository().findByNameInAndWorkspaceId(names, workspaceId);
+        Set<String> notFound = Sets.difference(names,
+                results.stream().map(WorkspaceAwareResource::getName).collect(Collectors.toSet()));
+
+        if (!notFound.isEmpty()) {
+            throw new NotFoundException(String.format("No %s(s) found with name(s) '%s'", resource().getShortName(),
+                    notFound.stream().map(name -> '\'' + name + '\'').collect(Collectors.joining(", "))));
+        }
+
+        return results;
+    }
+
+    @Override
     public T getByNameForWorkspaceId(String name, Long workspaceId) {
         T object = repository().findByNameAndWorkspaceId(name, workspaceId);
         if (object == null) {
@@ -120,7 +136,7 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
 
     @Override
     public Set<T> deleteMultipleByNameFromWorkspace(Set<String> names, Long workspaceId) {
-        Set<T> toBeDeleted = names.stream().map(n -> getByNameForWorkspaceId(n, workspaceId)).collect(Collectors.toSet());
+        Set<T> toBeDeleted = getByNamesForWorkspaceId(names, workspaceId);
         return delete(toBeDeleted);
     }
 

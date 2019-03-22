@@ -289,6 +289,11 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public Set<Stack> findByNameInAndWorkspaceId(Set<String> name, Long workspaceId) {
+            return null;
+        }
+
+        @Override
         public Stack findByNameAndWorkspaceIdWithLists(String name, Long workspaceId, Boolean showTerminated, Long terminatedAfter) {
             return null;
         }

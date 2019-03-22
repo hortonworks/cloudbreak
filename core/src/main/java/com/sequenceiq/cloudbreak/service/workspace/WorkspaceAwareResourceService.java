@@ -17,6 +17,8 @@ public interface WorkspaceAwareResourceService<T extends WorkspaceAwareResource>
 
     T getByNameForWorkspaceId(String name, Long workspaceId);
 
+    Set<T> getByNamesForWorkspaceId(Set<String> name, Long workspaceId);
+
     T getByNameForWorkspace(String name, Workspace workspace);
 
     Set<T> findAllByWorkspace(Workspace workspace);

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.db;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
@@ -60,6 +61,11 @@ public interface StructuredEventRepository extends WorkspaceResourceRepository<S
 
     @Override
     default StructuredEventEntity findByNameAndWorkspaceId(String name, Long workspaceId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    default Set<StructuredEventEntity> findByNameInAndWorkspaceId(Set<String> name, Long workspaceId) {
         throw new UnsupportedOperationException();
     }
 }

@@ -51,6 +51,12 @@ public interface RdsConfigRepository extends EnvironmentResourceRepository<RDSCo
     RDSConfig findByNameAndWorkspaceId(@Param("name") String name, @Param("workspaceId") Long workspaceId);
 
     @Override
+    @CheckPermissionsByWorkspaceId(action = READ, workspaceIdIndex = 1)
+    @Query("SELECT r FROM RDSConfig r LEFT JOIN FETCH r.clusters WHERE r.name in :names AND r.status = 'USER_MANAGED'"
+            + "AND r.workspace.id = :workspaceId")
+    Set<RDSConfig> findByNameInAndWorkspaceId(@Param("names") Set<String> name, @Param("workspaceId") Long workspaceId);
+
+    @Override
     @CheckPermissionsByWorkspace(action = READ, workspaceIndex = 1)
     @Query("SELECT r FROM RDSConfig r LEFT JOIN FETCH r.clusters WHERE r.name= :name AND r.status = 'USER_MANAGED'"
             + "AND r.workspace = :org")
