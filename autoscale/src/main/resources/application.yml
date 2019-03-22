@@ -20,6 +20,8 @@ management:
       show-details: always
 
 periscope:
+  cert:
+    dir: /certs/
   db.env:
     user: postgres
     pass:
