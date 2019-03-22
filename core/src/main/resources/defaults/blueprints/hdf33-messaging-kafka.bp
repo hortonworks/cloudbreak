@@ -1,4 +1,5 @@
 {
+  "inputs": [],
   "description": "Useful for messaging management with Apache Kafka",
   "blueprint":
   {
