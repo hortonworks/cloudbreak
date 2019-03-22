@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.MAGNETIC;
-import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.values;
+import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.SSD;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,17 +43,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
-import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 
 @Service
 public class AzurePlatformResources implements PlatformResources {
-
-    public static final int DEFAULT_MINIMUM_VOLUME_SIZE = 10;
-
-    public static final int DEFAULT_MAXIMUM_VOLUME_SIZE = 1023;
-
-    public static final int DEFAULT_MINIMUM_VOLUME_COUNT = 1;
 
     private static final float NO_MB_PER_GB = 1024.0f;
 
@@ -150,14 +143,14 @@ public class AzurePlatformResources implements PlatformResources {
 
         for (VirtualMachineSize virtualMachineSize : vmTypes) {
             float memoryInGB = virtualMachineSize.memoryInMB() / NO_MB_PER_GB;
-            VmTypeMetaBuilder builder = VmTypeMetaBuilder.builder()
-                    .withCpuAndMemory(virtualMachineSize.numberOfCores(), memoryInGB);
+            VmTypeMetaBuilder builder = VmTypeMetaBuilder.builder().withCpuAndMemory(virtualMachineSize.numberOfCores(), memoryInGB);
 
-            for (VolumeParameterType volumeParameterType : values()) {
-                if (volumeParameterType == MAGNETIC) {
-                    builder.withMagneticConfig(volumeParameterConfig(MAGNETIC, virtualMachineSize));
+            for (VolumeParameterType volumeParameterType : VolumeParameterType.values()) {
+                if (volumeParameterType.in(MAGNETIC, SSD)) {
+                    volumeParameterType.buildForVmTypeMetaBuilder(builder, virtualMachineSize.maxDataDiskCount());
                 }
             }
+
             VmType vmType = VmType.vmTypeWithMeta(virtualMachineSize.name(), builder.create(), true);
             types.add(vmType);
             if (virtualMachineSize.name().equals(armVmDefault)) {
@@ -187,15 +180,6 @@ public class AzurePlatformResources implements PlatformResources {
     @Override
     public CloudEncryptionKeys encryptionKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudEncryptionKeys(new HashSet<>());
-    }
-
-    private VolumeParameterConfig volumeParameterConfig(VolumeParameterType volumeParameterType, VirtualMachineSize virtualMachineSize) {
-        return new VolumeParameterConfig(
-                volumeParameterType,
-                DEFAULT_MINIMUM_VOLUME_SIZE,
-                DEFAULT_MAXIMUM_VOLUME_SIZE,
-                DEFAULT_MINIMUM_VOLUME_COUNT,
-                virtualMachineSize.maxDataDiskCount());
     }
 
 }
