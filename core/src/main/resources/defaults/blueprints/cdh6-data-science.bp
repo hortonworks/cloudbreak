@@ -47,7 +47,7 @@
             "configs": [
               {
                 "name": "fs_checkpoint_dir_list",
-                "value": "/hadoopfs/fs1/secondarynamenode"
+                "value": "/hadoopfs/fs1/namesecondary"
               }
             ]
           },

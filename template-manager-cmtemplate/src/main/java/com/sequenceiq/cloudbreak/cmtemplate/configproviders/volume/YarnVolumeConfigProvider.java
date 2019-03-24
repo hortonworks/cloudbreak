@@ -1,29 +1,60 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.volume;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
+import com.sequenceiq.cloudbreak.template.VolumeUtils;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
 public class YarnVolumeConfigProvider extends AbstractVolumeConfigProvider {
+
+    private static final String NODE_LOCAL_DIRS = "yarn_nodemanager_local_dirs";
+
+    private static final String NODE_LOG_DIRS = "yarn_nodemanager_log_dirs";
+
     @Override
     List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView) {
         List<ApiClusterTemplateConfig> roleConfigs = new ArrayList<>();
-        String variable = getRoleTypeVariableName(hostGroupView.getName(), roleType);
+
         switch (roleType) {
             case "NODEMANAGER":
-                roleConfigs.add(new ApiClusterTemplateConfig().name("yarn_nodemanager_local_dirs").variable(variable));
-                roleConfigs.add(new ApiClusterTemplateConfig().name("yarn_nodemanager_log_dirs").variable(variable));
+                String localDirs = getRoleTypeVariableName(hostGroupView.getName(), roleType, NODE_LOCAL_DIRS);
+                roleConfigs.add(new ApiClusterTemplateConfig().name(NODE_LOCAL_DIRS).variable(localDirs));
+
+                String logDirs = getRoleTypeVariableName(hostGroupView.getName(), roleType, NODE_LOG_DIRS);
+                roleConfigs.add(new ApiClusterTemplateConfig().name(NODE_LOG_DIRS).variable(logDirs));
                 break;
             default:
                 break;
         }
+
         return roleConfigs;
+    }
+
+    @Override
+    List<ApiClusterTemplateVariable> getVariables(String roleType, HostgroupView hostGroupView) {
+        List<ApiClusterTemplateVariable> variables = new ArrayList<>();
+
+        switch (roleType) {
+            case "NODEMANAGER":
+                String localDirVar = getRoleTypeVariableName(hostGroupView.getName(), roleType, NODE_LOCAL_DIRS);
+                String localDirs = VolumeUtils.buildVolumePathString(hostGroupView.getVolumeCount(), "nodemanager");
+                variables.add(new ApiClusterTemplateVariable().name(localDirVar).value(localDirs));
+
+                String logDirVar = getRoleTypeVariableName(hostGroupView.getName(), roleType, NODE_LOG_DIRS);
+                String loglDirs = VolumeUtils.buildVolumePathString(hostGroupView.getVolumeCount(), "nodemanager/log");
+                variables.add(new ApiClusterTemplateVariable().name(logDirVar).value(loglDirs));
+                break;
+            default:
+                break;
+        }
+
+        return variables;
     }
 
     @Override
@@ -33,6 +64,6 @@ public class YarnVolumeConfigProvider extends AbstractVolumeConfigProvider {
 
     @Override
     public List<String> getRoleTypes() {
-        return Arrays.asList("NODEMANAGER");
+        return List.of("NODEMANAGER");
     }
 }

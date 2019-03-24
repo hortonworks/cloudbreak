@@ -28,9 +28,9 @@ public class HdfsVolumeConfigProviderTest {
 
     @Test
     public void testGetRoleTypeVariableName() {
-        String variableName = underTest.getRoleTypeVariableName("master", "NAMENODE");
+        String variableName = underTest.getRoleTypeVariableName("master", "NAMENODE", "dfs_dir");
 
-        assertEquals("master_NAMENODE", variableName);
+        assertEquals("master_namenode_dfs_dir", variableName);
     }
 
     @Test
@@ -48,10 +48,10 @@ public class HdfsVolumeConfigProviderTest {
 
         assertEquals(1, workerDN.size());
         assertEquals("dfs_data_dir_list", workerDN.get(0).getName());
-        assertEquals("worker_DATANODE", workerDN.get(0).getVariable());
+        assertEquals("worker_datanode_dfs_data_dir_list", workerDN.get(0).getVariable());
         assertEquals(1, masterNN.size());
         assertEquals("dfs_name_dir_list", masterNN.get(0).getName());
-        assertEquals("master_NAMENODE", masterNN.get(0).getVariable());
+        assertEquals("master_namenode_dfs_name_dir_list", masterNN.get(0).getVariable());
     }
 
     @Test
@@ -69,10 +69,10 @@ public class HdfsVolumeConfigProviderTest {
 
         assertEquals(1, workerDN.size());
         assertEquals("dfs_data_dir_list", workerDN.get(0).getName());
-        assertEquals("worker_DATANODE", workerDN.get(0).getVariable());
+        assertEquals("worker_datanode_dfs_data_dir_list", workerDN.get(0).getVariable());
         assertEquals(1, masterNN.size());
         assertEquals("dfs_name_dir_list", masterNN.get(0).getName());
-        assertEquals("master_NAMENODE", masterNN.get(0).getVariable());
+        assertEquals("master_namenode_dfs_name_dir_list", masterNN.get(0).getVariable());
     }
 
     @Test
@@ -91,9 +91,9 @@ public class HdfsVolumeConfigProviderTest {
         assertEquals(2, roleConfigs.size());
         assertEquals(1, masterNN.size());
         assertEquals("dfs_name_dir_list", masterNN.get(0).getName());
-        assertEquals("master_NAMENODE", masterNN.get(0).getVariable());
+        assertEquals("master_namenode_dfs_name_dir_list", masterNN.get(0).getVariable());
         assertEquals("fs_checkpoint_dir_list", masterSN.get(0).getName());
-        assertEquals("master_SECONDARYNAMENODE", masterSN.get(0).getVariable());
+        assertEquals("master_secondarynamenode_fs_checkpoint_dir_list", masterSN.get(0).getVariable());
     }
 
     @Test
@@ -138,7 +138,7 @@ public class HdfsVolumeConfigProviderTest {
         assertEquals(3, roleConfigs.size());
         assertEquals(1, masterNN.size());
         assertEquals("dfs_name_dir_list", masterNN.get(0).getName());
-        assertEquals("master_NAMENODE", masterNN.get(0).getVariable());
+        assertEquals("master_namenode_dfs_name_dir_list", masterNN.get(0).getVariable());
     }
 
     @Test
@@ -158,13 +158,13 @@ public class HdfsVolumeConfigProviderTest {
 
         assertEquals(1, workerDN.size());
         assertEquals("dfs_data_dir_list", workerDN.get(0).getName());
-        assertEquals("worker_DATANODE", workerDN.get(0).getVariable());
+        assertEquals("worker_datanode_dfs_data_dir_list", workerDN.get(0).getVariable());
         assertEquals(1, masterNN.size());
         assertEquals("dfs_name_dir_list", masterNN.get(0).getName());
-        assertEquals("master_NAMENODE", masterNN.get(0).getVariable());
+        assertEquals("master_namenode_dfs_name_dir_list", masterNN.get(0).getVariable());
         assertEquals(1, computeDN.size());
         assertEquals("dfs_data_dir_list", computeDN.get(0).getName());
-        assertEquals("compute_DATANODE", computeDN.get(0).getVariable());
+        assertEquals("compute_datanode_dfs_data_dir_list", computeDN.get(0).getVariable());
     }
 
     @Test
@@ -183,11 +183,11 @@ public class HdfsVolumeConfigProviderTest {
         ApiClusterTemplateVariable workerDN = roleVariables.get(2);
 
         assertEquals(3, roleVariables.size());
-        assertEquals("master_NAMENODE", masterNN.getName());
+        assertEquals("master_namenode_dfs_name_dir_list", masterNN.getName());
         assertEquals("/hadoopfs/fs1/namenode", masterNN.getValue());
-        assertEquals("master_SECONDARYNAMENODE", masterSN.getName());
-        assertEquals("/hadoopfs/fs1/secondarynamenode", masterSN.getValue());
-        assertEquals("worker_DATANODE", workerDN.getName());
+        assertEquals("master_secondarynamenode_fs_checkpoint_dir_list", masterSN.getName());
+        assertEquals("/hadoopfs/fs1/namesecondary", masterSN.getValue());
+        assertEquals("worker_datanode_dfs_data_dir_list", workerDN.getName());
         assertEquals("/hadoopfs/fs1/datanode,/hadoopfs/fs2/datanode", workerDN.getValue());
     }
 
@@ -205,10 +205,10 @@ public class HdfsVolumeConfigProviderTest {
         ApiClusterTemplateVariable masterSN = roleVariables.get(1);
 
         assertEquals(2, roleVariables.size());
-        assertEquals("master_NAMENODE", masterNN.getName());
+        assertEquals("master_namenode_dfs_name_dir_list", masterNN.getName());
         assertEquals("/hadoopfs/fs1/namenode", masterNN.getValue());
-        assertEquals("master_SECONDARYNAMENODE", masterSN.getName());
-        assertEquals("/hadoopfs/fs1/secondarynamenode", masterSN.getValue());
+        assertEquals("master_secondarynamenode_fs_checkpoint_dir_list", masterSN.getName());
+        assertEquals("/hadoopfs/fs1/namesecondary", masterSN.getValue());
     }
 
     @Test
@@ -240,11 +240,11 @@ public class HdfsVolumeConfigProviderTest {
         ApiClusterTemplateVariable workerDN = roleVariables.get(2);
 
         assertEquals(3, roleVariables.size());
-        assertEquals("master_NAMENODE", masterNN.getName());
+        assertEquals("master_namenode_dfs_name_dir_list", masterNN.getName());
         assertEquals("/hadoopfs/fs1/namenode", masterNN.getValue());
-        assertEquals("master_SECONDARYNAMENODE", masterSN.getName());
-        assertEquals("/hadoopfs/fs1/secondarynamenode", masterSN.getValue());
-        assertEquals("worker_DATANODE", workerDN.getName());
+        assertEquals("master_secondarynamenode_fs_checkpoint_dir_list", masterSN.getName());
+        assertEquals("/hadoopfs/fs1/namesecondary", masterSN.getValue());
+        assertEquals("worker_datanode_dfs_data_dir_list", workerDN.getName());
         assertEquals("/hadoopfs/fs1/datanode,/hadoopfs/fs2/datanode", workerDN.getValue());
     }
 
@@ -278,13 +278,13 @@ public class HdfsVolumeConfigProviderTest {
         ApiClusterTemplateVariable masterSN = roleVariables.get(2);
         ApiClusterTemplateVariable workerDN = roleVariables.get(3);
 
-        assertEquals("master_NAMENODE", masterNN.getName());
+        assertEquals("master_namenode_dfs_name_dir_list", masterNN.getName());
         assertEquals("/hadoopfs/fs1/namenode", masterNN.getValue());
-        assertEquals("master_SECONDARYNAMENODE", masterSN.getName());
-        assertEquals("/hadoopfs/fs1/secondarynamenode", masterSN.getValue());
-        assertEquals("worker_DATANODE", workerDN.getName());
+        assertEquals("master_secondarynamenode_fs_checkpoint_dir_list", masterSN.getName());
+        assertEquals("/hadoopfs/fs1/namesecondary", masterSN.getValue());
+        assertEquals("worker_datanode_dfs_data_dir_list", workerDN.getName());
         assertEquals("/hadoopfs/fs1/datanode,/hadoopfs/fs2/datanode", workerDN.getValue());
-        assertEquals("compute_DATANODE", computeDN.getName());
+        assertEquals("compute_datanode_dfs_data_dir_list", computeDN.getName());
         assertEquals("/hadoopfs/fs1/datanode,/hadoopfs/fs2/datanode,/hadoopfs/fs3/datanode", computeDN.getValue());
     }
 
