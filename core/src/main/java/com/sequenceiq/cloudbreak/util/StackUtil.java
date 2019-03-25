@@ -119,16 +119,16 @@ public class StackUtil {
                 .collect(Collectors.toMap(AbstractImmutableEntry::getKey, AbstractImmutableEntry::getValue));
     }
 
-    public String extractAmbariIp(StackView stackView) {
-        return extractAmbariIp(stackView.getId(), stackView.getOrchestrator().getType(),
+    public String extractClusterManagerIp(StackView stackView) {
+        return extractClusterManagerIp(stackView.getId(), stackView.getOrchestrator().getType(),
                 stackView.getClusterView() != null ? stackView.getClusterView().getAmbariIp() : null);
     }
 
-    public String extractAmbariIp(Stack stack) {
-        return extractAmbariIp(stack.getId(), stack.getOrchestrator().getType(), stack.getCluster() != null ? stack.getCluster().getAmbariIp() : null);
+    public String extractClusterManagerIp(Stack stack) {
+        return extractClusterManagerIp(stack.getId(), stack.getOrchestrator().getType(), stack.getCluster() != null ? stack.getCluster().getAmbariIp() : null);
     }
 
-    private String extractAmbariIp(long stackId, String orchestratorName, String ambariIp) {
+    private String extractClusterManagerIp(long stackId, String orchestratorName, String ambariIp) {
         String result = null;
         try {
             OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestratorName);

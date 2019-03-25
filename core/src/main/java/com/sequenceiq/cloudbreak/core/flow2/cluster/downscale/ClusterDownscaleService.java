@@ -53,17 +53,17 @@ public class ClusterDownscaleService {
     private HostGroupService hostGroupService;
 
     public void clusterDownscaleStarted(long stackId, String hostGroupName, Integer scalingAdjustment, Set<Long> privateIds, ClusterDownscaleDetails details) {
-        flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
         clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_IN_PROGRESS);
         if (scalingAdjustment != null) {
             LOGGER.debug("Decommissioning {} hosts from host group '{}'", Math.abs(scalingAdjustment), hostGroupName);
-            flowMessageService.fireInstanceGroupEventAndLog(stackId, Msg.AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP, Status.UPDATE_IN_PROGRESS.name(),
+            flowMessageService.fireInstanceGroupEventAndLog(stackId, Msg.CLUSTER_REMOVING_NODE_FROM_HOSTGROUP, Status.UPDATE_IN_PROGRESS.name(),
                     hostGroupName, Math.abs(scalingAdjustment), hostGroupName);
         } else if (!CollectionUtils.isEmpty(privateIds)) {
             LOGGER.debug("Decommissioning {} hosts from host group '{}'", privateIds, hostGroupName);
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             List<String> decomissionedHostNames = stackService.getHostNamesForPrivateIds(stack.getInstanceMetaDataAsList(), privateIds);
-            Msg message = details.isForced() ? Msg.AMBARI_CLUSTER_FORCE_REMOVING_NODE_FROM_HOSTGROUP : Msg.AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP;
+            Msg message = details.isForced() ? Msg.CLUSTER_FORCE_REMOVING_NODE_FROM_HOSTGROUP : Msg.CLUSTER_REMOVING_NODE_FROM_HOSTGROUP;
             flowMessageService.fireInstanceGroupEventAndLog(stackId, message, Status.UPDATE_IN_PROGRESS.name(),
                     hostGroupName, decomissionedHostNames, hostGroupName);
         }
@@ -84,7 +84,7 @@ public class ClusterDownscaleService {
             stackService.updateMetaDataStatusIfFound(stackView.getId(), hostName, InstanceStatus.DECOMMISSIONED);
         }
         clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
-        flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALED_DOWN, AVAILABLE.name());
+        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_SCALED_DOWN, AVAILABLE.name());
     }
 
     public void handleClusterDownscaleFailure(long stackId, Exception error) {
@@ -96,7 +96,7 @@ public class ClusterDownscaleService {
         }
         clusterService.updateClusterStatusByStackId(stackId, status, errorDetailes);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Node(s) could not be removed from the cluster: " + errorDetailes);
-        flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "removed from", errorDetailes);
+        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "removed from", errorDetailes);
 
     }
 }

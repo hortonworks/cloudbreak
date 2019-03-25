@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariStartServerAndAgentRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariStartServerAndAgentResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartServerAndAgentResult;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -53,18 +53,18 @@ public class AmbariStartServerAndAgentHandler implements ReactorEventHandler<Amb
     public void accept(Event<AmbariStartServerAndAgentRequest> event) {
         AmbariStartServerAndAgentRequest request = event.getData();
         Long stackId = request.getStackId();
-        AmbariStartServerAndAgentResult result;
+        StartServerAndAgentResult result;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             Set<Node> allNodes = stackUtil.collectNodes(stack);
 
             hostOrchestrator.startAmbariOnMaster(primaryGatewayConfig, allNodes, clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
-            result = new AmbariStartServerAndAgentResult(request);
+            result = new StartServerAndAgentResult(request);
         } catch (Exception e) {
             String message = "Failed to start ambari agent and/or server on new host.";
             LOGGER.error(message, e);
-            result = new AmbariStartServerAndAgentResult(message, e, request);
+            result = new StartServerAndAgentResult(message, e, request);
         }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }

@@ -29,19 +29,19 @@ public class ClusterUpgradeService {
 
     public void upgradeCluster(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_IN_PROGRESS);
-        flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_UPGRADE, Status.UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_UPGRADE, Status.UPDATE_IN_PROGRESS.name());
     }
 
     public void clusterUpgradeFinished(StackView stack) {
         Long stackId = stack.getId();
         clusterService.updateClusterStatusByStackId(stackId, Status.START_REQUESTED);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Ambari is successfully upgraded.");
-        flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_UPGRADE_FINISHED, Status.AVAILABLE.name(), stackUtil.extractAmbariIp(stack));
+        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_UPGRADE_FINISHED, Status.AVAILABLE.name(), stackUtil.extractClusterManagerIp(stack));
     }
 
     public void handleUpgradeClusterFailure(long stackId, String errorReason) {
         clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_FAILED, errorReason);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE);
-        flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_UPGRADE_FAILED, Status.UPDATE_FAILED.name(), errorReason);
+        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_UPGRADE_FAILED, Status.UPDATE_FAILED.name(), errorReason);
     }
 }

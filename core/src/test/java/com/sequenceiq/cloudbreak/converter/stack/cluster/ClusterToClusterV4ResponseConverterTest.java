@@ -78,7 +78,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         getSource().setConfigStrategy(ConfigStrategy.NEVER_APPLY);
         getSource().setClusterDefinition(new ClusterDefinition());
         getSource().setExtendedClusterDefinitionText("asdf");
-        given(stackUtil.extractAmbariIp(any(Stack.class))).willReturn("10.0.0.1");
+        given(stackUtil.extractClusterManagerIp(any(Stack.class))).willReturn("10.0.0.1");
         Cluster source = getSource();
         TestUtil.setSecretField(Cluster.class, "cloudbreakAmbariUser", source, "user", "secret/path");
         TestUtil.setSecretField(Cluster.class, "cloudbreakAmbariPassword", source, "pass", "secret/path");
@@ -123,7 +123,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         exposedServiceResponseMap.put("topology1", getExpiosedServices());
         given(serviceEndpointCollector.prepareClusterExposedServices(any(), anyString())).willReturn(exposedServiceResponseMap);
 
-        given(stackUtil.extractAmbariIp(any(Stack.class))).willReturn("10.0.0.1");
+        given(stackUtil.extractClusterManagerIp(any(Stack.class))).willReturn("10.0.0.1");
         ClusterV4Response clusterResponse = underTest.convert(getSource());
         Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesForTopologies = clusterResponse.getExposedServices();
         assertEquals(1L, clusterExposedServicesForTopologies.keySet().size());
