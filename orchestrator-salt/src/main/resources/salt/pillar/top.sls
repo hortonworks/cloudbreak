@@ -47,6 +47,7 @@ base:
     - cloudera-manager.repo
     - cloudera-manager.database
     - gateway.init
+    - gateway.ldap
 
   'roles:ambari_server*':
     - match: grain
