@@ -59,14 +59,14 @@ public class ClusterCreationService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_METADATA_SETUP, UPDATE_IN_PROGRESS.name());
     }
 
-    public void startingAmbariServices(StackView stack) throws CloudbreakException {
+    public void startingClusterServices(StackView stack) throws CloudbreakException {
         OrchestratorView orchestrator = stack.getOrchestrator();
         OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STARTING_AMBARI_SERVICES, "Running cluster services.");
         if (orchestratorType.containerOrchestrator()) {
-            flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_RUN_CONTAINERS, UPDATE_IN_PROGRESS.name());
+            flowMessageService.fireEventAndLog(stack.getId(), Msg.CLUSTER_RUN_CONTAINERS, UPDATE_IN_PROGRESS.name());
         } else if (orchestratorType.hostOrchestrator()) {
-            flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_RUN_SERVICES, UPDATE_IN_PROGRESS.name());
+            flowMessageService.fireEventAndLog(stack.getId(), Msg.CLUSTER_RUN_SERVICES, UPDATE_IN_PROGRESS.name());
         } else {
             String message = String.format("Please implement %s orchestrator because it is not on classpath.", orchestrator.getType());
             LOGGER.error(message);
@@ -80,17 +80,17 @@ public class ClusterCreationService {
     }
 
     public void installingCluster(StackView stack) {
-        String ambariIp = stackUtil.extractAmbariIp(stack);
+        String clusterManagerIP = stackUtil.extractClusterManagerIp(stack);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_OPERATION,
-                String.format("Building the Ambari cluster. Ambari ip:%s", ambariIp));
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_BUILDING, UPDATE_IN_PROGRESS.name(), ambariIp);
+                String.format("Building the cluster. Cluster manager ip:%s", clusterManagerIP));
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.CLUSTER_BUILDING, UPDATE_IN_PROGRESS.name(), clusterManagerIP);
     }
 
     public void clusterInstallationFinished(StackView stackView) {
-        String ambariIp = stackUtil.extractAmbariIp(stackView);
+        String clusterManagerIp = stackUtil.extractClusterManagerIp(stackView);
         clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
         stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE, "Cluster creation finished.");
-        flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_BUILT, AVAILABLE.name(), ambariIp);
+        flowMessageService.fireEventAndLog(stackView.getId(), Msg.CLUSTER_BUILT, AVAILABLE.name(), clusterManagerIp);
     }
 
     public void handleClusterCreationFailure(StackView stackView, Exception exception) {
@@ -99,7 +99,7 @@ public class ClusterCreationService {
             String errorMessage = getErrorMessageFromException(exception);
             clusterService.updateClusterStatusByStackId(stackView.getId(), CREATE_FAILED, errorMessage);
             stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE);
-            flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_CREATE_FAILED, CREATE_FAILED.name(), errorMessage);
+            flowMessageService.fireEventAndLog(stackView.getId(), Msg.CLUSTER_CREATE_FAILED, CREATE_FAILED.name(), errorMessage);
             try {
                 OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stackView.getOrchestrator().getType());
                 if (cluster != null && orchestratorType.containerOrchestrator()) {

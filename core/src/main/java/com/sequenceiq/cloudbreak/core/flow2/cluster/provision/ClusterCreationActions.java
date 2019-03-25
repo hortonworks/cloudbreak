@@ -108,7 +108,7 @@ public class ClusterCreationActions {
         return new AbstractClusterAction<>(UploadRecipesSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, UploadRecipesSuccess payload, Map<Object, Object> variables) throws Exception {
-                clusterCreationService.startingAmbariServices(context.getStack());
+                clusterCreationService.startingClusterServices(context.getStack());
                 sendEvent(context);
             }
 

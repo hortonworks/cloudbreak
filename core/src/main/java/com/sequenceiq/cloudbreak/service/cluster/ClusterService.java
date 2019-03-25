@@ -525,12 +525,12 @@ public class ClusterService {
                 try {
                     if (!autoRecoveryNodesMap.isEmpty()) {
                         flowManager.triggerClusterRepairFlow(stackId, autoRecoveryNodesMap, false);
-                        String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_AUTORECOVERY_REQUESTED.code(),
+                        String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.CLUSTER_AUTORECOVERY_REQUESTED.code(),
                                 Collections.singletonList(autoRecoveryNodesMap));
                         updateChangedHosts(cluster, autoRecoveryHostMetadata, HostMetadataState.HEALTHY, HostMetadataState.WAITING_FOR_REPAIR, recoveryMessage);
                     }
                     if (!failedHostMetadata.isEmpty()) {
-                        String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_FAILED_NODES_REPORTED.code(),
+                        String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.CLUSTER_FAILED_NODES_REPORTED.code(),
                                 Collections.singletonList(failedHostMetadata.keySet()));
                         updateChangedHosts(cluster, failedHostMetadata, HostMetadataState.HEALTHY, HostMetadataState.UNHEALTHY, recoveryMessage);
                     }
@@ -683,7 +683,7 @@ public class ClusterService {
     private void triggerRepair(Long stackId, Map<String, List<String>> failedNodeMap, boolean removeOnly, List<String> recoveryMessageArgument) {
         if (!failedNodeMap.isEmpty()) {
             flowManager.triggerClusterRepairFlow(stackId, failedNodeMap, removeOnly);
-            String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_MANUALRECOVERY_REQUESTED.code(),
+            String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.CLUSTER_MANUALRECOVERY_REQUESTED.code(),
                     Collections.singletonList(recoveryMessageArgument));
             LOGGER.debug(recoveryMessage);
             eventService.fireCloudbreakEvent(stackId, "RECOVERY", recoveryMessage);
@@ -730,12 +730,12 @@ public class ClusterService {
 
     private void start(Stack stack, Cluster cluster) {
         if (stack.isStartInProgress()) {
-            String message = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_START_REQUESTED.code());
+            String message = cloudbreakMessagesService.getMessage(Msg.CLUSTER_START_REQUESTED.code());
             eventService.fireCloudbreakEvent(stack.getId(), START_REQUESTED.name(), message);
             updateClusterStatusByStackId(stack.getId(), START_REQUESTED);
         } else {
             if (cluster.isAvailable()) {
-                String statusDesc = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_START_IGNORED.code());
+                String statusDesc = cloudbreakMessagesService.getMessage(Msg.CLUSTER_START_IGNORED.code());
                 LOGGER.debug(statusDesc);
                 eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), statusDesc);
             } else if (!cluster.isClusterReadyForStart() && !cluster.isStartFailed()) {
@@ -754,7 +754,7 @@ public class ClusterService {
     private void stop(Stack stack, Cluster cluster) {
         StopRestrictionReason reason = stack.isInfrastructureStoppable();
         if (cluster.isStopped()) {
-            String statusDesc = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_STOP_IGNORED.code());
+            String statusDesc = cloudbreakMessagesService.getMessage(Msg.CLUSTER_STOP_IGNORED.code());
             LOGGER.debug(statusDesc);
             eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), statusDesc);
         } else if (reason != StopRestrictionReason.NONE) {
@@ -1097,7 +1097,7 @@ public class ClusterService {
             hostMetadata.setHostMetadataState(newState);
             hostMetadataRepository.save(hostMetadata);
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
-                    cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_HOST_STATUS_UPDATED.code(), Arrays.asList(hostName, newState.name())));
+                    cloudbreakMessagesService.getMessage(Msg.CLUSTER_HOST_STATUS_UPDATED.code(), Arrays.asList(hostName, newState.name())));
         }
         return stateChanged;
     }
@@ -1307,13 +1307,13 @@ public class ClusterService {
     }
 
     private enum Msg {
-        AMBARI_CLUSTER_START_IGNORED("ambari.cluster.start.ignored"),
-        AMBARI_CLUSTER_STOP_IGNORED("ambari.cluster.stop.ignored"),
-        AMBARI_CLUSTER_HOST_STATUS_UPDATED("ambari.cluster.host.status.updated"),
-        AMBARI_CLUSTER_START_REQUESTED("ambari.cluster.start.requested"),
-        AMBARI_CLUSTER_AUTORECOVERY_REQUESTED("ambari.cluster.autorecovery.requested"),
-        AMBARI_CLUSTER_MANUALRECOVERY_REQUESTED("ambari.cluster.manualrecovery.requested"),
-        AMBARI_CLUSTER_FAILED_NODES_REPORTED("ambari.cluster.failednodes.reported");
+        CLUSTER_START_IGNORED("cluster.start.ignored"),
+        CLUSTER_STOP_IGNORED("cluster.stop.ignored"),
+        CLUSTER_HOST_STATUS_UPDATED("cluster.host.status.updated"),
+        CLUSTER_START_REQUESTED("cluster.start.requested"),
+        CLUSTER_AUTORECOVERY_REQUESTED("cluster.autorecovery.requested"),
+        CLUSTER_MANUALRECOVERY_REQUESTED("cluster.manualrecovery.requested"),
+        CLUSTER_FAILED_NODES_REPORTED("cluster.failednodes.reported");
 
         private final String code;
 

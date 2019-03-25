@@ -29,7 +29,7 @@ public class ClusterResetService {
     private StackUpdater stackUpdater;
 
     public void resetCluster(long stackId) {
-        flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_RESET, Status.UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_RESET, Status.UPDATE_IN_PROGRESS.name());
     }
 
     public void handleResetClusterFailure(StackView stackView, Exception exception) {
@@ -37,6 +37,6 @@ public class ClusterResetService {
                 ? exception.getCause().getMessage() : exception.getMessage();
         clusterService.updateClusterStatusByStackId(stackView.getId(), Status.CREATE_FAILED, errorMessage);
         stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE);
-        flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_CREATE_FAILED, Status.CREATE_FAILED.name(), errorMessage);
+        flowMessageService.fireEventAndLog(stackView.getId(), Msg.CLUSTER_CREATE_FAILED, Status.CREATE_FAILED.name(), errorMessage);
     }
 }

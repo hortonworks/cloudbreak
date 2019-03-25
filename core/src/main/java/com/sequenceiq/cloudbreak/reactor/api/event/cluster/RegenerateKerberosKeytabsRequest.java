@@ -2,11 +2,11 @@ package com.sequenceiq.cloudbreak.reactor.api.event.cluster;
 
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.AbstractClusterScaleRequest;
 
-public class AmbariRegenerateKerberosKeytabsRequest extends AbstractClusterScaleRequest {
+public class RegenerateKerberosKeytabsRequest extends AbstractClusterScaleRequest {
 
     private String hostname;
 
-    public AmbariRegenerateKerberosKeytabsRequest(Long stackId, String hostGroupName, String hostName) {
+    public RegenerateKerberosKeytabsRequest(Long stackId, String hostGroupName, String hostName) {
         super(stackId, hostGroupName);
         hostname = hostName;
     }

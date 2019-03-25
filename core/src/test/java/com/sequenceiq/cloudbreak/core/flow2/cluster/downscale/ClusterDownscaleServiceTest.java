@@ -64,13 +64,13 @@ public class ClusterDownscaleServiceTest {
 
     @Test
     public void testClusterDownscaleStartedWhenScalingAdjustmentIsGivenAndItIsPositiveThenInstanceGroupEventWillBeCalledThisNumber() {
-        doNothing().when(flowMessageService).fireEventAndLog(STACK_ID, Msg.AMBARI_CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
+        doNothing().when(flowMessageService).fireEventAndLog(STACK_ID, Msg.CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
 
         underTest.clusterDownscaleStarted(STACK_ID, HOST_GROUP_NAME, 1, PRIVATE_IDS, details);
 
-        verify(flowMessageService, times(1)).fireInstanceGroupEventAndLog(STACK_ID, Msg.AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP,
+        verify(flowMessageService, times(1)).fireInstanceGroupEventAndLog(STACK_ID, Msg.CLUSTER_REMOVING_NODE_FROM_HOSTGROUP,
                 Status.UPDATE_IN_PROGRESS.name(), HOST_GROUP_NAME, 1, HOST_GROUP_NAME);
-        verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID, Msg.AMBARI_CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
+        verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID, Msg.CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
         verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, Status.UPDATE_IN_PROGRESS);
         verify(stackService, times(0)).getByIdWithListsInTransaction(anyLong());
         verify(stackService, times(0)).getByIdWithListsInTransaction(STACK_ID);
@@ -81,13 +81,13 @@ public class ClusterDownscaleServiceTest {
 
     @Test
     public void testClusterDownscaleStartedWhenScalingAdjustmentIsGivenAndItIsNegativeThenInstanceGroupEventWillBeCalledWithTheAbsoluteValueOfThisNumber() {
-        doNothing().when(flowMessageService).fireEventAndLog(STACK_ID, Msg.AMBARI_CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
+        doNothing().when(flowMessageService).fireEventAndLog(STACK_ID, Msg.CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
 
         underTest.clusterDownscaleStarted(STACK_ID, HOST_GROUP_NAME, -1, PRIVATE_IDS, details);
 
-        verify(flowMessageService, times(1)).fireInstanceGroupEventAndLog(STACK_ID, Msg.AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP,
+        verify(flowMessageService, times(1)).fireInstanceGroupEventAndLog(STACK_ID, Msg.CLUSTER_REMOVING_NODE_FROM_HOSTGROUP,
                 Status.UPDATE_IN_PROGRESS.name(), HOST_GROUP_NAME, 1, HOST_GROUP_NAME);
-        verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID, Msg.AMBARI_CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
+        verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID, Msg.CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
         verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, Status.UPDATE_IN_PROGRESS);
         verify(stackService, times(0)).getByIdWithListsInTransaction(anyLong());
         verify(stackService, times(0)).getByIdWithListsInTransaction(STACK_ID);

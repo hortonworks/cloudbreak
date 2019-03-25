@@ -32,7 +32,7 @@ public class ClusterStopService {
 
     public void stoppingCluster(long stackId) {
         updateClusterUptime(stackId);
-        flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_STOPPING, Status.UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_STOPPING, Status.UPDATE_IN_PROGRESS.name());
         clusterService.updateClusterStatusByStackId(stackId, Status.STOP_IN_PROGRESS);
     }
 
@@ -44,12 +44,12 @@ public class ClusterStopService {
 
     public void clusterStopFinished(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, Status.STOPPED);
-        flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_STOPPED, Status.STOPPED.name());
+        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_STOPPED, Status.STOPPED.name());
     }
 
     public void handleClusterStopFailure(StackView stackView, String errorReason) {
         clusterService.updateClusterStatusByStackId(stackView.getId(), Status.STOP_FAILED);
-        stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE, "The Ambari cluster could not be stopped: " + errorReason);
-        flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_STOP_FAILED, Status.STOP_FAILED.name(), errorReason);
+        stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE, "The cluster could not be stopped: " + errorReason);
+        flowMessageService.fireEventAndLog(stackView.getId(), Msg.CLUSTER_STOP_FAILED, Status.STOP_FAILED.name(), errorReason);
     }
 }

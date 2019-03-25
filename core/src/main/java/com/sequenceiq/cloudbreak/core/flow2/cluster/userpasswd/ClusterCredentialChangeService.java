@@ -19,7 +19,7 @@ public class ClusterCredentialChangeService {
     private CloudbreakFlowMessageService flowMessageService;
 
     public void credentialChange(Long stackId) {
-        flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_CHANGING_CREDENTIAL, Status.UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_CHANGING_CREDENTIAL, Status.UPDATE_IN_PROGRESS.name());
     }
 
     public void finishCredentialReplace(Long stackId, Long clusterId, String user, String password) {
@@ -38,6 +38,6 @@ public class ClusterCredentialChangeService {
     private void finishCredentialChange(Long stackId, Cluster cluster) {
         clusterService.updateCluster(cluster);
         clusterService.updateClusterStatusByStackId(stackId, Status.AVAILABLE);
-        flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_CHANGED_CREDENTIAL, Status.AVAILABLE.name());
+        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_CHANGED_CREDENTIAL, Status.AVAILABLE.name());
     }
 }

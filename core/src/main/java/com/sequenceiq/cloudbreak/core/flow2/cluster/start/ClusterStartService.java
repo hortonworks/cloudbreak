@@ -36,24 +36,24 @@ public class ClusterStartService {
 
     public void startingCluster(StackView stack) {
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.START_IN_PROGRESS);
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_OPERATION, String.format("Starting the Ambari cluster. Ambari ip: %s",
-                stackUtil.extractAmbariIp(stack)));
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_STARTING, Status.UPDATE_IN_PROGRESS.name(), stackUtil.extractAmbariIp(stack));
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_OPERATION, String.format("Starting the cluster. Cluster manager ip: %s",
+                stackUtil.extractClusterManagerIp(stack)));
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.CLUSTER_STARTING, Status.UPDATE_IN_PROGRESS.name(), stackUtil.extractClusterManagerIp(stack));
     }
 
     public void clusterStartFinished(StackView stack) {
         Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(stack.getId());
-        String ambariIp = stackUtil.extractAmbariIp(stack);
+        String ambariIp = stackUtil.extractClusterManagerIp(stack);
         cluster.setUpSince(new Date().getTime());
         clusterService.updateCluster(cluster);
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.AVAILABLE);
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Ambari cluster started.");
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_STARTED, Status.AVAILABLE.name(), ambariIp);
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Cluster started.");
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.CLUSTER_STARTED, Status.AVAILABLE.name(), ambariIp);
     }
 
     public void handleClusterStartFailure(StackView stackView, String errorReason) {
         clusterService.updateClusterStatusByStackId(stackView.getId(), Status.START_FAILED);
         stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE, "Cluster could not be started: " + errorReason);
-        flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_START_FAILED, Status.START_FAILED.name(), errorReason);
+        flowMessageService.fireEventAndLog(stackView.getId(), Msg.CLUSTER_START_FAILED, Status.START_FAILED.name(), errorReason);
     }
 }
