@@ -418,8 +418,9 @@ identity:
         - IDENTITY_DB_PASS
     dns: $PRIVATE_IP
     volumes:
-      - ./uaa.yml:/uaa/uaa.yml
-      - ./logs/identity:/tomcat/logs/
+        - "$CBD_CERT_ROOT_PATH:/certs"
+        - ./uaa.yml:/uaa/uaa.yml
+        - ./logs/identity:/tomcat/logs/
     log_opt:
         max-size: "10M"
         max-file: "5"
