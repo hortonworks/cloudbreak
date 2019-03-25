@@ -23,7 +23,7 @@ public class WaitUtilForMultipleStatuses {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WaitUtilForMultipleStatuses.class);
 
-    @Value("${integrationtest.testsuite.maxRetry:720}")
+    @Value("${integrationtest.testsuite.maxRetry:1800}")
     private int maxRetry;
 
     @Value("${integrationtest.testsuite.pollingInterval:1000}")
