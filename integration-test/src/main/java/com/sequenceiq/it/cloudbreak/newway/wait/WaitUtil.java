@@ -23,7 +23,7 @@ public class WaitUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WaitUtil.class);
 
-    private static final int MAX_RETRY = 360;
+    private static final int MAX_RETRY = 1800;
 
     @Value("${integrationtest.testsuite.pollingInterval:1000}")
     private long pollingInterval;

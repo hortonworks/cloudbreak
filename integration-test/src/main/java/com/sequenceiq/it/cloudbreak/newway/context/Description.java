@@ -14,6 +14,8 @@ public @interface Description {
 
     String when() default "";
 
+    String and() default  "";
+
     String then() default "";
 
 }
