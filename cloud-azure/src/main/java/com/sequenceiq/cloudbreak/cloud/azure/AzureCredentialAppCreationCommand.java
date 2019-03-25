@@ -28,13 +28,13 @@ public class AzureCredentialAppCreationCommand {
 
     private static final long YEARS_OF_EXPIRATION = 3L;
 
-    private static final String CB_AZ_APP_REDIRECT_URI_PATTERN = "delegatedtoken/v3/%s/credentials/codegrantflow/authorization/azure";
+    private static final String CB_AZ_APP_REDIRECT_URI_PATTERN = "delegatedtoken/v4/%s/credentials/code_grant_flow/authorization/azure";
 
     private static final String GENERATE_EXCEPTION_MESSAGE_FORMAT = "Failed to process the Azure AD App creation template from path: '%s'";
 
     private static final String ENCODING = "UTF-8";
 
-    private static final String CB_AZ_APP_REPLY_URI = "delegatedtoken/v3/*";
+    private static final String CB_AZ_APP_REPLY_URI = "delegatedtoken/v4/*";
 
     private static final String DELIMITER = "/";
 
