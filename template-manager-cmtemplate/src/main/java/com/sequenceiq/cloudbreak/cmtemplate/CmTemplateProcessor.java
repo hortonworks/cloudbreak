@@ -64,7 +64,7 @@ public class CmTemplateProcessor implements ClusterDefinitionTextProcessor {
         for (ApiClusterTemplateService service : cmTemplate.getServices()) {
             List<String> nonBaseRefs = ofNullable(service.getRoleConfigGroups()).orElse(new ArrayList<>())
                     .stream()
-                    .filter(rcg -> !rcg.getBase())
+                    .filter(rcg -> rcg.getBase() == null || !rcg.getBase())
                     .map(ApiClusterTemplateRoleConfigGroup::getRefName)
                     .collect(Collectors.toList());
             for (String nonBaseRef : nonBaseRefs) {

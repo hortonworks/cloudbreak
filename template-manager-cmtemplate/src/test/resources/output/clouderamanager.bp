@@ -57,8 +57,7 @@
         },
         {
           "refName": "hdfs-DATANODE-BASE",
-          "roleType": "DATANODE",
-          "base": false
+          "roleType": "DATANODE"
         },
         {
           "refName": "hdfs-BALANCER-BASE",
