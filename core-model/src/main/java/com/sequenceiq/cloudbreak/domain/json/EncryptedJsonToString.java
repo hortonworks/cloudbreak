@@ -4,8 +4,12 @@ import java.util.Optional;
 
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.jasypt.exceptions.EncryptionOperationNotPossibleException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EncryptedJsonToString extends JsonToString {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EncryptedJsonToString.class);
 
     private static final String SECRET;
 
@@ -36,8 +40,9 @@ public class EncryptedJsonToString extends JsonToString {
         } catch (EncryptionOperationNotPossibleException e) {
             try {
                 json = legacyEncryptor.decrypt(dbData);
-            } catch (EncryptionOperationNotPossibleException ignored) {
+            } catch (EncryptionOperationNotPossibleException ex) {
                 json = dbData;
+                LOGGER.info("Cannot decrypt the data. {}", dbData, ex);
             }
         }
         return super.convertToEntityAttribute(json);
