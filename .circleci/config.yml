@@ -205,22 +205,50 @@ workflows:
   version: 2
   build_and_test:
     jobs:
-      - build
+      - build:
+          filters:
+            branches:
+              ignore:
+                - master
       - spotbugs-main:
           requires:
             - build
+          filters:
+            branches:
+              ignore:
+                - master
       - spotbugs-test:
           requires:
             - build
+          filters:
+            branches:
+              ignore:
+                - master
       - checkstyle-main:
           requires:
             - build
+          filters:
+            branches:
+              ignore:
+                - master
       - checkstyle-test:
           requires:
             - build
+          filters:
+            branches:
+              ignore:
+                - master
       - unit-test:
           requires:
             - build
+          filters:
+            branches:
+              ignore:
+                - master
       - integration-test:
           requires:
             - build
+          filters:
+            branches:
+              ignore:
+                - master
