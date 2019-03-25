@@ -102,6 +102,7 @@ public class ClouderaManagerKerberosServiceTest {
         when(clustersResourceApi.configureForKerberos(eq(cluster.getName()), any(ApiConfigureForKerberosArguments.class)))
                 .thenReturn(new ApiCommand().id(BigDecimal.TEN));
         when(clouderaManagerResourceApi.generateCredentialsCommand()).thenReturn(new ApiCommand().id(BigDecimal.ZERO));
+        when(clustersResourceApi.deployClientConfig(cluster.getName())).thenReturn(new ApiCommand().id(BigDecimal.valueOf(2L)));
 
         underTest.setupKerberos(client, clientConfig, stack);
 
@@ -119,6 +120,7 @@ public class ClouderaManagerKerberosServiceTest {
         verify(modificationService).stopCluster();
         verify(clouderaManagerPollingServiceProvider).kerberosConfigurePollingService(stack, client, BigDecimal.TEN);
         verify(clouderaManagerPollingServiceProvider).kerberosConfigurePollingService(stack, client, BigDecimal.ZERO);
+        verify(clustersResourceApi).deployClientConfig(cluster.getName());
         verify(modificationService).startCluster(anySet());
     }
 

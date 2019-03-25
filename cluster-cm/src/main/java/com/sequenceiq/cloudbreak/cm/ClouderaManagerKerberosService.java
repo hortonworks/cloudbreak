@@ -69,6 +69,8 @@ public class ClouderaManagerKerberosService {
             clouderaManagerPollingServiceProvider.kerberosConfigurePollingService(stack, client, configureForKerberos.getId());
             ApiCommand generateCredentials = clouderaManagerResourceApi.generateCredentialsCommand();
             clouderaManagerPollingServiceProvider.kerberosConfigurePollingService(stack, client, generateCredentials.getId());
+            ApiCommand deployClusterConfig = clustersResourceApi.deployClientConfig(cluster.getName());
+            clouderaManagerPollingServiceProvider.kerberosConfigurePollingService(stack, client, deployClusterConfig.getId());
             modificationService.startCluster(Collections.emptySet());
         }
     }
