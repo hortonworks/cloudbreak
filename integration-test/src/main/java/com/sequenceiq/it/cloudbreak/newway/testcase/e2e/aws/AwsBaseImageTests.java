@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.e2e.aws;
 
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.equalToIgnoringCase;
+import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +80,11 @@ public class AwsBaseImageTests extends AbstractE2ETest {
 
     private void checkCloudPlatform() {
         String cloudProvider = getTestParameter().getRequired(CommonCloudParameters.CLOUD_PROVIDER);
-        assertTrue("The only supported cloud provider for this test is AWS.", CloudPlatform.AWS.name().equalsIgnoreCase(cloudProvider));
+        assertThat(
+                String.format("The only supported cloud provider for this test is [%s]. Actual cloud provider is [%s].",
+                        CloudPlatform.AWS.name(), cloudProvider),
+                cloudProvider, equalToIgnoringCase(CloudPlatform.AWS.name()));
+
     }
 
     @AfterMethod(alwaysRun = true)
