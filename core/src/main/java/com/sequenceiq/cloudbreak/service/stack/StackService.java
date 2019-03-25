@@ -359,7 +359,10 @@ public class StackService {
                 if (stack == null) {
                     throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_TXT, name));
                 }
-                return converterUtil.convert(stack, StackV4Request.class);
+                StackV4Request request = converterUtil.convert(stack, StackV4Request.class);
+                request.getCluster().setName(null);
+                request.setName(name);
+                return request;
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
