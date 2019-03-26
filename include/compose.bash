@@ -465,6 +465,8 @@ cloudbreak:
         - CB_DB_PORT_5432_TCP_PORT
         - CB_DB_ENV_USER
         - CB_DB_ENV_PASS
+        - CB_DB_ENV_SSL
+        - CB_DB_ENV_CERT_FILE
         - CB_DB_ENV_DB
         - CB_DB_ENV_SCHEMA
         - "CB_DB_SERVICEID=$COMMON_DB.service.consul"
@@ -644,6 +646,8 @@ periscope:
         - PERISCOPE_DB_ENV_PASS
         - PERISCOPE_DB_ENV_DB
         - PERISCOPE_DB_ENV_SCHEMA
+        - PERISCOPE_DB_ENV_SSL
+        - PERISCOPE_DB_ENV_CERT_FILE
         - "HTTPS_PROXYFORCLUSTERCONNECTION=$HTTPS_PROXYFORCLUSTERCONNECTION"
         - SERVICE_NAME=periscope
           #- SERVICE_CHECK_HTTP=/info
