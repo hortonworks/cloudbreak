@@ -25,17 +25,39 @@
           {
             "refName": "hdfs-NAMENODE-BASE",
             "roleType": "NAMENODE",
-            "base": true
+            "base": true,
+            "configs": [
+              {
+                "name": "dfs_name_dir_list",
+                "value": "/hadoopfs/fs1/namenode"
+              }
+            ]
           },
           {
             "refName": "hdfs-SECONDARYNAMENODE-BASE",
             "roleType": "SECONDARYNAMENODE",
-            "base": true
+            "base": true,
+            "configs": [
+              {
+                "name": "fs_checkpoint_dir_list",
+                "value": "/hadoopfs/fs1/namesecondary"
+              }
+            ]
           },
           {
             "refName": "hdfs-DATANODE-BASE",
             "roleType": "DATANODE",
-            "base": true
+            "base": true,
+            "configs": [
+              {
+                "name": "dfs_data_dir_list",
+                "value": "/hadoopfs/fs1/datanode"
+              },
+              {
+                "name": "dfs_datanode_failed_volumes_tolerated",
+                "value": "0"
+              }
+            ]
           },
           {
             "refName": "hdfs-BALANCER-BASE",
@@ -56,7 +78,13 @@
           {
             "refName": "yarn-NODEMANAGER-BASE",
             "roleType": "NODEMANAGER",
-            "base": true
+            "base": true,
+            "configs": [
+              {
+                "name": "yarn_nodemanager_local_dirs",
+                "value": "/hadoopfs/fs1/nodemanager"
+              }
+            ]
           },
           {
             "refName": "yarn-JOBHISTORY-BASE",
