@@ -6,18 +6,17 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 
 @Component
-public class StackToAutoscaleStackResponseJsonConverter extends AbstractConversionServiceAwareConverter<Stack, AutoscaleStackResponse> {
+public class AutoscaleStackToAutoscaleStackResponseJsonConverter extends AbstractConversionServiceAwareConverter<AutoscaleStack, AutoscaleStackResponse> {
 
     @Inject
     private GatewayConfigService gatewayConfigService;
 
     @Override
-    public AutoscaleStackResponse convert(Stack source) {
+    public AutoscaleStackResponse convert(AutoscaleStack source) {
         AutoscaleStackResponse result = new AutoscaleStackResponse();
         result.setStackId(source.getId());
         result.setName(source.getName());
@@ -25,15 +24,14 @@ public class StackToAutoscaleStackResponseJsonConverter extends AbstractConversi
         result.setAccount(source.getOwner());
         result.setGatewayPort(source.getGatewayPort());
         result.setCreated(source.getCreated());
-        result.setStatus(source.getStatus());
+        result.setStatus(source.getStackStatus());
 
-        if (source.getCluster() != null) {
-            Cluster cluster = source.getCluster();
+        if (source.getClusterStatus() != null) {
             String gatewayIp = gatewayConfigService.getPrimaryGatewayIp(source);
             result.setAmbariServerIp(gatewayIp);
-            result.setUserName(cluster.getCloudbreakAmbariUser());
-            result.setPassword(cluster.getCloudbreakAmbariPassword());
-            result.setClusterStatus(cluster.getStatus());
+            result.setUserName(source.getCloudbreakAmbariUser());
+            result.setPassword(source.getCloudbreakAmbariPassword());
+            result.setClusterStatus(source.getClusterStatus());
         }
         return result;
     }

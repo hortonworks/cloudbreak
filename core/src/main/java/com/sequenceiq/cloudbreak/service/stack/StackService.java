@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
@@ -59,6 +60,7 @@ import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -264,8 +266,12 @@ public class StackService {
     public Set<AutoscaleStackResponse> getAllForAutoscale() {
         try {
             return transactionService.required(() -> {
-                Set<Stack> aliveOnes = stackRepository.findAliveOnes();
-                return convertStacksForAutoscale(aliveOnes);
+                Set<AutoscaleStack> aliveOnes = stackRepository.findAliveOnes();
+                Set<AutoscaleStack> aliveNotUnderDeletion = Optional.ofNullable(aliveOnes).orElse(Set.of()).stream()
+                        .filter(stack -> !DELETE_IN_PROGRESS.equals(stack.getStackStatus()))
+                        .collect(Collectors.toSet());
+
+                return convertStacksForAutoscale(aliveNotUnderDeletion);
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
@@ -592,7 +598,7 @@ public class StackService {
                 TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(StackResponse.class)));
     }
 
-    private Set<AutoscaleStackResponse> convertStacksForAutoscale(Set<Stack> stacks) {
+    private Set<AutoscaleStackResponse> convertStacksForAutoscale(Set<AutoscaleStack> stacks) {
         return (Set<AutoscaleStackResponse>) conversionService.convert(stacks, TypeDescriptor.forObject(stacks),
                 TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(AutoscaleStackResponse.class)));
     }

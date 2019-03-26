@@ -62,6 +62,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleConfig;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
@@ -346,7 +347,7 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Set<Stack> findAliveOnes() {
+        public Set<AutoscaleStack> findAliveOnes() {
             return null;
         }
 

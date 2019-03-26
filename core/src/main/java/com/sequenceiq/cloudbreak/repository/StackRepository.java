@@ -13,17 +13,18 @@ import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByReturnValue;
 import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspace;
 import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspaceId;
-import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByReturnValue;
 import com.sequenceiq.cloudbreak.aspect.workspace.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.EntityType;
 
@@ -102,11 +103,17 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     List<Stack> findByStatuses(@Param("statuses") List<Status> statuses);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.cluster LEFT JOIN FETCH s.credential LEFT JOIN FETCH s.network LEFT JOIN FETCH s.orchestrator "
-            + "LEFT JOIN FETCH s.stackStatus LEFT JOIN FETCH s.securityConfig LEFT JOIN FETCH s.failurePolicy LEFT JOIN FETCH"
-            + " s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.terminated = null "
-            + "AND s.stackStatus.status <> 'DELETE_IN_PROGRESS'")
-    Set<Stack> findAliveOnes();
+    @Query("SELECT s.id as id, s.name as name, s.owner as owner, s.gatewayPort as gatewayPort, s.created as created, ss.status as stackStatus, "
+            + "c.cloudbreakAmbariUser as cloudbreakAmbariUser, c.cloudbreakAmbariPassword as cloudbreakAmbariPassword, c.status as clusterStatus, "
+            + "ig.instanceGroupType as instanceGroupType, im.instanceMetadataType as instanceMetadataType, im.publicIp as publicIp, "
+            + "im.privateIp as privateIp, sc.usePrivateIpToTls as usePrivateIpToTls "
+            + "FROM Stack s LEFT JOIN s.cluster c "
+            + "LEFT JOIN s.stackStatus ss "
+            + "LEFT JOIN s.instanceGroups ig "
+            + "LEFT JOIN ig.instanceMetaData im "
+            + "LEFT JOIN s.securityConfig sc "
+            + "WHERE instanceGroupType = 'GATEWAY' AND instanceMetadataType = 'GATEWAY_PRIMARY' AND s.terminated = null")
+    Set<AutoscaleStack> findAliveOnes();
 
     @DisableCheckPermissions
     Long countByFlexSubscription(FlexSubscription flexSubscription);

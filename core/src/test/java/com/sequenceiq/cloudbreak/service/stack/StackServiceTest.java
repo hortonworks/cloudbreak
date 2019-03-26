@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -16,34 +19,40 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 import java.util.Set;
-
-import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
-import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
-import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
-import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import java.util.function.Supplier;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.security.access.AccessDeniedException;
 
+import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
+import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
@@ -52,16 +61,15 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserService;
-
-import org.springframework.security.access.AccessDeniedException;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackServiceTest {
@@ -183,6 +191,9 @@ public class StackServiceTest {
 
     @Mock
     private PermissionCheckingUtils permissionCheckingUtils;
+
+    @Mock
+    private ConversionService conversionService;
 
     @Before
     public void setup() {
@@ -817,5 +828,74 @@ public class StackServiceTest {
 
             verify(stackUpdater, times(0)).updateStackStatus(eq(Long.MAX_VALUE), eq(DetailedStackStatus.PROVISION_FAILED), anyString());
         }
+    }
+
+    @Test
+    public void testGetAllForAutoscaleWithNullSetFromDb() throws TransactionExecutionException {
+        when(transactionService.required(any())).thenAnswer(invocation -> {
+            Supplier<AutoscaleStackResponse> callback = invocation.getArgument(0);
+            return callback.get();
+        });
+        when(stackRepository.findAliveOnes()).thenReturn(null);
+        ArgumentCaptor<Set> aliveStackCaptor = ArgumentCaptor.forClass(Set.class);
+        when(conversionService.convert(aliveStackCaptor.capture(), any(), any())).thenReturn(Set.of());
+
+        Set<AutoscaleStackResponse> allForAutoscale = underTest.getAllForAutoscale();
+        assertNotNull(allForAutoscale);
+        assertTrue(allForAutoscale.isEmpty());
+
+        assertNotNull(aliveStackCaptor.getValue());
+        assertTrue(aliveStackCaptor.getValue().isEmpty());
+    }
+
+    @Test
+    public void testGetAllForAutoscaleWithAvailableStack() throws TransactionExecutionException {
+        when(transactionService.required(any())).thenAnswer(invocation -> {
+            Supplier<AutoscaleStackResponse> callback = invocation.getArgument(0);
+            return callback.get();
+        });
+
+        AutoscaleStack stack = mock(AutoscaleStack.class);
+        when(stack.getStackStatus()).thenReturn(Status.AVAILABLE);
+        when(stackRepository.findAliveOnes()).thenReturn(Set.of(stack));
+
+        ArgumentCaptor<Set> aliveStackCaptor = ArgumentCaptor.forClass(Set.class);
+        AutoscaleStackResponse autoscaleStackResponse = new AutoscaleStackResponse();
+        when(conversionService.convert(aliveStackCaptor.capture(), any(), any())).thenReturn(Set.of(autoscaleStackResponse));
+
+        Set<AutoscaleStackResponse> allForAutoscale = underTest.getAllForAutoscale();
+        assertNotNull(allForAutoscale);
+        assertEquals(autoscaleStackResponse, allForAutoscale.iterator().next());
+
+        Set<Stack> stackSet = aliveStackCaptor.getValue();
+        assertNotNull(stackSet);
+        assertEquals(stack, stackSet.iterator().next());
+    }
+
+    @Test
+    public void testGetAllForAutoscaleWithDeleteInProgressStack() throws TransactionExecutionException {
+        when(transactionService.required(any())).thenAnswer(invocation -> {
+            Supplier<AutoscaleStackResponse> callback = invocation.getArgument(0);
+            return callback.get();
+        });
+
+        AutoscaleStack availableStack = mock(AutoscaleStack.class);
+        when(availableStack.getStackStatus()).thenReturn(Status.AVAILABLE);
+
+        AutoscaleStack deleteInProgressStack = mock(AutoscaleStack.class);
+        when(deleteInProgressStack.getStackStatus()).thenReturn(Status.AVAILABLE);
+        when(stackRepository.findAliveOnes()).thenReturn(Set.of(availableStack, deleteInProgressStack));
+
+        ArgumentCaptor<Set> aliveStackCaptor = ArgumentCaptor.forClass(Set.class);
+        AutoscaleStackResponse autoscaleStackResponse = new AutoscaleStackResponse();
+        when(conversionService.convert(aliveStackCaptor.capture(), any(), any())).thenReturn(Set.of(autoscaleStackResponse));
+
+        Set<AutoscaleStackResponse> allForAutoscale = underTest.getAllForAutoscale();
+        assertNotNull(allForAutoscale);
+        assertEquals(autoscaleStackResponse, allForAutoscale.iterator().next());
+
+        Set<Stack> stackSet = aliveStackCaptor.getValue();
+        assertNotNull(stackSet);
+        assertEquals(availableStack, stackSet.iterator().next());
     }
 }
