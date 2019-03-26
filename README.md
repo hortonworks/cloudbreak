@@ -44,10 +44,11 @@ export VAULT_AUTO_UNSEAL=true
 In order to run Cloudbreak, Periscope and Datalake from IDEA, put this into your Profile:
 
 ```
-export CB_LOCAL_DEV=true
+export CB_LOCAL_DEV_LIST=cloudbreak,periscope,datalake
 ```
 
 Cloudbreak, Periscope and Datalake containers won't be started and Uluwatu will connect to java processes running on your host.
+You don't have to put all three containers into local-dev mode, the value of the variable could be any combination of these containers.
 
 Then run these commands:
 ```
