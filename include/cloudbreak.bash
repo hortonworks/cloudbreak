@@ -143,12 +143,16 @@ cloudbreak-conf-db() {
     env-import CB_DB_ENV_DB "cbdb"
     env-import CB_DB_ENV_PASS ""
     env-import CB_DB_ENV_SCHEMA "public"
+    env-import CB_DB_ENV_SSL "false"
+    env-import CB_DB_ENV_CERT_FILE ""
     env-import CB_HBM2DDL_STRATEGY "validate"
 
     env-import PERISCOPE_DB_ENV_USER "postgres"
     env-import PERISCOPE_DB_ENV_DB "periscopedb"
     env-import PERISCOPE_DB_ENV_PASS ""
     env-import PERISCOPE_DB_ENV_SCHEMA "public"
+    env-import PERISCOPE_DB_ENV_SSL "false"
+    env-import PERISCOPE_DB_ENV_CERT_FILE ""
     env-import PERISCOPE_HBM2DDL_STRATEGY "validate"
 
     env-import IDENTITY_DB_URL "${COMMON_DB}.service.consul:5432"

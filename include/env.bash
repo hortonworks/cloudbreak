@@ -77,6 +77,8 @@ CB_DB_ENV_DB - Name of the Cloudbreak database
 CB_DB_ENV_PASS - Password for the Cloudbreak database authentication
 CB_DB_ENV_SCHEMA - Used schema in the Cloudbreak database
 CB_DB_ENV_USER - User for the Cloudbreak database authentication
+CB_DB_ENV_SSL - Enable SSL database connection for Cloudbreak
+CB_DB_ENV_CERT_FILE - The name of the cert file. The directory should be $DEPLOYMENT_DIR/certs where the certs should be placed in.
 CB_DB_ROOT_PATH - Deprecated - Location of the database volume on Cloudbreak host
 CB_DEFAULT_SUBSCRIPTION_ADDRESS - Address of the default subscription for Cloudbreak notifications
 CB_CAPABILITIES - Comma separated list of enabled capabilities
@@ -167,6 +169,8 @@ PERISCOPE_DB_ENV_DB - Name of the Autoscale database
 PERISCOPE_DB_ENV_PASS - Password for the Autoscale database authentication
 PERISCOPE_DB_ENV_SCHEMA - Used schema in the Autoscale database
 PERISCOPE_DB_ENV_USER - User for the Autoscale database authentication
+PERISCOPE_DB_ENV_SSL - Enable SSL database connection for Periscope
+PERISCOPE_DB_ENV_CERT_FILE - the name of the cert file. The directory should be $DEPLOYMENT_DIR/certs where the certs should be placed in.
 PERISCOPE_DB_PORT_5432_TCP_ADDR - Address of the Autoscale database
 PERISCOPE_DB_PORT_5432_TCP_PORT - Port number of the Autoscale database
 PERISCOPE_LOG_LEVEL - Log level of the Autoscale service
