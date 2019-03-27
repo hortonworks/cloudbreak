@@ -34,11 +34,9 @@ public abstract class AbstractVolumeConfigProvider implements CmTemplateComponen
                     for (String roleType : getRoleTypes()) {
                         Optional<String> roleRefOpt = findRoleRef(cmTemplate.getTemplate(), hostTemplate, roleType);
                         if (roleRefOpt.isPresent()) {
-                            if (hasAnyAttachedDisks(hostGroupView)) {
-                                List<ApiClusterTemplateConfig> roleConfigs = configs.computeIfAbsent(roleRefOpt.get(), v -> new ArrayList<>());
-                                List<ApiClusterTemplateConfig> roleConfig = getRoleConfig(roleType, hostGroupView);
-                                setConfigs(roleConfigs, roleConfig);
-                            }
+                            List<ApiClusterTemplateConfig> roleConfigs = configs.computeIfAbsent(roleRefOpt.get(), v -> new ArrayList<>());
+                            List<ApiClusterTemplateConfig> roleConfig = getRoleConfig(roleType, hostGroupView);
+                            setConfigs(roleConfigs, roleConfig);
                         }
                     }
                 }
@@ -58,7 +56,7 @@ public abstract class AbstractVolumeConfigProvider implements CmTemplateComponen
                 if (hostGroupName.equals(hostGroupView.getName())) {
                     for (String roleType : getRoleTypes()) {
                         Optional<String> roleRefOpt = findRoleRef(cmTemplate.getTemplate(), hostTemplate, roleType);
-                        if (roleRefOpt.isPresent() && hasAnyAttachedDisks(hostGroupView)) {
+                        if (roleRefOpt.isPresent()) {
                             result.addAll(getVariables(roleType, hostGroupView));
                         }
                     }

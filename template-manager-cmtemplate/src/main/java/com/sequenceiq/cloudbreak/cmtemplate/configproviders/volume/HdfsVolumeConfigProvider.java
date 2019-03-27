@@ -51,17 +51,17 @@ public class HdfsVolumeConfigProvider extends AbstractVolumeConfigProvider {
         switch (roleType) {
             case "DATANODE":
                 String dataDirVar = getRoleTypeVariableName(hostGroupView.getName(), roleType, DFS_DATA_DIRS);
-                String dataDirs = VolumeUtils.buildVolumePathString(hostGroupView.getVolumeCount(), "datanode");
+                String dataDirs = VolumeUtils.buildVolumePathStringZeroVolumeHandled(hostGroupView.getVolumeCount(), "datanode");
                 variables.add(new ApiClusterTemplateVariable().name(dataDirVar).value(dataDirs));
                 break;
             case "NAMENODE":
                 String nameDirVar = getRoleTypeVariableName(hostGroupView.getName(), roleType, DFS_NAME_DIRS);
-                String nameDirs = VolumeUtils.buildVolumePathString(hostGroupView.getVolumeCount(), "namenode");
+                String nameDirs = VolumeUtils.buildVolumePathStringZeroVolumeHandled(hostGroupView.getVolumeCount(), "namenode");
                 variables.add(new ApiClusterTemplateVariable().name(nameDirVar).value(nameDirs));
                 break;
             case "SECONDARYNAMENODE":
                 String checkDirVar = getRoleTypeVariableName(hostGroupView.getName(), roleType, DFS_CHECK_DIRS);
-                String checkDirs = VolumeUtils.buildVolumePathString(hostGroupView.getVolumeCount(), "namesecondary");
+                String checkDirs = VolumeUtils.buildVolumePathStringZeroVolumeHandled(hostGroupView.getVolumeCount(), "namesecondary");
                 variables.add(new ApiClusterTemplateVariable().name(checkDirVar).value(checkDirs));
                 break;
             default:
