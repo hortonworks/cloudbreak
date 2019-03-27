@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter.v4.connectors;
+package com.sequenceiq.cloudbreak.converter.v4.clustertemplate;
 
 import java.util.HashMap;
 import java.util.HashSet;

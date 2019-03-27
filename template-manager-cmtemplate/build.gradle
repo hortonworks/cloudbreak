@@ -37,6 +37,9 @@ dependencies {
   testCompile 'net.javacrumbs.json-unit:json-unit:1.28.2'
   testCompile project(path: ':template-manager-core', configuration: 'tests')
   testCompile project(path: ':core-model', configuration: 'tests')
+  testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-api',              version: junitJupiterVersion
+  testRuntime        group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',           version: junitJupiterVersion
+  testCompile        group: 'org.mockito',               name: 'mockito-junit-jupiter',          version: mockitoVersion
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {

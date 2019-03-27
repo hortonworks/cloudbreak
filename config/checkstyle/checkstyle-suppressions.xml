@@ -54,5 +54,6 @@
     <suppress id="string-instantiation" files="RemoteUserDetailsService.java"/>
     <suppress checks="InnerAssignment" files="ScalingPolicyConverter.java" />
     <suppress id="sysout" files="VersionedApplication.java"/>
+    <suppress checks="VisibilityModifierCheck" files=".*Test.java"/>
 
 </suppressions>
