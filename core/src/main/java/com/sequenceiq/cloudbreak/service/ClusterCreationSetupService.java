@@ -415,10 +415,11 @@ public class ClusterCreationSetupService {
                 orElseThrow(notFound("Default Product Info with OS type:", osType));
         ClouderaManagerProduct cmProduct = new ClouderaManagerProduct();
         DefaultCDHInfo defaultCDHInfo = defaultCDHInfoEntry.getValue();
+        Map<String, String> stack = defaultCDHInfo.getRepo().getStack();
         cmProduct.
                 withVersion(defaultCDHInfo.getVersion()).
-                withName(defaultCDHInfo.getRepo().getStack().get("repoid")).
-                withParcel(defaultCDHInfo.getRepo().getStack().get(osType));
+                withName(stack.get("repoid").split("-")[0]).
+                withParcel(stack.get(osType));
         Json json = new Json(cmProduct);
         return new ClusterComponent(ComponentType.CDH_PRODUCT_DETAILS, json, cluster);
     }

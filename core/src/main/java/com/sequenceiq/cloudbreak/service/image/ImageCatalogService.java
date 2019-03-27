@@ -139,7 +139,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             List<Image> baseImages = filterImagesByOperatingSystems(rawImages.getBaseImages(), operatingSystems);
             List<Image> hdpImages = filterImagesByOperatingSystems(rawImages.getHdpImages(), operatingSystems);
             List<Image> hdfImages = filterImagesByOperatingSystems(rawImages.getHdfImages(), operatingSystems);
-            images = statedImages(new Images(baseImages, hdpImages, hdfImages, null, rawImages.getSuppertedVersions()),
+            List<Image> cdhImages = filterImagesByOperatingSystems(rawImages.getCdhImages(), operatingSystems);
+            images = statedImages(new Images(baseImages, hdpImages, hdfImages, cdhImages, rawImages.getSuppertedVersions()),
                     images.getImageCatalogUrl(), images.getImageCatalogName());
         }
         return images;
@@ -308,6 +309,9 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         if (!image.isPresent()) {
             image = findFirstWithImageId(imageId, images.getHdfImages());
         }
+        if (!image.isPresent()) {
+            image = findFirstWithImageId(imageId, images.getCdhImages());
+        }
         return image;
     }
 
@@ -344,11 +348,14 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             List<Image> baseImages = filterImagesByPlatforms(imageFilter.getPlatforms(), imageCatalogV2.getImages().getBaseImages(), vMImageUUIDs);
             List<Image> hdpImages = filterImagesByPlatforms(imageFilter.getPlatforms(), imageCatalogV2.getImages().getHdpImages(), vMImageUUIDs);
             List<Image> hdfImages = filterImagesByPlatforms(imageFilter.getPlatforms(), imageCatalogV2.getImages().getHdfImages(), vMImageUUIDs);
+            List<Image> cdhImages = filterImagesByPlatforms(imageFilter.getPlatforms(), imageCatalogV2.getImages().getCdhImages(), vMImageUUIDs);
 
-            Stream.concat(Stream.concat(baseImages.stream(), hdpImages.stream()), hdfImages.stream()).collect(Collectors.toList())
+            Stream.of(baseImages.stream(), hdpImages.stream(), hdfImages.stream(), cdhImages.stream())
+                    .reduce(Stream::concat)
+                    .orElseGet(Stream::empty)
                     .forEach(img -> img.setDefaultImage(defaultVMImageUUIDs.contains(img.getUuid())));
 
-            images = statedImages(new Images(baseImages, hdpImages, hdfImages, null, suppertedVersions),
+            images = statedImages(new Images(baseImages, hdpImages, hdfImages, cdhImages, suppertedVersions),
                     imageFilter.getImageCatalog().getImageCatalogUrl(),
                     imageFilter.getImageCatalog().getName());
         } else {
@@ -520,6 +527,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
                 return statedImages.getImages().getHdpImages();
             case "HDF":
                 return statedImages.getImages().getHdfImages();
+            case "CDH":
+                return statedImages.getImages().getCdhImages();
             default:
                 return emptyList();
         }

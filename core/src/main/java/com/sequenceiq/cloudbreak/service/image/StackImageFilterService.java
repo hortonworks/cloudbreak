@@ -71,7 +71,11 @@ public class StackImageFilterService {
                 ? filterByApplicability(imageCatalogName, statedImages.getImageCatalogUrl(), stack, statedImages.getImages().getHdfImages(), currentImageUuid)
                 : Collections.emptyList();
 
-        return new Images(filteredBaseImages, filteredHdpImages, filteredHdfImages, null, statedImages.getImages().getSuppertedVersions());
+        List<Image> filteredCdhImages = stackType.equals(StackType.CDH)
+                ? filterByApplicability(imageCatalogName, statedImages.getImageCatalogUrl(), stack, statedImages.getImages().getCdhImages(), currentImageUuid)
+                : Collections.emptyList();
+
+        return new Images(filteredBaseImages, filteredHdpImages, filteredHdfImages, filteredCdhImages, statedImages.getImages().getSuppertedVersions());
     }
 
     private String getCurrentImageUuid(Stack stack) {

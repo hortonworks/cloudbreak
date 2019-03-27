@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.AmbariStackDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.AmbariStackRepoDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseImageV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseStackDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ClouderaManagerStackDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ClouderaManagerStackRepoDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
@@ -34,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackInfo;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.service.DefaultAmbariRepoService;
 import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
@@ -62,9 +65,9 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
         List<BaseImageV4Response> baseImages = getBaseImageResponses(source);
         res.setBaseImages(baseImages);
 
-        List<ImageV4Response> hdpImages = convertImages(source.getHdpImages());
-        List<ImageV4Response> hdfImages = convertImages(source.getHdfImages());
-        List<ImageV4Response> cdhImages = convertImages(source.getCdhImages());
+        List<ImageV4Response> hdpImages = convertImages(source.getHdpImages(), StackType.HDP);
+        List<ImageV4Response> hdfImages = convertImages(source.getHdfImages(), StackType.HDF);
+        List<ImageV4Response> cdhImages = convertImages(source.getCdhImages(), StackType.CDH);
 
         res.setHdpImages(hdpImages);
         res.setHdfImages(hdfImages);
@@ -73,11 +76,11 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
         return res;
     }
 
-    private List<ImageV4Response> convertImages(List<Image> source) {
+    private List<ImageV4Response> convertImages(List<Image> source, StackType stackType) {
         return source.stream().map(img -> {
             ImageV4Response imgJson = new ImageV4Response();
             copyImageFieldsToJson(img, imgJson);
-            imgJson.setStackDetails(convertStackDetailsToJson(img.getStackDetails(), img.getOsType()));
+            imgJson.setStackDetails(convertStackDetailsToJson(img.getStackDetails(), img.getOsType(), stackType));
             return imgJson;
         }).collect(Collectors.toList());
     }
@@ -162,7 +165,9 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
                     return mpackEntry;
                 }).collect(Collectors.toList()));
             }
-            json.setMpacks(mpacks);
+            if (!mpacks.isEmpty()) {
+                json.setMpacks(mpacks);
+            }
             result.add(json);
         }
         return result;
@@ -185,10 +190,31 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
         json.setImageSetsByProvider(new HashMap<>(source.getImageSetsByProvider()));
     }
 
-    private AmbariStackDetailsV4Response convertStackDetailsToJson(StackDetails stackDetails, String osType) {
+    private BaseStackDetailsV4Response convertStackDetailsToJson(StackDetails stackDetails, String osType, StackType stackType) {
+        if (StackType.CDH.equals(stackType)) {
+            return convertClouderaManagerStackDetailsToJson(stackDetails);
+        } else {
+            return convertAmbariStackDetailsToJson(stackDetails, osType);
+        }
+    }
+
+    private ClouderaManagerStackDetailsV4Response convertClouderaManagerStackDetailsToJson(StackDetails stackDetails) {
+        ClouderaManagerStackDetailsV4Response json = new ClouderaManagerStackDetailsV4Response();
+        json.setVersion(stackDetails.getVersion());
+        json.setRepository(convertClouderaManagerStackRepoDetailsToJson(stackDetails.getRepo()));
+        return json;
+    }
+
+    private ClouderaManagerStackRepoDetailsV4Response convertClouderaManagerStackRepoDetailsToJson(StackRepoDetails repo) {
+        ClouderaManagerStackRepoDetailsV4Response json = new ClouderaManagerStackRepoDetailsV4Response();
+        json.setStack(new HashMap<>(repo.getStack()));
+        return json;
+    }
+
+    private AmbariStackDetailsV4Response convertAmbariStackDetailsToJson(StackDetails stackDetails, String osType) {
         AmbariStackDetailsV4Response json = new AmbariStackDetailsV4Response();
         json.setVersion(stackDetails.getVersion());
-        json.setRepository(convertStackRepoDetailsToJson(stackDetails.getRepo()));
+        json.setRepository(convertAmbariStackRepoDetailsToJson(stackDetails.getRepo()));
         Map<String, List<ManagementPackV4Entry>> mpacks = new HashMap<>();
         mpacks.put(osType, stackDetails.getMpackList().stream().map(mp -> {
             ManagementPackV4Entry mpackEntry = new ManagementPackV4Entry();
@@ -204,10 +230,12 @@ public class ImagesToImagesV4ResponseConverter extends AbstractConversionService
         return json;
     }
 
-    private AmbariStackRepoDetailsV4Response convertStackRepoDetailsToJson(StackRepoDetails repo) {
+    private AmbariStackRepoDetailsV4Response convertAmbariStackRepoDetailsToJson(StackRepoDetails repo) {
         AmbariStackRepoDetailsV4Response json = new AmbariStackRepoDetailsV4Response();
         json.setStack(new HashMap<>(repo.getStack()));
-        json.setUtil(new HashMap<>(repo.getUtil()));
+        if (Objects.nonNull(repo.getUtil())) {
+            json.setUtil(new HashMap<>(repo.getUtil()));
+        }
         return json;
     }
 }

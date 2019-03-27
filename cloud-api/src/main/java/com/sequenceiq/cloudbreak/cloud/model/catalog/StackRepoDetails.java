@@ -17,7 +17,7 @@ public class StackRepoDetails {
     @JsonCreator
     public StackRepoDetails(
             @JsonProperty(value = "stack", required = true) Map<String, String> stack,
-            @JsonProperty(value = "util", required = true) Map<String, String> util) {
+            @JsonProperty(value = "util") Map<String, String> util) {
         this.stack = stack;
         this.util = util;
     }

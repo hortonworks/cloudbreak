@@ -1216,6 +1216,66 @@
         },
         "description": "Cloudbreak's HDF official image"
       }
+    ],
+    "cdh-images": [
+      {
+        "date": "2018-09-21",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia East": "https://hwxaustraliaeast.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "Australia South East": "https://hwxaustralisoutheast.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "Central India": "https://hwxcentralindia.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "France Central": "https://hwxfrancecentral.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "Korea Central": "https://hwxkoreacentral.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "Korea South": "https://hwxkoreasouth.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "South East Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "South India": "https://hwxsouthindia.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "UK South": "https://hwxsouthuk.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "UK West": "https://hwxwestuk.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "West Central US": "https://hwxwestcentralus.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "West India": "https://hwxwestindia.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd",
+            "West US 2": "https://hwxwestus2.blob.core.windows.net/images/cb-hdp-31-1903252056.vhd"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "666aa8bf-bc1a-4cc6-43f1-427b4432c8c2",
+        "package-versions": {
+          "cm": "6.1.1",
+          "salt": "2017.7.5",
+          "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
+          "stack": "6.1.1"
+        },
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "https://archive.cloudera.com/cdh6/6.1.1/parcels/",
+              "repoid": "CDH",
+              "repository-version": "6.1.1-1.cdh6.1.1.p0.875250"
+            }
+          },
+          "version": "6.1.1"
+        },
+        "repo": {
+          "redhat7": "https://archive.cloudera.com/cm6/6.1.1/redhat7/yum/"
+        },
+        "version": "6.1.1"
+      }
     ]
   },
   "versions": {
@@ -1485,7 +1545,8 @@
         ],
         "images": [
           "2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2",
-          "2.5.2.0-a7b0e31f-0469-405c-834d-24a3f045dacb-2.6.2.0"
+          "2.5.2.0-a7b0e31f-0469-405c-834d-24a3f045dacb-2.6.2.0",
+          "666aa8bf-bc1a-4cc6-43f1-427b4432c8c2"
         ]
       }
     ]

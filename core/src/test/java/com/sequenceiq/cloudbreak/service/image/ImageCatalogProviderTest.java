@@ -63,6 +63,8 @@ public class ImageCatalogProviderTest {
 
     private static final String CB_IMAGE_CATALOG_WITHOUT_HDF_IMAGES = "cb-image-catalog-without-hdf-images.json";
 
+    private static final String CB_IMAGE_CATALOG_WITHOUT_CDH_IMAGES = "cb-image-catalog-without-cdh-images.json";
+
     private static final String CB_VERSION = "1.16.4";
 
     private static final List<String> CB_IMAGE_CATALOG_V2_OS_TYPES = Lists.newArrayList("amazonlinux", "centos7");
@@ -185,6 +187,7 @@ public class ImageCatalogProviderTest {
         assertEquals(mapToUuid(expectedCatalog.getImages().getBaseImages()), mapToUuid(actualCatalog.getImages().getBaseImages()));
         assertEquals(mapToUuid(expectedCatalog.getImages().getHdpImages()), mapToUuid(actualCatalog.getImages().getHdpImages()));
         assertEquals(mapToUuid(expectedCatalog.getImages().getHdfImages()), mapToUuid(actualCatalog.getImages().getHdfImages()));
+        assertEquals(mapToUuid(expectedCatalog.getImages().getCdhImages()), mapToUuid(actualCatalog.getImages().getCdhImages()));
     }
 
     private List<String> mapToUuid(List<Image> imageList) {
@@ -211,6 +214,8 @@ public class ImageCatalogProviderTest {
         List<String> expectedHdpImagesList = Collections.singletonList("2.4.0.0-1157-6eff4b14-482f-4e31-8e15-cb3a153d1030-2.5.0.0-1200");
         assertEquals(expectedHdpImagesList, mapToUuid(actualCatalog.getImages().getHdpImages()));
         assertEquals(mapToUuid(expectedCatalog.getImages().getHdfImages()), mapToUuid(actualCatalog.getImages().getHdfImages()));
+        assertEquals(mapToUuid(Collections.emptyList()), mapToUuid(actualCatalog.getImages().getCdhImages()));
+        assertEquals(1, expectedCatalog.getImages().getCdhImages().size());
     }
 
     private List<String> getImageCatalogOses(CloudbreakImageCatalogV2 actualCatalog) {
@@ -244,6 +249,8 @@ public class ImageCatalogProviderTest {
         assertEquals(mapToUuid(expectedCatalog.getImages().getBaseImages()), mapToUuid(actualCatalog.getImages().getBaseImages()));
         assertEquals(mapToUuid(expectedCatalog.getImages().getHdpImages()), mapToUuid(actualCatalog.getImages().getHdpImages()));
         assertEquals(mapToUuid(expectedCatalog.getImages().getHdfImages()), mapToUuid(actualCatalog.getImages().getHdfImages()));
+        assertEquals(mapToUuid(expectedCatalog.getImages().getCdhImages()), mapToUuid(actualCatalog.getImages().getCdhImages()));
+
     }
 
     @Test(expected = CloudbreakImageCatalogException.class)
@@ -313,6 +320,16 @@ public class ImageCatalogProviderTest {
 
         CloudbreakImageCatalogV2 imageCatalogV2 = underTest.getImageCatalogV2(CB_IMAGE_CATALOG_WITHOUT_BASE_IMAGES);
         assertNotNull(imageCatalogV2.getImages().getBaseImages());
+    }
+
+    @Test
+    public void testImageCatalogWithoutCdhImages() throws CloudbreakImageCatalogException {
+        String path = getPath(CB_IMAGE_CATALOG_WITHOUT_CDH_IMAGES);
+        ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
+        ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", Collections.emptyList());
+
+        CloudbreakImageCatalogV2 imageCatalogV2 = underTest.getImageCatalogV2(CB_IMAGE_CATALOG_WITHOUT_CDH_IMAGES);
+        assertNotNull(imageCatalogV2.getImages().getCdhImages());
     }
 
     private String getErrorMessage(String catalogUrl) {
