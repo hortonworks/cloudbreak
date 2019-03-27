@@ -65,6 +65,27 @@ public class YarnVolumeConfigProviderTest {
         assertEquals("/hadoopfs/fs1/nodemanager/log,/hadoopfs/fs2/nodemanager/log", workerLog.getValue());
     }
 
+    @Test
+    public void testGetRoleConfigVariablesWithZeroDisks() {
+        HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.GATEWAY, 1);
+        HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, 2);
+        TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker)).build();
+        String inputJson = getClusterDefinitionText("input/clouderamanager.bp");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+
+        List<ApiClusterTemplateVariable> roleVariables = underTest.getRoleConfigVariables(cmTemplateProcessor, preparationObject);
+
+        roleVariables.sort(Comparator.comparing(ApiClusterTemplateVariable::getName));
+        ApiClusterTemplateVariable workerLocal = roleVariables.get(0);
+        ApiClusterTemplateVariable workerLog = roleVariables.get(1);
+
+        assertEquals(2, roleVariables.size());
+        assertEquals("worker_nodemanager_yarn_nodemanager_local_dirs", workerLocal.getName());
+        assertEquals("/hadoopfs/root1/nodemanager", workerLocal.getValue());
+        assertEquals("worker_nodemanager_yarn_nodemanager_log_dirs", workerLog.getName());
+        assertEquals("/hadoopfs/root1/nodemanager/log", workerLog.getValue());
+    }
+
     private String getClusterDefinitionText(String path) {
         return FileReaderUtils.readFileFromClasspathQuietly(path);
     }

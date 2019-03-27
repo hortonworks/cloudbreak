@@ -43,11 +43,11 @@ public class YarnVolumeConfigProvider extends AbstractVolumeConfigProvider {
         switch (roleType) {
             case "NODEMANAGER":
                 String localDirVar = getRoleTypeVariableName(hostGroupView.getName(), roleType, NODE_LOCAL_DIRS);
-                String localDirs = VolumeUtils.buildVolumePathString(hostGroupView.getVolumeCount(), "nodemanager");
+                String localDirs = VolumeUtils.buildVolumePathStringZeroVolumeHandled(hostGroupView.getVolumeCount(), "nodemanager");
                 variables.add(new ApiClusterTemplateVariable().name(localDirVar).value(localDirs));
 
                 String logDirVar = getRoleTypeVariableName(hostGroupView.getName(), roleType, NODE_LOG_DIRS);
-                String loglDirs = VolumeUtils.buildVolumePathString(hostGroupView.getVolumeCount(), "nodemanager/log");
+                String loglDirs = VolumeUtils.buildVolumePathStringZeroVolumeHandled(hostGroupView.getVolumeCount(), "nodemanager/log");
                 variables.add(new ApiClusterTemplateVariable().name(logDirVar).value(loglDirs));
                 break;
             default:

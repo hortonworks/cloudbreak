@@ -87,13 +87,18 @@ public class HdfsVolumeConfigProviderTest {
 
         List<ApiClusterTemplateConfig> masterNN = roleConfigs.get("hdfs-NAMENODE-BASE");
         List<ApiClusterTemplateConfig> masterSN = roleConfigs.get("hdfs-SECONDARYNAMENODE-BASE");
+        List<ApiClusterTemplateConfig> workerDN = roleConfigs.get("hdfs-DATANODE-BASE");
 
-        assertEquals(2, roleConfigs.size());
+        assertEquals(3, roleConfigs.size());
         assertEquals(1, masterNN.size());
+        assertEquals(1, masterSN.size());
+        assertEquals(1, workerDN.size());
         assertEquals("dfs_name_dir_list", masterNN.get(0).getName());
         assertEquals("master_namenode_dfs_name_dir_list", masterNN.get(0).getVariable());
         assertEquals("fs_checkpoint_dir_list", masterSN.get(0).getName());
         assertEquals("master_secondarynamenode_fs_checkpoint_dir_list", masterSN.get(0).getVariable());
+        assertEquals("dfs_data_dir_list", workerDN.get(0).getName());
+        assertEquals("worker_datanode_dfs_data_dir_list", workerDN.get(0).getVariable());
     }
 
     @Test
@@ -106,7 +111,20 @@ public class HdfsVolumeConfigProviderTest {
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
 
-        assertEquals(0, roleConfigs.size());
+        List<ApiClusterTemplateConfig> masterNN = roleConfigs.get("hdfs-NAMENODE-BASE");
+        List<ApiClusterTemplateConfig> masterSN = roleConfigs.get("hdfs-SECONDARYNAMENODE-BASE");
+        List<ApiClusterTemplateConfig> workerDN = roleConfigs.get("hdfs-DATANODE-BASE");
+
+        assertEquals(3, roleConfigs.size());
+        assertEquals(1, masterNN.size());
+        assertEquals(1, masterSN.size());
+        assertEquals(1, workerDN.size());
+        assertEquals("dfs_name_dir_list", masterNN.get(0).getName());
+        assertEquals("master_namenode_dfs_name_dir_list", masterNN.get(0).getVariable());
+        assertEquals("fs_checkpoint_dir_list", masterSN.get(0).getName());
+        assertEquals("master_secondarynamenode_fs_checkpoint_dir_list", masterSN.get(0).getVariable());
+        assertEquals("dfs_data_dir_list", workerDN.get(0).getName());
+        assertEquals("worker_datanode_dfs_data_dir_list", workerDN.get(0).getVariable());
     }
 
     @Test
@@ -201,14 +219,18 @@ public class HdfsVolumeConfigProviderTest {
 
         List<ApiClusterTemplateVariable> roleVariables = underTest.getRoleConfigVariables(cmTemplateProcessor, preparationObject);
 
+        roleVariables.sort(Comparator.comparing(ApiClusterTemplateVariable::getName));
         ApiClusterTemplateVariable masterNN = roleVariables.get(0);
         ApiClusterTemplateVariable masterSN = roleVariables.get(1);
+        ApiClusterTemplateVariable workerDN = roleVariables.get(2);
 
-        assertEquals(2, roleVariables.size());
+        assertEquals(3, roleVariables.size());
         assertEquals("master_namenode_dfs_name_dir_list", masterNN.getName());
         assertEquals("/hadoopfs/fs1/namenode", masterNN.getValue());
         assertEquals("master_secondarynamenode_fs_checkpoint_dir_list", masterSN.getName());
         assertEquals("/hadoopfs/fs1/namesecondary", masterSN.getValue());
+        assertEquals("worker_datanode_dfs_data_dir_list", workerDN.getName());
+        assertEquals("/hadoopfs/root1/datanode", workerDN.getValue());
     }
 
     @Test
@@ -221,7 +243,18 @@ public class HdfsVolumeConfigProviderTest {
 
         List<ApiClusterTemplateVariable> roleVariables = underTest.getRoleConfigVariables(cmTemplateProcessor, preparationObject);
 
-        assertEquals(0, roleVariables.size());
+        roleVariables.sort(Comparator.comparing(ApiClusterTemplateVariable::getName));
+        ApiClusterTemplateVariable masterNN = roleVariables.get(0);
+        ApiClusterTemplateVariable masterSN = roleVariables.get(1);
+        ApiClusterTemplateVariable workerDN = roleVariables.get(2);
+
+        assertEquals(3, roleVariables.size());
+        assertEquals("master_namenode_dfs_name_dir_list", masterNN.getName());
+        assertEquals("/hadoopfs/root1/namenode", masterNN.getValue());
+        assertEquals("master_secondarynamenode_fs_checkpoint_dir_list", masterSN.getName());
+        assertEquals("/hadoopfs/root1/namesecondary", masterSN.getValue());
+        assertEquals("worker_datanode_dfs_data_dir_list", workerDN.getName());
+        assertEquals("/hadoopfs/root1/datanode", workerDN.getValue());
     }
 
     @Test
