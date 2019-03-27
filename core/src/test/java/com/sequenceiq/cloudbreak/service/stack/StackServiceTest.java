@@ -867,9 +867,9 @@ public class StackServiceTest {
         assertNotNull(allForAutoscale);
         assertEquals(autoscaleStackResponse, allForAutoscale.iterator().next());
 
-        Set<Stack> stackSet = aliveStackCaptor.getValue();
+        Set<AutoscaleStack> stackSet = aliveStackCaptor.getValue();
         assertNotNull(stackSet);
-        assertEquals(stack, stackSet.iterator().next());
+        assertEquals(stack.getStackStatus(), stackSet.iterator().next().getStackStatus());
     }
 
     @Test
@@ -894,8 +894,8 @@ public class StackServiceTest {
         assertNotNull(allForAutoscale);
         assertEquals(autoscaleStackResponse, allForAutoscale.iterator().next());
 
-        Set<Stack> stackSet = aliveStackCaptor.getValue();
+        Set<AutoscaleStack> stackSet = aliveStackCaptor.getValue();
         assertNotNull(stackSet);
-        assertEquals(availableStack, stackSet.iterator().next());
+        assertEquals(availableStack.getStackStatus(), stackSet.iterator().next().getStackStatus());
     }
 }
