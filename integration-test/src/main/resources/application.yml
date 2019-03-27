@@ -116,7 +116,6 @@ integrationtest:
         region:
       credential:
         endpoint:
-        ambariUser:
       instance:
         cpus:
         memory:

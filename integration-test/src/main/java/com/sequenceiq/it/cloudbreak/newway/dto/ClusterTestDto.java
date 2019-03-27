@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
+import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.ldap.LdapTestDto;
@@ -30,8 +31,8 @@ public class ClusterTestDto extends AbstractCloudbreakTestDto<ClusterV4Request, 
     }
 
     public ClusterTestDto valid() {
-        withUserName("admin")
-                .withPassword("Admin123")
+        withUserName(getTestParameter().get(CommonCloudParameters.DEFAULT_AMBARI_USER))
+                .withPassword(getTestParameter().get(CommonCloudParameters.DEFAULT_AMBARI_PASSWORD))
                 .withAmbari(getTestContext().init(AmbariTestDto.class));
         return getCloudProvider().cluster(this);
     }
