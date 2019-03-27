@@ -3,19 +3,19 @@ package com.sequenceiq.cloudbreak.cache.common;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.cache.Cache;
-import org.springframework.cache.guava.GuavaCache;
+import org.springframework.cache.caffeine.CaffeineCache;
 
-import com.google.common.cache.CacheBuilder;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.sequenceiq.cloudbreak.cache.CacheDefinition;
 
 public abstract class AbstractCacheDefinition implements CacheDefinition {
 
     @Override
     public final Cache cacheConfiguration() {
-        CacheBuilder<Object, Object> builder = CacheBuilder.newBuilder()
+        Caffeine<Object, Object> builder = Caffeine.newBuilder()
                 .maximumSize(getMaxEntries())
                 .expireAfterWrite(getTimeToLiveSeconds(), TimeUnit.SECONDS);
-        return new GuavaCache(getName(), builder.build());
+        return new CaffeineCache(getName(), builder.build());
     }
 
     protected abstract String getName();

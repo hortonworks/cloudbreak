@@ -78,7 +78,8 @@ import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import freemarker.template.TemplateException;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = AwsTestContext.class)
+@SpringBootTest(classes = AwsTestContext.class,
+        properties = "spring.main.allow-bean-definition-overriding=true")
 public abstract class AwsComponentTest {
 
     protected static final String AVAILABILITY_ZONE = "eu-west-1c";

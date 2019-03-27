@@ -57,7 +57,7 @@ public class RsaPublicKeyValidatorTest {
     @Test
     public void inValidPublicKeyWillFailWhenTooShortBody() {
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage("detailed message: 3");
+        thrown.expectMessage("detailed message: Index 3 out of bounds for length 3");
         openSshPublicKeyValidator.validate(
                         "ssh-rsa AAAA sequence-eu"
         );

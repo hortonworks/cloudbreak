@@ -35,6 +35,7 @@ import org.testng.xml.SuiteXmlParser;
 import org.testng.xml.XmlSuite;
 import org.uncommons.reportng.JUnitXMLReporter;
 
+import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.it.cloudbreak.config.ITProps;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.aws.AwsProperties;
 import com.sequenceiq.it.cloudbreak.newway.listener.ReportListener;
@@ -87,6 +88,7 @@ public class IntegrationTestApp implements CommandLineRunner {
         long start = System.currentTimeMillis();
         SpringApplication springApp = new SpringApplication(IntegrationTestApp.class);
         springApp.setWebApplicationType(WebApplicationType.NONE);
+        springApp.setDefaultProperties(ImmutableMap.of("spring.main.allow-bean-definition-overriding", "true"));
         try {
             ConfigurableApplicationContext context = springApp.run(args);
             LOG.info("Closing Spring test context.");
