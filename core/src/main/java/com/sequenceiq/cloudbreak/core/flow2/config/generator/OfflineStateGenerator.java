@@ -62,6 +62,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFl
 import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleConfig;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -354,7 +355,7 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Set<Stack> findAliveOnesWithAmbari() {
+        public Set<AutoscaleStack> findAliveOnesWithAmbari() {
             return null;
         }
 

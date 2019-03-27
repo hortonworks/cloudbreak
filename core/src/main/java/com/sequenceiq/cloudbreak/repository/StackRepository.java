@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
@@ -114,14 +115,38 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     List<Stack> findByStatuses(@Param("statuses") List<Status> statuses);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.cluster LEFT JOIN FETCH s.credential LEFT JOIN FETCH s.network LEFT JOIN FETCH s.orchestrator "
-            + "LEFT JOIN FETCH s.stackStatus LEFT JOIN FETCH s.securityConfig LEFT JOIN FETCH s.failurePolicy LEFT JOIN FETCH"
-            + " s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.terminated = null "
-            + "AND s.stackStatus.status <> 'DELETE_IN_PROGRESS' "
-            + "AND s.cluster.ambariIp IS NOT NULL "
-            + "AND s.cluster.status = 'AVAILABLE' "
+    @Query("SELECT s.id as id, "
+            + "s.name as name, "
+            + "s.gatewayPort as gatewayPort, "
+            + "s.created as created, "
+            + "ss.status as stackStatus, "
+            + "c.cloudbreakAmbariUser as cloudbreakAmbariUser, "
+            + "c.cloudbreakAmbariPassword as cloudbreakAmbariPassword, "
+            + "c.status as clusterStatus, "
+            + "ig.instanceGroupType as instanceGroupType, "
+            + "im.instanceMetadataType as instanceMetadataType, "
+            + "im.publicIp as publicIp, "
+            + "im.privateIp as privateIp, "
+            + "sc.usePrivateIpToTls as usePrivateIpToTls, "
+            + "w.id as workspaceId, "
+            + "t.name as tenantName, "
+            + "u.userId as userId "
+            + "FROM Stack s "
+            + "LEFT JOIN s.cluster c "
+            + "LEFT JOIN s.stackStatus ss "
+            + "LEFT JOIN s.instanceGroups ig "
+            + "LEFT JOIN ig.instanceMetaData im "
+            + "LEFT JOIN s.securityConfig sc "
+            + "LEFT JOIN s.workspace w "
+            + "LEFT JOIN w.tenant t "
+            + "LEFT JOIN s.creator u "
+            + "WHERE instanceGroupType = 'GATEWAY' "
+            + "AND instanceMetadataType = 'GATEWAY_PRIMARY' "
+            + "AND s.terminated = null "
+            + "AND c.ambariIp IS NOT NULL "
+            + "AND c.status = 'AVAILABLE' "
             + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
-    Set<Stack> findAliveOnesWithAmbari();
+    Set<AutoscaleStack> findAliveOnesWithAmbari();
 
     @DisableCheckPermissions
     Long countByCredential(Credential credential);

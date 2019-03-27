@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -12,6 +13,7 @@ import com.sequenceiq.cloudbreak.client.SaltClientConfig;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
+import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -45,6 +47,14 @@ public class GatewayConfigService {
     public String getPrimaryGatewayIp(Stack stack) {
         InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
         return gatewayInstance == null ? null : getGatewayIp(stack, gatewayInstance);
+    }
+
+    public String getPrimaryGatewayIp(AutoscaleStack stack) {
+        String gatewayIP = Optional.ofNullable(stack.getPublicIp()).orElse(stack.getPrivateIp());
+        if (stack.getUsePrivateIpToTls()) {
+            gatewayIP = stack.getPrivateIp();
+        }
+        return gatewayIP;
     }
 
     public String getGatewayIp(Stack stack, InstanceMetaData gatewayInstance) {

@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -15,18 +18,23 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
@@ -39,6 +47,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
+import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
@@ -53,6 +62,7 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
@@ -169,6 +179,9 @@ public class StackServiceTest {
 
     @Mock
     private DatalakeResourcesService datalakeResourcesService;
+
+    @Mock
+    private ConverterUtil converterUtil;
 
     @Before
     public void setup() {
@@ -801,5 +814,74 @@ public class StackServiceTest {
 
             verify(stackUpdater, times(0)).updateStackStatus(eq(Long.MAX_VALUE), eq(DetailedStackStatus.PROVISION_FAILED), anyString());
         }
+    }
+
+    @Test
+    public void testGetAllForAutoscaleWithNullSetFromDb() throws TransactionExecutionException {
+        when(transactionService.required(any())).thenAnswer(invocation -> {
+            Supplier<AutoscaleStackV4Response> callback = invocation.getArgument(0);
+            return callback.get();
+        });
+        when(stackRepository.findAliveOnesWithAmbari()).thenReturn(null);
+        ArgumentCaptor<Set> aliveStackCaptor = ArgumentCaptor.forClass(Set.class);
+        when(converterUtil.convertAllAsSet(aliveStackCaptor.capture(), eq(AutoscaleStackV4Response.class))).thenReturn(Set.of());
+
+        Set<AutoscaleStackV4Response> allForAutoscale = underTest.getAllForAutoscale();
+        assertNotNull(allForAutoscale);
+        assertTrue(allForAutoscale.isEmpty());
+
+        assertNotNull(aliveStackCaptor.getValue());
+        assertTrue(aliveStackCaptor.getValue().isEmpty());
+    }
+
+    @Test
+    public void testGetAllForAutoscaleWithAvailableStack() throws TransactionExecutionException {
+        when(transactionService.required(any())).thenAnswer(invocation -> {
+            Supplier<AutoscaleStackV4Response> callback = invocation.getArgument(0);
+            return callback.get();
+        });
+
+        AutoscaleStack stack = mock(AutoscaleStack.class);
+        when(stack.getStackStatus()).thenReturn(Status.AVAILABLE);
+        when(stackRepository.findAliveOnesWithAmbari()).thenReturn(Set.of(stack));
+
+        ArgumentCaptor<Set> aliveStackCaptor = ArgumentCaptor.forClass(Set.class);
+        AutoscaleStackV4Response autoscaleStackResponse = new AutoscaleStackV4Response();
+        when(converterUtil.convertAllAsSet(aliveStackCaptor.capture(), eq(AutoscaleStackV4Response.class))).thenReturn(Set.of(autoscaleStackResponse));
+
+        Set<AutoscaleStackV4Response> allForAutoscale = underTest.getAllForAutoscale();
+        assertNotNull(allForAutoscale);
+        assertEquals(autoscaleStackResponse, allForAutoscale.iterator().next());
+
+        Set<AutoscaleStack> stackSet = aliveStackCaptor.getValue();
+        assertNotNull(stackSet);
+        assertEquals(stack.getStackStatus(), stackSet.iterator().next().getStackStatus());
+    }
+
+    @Test
+    public void testGetAllForAutoscaleWithDeleteInProgressStack() throws TransactionExecutionException {
+        when(transactionService.required(any())).thenAnswer(invocation -> {
+            Supplier<AutoscaleStackV4Response> callback = invocation.getArgument(0);
+            return callback.get();
+        });
+
+        AutoscaleStack availableStack = mock(AutoscaleStack.class);
+        when(availableStack.getStackStatus()).thenReturn(Status.AVAILABLE);
+
+        AutoscaleStack deleteInProgressStack = mock(AutoscaleStack.class);
+        when(deleteInProgressStack.getStackStatus()).thenReturn(Status.AVAILABLE);
+        when(stackRepository.findAliveOnesWithAmbari()).thenReturn(Set.of(availableStack, deleteInProgressStack));
+
+        ArgumentCaptor<Set> aliveStackCaptor = ArgumentCaptor.forClass(Set.class);
+        AutoscaleStackV4Response autoscaleStackResponse = new AutoscaleStackV4Response();
+        when(converterUtil.convertAllAsSet(aliveStackCaptor.capture(), eq(AutoscaleStackV4Response.class))).thenReturn(Set.of(autoscaleStackResponse));
+
+        Set<AutoscaleStackV4Response> allForAutoscale = underTest.getAllForAutoscale();
+        assertNotNull(allForAutoscale);
+        assertEquals(autoscaleStackResponse, allForAutoscale.iterator().next());
+
+        Set<AutoscaleStack> stackSet = aliveStackCaptor.getValue();
+        assertNotNull(stackSet);
+        assertEquals(availableStack.getStackStatus(), stackSet.iterator().next().getStackStatus());
     }
 }
