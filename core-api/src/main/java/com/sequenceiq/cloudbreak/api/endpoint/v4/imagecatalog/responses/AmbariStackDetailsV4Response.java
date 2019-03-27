@@ -1,30 +1,21 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AmbariStackDetailsV4Response implements JsonEntity {
-    @JsonProperty
-    private String version;
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class AmbariStackDetailsV4Response extends BaseStackDetailsV4Response implements JsonEntity {
 
     @JsonProperty
     private AmbariStackRepoDetailsV4Response repository;
 
-    private Map<String, List<ManagementPackV4Entry>> mpacks = new HashMap<>();
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
+    private Map<String, List<ManagementPackV4Entry>> mpacks;
 
     public AmbariStackRepoDetailsV4Response getRepository() {
         return repository;

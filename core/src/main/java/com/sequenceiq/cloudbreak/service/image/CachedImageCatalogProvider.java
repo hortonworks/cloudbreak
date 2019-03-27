@@ -97,8 +97,9 @@ public class CachedImageCatalogProvider {
         List<Image> filteredBaseImages = filterImages(catalogImages.getBaseImages(), enabledOsPredicate());
         List<Image> filteredHdpImages = filterImages(catalogImages.getHdpImages(), enabledOsPredicate());
         List<Image> filteredHdfImages = filterImages(catalogImages.getHdfImages(), enabledOsPredicate());
+        List<Image> filteredCdhImages = filterImages(catalogImages.getCdhImages(), enabledOsPredicate());
 
-        Images images = new Images(filteredBaseImages, filteredHdpImages, filteredHdfImages, null, catalogImages.getSuppertedVersions());
+        Images images = new Images(filteredBaseImages, filteredHdpImages, filteredHdfImages, filteredCdhImages, catalogImages.getSuppertedVersions());
         return new CloudbreakImageCatalogV2(images, catalog.getVersions());
     }
 
@@ -147,9 +148,13 @@ public class CachedImageCatalogProvider {
     }
 
     private void validateImageCatalogUuids(CloudbreakImageCatalogV2 imageCatalog) throws CloudbreakImageCatalogException {
-        Stream<String> uuidStream = Stream.concat(imageCatalog.getImages().getBaseImages().stream().map(Image::getUuid),
-                imageCatalog.getImages().getHdpImages().stream().map(Image::getUuid));
-        uuidStream = Stream.concat(uuidStream, imageCatalog.getImages().getHdfImages().stream().map(Image::getUuid));
+        Stream<String> baseUuids = imageCatalog.getImages().getBaseImages().stream().map(Image::getUuid);
+        Stream<String> hdpUuids = imageCatalog.getImages().getHdpImages().stream().map(Image::getUuid);
+        Stream<String> hdfUuids = imageCatalog.getImages().getHdfImages().stream().map(Image::getUuid);
+        Stream<String> cdhUuids = imageCatalog.getImages().getCdhImages().stream().map(Image::getUuid);
+        Stream<String> uuidStream = Stream.of(baseUuids, hdpUuids, hdfUuids, cdhUuids).
+                reduce(Stream::concat).
+                orElseGet(Stream::empty);
         List<String> uuidList = uuidStream.collect(Collectors.toList());
         List<String> orphanUuids = imageCatalog.getVersions().getCloudbreakVersions().stream().flatMap(cbv -> cbv.getImageIds().stream()).
                 filter(imageId -> !uuidList.contains(imageId)).collect(Collectors.toList());
@@ -169,8 +174,9 @@ public class CachedImageCatalogProvider {
         boolean baseImagesValidate = isCleanAndCheckMap(catalog.getImages().getBaseImages());
         boolean hdfImagesValidate = isCleanAndCheckMap(catalog.getImages().getHdfImages());
         boolean hdpImagesValidate = isCleanAndCheckMap(catalog.getImages().getHdpImages());
+        boolean cdhImagesValidate = isCleanAndCheckMap(catalog.getImages().getCdhImages());
 
-        if (baseImagesValidate && hdfImagesValidate && hdpImagesValidate) {
+        if (baseImagesValidate && hdfImagesValidate && hdpImagesValidate && cdhImagesValidate) {
             throw new CloudbreakImageCatalogException("All images are empty or every items equals NULL");
         }
 

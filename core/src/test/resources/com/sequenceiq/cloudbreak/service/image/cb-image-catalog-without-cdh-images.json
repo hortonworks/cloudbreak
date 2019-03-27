@@ -1,0 +1,31 @@
+{
+  "images": {
+    "base-images": [
+      {
+        "date": "2017-10-13",
+        "description": "Cloudbreak official base image",
+        "images": {
+          "mock": {
+            "default": "mockimage/hdc-hdp--1710161226.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "uuid": "f6e778fc-7f17-4535-9021-515351df3691"
+      }
+    ],
+    "hdp-images": [],
+    "hdf-images": []
+  },
+  "versions": {
+    "cloudbreak": [
+      {
+        "images": [
+          "f6e778fc-7f17-4535-9021-515351df3691"
+        ],
+        "versions": [
+          "CB_VERSION"
+        ]
+      }
+    ]
+  }
+}
