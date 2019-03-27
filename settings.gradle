@@ -32,8 +32,9 @@ include 'cluster-ambari'
 include 'cluster-cm'
 include 'auth-connector'
 include 'flow'
-
-rootProject.name = 'cloudbreak'
 include 'mock-caas'
 include 'environment'
+
+rootProject.name = 'cloudbreak'
+
 

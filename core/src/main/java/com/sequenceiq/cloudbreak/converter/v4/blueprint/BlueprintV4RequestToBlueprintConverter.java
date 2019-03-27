@@ -16,6 +16,8 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
+import com.sequenceiq.cloudbreak.cmtemplate.generator.template.domain.GeneratedCmTemplate;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -42,6 +44,9 @@ public class BlueprintV4RequestToBlueprintConverter
     @Inject
     private MissingResourceNameGenerator missingResourceNameGenerator;
 
+    @Inject
+    private CmTemplateGeneratorService clusterTemplateGeneratorService;
+
     @Override
     public Blueprint convert(BlueprintV4Request json) {
         Blueprint blueprint = new Blueprint();
@@ -54,6 +59,10 @@ public class BlueprintV4RequestToBlueprintConverter
             } catch (IOException | CloudbreakApiException e) {
                 throw new BadRequestException(String.format("Cannot download ambari validation from: %s", sourceUrl), e);
             }
+        } else if (!json.getServices().isEmpty() && !Strings.isNullOrEmpty(json.getPlatform())) {
+            GeneratedCmTemplate generatedCmTemplate =
+                    clusterTemplateGeneratorService.generateTemplateByServices(json.getServices(), json.getPlatform());
+            blueprint.setBlueprintText(generatedCmTemplate.getTemplate());
         } else {
             blueprint.setBlueprintText(json.getBlueprint());
         }
