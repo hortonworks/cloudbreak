@@ -22,6 +22,14 @@ public class CommonCloudParameters {
 
     public static final String SSH_PUBLIC_KEY = PREFIX + "sshPublicKey";
 
+    public static final String AMBARI_PREFIX = PREFIX + "ambari.";
+
+    public static final String DEFAULT_AMBARI_USER = AMBARI_PREFIX + "defaultAmbariUser";
+
+    public static final String DEFAULT_AMBARI_PASSWORD = AMBARI_PREFIX + "defaultAmbariPassword";
+
+    public static final String DEFAULT_AMBARI_PORT = AMBARI_PREFIX + "defaultAmbariPort";
+
     private CommonCloudParameters() {
     }
 }

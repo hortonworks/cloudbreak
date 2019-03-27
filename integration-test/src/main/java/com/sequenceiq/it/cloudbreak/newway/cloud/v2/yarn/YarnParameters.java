@@ -24,8 +24,6 @@ public class YarnParameters {
 
     public static final String DEFAULT_ENDPOINT = "http://yprod001.l42scl.hortonworks.com:9191";
 
-    public static final String DEFAULT_AMBARI_USER = "admin";
-
     public static final String DEFAULT_CLUSTER_DEFINTION_NAME = "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin";
 
     private static final String PREFIX = CommonCloudParameters.PREFIX + "yarn.";
@@ -67,10 +65,8 @@ public class YarnParameters {
 
     public static class Credential {
 
-        private static final String PREFIX = YarnParameters.PREFIX + "credential.";
+        private static final String YARN_PREFIX = YarnParameters.PREFIX + "credential.";
 
-        public static final String ENDPOINT = PREFIX + "endpoint";
-
-        public static final String AMBARI_USER = PREFIX + "ambariUser";
+        public static final String ENDPOINT = YARN_PREFIX + "endpoint";
     }
 }

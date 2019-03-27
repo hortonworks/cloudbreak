@@ -135,7 +135,6 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     public YarnCredentialV4Parameters yarnCredentialParameters() {
         YarnCredentialV4Parameters yarnCredentialV4Parameters = new YarnCredentialV4Parameters();
         yarnCredentialV4Parameters.setEndpoint(getTestParameter().getWithDefault(YarnParameters.Credential.ENDPOINT, YarnParameters.DEFAULT_ENDPOINT));
-        yarnCredentialV4Parameters.setAmbariUser(getTestParameter().getWithDefault(YarnParameters.Credential.AMBARI_USER, YarnParameters.DEFAULT_AMBARI_USER));
         return yarnCredentialV4Parameters;
     }
 

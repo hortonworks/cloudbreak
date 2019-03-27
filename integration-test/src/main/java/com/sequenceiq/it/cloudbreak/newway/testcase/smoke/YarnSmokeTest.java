@@ -4,10 +4,15 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_CLUSTER_INSTALL;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_AMBARI_START;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_TERMINATION;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.WORKER;
+
+import java.io.IOException;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -16,13 +21,16 @@ import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.stack.StackScalePostAction;
 import com.sequenceiq.it.cloudbreak.newway.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
+import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.e2e.AbstractE2ETest;
+import com.sequenceiq.it.cloudbreak.newway.util.AmbariUtil;
 import com.sequenceiq.it.cloudbreak.newway.util.ShowClusterDefinitionUtil;
+import com.sequenceiq.it.util.ResourceUtil;
 
 public class YarnSmokeTest extends AbstractE2ETest {
 
@@ -30,17 +38,17 @@ public class YarnSmokeTest extends AbstractE2ETest {
 
     private static final String INSTANCE_GROUP_ID = "ig";
 
-    private static final String POST_CLUSTER_INSTALL_RECIPE_CONTENT = Base64
-            .encodeBase64String("#!/bin/bash\ntouch /post-install\necho \"Hello Pre-Install\" >> /pre-install".getBytes());
+    private static final String POST_CLUSTER_INSTALL_RECIPE_SCRIPT_FILE = "classpath:/recipes/post-install.sh";
 
-    private static final String PRE_AMBARI_START_RECIPE_CONTENT = Base64
-            .encodeBase64String("#!/bin/bash\ntouch /post-install\necho \"Hello Pre-Ambari\" >> /pre-ambari".getBytes());
+    private static final String PRE_AMBARI_START_RECIPE_SCRIPT_FILE = "classpath:/recipes/pre-ambari.sh";
 
-    private static final String POST_AMBARI_STAR_RECIPE_CONTENT = Base64
-            .encodeBase64String("#!/bin/bash\ntouch /post-install\necho \"Hello Post-Ambari\" >> /post-ambari".getBytes());
+    private static final String POST_AMBARI_START_RECIPE_SCRIPT_FILE = "classpath:/recipes/post-ambari.sh";
 
-    private static final String PRE_TERMINATION_RECIPE_CONTENT = Base64
-            .encodeBase64String("#!/bin/bash\ntouch /post-install\necho \"Hello Pre-Termination\" >> /pre-termination".getBytes());
+    private static final String PRE_TERMINATION_RECIPE_SCRIPT_FILE = "classpath:/recipes/pre-termination.sh";
+
+    private static final String CREATE_AMBARI_USER_SCRIPT_FILE = "classpath:/recipes/create-ambari-user.sh";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(YarnSmokeTest.class);
 
     @Inject
     private StackTestClient stackTestClient;
@@ -104,34 +112,24 @@ public class YarnSmokeTest extends AbstractE2ETest {
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
-            given = "a valid YARN cluster with PRE_TERMINATION recipe",
-            when = "terminate the cluster",
-            then = "the pre-termination highstate has to be called"
+            given = "a valid YARN cluster with POST_AMBARI_STAR recipe",
+            when = "the cluster is created",
+            then = "a new Ambari user has to be created"
     )
-    public void testWhenCreatedYARNClusterShouldPreTerminationRecipePresent(TestContext testContext) {
-        String postClusterInstallRecipeName = getNameGenerator().getRandomNameForResource();
-        String preAmbariStartRecipeName = getNameGenerator().getRandomNameForResource();
+    public void testWhenCreatedYARNClusterShouldAmbariUserPresentByPostAmbariInstallRecipe(TestContext testContext) throws IOException {
         String postAmbariStartRecipeName = getNameGenerator().getRandomNameForResource();
-        String preTerminationRecipeName = getNameGenerator().getRandomNameForResource();
-        String[] recipeNames = new String[]{postClusterInstallRecipeName, preAmbariStartRecipeName, postAmbariStartRecipeName, preTerminationRecipeName};
 
         testContext.given(RecipeTestDto.class)
-                .withName(postClusterInstallRecipeName).withContent(POST_CLUSTER_INSTALL_RECIPE_CONTENT).withRecipeType(POST_CLUSTER_INSTALL)
-                .when(recipeTestClient.createV4())
-                .withName(preAmbariStartRecipeName).withContent(PRE_AMBARI_START_RECIPE_CONTENT).withRecipeType(PRE_AMBARI_START)
-                .when(recipeTestClient.createV4())
-                .withName(postAmbariStartRecipeName).withContent(POST_AMBARI_STAR_RECIPE_CONTENT).withRecipeType(POST_AMBARI_START)
-                .when(recipeTestClient.createV4())
-                .withName(preTerminationRecipeName).withContent(PRE_TERMINATION_RECIPE_CONTENT).withRecipeType(PRE_TERMINATION)
+                .withName(postAmbariStartRecipeName).withContent(generateCreateAmbariUserRecipeContent(CREATE_AMBARI_USER_SCRIPT_FILE))
+                .withRecipeType(POST_AMBARI_START)
                 .when(recipeTestClient.createV4())
                 .given(INSTANCE_GROUP_ID, InstanceGroupTestDto.class)
-                .withHostGroup(WORKER).withNodeCount(NODE_COUNT).withRecipes(recipeNames)
+                .withHostGroup(MASTER).withNodeCount(NODE_COUNT).withRecipes(postAmbariStartRecipeName)
                 .given(StackTestDto.class)
                 .replaceInstanceGroups(INSTANCE_GROUP_ID)
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
-                .when(stackTestClient.deleteV4())
-                .await(STACK_DELETED)
+                .then(AmbariUtil::checkAmbariUser)
                 .validate();
     }
 
@@ -141,7 +139,7 @@ public class YarnSmokeTest extends AbstractE2ETest {
             when = "upscaling the cluster with 2 nodes",
             then = "the cluster should be available and scaled up successfully"
     )
-    public void testWhenCreatedYARNClusterShouldBeUpScaledAlongWithAllTheRecipes(TestContext testContext) {
+    public void testWhenCreatedYARNClusterShouldBeUpScaledAlongWithAllTheRecipes(TestContext testContext) throws IOException {
         String postClusterInstallRecipeName = getNameGenerator().getRandomNameForResource();
         String preAmbariStartRecipeName = getNameGenerator().getRandomNameForResource();
         String postAmbariStartRecipeName = getNameGenerator().getRandomNameForResource();
@@ -149,10 +147,24 @@ public class YarnSmokeTest extends AbstractE2ETest {
         String[] recipeNames = new String[]{postClusterInstallRecipeName, preAmbariStartRecipeName, postAmbariStartRecipeName, preTerminationRecipeName};
 
         testContext.given(RecipeTestDto.class)
-                .withName(postClusterInstallRecipeName).withContent(POST_CLUSTER_INSTALL_RECIPE_CONTENT).withRecipeType(POST_CLUSTER_INSTALL)
-                .withName(preAmbariStartRecipeName).withContent(PRE_AMBARI_START_RECIPE_CONTENT).withRecipeType(PRE_AMBARI_START)
-                .withName(postAmbariStartRecipeName).withContent(POST_AMBARI_STAR_RECIPE_CONTENT).withRecipeType(POST_AMBARI_START)
-                .withName(preTerminationRecipeName).withContent(PRE_TERMINATION_RECIPE_CONTENT).withRecipeType(PRE_TERMINATION)
+                .withName(postClusterInstallRecipeName)
+                .withContent(Base64.encodeBase64String(ResourceUtil
+                        .readResourceAsString(applicationContext, POST_CLUSTER_INSTALL_RECIPE_SCRIPT_FILE).getBytes()))
+                .withRecipeType(POST_CLUSTER_INSTALL)
+                .when(recipeTestClient.createV4())
+                .withName(preAmbariStartRecipeName)
+                .withContent(Base64.encodeBase64String(ResourceUtil
+                        .readResourceAsString(applicationContext, PRE_AMBARI_START_RECIPE_SCRIPT_FILE).getBytes()))
+                .withRecipeType(PRE_AMBARI_START)
+                .when(recipeTestClient.createV4())
+                .withName(postAmbariStartRecipeName)
+                .withContent(Base64.encodeBase64String(ResourceUtil
+                        .readResourceAsString(applicationContext, POST_AMBARI_START_RECIPE_SCRIPT_FILE).getBytes()))
+                .withRecipeType(POST_AMBARI_START)
+                .when(recipeTestClient.createV4())
+                .withName(preTerminationRecipeName)
+                .withContent(Base64.encodeBase64String(ResourceUtil
+                        .readResourceAsString(applicationContext, PRE_TERMINATION_RECIPE_SCRIPT_FILE).getBytes()))
                 .withRecipeType(PRE_TERMINATION)
                 .when(recipeTestClient.createV4())
                 .given(INSTANCE_GROUP_ID, InstanceGroupTestDto.class)
@@ -170,5 +182,15 @@ public class YarnSmokeTest extends AbstractE2ETest {
     public void teardown(Object[] data) {
         TestContext testContext = (TestContext) data[0];
         testContext.cleanupTestContext();
+    }
+
+    private String generateCreateAmbariUserRecipeContent(String filePath) throws IOException {
+        String ambariUser = getTestParameter().get(CommonCloudParameters.DEFAULT_AMBARI_USER);
+        String ambariPassword = getTestParameter().get(CommonCloudParameters.DEFAULT_AMBARI_PASSWORD);
+        String recipeContentFromFile = ResourceUtil.readResourceAsString(applicationContext, filePath);
+
+        recipeContentFromFile = recipeContentFromFile.replaceAll("AMBARI_USER", ambariUser);
+        recipeContentFromFile = recipeContentFromFile.replaceAll("AMBARI_PASSWORD", ambariPassword);
+        return Base64.encodeBase64String(recipeContentFromFile.getBytes());
     }
 }
