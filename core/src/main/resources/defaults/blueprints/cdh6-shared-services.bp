@@ -35,13 +35,7 @@
           {
             "refName": "hdfs-DATANODE-BASE",
             "roleType": "DATANODE",
-            "base": true,
-            "configs": [
-              {
-                "name": "dfs_datanode_failed_volumes_tolerated",
-                "value": "0"
-              }
-            ]
+            "base": true
           },
           {
             "refName": "hdfs-BALANCER-BASE",
