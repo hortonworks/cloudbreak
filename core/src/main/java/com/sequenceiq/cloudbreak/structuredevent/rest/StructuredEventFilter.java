@@ -197,7 +197,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         if (cloudbreakUser == null) {
             String serviceId = authenticatedUserService.getServiceAccountId();
-            cloudbreakUser = new CloudbreakUser(serviceId, serviceId, serviceId, serviceId);
+            cloudbreakUser = new CloudbreakUser(serviceId, serviceId, serviceId, serviceId, null);
         }
         Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
         structuredEventClient.sendStructuredEvent(new StructuredRestCallEvent(createOperationDetails(restParams, requestTime, workspaceId, cloudbreakUser),

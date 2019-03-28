@@ -81,7 +81,7 @@ public class UserProfileHandlerTest {
     }
 
     private CloudbreakUser createIdentityUser() {
-        return new CloudbreakUser(USER_ID_1, USERNAME_1, EMAIL_1, TENANT_A);
+        return new CloudbreakUser(USER_ID_1, USERNAME_1, EMAIL_1, TENANT_A, null);
     }
 
     private User createUser() {

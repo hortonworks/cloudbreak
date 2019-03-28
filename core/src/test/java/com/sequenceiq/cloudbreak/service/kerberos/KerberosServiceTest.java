@@ -72,7 +72,7 @@ public class KerberosServiceTest {
         workspace.setId(1L);
         resource.setWorkspace(workspace);
         User user = new User();
-        CloudbreakUser cloudbreakUser = new CloudbreakUser("1", "user", "user@user.com", "tenant");
+        CloudbreakUser cloudbreakUser = new CloudbreakUser("1", "user", "user@user.com", "tenant", null);
 
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
         when(userService.getOrCreate(any())).thenReturn(user);
@@ -94,7 +94,7 @@ public class KerberosServiceTest {
         workspace.setId(1L);
         resource.setWorkspace(workspace);
         User user = new User();
-        CloudbreakUser cloudbreakUser = new CloudbreakUser("1", "user", "user@user.com", "tenant");
+        CloudbreakUser cloudbreakUser = new CloudbreakUser("1", "user", "user@user.com", "tenant", null);
 
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
         when(userService.getOrCreate(any())).thenReturn(user);

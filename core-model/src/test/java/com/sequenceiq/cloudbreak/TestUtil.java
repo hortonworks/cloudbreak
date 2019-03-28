@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.ChangeWorkspaceUsersV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceStatus;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceRole;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -79,7 +80,6 @@ import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.domain.workspace.UserWorkspacePermissions;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.structuredevent.event.LdapDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.LdapNotificationDetails;
@@ -116,11 +116,11 @@ public class TestUtil {
     }
 
     public static CloudbreakUser cbAdminUser() {
-        return new CloudbreakUser("userid", "testuser", "email", "testaccount");
+        return new CloudbreakUser("userid", "testuser", "email", "testaccount", null);
     }
 
     public static CloudbreakUser cbUser() {
-        return new CloudbreakUser("userid", "testuser", "email", "testaccount");
+        return new CloudbreakUser("userid", "testuser", "email", "testaccount", null);
     }
 
     public static Credential awsCredential() {
@@ -218,18 +218,10 @@ public class TestUtil {
         return user;
     }
 
-    public static UserWorkspacePermissions userWorkspacePermissions(User user, Workspace workspace, String... permissions) {
-        UserWorkspacePermissions userWorkspacePermissions = new UserWorkspacePermissions();
-        userWorkspacePermissions.setUser(user);
-        userWorkspacePermissions.setWorkspace(workspace);
-        userWorkspacePermissions.setPermissionSet(Set.of(permissions));
-        return userWorkspacePermissions;
-    }
-
-    public static ChangeWorkspaceUsersV4Request changeWorkspaceUsersJson(String userId, String... permissions) {
+    public static ChangeWorkspaceUsersV4Request changeWorkspaceUsersJson(String userId, Set<WorkspaceRole> roles) {
         ChangeWorkspaceUsersV4Request json1 = new ChangeWorkspaceUsersV4Request();
         json1.setUserId(userId);
-        json1.setPermissions(Set.of(permissions));
+        json1.setRoles(roles);
         return json1;
     }
 

@@ -41,6 +41,6 @@ public class CloudbreakRestRequestThreadLocalService implements RestRequestThrea
 
     @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
     public void setCloudbreakUserByUsernameAndTenant(String userId, String tenant) {
-        CLOUDBREAK_USER.set(new CloudbreakUser(userId, "", "", tenant));
+        CLOUDBREAK_USER.set(new CloudbreakUser(userId, "", "", tenant, null));
     }
 }

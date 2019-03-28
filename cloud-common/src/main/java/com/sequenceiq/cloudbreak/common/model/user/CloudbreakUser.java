@@ -12,11 +12,14 @@ public class CloudbreakUser {
 
     private final String tenant;
 
-    public CloudbreakUser(String userId, String username, String email, String tenant) {
+    private final String crn;
+
+    public CloudbreakUser(String userId, String username, String email, String tenant, String crn) {
         this.userId = userId;
         this.username = username;
         this.email = email;
         this.tenant = tenant;
+        this.crn = crn;
     }
 
     public String getUserId() {
@@ -33,6 +36,10 @@ public class CloudbreakUser {
 
     public String getTenant() {
         return tenant;
+    }
+
+    public String getCrn() {
+        return crn;
     }
 
     @Override

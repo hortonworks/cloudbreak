@@ -37,4 +37,10 @@ public interface WorkspaceRepository extends DisabledBaseRepository<Workspace, L
     @Override
     @Query("SELECT o FROM Workspace o WHERE o.status <> 'DELETED' AND o.id IN :ids")
     Iterable<Workspace> findAllById(@Param("ids") Iterable<Long> ids);
+
+    @Query("SELECT o FROM Workspace o WHERE o.resourceCrn= :crn AND o.status <> 'DELETED'")
+    Optional<Workspace> findByCrn(@Param("crn") String crn);
+
+    @Query("SELECT o FROM Workspace o WHERE o.status <> 'DELETED' AND o.resourceCrn IN :crns")
+    Iterable<Workspace> findAllByCrn(@Param("crns") Iterable<String> crns);
 }
