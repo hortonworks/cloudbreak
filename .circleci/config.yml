@@ -43,6 +43,16 @@ jobs:
           paths:
             - build
 
+  upload-tagged:
+    machine: true
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: upload tagged
+          command: make upload-tagged
+
   upload-snapshot:
     machine: true
     steps:
@@ -74,15 +84,21 @@ workflows:
   build_and_upload:
     jobs:
       - build
+      - upload-tagged:
+          filters:
+            branches:
+              only:
+                - rc-1.16
+                - rc-2.4
+                - rc-2.7
+                - rc-2.9
+          requires:
+            - build
       - upload-snapshot:
           filters:
             branches:
               only: 
                 - master
-                - rc-1.16
-                - rc-2.4
-                - rc-2.7
-                - rc-2.9
           requires:
             - build
       - release:
