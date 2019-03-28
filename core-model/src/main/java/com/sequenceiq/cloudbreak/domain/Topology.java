@@ -61,7 +61,7 @@ public class Topology implements ProvisionEntity, WorkspaceAwareResource, Archiv
 
     @Override
     public WorkspaceResource getResource() {
-        return WorkspaceResource.TOPOLOGY;
+        return WorkspaceResource.STACK;
     }
 
     public Long getId() {

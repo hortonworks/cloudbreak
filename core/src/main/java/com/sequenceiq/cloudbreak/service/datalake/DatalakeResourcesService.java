@@ -49,7 +49,7 @@ public class DatalakeResourcesService extends AbstractWorkspaceAwareResourceServ
 
     @Override
     public WorkspaceResource resource() {
-        return WorkspaceResource.DATALAKE_RESOURCES;
+        return WorkspaceResource.STACK;
     }
 
     public Long countDatalakeResourcesInEnvironment(EnvironmentView environment) {

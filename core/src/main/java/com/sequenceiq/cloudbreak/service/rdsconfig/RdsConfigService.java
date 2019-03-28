@@ -145,7 +145,7 @@ public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig>
 
     @Override
     public WorkspaceResource resource() {
-        return WorkspaceResource.RDS;
+        return WorkspaceResource.DATABASE;
     }
 
     @Override

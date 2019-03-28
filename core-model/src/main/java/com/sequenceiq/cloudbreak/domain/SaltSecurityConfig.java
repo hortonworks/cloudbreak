@@ -72,7 +72,7 @@ public class SaltSecurityConfig implements ProvisionEntity, WorkspaceAwareResour
 
     @Override
     public WorkspaceResource getResource() {
-        return WorkspaceResource.SALT_SECURITY_CONFIG;
+        return WorkspaceResource.STACK;
     }
 
     public void setId(Long id) {

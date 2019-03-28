@@ -86,7 +86,7 @@ public class NetworkService extends AbstractArchivistService<Network> {
 
     @Override
     public WorkspaceResource resource() {
-        return WorkspaceResource.NETWORK;
+        return WorkspaceResource.STACK;
     }
 
 }

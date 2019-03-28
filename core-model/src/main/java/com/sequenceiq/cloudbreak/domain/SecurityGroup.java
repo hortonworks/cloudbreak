@@ -63,7 +63,7 @@ public class SecurityGroup implements ProvisionEntity, WorkspaceAwareResource {
 
     @Override
     public WorkspaceResource getResource() {
-        return WorkspaceResource.SECURITY_GROUP;
+        return WorkspaceResource.STACK;
     }
 
     public Long getId() {

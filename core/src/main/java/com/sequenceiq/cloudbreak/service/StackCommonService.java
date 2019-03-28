@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedCluste
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
-import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
+import com.sequenceiq.cloudbreak.authorization.ResourceAction;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
@@ -127,7 +127,7 @@ public class StackCommonService {
     public void putInDefaultWorkspace(Long id, UpdateStackV4Request updateRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(restRequestThreadLocalService.getRequestedWorkspaceId(),
-                WorkspaceResource.STACK, Action.WRITE, user);
+                WorkspaceResource.STACK, ResourceAction.WRITE, user);
         Stack stack = stackService.getById(id);
         MDCBuilder.buildMdcContext(stack);
         put(stack, updateRequest);
@@ -135,7 +135,7 @@ public class StackCommonService {
 
     public void putStopInWorkspace(String name, Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, ResourceAction.WRITE, user);
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         if (!cloudParameterCache.isStartStopSupported(stack.cloudPlatform())) {
@@ -149,7 +149,7 @@ public class StackCommonService {
 
     public void putSyncInWorkspace(String name, Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, ResourceAction.WRITE, user);
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
@@ -160,7 +160,7 @@ public class StackCommonService {
 
     public void putStartInWorkspace(String name, Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, ResourceAction.WRITE, user);
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         if (!cloudParameterCache.isStartStopSupported(stack.cloudPlatform())) {
@@ -174,7 +174,7 @@ public class StackCommonService {
 
     public void putScalingInWorkspace(String name, Long workspaceId, StackScaleV4Request updateRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, ResourceAction.WRITE, user);
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         updateRequest.setStackId(stack.getId());
@@ -197,7 +197,7 @@ public class StackCommonService {
 
     public void deleteWithKerbereosInWorkspace(String name, Long workspaceId, Boolean withStackDelete, Boolean deleteDependencies) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, ResourceAction.WRITE, user);
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         clusterService.delete(stack.getId(), withStackDelete, deleteDependencies);
@@ -205,7 +205,7 @@ public class StackCommonService {
 
     public void repairCluster(Long workspaceId, String name, ClusterRepairV4Request clusterRepairRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, ResourceAction.WRITE, user);
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         if (clusterRepairRequest.getHostGroups() != null) {
             clusterService.repairCluster(stack.getId(), clusterRepairRequest.getHostGroups(), clusterRepairRequest.isRemoveOnly());
@@ -217,7 +217,7 @@ public class StackCommonService {
 
     public void retryInWorkspace(String name, Long workspaceId) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, ResourceAction.WRITE, user);
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         operationRetryService.retry(stack);
     }
@@ -254,7 +254,7 @@ public class StackCommonService {
 
     public void deleteInstanceByNameInWorkspace(String name, Long workspaceId, String instanceId, boolean forced) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, ResourceAction.WRITE, user);
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         stackService.removeInstance(stack, workspaceId, instanceId, forced, user);
     }

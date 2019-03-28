@@ -331,6 +331,7 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
         notification.setEventMessage(messagesService.getMessage(resourceEvent.getMessage()));
         notification.setCloud(credential.cloudPlatform());
         notification.setWorkspaceId(credential.getWorkspace().getId());
+        notification.setTenantName(credential.getWorkspace().getName());
         notificationSender.send(new Notification<>(notification));
     }
 

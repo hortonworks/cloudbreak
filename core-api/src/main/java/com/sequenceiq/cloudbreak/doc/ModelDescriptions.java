@@ -20,6 +20,7 @@ public class ModelDescriptions {
     public static final String PREINSTALLED = "Denotes that the image is prewarmed or base image.";
     public static final String ENVIRONMENTS = "Environments of the resource";
     public static final String GOV_CLOUD_FLAG = "Flag indicating if the credential type is AWS Gov Cloud";
+    public static final String TENANT_NAME = "name of the current tenant";
 
     private ModelDescriptions() {
     }

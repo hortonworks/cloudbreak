@@ -115,7 +115,7 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource {
 
     @Override
     public WorkspaceResource getResource() {
-        return WorkspaceResource.GATEWAY;
+        return WorkspaceResource.STACK;
     }
 
     public void setId(Long id) {

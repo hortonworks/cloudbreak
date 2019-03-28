@@ -21,15 +21,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
-import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.domain.workspace.UserWorkspacePermissions;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentResourceRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.cloudbreak.service.user.UserWorkspacePermissionsService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Component
 public class PermissionCheckingUtils {
@@ -37,37 +36,33 @@ public class PermissionCheckingUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(PermissionCheckingUtils.class);
 
     @Inject
-    private UserWorkspacePermissionsService userWorkspacePermissionsService;
+    private UmsAuthorizationService umsAuthorizationService;
 
     @Inject
-    private WorkspacePermissionAuthorizer workspacePermissionAuthorizer;
+    private WorkspaceService workspaceService;
 
-    public void checkPermissionByWorkspaceIdForUser(Long workspaceId, WorkspaceResource resource, Action action, User user) {
-        UserWorkspacePermissions userWorkspacePermissions = userWorkspacePermissionsService.findForUserByWorkspaceId(workspaceId, user);
-        if (userWorkspacePermissions != null) {
-            Set<String> permissionSet = userWorkspacePermissions.getPermissionSet();
-            boolean hasPermission = workspacePermissionAuthorizer.hasPermission(permissionSet, resource, action);
-            if (!hasPermission) {
-                throw new AccessDeniedException(format("You have no [%s] permission to %s.", action.name(), resource));
-            }
-        } else {
-            throw new AccessDeniedException(format("You have no [%s] permission to %s.", action.name(), resource));
-        }
+    public void checkPermissionByWorkspaceIdForUser(Long workspaceId, WorkspaceResource resource, ResourceAction action, User user) {
+        Workspace workspace = workspaceService.getByIdForCurrentUser(workspaceId);
+        umsAuthorizationService.checkRightOfUserForResource(user, workspace, resource, action);
     }
 
-    public void checkPermissionsByTarget(Object target, User user, WorkspaceResource resource, Action action) {
+    public void checkPermissionsByTarget(Object target, User user, WorkspaceResource resource, ResourceAction action) {
         Iterable<?> iterableTarget = targetToIterable(target);
         Set<Long> workspaceIds = collectWorkspaceIds(iterableTarget);
         if (workspaceIds.isEmpty()) {
             return;
         }
-        Set<UserWorkspacePermissions> userWorkspacePermissionSet = userWorkspacePermissionsService.findForUserByWorkspaceIds(user, workspaceIds);
-        if (userWorkspacePermissionSet.size() != workspaceIds.size()) {
-            throw new AccessDeniedException(format("You have no [%s] permission to %s.", action.name(), resource.getReadableName()));
+        List<Long> idsWithFailedCheck = workspaceIds.stream()
+                .filter(workspaceId -> {
+                    Workspace workspace = workspaceService.getByIdForCurrentUser(workspaceId);
+                    return !umsAuthorizationService.hasRightOfUserForResource(user, workspace, resource, action);
+                })
+                .collect(Collectors.toList());
+        if (!idsWithFailedCheck.isEmpty()) {
+            throw new AccessDeniedException(format("You have no [%s] permission to these workspaces: %s.", action.name(),
+                    Joiner.on(",").join(idsWithFailedCheck)));
         }
-        userWorkspacePermissionSet.stream()
-                .map(UserWorkspacePermissions::getPermissionSet)
-                .forEach(permissions -> checkPermissionByPermissionSet(action, resource, permissions));
+
     }
 
     private Iterable<?> targetToIterable(Object target) {
@@ -101,26 +96,13 @@ public class PermissionCheckingUtils {
         return workspaceId;
     }
 
-    Object checkPermissionsByPermissionSetAndProceed(WorkspaceResource resource, User user, Long workspaceId, Action action,
+    Object checkPermissionsByWorkspaceIdForUserAndProceed(WorkspaceResource resource, User user, Long workspaceId, ResourceAction action,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
         if (workspaceId == null) {
             throw new IllegalArgumentException("workspaceId cannot be null!");
         }
-        UserWorkspacePermissions userWorkspacePermissions = userWorkspacePermissionsService.findForUserByWorkspaceId(user, workspaceId);
-        if (userWorkspacePermissions == null) {
-            throw new AccessDeniedException(format("You have no [%s] permission to %s.", action.name(), resource.getReadableName()));
-        }
-        Set<String> permissionSet = userWorkspacePermissions.getPermissionSet();
-        LOGGER.debug("Checking {} permission for: {}", action, resource);
-        checkPermissionByPermissionSet(action, resource, permissionSet);
+        checkPermissionByWorkspaceIdForUser(workspaceId, resource, action, user);
         return proceed(proceedingJoinPoint, methodSignature);
-    }
-
-    void checkPermissionByPermissionSet(Action action, WorkspaceResource resource, Set<String> permissionSet) {
-        boolean hasPermission = workspacePermissionAuthorizer.hasPermission(permissionSet, resource, action);
-        if (!hasPermission) {
-            throw new AccessDeniedException(format("You have no [%s] permission to %s.", action.name(), resource.getReadableName()));
-        }
     }
 
     void validateIndex(int index, int length, String indexName) {

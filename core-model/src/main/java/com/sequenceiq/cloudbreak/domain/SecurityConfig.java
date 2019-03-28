@@ -66,7 +66,7 @@ public class SecurityConfig implements ProvisionEntity, WorkspaceAwareResource {
 
     @Override
     public WorkspaceResource getResource() {
-        return WorkspaceResource.SECURITY_GROUP;
+        return WorkspaceResource.STACK;
     }
 
     public void setId(Long id) {

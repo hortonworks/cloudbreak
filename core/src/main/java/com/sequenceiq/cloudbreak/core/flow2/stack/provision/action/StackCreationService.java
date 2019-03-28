@@ -228,6 +228,7 @@ public class StackCreationService {
         notification.setStackId(stack.getId());
         notification.setStackName(stack.getName());
         notification.setStackStatus(stack.getStatus());
+        notification.setTenantName(stack.getCreator().getTenant().getName());
         return new Notification<>(notification);
     }
 

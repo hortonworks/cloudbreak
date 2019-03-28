@@ -56,7 +56,7 @@ public class TopologyService extends AbstractArchivistService<Topology> {
 
     @Override
     public WorkspaceResource resource() {
-        return WorkspaceResource.TOPOLOGY;
+        return WorkspaceResource.STACK;
     }
 
     @Override

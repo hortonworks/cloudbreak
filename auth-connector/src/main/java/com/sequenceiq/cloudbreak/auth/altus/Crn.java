@@ -12,7 +12,6 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
-
 /**
  * A Cloudera Resource Name uniquely identifies an Altus resource. The format is:
  *

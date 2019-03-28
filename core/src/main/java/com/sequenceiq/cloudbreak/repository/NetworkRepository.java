@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @DisableHasPermission
 @EntityType(entityClass = Network.class)
 @Transactional(TxType.REQUIRED)
-@WorkspaceResourceType(resource = WorkspaceResource.NETWORK)
+@WorkspaceResourceType(resource = WorkspaceResource.STACK)
 public interface NetworkRepository extends WorkspaceResourceRepository<Network, Long> {
 
     @Override

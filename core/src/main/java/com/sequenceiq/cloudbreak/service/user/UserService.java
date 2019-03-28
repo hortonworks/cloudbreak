@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.service.user;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceStatus.ACTIVE;
-
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -18,12 +15,12 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.UserPreferences;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.workspace.TenantRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.UserPreferencesRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.UserRepository;
@@ -31,7 +28,6 @@ import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Service
 public class UserService {
@@ -48,9 +44,6 @@ public class UserService {
 
     @Inject
     private TenantRepository tenantRepository;
-
-    @Inject
-    private WorkspaceService workspaceService;
 
     @Inject
     private TransactionService transactionService;
@@ -116,7 +109,6 @@ public class UserService {
                 User user = new User();
                 user.setUserId(cloudbreakUser.getUserId());
                 user.setUserName(cloudbreakUser.getUsername());
-                user.setUserCrn(cloudbreakUser.getUserCrn());
 
                 Tenant tenant = tenantRepository.findByName(cloudbreakUser.getTenant());
                 if (tenant == null) {
@@ -125,16 +117,10 @@ public class UserService {
                     tenant = tenantRepository.save(tenant);
                 }
                 user.setTenant(tenant);
-                user.setTenantPermissionSet(Collections.emptySet());
+                if (!StringUtils.isEmpty(cloudbreakUser.getUserCrn())) {
+                    user.setUserCrn(cloudbreakUser.getUserCrn());
+                }
                 user = userRepository.save(user);
-
-                //create workspace
-                Workspace workspace = new Workspace();
-                workspace.setTenant(tenant);
-                workspace.setName(cloudbreakUser.getUsername());
-                workspace.setStatus(ACTIVE);
-                workspace.setDescription("Default workspace for the user.");
-                workspaceService.create(user, workspace);
 
                 UserPreferences userPreferences = new UserPreferences(null, user);
                 userPreferences = userPreferencesRepository.save(userPreferences);

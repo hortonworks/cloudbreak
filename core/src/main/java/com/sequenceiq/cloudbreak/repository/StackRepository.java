@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action.READ;
+import static com.sequenceiq.cloudbreak.authorization.ResourceAction.READ;
 import static com.sequenceiq.cloudbreak.repository.snippets.ShowTerminatedClustersSnippets.SHOW_TERMINATED_CLUSTERS_IF_REQUESTED;
 
 import java.util.List;
