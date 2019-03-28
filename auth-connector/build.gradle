@@ -31,7 +31,9 @@ dependencies {
   compile group: 'org.springframework.security.oauth',  name: 'spring-security-oauth2',    version: springOauthVersion
   compile group:  'org.springframework.security', name: 'spring-security-jwt',            version: '1.0.9.RELEASE'
   compile group: 'com.fasterxml.jackson.core',          name: 'jackson-databind', version: jacksonVersion
-  compile 'io.grpc:grpc-all:1.12.0'
+  compile ("io.grpc:grpc-all:1.12.0") {
+    exclude group: 'org.mockito'
+  }
   testCompile group: 'org.mockito',                     name: 'mockito-core', version: mockitoVersion
 }
 
