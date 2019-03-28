@@ -12,6 +12,7 @@ import (
 	apiclient "github.com/hortonworks/cb-cli/dataplane/api/client"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	authapiclient "github.com/hortonworks/cb-cli/dataplane/oauthapi/client"
+	u "github.com/hortonworks/cb-cli/dataplane/utils"
 	"github.com/hortonworks/dp-cli-common/caasauth"
 	"github.com/urfave/cli"
 )
@@ -44,6 +45,7 @@ func NewCloudbreakHTTPClientFromContext(c *cli.Context) *Cloudbreak {
 }
 
 func NewCloudbreakHTTPClient(address string, refreshToken string) *Cloudbreak {
+	u.CheckServerAddress(address)
 	var transport *caasauth.Transport
 	baseAPIPath := "/cb/api"
 	if len(refreshToken) == 0 {
@@ -61,6 +63,7 @@ func NewDataplaneHTTPClientFromContext(c *cli.Context) *Dataplane {
 
 // NewDataplaneHTTPClient : Creates new Dataplane client
 func NewDataplaneHTTPClient(address string, refreshToken string) *Dataplane {
+	u.CheckServerAddress(address)
 	var transport *caasauth.Transport
 	const baseAPIPath string = "/"
 	if len(refreshToken) == 0 {

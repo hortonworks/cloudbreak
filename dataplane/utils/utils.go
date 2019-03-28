@@ -2,9 +2,11 @@ package utils
 
 import (
 	"errors"
+
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4utils"
+	"github.com/hortonworks/dp-cli-common/utils"
 	commonutils "github.com/hortonworks/dp-cli-common/utils"
 )
 
@@ -57,4 +59,10 @@ func SafeClusterStatusConvert(s *model.StackV4Response) string {
 		return s.Cluster.Status
 	}
 	return ""
+}
+
+func CheckServerAddress(address string) {
+	if len(address) == 0 {
+		utils.LogErrorMessageAndExit("Server address is empty. Please set it with the `dp configure` command or the `--server` option.")
+	}
 }

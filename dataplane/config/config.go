@@ -11,6 +11,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/dataplane/common"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
+	u "github.com/hortonworks/cb-cli/dataplane/utils"
 	ws "github.com/hortonworks/cb-cli/dataplane/workspace"
 	"github.com/hortonworks/dp-cli-common/caasauth"
 	"github.com/hortonworks/dp-cli-common/utils"
@@ -150,7 +151,9 @@ func configRead(c *cli.Context) error {
 	}
 	if len(refreshToken) == 0 {
 		if len(config.RefreshToken) == 0 {
-			token := caasauth.NewRefreshToken(c.String(fl.FlServerOptional.Name))
+			address := c.String(fl.FlServerOptional.Name)
+			u.CheckServerAddress(address)
+			token := caasauth.NewRefreshToken(address)
 			err = WriteConfigToFile(GetHomeDirectory(), config.Server, config.Output, profile, config.Workspace, token)
 			if err != nil {
 				utils.LogErrorAndExit(err)
