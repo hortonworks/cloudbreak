@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
-import static com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType.GEO_REDUNDANT;
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType.LOCALLY_REDUNDANT;
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType.PREMIUM_LOCALLY_REDUNDANT;
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType.STANDARD_SSD_LRS;
 import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
 import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
@@ -91,7 +91,7 @@ public class AzurePlatformParameters implements PlatformParameters {
 
     private Map<DiskType, DisplayName> diskDisplayNames() {
         Map<DiskType, DisplayName> map = new HashMap<>();
-        map.put(diskType(GEO_REDUNDANT.value()), displayName(GEO_REDUNDANT.displayName()));
+        map.put(diskType(STANDARD_SSD_LRS.value()), displayName(STANDARD_SSD_LRS.displayName()));
         map.put(diskType(LOCALLY_REDUNDANT.value()), displayName(LOCALLY_REDUNDANT.displayName()));
         map.put(diskType(PREMIUM_LOCALLY_REDUNDANT.value()), displayName(PREMIUM_LOCALLY_REDUNDANT.displayName()));
         return map;
@@ -107,9 +107,9 @@ public class AzurePlatformParameters implements PlatformParameters {
 
     private Map<String, VolumeParameterType> diskMappings() {
         Map<String, VolumeParameterType> map = new HashMap<>();
-        map.put(GEO_REDUNDANT.value(), VolumeParameterType.MAGNETIC);
-        map.put(LOCALLY_REDUNDANT.value(), VolumeParameterType.MAGNETIC);
-        map.put(PREMIUM_LOCALLY_REDUNDANT.value(), VolumeParameterType.MAGNETIC);
+        map.put(STANDARD_SSD_LRS.value(), VolumeParameterType.MAGNETIC);
+        map.put(LOCALLY_REDUNDANT.value(), VolumeParameterType.SSD);
+        map.put(PREMIUM_LOCALLY_REDUNDANT.value(), VolumeParameterType.SSD);
         return map;
     }
 

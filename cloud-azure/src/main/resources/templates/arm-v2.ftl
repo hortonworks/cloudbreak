@@ -296,7 +296,7 @@
                    }
                  },
                  {
-                   "apiVersion": "2016-04-30-preview",
+                   "apiVersion": "2018-04-01",
                    "type": "Microsoft.Compute/virtualMachines",
                    "name": "[concat(parameters('vmNamePrefix'), '${instance.instanceId}')]",
                    "location": "[parameters('region')]",

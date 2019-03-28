@@ -56,10 +56,10 @@ import com.microsoft.azure.management.resources.fluentcore.arm.AvailabilityZoneI
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.resources.fluentcore.arm.models.HasId;
 import com.microsoft.azure.management.storage.ProvisioningState;
-import com.microsoft.azure.management.storage.SkuName;
 import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azure.management.storage.StorageAccount.DefinitionStages.WithCreate;
 import com.microsoft.azure.management.storage.StorageAccountKey;
+import com.microsoft.azure.management.storage.StorageAccountSkuType;
 import com.microsoft.azure.management.storage.StorageAccounts;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
@@ -203,7 +203,7 @@ public class AzureClient {
         handleAuthException(() -> azure.storageAccounts().deleteByResourceGroup(resourceGroup, storageName));
     }
 
-    public StorageAccount createStorageAccount(String resourceGroup, String storageName, String storageLocation, SkuName accType, Boolean encryted,
+    public StorageAccount createStorageAccount(String resourceGroup, String storageName, String storageLocation, StorageAccountSkuType accType, Boolean encryted,
             Map<String, String> tags, Map<String, String> costFollowerTags) {
         Map<String, String> resultTags = new HashMap<>();
         for (Entry<String, String> entry : costFollowerTags.entrySet()) {
@@ -218,7 +218,7 @@ public class AzureClient {
                     .withTags(resultTags)
                     .withSku(accType);
             if (encryted) {
-                withCreate.withEncryption();
+                withCreate.withBlobEncryption();
             }
 
             return withCreate.create();
@@ -494,7 +494,7 @@ public class AzureClient {
         return handleAuthException(() -> {
             LOGGER.debug("Create custom image from '{}' with name '{}' into '{}' resource group (Region: {})",
                     fromVhdUri, imageName, resourceGroup, region);
-            if (!azure.resourceGroups().checkExistence(resourceGroup)) {
+            if (!azure.resourceGroups().contain(resourceGroup)) {
                 azure.resourceGroups().define(resourceGroup).withRegion(region).create();
             }
             return azure.virtualMachineCustomImages()
