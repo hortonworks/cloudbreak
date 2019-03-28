@@ -2,8 +2,11 @@ package com.sequenceiq.cloudbreak.auth.altus;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.List;
+
 import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc.UserManagementBlockingStub;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 
@@ -47,6 +50,49 @@ public class UmsClient {
                         .setUserIdOrCrn(userCrn)
                         .build()
         ).getUser();
+    }
+
+    public void assignResourceRole(String requestId, String userCrn, String resourceCrn, String resourceRoleCrn) {
+        newStub(requestId).assignResourceRole(UserManagementProto.AssignResourceRoleRequest.newBuilder()
+                .setAssignee(UserManagementProto.Assignee.newBuilder()
+                        .setAccountId(Crn.fromString(userCrn).getAccountId())
+                        .setUserIdOrCrn(userCrn)
+                        .build())
+                .setResourceCrn(resourceCrn)
+                .setResourceRoleCrn(resourceRoleCrn)
+                .build());
+    }
+
+    public void unassignResourceRole(String requestId, String userCrn, String resourceCrn, String resourceRoleCrn) {
+        newStub(requestId).unassignResourceRole(UserManagementProto.UnassignResourceRoleRequest.newBuilder()
+                .setAssignee(UserManagementProto.Assignee.newBuilder()
+                        .setAccountId(Crn.fromString(userCrn).getAccountId())
+                        .setUserIdOrCrn(userCrn)
+                        .build())
+                .setResourceCrn(resourceCrn)
+                .setResourceRoleCrn(resourceRoleCrn)
+                .build());
+    }
+
+    public List<UserManagementProto.ResourceAssignment> listAssigmentsOfUser(String requestId, String userCrn) {
+        return newStub(requestId).getAssigneeAuthorizationInformation(UserManagementProto.GetAssigneeAuthorizationInformationRequest.newBuilder()
+                .setAssigneeCrn(userCrn)
+                .build())
+        .getResourceAssignmentList();
+    }
+
+    public List<UserManagementProto.ResourceAssignee> listResourceAssigneesForResource(String requestId, String resourceCrn) {
+        return newStub(requestId).listResourceAssignees(UserManagementProto.ListResourceAssigneesRequest.newBuilder()
+                .setAccountId(Crn.fromString(resourceCrn).getAccountId())
+                .setResourceCrn(resourceCrn)
+                .build())
+                .getResourceAssigneeList();
+    }
+
+    public void notifyResourceDeleted(String requestId, String resourceCrn) {
+        newStub(requestId).notifyResourceDeleted(UserManagementProto.NotifyResourceDeletedRequest.newBuilder()
+                .setResourceCrn(resourceCrn)
+                .build());
     }
 
     /**

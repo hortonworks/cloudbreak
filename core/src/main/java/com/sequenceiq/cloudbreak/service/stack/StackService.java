@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
-import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
@@ -36,6 +35,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
+import com.sequenceiq.cloudbreak.authorization.ResourceAction;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
@@ -496,7 +496,7 @@ public class StackService {
     }
 
     public void updateNodeCount(Stack stack1, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, boolean withClusterEvent, User user) {
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack1.getWorkspace().getId(), WorkspaceResource.STACK, Action.WRITE, user);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack1.getWorkspace().getId(), WorkspaceResource.STACK, ResourceAction.WRITE, user);
         try {
             transactionService.required(() -> {
                 Stack stackWithLists = getByIdWithLists(stack1.getId());
@@ -621,7 +621,7 @@ public class StackService {
     }
 
     public void updateImage(Long stackId, Long workspaceId, String imageId, String imageCatalogName, String imageCatalogUrl, User user) {
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, ResourceAction.WRITE, user);
         flowManager.triggerStackImageUpdate(stackId, imageId, imageCatalogName, imageCatalogUrl);
     }
 
@@ -648,7 +648,7 @@ public class StackService {
     }
 
     private InstanceMetaData validateInstanceForDownscale(String instanceId, Stack stack, Long workspaceId, User user) {
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, Action.WRITE, user);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, ResourceAction.WRITE, user);
         InstanceMetaData metaData = instanceMetaDataRepository.findByInstanceId(stack.getId(), instanceId);
         if (metaData == null) {
             throw new NotFoundException(String.format("Metadata for instance %s has not found.", instanceId));
@@ -667,13 +667,13 @@ public class StackService {
     }
 
     private void repairFailedNodes(Stack stack, User user) {
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, Action.WRITE, user);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, ResourceAction.WRITE, user);
         LOGGER.debug("Received request to replace failed nodes: " + stack.getId());
         flowManager.triggerManualRepairFlow(stack.getId());
     }
 
     private void sync(Stack stack, boolean full, User user) {
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, Action.WRITE, user);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, ResourceAction.WRITE, user);
         if (!stack.isDeleteInProgress() && !stack.isStackInDeletionPhase() && !stack.isModificationInProgress()) {
             if (full) {
                 flowManager.triggerFullSync(stack.getId());
@@ -694,7 +694,7 @@ public class StackService {
     }
 
     private void triggerStackStopIfNeeded(Stack stack, Cluster cluster, boolean updateCluster, User user) {
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, Action.WRITE, user);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, ResourceAction.WRITE, user);
         if (!isStopNeeded(stack)) {
             return;
         }
@@ -740,7 +740,7 @@ public class StackService {
     }
 
     private void start(Stack stack, Cluster cluster, boolean updateCluster, User user) {
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, Action.WRITE, user);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, ResourceAction.WRITE, user);
         if (stack.isAvailable()) {
             String statusDesc = cloudbreakMessagesService.getMessage(Msg.STACK_START_IGNORED.code());
             LOGGER.debug(statusDesc);
@@ -817,7 +817,7 @@ public class StackService {
     }
 
     private void delete(Stack stack, Boolean forced, Boolean deleteDependencies, User user) {
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, Action.WRITE, user);
+        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, ResourceAction.WRITE, user);
         checkStackHasNoAttachedClusters(stack);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Stack delete requested.");

@@ -10,7 +10,6 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByReturnValue;
-import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 
 @Component
@@ -23,7 +22,7 @@ public class ReturnValuePermissionChecker implements PermissionChecker<CheckPerm
     public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, WorkspaceResource resource, User user,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
         CheckPermissionsByReturnValue methodAnnotation = (CheckPermissionsByReturnValue) rawMethodAnnotation;
-        Action action = methodAnnotation.action();
+        ResourceAction action = methodAnnotation.action();
         Object proceed = permissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature);
         if (proceed instanceof Optional<?>) {
             Optional<?> optionalResult = (Optional<?>) proceed;

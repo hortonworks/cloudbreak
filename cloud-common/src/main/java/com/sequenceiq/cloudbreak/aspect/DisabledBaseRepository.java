@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.aspect;
 
-import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action.READ;
-import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action.WRITE;
+import static com.sequenceiq.cloudbreak.authorization.ResourceAction.READ;
+import static com.sequenceiq.cloudbreak.authorization.ResourceAction.WRITE;
 
 import java.io.Serializable;
 import java.util.Optional;

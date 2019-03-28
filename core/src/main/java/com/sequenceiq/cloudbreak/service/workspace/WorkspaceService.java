@@ -1,30 +1,29 @@
 package com.sequenceiq.cloudbreak.service.workspace;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceStatus.DELETED;
-import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.ALL_READ;
-import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.ALL_WRITE;
-import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.WORKSPACE_MANAGE;
 
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.ChangeWorkspaceUsersV4Request;
-import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.authorization.UmsAuthorizationService;
+import com.sequenceiq.cloudbreak.authorization.ResourceAction;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceRole;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.domain.workspace.UserWorkspacePermissions;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceRepository;
 import com.sequenceiq.cloudbreak.service.Clock;
@@ -33,7 +32,6 @@ import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.user.UserService;
-import com.sequenceiq.cloudbreak.service.user.UserWorkspacePermissionsService;
 
 @Service
 public class WorkspaceService {
@@ -47,9 +45,6 @@ public class WorkspaceService {
     private WorkspaceRepository workspaceRepository;
 
     @Inject
-    private UserWorkspacePermissionsService userWorkspacePermissionsService;
-
-    @Inject
     private UserService userService;
 
     @Inject
@@ -61,16 +56,15 @@ public class WorkspaceService {
     @Inject
     private Clock clock;
 
+    @Inject
+    private UmsAuthorizationService umsAuthorizationService;
+
     public Workspace create(User user, Workspace workspace) {
         try {
             return transactionService.required(() -> {
-                Workspace createdWorkspace = workspaceRepository.save(workspace);
-                UserWorkspacePermissions userWorkspacePermissions = new UserWorkspacePermissions();
-                userWorkspacePermissions.setWorkspace(createdWorkspace);
-                userWorkspacePermissions.setUser(user);
-                userWorkspacePermissions.setPermissionSet(Set.of(ALL_READ.value(), ALL_WRITE.value(), WORKSPACE_MANAGE.value()));
-                userWorkspacePermissionsService.save(userWorkspacePermissions);
-                return createdWorkspace;
+                workspace.setResourceCrnByUser(user);
+                umsAuthorizationService.assignResourceRoleToUserInWorkspace(user, workspace, WorkspaceRole.WORKSPACEMANAGER);
+                return workspaceRepository.save(workspace);
             });
         } catch (TransactionExecutionException e) {
             if (e.getCause() instanceof DataIntegrityViolationException) {
@@ -81,21 +75,33 @@ public class WorkspaceService {
         }
     }
 
+    public Workspace create(Workspace workspace) {
+        try {
+            return transactionService.required(() -> workspaceRepository.save(workspace));
+        } catch (TransactionExecutionException e) {
+            if (e.getCause() instanceof DataIntegrityViolationException) {
+                throw new BadRequestException(String.format("Workspace with name '%s' in your tenant already exists.",
+                        workspace.getName()), e.getCause());
+            }
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
     public Set<Workspace> retrieveForUser(User user) {
-        return userWorkspacePermissionsService.findForUser(user).stream()
-                .map(UserWorkspacePermissions::getWorkspace).collect(Collectors.toSet());
+        //return umsAuthorizationService.getWorkspacesOfCurrentUser(user);
+        return Sets.newHashSet(getByName(getAccountWorkspaceName(user), user).get());
     }
 
     public Workspace getDefaultWorkspaceForUser(User user) {
-        return workspaceRepository.getByName(user.getUserName(), user.getTenant());
+        return workspaceRepository.getByName(getAccountWorkspaceName(user), user.getTenant());
     }
 
     public Optional<Workspace> getByName(String name, User user) {
-        return Optional.ofNullable(workspaceRepository.getByName(name, user.getTenant()));
+        return Optional.ofNullable(workspaceRepository.getByName(getAccountWorkspaceName(user), user.getTenant()));
     }
 
     public Optional<Workspace> getByNameForUser(String name, User user) {
-        return Optional.ofNullable(workspaceRepository.getByName(name, user.getTenant()));
+        return Optional.ofNullable(workspaceRepository.getByName(getAccountWorkspaceName(user), user.getTenant()));
     }
 
     /**
@@ -119,29 +125,21 @@ public class WorkspaceService {
     }
 
     public Workspace get(Long id, User user) {
-        UserWorkspacePermissions userWorkspacePermissions = userWorkspacePermissionsService.findForUserByWorkspaceId(user, id);
-        if (userWorkspacePermissions == null) {
-            throw new NotFoundException("Cannot find workspace by user.");
-        }
-        return userWorkspacePermissions.getWorkspace();
+        return getDefaultWorkspaceForUser(user);
     }
 
-    public Set<User> removeUsers(String workspaceName, Set<String> userIds, User user) {
-        Workspace workspace = getByNameForUserOrThrowNotFound(workspaceName, user);
-        verifierService.authorizeWorkspaceManipulation(user, workspace, Action.MANAGE,
+    public Set<User> removeUsers(String workspaceName, Set<String> userIds, User currentUser) {
+        Workspace workspace = getByNameForUserOrThrowNotFound(workspaceName, currentUser);
+        verifierService.authorizeWorkspaceManipulation(currentUser, workspace, ResourceAction.MANAGE,
                 "You cannot remove users from this workspace.");
-        verifierService.ensureWorkspaceManagementForUserRemoval(workspace, userIds);
+        verifierService.ensureWorkspaceManagementForUserRemainingUsers(currentUser, workspace, userIds);
         try {
             return transactionService.required(() -> {
-                Set<User> users = userService.getByUsersIds(userIds);
-                Set<UserWorkspacePermissions> toBeRemoved = verifierService.validateAllUsersAreAlreadyInTheWorkspace(workspace, users);
-                Set<User> usersToBeRemoved = toBeRemoved.stream().map(UserWorkspacePermissions::getUser).collect(Collectors.toSet());
-                verifierService.verifyDefaultWorkspaceUserRemovals(user, workspace, usersToBeRemoved);
-
-                userWorkspacePermissionsService.deleteAll(toBeRemoved);
-                return toBeRemoved.stream()
-                        .map(UserWorkspacePermissions::getUser)
-                        .collect(Collectors.toSet());
+                Set<User> usersToBeRemoved = userService.getByUsersIds(userIds);
+                verifierService.validateAllUsersAreAlreadyInTheWorkspace(currentUser, workspace, usersToBeRemoved);
+                verifierService.verifyDefaultWorkspaceUserRemovals(currentUser, workspace, usersToBeRemoved);
+                umsAuthorizationService.removeResourceRolesOfUserInWorkspace(usersToBeRemoved, workspace);
+                return usersToBeRemoved;
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
@@ -150,25 +148,17 @@ public class WorkspaceService {
 
     public Set<User> addUsers(String workspaceName, Set<ChangeWorkspaceUsersV4Request> changeWorkspaceUsersV4Requests, User currentUser) {
         Workspace workspace = getByNameForUserOrThrowNotFound(workspaceName, currentUser);
-        verifierService.authorizeWorkspaceManipulation(currentUser, workspace, Action.INVITE,
+        verifierService.authorizeWorkspaceManipulation(currentUser, workspace, ResourceAction.MANAGE,
                 "You cannot add users to this workspace.");
-        Map<User, Set<String>> usersToAddWithPermissions = workspaceUserPermissionJsonSetToMap(changeWorkspaceUsersV4Requests);
-        verifierService.validateUsersAreNotInTheWorkspaceYet(workspace, usersToAddWithPermissions.keySet());
+        Set<String> userIdsToAdd = changeWorkspaceUsersV4Requests.stream()
+                .map(request -> request.getUserId())
+                .collect(Collectors.toSet());
+        Set<User> usersToAdd = userService.getByUsersIds(userIdsToAdd);
+        verifierService.validateUsersAreNotInTheWorkspaceYet(currentUser, workspace, usersToAdd);
         try {
             return transactionService.required(() -> {
-                Set<UserWorkspacePermissions> userWorkspacePermsToAdd = usersToAddWithPermissions.entrySet().stream()
-                        .map(userWithPermissions -> {
-                            UserWorkspacePermissions newUserPermission = new UserWorkspacePermissions();
-                            newUserPermission.setPermissionSet(userWithPermissions.getValue());
-                            newUserPermission.setUser(userWithPermissions.getKey());
-                            newUserPermission.setWorkspace(workspace);
-                            return newUserPermission;
-                        })
-                        .collect(Collectors.toSet());
-
-                userWorkspacePermissionsService.saveAll(userWorkspacePermsToAdd);
-                return userWorkspacePermsToAdd.stream().map(UserWorkspacePermissions::getUser)
-                        .collect(Collectors.toSet());
+                usersToAdd.stream().forEach(userToAdd -> addUserByRequest(changeWorkspaceUsersV4Requests, workspace, userToAdd));
+                return usersToAdd;
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
@@ -177,28 +167,23 @@ public class WorkspaceService {
 
     public Set<User> updateUsers(String workspaceName, Set<ChangeWorkspaceUsersV4Request> updateWorkspaceUsersJsons, User currentUser) {
         Workspace workspace = getByNameForUserOrThrowNotFound(workspaceName, currentUser);
-        verifierService.authorizeWorkspaceManipulation(currentUser, workspace, Action.MANAGE,
+        Set<User> usersInWorkspace = umsAuthorizationService.getUsersOfWorkspace(currentUser, workspace);
+        verifierService.authorizeWorkspaceManipulation(currentUser, workspace, ResourceAction.MANAGE,
                 "You cannot modify the users in this workspace.");
-        verifierService.ensureWorkspaceManagementForUserUpdates(workspace, updateWorkspaceUsersJsons);
-        Map<User, Set<String>> usersToUpdateWithPermissions = workspaceUserPermissionJsonSetToMap(updateWorkspaceUsersJsons);
+        verifierService.ensureWorkspaceManagementForUserUpdates(currentUser, workspace, updateWorkspaceUsersJsons);
+
         try {
             return transactionService.required(() -> {
-                Map<User, UserWorkspacePermissions> toBeUpdated = verifierService.validateAllUsersAreAlreadyInTheWorkspace(
-                        workspace, usersToUpdateWithPermissions.keySet()).stream()
-                        .collect(Collectors.toMap(UserWorkspacePermissions::getUser, uop -> uop));
-
-                Set<UserWorkspacePermissions> userWorkspacePermissions = toBeUpdated.entrySet().stream()
-                        .map(userPermission -> {
-                            userPermission.getValue().setPermissionSet(usersToUpdateWithPermissions.get(userPermission.getKey()));
-                            return userPermission.getValue();
-                        })
+                Set<String> userIdsToBeUpdated = updateWorkspaceUsersJsons.stream()
+                        .map(request -> request.getUserId())
                         .collect(Collectors.toSet());
-
-                Set<User> usersToBeUpdated = userWorkspacePermissions.stream().map(UserWorkspacePermissions::getUser).collect(Collectors.toSet());
+                Set<User> usersToBeUpdated = userService.getByUsersIds(userIdsToBeUpdated);
+                verifierService.validateAllUsersAreAlreadyInTheWorkspace(currentUser, workspace, usersToBeUpdated);
                 verifierService.verifyDefaultWorkspaceUserUpdates(currentUser, workspace, usersToBeUpdated);
-
-                userWorkspacePermissionsService.saveAll(userWorkspacePermissions);
-                return toBeUpdated.keySet();
+                usersToBeUpdated.stream()
+                        .filter(userToBeChange -> usersInWorkspace.contains(userToBeChange))
+                        .forEach(userToBeChange -> updateUser(updateWorkspaceUsersJsons, workspace, userToBeChange));
+                return usersToBeUpdated;
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
@@ -210,101 +195,55 @@ public class WorkspaceService {
         return workspace.orElseThrow(() -> new NotFoundException("Cannot find workspace with name: " + workspaceName));
     }
 
-    public Set<User> changeUsers(String workspaceName, Set<ChangeWorkspaceUsersV4Request> newUserPermissions, User currentUser) {
+    public Set<User> changeUsers(String workspaceName, Set<ChangeWorkspaceUsersV4Request> changeUsersRequests, User currentUser) {
         Workspace workspace = getByNameForUserOrThrowNotFound(workspaceName, currentUser);
-        verifierService.authorizeWorkspaceManipulation(currentUser, workspace, Action.MANAGE,
+        Set<User> usersInWorkspace = umsAuthorizationService.getUsersOfWorkspace(currentUser, workspace);
+        verifierService.authorizeWorkspaceManipulation(currentUser, workspace, ResourceAction.MANAGE,
                 "You cannot modify the users in this workspace.");
-        verifierService.ensureWorkspaceManagementForChangeUsers(newUserPermissions);
+        verifierService.ensureWorkspaceManagementForChangeUsers(changeUsersRequests);
 
         try {
             return transactionService.required(() -> {
-                Set<UserWorkspacePermissions> oldPermissions = userWorkspacePermissionsService.findForWorkspace(workspace);
-                Map<String, User> newUsers = userService.getByUsersIds(getUserIds(newUserPermissions)).stream()
-                        .collect(Collectors.toMap(User::getUserId, user -> user));
-                Map<String, Set<String>> newPermissions = newUserPermissions.stream()
-                        .collect(Collectors.toMap(ChangeWorkspaceUsersV4Request::getUserId, ChangeWorkspaceUsersV4Request::getPermissions));
-                Map<String, User> oldUsers = oldPermissions.stream().map(UserWorkspacePermissions::getUser)
-                        .collect(Collectors.toMap(User::getUserId, user -> user));
+                Set<String> newUserIds = changeUsersRequests.stream()
+                        .map(newUserPermission -> newUserPermission.getUserId())
+                        .collect(Collectors.toSet());
 
-                removeUsers(currentUser, workspace, oldPermissions, newUsers, oldUsers);
-                updateUsers(currentUser, workspace, oldPermissions, newUsers, newPermissions, oldUsers);
-                addUsers(workspace, newUsers, newPermissions, oldUsers);
-                return new HashSet<>(newUsers.values());
+                Set<User> removableUsers = usersInWorkspace.stream()
+                        .filter(workspaceUser -> !newUserIds.contains(workspaceUser.getUserId()))
+                        .collect(Collectors.toSet());
+                umsAuthorizationService.removeResourceRolesOfUserInWorkspace(removableUsers, workspace);
+
+                Set<User> newUsers = userService.getByUsersIds(newUserIds);
+
+                Set<User> usersToBeUpdated = newUsers.stream()
+                        .filter(userToBeChange -> usersInWorkspace.contains(userToBeChange))
+                        .collect(Collectors.toSet());
+                verifierService.verifyDefaultWorkspaceUserUpdates(currentUser, workspace, usersToBeUpdated);
+                usersToBeUpdated.stream().forEach(userToBeChange -> updateUser(changeUsersRequests, workspace, userToBeChange));
+
+                newUsers.stream()
+                        .filter(newUser -> !usersInWorkspace.contains(newUser))
+                        .forEach(newUser -> addUserByRequest(changeUsersRequests, workspace, newUser));
+
+                return newUsers;
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
     }
 
-    private void removeUsers(User currentUser, Workspace workspace, Set<UserWorkspacePermissions> oldPermissions,
-            Map<String, User> newUsers, Map<String, User> oldUsers) {
-
-        Set<String> usersIdsToBeDeleted = new HashSet<>(oldUsers.keySet());
-        usersIdsToBeDeleted.removeAll(newUsers.keySet());
-        Set<User> usersToBeDeleted = oldUsers.values().stream()
-                .filter(u -> usersIdsToBeDeleted.contains(u.getUserId()))
-                .collect(Collectors.toSet());
-        verifierService.verifyDefaultWorkspaceUserRemovals(currentUser, workspace, usersToBeDeleted);
-
-        Set<UserWorkspacePermissions> permissionsToDelete = oldPermissions.stream()
-                .filter(oldPermission -> usersIdsToBeDeleted.contains(oldPermission.getUser().getUserId()))
-                .collect(Collectors.toSet());
-        userWorkspacePermissionsService.deleteAll(permissionsToDelete);
-    }
-
-    private void updateUsers(User currentUser, Workspace workspace, Set<UserWorkspacePermissions> oldPermissions, Map<String, User> newUsers,
-            Map<String, Set<String>> newPermissions, Map<String, User> oldUsers) {
-
-        Set<String> usersIdsToBeUpdated = new HashSet<>(oldUsers.keySet());
-        usersIdsToBeUpdated.retainAll(newUsers.keySet());
-
-        Set<User> usersToBeUpdated = oldUsers.values().stream()
-                .filter(u -> usersIdsToBeUpdated.contains(u.getUserId()))
-                .collect(Collectors.toSet());
-        verifierService.verifyDefaultWorkspaceUserUpdates(currentUser, workspace, usersToBeUpdated);
-
-        Set<UserWorkspacePermissions> permissionsToUpdate = oldPermissions.stream()
-                .filter(oldPermission -> usersIdsToBeUpdated.contains(oldPermission.getUser().getUserId()))
-                .peek(oldPermission -> oldPermission.setPermissionSet(newPermissions.get(oldPermission.getUser().getUserId())))
-                .collect(Collectors.toSet());
-        userWorkspacePermissionsService.saveAll(permissionsToUpdate);
-    }
-
-    private void addUsers(Workspace workspace, Map<String, User> newUsers, Map<String, Set<String>> newPermissions, Map<String, User> oldUsers) {
-        Set<String> usersIdsToBeAdded = new HashSet<>(newUsers.keySet());
-        usersIdsToBeAdded.removeAll(oldUsers.keySet());
-
-        Map<String, Set<String>> userAdditionsWithPermissions = usersIdsToBeAdded.stream()
-                .collect(Collectors.toMap(userId -> userId, newPermissions::get));
-
-        Set<UserWorkspacePermissions> userPermissionsToAdd = userAdditionsWithPermissions.entrySet().stream()
-                .map(userPermissions -> {
-                    UserWorkspacePermissions userWorkspacePermissions = new UserWorkspacePermissions();
-                    userWorkspacePermissions.setUser(newUsers.get(userPermissions.getKey()));
-                    userWorkspacePermissions.setPermissionSet(userPermissions.getValue());
-                    userWorkspacePermissions.setWorkspace(workspace);
-                    return userWorkspacePermissions;
-                })
-                .collect(Collectors.toSet());
-        userWorkspacePermissionsService.saveAll(userPermissionsToAdd);
-    }
-
-    private Set<String> getUserIds(Set<ChangeWorkspaceUsersV4Request> userPermissions) {
-        return userPermissions.stream().map(ChangeWorkspaceUsersV4Request::getUserId).collect(Collectors.toSet());
-    }
-
     public Workspace deleteByNameForUser(String workspaceName, User currentUser, Workspace defaultWorkspace) {
+        Workspace workspaceForDelete = getByNameForUserOrThrowNotFound(workspaceName, currentUser);
+        verifierService.authorizeWorkspaceManipulation(currentUser, workspaceForDelete, ResourceAction.MANAGE,
+                "You cannot delete this workspace.");
+
         try {
             return transactionService.required(() -> {
-                Workspace workspaceForDelete = getByNameForUserOrThrowNotFound(workspaceName, currentUser);
-                verifierService.authorizeWorkspaceManipulation(currentUser, workspaceForDelete, Action.MANAGE,
-                        "You cannot delete this workspace.");
-
                 verifierService.checkThatWorkspaceIsDeletable(currentUser, workspaceForDelete, defaultWorkspace);
-                Long deleted = userWorkspacePermissionsService.deleteByWorkspace(workspaceForDelete);
                 setupDeletionDateAndFlag(workspaceForDelete);
                 workspaceRepository.save(workspaceForDelete);
-                LOGGER.debug("Deleted workspace: {}, related permissions: {}", workspaceName, deleted);
+                umsAuthorizationService.notifyAltusAboutResourceDeletion(currentUser, workspaceForDelete);
+                LOGGER.debug("Deleted workspace: {}", workspaceName);
                 return workspaceForDelete;
             });
         } catch (TransactionExecutionException e) {
@@ -312,9 +251,34 @@ public class WorkspaceService {
         }
     }
 
-    private Map<User, Set<String>> workspaceUserPermissionJsonSetToMap(Set<ChangeWorkspaceUsersV4Request> updateWorkspaceUsersJsons) {
-        return updateWorkspaceUsersJsons.stream()
-                .collect(Collectors.toMap(json -> userService.getByUserId(json.getUserId()), ChangeWorkspaceUsersV4Request::getPermissions));
+    public Workspace getForCurrentUser() {
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
+        return get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+    }
+
+    private void addUserByRequest(Set<ChangeWorkspaceUsersV4Request> changeWorkspaceUsersV4Requests, Workspace workspace, User user) {
+        Optional<ChangeWorkspaceUsersV4Request> requestForUser = changeWorkspaceUsersV4Requests.stream()
+                .filter(request -> StringUtils.equals(request.getUserId(), user.getUserId()))
+                .findFirst();
+        if (requestForUser.isPresent() && requestForUser.get().getRoles() != null) {
+            requestForUser.get().getRoles().stream()
+                    .forEach(role -> umsAuthorizationService.assignResourceRoleToUserInWorkspace(user, workspace, role));
+        }
+    }
+
+    private void updateUser(Set<ChangeWorkspaceUsersV4Request> requestWithRoles, Workspace workspace, User userToBeChange) {
+        Set<WorkspaceRole> userCurrentRoles = umsAuthorizationService.getUserRolesInWorkspace(userToBeChange, workspace);
+        Optional<ChangeWorkspaceUsersV4Request> newRolesOptional = requestWithRoles.stream()
+                .filter(request -> StringUtils.equals(request.getUserId(), userToBeChange.getUserId()))
+                .findFirst();
+        Set<WorkspaceRole> newRoles = newRolesOptional.isPresent() ? newRolesOptional.get().getRoles() : Sets.newHashSet();
+        if (!userCurrentRoles.containsAll(newRoles) || !newRoles.containsAll(userCurrentRoles)) {
+            userCurrentRoles.stream()
+                    .forEach(currentRole -> umsAuthorizationService.unassignResourceRoleFromUserInWorkspace(userToBeChange, workspace, currentRole));
+            newRoles.stream()
+                    .forEach(currentRole -> umsAuthorizationService.assignResourceRoleToUserInWorkspace(userToBeChange, workspace, currentRole));
+        }
     }
 
     private void setupDeletionDateAndFlag(Workspace workspaceForDelete) {
@@ -322,9 +286,8 @@ public class WorkspaceService {
         workspaceForDelete.setDeletionTimestamp(clock.getCurrentTimeMillis());
     }
 
-    public Workspace getForCurrentUser() {
-        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
-        User user = userService.getOrCreate(cloudbreakUser);
-        return get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+    private String getAccountWorkspaceName(User user) {
+        return Crn.isCrn(user.getCrn()) ? Crn.fromString(user.getCrn()).getAccountId()
+                : user.getTenant().getName();
     }
 }

@@ -10,7 +10,7 @@ public enum WorkspaceResource {
     STACK("Stack", "stack"),
     STACK_TEMPLATE("Stack template", "stacktemplate"),
     LDAP("LDAP config", "ldap"),
-    RDS("RDS config", "rds"),
+    DATABASE("database config", "database"),
     PROXY("Proxy config", "proxy"),
     MPACK("MPACK resource", "mpack"),
     KUBERNETES("Kubernetes config", "kube"),

@@ -8,20 +8,20 @@ import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 @Service("RestRequestThreadLocalService")
 public class CloudbreakRestRequestThreadLocalService implements RestRequestThreadLocalService {
 
-    private static final ThreadLocal<Long> REQUESTED_ORG_ID = new ThreadLocal<>();
+    private static final ThreadLocal<Long> REQUESTED_WORKSPACE_ID = new ThreadLocal<>();
 
     private static final ThreadLocal<CloudbreakUser> CLOUDBREAK_USER = new ThreadLocal<>();
 
     public void setRequestedWorkspaceId(Long workspaceId) {
-        REQUESTED_ORG_ID.set(workspaceId);
+        REQUESTED_WORKSPACE_ID.set(workspaceId);
     }
 
     public Long getRequestedWorkspaceId() {
-        return REQUESTED_ORG_ID.get();
+        return REQUESTED_WORKSPACE_ID.get();
     }
 
     public void removeRequestedWorkspaceId() {
-        REQUESTED_ORG_ID.remove();
+        REQUESTED_WORKSPACE_ID.remove();
     }
 
     @Override
@@ -41,6 +41,6 @@ public class CloudbreakRestRequestThreadLocalService implements RestRequestThrea
 
     @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
     public void setCloudbreakUserByUsernameAndTenant(String userId, String tenant) {
-        CLOUDBREAK_USER.set(new CloudbreakUser(userId, "", "", tenant));
+        CLOUDBREAK_USER.set(new CloudbreakUser(userId, "", "", tenant, null));
     }
 }

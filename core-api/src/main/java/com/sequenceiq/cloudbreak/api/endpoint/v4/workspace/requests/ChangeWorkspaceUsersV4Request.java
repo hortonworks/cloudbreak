@@ -2,19 +2,22 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests;
 
 import java.util.Set;
 
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.validation.ValidChangeWorkspaceUsersJson;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceRole;
 
 import io.swagger.annotations.ApiModel;
 
-@ValidChangeWorkspaceUsersJson
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ChangeWorkspaceUsersV4Request {
 
+    @NotNull
     private String userId;
 
-    private Set<String> permissions;
+    //@NotNull
+    private Set<WorkspaceRole> roles;
 
     public String getUserId() {
         return userId;
@@ -24,11 +27,11 @@ public class ChangeWorkspaceUsersV4Request {
         this.userId = userId;
     }
 
-    public Set<String> getPermissions() {
-        return permissions;
+    public Set<WorkspaceRole> getRoles() {
+        return roles;
     }
 
-    public void setPermissions(Set<String> permissions) {
-        this.permissions = permissions;
+    public void setRoles(Set<WorkspaceRole> roles) {
+        this.roles = roles;
     }
 }

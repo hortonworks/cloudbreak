@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action.READ;
+import static com.sequenceiq.cloudbreak.authorization.ResourceAction.READ;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @EntityType(entityClass = RDSConfig.class)
 @Transactional(TxType.REQUIRED)
 @DisableHasPermission
-@WorkspaceResourceType(resource = WorkspaceResource.RDS)
+@WorkspaceResourceType(resource = WorkspaceResource.DATABASE)
 public interface RdsConfigRepository extends EnvironmentResourceRepository<RDSConfig, Long> {
 
     @Override

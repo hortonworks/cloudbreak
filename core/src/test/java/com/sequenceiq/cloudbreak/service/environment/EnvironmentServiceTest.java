@@ -212,7 +212,7 @@ public class EnvironmentServiceTest {
         when(kerberosService.findByNamesInWorkspace(anySet(), anyLong())).thenReturn(Collections.emptySet());
         when(environmentCreationValidator.validate(any(), any(), any())).thenReturn(ValidationResult.builder().build());
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);
-        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(new CloudbreakUser("", "", "", ""));
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(new CloudbreakUser("", "", "", "", null));
         when(userService.getOrCreate(any())).thenReturn(new User());
         when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentV4Response.class))).thenReturn(new DetailedEnvironmentV4Response());
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);
@@ -632,7 +632,7 @@ public class EnvironmentServiceTest {
         when(kerberosService.getClustersUsingResourceInEnvironment(kdc1, ENVIRONMENT_ID)).thenReturn(Sets.newHashSet(cluster1));
 
         exceptionRule.expect(BadRequestException.class);
-        exceptionRule.expectMessage(String.format("RDS config '%s' cannot be detached from environment 'EnvName' "
+        exceptionRule.expectMessage(String.format("database config '%s' cannot be detached from environment 'EnvName' "
                 + "because it is used by the following cluster(s): [%s]", rdsName1, clusterName1));
         exceptionRule.expectMessage(String.format("Proxy config '%s' cannot be detached from environment 'EnvName' "
                 + "because it is used by the following cluster(s): [%s]", proxyName1, clusterName1));

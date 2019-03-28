@@ -257,7 +257,7 @@ public class StackImageFilterServiceTest {
     }
 
     private CloudbreakUser setupLoggedInUser() {
-        CloudbreakUser user = new CloudbreakUser("", "", "", "");
+        CloudbreakUser user = new CloudbreakUser("", "", "", "", null);
         when(authenticatedUserService.getCbUser()).thenReturn(user);
         return user;
     }

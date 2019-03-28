@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package authorization;
+
+option java_package = "com.cloudera.thunderhead.service.authorization";
+option java_outer_classname = "AuthorizationProto";
+
+import "version.proto";
+
+// For future compatibility, all rpcs must take a request and return a response
+// even if there is initially no content for these messages.
+service Authorization {
+
+  // Get the service version.
+  rpc GetVersion (version.VersionRequest)
+    returns (version.VersionResponse) {}
+
+  // Does a rights check for the input actor. Fails with a PERMISSION_DENIED
+  // error with a user-appropriate message if the check fails.
+  rpc CheckRight (CheckRightRequest)
+    returns (CheckRightResponse) {}
+
+  // Performs a number of rights checks returning results rather than throwing.
+  // This call should be used by clients to perform multiple rights checks as
+  // part of a single operation. It is the caller's responsibility to craft an
+  // appropriate error if the results indicate authorization failure. See
+  // Scrutinizer.java for examples of user-appropriate errors.
+  rpc HasRights (HasRightsRequest)
+    returns (HasRightsResponse) {}
+
+}
+
+// Object representing the check of a single right.
+message RightCheck {
+  // The right to check.
+  string right = 1;
+  // The resource to check if any.
+  string resource = 2;
+}
+
+message CheckRightRequest {
+  // The CRN of the actor to check.
+  string actorCrn = 1;
+  // The check to perform.
+  RightCheck check = 2;
+}
+
+message CheckRightResponse {
+}
+
+message HasRightsRequest {
+  // The CRN of the actor to check.
+  string actorCrn = 1;
+  // The check to perform.
+  repeated RightCheck check = 2;
+}
+
+message HasRightsResponse {
+  // The results of the checks.
+  repeated bool result = 1;
+}
