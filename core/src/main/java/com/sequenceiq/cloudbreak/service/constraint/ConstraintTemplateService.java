@@ -75,7 +75,7 @@ public class ConstraintTemplateService extends AbstractWorkspaceAwareResourceSer
 
     @Override
     public WorkspaceResource resource() {
-        return WorkspaceResource.CONSTRAINT_TEMPLATE;
+        return WorkspaceResource.STACK;
     }
 
     @Override

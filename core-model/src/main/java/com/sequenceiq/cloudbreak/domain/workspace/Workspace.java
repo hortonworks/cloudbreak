@@ -13,10 +13,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceStatus;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 
 @Entity
-public class Workspace implements ProvisionEntity {
+public class Workspace implements ProvisionEntity, TenantAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "workspace_generator")
@@ -34,6 +35,8 @@ public class Workspace implements ProvisionEntity {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private WorkspaceStatus status = WorkspaceStatus.ACTIVE;
+
+    private String resourceCrn;
 
     private Long deletionTimestamp = -1L;
 
@@ -83,6 +86,26 @@ public class Workspace implements ProvisionEntity {
 
     public void setStatus(WorkspaceStatus status) {
         this.status = status;
+    }
+
+    public String getResourceCrn() {
+        return resourceCrn;
+    }
+
+    public void setResourceCrn(String resourceCrn) {
+        this.resourceCrn = resourceCrn;
+    }
+
+    public void setResourceCrnByUser(User user) {
+        if (user.getUserCrn() != null) {
+            resourceCrn = Crn.builder()
+                        .setAccountId(Crn.fromString(user.getUserCrn()).getAccountId())
+                        .setResource(getTenant().getName() + "#" + getName())
+                        .setResourceType(Crn.ResourceType.WORKSPACE)
+                        .setService(Crn.fromString(user.getUserCrn()).getService())
+                        .build()
+                        .toString();
+        }
     }
 
     @Override

@@ -51,6 +51,7 @@ public abstract class NotificationController {
         notification.setUserId(userService.getOrCreate(cloudbreakUser).getUserId());
         notification.setEventType(resourceEvent.name());
         notification.setEventMessage(messagesService.getMessage(resourceEvent.getMessage(), messageArgs));
+        notification.setTenantName(cloudbreakUser.getTenant());
         if (workspaceMessage) {
             Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
             notification.setWorkspaceId(workspaceId);

@@ -25,7 +25,7 @@ public class FileSystemConfigService extends AbstractWorkspaceAwareResourceServi
 
     @Override
     public WorkspaceResource resource() {
-        return WorkspaceResource.FILESYSTEM;
+        return WorkspaceResource.STACK;
     }
 
     public FileSystem getByIdFromAnyAvailableWorkspace(Long id) {

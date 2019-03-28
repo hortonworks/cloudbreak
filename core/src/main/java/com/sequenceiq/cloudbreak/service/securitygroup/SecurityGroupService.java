@@ -98,7 +98,7 @@ public class SecurityGroupService extends AbstractWorkspaceAwareResourceService<
 
     @Override
     public WorkspaceResource resource() {
-        return WorkspaceResource.SECURITY_GROUP;
+        return WorkspaceResource.STACK;
     }
 
     @Override

@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
+
 import io.swagger.annotations.ApiModel;
 
 @ApiModel
-public class UserV4Response {
+public class UserV4Response implements JsonEntity {
 
     private long id;
 

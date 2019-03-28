@@ -230,7 +230,7 @@ public class RDSConfig implements ProvisionEntity, EnvironmentAwareResource {
 
     @Override
     public WorkspaceResource getResource() {
-        return WorkspaceResource.RDS;
+        return WorkspaceResource.DATABASE;
     }
 
     @Override

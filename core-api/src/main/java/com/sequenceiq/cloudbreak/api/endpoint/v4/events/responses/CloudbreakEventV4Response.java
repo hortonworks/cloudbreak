@@ -60,6 +60,9 @@ public class CloudbreakEventV4Response extends CloudbreakEventBaseV4 {
     @ApiModelProperty(ModelDescriptions.WORKSPACE_ID)
     private Long workspaceId;
 
+    @ApiModelProperty(ModelDescriptions.TENANT_NAME)
+    private String tenantName;
+
     private LdapDetails ldapDetails;
 
     private RdsDetails rdsDetails;
@@ -190,5 +193,13 @@ public class CloudbreakEventV4Response extends CloudbreakEventBaseV4 {
 
     public void setRdsDetails(RdsDetails rdsDetails) {
         this.rdsDetails = rdsDetails;
+    }
+
+    public String getTenantName() {
+        return tenantName;
+    }
+
+    public void setTenantName(String tenantName) {
+        this.tenantName = tenantName;
     }
 }

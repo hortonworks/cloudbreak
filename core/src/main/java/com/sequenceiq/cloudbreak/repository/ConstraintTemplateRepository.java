@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @DisableHasPermission
 @Transactional(TxType.REQUIRED)
 @EntityType(entityClass = ConstraintTemplate.class)
-@WorkspaceResourceType(resource = WorkspaceResource.CONSTRAINT_TEMPLATE)
+@WorkspaceResourceType(resource = WorkspaceResource.STACK)
 public interface ConstraintTemplateRepository extends WorkspaceResourceRepository<ConstraintTemplate, Long> {
 
 }

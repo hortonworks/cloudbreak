@@ -72,7 +72,7 @@ public class ServiceDescriptor implements ProvisionEntity, WorkspaceAwareResourc
 
     @Override
     public WorkspaceResource getResource() {
-        return WorkspaceResource.SERVICE_DESCRIPTOR;
+        return WorkspaceResource.STACK;
     }
 
     public DatalakeResources getDatalakeResources() {

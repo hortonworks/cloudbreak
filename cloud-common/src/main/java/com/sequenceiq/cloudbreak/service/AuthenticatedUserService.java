@@ -39,6 +39,14 @@ public class AuthenticatedUserService {
         return null;
     }
 
+    public String getUserCrn() throws CloudbreakException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication instanceof OAuth2Authentication) {
+            return userService.getUserCrn((OAuth2Authentication) authentication);
+        }
+        throw new CloudbreakException("User is not authenticated via UMS, userCRN cannot be retrieved.");
+    }
+
     public static String getTenant(OAuth2Authentication oauth) {
         Jwt decodedJwt = JwtHelper.decode(((OAuth2AuthenticationDetails) oauth.getDetails()).getTokenValue());
         String tenant = "DEFAULT";

@@ -65,7 +65,7 @@ public class GeneratedRecipe implements ProvisionEntity, WorkspaceAwareResource 
 
     @Override
     public WorkspaceResource getResource() {
-        return WorkspaceResource.GENERATED_RECIPE;
+        return WorkspaceResource.STACK;
     }
 
     public void setId(Long id) {

@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @EntityType(entityClass = FileSystem.class)
 @Transactional(TxType.REQUIRED)
 @HasPermission
-@WorkspaceResourceType(resource = WorkspaceResource.FILESYSTEM)
+@WorkspaceResourceType(resource = WorkspaceResource.STACK)
 public interface FileSystemRepository extends WorkspaceResourceRepository<FileSystem, Long> {
 
 }

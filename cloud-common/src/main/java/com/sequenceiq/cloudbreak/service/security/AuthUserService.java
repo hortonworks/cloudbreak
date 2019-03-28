@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @Component
 public class AuthUserService {
@@ -42,6 +43,13 @@ public class AuthUserService {
             user = createCbUserWithCaas(auth);
         }
         return user;
+    }
+
+    public String getUserCrn(OAuth2Authentication auth) throws CloudbreakException {
+        if (umsClient.isConfigured()) {
+            return ((OAuth2AuthenticationDetails) auth.getDetails()).getTokenValue();
+        }
+        throw new CloudbreakException("UMS Client is not configured, userCRN cannot be retrieved.");
     }
 
     private CloudbreakUser createCbUserWithCaas(OAuth2Authentication auth) {

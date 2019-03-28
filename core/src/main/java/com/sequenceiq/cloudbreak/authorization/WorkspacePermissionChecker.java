@@ -12,7 +12,6 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspace;
-import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 
@@ -26,8 +25,8 @@ public class WorkspacePermissionChecker implements PermissionChecker<CheckPermis
     public <T extends Annotation> Object checkPermissions(T rawMethodAnnotation, WorkspaceResource resource, User user,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
         Long workspaceId = getWorkspaceId(rawMethodAnnotation, proceedingJoinPoint);
-        Action action = getAction(rawMethodAnnotation);
-        return permissionCheckingUtils.checkPermissionsByPermissionSetAndProceed(resource, user, workspaceId, action, proceedingJoinPoint, methodSignature);
+        ResourceAction action = getAction(rawMethodAnnotation);
+        return permissionCheckingUtils.checkPermissionsByWorkspaceIdForUserAndProceed(resource, user, workspaceId, action, proceedingJoinPoint, methodSignature);
     }
 
     private <T extends Annotation> Long getWorkspaceId(T rawMethodAnnotation, ProceedingJoinPoint proceedingJoinPoint) {
@@ -46,7 +45,7 @@ public class WorkspacePermissionChecker implements PermissionChecker<CheckPermis
         }
     }
 
-    private <T extends Annotation> Action getAction(T rawMethodAnnotation) {
+    private <T extends Annotation> ResourceAction getAction(T rawMethodAnnotation) {
         return ((CheckPermissionsByWorkspace) rawMethodAnnotation).action();
     }
 

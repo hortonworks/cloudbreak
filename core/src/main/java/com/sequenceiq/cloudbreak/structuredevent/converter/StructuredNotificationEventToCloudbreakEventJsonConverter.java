@@ -54,7 +54,7 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverter
         cloudbreakEvent.setEventTimestamp(operationDetails.getTimestamp());
         cloudbreakEvent.setUserId(operationDetails.getUserId());
         cloudbreakEvent.setWorkspaceId(operationDetails.getWorkspaceId());
-        cloudbreakEvent.setWorkspaceId(operationDetails.getWorkspaceId());
+        cloudbreakEvent.setTenantName(operationDetails.getTenant());
 
         if (source.getLdapNotificationDetails() != null) {
             cloudbreakEvent.setLdapDetails(source.getLdapNotificationDetails().getLdapDetails());

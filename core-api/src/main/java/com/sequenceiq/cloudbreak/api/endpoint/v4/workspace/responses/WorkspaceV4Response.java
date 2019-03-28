@@ -15,7 +15,7 @@ public class WorkspaceV4Response extends WorkspaceV4Base {
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
 
-    private Set<UserWorkspacePermissionsV4Response> users;
+    private Set<UserV4Response> users;
 
     private WorkspaceStatus status;
 
@@ -28,11 +28,11 @@ public class WorkspaceV4Response extends WorkspaceV4Base {
         this.id = id;
     }
 
-    public Set<UserWorkspacePermissionsV4Response> getUsers() {
+    public Set<UserV4Response> getUsers() {
         return users;
     }
 
-    public void setUsers(Set<UserWorkspacePermissionsV4Response> users) {
+    public void setUsers(Set<UserV4Response> users) {
         this.users = users;
     }
 

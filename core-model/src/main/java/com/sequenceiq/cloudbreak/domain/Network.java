@@ -68,7 +68,7 @@ public class Network implements ProvisionEntity, WorkspaceAwareResource, Archiva
 
     @Override
     public WorkspaceResource getResource() {
-        return WorkspaceResource.NETWORK;
+        return WorkspaceResource.STACK;
     }
 
     public Long getId() {

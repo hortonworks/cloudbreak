@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @DisableHasPermission
 @EntityType(entityClass = DatalakeResources.class)
 @Transactional(TxType.REQUIRED)
-@WorkspaceResourceType(resource = WorkspaceResource.DATALAKE_RESOURCES)
+@WorkspaceResourceType(resource = WorkspaceResource.STACK)
 public interface DatalakeResourcesRepository extends WorkspaceResourceRepository<DatalakeResources, Long> {
     @CheckPermissionsByReturnValue
     DatalakeResources findByDatalakeStackId(Long datalakeStackId);

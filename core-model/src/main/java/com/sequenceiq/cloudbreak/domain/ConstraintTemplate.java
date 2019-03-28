@@ -66,7 +66,7 @@ public class ConstraintTemplate implements ProvisionEntity, WorkspaceAwareResour
 
     @Override
     public WorkspaceResource getResource() {
-        return WorkspaceResource.CONSTRAINT_TEMPLATE;
+        return WorkspaceResource.STACK;
     }
 
     public Long getId() {
