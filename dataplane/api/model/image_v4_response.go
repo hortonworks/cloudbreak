@@ -41,7 +41,7 @@ type ImageV4Response struct {
 	Repository map[string]string `json:"repository,omitempty"`
 
 	// stack details
-	StackDetails *AmbariStackDetailsV4Response `json:"stackDetails,omitempty"`
+	StackDetails *BaseStackDetailsV4Response `json:"stackDetails,omitempty"`
 
 	// uuid
 	UUID string `json:"uuid,omitempty"`
