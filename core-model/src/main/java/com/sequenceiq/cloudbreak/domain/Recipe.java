@@ -13,6 +13,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Where;
+
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
@@ -20,8 +22,9 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
 @Entity
+@Where(clause = "archived = false")
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
-public class Recipe implements ProvisionEntity, WorkspaceAwareResource {
+public class Recipe implements ProvisionEntity, WorkspaceAwareResource, ArchivableResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "recipe_generator")
@@ -43,6 +46,10 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource {
 
     @ManyToOne
     private Workspace workspace;
+
+    private boolean archived;
+
+    private Long deletionTimestamp = -1L;
 
     public Long getId() {
         return id;
@@ -102,5 +109,20 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource {
     @Override
     public WorkspaceResource getResource() {
         return WorkspaceResource.RECIPE;
+    }
+
+    @Override
+    public void setDeletionTimestamp(Long timestampMillisecs) {
+        deletionTimestamp = timestampMillisecs;
+    }
+
+    @Override
+    public void setArchived(boolean archived) {
+        this.archived = archived;
+    }
+
+    @Override
+    public void unsetRelationsToEntitiesToBeDeleted() {
+
     }
 }

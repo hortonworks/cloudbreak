@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
-import java.util.Collection;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -33,7 +32,7 @@ public class HostGroupDecorator {
         return subject;
     }
 
-    private void prepareRecipesByName(HostGroup subject, Workspace workspace, Collection<String> recipeNames) {
+    private void prepareRecipesByName(HostGroup subject, Workspace workspace, Set<String> recipeNames) {
         Set<Recipe> recipes = recipeService.getRecipesByNamesForWorkspace(workspace, recipeNames);
         subject.getRecipes().addAll(recipes);
     }

@@ -26,10 +26,10 @@ import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeViewRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
+import com.sequenceiq.cloudbreak.service.AbstractArchivistService;
 
 @Service
-public class RecipeService extends AbstractWorkspaceAwareResourceService<Recipe> {
+public class RecipeService extends AbstractArchivistService<Recipe> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeService.class);
 
@@ -42,11 +42,11 @@ public class RecipeService extends AbstractWorkspaceAwareResourceService<Recipe>
     @Inject
     private HostGroupRepository hostGroupRepository;
 
-    public Set<Recipe> getRecipesByNamesForWorkspace(Workspace workspace, Collection<String> recipeNames) {
+    public Set<Recipe> getRecipesByNamesForWorkspace(Workspace workspace, Set<String> recipeNames) {
         if (recipeNames.isEmpty()) {
             return emptySet();
         }
-        Set<Recipe> recipes = recipeRepository.findByNamesInWorkspace(recipeNames, workspace.getId());
+        Set<Recipe> recipes = recipeRepository.findByNameInAndWorkspaceId(recipeNames, workspace.getId());
         if (recipeNames.size() != recipes.size()) {
             throw new NotFoundException(String.format("Recipes '%s' not found.", collectMissingRecipeNames(recipes, recipeNames)));
         }
