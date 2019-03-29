@@ -13,25 +13,12 @@ buildscript {
   }
 }
 
-ext {
-  jersey_version = "2.25.1"
-}
-
 dependencies {
 
-  compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
-    exclude group: 'org.slf4j';
-  }
-
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-jersey', version: '2.0.3.RELEASE'
-
-  compile group:  'org.springframework',          name: 'spring-context-support',         version: springFrameworkVersion
-  compile group: 'org.springframework.boot',            name: 'spring-boot-starter', version: springBootVersion
-  compile group: 'org.springframework.boot',            name: 'spring-boot-starter-security', version: springBootVersion
   compile group: 'org.springframework.security.oauth',  name: 'spring-security-oauth2',    version: springOauthVersion
-  compile group:  'org.springframework.security', name: 'spring-security-jwt',            version: '1.0.9.RELEASE'
-  compile group: 'com.fasterxml.jackson.core',          name: 'jackson-databind', version: jacksonVersion
-  compile ("io.grpc:grpc-all:1.12.0") {
+
+  compile ("io.grpc:grpc-all:1.19.0") {
     exclude group: 'org.mockito'
   }
   testCompile group: 'org.mockito',                     name: 'mockito-core', version: mockitoVersion

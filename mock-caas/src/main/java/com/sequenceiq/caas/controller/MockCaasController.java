@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sequenceiq.caas.model.CaasUser;
 import com.sequenceiq.caas.model.CaasUserList;
+import com.sequenceiq.caas.model.IntrospectRequest;
+import com.sequenceiq.caas.model.IntrospectResponse;
+import com.sequenceiq.caas.model.TokenRequest;
+import com.sequenceiq.caas.model.TokenResponse;
 import com.sequenceiq.caas.service.MockCaasService;
-import com.sequenceiq.cloudbreak.client.CaasUser;
-import com.sequenceiq.cloudbreak.client.IntrospectRequest;
-import com.sequenceiq.cloudbreak.client.IntrospectResponse;
-import com.sequenceiq.cloudbreak.client.TokenRequest;
-import com.sequenceiq.cloudbreak.client.TokenResponse;
 
 @RestController
 public class MockCaasController {

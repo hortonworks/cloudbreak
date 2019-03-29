@@ -17,8 +17,6 @@ import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 @Component
 public class AuthUserService {
 
-    private static final String CRN_HEADER = "x-cdp-actor-crn";
-
     @Inject
     private CaasClient caasClient;
 
@@ -27,7 +25,8 @@ public class AuthUserService {
 
     public CloudbreakUser getUserWithCaasFallback(OAuth2Authentication auth) {
         CloudbreakUser user;
-        if (umsClient.isConfigured()) {
+        String token = ((OAuth2AuthenticationDetails) auth.getDetails()).getTokenValue();
+        if (umsClient.isUmsUsable(token)) {
             user = createCbUserWithUms(auth);
         } else {
             user = createCbUserWithCaas(auth);
@@ -45,7 +44,6 @@ public class AuthUserService {
     private CloudbreakUser createCbUserWithUms(OAuth2Authentication auth) {
         String userCrn = ((OAuth2AuthenticationDetails) auth.getDetails()).getTokenValue();
         UserManagementProto.User userInfo = umsClient.getUserDetails(userCrn, userCrn);
-        return new CloudbreakUser(userInfo.getUserId(), (String) auth.getPrincipal(), userInfo.getEmail(), Crn.getAccountId(userCrn));
+        return new CloudbreakUser(userInfo.getUserId(), (String) auth.getPrincipal(), userInfo.getEmail(), Crn.fromString(userCrn).getAccountId());
     }
-
 }

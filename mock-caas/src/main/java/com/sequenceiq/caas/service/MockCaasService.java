@@ -28,25 +28,30 @@ import org.springframework.security.jwt.Jwt;
 import org.springframework.security.jwt.crypto.sign.MacSigner;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.caas.model.AltusToken;
+import com.sequenceiq.caas.model.CaasUser;
 import com.sequenceiq.caas.model.CaasUserList;
+import com.sequenceiq.caas.model.IntrospectRequest;
+import com.sequenceiq.caas.model.IntrospectResponse;
+import com.sequenceiq.caas.model.TokenResponse;
 import com.sequenceiq.caas.util.JsonUtil;
-import com.sequenceiq.cloudbreak.client.CaasUser;
-import com.sequenceiq.cloudbreak.client.IntrospectRequest;
-import com.sequenceiq.cloudbreak.client.IntrospectResponse;
-import com.sequenceiq.cloudbreak.client.TokenResponse;
 
 @Service
 public class MockCaasService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MockCaasService.class);
+    public static final MacSigner SIGNATURE_VERIFIER = new MacSigner("titok");
 
-    private static final MacSigner SIGNATURE_VERIFIER = new MacSigner("titok");
+    private static final Logger LOGGER = LoggerFactory.getLogger(MockCaasService.class);
 
     private static final String LOCATION_HEADER_KEY = "Location";
 
     private static final String JWT_COOKIE_KEY = "dps-jwt";
 
+    private static final String CDP_SESSION_TOKEN = "cdp-session-token";
+
     private static final String ISS_KNOX = "KNOXSSO";
+
+    private static final String ISS_ALTUS = "Altus IAM";
 
     private static final int PLUS_QUANTITY = 1;
 
@@ -61,6 +66,68 @@ public class MockCaasService {
             }
         }
         throw new NotFoundException("Can not retrieve user from token");
+    }
+
+    public void out(@Nonnull HttpServletRequest httpServletRequest, @Nonnull HttpServletResponse httpServletResponse) {
+        String host = httpServletRequest.getHeader("Host");
+        Cookie cookie = new Cookie(JWT_COOKIE_KEY, "");
+        cookie.setDomain(host.split(":")[0]);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        httpServletResponse.addCookie(cookie);
+        httpServletResponse.setHeader(LOCATION_HEADER_KEY, "/");
+        httpServletResponse.setStatus(SC_FOUND);
+    }
+
+    public void auth(@Nonnull HttpServletRequest httpServletRequest, @Nonnull HttpServletResponse httpServletResponse, @Nonnull Optional<String> tenant,
+            @Nonnull Optional<String> userName, String redirectUri, Boolean active) {
+        if (tenant.isEmpty() || userName.isEmpty()) {
+            LOGGER.info("redirect to sign in page");
+            httpServletResponse.setHeader(LOCATION_HEADER_KEY, "../caas/sign-in.html?redirect_uri=" + redirectUri);
+        } else {
+            Cookie jwtCookie = new Cookie(JWT_COOKIE_KEY, getCaasToken(tenant.get(), userName.get(), active).getAccessToken());
+            jwtCookie.setDomain("");
+            jwtCookie.setPath("/");
+            httpServletResponse.addCookie(jwtCookie);
+
+            Cookie cdpSessionToken = new Cookie(CDP_SESSION_TOKEN, getAltusToken(tenant.get(), userName.get()));
+            cdpSessionToken.setDomain("");
+            cdpSessionToken.setPath("/");
+            httpServletResponse.addCookie(cdpSessionToken);
+
+            httpServletResponse.setHeader(LOCATION_HEADER_KEY, redirectUri);
+        }
+        httpServletResponse.setStatus(SC_FOUND);
+    }
+
+    public TokenResponse getTokenResponse(String authorizationCode, String refreshToken) {
+        if (authorizationCode != null) {
+            return new TokenResponse(authorizationCode, authorizationCode);
+        } else if (refreshToken != null) {
+            return new TokenResponse(refreshToken, refreshToken);
+        } else {
+            throw new InvalidParameterException();
+        }
+    }
+
+    public String authorize(@Nonnull HttpServletResponse httpServletResponse, Optional<String> tenant, Optional<String> userName, Optional<String> redirectUri,
+            Boolean active) {
+        if (tenant.isPresent() && userName.isPresent()) {
+            TokenResponse token = getCaasToken(tenant.get(), userName.get(), active);
+            if (redirectUri.isPresent()) {
+                LOGGER.info("redirect to " + redirectUri + ".html");
+                httpServletResponse.setHeader(LOCATION_HEADER_KEY, redirectUri.get() + "?authorization_code=" + token.getRefreshToken());
+                httpServletResponse.setStatus(SC_FOUND);
+                return null;
+            } else {
+                return token.getRefreshToken();
+            }
+        } else {
+            LOGGER.info("redirect to authorize.html");
+            httpServletResponse.setHeader(LOCATION_HEADER_KEY, "authorize.html");
+            httpServletResponse.setStatus(SC_FOUND);
+            return null;
+        }
     }
 
     public CaasUserList getUsers(HttpServletRequest request) {
@@ -116,64 +183,7 @@ public class MockCaasService {
         }
     }
 
-    public void out(@Nonnull HttpServletRequest httpServletRequest, @Nonnull HttpServletResponse httpServletResponse) {
-        String host = httpServletRequest.getHeader("Host");
-        Cookie cookie = new Cookie(JWT_COOKIE_KEY, "");
-        cookie.setDomain(host.split(":")[0]);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        httpServletResponse.addCookie(cookie);
-        httpServletResponse.setHeader(LOCATION_HEADER_KEY, "/");
-        httpServletResponse.setStatus(SC_FOUND);
-    }
-
-    public void auth(@Nonnull HttpServletRequest httpServletRequest, @Nonnull HttpServletResponse httpServletResponse, @Nonnull Optional<String> tenant,
-            @Nonnull Optional<String> userName, String redirectUri, Boolean active) {
-        String host = httpServletRequest.getHeader("Host");
-        if (!tenant.isPresent() || !userName.isPresent()) {
-            LOGGER.info("redirect to sign in page");
-            httpServletResponse.setHeader(LOCATION_HEADER_KEY, "../caas/sign-in.html?redirect_uri=" + redirectUri);
-        } else {
-            Cookie cookie = new Cookie(JWT_COOKIE_KEY, getToken(tenant.get(), userName.get(), active).getAccessToken());
-            cookie.setDomain(host.split(":")[0]);
-            cookie.setPath("/");
-            httpServletResponse.addCookie(cookie);
-            httpServletResponse.setHeader(LOCATION_HEADER_KEY, redirectUri);
-        }
-        httpServletResponse.setStatus(SC_FOUND);
-    }
-
-    public TokenResponse getTokenResponse(String authorizationCode, String refreshToken) {
-        if (authorizationCode != null) {
-            return new TokenResponse(authorizationCode, authorizationCode);
-        } else if (refreshToken != null) {
-            return new TokenResponse(refreshToken, refreshToken);
-        } else {
-            throw new InvalidParameterException();
-        }
-    }
-
-    public String authorize(@Nonnull HttpServletResponse httpServletResponse, Optional<String> tenant, Optional<String> userName, Optional<String> redirectUri,
-            Boolean active) {
-        if (tenant.isPresent() && userName.isPresent()) {
-            TokenResponse token = getToken(tenant.get(), userName.get(), active);
-            if (redirectUri.isPresent()) {
-                LOGGER.info("redirect to " + redirectUri + ".html");
-                httpServletResponse.setHeader(LOCATION_HEADER_KEY, redirectUri.get() + "?authorization_code=" + token.getRefreshToken());
-                httpServletResponse.setStatus(SC_FOUND);
-                return null;
-            } else {
-                return token.getRefreshToken();
-            }
-        } else {
-            LOGGER.info("redirect to authorize.html");
-            httpServletResponse.setHeader(LOCATION_HEADER_KEY, "authorize.html");
-            httpServletResponse.setStatus(SC_FOUND);
-            return null;
-        }
-    }
-
-    private TokenResponse getToken(String tenant, String user, boolean active) {
+    private TokenResponse getCaasToken(String tenant, String user, boolean active) {
         IntrospectResponse payload = new IntrospectResponse();
         payload.setSub(user);
         payload.setTenantName(tenant);
@@ -183,6 +193,20 @@ public class MockCaasService {
         String token = encode(jsonUtil.toJsonString(payload), SIGNATURE_VERIFIER).getEncoded();
         LOGGER.info(format("Token generated: %s", token));
         return new TokenResponse(token, token);
+    }
+
+    private String getAltusToken(String tenant, String user) {
+        AltusToken altusToken = new AltusToken();
+        altusToken.setIss(ISS_ALTUS);
+        altusToken.setAud(ISS_ALTUS);
+        altusToken.setJti(UUID.randomUUID().toString());
+        altusToken.setIat(Instant.now().toEpochMilli());
+        altusToken.setExp(Instant.now().plus(PLUS_QUANTITY, DAYS).toEpochMilli());
+        altusToken.setIat(Instant.now().toEpochMilli());
+        altusToken.setSub("crn:altus:iam:us-west-1:" + tenant + ":user:" + user);
+        String token = encode(jsonUtil.toJsonString(altusToken), SIGNATURE_VERIFIER).getEncoded();
+        LOGGER.info(format("Token generated for Altus: %s", token));
+        return token;
     }
 
 }

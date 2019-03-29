@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.auth.altus;
 
 
 import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
-import static java.lang.String.format;
 
 import java.util.UUID;
 
@@ -39,15 +38,18 @@ public class GrpcUmsClient {
                         .build())) {
             UmsClient client = new UmsClient(channelWrapper.getChannel(), actorCrn);
             String requestId = newRequestId();
-            LOGGER.info(format("Getting user information for %s using request ID %s", userCrn, requestId));
+            LOGGER.info("Getting user information for {} using request ID {}", userCrn, requestId);
             UserManagementProto.User user = client.getUser(requestId, userCrn);
-            LOGGER.info("User information:");
-            LOGGER.info(user.toString());
+            LOGGER.info("User information retrieved for userCrn: {}", user.getCrn());
             return user;
         }
     }
 
     public boolean isConfigured() {
         return umsConfig.isConfigured();
+    }
+
+    public boolean isUmsUsable(String crn) {
+        return umsConfig.isConfigured() && Crn.isCrn(crn);
     }
 }

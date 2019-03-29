@@ -47,6 +47,12 @@ service UserManagement {
     rpc GetAccessKeyVerificationData (GetAccessKeyVerificationDataRequest)
     returns (GetAccessKeyVerificationDataResponse) {}
 
+    // Verifies an interactive user session key. If the session key is expired an
+    // exception is thrown. If the session key is found and is valid,
+    // information about the user and their account is returned.
+    rpc VerifyInteractiveUserSessionToken (VerifyInteractiveUserSessionTokenRequest)
+    returns (VerifyInteractiveUserSessionTokenResponse) {}
+
     // Handles access key usage, marking the last time it was used and the last
     // service on which it was used.
     rpc AccessKeyUsage (AccessKeyUsageRequest)
@@ -455,6 +461,12 @@ message InteractiveLoginResponse {
     // See AccessKeyKeyPairGenerator.AccessKeyPair.
     // Ed25519 private key is 32 bytes encoded in base64
     string privateKey = 3 [(options.sensitive) = true];
+    // A JWT that can be used to authenticate with DP2 CAAS in man-o-war. This is
+    // only set when UMS is configured to generate JWTs and will be removed
+    // shortly.
+    string jwt = 6;
+    // A session token that can be used by consoles to authenticate users.
+    string sessionToken = 7 [(options.sensitive) = true];
 }
 
 message InteractiveLoginTrialRequest {
@@ -484,6 +496,8 @@ message InteractiveLoginTrialResponse {
     // See AccessKeyKeyPairGenerator.AccessKeyPair.
     // Ed25519 private key is 32 bytes encoded in base64
     string privateKey = 3 [(options.sensitive) = true];
+    // A session token that can be used by consoles to authenticate users.
+    string sessionToken = 6 [(options.sensitive) = true];
 }
 
 message InteractiveLogin3rdPartyRequest {
@@ -511,6 +525,8 @@ message InteractiveLogin3rdPartyResponse {
     // See AccessKeyKeyPairGenerator.AccessKeyPair.
     // Ed25519 private key is 32 bytes encoded in base64
     string privateKey = 3 [(options.sensitive) = true];
+    // A session token that can be used by consoles to authenticate users.
+    string sessionToken = 4 [(options.sensitive) = true];
 }
 
 // Note that this intentionally lacks a request context as this is called during
@@ -534,6 +550,22 @@ message GetAccessKeyVerificationDataResponse {
     AccessKeyType.Value type = 9;
     // See AccessKeyType for key format
     bytes publicKey = 6 [(options.skipLogging) = true];
+}
+
+message VerifyInteractiveUserSessionTokenRequest {
+    // The interactive user's session token.
+    string sessionToken = 1 [(options.sensitive) = true];
+}
+
+message VerifyInteractiveUserSessionTokenResponse {
+    // The Altus account ID.
+    string accountId = 1;
+    // The Altus external account ID.
+    string externalAccountId = 4;
+    // The type of Altus account.
+    AccountType accountType = 2;
+    // The CRN of the user bearing the session token.
+    string userCrn = 3;
 }
 
 message AccessKeyUsageRequest {
@@ -766,6 +798,8 @@ message Account {
     repeated Entitlement entitlements = 11;
     // Account type can be regular or trial. By default it is regular account
     AccountType accountType = 12;
+    // Whether login using Cloudera SSO is enabled
+    bool clouderaSSOLoginEnabled = 13;
 }
 
 // Either the accountId or externalAccountId is required to get
@@ -1148,6 +1182,37 @@ message RedisAccessKeyCacheEntry {
 // This structure is used to serialize the redis actor tombstone entry and not
 // used in our rpc system.
 message RedisActorTombstoneCacheEntry {
+    // Redis does not allow null values, so in order to serialize a tombstone we
+    // have to some mbmer that we set to a non default value. Let's use a bool for
+    // that. This is always set to 'true' and the actual value is ignored.
+    bool created = 1;
+}
+
+message SessionTokenVerificationAlgorithm {
+    enum Value {
+        UNSET = 0;
+        // The public key is a x.509 encoded key (65 bytes). Use jose4j
+        // ECDSA_USING_P256_CURVE_AND_SHA256 algorithm to verify the session token.
+        ECDSA_USING_P256_CURVE_AND_SHA256 = 1;
+    }
+}
+
+// This structure is used to serialize the redis session token entry and is not
+// used in our rpc system. Session tokens are generated for interactive login
+// sessions - that is for users.
+message RedisSessionTokenCacheEntry {
+    // The user's CRN
+    string userCrn = 1;
+    // The user's external account ID.
+    string externalAccountId = 7;
+    // The type of the Altus account.
+    AccountType accountType = 2;
+    // The verification algorithm to use.
+    SessionTokenVerificationAlgorithm.Value verificationAlgo = 3;
+    // The public key to use to verify the session token.
+    bytes publicKey = 4 [(options.skipLogging) = true];
+    int64 lastAccessed = 5;
+    int32 inactivityDurationSec = 6;
 }
 
 // This is used to serialize all the Role dynamoDB related information that is
@@ -1219,8 +1284,8 @@ message AccountDetails {
     string contactYourAdministratorMessage = 1;
     // List of entitlements associated with an account
     repeated EntitlementGrant entitlement = 2;
-    // Whether login using Cloudera SSO is enabled.
-    bool clouderaSSOLoginEnabled = 3;
+    // Whether login using Cloudera SSO is disabled
+    bool clouderaSSOLoginDisabled = 3;
 }
 
 // Set Account Messages request object.
