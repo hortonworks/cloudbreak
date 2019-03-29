@@ -75,9 +75,17 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
     @Override
     @Cacheable(cacheNames = "tokenCache", key = "#accessToken")
     public OAuth2Authentication loadAuthentication(String accessToken) throws AuthenticationException, InvalidTokenException {
-        if (umsClient.isConfigured()) {
-            return getUmsAuthentication(accessToken);
+        if (umsClient.isUmsUsable(accessToken)) {
+            try {
+                return getUmsAuthentication(accessToken);
+            } catch (RuntimeException e) {
+                throw new InvalidTokenException("Invalid CRN provided", e);
+            }
         }
+        return extractJwtAuthentication(accessToken);
+    }
+
+    private OAuth2Authentication extractJwtAuthentication(String accessToken) {
         Jwt jwtToken;
         try {
             jwtToken = JwtHelper.decode(accessToken);
@@ -96,7 +104,7 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
     private OAuth2Authentication getUmsAuthentication(String crn) {
         UserManagementProto.User user = umsClient.getUserDetails(crn, crn);
         Map<String, Object> tokenMap = new HashMap<>();
-        tokenMap.put("tenant", Crn.getAccountId(crn));
+        tokenMap.put("tenant", Crn.fromString(crn).getAccountId());
         tokenMap.put("crn", user.getCrn());
         tokenMap.put("user_id", user.getUserId());
         tokenMap.put("user_name", user.getEmail());

@@ -27,9 +27,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.sequenceiq.caas.model.TokenResponse;
 import com.sequenceiq.caas.service.MockCaasService;
 import com.sequenceiq.caas.util.JsonUtil;
-import com.sequenceiq.cloudbreak.client.TokenResponse;
 
 public class MockCaasServiceTest {
 

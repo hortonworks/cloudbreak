@@ -20,13 +20,13 @@ springBoot {
 }
 
 jar {
-  baseName = 'mock-caas'
-  archiveName = 'mock-caas.jar'
+  archiveBaseName = 'mock-caas'
+  archiveFileName = 'mock-caas.jar'
 }
 
 bootJar {
-  baseName = 'mock-caas'
-  archiveName = 'mock-caas.jar'
+  archiveBaseName = 'mock-caas'
+  archiveFileName = 'mock-caas.jar'
   manifest {
     def grgit = Grgit.open(currentDir: project.projectDir)
     attributes "Implementation-Version": grgit.describe()
@@ -34,19 +34,18 @@ bootJar {
 }
 
 dependencies {
-  compile project(':core-api')
-  compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
-    exclude group: 'org.slf4j';
-  }
-
   compile group:  'org.springframework.boot',     name: 'spring-boot-starter',            version: springBootVersion
+  compile group:  'org.springframework.boot',     name: 'spring-boot-starter-security',   version: springBootVersion
+  compile group:  'org.springframework.boot',     name: 'spring-boot-starter-jersey',     version: springBootVersion
   compile group:  'org.springframework.boot',     name: 'spring-boot-starter-web',        version: springBootVersion
   compile group:  'org.springframework.boot',     name: 'spring-boot-starter-actuator',   version: springBootVersion
   compile group:  'org.springframework',          name: 'spring-context-support',         version: springFrameworkVersion
-  compile group:  'org.springframework.security', name: 'spring-security-jwt',            version: '1.0.9.RELEASE'
-  compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.7'
-  compile group: 'io.jsonwebtoken',               name: 'jjwt',                           version: '0.9.1'
+  compile group:  'org.springframework.security', name: 'spring-security-jwt',            version: '1.0.10.RELEASE'
+  compile group:  'com.fasterxml.jackson.core',   name: 'jackson-core',                   version: '2.9.7'
+  compile group:  'io.jsonwebtoken',              name: 'jjwt',                           version: '0.9.1'
   testCompile group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
+
+  compile project(':auth-connector')
 }
 
 dependencies {

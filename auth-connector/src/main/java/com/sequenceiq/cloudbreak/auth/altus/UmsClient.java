@@ -43,7 +43,7 @@ public class UmsClient {
         checkNotNull(userCrn);
         return newStub(requestId).getUser(
                 GetUserRequest.newBuilder()
-                        .setAccountId(Crn.getAccountId(userCrn))
+                        .setAccountId(Crn.fromString(userCrn).getAccountId())
                         .setUserIdOrCrn(userCrn)
                         .build()
         ).getUser();
