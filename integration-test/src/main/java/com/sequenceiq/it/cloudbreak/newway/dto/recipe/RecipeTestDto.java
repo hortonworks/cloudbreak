@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Reques
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Responses;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.dto.AbstractCloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
@@ -22,6 +23,8 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 
 @Prototype
 public class RecipeTestDto extends AbstractCloudbreakTestDto<RecipeV4Request, RecipeV4Response, RecipeTestDto> implements Purgable<RecipeViewV4Response> {
+
+    private RecipeViewV4Responses simpleResponses;
 
     public RecipeTestDto(TestContext testContext) {
         super(new RecipeV4Request(), testContext);
@@ -89,6 +92,14 @@ public class RecipeTestDto extends AbstractCloudbreakTestDto<RecipeV4Request, Re
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), getErrorMessage(e), e);
         }
+    }
+
+    public void setSimpleResponses(RecipeViewV4Responses simpleResponses) {
+        this.simpleResponses = simpleResponses;
+    }
+
+    public RecipeViewV4Responses getSimpleResponses() {
+        return simpleResponses;
     }
 
     @Override

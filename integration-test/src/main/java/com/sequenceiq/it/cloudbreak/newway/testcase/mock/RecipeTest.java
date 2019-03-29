@@ -1,13 +1,19 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+
+import java.util.Collection;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
+import org.hamcrest.collection.IsEmptyCollection;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -115,7 +121,6 @@ public class RecipeTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT)
-
     @Description(
             given = "an invalid recipe request with too long description",
             when = "create recipe",
@@ -130,4 +135,54 @@ public class RecipeTest extends AbstractIntegrationTest {
                         .withExpectedMessage("size must be between 0 and 1000"))
                 .validate();
     }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "a deleted valid recipe",
+            when = "list recipes",
+            then = "recipe is not present")
+    public void testCreateDeleteValidAndList(TestContext testContext) {
+        testContext
+                .given(RecipeTestDto.class)
+                .when(recipeTestClient.createV4())
+                .when(recipeTestClient.deleteV4())
+
+                .when(recipeTestClient.listV4());
+
+        testContext
+                .given(RecipeTestDto.class)
+                .when(this::assertRecipesEmpty)
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "a valid recipe",
+            when = "list recipes",
+            then = "recipe is present")
+    public void testCreateValidAndList(TestContext testContext) {
+        testContext
+                .given(RecipeTestDto.class)
+                .when(recipeTestClient.createV4())
+
+                .when(recipeTestClient.listV4());
+
+        testContext
+                .given(RecipeTestDto.class)
+                .when(this::assertRecipesContainsElement)
+                .validate();
+    }
+
+    private RecipeTestDto assertRecipesEmpty(TestContext tc, RecipeTestDto recipeTestDto, CloudbreakClient cc) {
+        Collection<?> foundRecipes = recipeTestDto.getSimpleResponses().getResponses();
+        assertThat(foundRecipes, IsEmptyCollection.empty());
+        return recipeTestDto;
+    }
+
+    private RecipeTestDto assertRecipesContainsElement(TestContext tc, RecipeTestDto recipeTestDto, CloudbreakClient cc) {
+        Collection<?> foundRecipes = recipeTestDto.getSimpleResponses().getResponses();
+        assertEquals(1, foundRecipes.size());
+        return recipeTestDto;
+    }
+
 }

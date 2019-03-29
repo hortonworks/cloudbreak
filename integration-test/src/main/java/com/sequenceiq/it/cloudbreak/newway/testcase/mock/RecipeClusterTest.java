@@ -100,6 +100,36 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
+            given = "a deleted recipe",
+            when = "starting cluster with deleted recipe",
+            then = "badrequest exception is received")
+    public void testDeletedRecipeCannotBeAssignedToCluster(TestContext testContext) {
+        LOGGER.info("testing recipe execution for type: {}", PRE_AMBARI_START.name());
+        String recipeName = getNameGenerator().getRandomNameForResource();
+        String stackName = getNameGenerator().getRandomNameForResource();
+        String instanceGroupName = getNameGenerator().getRandomNameForResource();
+
+        testContext
+                .given(recipeName, RecipeTestDto.class)
+                .withName(recipeName)
+                .withContent(RECIPE_CONTENT)
+                .withRecipeType(PRE_AMBARI_START)
+                .when(recipeTestClient.createV4(), key(recipeName))
+                .when(recipeTestClient.deleteV4(), key(recipeName))
+                .given(instanceGroupName, InstanceGroupTestDto.class)
+                .withHostGroup(WORKER)
+                .withNodeCount(NODE_COUNT)
+                .withRecipes(recipeName)
+                .given(stackName, StackTestDto.class)
+                .replaceInstanceGroups(instanceGroupName)
+                .when(stackTestClient.createV4(), key(stackName))
+                .expect(BadRequestException.class, key(stackName)
+                        .withExpectedMessage("Recipes '" + recipeName + "' not found"))
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
             given = "a created cluster with pretermination recipe",
             when = "calling termination",
             then = "the pretermination highstate has to called on pretermination recipes")
