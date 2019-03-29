@@ -1,13 +1,22 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.core.IsCollectionContaining.hasItem;
+import static org.junit.Assert.assertThat;
+
+import java.util.Collection;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -22,6 +31,11 @@ public class RecipeTest extends AbstractIntegrationTest {
     @BeforeMethod
     public void beforeMethod(Object[] data) {
         createDefaultUser((TestContext) data[0]);
+    }
+
+    @AfterMethod(alwaysRun = true)
+    public void tear(Object[] data) {
+        ((TestContext) data[0]).cleanupTestContext();
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -115,7 +129,6 @@ public class RecipeTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT)
-
     @Description(
             given = "an invalid recipe request with too long description",
             when = "create recipe",
@@ -130,4 +143,58 @@ public class RecipeTest extends AbstractIntegrationTest {
                         .withExpectedMessage("size must be between 0 and 1000"))
                 .validate();
     }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "a deleted valid recipe",
+            when = "list recipes",
+            then = "recipe is not present")
+    public void testCreateDeleteValidAndList(TestContext testContext) {
+        String recipeName = getNameGenerator().getRandomNameForResource();
+        testContext
+                .given(RecipeTestDto.class)
+                .withName(recipeName)
+                .when(recipeTestClient.createV4())
+                .when(recipeTestClient.deleteV4())
+
+                .when(recipeTestClient.listV4());
+
+        testContext
+                .given(RecipeTestDto.class)
+                .when((tc, recipeTestDto, cc) -> assertRecipesEmpty(tc, recipeTestDto, cc, recipeName))
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "a valid recipe",
+            when = "list recipes",
+            then = "recipe is present")
+    public void testCreateValidAndList(TestContext testContext) {
+        String recipeName = getNameGenerator().getRandomNameForResource();
+        testContext
+                .given(RecipeTestDto.class)
+                .withName(recipeName)
+                .when(recipeTestClient.createV4())
+
+                .when(recipeTestClient.listV4());
+
+        testContext
+                .given(RecipeTestDto.class)
+                .when((tc, recipeTestDto, cc) -> assertRecipesContainsElement(tc, recipeTestDto, cc, recipeName))
+                .validate();
+    }
+
+    private RecipeTestDto assertRecipesEmpty(TestContext tc, RecipeTestDto recipeTestDto, CloudbreakClient cc, String recipeName) {
+        Collection<?> foundRecipes = recipeTestDto.getSimpleResponses().getResponses();
+        assertThat(foundRecipes, not(hasItem(hasProperty("name", is(recipeName)))));
+        return recipeTestDto;
+    }
+
+    private RecipeTestDto assertRecipesContainsElement(TestContext tc, RecipeTestDto recipeTestDto, CloudbreakClient cc, String recipeName) {
+        Collection<?> foundRecipes = recipeTestDto.getSimpleResponses().getResponses();
+        assertThat(foundRecipes, hasItem(hasProperty("name", is(recipeName))));
+        return recipeTestDto;
+    }
+
 }

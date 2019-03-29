@@ -1,24 +1,28 @@
 package com.sequenceiq.it.cloudbreak.newway.dto.recipe;
 
+import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
+
+import java.util.Base64;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.ws.rs.WebApplicationException;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Responses;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.DeletableTestDto;
 
-import javax.ws.rs.WebApplicationException;
-import java.util.Base64;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
-
 @Prototype
 public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Response, RecipeTestDto, RecipeViewV4Response> {
+
+    private RecipeViewV4Responses simpleResponses;
 
     public RecipeTestDto(TestContext testContext) {
         super(new RecipeV4Request(), testContext);
@@ -86,6 +90,14 @@ public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Res
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), getErrorMessage(e), e);
         }
+    }
+
+    public void setSimpleResponses(RecipeViewV4Responses simpleResponses) {
+        this.simpleResponses = simpleResponses;
+    }
+
+    public RecipeViewV4Responses getSimpleResponses() {
+        return simpleResponses;
     }
 
     @Override
