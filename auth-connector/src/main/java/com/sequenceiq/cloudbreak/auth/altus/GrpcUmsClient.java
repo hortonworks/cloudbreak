@@ -10,6 +10,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
@@ -29,6 +30,7 @@ public class GrpcUmsClient {
         return UUID.randomUUID().toString();
     }
 
+    @Cacheable(cacheNames = "umsUserCache")
     public UserManagementProto.User getUserDetails(String actorCrn, String userCrn) {
         try (ManagedChannelWrapper channelWrapper = new ManagedChannelWrapper(
                 ManagedChannelBuilder.forAddress(umsConfig.getEndpoint(), umsConfig.getPort())
