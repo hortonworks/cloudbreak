@@ -48,6 +48,7 @@ import com.amazonaws.services.ec2.model.InternetGatewayAttachment;
 import com.amazonaws.services.ec2.model.KeyPairInfo;
 import com.amazonaws.services.ec2.model.SecurityGroup;
 import com.amazonaws.services.ec2.model.Subnet;
+import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.Vpc;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
@@ -268,13 +269,30 @@ public class AwsPlatformResources implements PlatformResources {
             properties.put("dhcpOptionsId", vpc.getDhcpOptionsId());
             properties.put("instanceTenancy", vpc.getInstanceTenancy());
             properties.put("state", vpc.getState());
+
             for (Subnet subnet : subnets) {
-                subnetMap.put(subnet.getSubnetId(), subnet.getSubnetId());
+                Optional<String> subnetName = getName(subnet.getTags());
+                subnetMap.put(subnet.getSubnetId(), subnetName.isPresent() ? subnetName.get() : subnet.getSubnetId());
             }
-            cloudNetworks.add(new CloudNetwork(vpc.getVpcId(), vpc.getVpcId(), subnetMap, properties));
+
+            Optional<String> name = getName(vpc.getTags());
+            if (name.isPresent()) {
+                cloudNetworks.add(new CloudNetwork(name.get(), vpc.getVpcId(), subnetMap, properties));
+            } else {
+                cloudNetworks.add(new CloudNetwork(vpc.getVpcId(), vpc.getVpcId(), subnetMap, properties));
+            }
         }
         result.put(region.value(), cloudNetworks);
         return new CloudNetworks(result);
+    }
+
+    private Optional<String> getName(List<Tag> tags) {
+        for (Tag tag : tags) {
+            if (tag.getKey().equals("Name")) {
+                return Optional.ofNullable(tag.getValue());
+            }
+        }
+        return Optional.empty();
     }
 
     private DescribeSubnetsRequest createVpcDescribeRequest(Vpc vpc) {

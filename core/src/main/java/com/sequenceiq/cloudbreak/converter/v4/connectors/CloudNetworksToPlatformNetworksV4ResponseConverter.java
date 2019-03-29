@@ -23,7 +23,10 @@ public class CloudNetworksToPlatformNetworksV4ResponseConverter extends Abstract
         for (Entry<String, Set<CloudNetwork>> entry : source.getCloudNetworkResponses().entrySet()) {
             Set<PlatformNetworkV4Response> networks = new HashSet<>();
             for (CloudNetwork cloudNetwork : entry.getValue()) {
-                PlatformNetworkV4Response actual = new PlatformNetworkV4Response(cloudNetwork.getName(), cloudNetwork.getId(), cloudNetwork.getSubnets(),
+                PlatformNetworkV4Response actual = new PlatformNetworkV4Response(
+                        cloudNetwork.getName(),
+                        cloudNetwork.getId(),
+                        cloudNetwork.getSubnets(),
                         cloudNetwork.getProperties());
                 networks.add(actual);
             }
