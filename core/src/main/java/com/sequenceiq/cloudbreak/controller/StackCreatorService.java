@@ -1,9 +1,17 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static com.sequenceiq.cloudbreak.service.metrics.MetricType.STACK_PREPARATION;
+import static com.sequenceiq.cloudbreak.util.BenchMark.measure;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.io.IOException;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
@@ -20,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackValidationV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.cloud.event.validation.ParametersValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
@@ -54,6 +63,7 @@ import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -113,105 +123,90 @@ public class StackCreatorService {
     @Inject
     private DatalakeResourcesService datalakeResourcesService;
 
+    @Inject
+    private ExecutorService executorService;
+
+    @Inject
+    private CloudbreakMetricService metricService;
+
     public StackV4Response createStack(CloudbreakUser cloudbreakUser, User user, Workspace workspace, StackV4Request stackRequest) {
+        long start = System.currentTimeMillis();
+
         ValidationResult validationResult = stackRequestValidator.validate(stackRequest);
         if (validationResult.getState() == State.ERROR) {
             LOGGER.debug("Stack request has validation error(s): {}.", validationResult.getFormattedErrors());
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
 
+        String stackName = stackRequest.getName();
+
+        ensureStackDoesNotExists(stackRequest.getName(), workspace);
+
+        Stack stackStub = measure(() -> converterUtil.convert(stackRequest, Stack.class),
+                LOGGER, "Stack request converted to stack in {} ms for stack {}", stackName);
+        stackStub.setWorkspace(workspace);
+        stackStub.setCreator(user);
+
+        MDCBuilder.buildMdcContext(stackStub);
+
+        String platformString = stackStub.getCloudPlatform().toLowerCase();
+        ClusterDefinition clusterDefinition = determineClusterDefinition(stackRequest, workspace);
+        Future<StatedImage> imgFromCatalogFuture = determineImageCatalog(stackName, platformString, stackRequest, clusterDefinition, user, workspace);
+
         Stack savedStack;
         try {
             savedStack = transactionService.required(() -> {
-                long start = System.currentTimeMillis();
-                ensureStackDoesNotExists(stackRequest.getName(), workspace);
+                Stack stack = stackDecorator.decorate(stackStub, stackRequest, user, workspace);
 
-                Stack stack = converterUtil.convert(stackRequest, Stack.class);
+                CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stackStub.getCredential());
 
-                stack.setWorkspace(workspace);
-                stack.setCreator(user);
-
-                String stackName = stack.getName();
-                LOGGER.debug("Stack request converted to stack in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-                MDCBuilder.buildMdcContext(stack);
-
-                start = System.currentTimeMillis();
-                LOGGER.debug("Stack propagated with sensitive data in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-                start = System.currentTimeMillis();
-                stack = stackDecorator.decorate(stack, stackRequest, user, workspace);
-                LOGGER.debug("Stack object has been decorated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+                ParametersValidationRequest parametersValidationRequest = parametersValidator.triggerValidate(stackRequest.getCloudPlatform().name(),
+                        cloudCredential, stack.getParameters(), stack.getCreator().getUserId(), stack.getWorkspace().getId());
 
                 if (stack.getOrchestrator() != null && stack.getOrchestrator().getApiEndpoint() != null) {
                     stackService.validateOrchestrator(stack.getOrchestrator());
                 }
 
-                start = System.currentTimeMillis();
-                for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-                    templateValidator.validateTemplateRequest(stack.getCredential(), instanceGroup.getTemplate(), stack.getRegion(),
-                            stack.getAvailabilityZone(), stack.getPlatformVariant());
-                }
-                LOGGER.debug("Stack's instance templates have been validated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+                measure(() -> {
+                    for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+                        templateValidator.validateTemplateRequest(stack.getCredential(), instanceGroup.getTemplate(), stack.getRegion(),
+                                stack.getAvailabilityZone(), stack.getPlatformVariant());
+                    }
+                }, LOGGER, "Stack's instance templates have been validated in {} ms for stack {}", stackName);
 
-                CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stack.getCredential());
-                ClusterDefinition clusterDefinition = null;
                 if (stackRequest.getCluster() != null) {
-                    start = System.currentTimeMillis();
-                    StackValidationV4Request stackValidationRequest = converterUtil.convert(stackRequest, StackValidationV4Request.class);
-                    LOGGER.debug("Stack validation request has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+                    StackValidationV4Request stackValidationRequest = measure(() -> converterUtil.convert(stackRequest, StackValidationV4Request.class),
+                            LOGGER, "Stack validation request has been created in {} ms for stack {}", stackName);
 
-                    start = System.currentTimeMillis();
-                    StackValidation stackValidation = converterUtil.convert(stackValidationRequest, StackValidation.class);
-                    LOGGER.debug("Stack validation object has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
-                    clusterDefinition = stackValidation.getClusterDefinition();
+                    StackValidation stackValidation = measure(() -> converterUtil.convert(stackValidationRequest, StackValidation.class),
+                            LOGGER, "Stack validation object has been created in {} ms for stack {}", stackName);
+
                     setStackTypeAndValidateDatalake(stack, clusterDefinition);
 
-                    start = System.currentTimeMillis();
                     stackService.validateStack(stackValidation);
-                    LOGGER.debug("Stack has been validated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
-                    start = System.currentTimeMillis();
                     fileSystemValidator.validateFileSystem(stackValidation.getCredential().cloudPlatform(), cloudCredential,
-                            stackValidationRequest.getFileSystem(), stack.getCreator().getUserId(), stack.getWorkspace().getId());
-                    LOGGER.debug("Filesystem has been validated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+                                stackValidationRequest.getFileSystem(), stack.getCreator().getUserId(), stack.getWorkspace().getId());
 
-                    start = System.currentTimeMillis();
                     clusterCreationService.validate(stackRequest.getCluster(), cloudCredential, stack, user, workspace);
-                    LOGGER.debug("Cluster has been validated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
                 }
-
-                start = System.currentTimeMillis();
-                parametersValidator.validate(stackRequest.getCloudPlatform().name(), cloudCredential, stack.getParameters(), stack.getCreator().getUserId(),
-                        stack.getWorkspace().getId());
-                LOGGER.debug("Parameter validation has been finished under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-                start = System.currentTimeMillis();
-                String platformString = platform(stack.cloudPlatform()).value().toLowerCase();
-                StatedImage imgFromCatalog;
-                try {
-                    imgFromCatalog = imageService.determineImageFromCatalog(workspace.getId(), stackRequest.getImage(), platformString, clusterDefinition,
-                            shouldUseBaseImage(stackRequest.getCluster(), clusterDefinition), user);
-                } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
-                    throw new BadRequestException(e.getMessage(), e);
-                }
-                LOGGER.debug("Image for stack has been determined under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
                 fillInstanceMetadata(stack);
 
-                start = System.currentTimeMillis();
-                stack = stackService.create(stack, platformString, imgFromCatalog, user, workspace);
-                LOGGER.debug("Stack object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+                parametersValidator.waitResult(parametersValidationRequest);
 
-                decorateWithDatalakeResourceIdFromEnvironment(stack);
+                StatedImage imgFromCatalog = getImageCatalog(imgFromCatalogFuture);
+
+                Stack newStack = stackService.create(stack, platformString, imgFromCatalog, user, workspace);
+
+                decorateWithDatalakeResourceIdFromEnvironment(newStack);
                 try {
-                    createClusterIfNeed(user, workspace, stackRequest, stack, stackName, clusterDefinition);
+                    createClusterIfNeed(user, workspace, stackRequest, newStack, stackName, clusterDefinition);
                 } catch (CloudbreakImageNotFoundException | IOException | TransactionExecutionException e) {
                     throw new RuntimeException(e.getMessage(), e);
                 }
-                prepareSharedServiceIfNeed(stack);
-                return stack;
+                return prepareSharedServiceIfNeed(newStack);
             });
         } catch (TransactionExecutionException e) {
             stackUnderOperationService.off();
@@ -223,13 +218,12 @@ public class StackCreatorService {
             throw new TransactionRuntimeExecutionException(e);
         }
 
-        long start = System.currentTimeMillis();
-        StackV4Response response = converterUtil.convert(savedStack, StackV4Response.class);
-        LOGGER.debug("Stack response has been created in {} ms for stack {}", System.currentTimeMillis() - start, savedStack.getName());
+        StackV4Response response = measure(() -> converterUtil.convert(savedStack, StackV4Response.class),
+                LOGGER, "Stack response has been created in {} ms for stack {}", savedStack.getName());
 
-        start = System.currentTimeMillis();
         flowManager.triggerProvisioning(savedStack.getId());
-        LOGGER.debug("Stack provision triggered in {} ms for stack {}", System.currentTimeMillis() - start, savedStack.getName());
+
+        metricService.submit(STACK_PREPARATION, System.currentTimeMillis() - start);
 
         return response;
     }
@@ -259,9 +253,8 @@ public class StackCreatorService {
         long privateIdNumber = 0;
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             for (InstanceMetaData instanceMetaData : instanceGroup.getAllInstanceMetaData()) {
-                instanceMetaData.setPrivateId(privateIdNumber);
+                instanceMetaData.setPrivateId(privateIdNumber++);
                 instanceMetaData.setInstanceStatus(InstanceStatus.REQUESTED);
-                privateIdNumber++;
             }
         }
     }
@@ -269,18 +262,16 @@ public class StackCreatorService {
     private boolean shouldUseBaseImage(ClusterV4Request clusterRequest, ClusterDefinition clusterDefinition) {
         return (clusterRequest.getAmbari() != null && clusterRequest.getAmbari().getRepository() != null)
                 || (clusterRequest.getAmbari() != null
-                && clusterRequest.getAmbari().getStackRepository() != null
-                && clusterRequest.getAmbari().getStackRepository().customRepoSpecified())
+                    && clusterRequest.getAmbari().getStackRepository() != null
+                    && clusterRequest.getAmbari().getStackRepository().customRepoSpecified())
                 || clusterDefinitionService.isClouderaManagerTemplate(clusterDefinition);
     }
 
-    private void prepareSharedServiceIfNeed(Stack stack) {
-        if (credentialPrerequisiteService.isCumulusCredential(stack.getCredential().getAttributes())
-                || stack.getDatalakeResourceId() != null) {
-            long start = System.currentTimeMillis();
-            stack = sharedServiceConfigProvider.prepareDatalakeConfigs(stack);
-            LOGGER.debug("Cluster object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stack.getName());
+    private Stack prepareSharedServiceIfNeed(Stack stack) {
+        if (credentialPrerequisiteService.isCumulusCredential(stack.getCredential().getAttributes()) || stack.getDatalakeResourceId() != null) {
+            return sharedServiceConfigProvider.prepareDatalakeConfigs(stack);
         }
+        return stack;
     }
 
     private void createClusterIfNeed(User user, Workspace workspace, StackV4Request stackRequest, Stack stack, String stackName,
@@ -298,5 +289,40 @@ public class StackCreatorService {
         if (stack != null) {
             throw new BadRequestException("Cluster already exists: " + stackName);
         }
+    }
+
+    private ClusterDefinition determineClusterDefinition(StackV4Request stackRequest, Workspace workspace) {
+        if (stackRequest.getCluster() == null) {
+            return null;
+        }
+        Set<ClusterDefinition> clusterDefinitions = clusterDefinitionService.getAllAvailableInWorkspace(workspace);
+        return clusterDefinitions.stream()
+                .filter(cd -> cd.getName().equals(stackRequest.getCluster().getClusterDefinitionName()))
+                .findFirst().orElseThrow(() -> new BadRequestException("Cluster definition not found!"));
+    }
+
+    private Future<StatedImage> determineImageCatalog(String stackName, String platformString, StackV4Request stackRequest, ClusterDefinition clusterDefinition,
+            User user, Workspace workspace) {
+        if (stackRequest.getCluster() == null) {
+            return null;
+        }
+        return executorService.submit(() -> {
+            try {
+                return imageService.determineImageFromCatalog(workspace.getId(), stackRequest.getImage(), platformString, clusterDefinition,
+                        shouldUseBaseImage(stackRequest.getCluster(), clusterDefinition), user);
+            } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
+                throw new BadRequestException(e.getMessage(), e);
+            }
+        });
+    }
+
+    private StatedImage getImageCatalog(Future<StatedImage> imgFromCatalogFuture) {
+        return Optional.ofNullable(imgFromCatalogFuture).map(f -> {
+            try {
+                return f.get(1, TimeUnit.HOURS);
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                throw new RuntimeException("Image catalog determaination failed", e);
+            }
+        }).orElse(null);
     }
 }

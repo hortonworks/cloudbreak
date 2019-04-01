@@ -3,9 +3,12 @@ package com.sequenceiq.cloudbreak.service;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.CUSTOM_VDF_REPO_KEY;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.VDF_REPO_KEY_PREFIX;
 import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.util.BenchMark.checkedMeasure;
+import static com.sequenceiq.cloudbreak.util.BenchMark.measure;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +38,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repos
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.AmbariStackDescriptorV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -80,6 +84,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
+import com.sequenceiq.cloudbreak.util.BenchMark.MultiCheckedSupplier;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
@@ -151,6 +156,7 @@ public class ClusterCreationSetupService {
         validate(request, null, stack, user, workspace);
     }
 
+    @Measure(ClusterCreationSetupService.class)
     public void validate(ClusterV4Request request, CloudCredential cloudCredential, Stack stack, User user, Workspace workspace) {
         if (stack.getDatalakeResourceId() != null && StringUtils.isNotBlank(request.getKerberosName())) {
             throw new BadRequestException("Invalid kerberos settings, attached cluster should inherit kerberos parameters");
@@ -170,70 +176,58 @@ public class ClusterCreationSetupService {
         }
     }
 
-    public Cluster prepare(ClusterV4Request request, Stack stack, User user, Workspace workspace) throws CloudbreakImageNotFoundException,
-            IOException, TransactionExecutionException {
+    public Cluster prepare(ClusterV4Request request, Stack stack, User user, Workspace workspace) throws CloudbreakImageNotFoundException, IOException,
+            TransactionExecutionException {
         return prepare(request, stack, null, user, workspace);
     }
 
     public Cluster prepare(ClusterV4Request request, Stack stack, ClusterDefinition clusterDefinition, User user, Workspace workspace) throws IOException,
             CloudbreakImageNotFoundException, TransactionExecutionException {
         String stackName = stack.getName();
-        Cluster cluster = stack.getCluster();
+        Cluster clusterStub = stack.getCluster();
         stack.setCluster(null);
 
-        decorateHostGroupWithConstraint(stack, cluster);
-
-        long start = System.currentTimeMillis();
+        decorateHostGroupWithConstraint(stack, clusterStub);
 
         if (request.getCloudStorage() != null) {
-            FileSystem fs = fileSystemConfigService.create(converterUtil.convert(request.getCloudStorage(), FileSystem.class), stack.getWorkspace(),
-                    stack.getCreator());
-            LOGGER.debug("File system saving took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            FileSystem fs = measure(() -> fileSystemConfigService.create(converterUtil.convert(request.getCloudStorage(), FileSystem.class),
+                        stack.getWorkspace(), stack.getCreator()),
+                    LOGGER, "File system saving took {} ms for stack {}", stackName);
         }
 
-        cluster.setStack(stack);
-        cluster.setWorkspace(stack.getWorkspace());
-        LOGGER.debug("Cluster conversion took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+        clusterStub.setStack(stack);
+        clusterStub.setWorkspace(stack.getWorkspace());
 
-        start = System.currentTimeMillis();
-
-        cluster = clusterDecorator.decorate(cluster, request, clusterDefinition, user, stack.getWorkspace(), stack);
+        Cluster cluster = clusterDecorator.decorate(clusterStub, request, clusterDefinition, user, stack.getWorkspace(), stack);
 
         decorateStackWithCustomDomainIfAdOrIpaJoinable(stack, cluster);
 
-        LOGGER.debug("Cluster object decorated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+        List<ClusterComponent> components = checkedMeasure((MultiCheckedSupplier<List<ClusterComponent>, IOException, CloudbreakImageNotFoundException>) () -> {
+            if (clusterDefinition != null) {
+                Set<Component> allComponent = componentConfigProvider.getAllComponentsByStackIdAndType(stack.getId(),
+                        Sets.newHashSet(ComponentType.AMBARI_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS, ComponentType.IMAGE));
+                Optional<Component> stackAmbariRepoConfig = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.AMBARI_REPO_DETAILS)
+                        && c.getName().equalsIgnoreCase(ComponentType.AMBARI_REPO_DETAILS.name())).findAny();
+                Optional<Component> stackHdpRepoConfig = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.HDP_REPO_DETAILS)
+                        && c.getName().equalsIgnoreCase(ComponentType.HDP_REPO_DETAILS.name())).findAny();
+                Optional<Component> stackImageComponent = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.IMAGE)
+                        && c.getName().equalsIgnoreCase(ComponentType.IMAGE.name())).findAny();
 
-        start = System.currentTimeMillis();
-        List<ClusterComponent> components = new ArrayList<>();
-        Set<Component> allComponent = componentConfigProvider.getAllComponentsByStackIdAndType(stack.getId(),
-                Sets.newHashSet(ComponentType.AMBARI_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS, ComponentType.IMAGE));
-        Optional<Component> stackAmbariRepoConfig = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.AMBARI_REPO_DETAILS)
-                && c.getName().equalsIgnoreCase(ComponentType.AMBARI_REPO_DETAILS.name())).findAny();
-        Optional<Component> stackHdpRepoConfig = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.HDP_REPO_DETAILS)
-                && c.getName().equalsIgnoreCase(ComponentType.HDP_REPO_DETAILS.name())).findAny();
-        Optional<Component> stackImageComponent = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.IMAGE)
-                && c.getName().equalsIgnoreCase(ComponentType.IMAGE.name())).findAny();
-
-        if (clusterDefinition != null) {
-            if (clusterDefinitionService.isAmbariBlueprint(clusterDefinition)) {
-                components = prepareAmbariCluster(request, stack, clusterDefinition, cluster, stackAmbariRepoConfig, stackHdpRepoConfig, stackImageComponent);
-            } else if (clusterDefinitionService.isClouderaManagerTemplate(clusterDefinition)) {
-                components = prepareClouderaManagerCluster(request, cluster, stackImageComponent);
+                if (clusterDefinitionService.isAmbariBlueprint(clusterDefinition)) {
+                    return prepareAmbariCluster(request, stack, clusterDefinition, cluster, stackAmbariRepoConfig, stackHdpRepoConfig, stackImageComponent);
+                } else if (clusterDefinitionService.isClouderaManagerTemplate(clusterDefinition)) {
+                    return prepareClouderaManagerCluster(request, cluster, stackImageComponent);
+                }
             }
-        }
-        LOGGER.debug("Cluster components saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            return Collections.emptyList();
+        }, LOGGER, "Cluster components saved in {} ms for stack {}", stackName);
 
-        start = System.currentTimeMillis();
-        Cluster savedCluster = clusterService.create(stack, cluster, components, user);
-        LOGGER.debug("Cluster object creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-        return savedCluster;
+        return clusterService.create(stack, cluster, components, user);
     }
 
     private List<ClusterComponent> prepareAmbariCluster(ClusterV4Request request, Stack stack, ClusterDefinition clusterDefinition, Cluster cluster,
-            Optional<Component> stackAmbariRepoConfig,
-            Optional<Component> stackHdpRepoConfig,
-            Optional<Component> stackImageComponent) throws IOException, CloudbreakImageNotFoundException {
+            Optional<Component> stackAmbariRepoConfig, Optional<Component> stackHdpRepoConfig, Optional<Component> stackImageComponent) throws IOException,
+            CloudbreakImageNotFoundException {
         List<ClusterComponent> components = new ArrayList<>();
         AmbariRepositoryV4Request repoDetailsJson = Optional.ofNullable(request.getAmbari()).map(AmbariV4Request::getRepository).orElse(null);
         ClusterComponent ambariRepoConfig = determineAmbariRepoConfig(stackAmbariRepoConfig, repoDetailsJson, stackImageComponent, cluster);

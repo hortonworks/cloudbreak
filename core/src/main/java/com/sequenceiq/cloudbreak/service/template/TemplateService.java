@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.Topology;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
@@ -44,19 +43,15 @@ public class TemplateService {
         return templateRepository.findById(id).orElseThrow(notFound("Template", id));
     }
 
-    public Template create(User user, Template template, Workspace workspace) {
+    public Template create(User user, Template template) {
         LOGGER.debug("Creating template: [User: '{}']", user.getUserId());
 
-        template.setWorkspace(workspace);
-
-        Template savedTemplate;
         try {
-            savedTemplate = templateRepository.save(template);
+            return templateRepository.save(template);
         } catch (DataIntegrityViolationException ex) {
             String msg = String.format("Error with resource [%s], %s", APIResourceType.CLUSTER_DEFINITION, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg, ex);
         }
-        return savedTemplate;
     }
 
     public Template savePure(Template template) {

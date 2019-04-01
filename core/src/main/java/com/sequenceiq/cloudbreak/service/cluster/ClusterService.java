@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.s
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.mpack.ManagementPackDetailsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
@@ -211,6 +212,7 @@ public class ClusterService {
     @Inject
     private ClusterApiConnectors clusterApiConnectors;
 
+    @Measure(ClusterService.class)
     public Cluster create(Stack stack, Cluster cluster, List<ClusterComponent> components, User user) throws TransactionExecutionException {
         LOGGER.debug("Cluster requested [ClusterDefinitionId: {}]", cluster.getClusterDefinition().getId());
         String stackName = stack.getName();

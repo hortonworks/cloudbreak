@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
+import static com.sequenceiq.cloudbreak.util.BenchMark.measure;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -20,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
@@ -27,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterResponse;
 import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
+import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
@@ -41,6 +45,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
@@ -90,54 +95,54 @@ public class StackDecorator {
     @Inject
     private EnvironmentViewService environmentViewService;
 
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Measure(StackDecorator.class)
     public Stack decorate(@Nonnull Stack subject, @Nonnull StackV4Request request, User user, Workspace workspace) {
         setEnvironment(subject, request, workspace);
 
         String stackName = request.getName();
-        long start = System.currentTimeMillis();
-        prepareCredential(subject, request, workspace);
-        LOGGER.debug("Credential was prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+        measure(() -> prepareCredential(subject, request, workspace),
+                LOGGER, "Credential was prepared under {} ms for stack {}", stackName);
 
-        start = System.currentTimeMillis();
-        prepareDomainIfDefined(subject, request, user, workspace);
-        LOGGER.debug("Domain was prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+        measure(() -> prepareDomainIfDefined(subject, request, user, workspace),
+                LOGGER, "Domain was prepared under {} ms for stack {}", stackName);
 
         subject.setCloudPlatform(subject.getCredential().cloudPlatform());
         if (subject.getInstanceGroups() == null) {
             throw new BadRequestException("Instance groups must be specified!");
         }
-        start = System.currentTimeMillis();
-        PlatformParameters pps = cloudParameterCache.getPlatformParameters().get(Platform.platform(subject.cloudPlatform()));
-        Boolean mandatoryNetwork = pps.specialParameters().getSpecialParameters().get(PlatformParametersConsts.NETWORK_IS_MANDATORY);
-        if (BooleanUtils.isTrue(mandatoryNetwork) && subject.getNetwork() == null) {
-            throw new BadRequestException("Network must be specified!");
-        }
-        LOGGER.debug("Network was prepared and validated under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
-        start = System.currentTimeMillis();
-        prepareOrchestratorIfNotExist(subject, subject.getCredential());
-        LOGGER.debug("Orchestrator was prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+        measure(() -> {
+            PlatformParameters pps = cloudParameterCache.getPlatformParameters().get(Platform.platform(subject.cloudPlatform()));
+            Boolean mandatoryNetwork = pps.specialParameters().getSpecialParameters().get(PlatformParametersConsts.NETWORK_IS_MANDATORY);
+            if (BooleanUtils.isTrue(mandatoryNetwork) && subject.getNetwork() == null) {
+                throw new BadRequestException("Network must be specified!");
+            }
+        }, LOGGER, "Network was prepared and validated under {} ms for stack {}", stackName);
 
-        start = System.currentTimeMillis();
+        measure(() -> prepareOrchestratorIfNotExist(subject, subject.getCredential()),
+                LOGGER, "Orchestrator was prepared under {} ms for stack {}", stackName);
+
         if (subject.getFailurePolicy() != null) {
-            validatFailurePolicy(subject, subject.getFailurePolicy());
+            measure(() -> validatFailurePolicy(subject, subject.getFailurePolicy()),
+                    LOGGER, "Failure policy was validated under {} ms for stack {}", stackName);
         }
-        LOGGER.debug("Failure policy was validated under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
-        start = System.currentTimeMillis();
-        prepareInstanceGroups(subject, request, subject.getCredential(), user);
-        LOGGER.debug("Instance groups were prepared under {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+        measure(() -> prepareInstanceGroups(subject, request, subject.getCredential(), user),
+                LOGGER, "Instance groups were prepared under {} ms for stack {}", stackName);
 
-        start = System.currentTimeMillis();
-        validateInstanceGroups(subject);
-        LOGGER.debug("Validation of gateway instance groups has been finished in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+        measure(() -> validateInstanceGroups(subject),
+                LOGGER, "Validation of gateway instance groups has been finished in {} ms for stack {}", stackName);
 
-        start = System.currentTimeMillis();
-        ValidationResult validationResult = sharedServiceValidator.checkSharedServiceStackRequirements(request, workspace);
-        if (validationResult.hasError()) {
-            throw new BadRequestException(validationResult.getFormattedErrors());
-        }
-        LOGGER.info("Validation of shared services requirements has been finished in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+        measure(() -> {
+            ValidationResult validationResult = sharedServiceValidator.checkSharedServiceStackRequirements(request, workspace);
+            if (validationResult.hasError()) {
+                throw new BadRequestException(validationResult.getFormattedErrors());
+            }
+        }, LOGGER, "Validation of shared services requirements has been finished in {} ms for stack {}", stackName);
+
         return subject;
     }
 
@@ -162,30 +167,35 @@ public class StackDecorator {
     private void prepareInstanceGroups(Stack subject, StackV4Request request, Credential credential, User user) {
         Map<String, InstanceGroupParameterResponse> instanceGroupParameterResponse = cloudParameterService
                 .getInstanceGroupParameters(credential, getInstanceGroupParameterRequests(subject));
-        for (InstanceGroup instanceGroup : subject.getInstanceGroups()) {
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        subject.getInstanceGroups().parallelStream().forEach(instanceGroup -> {
+            restRequestThreadLocalService.setCloudbreakUser(cloudbreakUser);
             updateInstanceGroupParameters(instanceGroupParameterResponse, instanceGroup);
             if (instanceGroup.getTemplate() != null) {
                 Template template = instanceGroup.getTemplate();
                 if (template.getId() == null) {
                     template.setCloudPlatform(getCloudPlatform(subject, request, template.cloudPlatform()));
                     PlacementSettingsV4Request placement = request.getPlacement();
-                    templateValidator.validateTemplateRequest(credential, template, placement != null ? placement.getRegion() : null,
-                            placement != null ? placement.getAvailabilityZone() : null, subject.getPlatformVariant());
-                    template = templateDecorator.decorate(credential, template, placement != null ? placement.getRegion() : null,
-                            placement != null ? placement.getAvailabilityZone() : null, subject.getPlatformVariant());
-                    template = templateService.create(user, template, subject.getWorkspace());
+                    String availabilityZone = placement != null ? placement.getAvailabilityZone() : null;
+                    String region = placement != null ? placement.getRegion() : null;
+
+                    templateValidator.validateTemplateRequest(credential, template, region, availabilityZone, subject.getPlatformVariant());
+                    template = templateDecorator.decorate(credential, template, region, availabilityZone, subject.getPlatformVariant());
+                    template.setWorkspace(subject.getWorkspace());
+                    template = templateService.create(user, template);
+                    instanceGroup.setTemplate(template);
                 }
-                instanceGroup.setTemplate(template);
             }
             if (instanceGroup.getSecurityGroup() != null) {
                 SecurityGroup securityGroup = instanceGroup.getSecurityGroup();
                 if (securityGroup.getId() == null) {
                     securityGroup.setCloudPlatform(getCloudPlatform(subject, request, securityGroup.getCloudPlatform()));
-                    securityGroup = securityGroupService.create(user, securityGroup, subject.getWorkspace());
+                    securityGroup.setWorkspace(subject.getWorkspace());
+                    securityGroup = securityGroupService.create(user, securityGroup);
                     instanceGroup.setSecurityGroup(securityGroup);
                 }
             }
-        }
+        });
     }
 
     private Set<InstanceGroupParameterRequest> getInstanceGroupParameterRequests(Stack subject) {
@@ -276,8 +286,7 @@ public class StackDecorator {
             return stack.getCredential().cloudPlatform();
         } else if (Strings.isNullOrEmpty(stack.cloudPlatform())) {
             return stack.cloudPlatform();
-        } else {
-            return request.getCloudPlatform().name();
         }
+        return request.getCloudPlatform().name();
     }
 }

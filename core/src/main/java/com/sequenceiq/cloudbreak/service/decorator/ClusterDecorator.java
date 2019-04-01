@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.clusterdefinition.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
@@ -60,6 +61,7 @@ public class ClusterDecorator {
     @Inject
     private AmbariHaComponentFilter ambariHaComponentFilter;
 
+    @Measure(ClusterDecorator.class)
     public Cluster decorate(@Nonnull Cluster cluster, @Nonnull ClusterV4Request request, ClusterDefinition clusterDefinition, User user, Workspace workspace,
             @Nonnull Stack stack) {
         prepareClusterDefinition(cluster, request, workspace, stack, Optional.ofNullable(clusterDefinition), user);

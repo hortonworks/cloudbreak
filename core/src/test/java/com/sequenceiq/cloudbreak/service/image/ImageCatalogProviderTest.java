@@ -27,7 +27,9 @@ import org.apache.commons.io.FileUtils;
 import org.assertj.core.util.Lists;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -55,6 +57,8 @@ public class ImageCatalogProviderTest {
 
     private static final String CB_IMAGE_CATALOG_FILTER_NULL_IMAGES_JSON = "cb-image-catalog-filter-null-images.json";
 
+    private static final String CB_IMAGE_CATALOG_FILTER_IMAGES_NULL_JSON = "cb-image-catalog-filter-images-null.json";
+
     private static final String CB_IMAGE_CATALOG_EMPTY_CLOUDBREAK_VERSIONS_JSON = "cb-image-catalog-empty-cloudbreak-versions.json";
 
     private static final String CB_IMAGE_CATALOG_WITHOUT_BASE_IMAGES = "cb-image-catalog-without-base-images.json";
@@ -70,6 +74,9 @@ public class ImageCatalogProviderTest {
     private static final List<String> CB_IMAGE_CATALOG_V2_OS_TYPES = Lists.newArrayList("amazonlinux", "centos7");
 
     private static final List<String> CB_AMAZONLINUX_FILTER = Lists.newArrayList("amazonlinux");
+
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
     private CachedImageCatalogProvider underTest;
@@ -290,6 +297,18 @@ public class ImageCatalogProviderTest {
 
         CloudbreakImageCatalogV2 imageCatalogV2 = underTest.getImageCatalogV2(CB_IMAGE_CATALOG_FILTER_NULL_IMAGES_JSON);
         assertEquals(1L, imageCatalogV2.getImages().getBaseImages().get(0).getImageSetsByProvider().values().size());
+    }
+
+    @Test
+    public void testImageCatalogFilterImagesNull() throws CloudbreakImageCatalogException {
+        String path = getPath(CB_IMAGE_CATALOG_FILTER_IMAGES_NULL_JSON);
+        ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
+        ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", Collections.emptyList());
+
+        thrown.expectMessage("All images are empty or every items equals NULL");
+        thrown.expect(CloudbreakImageCatalogException.class);
+
+        underTest.getImageCatalogV2(CB_IMAGE_CATALOG_FILTER_IMAGES_NULL_JSON);
     }
 
     @Test

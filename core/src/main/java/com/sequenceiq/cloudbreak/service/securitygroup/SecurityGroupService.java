@@ -39,9 +39,8 @@ public class SecurityGroupService extends AbstractWorkspaceAwareResourceService<
     @Inject
     private InstanceGroupRepository instanceGroupRepository;
 
-    public SecurityGroup create(User user, SecurityGroup securityGroup, Workspace workspace) {
+    public SecurityGroup create(User user, SecurityGroup securityGroup) {
         LOGGER.debug("Creating SecurityGroup: [User: '{}']", user.getUserId());
-        securityGroup.setWorkspace(workspace);
         try {
             return groupRepository.save(securityGroup);
         } catch (DataIntegrityViolationException ex) {

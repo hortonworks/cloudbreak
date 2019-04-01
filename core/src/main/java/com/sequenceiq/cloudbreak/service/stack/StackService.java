@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.util.BenchMark.measure;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -33,8 +34,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.clusterdefinition.validation.AmbariBlueprintValidator;
@@ -378,6 +381,7 @@ public class StackService {
         return findByNameAndWorkspaceIdWithLists(name, workspaceId);
     }
 
+    @Measure(StackService.class)
     public Stack create(Stack stack, String platformString, StatedImage imgFromCatalog, User user, Workspace workspace) {
         if (stack.getGatewayPort() == null) {
             stack.setGatewayPort(nginxPort);
@@ -388,60 +392,45 @@ public class StackService {
 
         setPlatformVariant(stack);
         String stackName = stack.getName();
+
         MDCBuilder.buildMdcContext(stack);
-        try {
-            if (!stack.getStackAuthentication().passwordAuthenticationRequired()
-                    && !Strings.isNullOrEmpty(stack.getStackAuthentication().getPublicKey())) {
-                long start = System.currentTimeMillis();
-                rsaPublicKeyValidator.validate(stack.getStackAuthentication().getPublicKey());
-                LOGGER.debug("RSA key has been validated in {} ms fot stack {}", System.currentTimeMillis() - start, stackName);
-            }
-            if (stack.getOrchestrator() != null) {
-                orchestratorRepository.save(stack.getOrchestrator());
-            }
-            stack.getStackAuthentication().setLoginUserName(SSH_USER_CB);
 
-            long start = System.currentTimeMillis();
-            String template = connector.getTemplate(stack);
-            LOGGER.debug("Get cluster template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+        GetPlatformTemplateRequest templateRequest = connector.triggerGetTemplate(stack);
 
-            start = System.currentTimeMillis();
-            Stack savedStack = stackRepository.save(stack);
-            LOGGER.debug("Stackrepository save took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+        if (!stack.getStackAuthentication().passwordAuthenticationRequired() && !Strings.isNullOrEmpty(stack.getStackAuthentication().getPublicKey())) {
+            rsaPublicKeyValidator.validate(stack.getStackAuthentication().getPublicKey());
+        }
+        if (stack.getOrchestrator() != null) {
+            orchestratorRepository.save(stack.getOrchestrator());
+        }
+        stack.getStackAuthentication().setLoginUserName(SSH_USER_CB);
 
-            start = System.currentTimeMillis();
-            addTemplateForStack(savedStack, template);
-            LOGGER.debug("Save cluster template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+        Stack savedStack = measure(() -> stackRepository.save(stack),
+                LOGGER, "Stackrepository save took {} ms for stack {}", stackName);
 
-            start = System.currentTimeMillis();
-            addCloudbreakDetailsForStack(savedStack);
-            LOGGER.debug("Add Cloudbreak template took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+        MDCBuilder.buildMdcContext(savedStack);
 
-            MDCBuilder.buildMdcContext(savedStack);
+        measure(() -> addCloudbreakDetailsForStack(savedStack),
+                LOGGER, "Add Cloudbreak details took {} ms for stack {}", stackName);
 
-            start = System.currentTimeMillis();
-            instanceGroupRepository.saveAll(savedStack.getInstanceGroups());
-            LOGGER.debug("Instance groups saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+        measure(() -> instanceGroupRepository.saveAll(savedStack.getInstanceGroups()),
+                LOGGER, "Instance groups saved in {} ms for stack {}", stackName);
 
-            start = System.currentTimeMillis();
-            instanceMetaDataRepository.saveAll(savedStack.getInstanceMetaDataAsList());
-            LOGGER.debug("Instance metadatas saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+        measure(() -> instanceMetaDataRepository.saveAll(savedStack.getInstanceMetaDataAsList()),
+                LOGGER, "Instance metadatas saved in {} ms for stack {}", stackName);
 
-            start = System.currentTimeMillis();
-            SecurityConfig securityConfig = tlsSecurityService.generateSecurityKeys(workspace);
-            LOGGER.debug("Generating security keys took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+        SecurityConfig securityConfig = tlsSecurityService.generateSecurityKeys(workspace);
 
-            securityConfig.setStack(savedStack);
-            start = System.currentTimeMillis();
+        securityConfig.setStack(savedStack);
+
+        measure(() -> {
             saltSecurityConfigRepository.save(securityConfig.getSaltSecurityConfig());
             securityConfigRepository.save(securityConfig);
-            LOGGER.debug("Security config save took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-            savedStack.setSecurityConfig(securityConfig);
+        }, LOGGER, "Security config save took {} ms for stack {}", stackName);
+        savedStack.setSecurityConfig(securityConfig);
 
-            start = System.currentTimeMillis();
+        try {
             imageService.create(savedStack, platformString, connector.getPlatformParameters(savedStack), imgFromCatalog);
-            LOGGER.debug("Image creation took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-            return savedStack;
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.info("Cloudbreak Image not found", e);
             throw new CloudbreakApiException(e.getMessage(), e);
@@ -449,6 +438,11 @@ public class StackService {
             LOGGER.info("Cloudbreak Image Catalog error", e);
             throw new CloudbreakApiException(e.getMessage(), e);
         }
+
+        measure(() -> addTemplateForStack(savedStack, connector.waitGetTemplate(stack, templateRequest)),
+                LOGGER, "Save cluster template took {} ms for stack {}", stackName);
+
+        return savedStack;
     }
 
     private void setPlatformVariant(Stack stack) {
@@ -572,6 +566,7 @@ public class StackService {
                 .findFirst();
     }
 
+    @Measure(StackService.class)
     public void validateStack(StackValidation stackValidation) {
         if (stackValidation.getNetwork() != null) {
             networkConfigurationValidator.validateNetworkForStack(stackValidation.getNetwork(), stackValidation.getInstanceGroups());
