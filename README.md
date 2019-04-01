@@ -12,7 +12,7 @@
 # Local Development Setup
 As of now this document is focusing on setting up your development environment on OSX. You'll need brew to install certain components in case you don't have them already. To get brew please follow the install instructions on the brew homepage: https://brew.sh
 
-As a prerequisite you need to have Java 10 installed. You can get it from [here](https://jdk.java.net/10/).
+As a prerequisite you will need to have Java 10 installed. You can get it from [here](https://jdk.java.net/10/).
 
 You'll need Docker For Mac, use [Docker for mac](https://docs.docker.com/docker-for-mac/install/).
 
