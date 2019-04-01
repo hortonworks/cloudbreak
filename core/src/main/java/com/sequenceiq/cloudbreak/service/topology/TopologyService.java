@@ -18,10 +18,10 @@ import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.TopologyRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
+import com.sequenceiq.cloudbreak.service.AbstractArchivistService;
 
 @Service
-public class TopologyService extends AbstractWorkspaceAwareResourceService<Topology> {
+public class TopologyService extends AbstractArchivistService<Topology> {
 
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 

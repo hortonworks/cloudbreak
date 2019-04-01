@@ -15,13 +15,16 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Where;
+
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
 @Entity
+@Where(clause = "deleted = false")
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
-public class Topology implements ProvisionEntity, WorkspaceAwareResource {
+public class Topology implements ProvisionEntity, WorkspaceAwareResource, ArchivableResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "topology_generator")
@@ -45,6 +48,8 @@ public class Topology implements ProvisionEntity, WorkspaceAwareResource {
 
     @ManyToOne
     private Workspace workspace;
+
+    private Long deletionTimestamp = -1L;
 
     public Workspace getWorkspace() {
         return workspace;
@@ -105,5 +110,24 @@ public class Topology implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+    @Override
+    public void setDeletionTimestamp(Long timestampMillisecs) {
+        deletionTimestamp = timestampMillisecs;
+    }
+
+    @Override
+    public void setArchived(boolean archived) {
+        this.deleted = archived;
+    }
+
+    @Override
+    public void unsetRelationsToEntitiesToBeDeleted() {
+
+    }
+
+    public Long getDeletionTimestamp() {
+        return deletionTimestamp;
     }
 }
