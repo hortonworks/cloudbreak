@@ -237,8 +237,15 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
             request.setLocation(locationRequest);
             editRegions(request, environment, cloudRegions);
         }
-        environment = pureSave(environment);
-        return conversionService.convert(environment, DetailedEnvironmentV4Response.class);
+
+        try {
+            return transactionService.required(() -> {
+                    Environment savedEnvironment = pureSave(environment);
+                    return conversionService.convert(savedEnvironment, DetailedEnvironmentV4Response.class);
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
     }
 
     private boolean locationAndRegionChanged(EnvironmentEditV4Request request) {
