@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -14,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -23,12 +23,11 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.NetworkRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
+import com.sequenceiq.cloudbreak.service.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
-public class NetworkService extends AbstractWorkspaceAwareResourceService<Network> {
+public class NetworkService extends AbstractArchivistService<Network> {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkService.class);
 
     @Inject
@@ -52,20 +51,12 @@ public class NetworkService extends AbstractWorkspaceAwareResourceService<Networ
     }
 
     public void delete(Long id) {
-        deleteImpl(get(id));
+        Optional.ofNullable(networkRepository.findById(id)).orElseThrow(notFound("Network", id))
+                .map(this::delete);
     }
 
     @Override
     protected void prepareDeletion(Network network) {
-    }
-
-    @Override
-    protected void prepareCreation(Network resource) {
-
-    }
-
-    private void deleteImpl(Network network) {
-        LOGGER.debug("Deleting network with name: {}", network.getName());
         List<Stack> stacksWithThisNetwork = new ArrayList<>(stackService.getByNetwork(network));
         if (!stacksWithThisNetwork.isEmpty()) {
             if (stacksWithThisNetwork.size() > 1) {
@@ -80,15 +71,12 @@ public class NetworkService extends AbstractWorkspaceAwareResourceService<Networ
                 throw new BadRequestException(String.format("There is a cluster ['%s'] which uses network '%s'(ID:'%s'). Please remove this "
                         + "cluster before deleting the network", stacksWithThisNetwork.get(0).getCluster().getName(), network.getName(), network.getId()));
             }
+        }
+    }
 
-        }
-        if (ResourceStatus.USER_MANAGED.equals(network.getStatus())) {
-            networkRepository.delete(network);
-        } else {
-            network.setName(NameUtil.postfixWithTimestamp(network.getName()));
-            network.setStatus(ResourceStatus.DEFAULT_DELETED);
-            networkRepository.save(network);
-        }
+    @Override
+    protected void prepareCreation(Network resource) {
+
     }
 
     @Override

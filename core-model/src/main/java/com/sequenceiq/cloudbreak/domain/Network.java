@@ -13,6 +13,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Where;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -21,8 +23,9 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
 @Entity
+@Where(clause = "archived = false")
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
-public class Network implements ProvisionEntity, WorkspaceAwareResource {
+public class Network implements ProvisionEntity, WorkspaceAwareResource, ArchivableResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "network_generator")
@@ -50,6 +53,10 @@ public class Network implements ProvisionEntity, WorkspaceAwareResource {
 
     @ManyToOne
     private Workspace workspace;
+
+    private boolean archived;
+
+    private Long deletionTimestamp = -1L;
 
     public Workspace getWorkspace() {
         return workspace;
@@ -126,5 +133,26 @@ public class Network implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setTopology(Topology topology) {
         this.topology = topology;
+    }
+
+    public boolean isArchived() {
+        return archived;
+    }
+
+    public Long getDeletionTimestamp() {
+        return deletionTimestamp;
+    }
+
+    public void setArchived(boolean archived) {
+        this.archived = archived;
+    }
+
+    @Override
+    public void unsetRelationsToEntitiesToBeDeleted() {
+
+    }
+
+    public void setDeletionTimestamp(Long deletionTimestamp) {
+        this.deletionTimestamp = deletionTimestamp;
     }
 }
