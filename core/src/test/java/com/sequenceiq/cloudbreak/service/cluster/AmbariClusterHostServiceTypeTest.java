@@ -109,23 +109,6 @@ public class AmbariClusterHostServiceTypeTest {
     }
 
     @Test
-    public void testStopWhenAwsHasSpotInstances() {
-        cluster = TestUtil.cluster(TestUtil.clusterDefinition(), TestUtil.stack(Status.AVAILABLE, TestUtil.awsCredential()), 1L);
-        cluster.getStack().setCloudPlatform("AWS");
-        stack = TestUtil.setSpotInstances(cluster.getStack());
-        cluster.setStatus(Status.AVAILABLE);
-        cluster.setStack(stack);
-        stack.setCluster(cluster);
-
-        when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
-
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Cannot stop a cluster '1'. Reason: Spot instances cannot be stopped.");
-
-        underTest.updateStatus(1L, StatusRequest.STOPPED);
-    }
-
-    @Test
     public void testUpdateHostsDoesntAcceptZeroScalingAdjustments() {
         // GIVEN
         HostGroupAdjustmentV4Request hga1 = new HostGroupAdjustmentV4Request();

@@ -554,12 +554,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
                 if ("ephemeral".equals(instanceGroup.getTemplate().getVolumeType())) {
                     reason = StopRestrictionReason.EPHEMERAL_VOLUMES;
                     break;
-                } else {
-                    Json attributes = instanceGroup.getTemplate().getAttributes();
-                    if (attributes != null && attributes.getMap().get("spotPrice") != null) {
-                        reason = StopRestrictionReason.SPOT_INSTANCES;
-                        break;
-                    }
                 }
             }
         }

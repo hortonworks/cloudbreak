@@ -26,22 +26,6 @@ public class StackTest {
     }
 
     @Test
-    public void infrastructureShouldNotBeStoppableForSpotInstances() {
-        Stack stack = new Stack();
-        stack.setCloudPlatform("AWS");
-        Set<InstanceGroup> groups = new HashSet<>();
-        groups.add(createGroup("ebs"));
-        InstanceGroup master = createGroup("ebs");
-        master.getTemplate().setAttributes(
-                new JsonToString().convertToEntityAttribute(
-                        "{\"sshLocation\":\"0.0.0.0/0\",\"encrypted\":false,\"spotPrice\":0.04}"));
-        groups.add(master);
-        stack.setInstanceGroups(groups);
-        StopRestrictionReason infrastructureStoppable = stack.isInfrastructureStoppable();
-        assertEquals(StopRestrictionReason.SPOT_INSTANCES, infrastructureStoppable);
-    }
-
-    @Test
     public void infrastructureShouldBeStoppableForNonAWSClusters() {
         Stack stack = new Stack();
         stack.setCloudPlatform("GCP");
