@@ -14,7 +14,7 @@ As of now this document is focusing on setting up your development environment o
 
 As a prerequisite you need to have Java 10 installed. You can get it from [here](https://jdk.java.net/10/).
 
-You'll need Docker. For Mac, use [Docker for mac](https://docs.docker.com/docker-for-mac/install/).
+You'll need Docker For Mac, use [Docker for mac](https://docs.docker.com/docker-for-mac/install/).
 
 ## Cloudbreak Deployer
 
