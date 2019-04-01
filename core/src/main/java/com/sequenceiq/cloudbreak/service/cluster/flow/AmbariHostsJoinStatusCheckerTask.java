@@ -17,28 +17,35 @@ public class AmbariHostsJoinStatusCheckerTask extends ClusterBasedStatusCheckerT
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariHostsJoinStatusCheckerTask.class);
 
     @Override
-    public boolean checkStatus(AmbariHostsCheckerContext hosts) {
+    public boolean checkStatus(AmbariHostsCheckerContext ambariHostsCheckerContext) {
         try {
-            AmbariClient ambariClient = hosts.getAmbariClient();
-            Map<String, String> hostNames = ambariClient.getHostStatuses();
-            for (HostMetadata hostMetadata : hosts.getHostsInCluster()) {
-                boolean contains = false;
-                for (Entry<String, String> hostName : hostNames.entrySet()) {
-                    if (hostName.getKey().equals(hostMetadata.getHostName()) && !"UNKNOWN".equals(hostName.getValue())) {
-                        contains = true;
-                        break;
-                    }
-                }
-                if (!contains) {
-                    LOGGER.info("The host {} currently not part of the cluster, waiting for join", hostMetadata.getHostName());
-                    return false;
-                }
-            }
-        } catch (Exception ignored) {
-            LOGGER.info("Did not join all hosts yet, polling");
+            return areAllHostsJoined(ambariHostsCheckerContext);
+        } catch (Exception e) {
+            LOGGER.info("Not all hosts joined yet. Continuing polling.", e);
             return false;
         }
-        return true;
+    }
+
+    private boolean areAllHostsJoined(AmbariHostsCheckerContext ambariHostsCheckerContext) {
+        AmbariClient ambariClient = ambariHostsCheckerContext.getAmbariClient();
+        Map<String, String> hostNamesToStatuses = ambariClient.getHostStatuses();
+        boolean allHostsJoined = true;
+        for (HostMetadata host : ambariHostsCheckerContext.getHostsInCluster()) {
+            if (!isHostJoined(host, hostNamesToStatuses)) {
+                LOGGER.info("Host {} is currently not part of the cluster, waiting for it to join.", host.getHostName());
+                allHostsJoined = false;
+            }
+        }
+        return allHostsJoined;
+    }
+
+    private boolean isHostJoined(HostMetadata hostMetadata, Map<String, String> hostNamesToStatuses) {
+        for (Entry<String, String> hostWithState : hostNamesToStatuses.entrySet()) {
+            if (hostWithState.getKey().equals(hostMetadata.getHostName()) && !"UNKNOWN".equals(hostWithState.getValue())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

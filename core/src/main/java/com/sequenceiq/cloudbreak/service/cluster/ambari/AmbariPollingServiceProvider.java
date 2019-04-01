@@ -15,11 +15,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClientPollerObject;
+import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariComponenstJoinStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariHealthCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariHostsCheckerContext;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariHostsJoinStatusCheckerTask;
@@ -55,6 +56,9 @@ public class AmbariPollingServiceProvider {
     @Inject
     private AmbariHostsJoinStatusCheckerTask ambariHostsJoinStatusCheckerTask;
 
+    @Inject
+    private AmbariComponenstJoinStatusCheckerTask ambariComponenstJoinStatusCheckerTask;
+
     public PollingResult ambariStartupPollerObjectPollingService(Stack stack, AmbariClient defaultAmbariClient, AmbariClient cloudbreakAmbariClient) {
         AmbariStartupPollerObject ambariStartupPollerObject = new AmbariStartupPollerObject(
                 stack,
@@ -82,6 +86,17 @@ public class AmbariPollingServiceProvider {
                 new AmbariHostsCheckerContext(stack, ambariClient, hostsInCluster, stack.getFullNodeCount());
         return ambariHostJoin.pollWithTimeout(
                 ambariHostsJoinStatusCheckerTask,
+                ambariHostsCheckerContext,
+                AMBARI_POLLING_INTERVAL,
+                MAX_ATTEMPTS_FOR_HOSTS,
+                MAX_FAILURE_COUNT).getLeft();
+    }
+
+    public PollingResult ambariComponentJoin(Stack stack, AmbariClient ambariClient, Set<HostMetadata> hostsInCluster) {
+        AmbariHostsCheckerContext ambariHostsCheckerContext =
+                new AmbariHostsCheckerContext(stack, ambariClient, hostsInCluster, stack.getFullNodeCount());
+        return ambariHostJoin.pollWithTimeout(
+                ambariComponenstJoinStatusCheckerTask,
                 ambariHostsCheckerContext,
                 AMBARI_POLLING_INTERVAL,
                 MAX_ATTEMPTS_FOR_HOSTS,
