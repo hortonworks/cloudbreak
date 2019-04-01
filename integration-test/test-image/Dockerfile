@@ -1,4 +1,4 @@
-FROM hortonworks/hwx_openjdk:11.0-jdk-slim
+FROM openjdk:11-jdk-slim
 MAINTAINER info@hortonworks.com
 
 WORKDIR /
