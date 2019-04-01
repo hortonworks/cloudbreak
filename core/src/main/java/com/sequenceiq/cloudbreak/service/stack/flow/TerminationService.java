@@ -80,7 +80,6 @@ public class TerminationService {
                     }
                 }
                 stack.setCredential(null);
-                stack.setNetwork(null);
                 stack.setName(terminatedName);
                 terminateInstanceGroups(stack);
                 terminateMetaDataInstances(stack);
