@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.api.ComponentType;
 
 @Service
-public final class ApplicationUtils {
+public class ApplicationUtils {
 
     private static final String AMBARI_DB_PREFIX = "ambari_db";
 

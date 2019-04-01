@@ -26,6 +26,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.client.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
@@ -81,6 +82,7 @@ public class ImageService {
         return componentConfigProvider.getImage(stackId);
     }
 
+    @Measure(ImageService.class)
     public void create(Stack stack, String platformString, PlatformParameters params, StatedImage imgFromCatalog)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         try {
@@ -112,6 +114,7 @@ public class ImageService {
     }
 
     //CHECKSTYLE:OFF
+    @Measure(ImageService.class)
     public StatedImage determineImageFromCatalog(Long workspaceId, ImageSettingsV4Request image, String platformString,
             ClusterDefinition clusterDefinition, boolean useBaseImage, User user) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         String clusterType = ImageCatalogService.UNDEFINED;
@@ -136,22 +139,19 @@ public class ImageService {
         }
         if (image != null && image.getId() != null) {
             return imageCatalogService.getImageByCatalogName(workspaceId, image.getId(), image.getCatalog());
-        } else {
-            if (useBaseImage) {
-                LOGGER.debug("Image id isn't specified for the stack, falling back to a base image, because repo information is provided");
-                return imageCatalogService.getLatestBaseImageDefaultPreferred(platformString, operatingSystems, user);
-            } else {
-                LOGGER.debug("Image id isn't specified for the stack, falling back to a prewarmed "
-                        + "image of {}-{} or to a base image if prewarmed doesn't exist", clusterType, clusterVersion);
-                return imageCatalogService.getPrewarmImageDefaultPreferred(platformString, clusterType, clusterVersion, operatingSystems, user);
-            }
         }
+        if (useBaseImage) {
+            LOGGER.debug("Image id isn't specified for the stack, falling back to a base image, because repo information is provided");
+            return imageCatalogService.getLatestBaseImageDefaultPreferred(platformString, operatingSystems, user);
+        }
+        LOGGER.debug("Image id isn't specified for the stack, falling back to a prewarmed "
+                + "image of {}-{} or to a base image if prewarmed doesn't exist", clusterType, clusterVersion);
+        return imageCatalogService.getPrewarmImageDefaultPreferred(platformString, clusterType, clusterVersion, operatingSystems, user);
     }
     //CHECKSTYLE:ON
 
     public String determineImageName(String platformString, String region, com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog)
             throws CloudbreakImageNotFoundException {
-        String imageName;
         Optional<Map<String, String>> imagesForPlatform = findStringKeyWithEqualsIgnoreCase(platformString, imgFromCatalog.getImageSetsByProvider());
         if (imagesForPlatform.isPresent()) {
             Map<String, String> imagesByRegion = imagesForPlatform.get();
@@ -160,18 +160,15 @@ public class ImageService {
                 imageNameOpt = findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion);
             }
             if (imageNameOpt.isPresent()) {
-                imageName = imageNameOpt.get();
-            } else {
-                String msg = String.format("Virtual machine image couldn't found in image: '%s' for the selected platform: '%s' and region: '%s'.",
-                        imgFromCatalog, platformString, region);
-                throw new CloudbreakImageNotFoundException(msg);
+                return imageNameOpt.get();
             }
-        } else {
-            String msg = String.format("The selected image: '%s' doesn't contain virtual machine image for the selected platform: '%s'.",
-                    imgFromCatalog, platformString);
+            String msg = String.format("Virtual machine image couldn't found in image: '%s' for the selected platform: '%s' and region: '%s'.",
+                    imgFromCatalog, platformString, region);
             throw new CloudbreakImageNotFoundException(msg);
         }
-        return imageName;
+        String msg = String.format("The selected image: '%s' doesn't contain virtual machine image for the selected platform: '%s'.",
+                imgFromCatalog, platformString);
+        throw new CloudbreakImageNotFoundException(msg);
     }
 
     private <T> Optional<T> findStringKeyWithEqualsIgnoreCase(String key, Map<String, T> map) {

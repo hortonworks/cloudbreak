@@ -6,13 +6,18 @@ import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 import java.util.Optional;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
+import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.PkiUtil;
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
@@ -24,6 +29,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
+import com.sequenceiq.cloudbreak.util.FixedSizePreloadCache;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Component
@@ -35,23 +41,40 @@ public class TlsSecurityService {
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
+    @Value("${cb.security.keypair.cache.size:10}")
+    private int keyPairCacheSize;
+
+    private FixedSizePreloadCache<KeyPair> keyPairCache;
+
+    @PostConstruct
+    public void init() {
+        keyPairCache = new FixedSizePreloadCache<>(keyPairCacheSize, PkiUtil::generateKeypair);
+    }
+
+    @Measure(TlsSecurityService.class)
     public SecurityConfig generateSecurityKeys(Workspace workspace) {
         SecurityConfig securityConfig = new SecurityConfig();
         securityConfig.setWorkspace(workspace);
         SaltSecurityConfig saltSecurityConfig = new SaltSecurityConfig();
         saltSecurityConfig.setWorkspace(workspace);
+        saltSecurityConfig.setSaltBootPassword(PasswordUtil.generatePassword());
+        saltSecurityConfig.setSaltPassword(PasswordUtil.generatePassword());
         securityConfig.setSaltSecurityConfig(saltSecurityConfig);
-        generateClientKeys(securityConfig);
-        generateSaltBootSignKeypair(saltSecurityConfig);
-        generateSaltSignKeypair(securityConfig);
-        generateSaltPassword(saltSecurityConfig);
-        generateSaltBootPassword(saltSecurityConfig);
+
+        setClientKeys(securityConfig, keyPairCache.pop(), keyPairCache.pop());
+        setSaltBootSignKeypair(saltSecurityConfig, convertKeyPair(keyPairCache.pop()));
+        setSaltSignKeypair(securityConfig, convertKeyPair(keyPairCache.pop()));
+
         return securityConfig;
     }
 
-    private void generateClientKeys(SecurityConfig securityConfig) {
-        KeyPair identity = PkiUtil.generateKeypair();
-        KeyPair signKey = PkiUtil.generateKeypair();
+    private Pair<String, String> convertKeyPair(KeyPair keyPair) {
+        String privateKey = PkiUtil.convert(keyPair.getPrivate());
+        String publicKey = PkiUtil.convertOpenSshPublicKey(keyPair.getPublic());
+        return new ImmutablePair<>(privateKey, publicKey);
+    }
+
+    private void setClientKeys(SecurityConfig securityConfig, KeyPair identity, KeyPair signKey) {
         X509Certificate cert = PkiUtil.cert(identity, "cloudbreak", signKey);
 
         String clientPrivateKey = PkiUtil.convert(identity.getPrivate());
@@ -61,29 +84,15 @@ public class TlsSecurityService {
         securityConfig.setClientCert(BaseEncoding.base64().encode(clientCert.getBytes()));
     }
 
-    private void generateSaltBootSignKeypair(SaltSecurityConfig saltSecurityConfig) {
-        KeyPair keyPair = PkiUtil.generateKeypair();
-        String privateKey = PkiUtil.convert(keyPair.getPrivate());
-        String publicKey = PkiUtil.convertOpenSshPublicKey(keyPair.getPublic());
-        saltSecurityConfig.setSaltBootSignPublicKey(BaseEncoding.base64().encode(publicKey.getBytes()));
-        saltSecurityConfig.setSaltBootSignPrivateKey(BaseEncoding.base64().encode(privateKey.getBytes()));
+    private void setSaltBootSignKeypair(SaltSecurityConfig saltSecurityConfig, Pair<String, String> keyPair) {
+        saltSecurityConfig.setSaltBootSignPublicKey(BaseEncoding.base64().encode(keyPair.getValue().getBytes()));
+        saltSecurityConfig.setSaltBootSignPrivateKey(BaseEncoding.base64().encode(keyPair.getKey().getBytes()));
     }
 
-    private void generateSaltSignKeypair(SecurityConfig securityConfig) {
-        KeyPair keyPair = PkiUtil.generateKeypair();
-        String privateKey = PkiUtil.convert(keyPair.getPrivate());
-        String publicKey = PkiUtil.convertOpenSshPublicKey(keyPair.getPublic());
+    private void setSaltSignKeypair(SecurityConfig securityConfig, Pair<String, String> keyPair) {
         SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
-        saltSecurityConfig.setSaltSignPublicKey(BaseEncoding.base64().encode(publicKey.getBytes()));
-        saltSecurityConfig.setSaltSignPrivateKey(BaseEncoding.base64().encode(privateKey.getBytes()));
-    }
-
-    private void generateSaltBootPassword(SaltSecurityConfig saltSecurityConfig) {
-        saltSecurityConfig.setSaltBootPassword(PasswordUtil.generatePassword());
-    }
-
-    private void generateSaltPassword(SaltSecurityConfig saltSecurityConfig) {
-        saltSecurityConfig.setSaltPassword(PasswordUtil.generatePassword());
+        saltSecurityConfig.setSaltSignPublicKey(BaseEncoding.base64().encode(keyPair.getValue().getBytes()));
+        saltSecurityConfig.setSaltSignPrivateKey(BaseEncoding.base64().encode(keyPair.getKey().getBytes()));
     }
 
     public GatewayConfig buildGatewayConfig(Long stackId, InstanceMetaData gatewayInstance, Integer gatewayPort,
@@ -133,5 +142,4 @@ public class TlsSecurityService {
                 .orElseThrow(() -> new NotFoundException("Server certificate was not found."));
         return new CertificateV4Response(serverCert, securityConfig.getClientKeySecret(), securityConfig.getClientCertSecret());
     }
-
 }

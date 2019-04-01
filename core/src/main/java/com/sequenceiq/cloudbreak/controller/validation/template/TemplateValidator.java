@@ -44,8 +44,6 @@ public class TemplateValidator {
             Suppliers.memoize(() -> cloudParameterService.getPlatformParameters());
 
     public void validateTemplateRequest(Credential credential, Template value, String region, String availabilityZone, String variant) {
-
-
         CloudVmTypes cloudVmTypes = cloudParameterService.getVmTypesV2(credential, region, variant, new HashMap<>());
 
         if (StringUtils.isEmpty(value.getInstanceType())) {

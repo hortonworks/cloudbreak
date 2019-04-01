@@ -29,25 +29,31 @@ public class ParametersValidator {
     @Inject
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
-    public void validate(String platform, CloudCredential cloudCredential, Map<String, String> parameters, String userId, Long workspaceId) {
+    public ParametersValidationRequest triggerValidate(String platform, CloudCredential cloudCredential, Map<String, String> parameters, String userId,
+            Long workspaceId) {
         if (parameters == null || parameters.isEmpty()) {
-            return;
+            return null;
         }
         LOGGER.debug("Validate the parameters: {}", parameters);
         CloudContext cloudContext = new CloudContext(null, null, platform, userId, workspaceId);
         ParametersValidationRequest request = new ParametersValidationRequest(cloudCredential, cloudContext, parameters);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
-        try {
-            ParametersValidationResult result = request.await();
-            LOGGER.debug("Parameter validation result: {}", result);
-            Exception exception = result.getErrorDetails();
-            if (exception != null) {
-                throw new BadRequestException(result.getStatusReason(), exception);
-            }
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while sending the parameters validation request", e);
-            throw new OperationException(e);
-        }
+        return request;
     }
 
+    public void waitResult(ParametersValidationRequest parametersValidationRequest) {
+        if (parametersValidationRequest != null) {
+            try {
+                ParametersValidationResult result = parametersValidationRequest.await();
+                LOGGER.debug("Parameter validation result: {}", result);
+                Exception exception = result.getErrorDetails();
+                if (exception != null) {
+                    throw new BadRequestException(result.getStatusReason(), exception);
+                }
+            } catch (InterruptedException e) {
+                LOGGER.error("Error while sending the parameters validation request", e);
+                throw new OperationException(e);
+            }
+        }
+    }
 }

@@ -19,6 +19,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -70,6 +71,7 @@ public class SharedServiceConfigProvider {
         return requestedCluster;
     }
 
+    @Measure(SharedServiceConfigProvider.class)
     public Stack prepareDatalakeConfigs(Stack publicStack) {
         try {
             DatalakeConfigApi connector = null;

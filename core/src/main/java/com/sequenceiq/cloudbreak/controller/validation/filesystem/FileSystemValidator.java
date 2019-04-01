@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.FileSystemValidationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.validation.FileSystemValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.validation.FileSystemValidationResult;
@@ -57,6 +58,7 @@ public class FileSystemValidator {
         }
     }
 
+    @Measure(FileSystemValidator.class)
     public void validateFileSystem(String platform, CloudCredential cloudCredential, FileSystemValidationV4Request fileSystemValidationV4Request,
             String userId, Long workspaceId) {
         if (fileSystemValidationV4Request == null) {

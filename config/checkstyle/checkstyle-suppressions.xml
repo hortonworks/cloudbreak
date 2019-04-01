@@ -15,6 +15,7 @@
     <suppress checks="IllegalThrow" files="ConcurrentMethodExecutionAspect.java"/>
     <suppress checks="IllegalThrow" files="HasPermissionAspects.java"/>
     <suppress checks="IllegalThrow" files="HasPermissionService.java"/>
+    <suppress checks="IllegalThrow" files="MeasureAspects.java"/>
     <suppress checks="RedundantModifier" files="CoreApi.java"/>
     <suppress checks="RegexpMultilineCheck" files="ShellConfiguration.java"/>
     <suppress checks="RegexpMultilineCheck" files="IntegrationTestApp.java"/>

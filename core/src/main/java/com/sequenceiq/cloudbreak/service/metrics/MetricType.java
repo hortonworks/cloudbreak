@@ -23,6 +23,8 @@ public enum MetricType implements Metric {
     CLUSTER_START_SUCCESSFUL("cluster.start.successful"),
     CLUSTER_START_FAILED("cluster.start.failed"),
 
+    STACK_PREPARATION("stack.preparation.duration"),
+
     FLOW_STEP("flowstep"),
     ACTIVE_FLOWS("activeflow"),
     HEARTBEAT_UPDATE_FAILED("heartbeat.update.failed");
