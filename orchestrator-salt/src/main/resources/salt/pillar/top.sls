@@ -4,7 +4,6 @@ base:
     - ambari.repo
     - ambari.gpl
     - hdp.repo
-    - network
     - nodes.hosts
     - discovery.init
     - recipes.init
