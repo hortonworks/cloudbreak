@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.MappableBase;
 
@@ -18,7 +19,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class AzureCredentialV4Parameters extends MappableBase {
+public class AzureCredentialV4RequestParameters extends MappableBase implements JsonEntity {
 
     @NotNull
     @ApiModelProperty(required = true, example = "a8d4457d-310v-41p6-sc53-14g8d733e514")
@@ -30,25 +31,25 @@ public class AzureCredentialV4Parameters extends MappableBase {
 
     @Valid
     @ApiModelProperty
-    private AppBased appBased;
+    private AppBasedRequest appBased;
 
     @Valid
     @ApiModelProperty
-    private RoleBased roleBased;
+    private RoleBasedRequest roleBased;
 
-    public RoleBased getRoleBased() {
+    public RoleBasedRequest getRoleBased() {
         return roleBased;
     }
 
-    public void setRoleBased(RoleBased roleBased) {
+    public void setRoleBased(RoleBasedRequest roleBased) {
         this.roleBased = roleBased;
     }
 
-    public AppBased getAppBased() {
+    public AppBasedRequest getAppBased() {
         return appBased;
     }
 
-    public void setAppBased(AppBased appBased) {
+    public void setAppBased(AppBasedRequest appBased) {
         this.appBased = appBased;
     }
 
@@ -94,9 +95,9 @@ public class AzureCredentialV4Parameters extends MappableBase {
         super.parse(parameters);
         subscriptionId = getParameterOrNull(parameters, "subscriptionId");
         tenantId = getParameterOrNull(parameters, "tenantId");
-        appBased = new AppBased();
+        appBased = new AppBasedRequest();
         appBased.parse(parameters);
-        roleBased = new RoleBased();
+        roleBased = new RoleBasedRequest();
         roleBased.parse(parameters);
     }
 

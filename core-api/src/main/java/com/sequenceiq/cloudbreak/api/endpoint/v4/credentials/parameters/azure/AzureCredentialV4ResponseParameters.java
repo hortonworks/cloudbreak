@@ -2,12 +2,11 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure;
 
 import java.util.Map;
 
-import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.MappableBase;
 
@@ -17,15 +16,27 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class AppBased extends MappableBase {
+public class AzureCredentialV4ResponseParameters extends MappableBase implements JsonEntity {
 
-    @NotNull
-    @ApiModelProperty(required = true)
+    @ApiModelProperty
+    private String subscriptionId;
+
+    @ApiModelProperty
+    private String tenantId;
+
+    @ApiModelProperty
     private String accessKey;
 
-    @NotNull
-    @ApiModelProperty(required = true)
-    private String secretKey;
+    @ApiModelProperty
+    private RoleBasedResponse roleBased;
+
+    public RoleBasedResponse getRoleBased() {
+        return roleBased;
+    }
+
+    public void setRoleBased(RoleBasedResponse roleBased) {
+        this.roleBased = roleBased;
+    }
 
     public String getAccessKey() {
         return accessKey;
@@ -35,19 +46,30 @@ public class AppBased extends MappableBase {
         this.accessKey = accessKey;
     }
 
-    public String getSecretKey() {
-        return secretKey;
+    public String getSubscriptionId() {
+        return subscriptionId;
     }
 
-    public void setSecretKey(String secretKey) {
-        this.secretKey = secretKey;
+    public void setSubscriptionId(String subscriptionId) {
+        this.subscriptionId = subscriptionId;
+    }
+
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
 
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
-        map.put("accessKey", accessKey);
-        map.put("secretKey", secretKey);
+        map.put("subscriptionId", subscriptionId);
+        map.put("tenantId", tenantId);
+        if (roleBased != null) {
+            map.putAll(roleBased.asMap());
+        }
         return map;
     }
 
@@ -61,8 +83,11 @@ public class AppBased extends MappableBase {
     @Override
     public void parse(Map<String, Object> parameters) {
         super.parse(parameters);
+        subscriptionId = getParameterOrNull(parameters, "subscriptionId");
+        tenantId = getParameterOrNull(parameters, "tenantId");
         accessKey = getParameterOrNull(parameters, "accessKey");
-        secretKey = getParameterOrNull(parameters, "secretKey");
+        roleBased = new RoleBasedResponse();
+        roleBased.parse(parameters);
     }
 
 }

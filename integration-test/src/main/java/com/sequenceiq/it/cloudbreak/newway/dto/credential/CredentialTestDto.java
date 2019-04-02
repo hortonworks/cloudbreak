@@ -1,7 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.dto.credential;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.AwsCredentialV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AzureCredentialV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AzureCredentialV4RequestParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.cumulus.CumulusYarnCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.gcp.GcpCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.mock.MockCredentialV4Parameters;
@@ -68,7 +68,7 @@ public class CredentialTestDto extends AbstractCloudbreakTestDto<CredentialV4Req
         return this;
     }
 
-    public CredentialTestDto withAzureParameters(AzureCredentialV4Parameters azureParameters) {
+    public CredentialTestDto withAzureParameters(AzureCredentialV4RequestParameters azureParameters) {
         getRequest().setAzure(azureParameters);
         return this;
     }

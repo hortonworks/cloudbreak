@@ -9,7 +9,9 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.CredentialV4Base;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AzureCredentialV4ResponseParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -26,6 +28,17 @@ public class CredentialV4Response extends CredentialV4Base {
 
     @ApiModelProperty
     private WorkspaceResourceV4Response workspace;
+
+    @ApiModelProperty(ModelDescriptions.CredentialModelDescription.AZURE_PARAMETERS)
+    private AzureCredentialV4ResponseParameters azure;
+
+    public AzureCredentialV4ResponseParameters getAzure() {
+        return azure;
+    }
+
+    public void setAzure(AzureCredentialV4ResponseParameters azure) {
+        this.azure = azure;
+    }
 
     @JsonProperty("id")
     public Long getId() {
