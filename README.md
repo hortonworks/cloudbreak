@@ -80,7 +80,9 @@ If the profile switch is omitted, the `default` profile is saved and used.
 ```
 dp configure --server https://ec2-52-29-224-64...compute.amazonaws.com --workspace your@email --profile dataplane-staging
 ```
-This will save the configuration into the user's home directory. To see its content: `cat ~/.dp/config`. If this config file is present you don't need to specify the connection flags anymore,
+The configure command will print an URL where the user could get a device code after authentication. The user have to copy this device code into the command prompt.
+With this device code the CLI will acquire a refresh token and save it and the other parameters into the configuration profile in the user's home directory.
+To see its content: `cat ~/.dp/config`. If this config file is present you don't need to specify the connection flags anymore,
 otherwise you need to specify these flags to every command.
 ```
 dp cluster list --server https://ec2-52-29-224-64...compute.amazonaws.com --workspace your@email
