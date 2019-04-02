@@ -111,7 +111,7 @@ func DescribeClusterDefinition(c *cli.Context) {
 	if output.Format != "table" {
 		output.Write(append(clusterDefinitionHeader, "Content", "ID"), convertResponseWithContentAndIDToClusterDefinition(bp))
 	} else {
-		output.Write(append(clusterDefinitionHeader, "ID"), convertResponseWithIDToClusterDefinition(bp))
+		output.Write(append(clusterDefinitionHeader, "ID"), convertResponseWithContentAndIDToClusterDefinition(bp))
 	}
 }
 
@@ -208,22 +208,6 @@ func convertResponseWithContentAndIDToClusterDefinition(bp *model.ClusterDefinit
 		},
 		Content: bp.ClusterDefinition,
 		ID:      strconv.FormatInt(bp.ID, 10),
-	}
-}
-
-func convertResponseWithIDToClusterDefinition(bp *model.ClusterDefinitionV4Response) *clusterDefinitionOutTableDescribe {
-	jsonRoot := decodeAndParseToJson(bp.ClusterDefinition)
-	clusterDefinitionsNode := jsonRoot["Blueprints"].(map[string]interface{})
-	return &clusterDefinitionOutTableDescribe{
-		clusterDefinitionOut: &clusterDefinitionOut{
-			Name:           *bp.Name,
-			Description:    *bp.Description,
-			StackName:      fmt.Sprintf("%v", clusterDefinitionsNode["stack_name"]),
-			StackVersion:   fmt.Sprintf("%v", clusterDefinitionsNode["stack_version"]),
-			HostgroupCount: fmt.Sprint(bp.HostGroupCount),
-			Tags:           bp.Status,
-		},
-		ID: strconv.FormatInt(bp.ID, 10),
 	}
 }
 
