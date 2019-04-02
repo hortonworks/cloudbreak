@@ -5,8 +5,8 @@ import static com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AppBased;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AzureCredentialV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AppBasedRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AzureCredentialV4RequestParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.AbstractCloudProvider;
@@ -24,10 +24,10 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Override
     public CredentialTestDto credential(CredentialTestDto credential) {
-        AzureCredentialV4Parameters parameters = new AzureCredentialV4Parameters();
+        AzureCredentialV4RequestParameters parameters = new AzureCredentialV4RequestParameters();
         parameters.setSubscriptionId(getTestParameter().getRequired(AzureParameters.Credential.SUBSCRIPTION_ID));
         parameters.setTenantId(getTestParameter().getRequired(AzureParameters.Credential.TENANT_ID));
-        AppBased appBased = new AppBased();
+        AppBasedRequest appBased = new AppBasedRequest();
         appBased.setAccessKey(getTestParameter().getRequired(AzureParameters.Credential.APP_ID));
         appBased.setSecretKey(getTestParameter().getRequired(AzureParameters.Credential.APP_PASSWORD));
         parameters.setAppBased(appBased);

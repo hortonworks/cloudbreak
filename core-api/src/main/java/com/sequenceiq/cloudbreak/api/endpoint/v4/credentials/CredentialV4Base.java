@@ -7,7 +7,6 @@ import javax.validation.constraints.Size;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.AwsCredentialV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AzureCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.cumulus.CumulusYarnCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.gcp.GcpCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.mock.MockCredentialV4Parameters;
@@ -17,13 +16,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.Credential
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.CredentialModelDescription;
-import com.sequenceiq.cloudbreak.validation.ValidCredentialV4Base;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(subTypes = {CredentialV4Request.class, CredentialV4Response.class})
-@ValidCredentialV4Base
 public abstract class CredentialV4Base implements JsonEntity {
 
     @Size(max = 100, min = 5, message = "The length of the credential's name has to be in range of 5 to 100")
@@ -40,10 +37,6 @@ public abstract class CredentialV4Base implements JsonEntity {
     @Valid
     @ApiModelProperty(CredentialModelDescription.AWS_PARAMETERS)
     private AwsCredentialV4Parameters aws;
-
-    @Valid
-    @ApiModelProperty(CredentialModelDescription.AZURE_PARAMETERS)
-    private AzureCredentialV4Parameters azure;
 
     @Valid
     @ApiModelProperty(CredentialModelDescription.GCP_PARAMETERS)
@@ -107,14 +100,6 @@ public abstract class CredentialV4Base implements JsonEntity {
 
     public void setAws(AwsCredentialV4Parameters aws) {
         this.aws = aws;
-    }
-
-    public AzureCredentialV4Parameters getAzure() {
-        return azure;
-    }
-
-    public void setAzure(AzureCredentialV4Parameters azure) {
-        this.azure = azure;
     }
 
     public GcpCredentialV4Parameters getGcp() {

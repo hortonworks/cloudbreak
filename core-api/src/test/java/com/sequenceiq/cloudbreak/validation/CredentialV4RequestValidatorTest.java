@@ -17,23 +17,23 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.AwsCredentialV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AzureCredentialV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AzureCredentialV4RequestParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.cumulus.CumulusYarnCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.gcp.GcpCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.mock.MockCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.yarn.YarnCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 
-public class CredentialV4BaseValidatorTest {
+public class CredentialV4RequestValidatorTest {
 
-    private CredentialV4BaseValidator underTest;
+    private CredentialV4RequestValidator underTest;
 
     @Mock
     private ConstraintValidatorContext constraintValidatorContext;
 
     @Before
     public void setUp() {
-        underTest = new CredentialV4BaseValidator();
+        underTest = new CredentialV4RequestValidator();
         MockitoAnnotations.initMocks(this);
         ConstraintViolationBuilder constraintViolationBuilder = mock(ConstraintViolationBuilder.class);
         NodeBuilderCustomizableContext nodeBuilderCustomizableContext = mock(NodeBuilderCustomizableContext.class);
@@ -52,7 +52,7 @@ public class CredentialV4BaseValidatorTest {
     @Test
     public void testWhenOnlyAzureParametersHasSetThenTheRequestIsValid() {
         CredentialV4Request request = new CredentialV4Request();
-        request.setAzure(new AzureCredentialV4Parameters());
+        request.setAzure(new AzureCredentialV4RequestParameters());
 
         assertTrue(underTest.isValid(request, constraintValidatorContext));
     }
@@ -92,7 +92,7 @@ public class CredentialV4BaseValidatorTest {
     @Test
     public void testWhenMoreThanOneCredentialParametersHasSetThenTheRequestIsInvalid() {
         CredentialV4Request request = new CredentialV4Request();
-        request.setAws(new AwsCredentialV4Parameters());
+        request.setAzure(new AzureCredentialV4RequestParameters());
         request.setGcp(new GcpCredentialV4Parameters());
 
         assertFalse(underTest.isValid(request, constraintValidatorContext));
