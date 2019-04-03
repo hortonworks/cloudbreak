@@ -34,13 +34,13 @@ public class ClouderaManagerLdapService {
     @Inject
     private ClouderaManagerClientFactory clouderaManagerClientFactory;
 
-    public void setupLdap(Stack stack, Cluster cluster, HttpClientConfig clientConfig)  throws ApiException {
+    public void setupLdap(Stack stack, Cluster cluster, HttpClientConfig clientConfig) throws ApiException {
         LdapConfig ldapConfig = cluster.getLdapConfig();
+        ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerClientFactory.getClouderaManagerResourceApi(stack, cluster, clientConfig);
+        clouderaManagerResourceApi.beginTrial();
         if (ldapConfig != null) {
             LOGGER.debug("Setup LDAP on ClouderaManager API for stack: {}", stack.getId());
             LdapView ldapView = new LdapView(ldapConfig, ldapConfig.getBindDn(), ldapConfig.getBindPassword());
-            ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerClientFactory.getClouderaManagerResourceApi(stack, cluster, clientConfig);
-            clouderaManagerResourceApi.beginTrial();
             ApiConfigList apiConfigList = new ApiConfigList()
                     .addItemsItem(new ApiConfig().name("auth_backend_order").value("DB_THEN_LDAP"))
                     .addItemsItem(new ApiConfig().name("ldap_url").value(ldapView.getConnectionURL()))
