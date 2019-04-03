@@ -1,20 +1,32 @@
 package com.sequenceiq.cloudbreak.ambari;
 
-import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.ambari.flow.*;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
-import com.sequenceiq.cloudbreak.polling.PollingResult;
-import com.sequenceiq.cloudbreak.polling.PollingService;
+import static com.sequenceiq.cloudbreak.ambari.flow.AmbariOperationService.AMBARI_POLLING_INTERVAL;
+import static com.sequenceiq.cloudbreak.ambari.flow.AmbariOperationService.MAX_ATTEMPTS_FOR_AMBARI_SERVER_STARTUP;
+import static com.sequenceiq.cloudbreak.ambari.flow.AmbariOperationService.MAX_ATTEMPTS_FOR_HOSTS;
+import static com.sequenceiq.cloudbreak.ambari.flow.AmbariOperationService.MAX_FAILURE_COUNT;
+
+import java.util.Arrays;
+import java.util.Set;
+
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
-import java.util.Arrays;
-import java.util.Set;
-
-import static com.sequenceiq.cloudbreak.ambari.flow.AmbariOperationService.*;
+import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.ambari.flow.AmbariClientPollerObject;
+import com.sequenceiq.cloudbreak.ambari.flow.AmbariComponenstJoinStatusCheckerTask;
+import com.sequenceiq.cloudbreak.ambari.flow.AmbariHealthCheckerTask;
+import com.sequenceiq.cloudbreak.ambari.flow.AmbariHostsCheckerContext;
+import com.sequenceiq.cloudbreak.ambari.flow.AmbariHostsJoinStatusCheckerTask;
+import com.sequenceiq.cloudbreak.ambari.flow.AmbariHostsStatusCheckerTask;
+import com.sequenceiq.cloudbreak.ambari.flow.AmbariStartupListenerTask;
+import com.sequenceiq.cloudbreak.ambari.flow.AmbariStartupPollerObject;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
+import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.PollingService;
 
 @Service
 public class AmbariPollingServiceProvider {
