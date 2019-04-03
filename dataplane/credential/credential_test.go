@@ -118,10 +118,13 @@ func (m *mockCredentialModifyClient) PutCredentialInWorkspace(params *v4cred.Put
 		Description:   params.Body.Description,
 		CloudPlatform: params.Body.CloudPlatform,
 		Aws:           params.Body.Aws,
-		Azure:         params.Body.Azure,
-		Gcp:           params.Body.Gcp,
-		Openstack:     params.Body.Openstack,
-		Yarn:          params.Body.Yarn,
+		Azure: &model.AzureCredentialV4ResponseParameters{
+			SubscriptionID: "some",
+			TenantID:       "tenantid",
+		},
+		Gcp:       params.Body.Gcp,
+		Openstack: params.Body.Openstack,
+		Yarn:      params.Body.Yarn,
 	},
 	}, nil
 }

@@ -24,7 +24,7 @@ type CredentialV4Response struct {
 	Aws *AwsCredentialV4Parameters `json:"aws,omitempty"`
 
 	// custom parameters for Azure credential
-	Azure *AzureCredentialV4Parameters `json:"azure,omitempty"`
+	Azure *AzureCredentialV4ResponseParameters `json:"azure,omitempty"`
 
 	// type of cloud provider
 	// Required: true

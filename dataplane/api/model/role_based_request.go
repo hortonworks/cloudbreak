@@ -13,17 +13,17 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// RoleBased role based
-// swagger:model RoleBased
-type RoleBased struct {
+// RoleBasedRequest role based request
+// swagger:model RoleBasedRequest
+type RoleBasedRequest struct {
 
 	// role name
 	// Required: true
 	RoleName *string `json:"roleName"`
 }
 
-// Validate validates this role based
-func (m *RoleBased) Validate(formats strfmt.Registry) error {
+// Validate validates this role based request
+func (m *RoleBasedRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateRoleName(formats); err != nil {
@@ -36,7 +36,7 @@ func (m *RoleBased) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *RoleBased) validateRoleName(formats strfmt.Registry) error {
+func (m *RoleBasedRequest) validateRoleName(formats strfmt.Registry) error {
 
 	if err := validate.Required("roleName", "body", m.RoleName); err != nil {
 		return err
@@ -46,7 +46,7 @@ func (m *RoleBased) validateRoleName(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *RoleBased) MarshalBinary() ([]byte, error) {
+func (m *RoleBasedRequest) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -54,8 +54,8 @@ func (m *RoleBased) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *RoleBased) UnmarshalBinary(b []byte) error {
-	var res RoleBased
+func (m *RoleBasedRequest) UnmarshalBinary(b []byte) error {
+	var res RoleBasedRequest
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

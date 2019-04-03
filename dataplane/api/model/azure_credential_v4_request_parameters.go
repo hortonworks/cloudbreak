@@ -13,15 +13,15 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// AzureCredentialV4Parameters azure credential v4 parameters
-// swagger:model AzureCredentialV4Parameters
-type AzureCredentialV4Parameters struct {
+// AzureCredentialV4RequestParameters azure credential v4 request parameters
+// swagger:model AzureCredentialV4RequestParameters
+type AzureCredentialV4RequestParameters struct {
 
 	// app based
-	AppBased *AppBased `json:"appBased,omitempty"`
+	AppBased *AppBasedRequest `json:"appBased,omitempty"`
 
 	// role based
-	RoleBased *RoleBased `json:"roleBased,omitempty"`
+	RoleBased *RoleBasedRequest `json:"roleBased,omitempty"`
 
 	// subscription Id
 	// Required: true
@@ -32,8 +32,8 @@ type AzureCredentialV4Parameters struct {
 	TenantID *string `json:"tenantId"`
 }
 
-// Validate validates this azure credential v4 parameters
-func (m *AzureCredentialV4Parameters) Validate(formats strfmt.Registry) error {
+// Validate validates this azure credential v4 request parameters
+func (m *AzureCredentialV4RequestParameters) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAppBased(formats); err != nil {
@@ -58,7 +58,7 @@ func (m *AzureCredentialV4Parameters) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *AzureCredentialV4Parameters) validateAppBased(formats strfmt.Registry) error {
+func (m *AzureCredentialV4RequestParameters) validateAppBased(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.AppBased) { // not required
 		return nil
@@ -76,7 +76,7 @@ func (m *AzureCredentialV4Parameters) validateAppBased(formats strfmt.Registry) 
 	return nil
 }
 
-func (m *AzureCredentialV4Parameters) validateRoleBased(formats strfmt.Registry) error {
+func (m *AzureCredentialV4RequestParameters) validateRoleBased(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.RoleBased) { // not required
 		return nil
@@ -94,7 +94,7 @@ func (m *AzureCredentialV4Parameters) validateRoleBased(formats strfmt.Registry)
 	return nil
 }
 
-func (m *AzureCredentialV4Parameters) validateSubscriptionID(formats strfmt.Registry) error {
+func (m *AzureCredentialV4RequestParameters) validateSubscriptionID(formats strfmt.Registry) error {
 
 	if err := validate.Required("subscriptionId", "body", m.SubscriptionID); err != nil {
 		return err
@@ -103,7 +103,7 @@ func (m *AzureCredentialV4Parameters) validateSubscriptionID(formats strfmt.Regi
 	return nil
 }
 
-func (m *AzureCredentialV4Parameters) validateTenantID(formats strfmt.Registry) error {
+func (m *AzureCredentialV4RequestParameters) validateTenantID(formats strfmt.Registry) error {
 
 	if err := validate.Required("tenantId", "body", m.TenantID); err != nil {
 		return err
@@ -113,7 +113,7 @@ func (m *AzureCredentialV4Parameters) validateTenantID(formats strfmt.Registry) 
 }
 
 // MarshalBinary interface implementation
-func (m *AzureCredentialV4Parameters) MarshalBinary() ([]byte, error) {
+func (m *AzureCredentialV4RequestParameters) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -121,8 +121,8 @@ func (m *AzureCredentialV4Parameters) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *AzureCredentialV4Parameters) UnmarshalBinary(b []byte) error {
-	var res AzureCredentialV4Parameters
+func (m *AzureCredentialV4RequestParameters) UnmarshalBinary(b []byte) error {
+	var res AzureCredentialV4RequestParameters
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

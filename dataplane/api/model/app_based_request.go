@@ -13,9 +13,9 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// AppBased app based
-// swagger:model AppBased
-type AppBased struct {
+// AppBasedRequest app based request
+// swagger:model AppBasedRequest
+type AppBasedRequest struct {
 
 	// access key
 	// Required: true
@@ -26,8 +26,8 @@ type AppBased struct {
 	SecretKey *string `json:"secretKey"`
 }
 
-// Validate validates this app based
-func (m *AppBased) Validate(formats strfmt.Registry) error {
+// Validate validates this app based request
+func (m *AppBasedRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAccessKey(formats); err != nil {
@@ -44,7 +44,7 @@ func (m *AppBased) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *AppBased) validateAccessKey(formats strfmt.Registry) error {
+func (m *AppBasedRequest) validateAccessKey(formats strfmt.Registry) error {
 
 	if err := validate.Required("accessKey", "body", m.AccessKey); err != nil {
 		return err
@@ -53,7 +53,7 @@ func (m *AppBased) validateAccessKey(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *AppBased) validateSecretKey(formats strfmt.Registry) error {
+func (m *AppBasedRequest) validateSecretKey(formats strfmt.Registry) error {
 
 	if err := validate.Required("secretKey", "body", m.SecretKey); err != nil {
 		return err
@@ -63,7 +63,7 @@ func (m *AppBased) validateSecretKey(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (m *AppBased) MarshalBinary() ([]byte, error) {
+func (m *AppBasedRequest) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -71,8 +71,8 @@ func (m *AppBased) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *AppBased) UnmarshalBinary(b []byte) error {
-	var res AppBased
+func (m *AppBasedRequest) UnmarshalBinary(b []byte) error {
+	var res AppBasedRequest
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

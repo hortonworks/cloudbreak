@@ -20,9 +20,6 @@ type AzureStackV4Parameters struct {
 
 	// resource group name
 	ResourceGroupName string `json:"resourceGroupName,omitempty"`
-
-	// yarn queue
-	YarnQueue *bool `json:"yarnQueue,omitempty"`
 }
 
 // Validate validates this azure stack v4 parameters
