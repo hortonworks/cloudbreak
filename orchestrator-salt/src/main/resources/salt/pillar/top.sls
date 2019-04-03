@@ -7,7 +7,6 @@ base:
     - hdp.repo
 
   '*':
-    - network
     - nodes.hosts
     - discovery.init
     - recipes.init
