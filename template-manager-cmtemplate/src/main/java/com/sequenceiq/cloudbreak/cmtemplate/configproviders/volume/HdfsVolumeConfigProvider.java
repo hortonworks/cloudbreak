@@ -32,10 +32,8 @@ public class HdfsVolumeConfigProvider extends AbstractVolumeConfigProvider {
             case "DATANODE":
                 String dataDir = getRoleTypeVariableName(hostGroupView.getName(), roleType, DFS_DATA_DIRS);
                 roleConfigs.add(new ApiClusterTemplateConfig().name(DFS_DATA_DIRS).variable(dataDir));
-                if (!hasAnyAttachedDisks(hostGroupView)) {
-                    String tolerate = getRoleTypeVariableName(hostGroupView.getName(), roleType, FAILED_VOLUMES_TOLERATED);
-                    roleConfigs.add(new ApiClusterTemplateConfig().name(FAILED_VOLUMES_TOLERATED).variable(tolerate));
-                }
+                String tolerate = getRoleTypeVariableName(hostGroupView.getName(), roleType, FAILED_VOLUMES_TOLERATED);
+                roleConfigs.add(new ApiClusterTemplateConfig().name(FAILED_VOLUMES_TOLERATED).variable(tolerate));
                 break;
             case "NAMENODE":
                 String nameDir = getRoleTypeVariableName(hostGroupView.getName(), roleType, DFS_NAME_DIRS);
@@ -61,10 +59,8 @@ public class HdfsVolumeConfigProvider extends AbstractVolumeConfigProvider {
                 String dataDirVar = getRoleTypeVariableName(hostGroupView.getName(), roleType, DFS_DATA_DIRS);
                 String dataDirs = VolumeUtils.buildVolumePathStringZeroVolumeHandled(hostGroupView.getVolumeCount(), "datanode");
                 variables.add(new ApiClusterTemplateVariable().name(dataDirVar).value(dataDirs));
-                if (!hasAnyAttachedDisks(hostGroupView)) {
-                    String tolerate = getRoleTypeVariableName(hostGroupView.getName(), roleType, FAILED_VOLUMES_TOLERATED);
-                    variables.add(new ApiClusterTemplateVariable().name(tolerate).value(NUM_FAILED_VOLUMES_TOLERATED));
-                }
+                String tolerate = getRoleTypeVariableName(hostGroupView.getName(), roleType, FAILED_VOLUMES_TOLERATED);
+                variables.add(new ApiClusterTemplateVariable().name(tolerate).value(NUM_FAILED_VOLUMES_TOLERATED));
                 break;
             case "NAMENODE":
                 String nameDirVar = getRoleTypeVariableName(hostGroupView.getName(), roleType, DFS_NAME_DIRS);

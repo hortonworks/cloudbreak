@@ -46,9 +46,11 @@ public class HdfsVolumeConfigProviderTest {
         List<ApiClusterTemplateConfig> masterNN = roleConfigs.get("hdfs-NAMENODE-BASE");
         List<ApiClusterTemplateConfig> workerDN = roleConfigs.get("hdfs-DATANODE-BASE");
 
-        assertEquals(1, workerDN.size());
+        assertEquals(2, workerDN.size());
         assertEquals("dfs_data_dir_list", workerDN.get(0).getName());
         assertEquals("worker_datanode_dfs_data_dir_list", workerDN.get(0).getVariable());
+        assertEquals("dfs_datanode_failed_volumes_tolerated", workerDN.get(1).getName());
+        assertEquals("worker_datanode_dfs_datanode_failed_volumes_tolerated", workerDN.get(1).getVariable());
         assertEquals(1, masterNN.size());
         assertEquals("dfs_name_dir_list", masterNN.get(0).getName());
         assertEquals("master_namenode_dfs_name_dir_list", masterNN.get(0).getVariable());
@@ -67,9 +69,11 @@ public class HdfsVolumeConfigProviderTest {
         List<ApiClusterTemplateConfig> masterNN = roleConfigs.get("nn");
         List<ApiClusterTemplateConfig> workerDN = roleConfigs.get("dn");
 
-        assertEquals(1, workerDN.size());
+        assertEquals(2, workerDN.size());
         assertEquals("dfs_data_dir_list", workerDN.get(0).getName());
         assertEquals("worker_datanode_dfs_data_dir_list", workerDN.get(0).getVariable());
+        assertEquals("dfs_datanode_failed_volumes_tolerated", workerDN.get(1).getName());
+        assertEquals("worker_datanode_dfs_datanode_failed_volumes_tolerated", workerDN.get(1).getVariable());
         assertEquals(1, masterNN.size());
         assertEquals("dfs_name_dir_list", masterNN.get(0).getName());
         assertEquals("master_namenode_dfs_name_dir_list", masterNN.get(0).getVariable());
@@ -178,15 +182,20 @@ public class HdfsVolumeConfigProviderTest {
         List<ApiClusterTemplateConfig> workerDN = roleConfigs.get("hdfs-DATANODE-BASE");
         List<ApiClusterTemplateConfig> computeDN = roleConfigs.get("hdfs-DATANODE-compute");
 
-        assertEquals(1, workerDN.size());
+        assertEquals(2, workerDN.size());
         assertEquals("dfs_data_dir_list", workerDN.get(0).getName());
         assertEquals("worker_datanode_dfs_data_dir_list", workerDN.get(0).getVariable());
+        assertEquals("dfs_datanode_failed_volumes_tolerated", workerDN.get(1).getName());
+        assertEquals("worker_datanode_dfs_datanode_failed_volumes_tolerated", workerDN.get(1).getVariable());
         assertEquals(1, masterNN.size());
         assertEquals("dfs_name_dir_list", masterNN.get(0).getName());
         assertEquals("master_namenode_dfs_name_dir_list", masterNN.get(0).getVariable());
-        assertEquals(1, computeDN.size());
+        assertEquals(2, computeDN.size());
         assertEquals("dfs_data_dir_list", computeDN.get(0).getName());
         assertEquals("compute_datanode_dfs_data_dir_list", computeDN.get(0).getVariable());
+        assertEquals("dfs_datanode_failed_volumes_tolerated", computeDN.get(1).getName());
+        assertEquals("compute_datanode_dfs_datanode_failed_volumes_tolerated", computeDN.get(1).getVariable());
+
     }
 
     @Test
@@ -204,9 +213,11 @@ public class HdfsVolumeConfigProviderTest {
         List<ApiClusterTemplateConfig> workerDN = roleConfigs.get("hdfs-DATANODE-BASE");
         List<ApiClusterTemplateConfig> computeDN = roleConfigs.get("hdfs-DATANODE-compute");
 
-        assertEquals(1, workerDN.size());
+        assertEquals(2, workerDN.size());
         assertEquals("dfs_data_dir_list", workerDN.get(0).getName());
         assertEquals("worker_datanode_dfs_data_dir_list", workerDN.get(0).getVariable());
+        assertEquals("dfs_datanode_failed_volumes_tolerated", workerDN.get(1).getName());
+        assertEquals("worker_datanode_dfs_datanode_failed_volumes_tolerated", workerDN.get(1).getVariable());
         assertEquals(1, masterNN.size());
         assertEquals("dfs_name_dir_list", masterNN.get(0).getName());
         assertEquals("master_namenode_dfs_name_dir_list", masterNN.get(0).getVariable());
@@ -234,14 +245,17 @@ public class HdfsVolumeConfigProviderTest {
         ApiClusterTemplateVariable masterNN = roleVariables.get(0);
         ApiClusterTemplateVariable masterSN = roleVariables.get(1);
         ApiClusterTemplateVariable workerDN = roleVariables.get(2);
+        ApiClusterTemplateVariable workerDNFailedVolumes = roleVariables.get(3);
 
-        assertEquals(3, roleVariables.size());
+        assertEquals(4, roleVariables.size());
         assertEquals("master_namenode_dfs_name_dir_list", masterNN.getName());
         assertEquals("/hadoopfs/fs1/namenode", masterNN.getValue());
         assertEquals("master_secondarynamenode_fs_checkpoint_dir_list", masterSN.getName());
         assertEquals("/hadoopfs/fs1/namesecondary", masterSN.getValue());
         assertEquals("worker_datanode_dfs_data_dir_list", workerDN.getName());
         assertEquals("/hadoopfs/fs1/datanode,/hadoopfs/fs2/datanode", workerDN.getValue());
+        assertEquals("worker_datanode_dfs_datanode_failed_volumes_tolerated", workerDNFailedVolumes.getName());
+        assertEquals("0", workerDNFailedVolumes.getValue());
     }
 
     @Test
@@ -312,14 +326,17 @@ public class HdfsVolumeConfigProviderTest {
         ApiClusterTemplateVariable masterNN = roleVariables.get(0);
         ApiClusterTemplateVariable masterSN = roleVariables.get(1);
         ApiClusterTemplateVariable workerDN = roleVariables.get(2);
+        ApiClusterTemplateVariable workerDNFailedVolumes = roleVariables.get(3);
 
-        assertEquals(3, roleVariables.size());
+        assertEquals(4, roleVariables.size());
         assertEquals("master_namenode_dfs_name_dir_list", masterNN.getName());
         assertEquals("/hadoopfs/fs1/namenode", masterNN.getValue());
         assertEquals("master_secondarynamenode_fs_checkpoint_dir_list", masterSN.getName());
         assertEquals("/hadoopfs/fs1/namesecondary", masterSN.getValue());
         assertEquals("worker_datanode_dfs_data_dir_list", workerDN.getName());
         assertEquals("/hadoopfs/fs1/datanode,/hadoopfs/fs2/datanode", workerDN.getValue());
+        assertEquals("worker_datanode_dfs_datanode_failed_volumes_tolerated", workerDNFailedVolumes.getName());
+        assertEquals("0", workerDNFailedVolumes.getValue());
     }
 
     @Test
@@ -348,9 +365,10 @@ public class HdfsVolumeConfigProviderTest {
 
         roleVariables.sort(Comparator.comparing(ApiClusterTemplateVariable::getName));
         ApiClusterTemplateVariable computeDN = roleVariables.get(0);
-        ApiClusterTemplateVariable masterNN = roleVariables.get(1);
-        ApiClusterTemplateVariable masterSN = roleVariables.get(2);
-        ApiClusterTemplateVariable workerDN = roleVariables.get(3);
+        ApiClusterTemplateVariable computeVolTolerate = roleVariables.get(1);
+        ApiClusterTemplateVariable masterNN = roleVariables.get(2);
+        ApiClusterTemplateVariable masterSN = roleVariables.get(3);
+        ApiClusterTemplateVariable workerDN = roleVariables.get(4);
 
         assertEquals("master_namenode_dfs_name_dir_list", masterNN.getName());
         assertEquals("/hadoopfs/fs1/namenode", masterNN.getValue());
@@ -360,6 +378,8 @@ public class HdfsVolumeConfigProviderTest {
         assertEquals("/hadoopfs/fs1/datanode,/hadoopfs/fs2/datanode", workerDN.getValue());
         assertEquals("compute_datanode_dfs_data_dir_list", computeDN.getName());
         assertEquals("/hadoopfs/fs1/datanode,/hadoopfs/fs2/datanode,/hadoopfs/fs3/datanode", computeDN.getValue());
+        assertEquals("compute_datanode_dfs_datanode_failed_volumes_tolerated", computeVolTolerate.getName());
+        assertEquals("0", computeVolTolerate.getValue());
     }
 
     @Test
