@@ -1,7 +1,7 @@
 {
   "description": "Useful for data science with Spark and Impala",
   "blueprint": {
-    "cdhVersion": "6.1.1",
+    "cdhVersion": "6.2.0",
     "displayName": "datascience",
     "services": [
       {

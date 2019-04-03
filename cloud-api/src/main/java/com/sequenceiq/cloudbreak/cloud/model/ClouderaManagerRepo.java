@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonInclude(Include.NON_NULL)
 public class ClouderaManagerRepo {
 
-    private Boolean predefined;
+    private Boolean predefined = Boolean.FALSE;
 
     private String version;
 

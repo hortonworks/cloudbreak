@@ -169,8 +169,9 @@ public class CachedImageCatalogProvider {
         boolean baseImagesValidate = cleanAndAllIsEmpty(catalog.getImages().getBaseImages());
         boolean hdfImagesValidate = cleanAndAllIsEmpty(catalog.getImages().getHdfImages());
         boolean hdpImagesValidate = cleanAndAllIsEmpty(catalog.getImages().getHdpImages());
+        boolean cdhImagesValidate = cleanAndAllIsEmpty(catalog.getImages().getCdhImages());
 
-        if (baseImagesValidate && hdfImagesValidate && hdpImagesValidate) {
+        if (baseImagesValidate && hdfImagesValidate && hdpImagesValidate && cdhImagesValidate) {
             throw new CloudbreakImageCatalogException("All images are empty or every items equals NULL");
         }
     }

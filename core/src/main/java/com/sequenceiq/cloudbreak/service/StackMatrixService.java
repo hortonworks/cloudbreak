@@ -129,9 +129,9 @@ public class StackMatrixService {
     }
 
     private ClouderaManagerStackDescriptorV4Response getCMStackDescriptor(DefaultCDHInfo stackInfo) {
-        Map<String, RepositoryInfo> ambariInfoEntries = defaultClouderaManagerRepoService.getEntries();
+        Map<String, RepositoryInfo> clouderaManagerRepoInfoEntries = defaultClouderaManagerRepoService.getEntries();
         ClouderaManagerStackDescriptorV4Response stackDescriptorV4 = converterUtil.convert(stackInfo, ClouderaManagerStackDescriptorV4Response.class);
-        RepositoryInfo cmInfo = ambariInfoEntries.getOrDefault(stackDescriptorV4.getMinCM(), new RepositoryInfo());
+        RepositoryInfo cmInfo = clouderaManagerRepoInfoEntries.getOrDefault(stackDescriptorV4.getMinCM(), new RepositoryInfo());
         ClouderaManagerInfoV4Response cmInfoJson = converterUtil.convert(cmInfo, ClouderaManagerInfoV4Response.class);
         stackDescriptorV4.setClouderaManager(cmInfoJson);
         return stackDescriptorV4;

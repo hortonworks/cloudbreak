@@ -4,13 +4,10 @@ import static com.sequenceiq.cloudbreak.RepoTestUtil.getDefaultCDHInfo;
 import static com.sequenceiq.cloudbreak.RepoTestUtil.getDefaultHDPInfo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.io.IOException;
@@ -21,15 +18,11 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
@@ -41,9 +34,8 @@ import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPInfo;
-import com.sequenceiq.cloudbreak.clusterdefinition.utils.ClusterDefinitionUtils;
 import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
-import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
+import com.sequenceiq.cloudbreak.clusterdefinition.utils.ClusterDefinitionUtils;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -53,10 +45,8 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
@@ -68,6 +58,12 @@ public class ClusterCreationSetupServiceTest {
     public static final String HDP_VERSION = "3.0";
 
     public static final String CDH_VERSION = "6.1.0";
+
+    @Mock
+    private ClouderaManagerClusterCreationSetupService clouderaManagerClusterCreationSetupService;
+
+    @Mock
+    private AmbariClusterCreationSetupService ambariClusterCreationSetupService;
 
     @Mock
     private ClusterDecorator clusterDecorator;
@@ -94,19 +90,10 @@ public class ClusterCreationSetupServiceTest {
     private ClusterService clusterService;
 
     @Mock
-    private ClusterApiConnectors clusterApiConnectors;
-
-    @Mock
     private DefaultAmbariRepoService defaultAmbariRepoService;
 
     @Mock
     private DefaultClouderaManagerRepoService defaultClouderaManagerRepoService;
-
-    @Spy
-    private ClusterPreCreationApi clusterPreCreationApi;
-
-    @Captor
-    private ArgumentCaptor<ArrayList<ClusterComponent>> clusterComponentCaptor;
 
     @InjectMocks
     private ClusterCreationSetupService underTest;
@@ -124,7 +111,7 @@ public class ClusterCreationSetupServiceTest {
     private Cluster cluster;
 
     @Before
-    public void init() throws CloudbreakImageNotFoundException, JsonProcessingException {
+    public void init() throws CloudbreakImageNotFoundException, IOException {
         MockitoAnnotations.initMocks(this);
         workspace = new Workspace();
         clusterRequest = new ClusterV4Request();
@@ -162,32 +149,33 @@ public class ClusterCreationSetupServiceTest {
         when(componentConfigProvider.getImage(anyLong())).thenReturn(image);
         StackMatrixV4Response stackMatrixV4Response = new StackMatrixV4Response();
         stackMatrixV4Response.setHdp(Collections.singletonMap(HDP_VERSION, null));
+        stackMatrixV4Response.setCdh(Collections.singletonMap(CDH_VERSION, null));
         when(stackMatrixService.getStackMatrix()).thenReturn(stackMatrixV4Response);
         when(clusterService.save(any(Cluster.class))).thenReturn(cluster);
+        when(clusterDefinitionService.isAmbariBlueprint(clusterDefinition)).thenReturn(true);
+        when(ambariClusterCreationSetupService.prepareAmbariCluster(any(), any(), any(), any(), any(), any(), any())).
+                thenReturn(new ArrayList<>());
+        when(clouderaManagerClusterCreationSetupService.prepareClouderaManagerCluster(any(), any(), any(), any(), any())).
+                thenReturn(new ArrayList<>());
     }
 
     @Test
     public void testDomainIsSet() throws CloudbreakImageNotFoundException, IOException, TransactionService.TransactionExecutionException {
-        underTest.prepare(clusterRequest, stack, clusterDefinition, user, workspace);
-
+        underTest.prepare(clusterRequest, stack, clusterDefinition, user);
         assertEquals(cluster.getKerberosConfig().getDomain(), stack.getCustomDomain());
     }
 
     @Test
     public void testMissingKerberosConfig() throws CloudbreakImageNotFoundException, IOException, TransactionService.TransactionExecutionException {
         cluster.setKerberosConfig(null);
-
-        underTest.prepare(clusterRequest, stack, clusterDefinition, user, workspace);
-
+        underTest.prepare(clusterRequest, stack, clusterDefinition, user);
         assertNull(stack.getCustomDomain());
     }
 
     @Test
     public void testMissingDomain() throws CloudbreakImageNotFoundException, IOException, TransactionService.TransactionExecutionException {
         cluster.getKerberosConfig().setDomain(null);
-
-        underTest.prepare(clusterRequest, stack, clusterDefinition, user, workspace);
-
+        underTest.prepare(clusterRequest, stack, clusterDefinition, user);
         assertNull(stack.getCustomDomain());
     }
 
@@ -195,35 +183,7 @@ public class ClusterCreationSetupServiceTest {
     public void testIncorrectKerberosSettingForWorkloadCluster() {
         stack.setDatalakeResourceId(1L);
         clusterRequest.setKerberosName("attached_kerberos_which_not_allowed");
-
         assertThrows(BadRequestException.class, () -> underTest.validate(clusterRequest, stack, user, workspace));
-    }
-
-    @Test
-    public void testAmbariClusterComponents() throws CloudbreakImageNotFoundException, IOException, TransactionService.TransactionExecutionException {
-        when(clusterDefinitionService.isAmbariBlueprint(clusterDefinition)).thenReturn(true);
-        when(clusterApiConnectors.getConnector(any(Cluster.class))).thenReturn(clusterPreCreationApi);
-        when(clusterPreCreationApi.isVdfReady(any(AmbariRepo.class))).thenReturn(false);
-        underTest.prepare(clusterRequest, stack, clusterDefinition, user, workspace);
-        verify(clusterService, times(1)).create(any(Stack.class), any(Cluster.class), clusterComponentCaptor.capture(), any(User.class));
-
-        ArrayList<ClusterComponent> clusterComponents = clusterComponentCaptor.getValue();
-        assertEquals(2, clusterComponents.size());
-        assertTrue(clusterComponents.stream().anyMatch(component -> ComponentType.AMBARI_REPO_DETAILS.equals(component.getComponentType())));
-        assertTrue(clusterComponents.stream().anyMatch(component -> ComponentType.HDP_REPO_DETAILS.equals(component.getComponentType())));
-    }
-
-    @Test
-    public void testClouderaManagerClusterComponents() throws CloudbreakImageNotFoundException, IOException, TransactionService.TransactionExecutionException {
-        when(clusterDefinitionService.isClouderaManagerTemplate(clusterDefinition)).thenReturn(true);
-        when(clusterApiConnectors.getConnector(any(Cluster.class))).thenReturn(clusterPreCreationApi);
-        underTest.prepare(clusterRequest, stack, clusterDefinition, user, workspace);
-        verify(clusterService, times(1)).create(any(Stack.class), any(Cluster.class), clusterComponentCaptor.capture(), any(User.class));
-
-        ArrayList<ClusterComponent> clusterComponents = clusterComponentCaptor.getValue();
-        assertEquals(2, clusterComponents.size());
-        assertTrue(clusterComponents.stream().anyMatch(component -> ComponentType.CM_REPO_DETAILS.equals(component.getComponentType())));
-        assertTrue(clusterComponents.stream().anyMatch(component -> ComponentType.CDH_PRODUCT_DETAILS.equals(component.getComponentType())));
     }
 
     private AmbariRepo getAmbariRepo() {
