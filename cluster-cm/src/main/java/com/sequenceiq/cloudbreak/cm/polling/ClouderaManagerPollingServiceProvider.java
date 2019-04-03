@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerHostStatusChecker;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerKerberosConfigureListenerTask;
+import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerParcelRepoChecker;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerServiceStartListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerStartupListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerStopListenerTask;
@@ -52,6 +53,9 @@ public class ClouderaManagerPollingServiceProvider {
     private ClouderaManagerTemplateInstallChecker clouderaManagerTemplateInstallChecker;
 
     @Inject
+    private ClouderaManagerParcelRepoChecker clouderaManagerParcelRepoChecker;
+
+    @Inject
     private ClouderaManagerKerberosConfigureListenerTask kerberosConfigureListenerTask;
 
     public PollingResult clouderaManagerStartupPollerObjectPollingService(Stack stack, ApiClient apiClient) {
@@ -80,6 +84,17 @@ public class ClouderaManagerPollingServiceProvider {
                 new ClouderaManagerCommandPollerObject(stack, apiClient, commandId);
         return clouderaManagerCommandPollerObjectPollingService.pollWithTimeoutSingleFailure(
                 clouderaManagerTemplateInstallChecker,
+                clouderaManagerCommandPollerObject,
+                POLL_INTERVAL,
+                INFINITE_ATTEMPT);
+    }
+
+    public PollingResult parcelRepoRefreshCheckerService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
+        LOGGER.debug("Waiting for Cloudera Manager to refresh parcel repo. [Server address: {}]", stack.getAmbariIp());
+        ClouderaManagerCommandPollerObject clouderaManagerCommandPollerObject =
+                new ClouderaManagerCommandPollerObject(stack, apiClient, commandId);
+        return clouderaManagerCommandPollerObjectPollingService.pollWithTimeoutSingleFailure(
+                clouderaManagerParcelRepoChecker,
                 clouderaManagerCommandPollerObject,
                 POLL_INTERVAL,
                 INFINITE_ATTEMPT);

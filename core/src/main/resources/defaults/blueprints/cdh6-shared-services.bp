@@ -4,7 +4,7 @@
   },
   "description": "CM managed CDH Data Lake",
   "blueprint": {
-    "cdhVersion": "6.1.1",
+    "cdhVersion": "6.2.0",
     "displayName": "datalake",
     "services": [
       {

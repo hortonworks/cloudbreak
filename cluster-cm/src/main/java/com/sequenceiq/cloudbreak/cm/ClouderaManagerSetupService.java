@@ -18,8 +18,11 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
+import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiCommand;
+import com.cloudera.api.swagger.model.ApiConfig;
+import com.cloudera.api.swagger.model.ApiConfigList;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -98,15 +101,25 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     public Cluster buildCluster(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, TemplatePreparationObject templatePreparationObject,
             Set<HostMetadata> hostsInCluster) {
         Cluster cluster = stack.getCluster();
+        Long clusterId = cluster.getId();
         try {
             Map<String, List<Map<String, String>>> hostGroupMappings = hostGroupAssociationBuilder.buildHostGroupAssociations(instanceMetaDataByHostGroup);
+            ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(clusterId);
+            List<ClouderaManagerProduct> clouderaManagerProductDetails = clusterComponentProvider.getClouderaManagerProductDetails(clusterId);
+            ApiClusterTemplate apiClusterTemplate = cmTemplateUpdater.getCmTemplate(templatePreparationObject, hostGroupMappings, clouderaManagerRepoDetails,
+                    clouderaManagerProductDetails);
 
-            ApiClusterTemplate apiClusterTemplate = injectCustomClusterTemplateFragments(templatePreparationObject, cluster.getId(), hostGroupMappings);
             cluster.setExtendedClusterDefinitionText(getExtendedClusterDefinitionText(apiClusterTemplate));
             LOGGER.info("Generated Cloudera cluster template: {}", cluster.getExtendedClusterDefinitionText());
-
             ClouderaManagerResourceApi clouderaManagerResourceApi = new ClouderaManagerResourceApi(client);
-            ApiCommand apiCommand = clouderaManagerResourceApi.importClusterTemplate(true, apiClusterTemplate);
+
+            boolean prewarmed = isPrewarmed(clusterId);
+            if (prewarmed) {
+                removeRemoteParcelRepos(clouderaManagerResourceApi);
+                refreshParcelRepos(clouderaManagerResourceApi);
+            }
+            // addRepositories - if true the parcels repositories in the cluster template will be added.
+            ApiCommand apiCommand = clouderaManagerResourceApi.importClusterTemplate(!prewarmed, apiClusterTemplate);
             LOGGER.debug("Cloudera cluster template has been submitted, cluster install is in progress");
 
             clouderaManagerPollingServiceProvider.templateInstallCheckerService(stack, client, apiCommand.getId());
@@ -115,17 +128,31 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         } catch (CancellationException cancellationException) {
             throw cancellationException;
         } catch (Exception e) {
-            LOGGER.info("Error while building the Ambari cluster. Message {}, throwable: {}", e.getMessage(), e);
+            LOGGER.info("Error while building the cluster. Message {}, throwable: {}", e.getMessage(), e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
         return cluster;
     }
 
-    private ApiClusterTemplate injectCustomClusterTemplateFragments(TemplatePreparationObject templatePreparationObject,
-            Long clusterId, Map<String, List<Map<String, String>>> hostGroupMappings) {
-        ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(clusterId);
-        List<ClouderaManagerProduct> clouderaManagerProductDetails = clusterComponentProvider.getClouderaManagerProductDetails(clusterId);
-        return cmTemplateUpdater.getCmTemplate(templatePreparationObject, hostGroupMappings, clouderaManagerRepoDetails, clouderaManagerProductDetails);
+    private void removeRemoteParcelRepos(ClouderaManagerResourceApi clouderaManagerResourceApi) {
+        try {
+            ApiConfigList apiConfigList = new ApiConfigList()
+                .addItemsItem(new ApiConfig().name("remote_parcel_repo_urls").value(""));
+            clouderaManagerResourceApi.updateConfig("Updated configurations.", apiConfigList);
+        } catch (ApiException e) {
+            LOGGER.info("Error while updating remote parcel repos. Message {}, throwable: {}", e.getMessage(), e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    private void refreshParcelRepos(ClouderaManagerResourceApi clouderaManagerResourceApi) {
+        try {
+            ApiCommand apiCommand = clouderaManagerResourceApi.refreshParcelRepos();
+            clouderaManagerPollingServiceProvider.parcelRepoRefreshCheckerService(stack, client, apiCommand.getId());
+        } catch (ApiException e) {
+            LOGGER.info("Unable to refresh parcel repo", e);
+            throw new CloudbreakServiceException(e);
+        }
     }
 
     private ApiClusterTemplate convertStringJsonToTemplate(String json) {
@@ -149,5 +176,9 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     @Override
     public void waitForServices(int requestId) {
 
+    }
+
+    private Boolean isPrewarmed(Long clusterId) {
+        return clusterComponentProvider.getClouderaManagerRepoDetails(clusterId).getPredefined();
     }
 }

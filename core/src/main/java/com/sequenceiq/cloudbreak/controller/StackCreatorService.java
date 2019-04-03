@@ -278,7 +278,7 @@ public class StackCreatorService {
             ClusterDefinition clusterDefinition) throws CloudbreakImageNotFoundException, IOException, TransactionExecutionException {
         if (stackRequest.getCluster() != null) {
             long start = System.currentTimeMillis();
-            Cluster cluster = clusterCreationService.prepare(stackRequest.getCluster(), stack, clusterDefinition, user, workspace);
+            Cluster cluster = clusterCreationService.prepare(stackRequest.getCluster(), stack, clusterDefinition, user);
             LOGGER.debug("Cluster object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
             stack.setCluster(cluster);
         }

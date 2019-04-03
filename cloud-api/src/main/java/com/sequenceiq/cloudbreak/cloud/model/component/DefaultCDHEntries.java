@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class DefaultCDHEntries {
 
     public static final Comparator<Map.Entry<String, DefaultCDHInfo>> CDH_ENTRY_COMPARATOR =
-            (Map.Entry<String, DefaultCDHInfo> e1, Map.Entry<String, DefaultCDHInfo> e2) -> e1.getKey().compareTo(e2.getKey());
+            Comparator.comparing(Map.Entry::getKey);
 
     private Map<String, DefaultCDHInfo> entries = new HashMap<>();
 

@@ -355,7 +355,7 @@ public class ClusterV4RequestToClusterConverterTest {
         assertEquals(ComponentType.CM_REPO_DETAILS, component.getComponentType());
 
         Json expectedRepoJson = new Json(repository);
-        assertEquals(expectedRepoJson, component.getAttributes());
+        assertEquals(expectedRepoJson.getMap().size() + 1, component.getAttributes().getMap().size());
     }
 
     @Test
