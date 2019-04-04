@@ -29,7 +29,7 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_CONSUL 0.5
     env-import DOCKER_TAG_REGISTRATOR v7
     env-import DOCKER_TAG_POSTFIX latest
-    env-import DOCKER_TAG_UAA 3.6.5-pgupdate
+    env-import DOCKER_TAG_UAA 3.6.5-certs
     env-import DOCKER_TAG_AMBASSADOR 0.5.0
     env-import DOCKER_TAG_CERT_TOOL 0.2.0
 
