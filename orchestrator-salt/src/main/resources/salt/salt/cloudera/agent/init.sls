@@ -8,7 +8,7 @@ install-cloudera-manager-agent:
 
 install-psycopg2:
   cmd.run:
-    - name: pip install --upgrade 'psycopg2>=2.5.4'
+    - name: pip install psycopg2==2.7.5 --ignore-installed
 
 replace_server_host:
   file.replace:
