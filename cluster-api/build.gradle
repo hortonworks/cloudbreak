@@ -10,7 +10,6 @@ repositories {
   maven { url "https://cloudbreak-maven.s3.amazonaws.com/releases" }
   maven { url "https://repo.spring.io/release" }
   maven { url "https://plugins.gradle.org/m2/" }
-  maven { url "https://repository.cloudera.com/artifactory/cloudera-repos" }
 }
 
 jar {

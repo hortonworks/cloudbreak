@@ -10,7 +10,6 @@ repositories {
   maven { url "https://cloudbreak-maven.s3.amazonaws.com/releases" }
   maven { url "https://repo.spring.io/release" }
   maven { url "https://plugins.gradle.org/m2/" }
-  maven { url "https://repository.cloudera.com/artifactory/cloudera-repos" }
 }
 
 jar {
@@ -18,8 +17,8 @@ jar {
 }
 
 dependencies {
-  compile (group: 'com.cloudera.api.swagger',           name: 'cloudera-manager-api-swagger',version: '6.1.0') {
-    exclude group: 'com.squareup.okio', module: 'okio'
+  compile (group: 'com.cloudera.api',           name: 'cloudera-manager-api',version: cmClientVersion) {
+    transitive = false
   }
   compile project(':cluster-api')
   compile project(':template-manager-cmtemplate')
