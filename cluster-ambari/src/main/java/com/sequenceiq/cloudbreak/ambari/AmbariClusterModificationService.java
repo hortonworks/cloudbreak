@@ -104,6 +104,7 @@ public class AmbariClusterModificationService implements ClusterModificationServ
     @Inject
     private Retry retry;
 
+    @Inject
     private AmbariClusterStatusFactory clusterStatusFactory;
 
     @Inject
