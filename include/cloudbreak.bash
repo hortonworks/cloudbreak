@@ -41,12 +41,25 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_POSTGRES 9.6.1-alpine
     env-import DOCKER_TAG_LOGROTATE 1.0.1
     env-import DOCKER_TAG_CBD_SMARTSENSE 0.13.4
+    env-import DOCKER_TAG_LOGSINK 1.0.0
+    env-import DOCKER_TAG_LOGSPOUT v3.2.2
 
     env-import DOCKER_IMAGE_CLOUDBREAK hortonworks/cloudbreak
     env-import DOCKER_IMAGE_CLOUDBREAK_WEB hortonworks/hdc-web
     env-import DOCKER_IMAGE_CLOUDBREAK_AUTH hortonworks/hdc-auth
     env-import DOCKER_IMAGE_CLOUDBREAK_PERISCOPE hortonworks/cloudbreak-autoscale
     env-import DOCKER_IMAGE_CBD_SMARTSENSE hortonworks/cbd-smartsense
+
+    env-import DOCKER_IMAGE_CLOUDBREAK_UAA hortonworks/cloudbreak-uaa
+    env-import DOCKER_IMAGE_CBD_TRAEFIK traefik
+    env-import DOCKER_IMAGE_CBD_HAVEGED hortonworks/haveged
+    env-import DOCKER_IMAGE_CBD_CONSUL gliderlabs/consul-server
+    env-import DOCKER_IMAGE_CBD_REGISTRATOR gliderlabs/registrator
+    env-import DOCKER_IMAGE_CBD_LOGSINK hortonworks/socat
+    env-import DOCKER_IMAGE_CBD_LOGSPOUT hortonworks/logspout
+    env-import DOCKER_IMAGE_CBD_LOGROTATE hortonworks/logrotate
+    env-import DOCKER_IMAGE_CBD_POSTFIX catatnight/postfix
+    env-import DOCKER_IMAGE_CBD_POSTGRES postgres
 
     env-import CB_DEFAULT_SUBSCRIPTION_ADDRESS http://uluwatu.service.consul:3000/notifications
     env-import CERTS_BUCKET ""
