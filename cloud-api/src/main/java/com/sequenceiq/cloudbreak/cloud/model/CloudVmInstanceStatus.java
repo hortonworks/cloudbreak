@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import java.util.Objects;
+
 public class CloudVmInstanceStatus {
 
     private final CloudInstance cloudInstance;
@@ -37,5 +39,26 @@ public class CloudVmInstanceStatus {
                 + ", status=" + status
                 + ", statusReason='" + statusReason + '\''
                 + '}';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+
+        CloudVmInstanceStatus other = (CloudVmInstanceStatus) obj;
+
+        return Objects.equals(cloudInstance, other.cloudInstance)
+                && Objects.equals(status, other.status)
+                && Objects.equals(statusReason, other.statusReason);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), cloudInstance, status, statusReason);
     }
 }

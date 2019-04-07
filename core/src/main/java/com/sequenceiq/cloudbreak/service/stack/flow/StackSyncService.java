@@ -154,7 +154,7 @@ public class StackSyncService {
         } else if (InstanceSyncState.STOPPED.equals(state)) {
             syncStoppedInstance(stack, counts, metaData);
         } else {
-            counts.put(InstanceSyncState.IN_PROGRESS, counts.get(InstanceSyncState.IN_PROGRESS) + 1);
+            counts.put(state, counts.get(state) + 1);
         }
     }
 
