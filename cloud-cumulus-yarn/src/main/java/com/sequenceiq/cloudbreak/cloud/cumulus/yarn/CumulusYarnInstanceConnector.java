@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.cumulus.yarn.client.CumulusYarnClient;
 import com.sequenceiq.cloudbreak.cloud.cumulus.yarn.util.CumulusYarnContainerStatus;
 import com.sequenceiq.cloudbreak.cloud.cumulus.yarn.util.CumulusYarnResourceNameHelper;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -60,7 +61,7 @@ public class CumulusYarnInstanceConnector implements InstanceConnector {
                             CumulusYarnContainerStatus.mapInstanceStatus(containerStateById.get(cloudInstance.getInstanceId()))))
                     .collect(Collectors.toList());
         } catch (ApiException e) {
-            throw new CloudOperationNotSupportedException("Couldn't get service state from Cumulus Yarn", e);
+            throw new CloudConnectorException("Couldn't get service state from Cumulus Yarn", e);
         }
     }
 
