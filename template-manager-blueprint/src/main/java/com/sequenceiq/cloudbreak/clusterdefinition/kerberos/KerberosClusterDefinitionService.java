@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.template.ClusterDefinitionComponentConfigProvider;
 import com.sequenceiq.cloudbreak.template.ClusterDefinitionProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.ClusterDefinitionTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -33,7 +33,7 @@ public class KerberosClusterDefinitionService implements ClusterDefinitionCompon
     private KerberosDetailService kerberosDetailService;
 
     @Override
-    public AmbariBlueprintTextProcessor customTextManipulation(TemplatePreparationObject source, AmbariBlueprintTextProcessor blueprintProcessor) {
+    public ClusterDefinitionTextProcessor customTextManipulation(TemplatePreparationObject source, ClusterDefinitionTextProcessor blueprintProcessor) {
         KerberosConfig kerberosConfig = source.getKerberosConfig().orElse(null);
         if (source.getGeneralClusterConfigs().getInstanceGroupsPresented()) {
             Integer propagationPort = source.getGeneralClusterConfigs().isGatewayInstanceMetadataPresented() ? KERBEROS_DB_PROPAGATION_PORT : null;
@@ -52,14 +52,14 @@ public class KerberosClusterDefinitionService implements ClusterDefinitionCompon
         return blueprintProcessor;
     }
 
-    private AmbariBlueprintTextProcessor extendBlueprintWithKerberos(AmbariBlueprintTextProcessor blueprintText, KerberosConfig kerberosConfig,
+    private ClusterDefinitionTextProcessor extendBlueprintWithKerberos(ClusterDefinitionTextProcessor blueprintText, KerberosConfig kerberosConfig,
             String gatewayHost, String domain, Integer propagationPort) {
         return extendBlueprintWithKerberos(blueprintText, kerberosConfig, gatewayHost, kerberosDetailService.getRealm(domain, kerberosConfig),
                 domain, propagationPort);
 
     }
 
-    private AmbariBlueprintTextProcessor extendBlueprintWithKerberos(AmbariBlueprintTextProcessor blueprintText, KerberosConfig kerberosConfig,
+    private ClusterDefinitionTextProcessor extendBlueprintWithKerberos(ClusterDefinitionTextProcessor blueprintText, KerberosConfig kerberosConfig,
             String gatewayHost, String realm, String domain, Integer propagationPort) {
         String kdcHosts = kerberosDetailService.resolveHostForKerberos(kerberosConfig, gatewayHost);
         String kdcType = kerberosDetailService.resolveTypeForKerberos(kerberosConfig);
@@ -84,7 +84,7 @@ public class KerberosClusterDefinitionService implements ClusterDefinitionCompon
                 !kerberosConfig.isTcpAllowed(), propagationPort, kerberosConfig.getType(), false);
     }
 
-    public AmbariBlueprintTextProcessor extendBlueprintWithKerberos(AmbariBlueprintTextProcessor blueprint, Map<String, String> kerberosEnv, String domains,
+    public ClusterDefinitionTextProcessor extendBlueprintWithKerberos(ClusterDefinitionTextProcessor blueprint, Map<String, String> kerberosEnv, String domains,
             Boolean useUdp, Integer kpropPort, KerberosType kerberosType,
             boolean forced) {
         try {

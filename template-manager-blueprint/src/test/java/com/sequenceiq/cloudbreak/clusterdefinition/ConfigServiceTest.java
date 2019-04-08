@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.clusterdefinition.utils.ConfigUtils;
 import com.sequenceiq.cloudbreak.clusterdefinition.utils.HadoopConfigurationUtils;
 import com.sequenceiq.cloudbreak.template.model.ConfigProperty;
-import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @RunWith(MockitoJUnitRunner.class)

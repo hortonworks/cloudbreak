@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.template.processor;
+package com.sequenceiq.cloudbreak.clusterdefinition;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -28,6 +28,8 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sequenceiq.cloudbreak.template.ClusterDefinitionProcessingException;
+import com.sequenceiq.cloudbreak.template.processor.ClusterDefinitionTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.ClusterManagerType;
 import com.sequenceiq.cloudbreak.template.processor.configuration.ClusterDefinitionConfigurationEntry;
 import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfiguration;
 import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfigurations;
@@ -694,7 +696,8 @@ public class AmbariBlueprintTextProcessor implements ClusterDefinitionTextProces
         return this;
     }
 
-    public AmbariBlueprintTextProcessor addComponentToHostgroups(String component, Collection<String> hostGroupNames) {
+    @Override
+    public ClusterDefinitionTextProcessor addComponentToHostgroups(String component, Collection<String> hostGroupNames) {
         ArrayNode hostGroupsNode = getArrayFromObjectNodeByPath(clusterDefinition, HOST_GROUPS_NODE);
         Iterator<JsonNode> hostGroups = hostGroupsNode.elements();
         while (hostGroups.hasNext()) {
@@ -708,7 +711,8 @@ public class AmbariBlueprintTextProcessor implements ClusterDefinitionTextProces
         return this;
     }
 
-    public AmbariBlueprintTextProcessor addComponentToHostgroups(String component, Predicate<String> addToHostgroup) {
+    @Override
+    public ClusterDefinitionTextProcessor addComponentToHostgroups(String component, Predicate<String> addToHostgroup) {
         ArrayNode hostGroupsNode = getArrayFromObjectNodeByPath(clusterDefinition, HOST_GROUPS_NODE);
         Iterator<JsonNode> hostGroups = hostGroupsNode.elements();
         while (hostGroups.hasNext()) {
@@ -744,7 +748,7 @@ public class AmbariBlueprintTextProcessor implements ClusterDefinitionTextProces
         return componentExists;
     }
 
-    public AmbariBlueprintTextProcessor replaceConfiguration(String key, String configuration) {
+    public ClusterDefinitionTextProcessor replaceConfiguration(String key, String configuration) {
         try {
             ArrayNode configurations = getArrayFromNodeByNodeName(clusterDefinition, CONFIGURATIONS_NODE);
             Iterator<JsonNode> elements = configurations.elements();

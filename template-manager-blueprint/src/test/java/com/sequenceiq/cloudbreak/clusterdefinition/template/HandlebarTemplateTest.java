@@ -12,6 +12,7 @@ import static com.sequenceiq.cloudbreak.template.filesystem.TemplateCoreTestUtil
 import static com.sequenceiq.cloudbreak.template.filesystem.TemplateCoreTestUtil.wasbSecureFileSystemConfiguration;
 import static com.sequenceiq.cloudbreak.template.filesystem.TemplateCoreTestUtil.wasbUnSecureFileSystemConfiguration;
 import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspath;
+import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -41,12 +42,15 @@ import com.sequenceiq.cloudbreak.template.HandlebarUtils;
 import com.sequenceiq.cloudbreak.template.TemplateModelContextBuilder;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
+import com.sequenceiq.cloudbreak.template.processor.ClusterDefinitionTextProcessor;
 import com.sequenceiq.cloudbreak.template.views.ClusterDefinitionView;
 import com.sequenceiq.cloudbreak.template.views.LdapView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 
 @RunWith(Parameterized.class)
 public class HandlebarTemplateTest {
+
+    private static ClusterDefinitionTextProcessor clusterDefinitionTextProcessor = mock(ClusterDefinitionTextProcessor.class);
 
     private final Handlebars handlebars = HandlebarUtils.handlebars();
 
@@ -443,7 +447,7 @@ public class HandlebarTemplateTest {
         Map<String, Object> properties = new HashMap<>();
         properties.put("blueprints_basics_zeppelin_shiro_ini_content", "testshiroini");
 
-        ClusterDefinitionView clusterDefinitionView = new ClusterDefinitionView("blueprintText", "2.6", "HDP");
+        ClusterDefinitionView clusterDefinitionView = new ClusterDefinitionView("blueprintText", "2.6", "HDP", clusterDefinitionTextProcessor);
 
         return new TemplateModelContextBuilder()
                 .withClusterDefinitionView(clusterDefinitionView)
@@ -455,7 +459,7 @@ public class HandlebarTemplateTest {
         Map<String, Object> properties = new HashMap<>();
         properties.put("blueprints_basics_zeppelin_shiro_ini_content", "testshiroini");
 
-        ClusterDefinitionView clusterDefinitionView = new ClusterDefinitionView("blueprintText", "2.5", "HDP");
+        ClusterDefinitionView clusterDefinitionView = new ClusterDefinitionView("blueprintText", "2.5", "HDP", clusterDefinitionTextProcessor);
 
         return new TemplateModelContextBuilder()
                 .withClusterDefinitionView(clusterDefinitionView)
@@ -602,7 +606,7 @@ public class HandlebarTemplateTest {
         generalClusterConfigs.setUserName("lastname");
         generalClusterConfigs.setIdentityUserEmail("admin@example.com");
 
-        ClusterDefinitionView clusterDefinitionView = new ClusterDefinitionView("blueprintText", "2.6", "HDF");
+        ClusterDefinitionView clusterDefinitionView = new ClusterDefinitionView("blueprintText", "2.6", "HDF", clusterDefinitionTextProcessor);
 
         return new TemplateModelContextBuilder()
                 .withGeneralClusterConfigs(generalClusterConfigs)
@@ -628,7 +632,7 @@ public class HandlebarTemplateTest {
         generalClusterConfigs.setUserName("lastname");
         generalClusterConfigs.setIdentityUserEmail("admin@example.com");
 
-        ClusterDefinitionView clusterDefinitionView = new ClusterDefinitionView("blueprintText", "2.6", "HDF");
+        ClusterDefinitionView clusterDefinitionView = new ClusterDefinitionView("blueprintText", "2.6", "HDF", clusterDefinitionTextProcessor);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("blueprints_basics_nifi_registry_identity_providers", "<test>");
@@ -652,7 +656,7 @@ public class HandlebarTemplateTest {
         generalClusterConfigs.setUserName("lastname");
         generalClusterConfigs.setIdentityUserEmail("admin@example.com");
 
-        ClusterDefinitionView clusterDefinitionView = new ClusterDefinitionView("blueprintText", "2.6", "HDP");
+        ClusterDefinitionView clusterDefinitionView = new ClusterDefinitionView("blueprintText", "2.6", "HDP", clusterDefinitionTextProcessor);
 
         return new TemplateModelContextBuilder()
                 .withGeneralClusterConfigs(generalClusterConfigs)
@@ -667,7 +671,7 @@ public class HandlebarTemplateTest {
         generalClusterConfigs.setUserName("lastname");
         generalClusterConfigs.setIdentityUserEmail("admin@example.com");
 
-        ClusterDefinitionView clusterDefinitionView = new ClusterDefinitionView("blueprintText", "2.6", "HDF");
+        ClusterDefinitionView clusterDefinitionView = new ClusterDefinitionView("blueprintText", "2.6", "HDF", clusterDefinitionTextProcessor);
 
         return new TemplateModelContextBuilder()
                 .withGeneralClusterConfigs(generalClusterConfigs)
@@ -677,7 +681,7 @@ public class HandlebarTemplateTest {
 
     public static Map<String, Object> registryRdsConfigWhenRdsPresentedThenShouldReturnWithRdsConfig() {
         RDSConfig rdsConfig = TestUtil.rdsConfig(DatabaseType.REGISTRY, DatabaseVendor.MYSQL);
-        ClusterDefinitionView clusterDefinitionView = new ClusterDefinitionView("blueprintText", "2.6", "HDF");
+        ClusterDefinitionView clusterDefinitionView = new ClusterDefinitionView("blueprintText", "2.6", "HDF", clusterDefinitionTextProcessor);
         return new TemplateModelContextBuilder()
                 .withRdsConfigs(Sets.newHashSet(rdsConfig))
                 .withClusterDefinitionView(clusterDefinitionView)
@@ -686,7 +690,7 @@ public class HandlebarTemplateTest {
 
     public static Map<String, Object> registryRdsConfigWhenPostGresDBEngineShouldReturnWithCorrectDatabaseTypeConfig() {
         RDSConfig rdsConfig = TestUtil.rdsConfig(DatabaseType.REGISTRY, DatabaseVendor.POSTGRES);
-        ClusterDefinitionView clusterDefinitionView = new ClusterDefinitionView("blueprintText", "2.6", "HDF");
+        ClusterDefinitionView clusterDefinitionView = new ClusterDefinitionView("blueprintText", "2.6", "HDF", clusterDefinitionTextProcessor);
         return new TemplateModelContextBuilder()
                 .withRdsConfigs(Sets.newHashSet(rdsConfig))
                 .withClusterDefinitionView(clusterDefinitionView)

@@ -8,6 +8,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -32,6 +33,7 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintViewProvider;
 import com.sequenceiq.cloudbreak.clusterdefinition.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.clusterdefinition.nifi.HdfConfigProvider;
@@ -54,6 +56,7 @@ import com.sequenceiq.cloudbreak.repository.cluster.DatalakeResourcesRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceGroupMetadataCollector;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionTextProcessorFactory;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -145,6 +148,9 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Mock
     private DatalakeResourcesRepository datalakeResourcesRepository;
 
+    @Mock
+    private ClusterDefinitionTextProcessorFactory clusterDefinitionTextProcessorFactory;
+
     @Before
     public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
@@ -159,6 +165,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(source.getInputs()).thenReturn(stackInputs);
         when(stackInputs.get(StackInputs.class)).thenReturn(null);
         when(stackInfoService.clusterDefinitionStackInfo(TEST_CLUSTER_DEFINITION_TEXT)).thenReturn(clusterDefinitionStackInfo);
+        when(clusterDefinitionTextProcessorFactory.createClusterDefinitionTextProcessor(anyString())).thenReturn(new AmbariBlueprintTextProcessor(""));
     }
 
     @Test
@@ -297,7 +304,8 @@ public class StackToTemplatePreparationObjectConverterTest {
     public void testConvertWhenProvidingStackAndBlueprintStackInfoThenExpectedBlueprintViewShouldBeStored() {
         String type = "HDF";
         String version = "2.6";
-        ClusterDefinitionView expected = new ClusterDefinitionView(clusterDefinitionStackInfo, cluster.getClusterDefinition().getClusterDefinitionText());
+        ClusterDefinitionView expected = new ClusterDefinitionView(TEST_CLUSTER_DEFINITION_TEXT, version, type,
+                new AmbariBlueprintTextProcessor(TEST_CLUSTER_DEFINITION_TEXT));
         when(clusterDefinitionStackInfo.getType()).thenReturn(type);
         when(clusterDefinitionStackInfo.getVersion()).thenReturn(version);
         when(ambariBlueprintViewProvider.getBlueprintView(clusterDefinition)).thenReturn(expected);

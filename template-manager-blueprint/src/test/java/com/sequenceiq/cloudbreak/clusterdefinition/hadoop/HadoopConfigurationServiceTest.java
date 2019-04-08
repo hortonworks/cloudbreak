@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.clusterdefinition.hadoop;
 
 import static java.util.Collections.emptyMap;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.junit.Assert;
@@ -12,11 +11,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.clusterdefinition.ConfigService;
 import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
-import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.ClusterDefinitionTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfigurations;
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
 import com.sequenceiq.cloudbreak.template.views.ClusterDefinitionView;
@@ -28,13 +28,15 @@ public class HadoopConfigurationServiceTest {
     private final HadoopConfigurationService underTest = new HadoopConfigurationService();
 
     @Mock
+    private AmbariBlueprintTextProcessor ambariBlueprintTextProcessor;
+
+    @Mock
     private ConfigService configService;
 
     @Test
     public void testConfigure() {
         TemplatePreparationObject source = Builder.builder()
                 .build();
-        AmbariBlueprintTextProcessor ambariBlueprintTextProcessor = mock(AmbariBlueprintTextProcessor.class);
 
         when(configService.getHostGroupConfiguration(ambariBlueprintTextProcessor, source.getHostgroupViews())).thenReturn(emptyMap());
         when(configService.getComponentsByHostGroup(ambariBlueprintTextProcessor, source.getHostgroupViews())).thenReturn(emptyMap());
@@ -44,7 +46,7 @@ public class HadoopConfigurationServiceTest {
         when(ambariBlueprintTextProcessor.extendBlueprintGlobalConfiguration(any(SiteConfigurations.class), any(Boolean.class)))
                 .thenReturn(ambariBlueprintTextProcessor);
 
-        AmbariBlueprintTextProcessor actual = underTest.customTextManipulation(source, ambariBlueprintTextProcessor);
+        ClusterDefinitionTextProcessor actual = underTest.customTextManipulation(source, ambariBlueprintTextProcessor);
 
         Assert.assertEquals(ambariBlueprintTextProcessor, actual);
     }
@@ -52,7 +54,7 @@ public class HadoopConfigurationServiceTest {
     @Test
     public void testAdditionalCriteriaWhenTrue() {
         TemplatePreparationObject source = Builder.builder()
-                .withClusterDefinitionView(new ClusterDefinitionView("clusterDefinitionText", "2.5", "HDP"))
+                .withClusterDefinitionView(new ClusterDefinitionView("clusterDefinitionText", "2.5", "HDP", ambariBlueprintTextProcessor))
                 .build();
 
         boolean actual = underTest.specialCondition(source, "clusterDefinitionText");
@@ -62,7 +64,7 @@ public class HadoopConfigurationServiceTest {
     @Test
     public void testAdditionalCriteriaWhenFalse() {
         TemplatePreparationObject source = Builder.builder()
-                .withClusterDefinitionView(new ClusterDefinitionView("clusterDefinitionText", "2.5", "HDF"))
+                .withClusterDefinitionView(new ClusterDefinitionView("clusterDefinitionText", "2.5", "HDF", ambariBlueprintTextProcessor))
                 .build();
 
         boolean actual = underTest.specialCondition(source, "clusterDefinitionText");

@@ -13,6 +13,7 @@ import java.util.Set;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.Maps;
@@ -31,11 +32,15 @@ import com.sequenceiq.cloudbreak.template.filesystem.TemplateCoreTestUtil;
 import com.sequenceiq.cloudbreak.template.model.ClusterDefinitionStackInfo;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
+import com.sequenceiq.cloudbreak.template.processor.ClusterDefinitionTextProcessor;
 import com.sequenceiq.cloudbreak.template.views.ClusterDefinitionView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TemplateProcessorTest {
+
+    @Mock
+    private ClusterDefinitionTextProcessor ambariBlueprintTextProcessor;
 
     @InjectMocks
     private final TemplateProcessor underTest = new TemplateProcessor();
@@ -59,7 +64,7 @@ public class TemplateProcessorTest {
                 .withLdapConfig(cluster.getLdapConfig(), "cn=admin,dc=example,dc=org", "admin<>char")
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withClusterDefinitionView(new ClusterDefinitionView(testBlueprint, clusterDefinitionStackInfo.getVersion(),
-                        clusterDefinitionStackInfo.getType()))
+                        clusterDefinitionStackInfo.getType(), ambariBlueprintTextProcessor))
                 .withFixInputs(properties)
                 .build();
 
@@ -93,7 +98,7 @@ public class TemplateProcessorTest {
                 .withLdapConfig(cluster.getLdapConfig(), "cn=admin,dc=example,dc=org", "admin<>char")
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withClusterDefinitionView(new ClusterDefinitionView(testBlueprint, clusterDefinitionStackInfo.getVersion(),
-                        clusterDefinitionStackInfo.getType()))
+                        clusterDefinitionStackInfo.getType(), ambariBlueprintTextProcessor))
                 .withFixInputs(properties)
                 .withFileSystemConfigurationView(s3FileSystemConfig())
                 .build();
@@ -140,7 +145,7 @@ public class TemplateProcessorTest {
                 .withFixInputs(properties)
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withClusterDefinitionView(new ClusterDefinitionView(testBlueprint, clusterDefinitionStackInfo.getVersion(),
-                        clusterDefinitionStackInfo.getType()))
+                        clusterDefinitionStackInfo.getType(), ambariBlueprintTextProcessor))
                 .build();
 
         String result = underTest.process(testBlueprint, templatePreparationObject, Maps.newHashMap());
@@ -176,7 +181,7 @@ public class TemplateProcessorTest {
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withFixInputs(properties)
                 .withClusterDefinitionView(new ClusterDefinitionView(testBlueprint, clusterDefinitionStackInfo.getVersion(),
-                        clusterDefinitionStackInfo.getType()))
+                        clusterDefinitionStackInfo.getType(), ambariBlueprintTextProcessor))
                 .withHdfConfigs(hdfConfigs)
                 .build();
 
@@ -198,7 +203,7 @@ public class TemplateProcessorTest {
                 .withLdapConfig(cluster.getLdapConfig(), "cn=admin,dc=example,dc=org", "admin<>char")
                 .withGeneralClusterConfigs(generalClusterConfigs())
                 .withClusterDefinitionView(new ClusterDefinitionView(testBlueprint, clusterDefinitionStackInfo.getVersion(),
-                        clusterDefinitionStackInfo.getType()))
+                        clusterDefinitionStackInfo.getType(), ambariBlueprintTextProcessor))
                 .build();
 
         String result = underTest.process(testBlueprint, templatePreparationObject, Maps.newHashMap());
@@ -224,7 +229,7 @@ public class TemplateProcessorTest {
                 .withLdapConfig(cluster.getLdapConfig(), "cn=admin,dc=example,dc=org", "admin<>char")
                 .withGeneralClusterConfigs(generalClusterConfigs())
                 .withClusterDefinitionView(new ClusterDefinitionView(testBlueprint, clusterDefinitionStackInfo.getVersion(),
-                        clusterDefinitionStackInfo.getType()))
+                        clusterDefinitionStackInfo.getType(), ambariBlueprintTextProcessor))
                 .build();
 
         String result = underTest.process(testBlueprint, templatePreparationObject, Maps.newHashMap());
@@ -250,7 +255,7 @@ public class TemplateProcessorTest {
                 .withLdapConfig(cluster.getLdapConfig(), "cn=admin,dc=example,dc=org", "admin<>char")
                 .withGeneralClusterConfigs(generalClusterConfigs())
                 .withClusterDefinitionView(new ClusterDefinitionView(testBlueprint, clusterDefinitionStackInfo.getVersion(),
-                        clusterDefinitionStackInfo.getType()))
+                        clusterDefinitionStackInfo.getType(), ambariBlueprintTextProcessor))
                 .build();
 
         String result = underTest.process(testBlueprint, templatePreparationObject, Maps.newHashMap());
@@ -270,7 +275,7 @@ public class TemplateProcessorTest {
 
         TemplatePreparationObject templatePreparationObject = Builder.builder()
                 .withClusterDefinitionView(new ClusterDefinitionView(testBlueprint, clusterDefinitionStackInfo.getVersion(),
-                        clusterDefinitionStackInfo.getType()))
+                        clusterDefinitionStackInfo.getType(), ambariBlueprintTextProcessor))
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withGeneralClusterConfigs(generalClusterConfigs(cluster))
                 .build();

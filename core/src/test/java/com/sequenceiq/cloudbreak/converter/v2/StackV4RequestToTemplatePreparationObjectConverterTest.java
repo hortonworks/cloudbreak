@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.clusterdefinition.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.clusterdefinition.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
@@ -52,6 +53,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionTextProcessorFactory;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
@@ -151,6 +153,9 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     @Mock
     private KerberosService kerberosService;
 
+    @Mock
+    private ClusterDefinitionTextProcessorFactory clusterDefinitionTextProcessorFactory;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -168,6 +173,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(cloudbreakUser.getEmail()).thenReturn("test@hortonworks.com");
         when(workspaceService.get(anyLong(), eq(user))).thenReturn(workspace);
         when(credentialService.getByNameForWorkspace(TEST_CREDENTIAL_NAME, workspace)).thenReturn(credential);
+        when(clusterDefinitionTextProcessorFactory.createClusterDefinitionTextProcessor(anyString())).thenReturn(new AmbariBlueprintTextProcessor(""));
     }
 
     @Test
@@ -263,7 +269,8 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         String stackType = "HDP";
         when(clusterDefinitionStackInfo.getVersion()).thenReturn(stackVersion);
         when(clusterDefinitionStackInfo.getType()).thenReturn(stackType);
-        ClusterDefinitionView expected = new ClusterDefinitionView(TEST_CLUSTER_DEFINITION_TEXT, stackVersion, stackType);
+        ClusterDefinitionView expected = new ClusterDefinitionView(TEST_CLUSTER_DEFINITION_TEXT, stackVersion, stackType,
+                new AmbariBlueprintTextProcessor(TEST_CLUSTER_DEFINITION_TEXT));
 
         TemplatePreparationObject result = underTest.convert(source);
 

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.clusterdefinition.ConfigService;
 import com.sequenceiq.cloudbreak.template.ClusterDefinitionComponentConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.ClusterDefinitionTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfigurations;
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -22,7 +22,7 @@ public class HadoopConfigurationService implements ClusterDefinitionComponentCon
     private ConfigService configService;
 
     @Override
-    public AmbariBlueprintTextProcessor customTextManipulation(TemplatePreparationObject source, AmbariBlueprintTextProcessor blueprintProcessor) {
+    public ClusterDefinitionTextProcessor customTextManipulation(TemplatePreparationObject source, ClusterDefinitionTextProcessor blueprintProcessor) {
         Map<String, Map<String, Map<String, String>>> hostGroupConfig =
                 configService.getHostGroupConfiguration(blueprintProcessor, source.getHostgroupViews());
         HostgroupConfigurations hostgroupConfigurations = HostgroupConfigurations.fromMap(hostGroupConfig);
@@ -40,7 +40,7 @@ public class HadoopConfigurationService implements ClusterDefinitionComponentCon
         return !source.getClusterDefinitionView().isHdf();
     }
 
-    private Map<String, Map<String, String>> getGlobalConfiguration(AmbariBlueprintTextProcessor blueprintProcessor, Collection<HostgroupView> hostGroups) {
+    private Map<String, Map<String, String>> getGlobalConfiguration(ClusterDefinitionTextProcessor blueprintProcessor, Collection<HostgroupView> hostGroups) {
         Map<String, Map<String, String>> config = configService.getComponentsByHostGroup(blueprintProcessor, hostGroups);
         configService.collectBlueprintConfigIfNeed(config);
         return config;

@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.clusterdefinition.utils.ConfigUtils;
 import com.sequenceiq.cloudbreak.clusterdefinition.utils.HadoopConfigurationUtils;
 import com.sequenceiq.cloudbreak.template.model.ConfigProperty;
-import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.ClusterDefinitionTextProcessor;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Service
@@ -89,7 +89,7 @@ public class ConfigService {
         return serviceConfigs;
     }
 
-    public Map<String, Map<String, Map<String, String>>> getHostGroupConfiguration(AmbariBlueprintTextProcessor blueprintProcessor,
+    public Map<String, Map<String, Map<String, String>>> getHostGroupConfiguration(ClusterDefinitionTextProcessor blueprintProcessor,
             Collection<HostgroupView> hostGroups) {
         Map<String, Map<String, Map<String, String>>> hadoopConfig = new HashMap<>();
         hostGroups.stream()
@@ -98,7 +98,7 @@ public class ConfigService {
         return hadoopConfig;
     }
 
-    public Map<String, Map<String, String>> getComponentsByHostGroup(AmbariBlueprintTextProcessor blueprintProcessor, Collection<HostgroupView> hostGroups) {
+    public Map<String, Map<String, String>> getComponentsByHostGroup(ClusterDefinitionTextProcessor blueprintProcessor, Collection<HostgroupView> hostGroups) {
         Map<String, Map<String, String>> config = new HashMap<>();
 
         Map<String, Set<String>> componentsByHostGroup = blueprintProcessor.getComponentsByHostGroup();
@@ -127,7 +127,7 @@ public class ConfigService {
         });
     }
 
-    private Map<String, Map<String, String>> getHadoopConfigs(AmbariBlueprintTextProcessor blueprintProcessor, HostgroupView hostGroup) {
+    private Map<String, Map<String, String>> getHadoopConfigs(ClusterDefinitionTextProcessor blueprintProcessor, HostgroupView hostGroup) {
         int volumeCount = Objects.isNull(hostGroup.getVolumeCount()) ? -1 : hostGroup.getVolumeCount();
 
         Map<String, Map<String, String>> hadoopConfig = new HashMap<>();
