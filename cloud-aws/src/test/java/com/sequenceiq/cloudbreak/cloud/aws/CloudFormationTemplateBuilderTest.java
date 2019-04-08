@@ -5,6 +5,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -90,8 +91,6 @@ public class CloudFormationTemplateBuilderTest {
 
     private CloudStack cloudStack;
 
-    private String name;
-
     private ModelContext modelContext;
 
     private String awsCloudFormationTemplate;
@@ -142,10 +141,7 @@ public class CloudFormationTemplateBuilderTest {
         authenticatedContext = authenticatedContext();
         existingSubnetCidr = "testSubnet";
 
-        name = "master";
-        List<Volume> volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1), new Volume("/hadoop/fs2", "HDD", 1));
-        InstanceTemplate instanceTemplate = new InstanceTemplate("m1.medium", name, 0L, volumes, InstanceStatus.CREATE_REQUESTED,
-                new HashMap<>(), 0L, "cb-centos66-amb200-2015-05-25");
+        InstanceTemplate instanceTemplate = createDefaultInstanceTemplate();
         instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         instance = new CloudInstance("SOME_ID", instanceTemplate, instanceAuthentication);
         Security security = getDefaultCloudStackSecurity();
@@ -154,8 +150,8 @@ public class CloudFormationTemplateBuilderTest {
                 InstanceGroupType.GATEWAY, "GATEWAY"
         );
         image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>());
-        List<Group> groups = List.of(createDefaultGroup(InstanceGroupType.CORE, ROOT_VOLUME_SIZE, security),
-                createDefaultGroup(InstanceGroupType.GATEWAY, ROOT_VOLUME_SIZE, security));
+        List<Group> groups = List.of(createDefaultGroup("master", InstanceGroupType.CORE, ROOT_VOLUME_SIZE, security),
+                createDefaultGroup("gateway", InstanceGroupType.GATEWAY, ROOT_VOLUME_SIZE, security));
 
         defaultTags.put(CloudbreakResourceType.DISK.templateVariable(), CloudbreakResourceType.DISK.key());
         defaultTags.put(CloudbreakResourceType.INSTANCE.templateVariable(), CloudbreakResourceType.INSTANCE.key());
@@ -183,10 +179,13 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
-        assertThat(templateString, containsString("AmbariNodes" + name));
-        assertThat(templateString, containsString("AmbariNodeLaunchConfig" + name));
-        assertThat(templateString, containsString("ClusterNodeSecurityGroup" + name));
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        assertThat(templateString, containsString("AmbariNodesmaster"));
+        assertThat(templateString, containsString("AmbariNodeLaunchConfigmaster"));
+        assertThat(templateString, containsString("ClusterNodeSecurityGroupmaster"));
+        assertThat(templateString, containsString("AmbariNodesgateway"));
+        assertThat(templateString, containsString("AmbariNodeLaunchConfiggateway"));
+        assertThat(templateString, containsString("ClusterNodeSecurityGroupgateway"));
         assertThat(templateString, not(containsString("testtagkey")));
         assertThat(templateString, not(containsString("testtagvalue")));
         assertThat(templateString, containsString(Integer.toString(ROOT_VOLUME_SIZE)));
@@ -203,8 +202,8 @@ public class CloudFormationTemplateBuilderTest {
         //GIVEN
         Integer rootVolumeSize = Integer.MAX_VALUE;
         Security security = getDefaultCloudStackSecurity();
-        List<Group> groups = List.of(createDefaultGroup(InstanceGroupType.CORE, rootVolumeSize, security),
-                createDefaultGroup(InstanceGroupType.GATEWAY, rootVolumeSize, security));
+        List<Group> groups = List.of(createDefaultGroup("master", InstanceGroupType.CORE, rootVolumeSize, security),
+                createDefaultGroup("gateway", InstanceGroupType.GATEWAY, rootVolumeSize, security));
         CloudStack cloudStack = createDefaultCloudStack(groups, getDefaultCloudStackParameters(), getDefaultCloudStackTags());
         //WHEN
         modelContext = new ModelContext()
@@ -220,7 +219,7 @@ public class CloudFormationTemplateBuilderTest {
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
 
         //THEN
-        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString(Integer.toString(rootVolumeSize)));
         JsonNode firstBlockDeviceMapping = getJsonNode(JsonUtil.readTree(templateString), "BlockDeviceMappings").get(0);
         String volumeSize = getJsonNode(firstBlockDeviceMapping, "VolumeSize").textValue();
@@ -232,8 +231,8 @@ public class CloudFormationTemplateBuilderTest {
         //GIVEN
         Integer rootVolumeSize = Integer.MIN_VALUE;
         Security security = getDefaultCloudStackSecurity();
-        List<Group> groups = List.of(createDefaultGroup(InstanceGroupType.CORE, rootVolumeSize, security),
-                createDefaultGroup(InstanceGroupType.GATEWAY, rootVolumeSize, security));
+        List<Group> groups = List.of(createDefaultGroup("master", InstanceGroupType.CORE, rootVolumeSize, security),
+                createDefaultGroup("gateway", InstanceGroupType.GATEWAY, rootVolumeSize, security));
         CloudStack cloudStack = createDefaultCloudStack(groups, getDefaultCloudStackParameters(), getDefaultCloudStackTags());
         //WHEN
         modelContext = new ModelContext()
@@ -249,7 +248,7 @@ public class CloudFormationTemplateBuilderTest {
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
 
         //THEN
-        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString(Integer.toString(rootVolumeSize)));
         JsonNode firstBlockDeviceMapping = getJsonNode(JsonUtil.readTree(templateString), "BlockDeviceMappings").get(0);
         String volumeSize = getJsonNode(firstBlockDeviceMapping, "VolumeSize").textValue();
@@ -272,7 +271,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -299,7 +298,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -326,7 +325,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -353,7 +352,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, not(containsString("InstanceProfile")));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -380,7 +379,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -407,7 +406,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -434,7 +433,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -461,7 +460,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, not(containsString("InstanceProfile")));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -488,7 +487,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -515,7 +514,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -542,7 +541,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -569,7 +568,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, not(containsString("InstanceProfile")));
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -596,7 +595,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, not(containsString("VPCId")));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -623,7 +622,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, not(containsString("VPCId")));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -650,7 +649,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, containsString("InstanceProfile"));
         assertThat(templateString, not(containsString("VPCId")));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -678,7 +677,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
-        Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, not(containsString("InstanceProfile")));
         assertThat(templateString, not(containsString("VPCId")));
         assertThat(templateString, not(containsString("SubnetCIDR")));
@@ -695,7 +694,7 @@ public class CloudFormationTemplateBuilderTest {
         //GIVEN
         List<Group> groups = new ArrayList<>();
         Security security = new Security(emptyList(), singletonList("single-sg-id"));
-        groups.add(new Group(name, InstanceGroupType.CORE, emptyList(), security, instance,
+        groups.add(new Group("master", InstanceGroupType.CORE, emptyList(), security, instance,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), "publickey", ROOT_VOLUME_SIZE));
         CloudStack cloudStack = new CloudStack(groups, new Network(new Subnet(CIDR)), image, emptyMap(), emptyMap(), "template",
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), "publicKey", null);
@@ -713,7 +712,7 @@ public class CloudFormationTemplateBuilderTest {
         //THEN
         // older templates are invalids
         if ("templates/aws-cf-stack.ftl".equals(templatePath)) {
-            Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+            Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
         }
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, containsString("\"single-sg-id\""));
@@ -724,9 +723,9 @@ public class CloudFormationTemplateBuilderTest {
         //GIVEN
         List<Group> groups = new ArrayList<>();
         Security security = new Security(emptyList(), singletonList("single-sg-id"));
-        groups.add(new Group(name, InstanceGroupType.GATEWAY, emptyList(), security, instance,
+        groups.add(new Group("gateway", InstanceGroupType.GATEWAY, emptyList(), security, instance,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), "publickey", ROOT_VOLUME_SIZE));
-        groups.add(new Group(name, InstanceGroupType.CORE, emptyList(), security, instance,
+        groups.add(new Group("master", InstanceGroupType.CORE, emptyList(), security, instance,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), "publickey", ROOT_VOLUME_SIZE));
         CloudStack cloudStack = new CloudStack(groups, new Network(new Subnet(CIDR)), image, emptyMap(), emptyMap(), "template",
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), "publicKey", null);
@@ -744,7 +743,7 @@ public class CloudFormationTemplateBuilderTest {
         //THEN
         // older templates are invalids
         if ("templates/aws-cf-stack.ftl".equals(templatePath)) {
-            Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+            Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
         }
         assertThat(templateString, containsString("VPCId"));
         assertThat(templateString, containsString("\"single-sg-id\""));
@@ -755,7 +754,7 @@ public class CloudFormationTemplateBuilderTest {
         //GIVEN
         List<Group> groups = new ArrayList<>();
         Security security = new Security(emptyList(), List.of("multi-sg-id1", "multi-sg-id2"));
-        groups.add(new Group(name, InstanceGroupType.CORE, emptyList(), security, instance,
+        groups.add(new Group("master", InstanceGroupType.CORE, emptyList(), security, instance,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), "publickey", ROOT_VOLUME_SIZE));
         CloudStack cloudStack = new CloudStack(groups, new Network(new Subnet(CIDR)), image, emptyMap(), emptyMap(), "template",
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), "publicKey", null);
@@ -773,11 +772,43 @@ public class CloudFormationTemplateBuilderTest {
         //THEN
         // older templates are invalids
         if ("templates/aws-cf-stack.ftl".equals(templatePath)) {
-            Assert.assertTrue("Ivalid JSON: " + templateString, JsonUtil.isValid(templateString));
+            Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
             // we don't support the multiple security groups in older templates
             assertThat(templateString, containsString("\"multi-sg-id1\",\"multi-sg-id2\""));
         }
         assertThat(templateString, containsString("VPCId"));
+    }
+
+    @Test
+    public void buildTestInstanceGroupsWithSpotInstances() throws IOException {
+        //GIVEN
+        List<Group> groups = new ArrayList<>();
+        Security security = getDefaultCloudStackSecurity();
+        groups.add(createDefaultGroup("master", InstanceGroupType.CORE, ROOT_VOLUME_SIZE, security));
+        InstanceTemplate spotInstanceTemplate = createDefaultInstanceTemplate();
+        spotInstanceTemplate.putParameter("spotPrice", "0.1");
+        CloudInstance spotInstance = new CloudInstance("SOME_ID", spotInstanceTemplate, instanceAuthentication);
+        groups.add(new Group("compute", InstanceGroupType.CORE, singletonList(spotInstance), security, spotInstance,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), "publickey", ROOT_VOLUME_SIZE));
+        groups.add(createDefaultGroup("gateway", InstanceGroupType.GATEWAY, ROOT_VOLUME_SIZE, security));
+        CloudStack cloudStack = createDefaultCloudStack(groups, getDefaultCloudStackParameters(), getDefaultCloudStackTags());
+
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
+                .withTemplate(awsCloudFormationTemplate);
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+
+        //THEN
+        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        assertThat(templateString, stringContainsInOrder("SpotPrice", "0.1"));
     }
 
     private AuthenticatedContext authenticatedContext() {
@@ -794,9 +825,15 @@ public class CloudFormationTemplateBuilderTest {
                 instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
     }
 
-    private Group createDefaultGroup(InstanceGroupType type, int rootVolumeSize, Security security) {
+    private Group createDefaultGroup(String name, InstanceGroupType type, int rootVolumeSize, Security security) {
         return new Group(name, type, singletonList(instance), security, null,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), rootVolumeSize);
+    }
+
+    private InstanceTemplate createDefaultInstanceTemplate() {
+        List<Volume> volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1), new Volume("/hadoop/fs2", "HDD", 1));
+        return new InstanceTemplate("m1.medium", "master", 0L, volumes, InstanceStatus.CREATE_REQUESTED, new HashMap<>(), 0L,
+                "cb-centos66-amb200-2015-05-25");
     }
 
     private Map<String, String> getDefaultCloudStackParameters() {
