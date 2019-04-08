@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.template.ClusterDefinitionComponentConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.ClusterDefinitionTextProcessor;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
@@ -18,7 +18,7 @@ public class KnoxConfigProvider implements ClusterDefinitionComponentConfigProvi
 
     // TODO-MASTER-REPAIR knox should be enabled
     @Override
-    public AmbariBlueprintTextProcessor customTextManipulation(TemplatePreparationObject source, AmbariBlueprintTextProcessor blueprintProcessor) {
+    public ClusterDefinitionTextProcessor customTextManipulation(TemplatePreparationObject source, ClusterDefinitionTextProcessor blueprintProcessor) {
         Set<String> hostGroupNames = source.getHostgroupViews()
                 .stream()
                 .filter(hostgroupView -> InstanceGroupType.isGateway(hostgroupView.getInstanceGroupType()))

@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionTextProcessorFactory;
 import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
@@ -116,6 +117,9 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
     @Inject
     private DatalakeConfigApiConnector datalakeConfigApiConnector;
 
+    @Inject
+    private ClusterDefinitionTextProcessorFactory clusterDefinitionTextProcessorFactory;
+
     @Override
     public TemplatePreparationObject convert(StackV4Request source) {
         try {
@@ -134,7 +138,8 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
             Gateway gateway = source.getCluster().getGateway() == null || clusterDefinitionService.isClouderaManagerTemplate(clusterDefinition)
                     ? null : getConversionService().convert(source, Gateway.class);
             ClusterDefinitionView clusterDefinitionView = new ClusterDefinitionView(clusterDefinition.getClusterDefinitionText(),
-                    clusterDefinitionStackInfo.getVersion(), clusterDefinitionStackInfo.getType());
+                    clusterDefinitionStackInfo.getVersion(), clusterDefinitionStackInfo.getType(),
+                    clusterDefinitionTextProcessorFactory.createClusterDefinitionTextProcessor(clusterDefinition.getClusterDefinitionText()));
             GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, cloudbreakUser.getEmail(),
                     clusterDefinitionService.getClusterDefinitionVariant(clusterDefinition));
             String bindDn = null;

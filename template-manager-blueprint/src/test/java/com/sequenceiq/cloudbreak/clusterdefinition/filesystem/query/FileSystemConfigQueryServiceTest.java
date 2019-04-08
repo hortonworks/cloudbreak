@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
-import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @RunWith(MockitoJUnitRunner.class)

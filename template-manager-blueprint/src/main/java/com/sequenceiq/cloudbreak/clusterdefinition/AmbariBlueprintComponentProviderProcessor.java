@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.template.ClusterDefinitionComponentConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.configuration.ClusterDefinitionConfigurationEntry;
 import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfigurations;
 import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupEntry;

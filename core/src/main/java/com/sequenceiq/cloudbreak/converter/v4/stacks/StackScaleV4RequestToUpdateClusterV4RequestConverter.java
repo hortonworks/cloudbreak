@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintTextProcessor;
 
 @Component
 public class StackScaleV4RequestToUpdateClusterV4RequestConverter extends AbstractConversionServiceAwareConverter<StackScaleV4Request, UpdateClusterV4Request> {

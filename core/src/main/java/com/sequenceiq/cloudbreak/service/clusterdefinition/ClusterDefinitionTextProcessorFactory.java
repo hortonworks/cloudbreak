@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.service.clusterdefinition;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.ClusterDefinitionTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.ClusterManagerType;
 

@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.FileReaderUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
-import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintTextProcessor;
 
 public class AmbariHaComponentFilterTest {
 

@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
-import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
 
 @Service
 public class GeneralClusterConfigsProvider {

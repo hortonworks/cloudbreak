@@ -7,13 +7,13 @@ import java.util.Set;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.ClusterDefinitionTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.configuration.ClusterDefinitionConfigurationEntry;
 import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupEntry;
 
 public interface ClusterDefinitionComponentConfigProvider {
 
-    default AmbariBlueprintTextProcessor customTextManipulation(TemplatePreparationObject source, AmbariBlueprintTextProcessor blueprintProcessor) {
+    default ClusterDefinitionTextProcessor customTextManipulation(TemplatePreparationObject source, ClusterDefinitionTextProcessor blueprintProcessor) {
         return blueprintProcessor;
     }
 

@@ -4,15 +4,19 @@ import static java.util.Optional.ofNullable;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
+
+import org.apache.commons.lang3.NotImplementedException;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -27,6 +31,8 @@ import com.cloudera.api.swagger.model.ApiProductVersion;
 import com.sequenceiq.cloudbreak.template.ClusterDefinitionProcessingException;
 import com.sequenceiq.cloudbreak.template.processor.ClusterDefinitionTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.ClusterManagerType;
+import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfigurations;
+import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class CmTemplateProcessor implements ClusterDefinitionTextProcessor {
@@ -43,6 +49,51 @@ public class CmTemplateProcessor implements ClusterDefinitionTextProcessor {
     @Override
     public ClusterManagerType getClusterManagerType() {
         return ClusterManagerType.CLOUDERA_MANAGER;
+    }
+
+    @Override
+    public ClusterDefinitionTextProcessor replaceConfiguration(String s, String descriptor) {
+        throw new NotImplementedException("");
+    }
+
+    @Override
+    public ClusterDefinitionTextProcessor addComponentToHostgroups(String component, Predicate<String> addToHostgroup) {
+        throw new NotImplementedException("");
+    }
+
+    @Override
+    public ClusterDefinitionTextProcessor addComponentToHostgroups(String component, Collection<String> addToHostGroups) {
+        throw new NotImplementedException("");
+    }
+
+    @Override
+    public Set<String> getHostGroupsWithComponent(String components) {
+        throw new NotImplementedException("");
+    }
+
+    @Override
+    public String asText() {
+        return cmTemplate.toString();
+    }
+
+    @Override
+    public ClusterDefinitionTextProcessor setSecurityType(String kerberos) {
+        throw new NotImplementedException("");
+    }
+
+    @Override
+    public ClusterDefinitionTextProcessor extendBlueprintGlobalConfiguration(SiteConfigurations configs, boolean forced) {
+        throw new NotImplementedException("");
+    }
+
+    @Override
+    public Set<String> getComponentsInHostGroup(String name) {
+        throw new NotImplementedException("");
+    }
+
+    @Override
+    public ClusterDefinitionTextProcessor extendBlueprintHostGroupConfiguration(HostgroupConfigurations hostgroupConfigurations, boolean b) {
+        throw new NotImplementedException("");
     }
 
     @Override

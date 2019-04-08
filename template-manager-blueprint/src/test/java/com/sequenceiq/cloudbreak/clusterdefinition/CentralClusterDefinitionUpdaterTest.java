@@ -50,7 +50,8 @@ public class CentralClusterDefinitionUpdaterTest {
         testBlueprint = TestUtil.clusterDefinition().getClusterDefinitionText();
 
         object = TemplatePreparationObject.Builder.builder()
-                .withClusterDefinitionView(new ClusterDefinitionView(TestUtil.clusterDefinition().getClusterDefinitionText(), "HDP", "2.6"))
+                .withClusterDefinitionView(new ClusterDefinitionView(TestUtil.clusterDefinition().getClusterDefinitionText(),
+                        "HDP", "2.6", new AmbariBlueprintTextProcessor(testBlueprint)))
                 .build();
     }
 

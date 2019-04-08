@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
+import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.ClusterDefinitionView;
@@ -50,7 +51,7 @@ public class ClusterDefinitionTestUtil {
     }
 
     public static ClusterDefinitionView generalBlueprintView(String blueprintText, String version, String type) {
-        return new ClusterDefinitionView(blueprintText, version, type);
+        return new ClusterDefinitionView(blueprintText, version, type, new AmbariBlueprintTextProcessor(blueprintText));
     }
 
     public static AmbariDatabase generalAmbariDatabase() {

@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.template.HandlebarUtils;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject;
 import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntries;
 import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
-import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service

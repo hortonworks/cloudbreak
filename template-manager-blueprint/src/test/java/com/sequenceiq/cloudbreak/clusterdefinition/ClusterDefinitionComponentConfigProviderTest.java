@@ -8,7 +8,6 @@ import org.junit.Test;
 import com.sequenceiq.cloudbreak.template.ClusterDefinitionComponentConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
-import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 public class ClusterDefinitionComponentConfigProviderTest {

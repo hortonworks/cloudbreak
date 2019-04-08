@@ -6,8 +6,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.template.ClusterDefinitionProcessingException;
-import com.sequenceiq.cloudbreak.template.model.ClusterDefinitionStackInfo;
-import com.sequenceiq.cloudbreak.template.processor.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.ClusterDefinitionTextProcessor;
 
 public class ClusterDefinitionView {
 
@@ -19,25 +18,20 @@ public class ClusterDefinitionView {
 
     private Set<String> components;
 
-    public ClusterDefinitionView(String clusterDefinitionText, String version, String type) {
+    private ClusterDefinitionTextProcessor processor;
+
+    public ClusterDefinitionView(String clusterDefinitionText, String version, String type, ClusterDefinitionTextProcessor processor) {
         this.clusterDefinitionText = clusterDefinitionText;
         this.type = type;
         this.version = version;
-        components = prepareComponents(clusterDefinitionText);
-    }
-
-    public ClusterDefinitionView(ClusterDefinitionStackInfo clusterDefinitionStackInfo, String clusterDefinitionText) {
-        this.clusterDefinitionText = clusterDefinitionText;
-        type = clusterDefinitionStackInfo.getType();
-        version = clusterDefinitionStackInfo.getVersion();
+        this.processor = processor;
         components = prepareComponents(clusterDefinitionText);
     }
 
     private Set<String> prepareComponents(String clusterDefinitionText) {
         Set<String> result = new HashSet<>();
         try {
-            AmbariBlueprintTextProcessor ambariBlueprintTextProcessor = new AmbariBlueprintTextProcessor(clusterDefinitionText);
-            Map<String, Set<String>> componentsByHostGroup = ambariBlueprintTextProcessor.getComponentsByHostGroup();
+            Map<String, Set<String>> componentsByHostGroup = processor.getComponentsByHostGroup();
             componentsByHostGroup.values().forEach(result::addAll);
         } catch (ClusterDefinitionProcessingException exception) {
             result = new HashSet<>();
