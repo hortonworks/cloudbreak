@@ -148,7 +148,7 @@ jobs:
           command: JACOCO_SOURCE_PATH=core/src/main/java ./cc-test-reporter format-coverage ./core/build/reports/jacoco/test/jacocoTestReport.xml --input-type jacoco
       - run:
           name: Upload code climate report
-          command: ./cc-test-reporter upload-coverage -r $CC_TEST_REPORTER_ID
+          command: if [[ -n "${CC_TEST_REPORTER_ID}" ]]; then ./cc-test-reporter upload-coverage -r $CC_TEST_REPORTER_ID; else echo "Skipping upload-coverage"; fi
           when: on_success
       - run:
           name: Save test results
