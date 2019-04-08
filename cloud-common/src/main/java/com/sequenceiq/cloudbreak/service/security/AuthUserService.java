@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.security;
 
+import java.util.UUID;
+
 import javax.inject.Inject;
 
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -12,6 +14,8 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.client.CaasClient;
 import com.sequenceiq.cloudbreak.client.CaasUser;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 
 @Component
@@ -43,7 +47,8 @@ public class AuthUserService {
 
     private CloudbreakUser createCbUserWithUms(OAuth2Authentication auth) {
         String userCrn = ((OAuth2AuthenticationDetails) auth.getDetails()).getTokenValue();
-        UserManagementProto.User userInfo = umsClient.getUserDetails(userCrn, userCrn);
+        String requestId = MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString());
+        UserManagementProto.User userInfo = umsClient.getUserDetails(userCrn, userCrn, requestId != null ? requestId : UUID.randomUUID().toString());
         return new CloudbreakUser(userInfo.getUserId(), (String) auth.getPrincipal(), userInfo.getEmail(), Crn.fromString(userCrn).getAccountId());
     }
 }

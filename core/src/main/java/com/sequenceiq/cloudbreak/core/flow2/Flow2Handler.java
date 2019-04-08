@@ -262,7 +262,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     }
 
     private void logFlowId(String flowId) {
-        String trackingId = MDCBuilder.getMdcContextMap().get(LoggerContextKey.TRACKING_ID.toString());
-        LOGGER.debug("Flow has been created with id: '{}' and the related tracking id: '{}'.", flowId, trackingId);
+        String requestId = MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString());
+        LOGGER.debug("Flow has been created with id: '{}' and the related request id: '{}'.", flowId, requestId);
     }
 }

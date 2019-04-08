@@ -26,7 +26,7 @@ public class MDCContextFilter extends OncePerRequestFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MDCContextFilter.class);
 
-    private static final String TRACKING_ID_HEADER = "trackingId";
+    private static final String REQUEST_ID_HEADER = "x-cdp-request-id";
 
     private final AuthenticatedUserService authenticatedUserService;
 
@@ -45,9 +45,9 @@ public class MDCContextFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
         MDCBuilder.cleanupMdc();
-        HttpServletRequestWrapper wrapper = new TrackingIdHeaderInjectingHttpRequestWrapper(request);
-        MDCBuilder.addTrackingIdToMdcContext(wrapper.getHeader(TRACKING_ID_HEADER));
-        LOGGER.debug("Tracking id has been added to MDC context for request, method: {}, path: {}",
+        HttpServletRequestWrapper wrapper = new RequestIdHeaderInjectingHttpRequestWrapper(request);
+        MDCBuilder.addRequestIdToMdcContext(wrapper.getHeader(REQUEST_ID_HEADER));
+        LOGGER.debug("Request id has been added to MDC context for request, method: {}, path: {}",
                 request.getMethod().toUpperCase(),
                 request.getRequestURI());
         MDCBuilder.buildUserMdcContext(authenticatedUserService.getCbUser());
@@ -55,16 +55,16 @@ public class MDCContextFilter extends OncePerRequestFilter {
         filterChain.doFilter(wrapper, response);
     }
 
-    private static class TrackingIdHeaderInjectingHttpRequestWrapper extends HttpServletRequestWrapper {
+    private static class RequestIdHeaderInjectingHttpRequestWrapper extends HttpServletRequestWrapper {
 
         private final Map<String, String> headerMap = new HashMap<>();
 
-        private TrackingIdHeaderInjectingHttpRequestWrapper(HttpServletRequest request) {
+        private RequestIdHeaderInjectingHttpRequestWrapper(HttpServletRequest request) {
             super(request);
-            if (StringUtils.isEmpty(request.getHeader(TRACKING_ID_HEADER))) {
-                String trackingId = UUID.randomUUID().toString();
-                LOGGER.debug("No trackingId in request. Adding trackingId: '{}'", trackingId);
-                addHeader(TRACKING_ID_HEADER, trackingId);
+            if (StringUtils.isEmpty(request.getHeader(REQUEST_ID_HEADER))) {
+                String requestId = UUID.randomUUID().toString();
+                LOGGER.debug("No requestId in request. Adding requestId: '{}'", requestId);
+                addHeader(REQUEST_ID_HEADER, requestId);
             }
         }
 
