@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.ws.rs.ProcessingException;
 
@@ -30,6 +31,8 @@ import com.sequenceiq.cloudbreak.client.CaasClient;
 import com.sequenceiq.cloudbreak.client.CaasUser;
 import com.sequenceiq.cloudbreak.client.IdentityClient;
 import com.sequenceiq.cloudbreak.client.IntrospectResponse;
+import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 public class CachedRemoteTokenService implements ResourceServerTokenServices {
 
@@ -102,7 +105,8 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
     }
 
     private OAuth2Authentication getUmsAuthentication(String crn) {
-        UserManagementProto.User user = umsClient.getUserDetails(crn, crn);
+        String requestId = MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString());
+        UserManagementProto.User user = umsClient.getUserDetails(crn, crn, requestId != null ? requestId : UUID.randomUUID().toString());
         Map<String, Object> tokenMap = new HashMap<>();
         tokenMap.put("tenant", Crn.fromString(crn).getAccountId());
         tokenMap.put("crn", user.getCrn());

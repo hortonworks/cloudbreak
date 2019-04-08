@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.auth.altus;
 
 import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
 
-import java.util.UUID;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -25,19 +23,14 @@ public class GrpcUmsClient {
     @Inject
     private UmsConfig umsConfig;
 
-    private static String newRequestId() {
-        return UUID.randomUUID().toString();
-    }
-
     @Cacheable(cacheNames = "umsUserCache")
-    public UserManagementProto.User getUserDetails(String actorCrn, String userCrn) {
+    public UserManagementProto.User getUserDetails(String actorCrn, String userCrn, String requestId) {
         try (ManagedChannelWrapper channelWrapper = new ManagedChannelWrapper(
                 ManagedChannelBuilder.forAddress(umsConfig.getEndpoint(), umsConfig.getPort())
                         .usePlaintext()
                         .maxInboundMessageSize(DEFAULT_MAX_MESSAGE_SIZE)
                         .build())) {
             UmsClient client = new UmsClient(channelWrapper.getChannel(), actorCrn);
-            String requestId = newRequestId();
             LOGGER.info("Getting user information for {} using request ID {}", userCrn, requestId);
             UserManagementProto.User user = client.getUser(requestId, userCrn);
             LOGGER.info("User information retrieved for userCrn: {}", user.getCrn());

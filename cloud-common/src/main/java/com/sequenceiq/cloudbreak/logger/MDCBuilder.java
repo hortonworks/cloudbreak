@@ -25,8 +25,8 @@ public class MDCBuilder {
         MDC.put(LoggerContextKey.FLOW_ID.toString(), flowId);
     }
 
-    public static void addTrackingIdToMdcContext(String trackingId) {
-        MDC.put(LoggerContextKey.TRACKING_ID.toString(), trackingId);
+    public static void addRequestIdToMdcContext(String requestId) {
+        MDC.put(LoggerContextKey.REQUEST_ID.toString(), requestId);
     }
 
     public static void buildMdcContext(Object object) {

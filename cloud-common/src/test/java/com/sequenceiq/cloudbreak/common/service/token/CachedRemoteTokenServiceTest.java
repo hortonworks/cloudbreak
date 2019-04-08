@@ -58,7 +58,7 @@ public class CachedRemoteTokenServiceTest {
     @Test
     public void whenInvalidCrnIsProvidedThrowInvalidTokenException() {
         when(umsClient.isUmsUsable(crn)).thenReturn(true);
-        when(umsClient.getUserDetails(anyString(), anyString())).thenThrow(new NullPointerException());
+        when(umsClient.getUserDetails(anyString(), anyString(), anyString())).thenThrow(new NullPointerException());
         thrown.expect(InvalidTokenException.class);
         thrown.expectMessage("Invalid CRN provided");
         CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret",
@@ -72,7 +72,7 @@ public class CachedRemoteTokenServiceTest {
         UserManagementProto.User user = UserManagementProto.User.newBuilder()
                 .setCrn(crn)
                 .setEmail("hansolo@cloudera.com").build();
-        when(umsClient.getUserDetails(anyString(), anyString())).thenReturn(user);
+        when(umsClient.getUserDetails(anyString(), anyString(), anyString())).thenReturn(user);
         CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret",
                 "http://localhost:8089", umsClient, caasClient, identityClient);
         OAuth2Authentication authentication = (OAuth2Authentication) tokenService.loadAuthentication(crn);
@@ -82,7 +82,7 @@ public class CachedRemoteTokenServiceTest {
     @Test
     public void testCrnBasedAuth() {
         when(umsClient.isUmsUsable(crn)).thenReturn(true);
-        when(umsClient.getUserDetails(anyString(), anyString())).thenThrow(new NullPointerException());
+        when(umsClient.getUserDetails(anyString(), anyString(), anyString())).thenThrow(new NullPointerException());
         thrown.expect(InvalidTokenException.class);
         thrown.expectMessage("Invalid CRN provided");
         CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret",
