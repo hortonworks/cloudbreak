@@ -29,12 +29,12 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.ambari.AmbariAdapter.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.ambari.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterConnectorPollingResultChecker;
+import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.clusterdefinition.CentralClusterDefinitionUpdater;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -159,8 +159,9 @@ public class AmbariClusterSetupService implements ClusterSetupService {
     private String constructClusterFailedMessage(Long clusterId, AmbariClient ambariClient) {
         String ambariClusterInstallFailedMsg = cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_INSTALL_FAILED.code());
         ClusterStatusResult clusterStatusResult = ambariAdapter.getClusterStatusHostComponentMap(ambariClient);
-        LOGGER.debug("There are not started services. Cluster: [{}], services: [{}]", clusterId, clusterStatusResult.getComponentsInStatus());
-        return String.format("%s Not started services: [%s]", ambariClusterInstallFailedMsg, clusterStatusResult.getComponentsInStatus());
+        String statusReason = clusterStatusResult.getStatusReason();
+        LOGGER.debug("There are not started services. Cluster: [{}], services: [{}]", clusterId, statusReason);
+        return String.format("%s Not started services: [%s]", ambariClusterInstallFailedMsg, statusReason);
     }
 
     @Override

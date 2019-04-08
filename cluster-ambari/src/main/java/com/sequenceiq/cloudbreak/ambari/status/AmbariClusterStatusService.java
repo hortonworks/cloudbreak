@@ -12,8 +12,10 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.ambari.AmbariClientFactory;
+import com.sequenceiq.cloudbreak.ambari.AmbariClusterStatusFactory;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
+import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
@@ -28,6 +30,9 @@ public class AmbariClusterStatusService implements ClusterStatusService {
     @Inject
     private AmbariClientFactory ambariClientFactory;
 
+    @Inject
+    private AmbariClusterStatusFactory clusterStatusFactory;
+
     private AmbariClient ambariClient;
 
     public AmbariClusterStatusService(Stack stack, HttpClientConfig clientConfig) {
@@ -38,6 +43,11 @@ public class AmbariClusterStatusService implements ClusterStatusService {
     @PostConstruct
     public void initAmbariClient() {
         ambariClient = ambariClientFactory.getAmbariClient(stack, stack.getCluster(), clientConfig);
+    }
+
+    @Override
+    public ClusterStatusResult getStatus(boolean blueprintPresent) {
+        return clusterStatusFactory.createClusterStatus(stack, clientConfig, blueprintPresent);
     }
 
     @Override

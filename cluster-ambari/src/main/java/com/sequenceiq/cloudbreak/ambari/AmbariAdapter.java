@@ -14,6 +14,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
+import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 
 @Component
 public class AmbariAdapter {
@@ -103,23 +104,4 @@ public class AmbariAdapter {
         }
     }
 
-    public static class ClusterStatusResult {
-
-        private final ClusterStatus clusterStatus;
-
-        private final String componentsInStatus;
-
-        ClusterStatusResult(ClusterStatus clusterStatus, String componentsInStatus) {
-            this.clusterStatus = clusterStatus;
-            this.componentsInStatus = componentsInStatus;
-        }
-
-        public ClusterStatus getClusterStatus() {
-            return clusterStatus;
-        }
-
-        public String getComponentsInStatus() {
-            return componentsInStatus;
-        }
-    }
 }

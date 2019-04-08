@@ -103,7 +103,7 @@ public interface ClusterApi {
     }
 
     default ClusterStatus getStatus(boolean blueprintPresent) {
-        return clusterModificationService().getStatus(blueprintPresent);
+        return clusterStatusService().getStatus(blueprintPresent).getClusterStatus();
     }
 
     default Map<String, HostMetadataState> getHostStatuses() {

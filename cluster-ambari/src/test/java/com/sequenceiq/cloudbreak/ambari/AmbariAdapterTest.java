@@ -14,8 +14,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.ambari.AmbariAdapter.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
+import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariAdapterTest {

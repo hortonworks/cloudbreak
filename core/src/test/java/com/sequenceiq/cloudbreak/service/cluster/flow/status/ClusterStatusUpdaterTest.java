@@ -16,8 +16,9 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
-import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
+import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -59,22 +60,22 @@ public class ClusterStatusUpdaterTest {
     private ClusterApi clusterApi;
 
     @Mock
-    private ClusterModificationService clusterModificationService;
+    private ClusterStatusService clusterStatusService;
 
     @Before
     public void setUp() {
         underTest = new ClusterStatusUpdater();
         MockitoAnnotations.initMocks(this);
         when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
-        when(clusterApi.clusterModificationService()).thenReturn(clusterModificationService);
-        when(clusterModificationService.getStatus(anyBoolean())).thenReturn(ClusterStatus.STARTED);
+        when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
+        when(clusterStatusService.getStatus(anyBoolean())).thenReturn(ClusterStatusResult.of(ClusterStatus.STARTED));
     }
 
     @Test
     public void testUpdateClusterStatusShouldUpdateStackStatusWhenStackStatusChanged() {
         // GIVEN
         Stack stack = createStack(Status.AVAILABLE, Status.AVAILABLE);
-        when(clusterModificationService.getStatus(anyBoolean())).thenReturn(ClusterStatus.INSTALLED);
+        when(clusterStatusService.getStatus(anyBoolean())).thenReturn(ClusterStatusResult.of(ClusterStatus.INSTALLED));
         // WHEN
         underTest.updateClusterStatus(stack, stack.getCluster());
         // THEN
@@ -105,7 +106,7 @@ public class ClusterStatusUpdaterTest {
     public void testUpdateClusterStatusShouldUpdateStackStatusWhenMaintenanceModeIsEnabledButClusterIsStopped() {
         // GIVEN
         Stack stack = createStack(Status.AVAILABLE, Status.MAINTENANCE_MODE_ENABLED);
-        when(clusterModificationService.getStatus(anyBoolean())).thenReturn(ClusterStatus.INSTALLED);
+        when(clusterStatusService.getStatus(anyBoolean())).thenReturn(ClusterStatusResult.of(ClusterStatus.INSTALLED));
         // WHEN
         underTest.updateClusterStatus(stack, stack.getCluster());
         // THEN
