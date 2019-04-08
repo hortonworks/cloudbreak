@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.ambari.AmbariAdapter.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
+import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @Component
@@ -26,15 +26,15 @@ public class AmbariClusterStatusFactory {
     @Inject
     private AmbariClientFactory ambariClientFactory;
 
-    public ClusterStatus createClusterStatus(Stack stack, HttpClientConfig clientConfig, boolean blueprintPresent) {
-        ClusterStatus clusterStatus;
+    public ClusterStatusResult createClusterStatus(Stack stack, HttpClientConfig clientConfig, boolean blueprintPresent) {
+        ClusterStatusResult clusterStatus;
         AmbariClient ambariClient = ambariClientFactory.getAmbariClient(stack, stack.getCluster(), clientConfig);
         if (!isAmbariServerRunning(ambariClient)) {
-            clusterStatus = ClusterStatus.AMBARISERVER_NOT_RUNNING;
+            clusterStatus = ClusterStatusResult.of(ClusterStatus.AMBARISERVER_NOT_RUNNING);
         } else if (blueprintPresent) {
             clusterStatus = determineClusterStatus(ambariClient);
         } else {
-            clusterStatus = ClusterStatus.AMBARISERVER_RUNNING;
+            clusterStatus = ClusterStatusResult.of(ClusterStatus.AMBARISERVER_RUNNING);
         }
         return clusterStatus;
     }
@@ -49,22 +49,19 @@ public class AmbariClusterStatusFactory {
         return result;
     }
 
-    private ClusterStatus determineClusterStatus(AmbariClient ambariClient) {
-        ClusterStatus clusterStatus;
+    private ClusterStatusResult determineClusterStatus(AmbariClient ambariClient) {
+        ClusterStatusResult result;
         try {
             Map<String, List<Integer>> ambariOperations = ambariClient.getRequests("IN_PROGRESS", "PENDING");
             if (!ambariOperations.isEmpty()) {
-                clusterStatus = ClusterStatus.PENDING;
+                result = ClusterStatusResult.of(ClusterStatus.PENDING);
             } else {
-                ClusterStatusResult statusResult = ambariAdapter.getClusterStatusHostComponentMap(ambariClient);
-
-                clusterStatus = statusResult.getClusterStatus();
-                clusterStatus.setStatusReasonArg(statusResult.getComponentsInStatus());
+                result = ambariAdapter.getClusterStatusHostComponentMap(ambariClient);
             }
         } catch (Exception ex) {
             LOGGER.warn("An error occurred while trying to reach Ambari.", ex);
-            clusterStatus = ClusterStatus.UNKNOWN;
+            result = ClusterStatusResult.of(ClusterStatus.UNKNOWN);
         }
-        return clusterStatus;
+        return result;
     }
 }

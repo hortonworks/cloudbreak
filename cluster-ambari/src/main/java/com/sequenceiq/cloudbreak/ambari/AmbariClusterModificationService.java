@@ -51,7 +51,6 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterConnectorPollingResultChecker;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterException;
-import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -103,9 +102,6 @@ public class AmbariClusterModificationService implements ClusterModificationServ
 
     @Inject
     private Retry retry;
-
-    @Inject
-    private AmbariClusterStatusFactory clusterStatusFactory;
 
     @Inject
     private AmbariRepositoryVersionService ambariRepositoryVersionService;
@@ -400,10 +396,6 @@ public class AmbariClusterModificationService implements ClusterModificationServ
         if (!errors.isEmpty()) {
             throw errors.poll();
         }
-    }
-
-    public ClusterStatus getStatus(boolean blueprintPresent) {
-        return clusterStatusFactory.createClusterStatus(stack, clientConfig, blueprintPresent);
     }
 
     @Override

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
+import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -49,10 +50,10 @@ public class ClusterStatusUpdater {
             Long stackId = stack.getId();
             clusterService.updateClusterMetadata(stackId);
             String blueprintName = cluster.getClusterDefinition().getStackName();
-            ClusterStatus clusterStatus =
-                    clusterApiConnectors.getConnector(stack).clusterModificationService().getStatus(StringUtils.isNotBlank(blueprintName));
-            LOGGER.debug("Ambari cluster status: [{}] Status reason: [{}]", clusterStatus.name(), clusterStatus.getStatusReason());
-            updateClusterStatus(stackId, stack.getStatus(), cluster, clusterStatus);
+            ClusterStatusResult clusterStatusResult =
+                    clusterApiConnectors.getConnector(stack).clusterStatusService().getStatus(StringUtils.isNotBlank(blueprintName));
+            LOGGER.debug("Ambari cluster status: [{}] Status reason: [{}]", clusterStatusResult.getClusterStatus(), clusterStatusResult.getStatusReason());
+            updateClusterStatus(stackId, stack.getStatus(), cluster, clusterStatusResult);
 
         }
     }
@@ -65,13 +66,13 @@ public class ClusterStatusUpdater {
                 || cluster.isModificationInProgress();
     }
 
-    private void updateClusterStatus(Long stackId, Status stackStatus, Cluster cluster, ClusterStatus ambariClusterStatus) {
+    private void updateClusterStatus(Long stackId, Status stackStatus, Cluster cluster, ClusterStatusResult clusterStatusResult) {
         Status statusInEvent = stackStatus;
-        String statusReason = ambariClusterStatus.getStatusReason();
-        if (isUpdateEnabled(ambariClusterStatus)) {
-            if (updateClusterStatus(stackId, cluster, ambariClusterStatus.getClusterStatus())) {
-                statusInEvent = ambariClusterStatus.getStackStatus();
-                statusReason = ambariClusterStatus.getStatusReason();
+        ClusterStatus clusterStatus = clusterStatusResult.getClusterStatus();
+        String statusReason = clusterStatusResult.getStatusReason();
+        if (isUpdateEnabled(clusterStatus)) {
+            if (updateClusterStatus(stackId, cluster, clusterStatus.getClusterStatus())) {
+                statusInEvent = clusterStatus.getStackStatus();
             } else {
                 statusReason = "The cluster's state is up to date.";
             }

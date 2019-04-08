@@ -59,7 +59,7 @@ public class CandidateUnhealthyInstancesSelectorTest {
 
         Set<InstanceMetaData> candidateUnhealthyInstances = undertest.selectCandidateUnhealthyInstances(stack.getId());
 
-        assertEquals(2L, candidateUnhealthyInstances.size());
+        assertEquals(2, candidateUnhealthyInstances.size());
         assertTrue(candidateUnhealthyInstances.contains(imd1));
         assertTrue(candidateUnhealthyInstances.contains(imd2));
     }

@@ -8,6 +8,9 @@ import com.cloudera.api.swagger.AuthRolesResourceApi;
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.ExternalUserMappingsResourceApi;
+import com.cloudera.api.swagger.HostsResourceApi;
+import com.cloudera.api.swagger.RolesResourceApi;
+import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -54,5 +57,17 @@ public class ClouderaManagerClientFactory {
 
     public ClustersResourceApi getClustersResourceApi(ApiClient apiClient) {
         return new ClustersResourceApi(apiClient);
+    }
+
+    public HostsResourceApi getHostsResourceApi(ApiClient client) {
+        return new HostsResourceApi(client);
+    }
+
+    public ServicesResourceApi getServicesResourceApi(ApiClient client) {
+        return new ServicesResourceApi(client);
+    }
+
+    public RolesResourceApi getRolesResourceApi(ApiClient client) {
+        return new RolesResourceApi(client);
     }
 }

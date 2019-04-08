@@ -76,7 +76,7 @@ public class AmbariClusterStatusFactoryTest {
         // GIVEN
         BDDMockito.given(ambariClient.healthCheck()).willThrow(new RuntimeException());
         // WHEN
-        ClusterStatus actualResult = underTest.createClusterStatus(stack, clientConfig, true);
+        ClusterStatus actualResult = underTest.createClusterStatus(stack, clientConfig, true).getClusterStatus();
         // THEN
         Assert.assertEquals(ClusterStatus.AMBARISERVER_NOT_RUNNING, actualResult);
     }
@@ -88,7 +88,7 @@ public class AmbariClusterStatusFactoryTest {
         BDDMockito.given(ambariClient.getRequests("IN_PROGRESS", "PENDING")).willReturn(Collections.singletonMap("IN_PROGRESS",
                 Collections.singletonList(1)));
         // WHEN
-        ClusterStatus actualResult = underTest.createClusterStatus(stack, clientConfig, true);
+        ClusterStatus actualResult = underTest.createClusterStatus(stack, clientConfig, true).getClusterStatus();
         // THEN
         Assert.assertEquals(ClusterStatus.PENDING, actualResult);
     }
@@ -98,7 +98,7 @@ public class AmbariClusterStatusFactoryTest {
         // GIVEN
         BDDMockito.given(ambariClient.healthCheck()).willReturn("RUNNING");
         // WHEN
-        ClusterStatus actualResult = underTest.createClusterStatus(stack, clientConfig, false);
+        ClusterStatus actualResult = underTest.createClusterStatus(stack, clientConfig, false).getClusterStatus();
         // THEN
         Assert.assertEquals(ClusterStatus.AMBARISERVER_RUNNING, actualResult);
         Assert.assertEquals(Status.AVAILABLE, actualResult.getStackStatus());
@@ -111,7 +111,7 @@ public class AmbariClusterStatusFactoryTest {
         BDDMockito.given(ambariClient.healthCheck()).willReturn("RUNNING");
         BDDMockito.given(ambariClient.getHostComponentsStatesCategorized()).willReturn(createHostComponentsStates("INSTALLED"));
         // WHEN
-        ClusterStatus actualResult = underTest.createClusterStatus(stack, clientConfig, true);
+        ClusterStatus actualResult = underTest.createClusterStatus(stack, clientConfig, true).getClusterStatus();
         // THEN
         Assert.assertEquals(ClusterStatus.INSTALLED, actualResult);
         Assert.assertEquals(Status.AVAILABLE, actualResult.getStackStatus());
@@ -124,7 +124,7 @@ public class AmbariClusterStatusFactoryTest {
         BDDMockito.given(ambariClient.healthCheck()).willReturn("RUNNING");
         BDDMockito.given(ambariClient.getHostComponentsStatesCategorized()).willReturn(createHostComponentsStates("STARTED"));
         // WHEN
-        ClusterStatus actualResult = underTest.createClusterStatus(stack, clientConfig, true);
+        ClusterStatus actualResult = underTest.createClusterStatus(stack, clientConfig, true).getClusterStatus();
         // THEN
         Assert.assertEquals(ClusterStatus.STARTED, actualResult);
         Assert.assertEquals(Status.AVAILABLE, actualResult.getStackStatus());
@@ -137,7 +137,7 @@ public class AmbariClusterStatusFactoryTest {
         BDDMockito.given(ambariClient.healthCheck()).willReturn("RUNNING");
         BDDMockito.given(ambariClient.getHostComponentsStatesCategorized()).willReturn(createInstallingHostComponentsStates());
         // WHEN
-        ClusterStatus actualResult = underTest.createClusterStatus(stack, clientConfig, true);
+        ClusterStatus actualResult = underTest.createClusterStatus(stack, clientConfig, true).getClusterStatus();
         // THEN
         Assert.assertEquals(ClusterStatus.INSTALLING, actualResult);
     }
@@ -148,7 +148,7 @@ public class AmbariClusterStatusFactoryTest {
         BDDMockito.given(ambariClient.healthCheck()).willReturn("RUNNING");
         BDDMockito.given(ambariClient.getHostComponentsStatesCategorized()).willReturn(createInstalledAndStartedHostComponentsStates());
         // WHEN
-        ClusterStatus actualResult = underTest.createClusterStatus(stack, clientConfig, true);
+        ClusterStatus actualResult = underTest.createClusterStatus(stack, clientConfig, true).getClusterStatus();
         // THEN
         Assert.assertEquals(ClusterStatus.AMBIGUOUS, actualResult);
     }
@@ -159,7 +159,7 @@ public class AmbariClusterStatusFactoryTest {
         BDDMockito.given(ambariClient.healthCheck()).willReturn("RUNNING");
         BDDMockito.given(ambariClient.getHostComponentsStatesCategorized()).willReturn(createHostComponentsStates("Unsupported"));
         // WHEN
-        ClusterStatus actualResult = underTest.createClusterStatus(stack, clientConfig, true);
+        ClusterStatus actualResult = underTest.createClusterStatus(stack, clientConfig, true).getClusterStatus();
         // THEN
         Assert.assertEquals(ClusterStatus.AMBIGUOUS, actualResult);
     }
@@ -170,7 +170,7 @@ public class AmbariClusterStatusFactoryTest {
         BDDMockito.given(ambariClient.healthCheck()).willReturn("RUNNING");
         BDDMockito.given(ambariClient.getHostComponentsStatesCategorized()).willThrow(new RuntimeException());
         // WHEN
-        ClusterStatus actualResult = underTest.createClusterStatus(stack, clientConfig, true);
+        ClusterStatus actualResult = underTest.createClusterStatus(stack, clientConfig, true).getClusterStatus();
         // THEN
         Assert.assertEquals(ClusterStatus.UNKNOWN, actualResult);
     }

@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
-import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -19,8 +18,6 @@ public interface ClusterModificationService {
     void stopCluster() throws CloudbreakException;
 
     int startCluster(Set<HostMetadata> hostsInCluster) throws CloudbreakException;
-
-    ClusterStatus getStatus(boolean blueprintPresent);
 
     Map<String, String> getComponentsByCategory(String blueprintName, String hostGroupName);
 
