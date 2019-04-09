@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.template.network.NetworkResourceService;
 
 /**
  * Abstract base implementation of {@link ResourceConnector} for cloud provider which do not have template based deployments. It provides the
- * functionality to call the resource builders in order starting from the {@link NetworkResourceBuilder} and continueing with the
+ * functionality to call the resource builders in order starting from the {@link NetworkResourceBuilder} and continuing with the
  * {@link ComputeResourceBuilder}. Before calling any resource builder it constructs a generic {@link ResourceBuilderContext}. This context object
  * will be extended with the created resources as the builder finish creating them. The resources are grouped by private id.
  * <br>
