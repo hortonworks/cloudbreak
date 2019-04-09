@@ -99,7 +99,7 @@ public class OpenStackCloudProvider extends AbstractCloudProvider {
 
     @Override
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
-        String sshPublicKey = commonCloudPropeties().getSshPublicKey();
+        String sshPublicKey = commonCloudProperties().getSshPublicKey();
         return stackAuthenticationEntity.withPublicKey(sshPublicKey);
     }
 

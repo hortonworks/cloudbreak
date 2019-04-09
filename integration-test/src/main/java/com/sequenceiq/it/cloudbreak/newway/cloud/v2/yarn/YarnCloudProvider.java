@@ -35,7 +35,7 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     @Override
     public CredentialTestDto credential(CredentialTestDto credential) {
         return credential
-                .withDescription(commonCloudPropeties().getDefaultCredentialDescription())
+                .withDescription(commonCloudProperties().getDefaultCredentialDescription())
                 .withCloudPlatform(CloudPlatform.YARN.name())
                 .withYarnParameters(yarnCredentialParameters());
     }
@@ -114,7 +114,7 @@ public class YarnCloudProvider extends AbstractCloudProvider {
 
     @Override
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
-        String sshPublicKey = commonCloudPropeties().getSshPublicKey();
+        String sshPublicKey = commonCloudProperties().getSshPublicKey();
         return stackAuthenticationEntity.withPublicKey(sshPublicKey);
     }
 

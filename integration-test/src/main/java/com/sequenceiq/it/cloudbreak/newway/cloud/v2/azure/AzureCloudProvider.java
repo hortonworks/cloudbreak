@@ -34,7 +34,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
         parameters.setAppBased(appBased);
         return credential.withAzureParameters(parameters)
                 .withCloudPlatform(CloudPlatform.AZURE.name())
-                .withDescription(commonCloudPropeties().getDefaultCredentialDescription());
+                .withDescription(commonCloudProperties().getDefaultCredentialDescription());
     }
 
     @Override
@@ -100,7 +100,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Override
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
-        String sshPublicKey = commonCloudPropeties().getSshPublicKey();
+        String sshPublicKey = commonCloudProperties().getSshPublicKey();
         return stackAuthenticationEntity.withPublicKey(sshPublicKey);
     }
 

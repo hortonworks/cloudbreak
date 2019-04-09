@@ -67,7 +67,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
         MockedTestContext mockedTestContext = (MockedTestContext) credentialEntity.getTestContext();
         credentialParameters.setMockEndpoint(mockedTestContext.getSparkServer().getEndpoint());
         return credentialEntity.withName(randomNameCreator.getRandomNameForResource())
-                .withDescription(commonCloudPropeties().getDefaultCredentialDescription())
+                .withDescription(commonCloudProperties().getDefaultCredentialDescription())
                 .withMockParameters(credentialParameters)
                 .withCloudPlatform(MOCK_CAPITAL);
     }

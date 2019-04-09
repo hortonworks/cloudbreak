@@ -1,5 +1,9 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud.v2;
 
+import java.util.Collections;
+
+import javax.inject.Inject;
+
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.ImageSettingsTestDto;
@@ -7,9 +11,6 @@ import com.sequenceiq.it.cloudbreak.newway.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDtoBase;
-
-import javax.inject.Inject;
-import java.util.Collections;
 
 public abstract class AbstractCloudProvider implements CloudProvider {
 
@@ -27,7 +28,7 @@ public abstract class AbstractCloudProvider implements CloudProvider {
         return testParameter;
     }
 
-    protected CommonCloudProperties commonCloudPropeties() {
+    protected CommonCloudProperties commonCloudProperties() {
         return commonCloudProperties;
     }
 

@@ -94,7 +94,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
             parameters = awsCredentialDetailsArn();
         }
         return credential
-                .withDescription(commonCloudPropeties().getDefaultCredentialDescription())
+                .withDescription(commonCloudProperties().getDefaultCredentialDescription())
                 .withCloudPlatform(CloudPlatform.AWS.name())
                 .withAwsParameters(parameters);
     }
