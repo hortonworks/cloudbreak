@@ -41,9 +41,8 @@ public abstract class AbstractMetricService implements MetricService {
     }
 
     protected void initMicrometerMetricCounter(String metric) {
-        try (Counter counter = Metrics.counter(metric)) {
-            counter.increment(0);
-        }
+        Counter counter = Metrics.counter(metric);
+        counter.increment(0);
     }
 
     @Override
@@ -52,9 +51,8 @@ public abstract class AbstractMetricService implements MetricService {
     }
 
     protected void incrementMetricCounter(String metric) {
-        try (Counter counter = Metrics.counter(metric)) {
-            counter.increment();
-        }
+        Counter counter = Metrics.counter(metric);
+        counter.increment();
     }
 
     protected boolean gaugeMetric(Metric metric) {
