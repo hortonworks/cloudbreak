@@ -22,7 +22,7 @@ public final class ConsulUtils {
     private static final int DEFAULT_TIMEOUT_MS = 5000;
 
     private ConsulUtils() {
-        throw new IllegalStateException("ConsulUtils not instancable");
+        throw new IllegalStateException("ConsulUtils not instanceable");
     }
 
     public static List<CatalogService> getService(Iterable<ConsulClient> clients, String serviceName) {
