@@ -104,12 +104,12 @@ public class GcpCloudProvider extends AbstractCloudProvider {
         }
         return credential.withGcpParameters(parameters)
                 .withCloudPlatform(CloudPlatform.GCP.name())
-                .withDescription(commonCloudPropeties().getDefaultCredentialDescription());
+                .withDescription(commonCloudProperties().getDefaultCredentialDescription());
     }
 
     @Override
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
-        String sshPublicKey = commonCloudPropeties().getSshPublicKey();
+        String sshPublicKey = commonCloudProperties().getSshPublicKey();
         return stackAuthenticationEntity.withPublicKey(sshPublicKey);
     }
 
