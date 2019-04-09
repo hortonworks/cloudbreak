@@ -39,7 +39,7 @@ public class CachingConfig implements CachingConfigurer {
     private final Map<Class<?>, CacheDefinition> classCacheDefinitionMap = new HashMap<>();
 
     @PostConstruct
-    public void postCachDefinition() {
+    public void postCacheDefinition() {
         for (CacheDefinition cacheDefinition : cacheDefinitions) {
             if (cacheDefinition.type() != null) {
                 classCacheDefinitionMap.put(cacheDefinition.type(), cacheDefinition);
