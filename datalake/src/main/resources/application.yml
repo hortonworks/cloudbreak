@@ -16,6 +16,12 @@ management:
           enabled: true
     prometheus:
       enabled: true
+  metrics:
+    distribution:
+      sla:
+        "[http.server.requests]": "125ms, 250ms, 500ms, 1s, 2s"
+      percentiles:
+        "[http.server.requests]": "0.5, 0.95"
 
 datalake:
   cert.dir: /certs/
