@@ -6,7 +6,7 @@ public class ApiDescription {
 
     public static final String ALERT_DESCRIPTION = "Operations on alerts";
     public static final String CONFIGURATION_DESCRIPTION = "Operations on configurations";
-    public static final String HISTORY_DESCRIPTION = "Operations on hirtories";
+    public static final String HISTORY_DESCRIPTION = "Operations on histories";
     public static final String CLUSTERS_DESCRIPTION = "Operations on clusters";
     public static final String POLICIES_DESCRIPTION = "Operations on policies";
 
