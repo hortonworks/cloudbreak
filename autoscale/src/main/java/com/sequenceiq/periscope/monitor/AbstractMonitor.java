@@ -37,7 +37,7 @@ public abstract class AbstractMonitor<M extends Monitored> implements Monitor<M>
                 EvaluatorContext evaluatorContext = getContext(monitored);
                 evaluatorExecutor.setContext(evaluatorContext);
                 executorServiceWithRegistry.submitIfAbsent(evaluatorExecutor, evaluatorContext.getItemId());
-                LOGGER.debug("Succesfully submitted {} for cluster {}.", evaluatorExecutor.getName(), evaluatorContext.getData());
+                LOGGER.debug("Successfully submitted {} for cluster {}.", evaluatorExecutor.getName(), evaluatorContext.getData());
                 rejectedThreadService.remove(evaluatorContext.getData());
                 monitored.setLastEvaluated(System.currentTimeMillis());
                 save(monitored);
