@@ -1,15 +1,15 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud.v2;
 
-import java.util.Collections;
+import com.sequenceiq.it.cloudbreak.newway.TestParameter;
+import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ImageSettingsTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.PlacementSettingsTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDtoBase;
 
 import javax.inject.Inject;
-
-import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.newway.dto.ImageSettingsTestDto;
-import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-import com.sequenceiq.it.cloudbreak.newway.dto.PlacementSettingsTestDto;
-import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDtoBase;
-import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
+import java.util.Collections;
 
 public abstract class AbstractCloudProvider implements CloudProvider {
 
@@ -20,8 +20,15 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     @Inject
     private TestParameter testParameter;
 
+    @Inject
+    private CommonCloudProperties commonCloudProperties;
+
     protected TestParameter getTestParameter() {
         return testParameter;
+    }
+
+    protected CommonCloudProperties commonCloudPropeties() {
+        return commonCloudProperties;
     }
 
     @Override
@@ -49,16 +56,21 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     @Override
     public String getSubnetCIDR() {
-        String subnetCIDR = testParameter.get(CommonCloudParameters.SUBNET_CIDR);
+        String subnetCIDR = commonCloudProperties.getSubnetCidr();
         return subnetCIDR == null ? DEFAULT_SUBNET_CIDR : subnetCIDR;
     }
 
     @Override
     public Integer gatewayPort(StackTestDtoBase stackEntity) {
-        String gatewayPort = getTestParameter().getWithDefault(CommonCloudParameters.GATEWAY_PORT, null);
-        if (gatewayPort == null) {
-            return null;
-        }
-        return Integer.parseInt(gatewayPort);
+        return commonCloudProperties.getGatewayPort();
     }
+
+    @Override
+    public final ClusterTestDto cluster(ClusterTestDto clusterTestDto) {
+        clusterTestDto.withUserName(commonCloudProperties.getAmbari().getDefaultUser())
+                .withPassword(commonCloudProperties.getAmbari().getDefaultPassword());
+        return withCluster(clusterTestDto);
+    }
+
+    protected abstract ClusterTestDto withCluster(ClusterTestDto cluster);
 }

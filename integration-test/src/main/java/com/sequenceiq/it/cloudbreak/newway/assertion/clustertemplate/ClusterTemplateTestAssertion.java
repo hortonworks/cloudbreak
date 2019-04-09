@@ -1,17 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway.assertion.clustertemplate;
 
-import static com.google.common.collect.Sets.newHashSet;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type.OTHER;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequired.OPTIONAL;
-
-import java.security.InvalidParameterException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
@@ -21,9 +9,19 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters;
 import com.sequenceiq.it.cloudbreak.newway.dto.clustertemplate.ClusterTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
+import org.apache.commons.lang3.StringUtils;
+
+import java.security.InvalidParameterException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import static com.google.common.collect.Sets.newHashSet;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type.OTHER;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequired.OPTIONAL;
 
 public class ClusterTemplateTestAssertion {
 
@@ -187,13 +185,6 @@ public class ClusterTemplateTestAssertion {
             ImageCatalogTestDto imageCatalogTestDto = testContext.get(ImageCatalogTestDto.class);
             if (!imageCatalogTestDto.getName().equals(stackTemplate.getImage().getCatalog())) {
                 throw new IllegalArgumentException("Image catalog name is mismatch!");
-            }
-
-            String clusterDefinitionName = entity.getTestParameter().getWithDefault(CommonCloudParameters.CLUSTER_DEFINITION_NAME,
-                    CommonCloudParameters.DEFAULT_CLUSTER_DEFINITION_NAME);
-
-            if (!clusterDefinitionName.equals(stackTemplate.getCluster().getClusterDefinitionName())) {
-                throw new IllegalArgumentException("Cluster Definition name is mismatch!");
             }
 
             if (!"2.7.2.2".equals(stackTemplate.getCluster().getAmbari().getRepository().getVersion())) {

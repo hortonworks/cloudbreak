@@ -1,25 +1,22 @@
 package com.sequenceiq.it.cloudbreak.newway.dto.ldap;
 
-import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.ws.rs.WebApplicationException;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
-import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
-import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.dto.AbstractCloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.DeletableTestDto;
+
+import javax.ws.rs.WebApplicationException;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
 
 @Prototype
-public class LdapTestDto extends AbstractCloudbreakTestDto<LdapV4Request, LdapV4Response, LdapTestDto> implements Purgable<LdapV4Response> {
+public class LdapTestDto extends DeletableTestDto<LdapV4Request, LdapV4Response, LdapTestDto, LdapV4Response> {
 
     public LdapTestDto(TestContext testContext) {
         super(new LdapV4Request(), testContext);
@@ -166,8 +163,8 @@ public class LdapTestDto extends AbstractCloudbreakTestDto<LdapV4Request, LdapV4
     }
 
     @Override
-    public boolean deletable(LdapV4Response entity) {
-        return entity.getName().startsWith(RandomNameCreator.PREFIX);
+    protected String name(LdapV4Response entity) {
+        return entity.getName();
     }
 
     @Override

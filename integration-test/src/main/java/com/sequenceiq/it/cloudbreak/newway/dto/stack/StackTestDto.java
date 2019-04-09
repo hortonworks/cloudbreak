@@ -1,19 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway.dto.stack;
 
-import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
-import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.withoutLogError;
-import static com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest.STACK_DELETED;
-import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -21,7 +7,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedCluste
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
-import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.RunningParameter;
@@ -29,6 +14,18 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.v4.StackActionV4;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
+import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.withoutLogError;
+import static com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest.STACK_DELETED;
+import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
 
 @Prototype
 public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purgable<StackV4Response> {
@@ -85,7 +82,7 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
 
     @Override
     public boolean deletable(StackV4Response entity) {
-        return entity.getName().startsWith(RandomNameCreator.PREFIX);
+        return entity.getName().startsWith(getNameCreator().prefix());
     }
 
     @Override

@@ -1,14 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway.dto.environment;
 
-import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
-import javax.ws.rs.WebApplicationException;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.EnvironmentV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.LocationV4Request;
@@ -16,15 +7,20 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedE
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
-import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
-import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.dto.AbstractCloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.DeletableTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
 
+import javax.ws.rs.WebApplicationException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
+import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
+
 @Prototype
-public class EnvironmentTestDto extends AbstractCloudbreakTestDto<EnvironmentV4Request, DetailedEnvironmentV4Response, EnvironmentTestDto>
-        implements Purgable<SimpleEnvironmentV4Response> {
+public class EnvironmentTestDto extends DeletableTestDto<EnvironmentV4Request, DetailedEnvironmentV4Response, EnvironmentTestDto, SimpleEnvironmentV4Response> {
 
     public static final String ENVIRONMENT = "ENVIRONMENT";
 
@@ -140,8 +136,8 @@ public class EnvironmentTestDto extends AbstractCloudbreakTestDto<EnvironmentV4R
     }
 
     @Override
-    public boolean deletable(SimpleEnvironmentV4Response entity) {
-        return entity.getName().startsWith(RandomNameCreator.PREFIX);
+    protected String name(SimpleEnvironmentV4Response entity) {
+        return entity.getName();
     }
 
     @Override

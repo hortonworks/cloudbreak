@@ -1,16 +1,11 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud.v2.azure;
 
-import static com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters.CREDENTIAL_DEFAULT_DESCRIPTION;
-
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AppBasedRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AzureCredentialV4RequestParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.AbstractCloudProvider;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters;
 import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.NetworkV2TestDto;
@@ -18,22 +13,28 @@ import com.sequenceiq.it.cloudbreak.newway.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDtoBase;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
 
 @Component
 public class AzureCloudProvider extends AbstractCloudProvider {
 
+    @Inject
+    private AzureProperties azureProperties;
+
     @Override
     public CredentialTestDto credential(CredentialTestDto credential) {
         AzureCredentialV4RequestParameters parameters = new AzureCredentialV4RequestParameters();
-        parameters.setSubscriptionId(getTestParameter().getRequired(AzureParameters.Credential.SUBSCRIPTION_ID));
-        parameters.setTenantId(getTestParameter().getRequired(AzureParameters.Credential.TENANT_ID));
+        parameters.setSubscriptionId(azureProperties.getCredential().getSubscriptionId());
+        parameters.setTenantId(azureProperties.getCredential().getTenantId());
         AppBasedRequest appBased = new AppBasedRequest();
-        appBased.setAccessKey(getTestParameter().getRequired(AzureParameters.Credential.APP_ID));
-        appBased.setSecretKey(getTestParameter().getRequired(AzureParameters.Credential.APP_PASSWORD));
+        appBased.setAccessKey(azureProperties.getCredential().getAppId());
+        appBased.setSecretKey(azureProperties.getCredential().getAppPassword());
         parameters.setAppBased(appBased);
         return credential.withAzureParameters(parameters)
                 .withCloudPlatform(CloudPlatform.AZURE.name())
-                .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION);
+                .withDescription(commonCloudPropeties().getDefaultCredentialDescription());
     }
 
     @Override
@@ -42,7 +43,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public ClusterTestDto cluster(ClusterTestDto cluster) {
+    protected ClusterTestDto withCluster(ClusterTestDto cluster) {
         return cluster
                 .withValidateClusterDefinition(Boolean.TRUE)
                 .withClusterDefinitionName(getClusterDefinitionName());
@@ -55,24 +56,24 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String region() {
-        return getTestParameter().getWithDefault(AzureParameters.REGION, "West Europe");
+        return azureProperties.getRegion();
     }
 
     @Override
     public String location() {
-        return getTestParameter().getWithDefault(AzureParameters.LOCATION, "West Europe");
+        return azureProperties.getLocation();
     }
 
     @Override
     public InstanceTemplateV4TestDto template(InstanceTemplateV4TestDto template) {
-        return template.withInstanceType(getTestParameter().getWithDefault(AzureParameters.Instance.TYPE, "Standard_D12_v2"));
+        return template.withInstanceType(azureProperties.getInstance().getType());
     }
 
     @Override
     public VolumeV4TestDto attachedVolume(VolumeV4TestDto volume) {
-        int attachedVolumeSize = Integer.parseInt(getTestParameter().getWithDefault(AzureParameters.Instance.VOLUME_SIZE, "100"));
-        int attachedVolumeCount = Integer.parseInt(getTestParameter().getWithDefault(AzureParameters.Instance.VOLUME_COUNT, "1"));
-        String attachedVolumeType = getTestParameter().getWithDefault(AzureParameters.Instance.VOLUME_TYPE, "Standard_LRS");
+        int attachedVolumeSize = azureProperties.getInstance().getVolumeSize();
+        int attachedVolumeCount = azureProperties.getInstance().getVolumeCount();
+        String attachedVolumeType = azureProperties.getInstance().getVolumeType();
         return volume.withSize(attachedVolumeSize)
                 .withCount(attachedVolumeCount)
                 .withType(attachedVolumeType);
@@ -94,17 +95,17 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String availabilityZone() {
-        return getTestParameter().getWithDefault(AzureParameters.AVAILABILITY_ZONE, null);
+        return azureProperties.getAvailabilityZone();
     }
 
     @Override
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
-        String sshPublicKey = getTestParameter().getWithDefault(CommonCloudParameters.SSH_PUBLIC_KEY, CommonCloudParameters.DEFAULT_SSH_PUBLIC_KEY);
+        String sshPublicKey = commonCloudPropeties().getSshPublicKey();
         return stackAuthenticationEntity.withPublicKey(sshPublicKey);
     }
 
     @Override
     public String getClusterDefinitionName() {
-        return getTestParameter().getWithDefault(CommonCloudParameters.CLUSTER_DEFINITION_NAME, AzureParameters.DEFAULT_CLUSTER_DEFINTION_NAME);
+        return azureProperties.getDefaultClusterDefinitionName();
     }
 }

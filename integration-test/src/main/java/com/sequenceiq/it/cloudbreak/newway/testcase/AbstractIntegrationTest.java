@@ -1,16 +1,34 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import javax.inject.Inject;
-
+import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.it.cloudbreak.exception.TestCaseDescriptionMissingException;
+import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
+import com.sequenceiq.it.cloudbreak.newway.actor.Actor;
+import com.sequenceiq.it.cloudbreak.newway.client.ClusterDefinitionTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.DatabaseTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.EnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.ImageCatalogTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.LdapTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.ProxyTestClient;
+import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudProperties;
+import com.sequenceiq.it.cloudbreak.newway.context.Description;
+import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
+import com.sequenceiq.it.cloudbreak.newway.context.PurgeGarbageService;
+import com.sequenceiq.it.cloudbreak.newway.context.SparklessTestContext;
+import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription;
+import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription.TestCaseDescriptionBuilder;
+import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.dto.clusterdefinition.ClusterDefinitionTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.database.DatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ldap.LdapTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.proxy.ProxyTestDto;
+import com.sequenceiq.it.config.IntegrationTestConfiguration;
+import com.sequenceiq.it.util.LongStringGeneratorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -28,34 +46,15 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.DataProvider;
 
-import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.it.cloudbreak.exception.TestCaseDescriptionMissingException;
-import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
-import com.sequenceiq.it.cloudbreak.newway.actor.Actor;
-import com.sequenceiq.it.cloudbreak.newway.client.ClusterDefinitionTestClient;
-import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
-import com.sequenceiq.it.cloudbreak.newway.client.DatabaseTestClient;
-import com.sequenceiq.it.cloudbreak.newway.client.EnvironmentTestClient;
-import com.sequenceiq.it.cloudbreak.newway.client.ImageCatalogTestClient;
-import com.sequenceiq.it.cloudbreak.newway.client.LdapTestClient;
-import com.sequenceiq.it.cloudbreak.newway.client.ProxyTestClient;
-import com.sequenceiq.it.cloudbreak.newway.context.Description;
-import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.newway.context.PurgeGarbageService;
-import com.sequenceiq.it.cloudbreak.newway.context.SparklessTestContext;
-import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription;
-import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription.TestCaseDescriptionBuilder;
-import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.dto.clusterdefinition.ClusterDefinitionTestDto;
-import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.newway.dto.database.DatabaseTestDto;
-import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
-import com.sequenceiq.it.cloudbreak.newway.dto.ldap.LdapTestDto;
-import com.sequenceiq.it.cloudbreak.newway.dto.proxy.ProxyTestDto;
-import com.sequenceiq.it.config.IntegrationTestConfiguration;
-import com.sequenceiq.it.util.LongStringGeneratorUtil;
+import javax.inject.Inject;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @ContextConfiguration(classes = {IntegrationTestConfiguration.class}, initializers = ConfigFileApplicationContextInitializer.class)
 public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContextTests {
@@ -100,6 +99,9 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     @Inject
     private DatabaseTestClient databaseTestClient;
+
+    @Inject
+    private CommonCloudProperties commonCloudProperties;
 
     private final List<AutoCloseable> closableBeans = new CopyOnWriteArrayList<>();
 
@@ -278,4 +280,7 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
         throw new IllegalStateException("No application context found!");
     }
 
+    protected CommonCloudProperties commonCloudProperties() {
+        return commonCloudProperties;
+    }
 }

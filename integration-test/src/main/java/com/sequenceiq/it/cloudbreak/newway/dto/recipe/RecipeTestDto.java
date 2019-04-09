@@ -1,27 +1,24 @@
 package com.sequenceiq.it.cloudbreak.newway.dto.recipe;
 
-import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
-
-import java.util.Base64;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.ws.rs.WebApplicationException;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
-import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
-import com.sequenceiq.it.cloudbreak.newway.dto.AbstractCloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
-import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.dto.DeletableTestDto;
+
+import javax.ws.rs.WebApplicationException;
+import java.util.Base64;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
 
 @Prototype
-public class RecipeTestDto extends AbstractCloudbreakTestDto<RecipeV4Request, RecipeV4Response, RecipeTestDto> implements Purgable<RecipeViewV4Response> {
+public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Response, RecipeTestDto, RecipeViewV4Response> {
 
     public RecipeTestDto(TestContext testContext) {
         super(new RecipeV4Request(), testContext);
@@ -78,8 +75,8 @@ public class RecipeTestDto extends AbstractCloudbreakTestDto<RecipeV4Request, Re
     }
 
     @Override
-    public boolean deletable(RecipeViewV4Response entity) {
-        return entity.getName().startsWith(RandomNameCreator.PREFIX);
+    protected String name(RecipeViewV4Response entity) {
+        return entity.getName();
     }
 
     @Override
