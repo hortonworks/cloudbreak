@@ -92,7 +92,7 @@ public class ChangePrimaryGatewayService {
 
     public void ambariServerStarted(StackView stack) {
         clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Gateway succesfully changed.");
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Gateway successfully changed.");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.CLUSTER_GATEWAY_CHANGED_SUCCESSFULLY, AVAILABLE.name(),
                 stackUtil.extractClusterManagerIp(stack));
     }
