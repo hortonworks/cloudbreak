@@ -8,358 +8,376 @@ logging:
     path: ${integrationtest.outputdir}
 
 integrationtest:
-    cloudProvider: MOCK
-    sshPublicKey:
-    subnetCidr:
-    gatewayPort:
-    clusterDefinitionName:
-    testsuite.pollingInterval: 1000
+  cloudProvider: MOCK
+  sshPublicKey: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kcUEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpjT7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh"
+  subnetCidr: 10.0.0.0/16
+  imageCatalogName: cloudbreak-default
+  gatewayPort: null
+  defaultCredentialDescription: "autotesting credential default description."
+  testsuite.pollingInterval: 1000
 
-    # aws parameters
-    aws:
-      region: eu-west-1
-      location: eu-west-1
-      availabilityZone: eu-west-1a
-      vpcId: vpc-5e68eb3a
-      subnetId: subnet-87b729f1
-      publicKeyId: api-e2e-test
-      defaultClusterDefinitionName: "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
-      credential:
-        type: key
-        roleArn:
-        accessKeyId:
-        secretKey:
-      instance:
-        type: m5.2xlarge
-        volumeSize: 100
-        volumeCount: 1
-        volumeType: gp2
-      baseimage:
-        redhat7:
-          imageId: 963f81ae-efd1-4bfb-7f91-4aa357950c02
-          clusterDefinitions:
-            - "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
-        amazonlinux2:
-          imageId: 97b9e57d-8135-4d71-4f52-37a09d913e5e
-          clusterDefinitions:
-            - "HDP 3.1 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin"
-        sles12:
-          imageId: 1580eb06-e175-4d06-675a-c484b2c634f3
-          clusterDefinitions:
-            - "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
+  ambari:
+    defaultUser: admin
+    defaultPassword: Admin123
+    defaultPort: 8080
 
-    # azure parameters
-    azure:
-      availabilityZone:
-      region:
-      vpcId:
-      subnetId:
-      credential:
-        appId:
-        appPassword:
-        subscriptionId:
-        tenantId:
-      instance:
-        type:
-        volumeSize:
-        volumeCount:
-        volumeType:
-
-    # gcp parameters
-    gcp:
-      availabilityZone:
-      region:
-      vpcId:
-      subnetId:
-      credential:
-        type:
-        json:
-        p12:
-      instance:
-        type:
-        volumeSize:
-        volumeCount:
-        volumeType:
-
-    # openstack parameters
-    openstack:
-      availabilityZone:
-      region:
-      location:
-      publicNetId:
-      networkingOption:
-      instance:
-        type:
-        volumeSize:
-        volumeCount:
-        volumeType:
-      credential:
-        endpoint:
-        tenant:
-        userName:
-        password:
-      prewarmed:
-        hdp:
-          version: "3.1"
-          enabled: true
-          groups: "master,worker,compute"
-          scaleGroup: compute
-        hdf:
-          clusterDefinitionNames: "HDF-3.3 Messaging Management: Apache Kafka"
-          enabled: true
-          groups: "Services,ZooKeeper,Messaging"
-          scaleGroup: Messaging
-
-    # yarn parameters
-    yarn:
-      availabilityZone:
-        region:
-      credential:
-        endpoint:
-      instance:
-        cpus:
-        memory:
-      queue:
-      image:
-        catalog:
-          url:
-        id:
-
-  # ---------- old test parameters: ---------- #
-
-    outputdir: .
-
-    publicKeyFile:
-
-    # uaa properties
-    uaa:
-        server:
-        user:
-        password:
-        autoscale:
-          clientId:
-          clientSecret:
-
-    # cloudbreak properites
-    cloudbreak:
-        server:
-    # periscope properites
-    periscope:
-        server:
-
-    # gcp credential details
-    gcpcredential:
-       name:
-       projectId:
-       serviceAccountId:
-       p12File:
-       jsonFile:
-       newServiceAccountId:
-       newP12File:
-
-    #ambari credentials
-    ambari:
-       defaultAmbariUser: admin
-       defaultAmbariPassword: admin123!@#
-       defaultAmbariPort: 8080
-
-    # aws credential details
-    awscredential:
-       name:
-       roleArn:
-       accessKey:
-       secretKey:
-
-    # openstack Keystone V2 credential details
-    openstackcredential:
-       name:
-       tenantName:
-       userName:
-       password:
-       endpoint:
-
-  # openstack Engineering V2 credential details
-    openstackEngcredential:
-      tenantName:
-      userName:
-      password:
-      endpoint:
-
-  # openstack Kilo V2 Admin credential details
-    openstackAdmincredential:
-      tenantName:
-      userName:
-      password:
-      endpoint:
-
-    # openstack Keystone V3 credential details
-    openstackFieldcredential:
-      name:
-      tenantName:
-      userDomain:
-      userName:
-      password:
-      endpoint:
-      projectDomainName:
-      projectName:
-      keystoneAuthScope:
-      keystoneVersion:
-      apiFacing:
-      selector:
-
-    # azure rm credential details
-    azurermcredential:
-      name:
+  # aws parameters
+  aws:
+    defaultClusterDefinitionName: "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
+    region: eu-west-1
+    location: eu-west-1
+    availabilityZone: eu-west-1a
+    vpcId: vpc-5e68eb3a
+    subnetId: subnet-87b729f1
+    publicKeyId: api-e2e-test
+    credential:
+      type: key
+      roleArn:
+      accessKeyId:
       secretKey:
-      accessKey:
+    instance:
+      type: m5.2xlarge
+      volumeSize: 100
+      volumeCount: 1
+      volumeType: gp2
+    baseimage:
+      redhat7:
+        imageId: 963f81ae-efd1-4bfb-7f91-4aa357950c02
+        clusterDefinitions:
+          - "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
+      amazonlinux2:
+        imageId: 97b9e57d-8135-4d71-4f52-37a09d913e5e
+        clusterDefinitions:
+          - "HDP 3.1 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin"
+      sles12:
+        imageId: 1580eb06-e175-4d06-675a-c484b2c634f3
+        clusterDefinitions:
+          - "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
+
+  # azure parameters
+  azure:
+    defaultClusterDefinitionName: "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
+    availabilityZone:
+    region: West Europe
+    location: West Europe
+    credential:
+      appId:
+      appPassword:
       subscriptionId:
       tenantId:
-      newAccessKey:
-      newSecretKey:
+    instance:
+      type: Standard_D12_v2
+      volumeSize: 100
+      volumeCount: 1
+      volumeType: Standard_LRS
+    cloudstorage:
+      accountKey:
+      accountName:
+      locationName:
 
-    rdsconfig:
-        rdsUser:
-        rdsPassword:
-        rdsConnectionUrl:
+  # gcp parameters
+  gcp:
+    defaultClusterDefinitionName: "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
+    availabilityZone: europe-west2-a
+    region: europe-west2
+    location: europe-west2
+    vpcId:
+    subnetId:
+    credential:
+      type: json
+      json:
+      p12:
+      serviceAccountId:
+      projectId:
+    instance:
+      type: n1-standard-8
+      volumeSize: 100
+      volumeCount: 1
+      volumeType: pd-standard
 
-    ldapconfig:
-        ldapServerHost:
-        bindPassword:
+  # openstack parameters
+  openstack:
+    defaultClusterDefinitionName: "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
+    availabilityZone: nova
+    region: RegionOne
+    location: Texas
+    publicNetId: 999e09bc-cf75-4a19-98fb-c0b4ddee6d93
+    networkingOption: self-service
+    instance:
+      type: m1.xlarge
+      volumeSize: 100
+      volumeCount: 0
+      volumeType: HDD
+    credential:
+      endpoint:
+      tenant:
+      userName:
+      password:
+    prewarmed:
+      hdp:
+        version: "3.1"
+        enabled: true
+        hostGroups:
+          - master
+          - worker
+          - compute
+        scaleGroup: compute
+      hdf:
+        clusterDefinitionNames:
+         - "HDF-3.3 Messaging Management: Apache Kafka"
+        enabled: true
+        hostGroups:
+          - Services
+          - ZooKeeper
+          - Messaging
+        scaleGroup: Messaging
 
-    proxyconfig:
-        proxyHost:
-        proxyUser:
-        proxyPassword:
+  # yarn parameters
+  yarn:
+    defaultClusterDefinitionName: "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
+    availabilityZone:
+    region: default
+    location: Frankfurt
+    credential:
+      endpoint: http://yprod001.l42scl.hortonworks.com:9191
+    instance:
+      cpuCount: 4
+      memory: 8192
+      volumeSize: 0
+      volumeCount: 0
+    queue: HDP_2_6_0_0-integration-tests
+    imageCatalogUrl: https://cloudbreak-imagecatalog.s3.amazonaws.com/v2-dev-cb-image-catalog.json
+    imageId: 6c005903-57ca-4acf-bec7-6275069db34a
 
-    filesystemconfig:
-        accountKeyWasb:
-        accountKeyAbfs:
-        accountNameAbfs:
+# ---------- old test parameters: ---------- #
 
-    mockcredential:
-        name:
+  outputdir: .
 
-    customAmbari:
-        aws:
-          hdf:
-            version:
-            repoUrl:
-            gpgKeyUrl:
+  publicKeyFile:
 
-    cleanup:
-        retryCount: 3
-        cleanupBeforeStart: false
+  # uaa properties
+  uaa:
+      server:
+      user:
+      password:
+      autoscale:
+        clientId:
+        clientSecret:
 
-    defaultClusterDefinitionName:
+  # cloudbreak properites
+  cloudbreak:
+      server:
+  # periscope properites
+  periscope:
+      server:
 
-    ambariContainer: hortonworks/ambari-agent
+  # gcp credential details
+  gcpcredential:
+     name:
+     projectId:
+     serviceAccountId:
+     p12File:
+     jsonFile:
+     newServiceAccountId:
+     newP12File:
 
-    defaultPrivateKeyFile:
+  # aws credential details
+  awscredential:
+     name:
+     roleArn:
+     accessKey:
+     secretKey:
 
-    testsuite:
-        threadPoolSize: 3
-        skipRemainingTestsAfterOneFailed: true
-        cleanUpOnFailure: false
+  # openstack Keystone V2 credential details
+  openstackcredential:
+     name:
+     tenantName:
+     userName:
+     password:
+     endpoint:
 
-    logsearch:
-      url:
-      components:
-      timeRangeInterval: 8
-      queryTypes:
-      - id: cbid
-        name: sdi_cb_id
-        label: 'Cb Id'
-      - id: cbname
-        name: sdi_cb_name
-        label: 'Cb Name'
-      - id: cbowner
-        name: sdt_cb_owner
-        label: 'Sdt Cb Owner'
+# openstack Engineering V2 credential details
+  openstackEngcredential:
+    tenantName:
+    userName:
+    password:
+    endpoint:
 
-    credentialNames:
-        GCP: it-gcp-credential
-        AWS: it-aws-credential
-        AZURE_RM: itazurermcredential
-        OPENSTACK: it-openstack-credential
-    defaultNetworks:
-       GCP: default-gcp-network
-       AWS: default-aws-network
-       AZURE_RM: default-azure-rm-network
-       AZURE: default-azure-network
-    defaultSecurityGroups:
-       GCP: UNSECURE-gcp-all-services-open
-       AWS: UNSECURE-aws-all-services-open
-       AZURE_RM: UNSECURE-azure_rm-all-services-open
-       OPENSTACK: UNSECURE-openstack-all-services-open
-       AZURE: default-azure-only-ssh-and-ssl
-    testSuites:
-        # Full smoke tests with cluster creation, stop-start, upscale-downscale
-        FULL_SMOKE_TEST:
-        - classpath:/testsuites/gcp/smoke/gcp-clustercreate-startstop-updown.yaml
-        - classpath:/testsuites/aws/smoke/aws-clustercreate-startstop-updown.yaml
-        - classpath:/testsuites/azure/smoke/azure-clustercreate-startstop-updown.yaml
-        - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate-startstop-updown.yaml
-        GCP_FULL_SMOKE_TEST:
-        - classpath:/testsuites/gcp/smoke/gcp-clustercreate-startstop-updown.yaml
-        AWS_FULL_SMOKE_TEST:
-        - classpath:/testsuites/aws/smoke/aws-clustercreate-startstop-updown.yaml
-        AZURE_FULL_SMOKE_TEST:
-        - classpath:/testsuites/azure/smoke/azure-clustercreate-startstop-updown.yaml
-        AZURE_RM_FULL_SMOKE_TEST:
-        - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate-startstop-updown.yaml
+# openstack Kilo V2 Admin credential details
+  openstackAdmincredential:
+    tenantName:
+    userName:
+    password:
+    endpoint:
 
-        # Simple smoke tests with cluster creation
-        SIMPLE_SMOKE_TEST:
-        - classpath:/testsuites/gcp/smoke/gcp-clustercreate.yaml
-        - classpath:/testsuites/aws/smoke/aws-clustercreate.yaml
-        - classpath:/testsuites/azure/smoke/azure-clustercreate.yaml
-        - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate.yaml
-        GCP_SIMPLE_SMOKE_TEST:
-        - classpath:/testsuites/gcp/smoke/gcp-clustercreate.yaml
-        AWS_SIMPLE_SMOKE_TEST:
-        - classpath:/testsuites/aws/smoke/aws-clustercreate.yaml
-        AZURE_SIMPLE_SMOKE_TEST:
-        - classpath:/testsuites/azure/smoke/azure-clustercreate.yaml
-        AZURE_RM_SIMPLE_SMOKE_TEST:
-        - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate.yaml
+  # openstack Keystone V3 credential details
+  openstackFieldcredential:
+    name:
+    tenantName:
+    userDomain:
+    userName:
+    password:
+    endpoint:
+    projectDomainName:
+    projectName:
+    keystoneAuthScope:
+    keystoneVersion:
+    apiFacing:
+    selector:
 
-        # Smoke tests with cluster creation and stop-start
-        STARTSTOP_SMOKE_TEST:
-        - classpath:/testsuites/gcp/smoke/gcp-clustercreate-startstop.yaml
-        - classpath:/testsuites/aws/smoke/aws-clustercreate-startstop.yaml
-        - classpath:/testsuites/azure/smoke/azure-clustercreate-startstop.yaml
-        - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate-startstop.yaml
-        GCP_STARTSTOP_SMOKE_TEST:
-        - classpath:/testsuites/gcp/smoke/gcp-clustercreate-startstop.yaml
-        AWS_STARTSTOP_SMOKE_TEST:
-        - classpath:/testsuites/aws/smoke/aws-clustercreate-startstop.yaml
-        AZURE_STARTSTOP_SMOKE_TEST:
-        - classpath:/testsuites/azure/smoke/azure-clustercreate-startstop.yaml
-        AZURE_RM_STARTSTOP_SMOKE_TEST:
-        - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate-startstop.yaml
+  # azure rm credential details
+  azurermcredential:
+    name:
+    secretKey:
+    accessKey:
+    subscriptionId:
+    tenantId:
+    newAccessKey:
+    newSecretKey:
 
-        # Smoke tests with cluster creation and upscale-downscale
-        UPDOWN_SMOKE_TEST:
-        - classpath:/testsuites/gcp/smoke/gcp-clustercreate-updown.yaml
-        - classpath:/testsuites/aws/smoke/aws-clustercreate-updown.yaml
-        - classpath:/testsuites/azure/smoke/azure-clustercreate-updown.yaml
-        - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate-updown.yaml
-        GCP_UPDOWN_SMOKE_TEST:
-        - classpath:/testsuites/gcp/smoke/gcp-clustercreate-updown.yaml
-        AWS_UPDOWN_SMOKE_TEST:
-        - classpath:/testsuites/aws/smoke/aws-clustercreate-updown.yaml
-        AZURE_UPDOWN_SMOKE_TEST:
-        - classpath:/testsuites/azure/smoke/azure-clustercreate-updown.yaml
-        AZURE_RM_UPDOWN_SMOKE_TEST:
-        - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate-updown.yaml
+  rdsconfig:
+      rdsUser:
+      rdsPassword:
+      rdsConnectionUrl:
 
-        # Kerberos test with cluster creation, stop-start and upscale-downscale
-        GCP_UPDOWN_KERBEROS_TEST:
-        - classpath:/testsuites/gcp/kerberos/gcp-clustercreate-startstop-updown.yaml
+  ldapconfig:
+      ldapServerHost:
+      bindPassword:
 
-        # Recipe test with cluster creation and upscale
-        GCP_UP_RECIPE_TEST:
-        - classpath:/testsuites/gcp/recipe/gcp-clustercreate-up.yaml
+  proxyconfig:
+      proxyHost:
+      proxyUser:
+      proxyPassword:
+
+  filesystemconfig:
+      accountKeyWasb:
+      accountKeyAbfs:
+      accountNameAbfs:
+
+  mockcredential:
+      name:
+
+  customAmbari:
+      aws:
+        hdf:
+          version:
+          repoUrl:
+          gpgKeyUrl:
+
+  cleanup:
+      retryCount: 3
+      cleanupBeforeStart: false
+
+  defaultClusterDefinitionName:
+
+  ambariContainer: hortonworks/ambari-agent
+
+  defaultPrivateKeyFile:
+
+  testsuite:
+      threadPoolSize: 3
+      skipRemainingTestsAfterOneFailed: true
+      cleanUpOnFailure: false
+
+  logsearch:
+    url:
+    components:
+    timeRangeInterval: 8
+    queryTypes:
+    - id: cbid
+      name: sdi_cb_id
+      label: 'Cb Id'
+    - id: cbname
+      name: sdi_cb_name
+      label: 'Cb Name'
+    - id: cbowner
+      name: sdt_cb_owner
+      label: 'Sdt Cb Owner'
+
+  credentialNames:
+      GCP: it-gcp-credential
+      AWS: it-aws-credential
+      AZURE_RM: itazurermcredential
+      OPENSTACK: it-openstack-credential
+  defaultNetworks:
+     GCP: default-gcp-network
+     AWS: default-aws-network
+     AZURE_RM: default-azure-rm-network
+     AZURE: default-azure-network
+  defaultSecurityGroups:
+     GCP: UNSECURE-gcp-all-services-open
+     AWS: UNSECURE-aws-all-services-open
+     AZURE_RM: UNSECURE-azure_rm-all-services-open
+     OPENSTACK: UNSECURE-openstack-all-services-open
+     AZURE: default-azure-only-ssh-and-ssl
+  testSuites:
+      # Full smoke tests with cluster creation, stop-start, upscale-downscale
+      FULL_SMOKE_TEST:
+      - classpath:/testsuites/gcp/smoke/gcp-clustercreate-startstop-updown.yaml
+      - classpath:/testsuites/aws/smoke/aws-clustercreate-startstop-updown.yaml
+      - classpath:/testsuites/azure/smoke/azure-clustercreate-startstop-updown.yaml
+      - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate-startstop-updown.yaml
+      GCP_FULL_SMOKE_TEST:
+      - classpath:/testsuites/gcp/smoke/gcp-clustercreate-startstop-updown.yaml
+      AWS_FULL_SMOKE_TEST:
+      - classpath:/testsuites/aws/smoke/aws-clustercreate-startstop-updown.yaml
+      AZURE_FULL_SMOKE_TEST:
+      - classpath:/testsuites/azure/smoke/azure-clustercreate-startstop-updown.yaml
+      AZURE_RM_FULL_SMOKE_TEST:
+      - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate-startstop-updown.yaml
+
+      # Simple smoke tests with cluster creation
+      SIMPLE_SMOKE_TEST:
+      - classpath:/testsuites/gcp/smoke/gcp-clustercreate.yaml
+      - classpath:/testsuites/aws/smoke/aws-clustercreate.yaml
+      - classpath:/testsuites/azure/smoke/azure-clustercreate.yaml
+      - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate.yaml
+      GCP_SIMPLE_SMOKE_TEST:
+      - classpath:/testsuites/gcp/smoke/gcp-clustercreate.yaml
+      AWS_SIMPLE_SMOKE_TEST:
+      - classpath:/testsuites/aws/smoke/aws-clustercreate.yaml
+      AZURE_SIMPLE_SMOKE_TEST:
+      - classpath:/testsuites/azure/smoke/azure-clustercreate.yaml
+      AZURE_RM_SIMPLE_SMOKE_TEST:
+      - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate.yaml
+
+      # Smoke tests with cluster creation and stop-start
+      STARTSTOP_SMOKE_TEST:
+      - classpath:/testsuites/gcp/smoke/gcp-clustercreate-startstop.yaml
+      - classpath:/testsuites/aws/smoke/aws-clustercreate-startstop.yaml
+      - classpath:/testsuites/azure/smoke/azure-clustercreate-startstop.yaml
+      - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate-startstop.yaml
+      GCP_STARTSTOP_SMOKE_TEST:
+      - classpath:/testsuites/gcp/smoke/gcp-clustercreate-startstop.yaml
+      AWS_STARTSTOP_SMOKE_TEST:
+      - classpath:/testsuites/aws/smoke/aws-clustercreate-startstop.yaml
+      AZURE_STARTSTOP_SMOKE_TEST:
+      - classpath:/testsuites/azure/smoke/azure-clustercreate-startstop.yaml
+      AZURE_RM_STARTSTOP_SMOKE_TEST:
+      - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate-startstop.yaml
+
+      # Smoke tests with cluster creation and upscale-downscale
+      UPDOWN_SMOKE_TEST:
+      - classpath:/testsuites/gcp/smoke/gcp-clustercreate-updown.yaml
+      - classpath:/testsuites/aws/smoke/aws-clustercreate-updown.yaml
+      - classpath:/testsuites/azure/smoke/azure-clustercreate-updown.yaml
+      - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate-updown.yaml
+      GCP_UPDOWN_SMOKE_TEST:
+      - classpath:/testsuites/gcp/smoke/gcp-clustercreate-updown.yaml
+      AWS_UPDOWN_SMOKE_TEST:
+      - classpath:/testsuites/aws/smoke/aws-clustercreate-updown.yaml
+      AZURE_UPDOWN_SMOKE_TEST:
+      - classpath:/testsuites/azure/smoke/azure-clustercreate-updown.yaml
+      AZURE_RM_UPDOWN_SMOKE_TEST:
+      - classpath:/testsuites/azurerm/smoke/azurerm-clustercreate-updown.yaml
+
+      # Kerberos test with cluster creation, stop-start and upscale-downscale
+      GCP_UPDOWN_KERBEROS_TEST:
+      - classpath:/testsuites/gcp/kerberos/gcp-clustercreate-startstop-updown.yaml
+
+      # Recipe test with cluster creation and upscale
+      GCP_UP_RECIPE_TEST:
+      - classpath:/testsuites/gcp/recipe/gcp-clustercreate-up.yaml
 
 mock:
   server:

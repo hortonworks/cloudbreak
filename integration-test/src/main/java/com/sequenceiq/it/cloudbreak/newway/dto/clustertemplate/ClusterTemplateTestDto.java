@@ -1,24 +1,22 @@
 package com.sequenceiq.it.cloudbreak.newway.dto.clustertemplate;
 
-import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
-
-import java.util.Collection;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.ClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.ClusterTemplateUtil;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
-import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
-import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.dto.AbstractCloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.DeletableTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTemplateTestDto;
 
+import java.util.Collection;
+
+import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
+
 @Prototype
-public class ClusterTemplateTestDto extends AbstractCloudbreakTestDto<ClusterTemplateV4Request, ClusterTemplateV4Response, ClusterTemplateTestDto>
-        implements Purgable<ClusterTemplateV4Response> {
+public class ClusterTemplateTestDto extends DeletableTestDto<ClusterTemplateV4Request, ClusterTemplateV4Response,
+        ClusterTemplateTestDto, ClusterTemplateV4Response> {
 
     public ClusterTemplateTestDto(TestContext testContext) {
         super(new ClusterTemplateV4Request(), testContext);
@@ -71,8 +69,8 @@ public class ClusterTemplateTestDto extends AbstractCloudbreakTestDto<ClusterTem
     }
 
     @Override
-    public boolean deletable(ClusterTemplateV4Response entity) {
-        return entity.getName().startsWith(RandomNameCreator.PREFIX);
+    protected String name(ClusterTemplateV4Response entity) {
+        return entity.getName();
     }
 
     @Override

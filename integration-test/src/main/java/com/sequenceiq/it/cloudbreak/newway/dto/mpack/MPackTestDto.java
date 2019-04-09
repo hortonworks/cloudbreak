@@ -1,20 +1,17 @@
 package com.sequenceiq.it.cloudbreak.newway.dto.mpack;
 
-import java.util.Collection;
-import java.util.List;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.request.ManagementPackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.response.ManagementPackV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
-import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
-import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.dto.AbstractCloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.DeletableTestDto;
+
+import java.util.Collection;
+import java.util.List;
 
 @Prototype
-public class MPackTestDto extends AbstractCloudbreakTestDto<ManagementPackV4Request, ManagementPackV4Response, MPackTestDto>
-        implements Purgable<ManagementPackV4Response> {
+public class MPackTestDto extends DeletableTestDto<ManagementPackV4Request, ManagementPackV4Response, MPackTestDto, ManagementPackV4Response> {
 
     public MPackTestDto(TestContext testContext) {
         super(new ManagementPackV4Request(), testContext);
@@ -61,8 +58,8 @@ public class MPackTestDto extends AbstractCloudbreakTestDto<ManagementPackV4Requ
     }
 
     @Override
-    public boolean deletable(ManagementPackV4Response entity) {
-        return entity.getName().startsWith(RandomNameCreator.PREFIX);
+    protected String name(ManagementPackV4Response entity) {
+        return entity.getName();
     }
 
     @Override

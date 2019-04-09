@@ -1,20 +1,9 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.smoke;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_AMBARI_START;
-import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.MASTER;
-
-import java.io.IOException;
-
-import javax.inject.Inject;
-
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
 import com.sequenceiq.it.cloudbreak.newway.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters;
+import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.InstanceGroupTestDto;
@@ -23,6 +12,15 @@ import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.newway.util.AmbariUtil;
 import com.sequenceiq.it.util.ResourceUtil;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import javax.inject.Inject;
+import java.io.IOException;
+
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_AMBARI_START;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.MASTER;
 
 public class YarnSmokeTest extends AbstractE2ETest {
 
@@ -37,6 +35,9 @@ public class YarnSmokeTest extends AbstractE2ETest {
 
     @Inject
     private RecipeTestClient recipeTestClient;
+
+    @Inject
+    private CommonCloudProperties commonCloudProperties;
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
@@ -74,8 +75,8 @@ public class YarnSmokeTest extends AbstractE2ETest {
     }
 
     private String generateCreateAmbariUserRecipeContent(String filePath) throws IOException {
-        String ambariUser = getTestParameter().get(CommonCloudParameters.DEFAULT_AMBARI_USER);
-        String ambariPassword = getTestParameter().get(CommonCloudParameters.DEFAULT_AMBARI_PASSWORD);
+        String ambariUser = commonCloudProperties.getAmbari().getDefaultUser();
+        String ambariPassword = commonCloudProperties.getAmbari().getDefaultPassword();
         String recipeContentFromFile = ResourceUtil.readResourceAsString(applicationContext, filePath);
 
         recipeContentFromFile = recipeContentFromFile.replaceAll("AMBARI_USER", ambariUser);

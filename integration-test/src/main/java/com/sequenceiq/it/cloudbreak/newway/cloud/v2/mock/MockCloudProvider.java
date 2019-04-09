@@ -1,34 +1,29 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud.v2.mock;
 
-import static com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters.CREDENTIAL_DEFAULT_DESCRIPTION;
-
-import java.util.Collections;
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.mock.MockCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.MockStackV4Parameters;
-import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.newway.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.AbstractCloudProvider;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.NetworkV2TestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.StackAuthenticationTestDto;
-import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.newway.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDtoBase;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.util.Collections;
+import java.util.Set;
 
 @Component
 public class MockCloudProvider extends AbstractCloudProvider {
@@ -51,8 +46,6 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     public static final String SUBNET_DEFAULT_ID = "subnet-83901cfe";
 
-    public static final String DEFAULT_SUBNET_CIDR = "10.0.0.0/16";
-
     public static final String NETWORK_DEFAULT_DESCRIPTION = "autotesting mock network";
 
     public static final String EUROPE = "Europe";
@@ -63,6 +56,8 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     public static final String LONDON = "London";
 
+    public static final String DEFAULT_CLUSTER_DEFINTION_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
+
     @Inject
     private RandomNameCreator randomNameCreator;
 
@@ -72,7 +67,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
         MockedTestContext mockedTestContext = (MockedTestContext) credentialEntity.getTestContext();
         credentialParameters.setMockEndpoint(mockedTestContext.getSparkServer().getEndpoint());
         return credentialEntity.withName(randomNameCreator.getRandomNameForResource())
-                .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION)
+                .withDescription(commonCloudPropeties().getDefaultCredentialDescription())
                 .withMockParameters(credentialParameters)
                 .withCloudPlatform(MOCK_CAPITAL);
     }
@@ -83,7 +78,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public ClusterTestDto cluster(ClusterTestDto cluster) {
+    protected ClusterTestDto withCluster(ClusterTestDto cluster) {
         return cluster
                 .withValidateClusterDefinition(Boolean.TRUE)
                 .withClusterDefinitionName(getClusterDefinitionName());
@@ -200,8 +195,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
-        String publicKeyId = getTestParameter().getWithDefault(MockParameters.DEFAULT_PUBLIC_KEY_ID, "publicKeyId");
-        stackAuthenticationEntity.withPublicKeyId(publicKeyId);
+        stackAuthenticationEntity.withPublicKeyId("publicKeyId");
         return stackAuthenticationEntity;
     }
 
@@ -213,6 +207,6 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getClusterDefinitionName() {
-        return getTestParameter().getWithDefault(CommonCloudParameters.CLUSTER_DEFINITION_NAME, MockParameters.DEFAULT_CLUSTER_DEFINTION_NAME);
+        return DEFAULT_CLUSTER_DEFINTION_NAME;
     }
 }

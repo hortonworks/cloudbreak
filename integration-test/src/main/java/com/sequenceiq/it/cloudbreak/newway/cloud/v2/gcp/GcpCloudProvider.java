@@ -1,9 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud.v2.gcp;
 
-import static com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters.CREDENTIAL_DEFAULT_DESCRIPTION;
-
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.gcp.GcpCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.gcp.JsonParameters;
@@ -11,43 +7,50 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.gcp.P12P
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.GcpStackV4Parameters;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.AbstractCloudProvider;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters;
 import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.NetworkV2TestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.StackAuthenticationTestDto;
-import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.newway.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDtoBase;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
 
 @Component
 public class GcpCloudProvider extends AbstractCloudProvider {
 
+    private static final String JSON_CREDENTIAL_TYPE = "json";
+
+    @Inject
+    private GcpProperties gcpProperties;
+
     @Override
     public String region() {
-        return getTestParameter().getWithDefault(GcpParameters.REGION, "europe-west2");
+        return gcpProperties.getRegion();
     }
 
     @Override
     public String location() {
-        return getTestParameter().getWithDefault(GcpParameters.REGION, "europe-west2");
+        return gcpProperties.getLocation();
     }
 
     @Override
     public String availabilityZone() {
-        return getTestParameter().getWithDefault(GcpParameters.AVAILABILITY_ZONE, "europe-west2-a");
+        return gcpProperties.getAvailabilityZone();
     }
 
     @Override
     public InstanceTemplateV4TestDto template(InstanceTemplateV4TestDto template) {
-        return template.withInstanceType(getTestParameter().getWithDefault(GcpParameters.Instance.TYPE, "n1-standard-8"));
+        return template.withInstanceType(gcpProperties.getInstance().getType());
     }
 
     @Override
     public VolumeV4TestDto attachedVolume(VolumeV4TestDto volume) {
-        int attachedVolumeSize = Integer.parseInt(getTestParameter().getWithDefault(GcpParameters.Instance.VOLUME_SIZE, "100"));
-        int attachedVolumeCount = Integer.parseInt(getTestParameter().getWithDefault(GcpParameters.Instance.VOLUME_COUNT, "1"));
-        String attachedVolumeType = getTestParameter().getWithDefault(GcpParameters.Instance.VOLUME_TYPE, "pd-standard");
+        int attachedVolumeSize = gcpProperties.getInstance().getVolumeSize();
+        int attachedVolumeCount = gcpProperties.getInstance().getVolumeCount();
+        String attachedVolumeType = gcpProperties.getInstance().getVolumeType();
         return volume.withSize(attachedVolumeSize)
                 .withCount(attachedVolumeCount)
                 .withType(attachedVolumeType);
@@ -68,7 +71,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public ClusterTestDto cluster(ClusterTestDto cluster) {
+    protected ClusterTestDto withCluster(ClusterTestDto cluster) {
         return cluster
                 .withValidateClusterDefinition(Boolean.TRUE)
                 .withClusterDefinitionName(getClusterDefinitionName());
@@ -87,32 +90,31 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     @Override
     public CredentialTestDto credential(CredentialTestDto credential) {
         GcpCredentialV4Parameters parameters = new GcpCredentialV4Parameters();
-        String defaultType = "json";
-        String credentialType = getTestParameter().getWithDefault(GcpParameters.Credential.TYPE, defaultType);
-        if (defaultType.equalsIgnoreCase(credentialType)) {
+        String credentialType = gcpProperties.getCredential().getType();
+        if (JSON_CREDENTIAL_TYPE.equalsIgnoreCase(credentialType)) {
             JsonParameters jsonParameters = new JsonParameters();
-            jsonParameters.setCredentialJson(getTestParameter().getRequired(GcpParameters.Credential.JSON));
+            jsonParameters.setCredentialJson(gcpProperties.getCredential().getJson());
             parameters.setJson(jsonParameters);
         } else {
             P12Parameters p12Parameters = new P12Parameters();
-            p12Parameters.setProjectId(getTestParameter().getRequired(GcpParameters.Credential.PROJECT_ID));
-            p12Parameters.setServiceAccountId(getTestParameter().getRequired(GcpParameters.Credential.SERVICE_ACCOUNT_ID));
-            p12Parameters.setServiceAccountPrivateKey(getTestParameter().getRequired(GcpParameters.Credential.P12));
+            p12Parameters.setProjectId(gcpProperties.getCredential().getProjectId());
+            p12Parameters.setServiceAccountId(gcpProperties.getCredential().getServiceAccountId());
+            p12Parameters.setServiceAccountPrivateKey(gcpProperties.getCredential().getP12());
             parameters.setP12(p12Parameters);
         }
         return credential.withGcpParameters(parameters)
                 .withCloudPlatform(CloudPlatform.GCP.name())
-                .withDescription(CREDENTIAL_DEFAULT_DESCRIPTION);
+                .withDescription(commonCloudPropeties().getDefaultCredentialDescription());
     }
 
     @Override
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
-        String sshPublicKey = getTestParameter().getWithDefault(CommonCloudParameters.SSH_PUBLIC_KEY, CommonCloudParameters.DEFAULT_SSH_PUBLIC_KEY);
+        String sshPublicKey = commonCloudPropeties().getSshPublicKey();
         return stackAuthenticationEntity.withPublicKey(sshPublicKey);
     }
 
     @Override
     public String getClusterDefinitionName() {
-        return getTestParameter().getWithDefault(CommonCloudParameters.CLUSTER_DEFINITION_NAME, GcpParameters.DEFAULT_CLUSTER_DEFINTION_NAME);
+        return gcpProperties.getDefaultClusterDefinitionName();
     }
 }

@@ -1,17 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway.dto.stack;
 
-import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.COMPUTE;
-import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.MASTER;
-import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.WORKER;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AwsStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
@@ -48,6 +36,18 @@ import com.sequenceiq.it.cloudbreak.newway.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.StackRepositoryTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.COMPUTE;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.MASTER;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.WORKER;
 
 public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends AbstractCloudbreakTestDto<StackV4Request, StackV4Response, T> {
 

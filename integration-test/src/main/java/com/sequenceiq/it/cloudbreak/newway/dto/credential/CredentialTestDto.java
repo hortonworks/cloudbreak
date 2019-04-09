@@ -10,12 +10,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.yarn.Yar
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.it.cloudbreak.exception.ProxyMethodInvocationException;
-import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
-import com.sequenceiq.it.cloudbreak.newway.dto.AbstractCloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
-import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.dto.DeletableTestDto;
 import com.sequenceiq.it.cloudbreak.newway.v4.CredentialV4Action;
 
 import java.util.Collection;
@@ -23,8 +21,7 @@ import java.util.Collection;
 import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
 
 @Prototype
-public class CredentialTestDto extends AbstractCloudbreakTestDto<CredentialV4Request, CredentialV4Response, CredentialTestDto>
-        implements Purgable<CredentialV4Response> {
+public class CredentialTestDto extends DeletableTestDto<CredentialV4Request, CredentialV4Response, CredentialTestDto, CredentialV4Response> {
 
     public static final String CREDENTIAL = "CREDENTIAL";
 
@@ -105,8 +102,8 @@ public class CredentialTestDto extends AbstractCloudbreakTestDto<CredentialV4Req
     }
 
     @Override
-    public boolean deletable(CredentialV4Response entity) {
-        return entity.getName().startsWith(RandomNameCreator.PREFIX);
+    protected String name(CredentialV4Response entity) {
+        return entity.getName();
     }
 
     @Override

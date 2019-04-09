@@ -1,14 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway.dto.database;
 
-import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
-
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import javax.ws.rs.WebApplicationException;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
@@ -17,13 +8,19 @@ import com.sequenceiq.it.cloudbreak.newway.Assertion;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.GherkinTest;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
-import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
-import com.sequenceiq.it.cloudbreak.newway.context.Purgable;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.dto.AbstractCloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.DeletableTestDto;
+
+import javax.ws.rs.WebApplicationException;
+import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
 
 @Prototype
-public class DatabaseTestDto extends AbstractCloudbreakTestDto<DatabaseV4Request, DatabaseV4Response, DatabaseTestDto> implements Purgable<DatabaseV4Response> {
+public class DatabaseTestDto extends DeletableTestDto<DatabaseV4Request, DatabaseV4Response, DatabaseTestDto, DatabaseV4Response> {
 
     public static final String DATABASE = "DATABASE";
 
@@ -98,8 +95,8 @@ public class DatabaseTestDto extends AbstractCloudbreakTestDto<DatabaseV4Request
     }
 
     @Override
-    public boolean deletable(DatabaseV4Response entity) {
-        return entity.getName().startsWith(RandomNameCreator.PREFIX);
+    protected String name(DatabaseV4Response entity) {
+        return entity.getName();
     }
 
     @Override

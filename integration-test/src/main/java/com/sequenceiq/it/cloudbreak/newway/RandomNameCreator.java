@@ -1,30 +1,42 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import static com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters.CLOUD_PROVIDER;
-
-import java.util.UUID;
-
-import org.springframework.beans.factory.annotation.Value;
+import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudProperties;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
+import javax.inject.Inject;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 @Component
 public class RandomNameCreator {
 
-    public static final String PREFIX = "autotest-";
-
     private static final int MAX_LENGTH = 40;
 
-    @Value("${" + CLOUD_PROVIDER + ":MOCK}")
-    private CloudPlatform cloudPlatform;
+    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd--HH-mm-ss");
+
+    @Inject
+    private CommonCloudProperties commonCloudProperties;
 
     public String getRandomNameForResource() {
-        return trim(PREFIX + cloudPlatform.name().toLowerCase() + '-' + UUID.randomUUID().toString().replaceAll("-", ""));
+        return trim(prefix() + '-' + dateTime() + '-' + uuid());
     }
 
     public String getInvalidRandomNameForResource() {
-        return trim(PREFIX + cloudPlatform.name().toLowerCase() + "-?!;" + UUID.randomUUID().toString().replaceAll("-", ""));
+        return trim(prefix() + "-?!;" + '-' + dateTime() + '-' + uuid());
+    }
+
+    public String prefix() {
+        return commonCloudProperties.getCloudProvider().toLowerCase() + "-test";
+    }
+
+    private String dateTime() {
+        LocalDateTime localDateTime = LocalDateTime.now();
+        return localDateTime.format(dateTimeFormatter);
+    }
+
+    private String uuid() {
+        return UUID.randomUUID().toString().replaceAll("-", "");
     }
 
     private String trim(String name) {

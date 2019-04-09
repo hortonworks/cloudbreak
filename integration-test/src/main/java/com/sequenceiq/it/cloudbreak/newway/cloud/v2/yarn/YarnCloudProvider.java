@@ -1,28 +1,31 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud.v2.yarn;
 
-import org.springframework.stereotype.Component;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.yarn.YarnCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.YarnNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.YarnInstanceTemplateV4Parameters;
-import com.sequenceiq.it.cloudbreak.newway.dto.ImageSettingsTestDto;
-import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.AbstractCloudProvider;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudParameters;
 import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.NetworkV2TestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.StackAuthenticationTestDto;
-import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.newway.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDtoBase;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
 
 @Component
 public class YarnCloudProvider extends AbstractCloudProvider {
+
+    @Inject
+    private YarnProperties yarnProperties;
 
     @Override
     public CloudPlatform getCloudPlatform() {
@@ -32,7 +35,7 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     @Override
     public CredentialTestDto credential(CredentialTestDto credential) {
         return credential
-                .withDescription(CommonCloudParameters.CREDENTIAL_DEFAULT_DESCRIPTION)
+                .withDescription(commonCloudPropeties().getDefaultCredentialDescription())
                 .withCloudPlatform(CloudPlatform.YARN.name())
                 .withYarnParameters(yarnCredentialParameters());
     }
@@ -40,7 +43,7 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     @Override
     public EnvironmentTestDto environment(EnvironmentTestDto environment) {
         return environment
-                .withLocation(YarnParameters.DEFAULT_LOCATION);
+                .withLocation(location());
     }
 
     @Override
@@ -50,11 +53,11 @@ public class YarnCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String region() {
-        return getTestParameter().getWithDefault(YarnParameters.REGION, YarnParameters.DEFAULT_REGION);
+        return yarnProperties.getRegion();
     }
 
     public String location() {
-        return getTestParameter().getWithDefault(YarnParameters.LOCATION, YarnParameters.DEFAULT_LOCATION);
+        return yarnProperties.getLocation();
     }
 
     @Override
@@ -68,7 +71,7 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public ClusterTestDto cluster(ClusterTestDto cluster) {
+    protected ClusterTestDto withCluster(ClusterTestDto cluster) {
         return cluster
                 .withValidateClusterDefinition(Boolean.FALSE)
                 .withClusterDefinitionName(getClusterDefinitionName());
@@ -83,8 +86,8 @@ public class YarnCloudProvider extends AbstractCloudProvider {
 
     @Override
     public VolumeV4TestDto attachedVolume(VolumeV4TestDto volume) {
-        return volume.withSize(Integer.parseInt(getTestParameter().getWithDefault(YarnParameters.Instance.VOLUME_SIZE, YarnParameters.DEFAULT_VOLUME_SIZE)))
-                .withCount(Integer.parseInt(getTestParameter().getWithDefault(YarnParameters.Instance.VOLUME_COUNT, YarnParameters.DEFAULT_VOLUME_COUNT)));
+        return volume.withSize(yarnProperties.getInstance().getVolumeSize())
+                .withCount(yarnProperties.getInstance().getVolumeCount());
     }
 
     @Override
@@ -94,47 +97,47 @@ public class YarnCloudProvider extends AbstractCloudProvider {
 
     @Override
     public ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog) {
-        imageCatalog.withUrl(getTestParameter().getWithDefault(YarnParameters.Image.CATALOG_URL, YarnParameters.DEFAULT_IMAGE_CATALOG_URL));
+        imageCatalog.withUrl(yarnProperties.getImageCatalogUrl());
         return imageCatalog;
     }
 
     @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
-        return imageSettings.withImageId(getTestParameter().getWithDefault(YarnParameters.Image.ID, YarnParameters.DEFAULT_IMAGE_ID))
+        return imageSettings.withImageId(yarnProperties.getImageId())
                 .withImageCatalog(imageSettings.getTestContext().given(ImageSettingsTestDto.class).getName());
     }
 
     @Override
     public String availabilityZone() {
-        return getTestParameter().getWithDefault(YarnParameters.AVAILABILITY_ZONE, null);
+        return yarnProperties.getAvailabilityZone();
     }
 
     @Override
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
-        String sshPublicKey = getTestParameter().getWithDefault(CommonCloudParameters.SSH_PUBLIC_KEY, CommonCloudParameters.DEFAULT_SSH_PUBLIC_KEY);
+        String sshPublicKey = commonCloudPropeties().getSshPublicKey();
         return stackAuthenticationEntity.withPublicKey(sshPublicKey);
     }
 
     @Override
     public String getClusterDefinitionName() {
-        return getTestParameter().getWithDefault(CommonCloudParameters.CLUSTER_DEFINITION_NAME, YarnParameters.DEFAULT_CLUSTER_DEFINTION_NAME);
+        return yarnProperties.getDefaultClusterDefinitionName();
     }
 
     public String getQueue() {
-        return getTestParameter().getWithDefault(YarnParameters.YARN_QUEUE, YarnParameters.DEFAULT_QUEUE);
+        return yarnProperties.getQueue();
     }
 
     public Integer getCPUCount() {
-        return Integer.parseInt(getTestParameter().getWithDefault(YarnParameters.Instance.CPU_COUNT, YarnParameters.DEFAULT_CPU_COUNT));
+        return yarnProperties.getInstance().getCpuCount();
     }
 
     public Integer getMemorySize() {
-        return Integer.parseInt(getTestParameter().getWithDefault(YarnParameters.Instance.MEMORY_SIZE, YarnParameters.DEFAULT_MEMORY_SIZE));
+        return yarnProperties.getInstance().getMemory();
     }
 
     public YarnCredentialV4Parameters yarnCredentialParameters() {
         YarnCredentialV4Parameters yarnCredentialV4Parameters = new YarnCredentialV4Parameters();
-        yarnCredentialV4Parameters.setEndpoint(getTestParameter().getWithDefault(YarnParameters.Credential.ENDPOINT, YarnParameters.DEFAULT_ENDPOINT));
+        yarnCredentialV4Parameters.setEndpoint(yarnProperties.getCredential().getEndpoint());
         return yarnCredentialV4Parameters;
     }
 
