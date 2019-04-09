@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.MaintenanceModeStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
@@ -186,10 +187,10 @@ public class ClusterCommonService {
 
         switch (maintenanceMode) {
             case ENABLED:
-                saveAndFireEventOnClusterStatusChange(cluster, stack.getId(), MAINTENANCE_MODE_ENABLED, ResourceEvent.MAINTENANCE_MODE_ENABLED);
+                saveAndFireEventOnClusterStatusChange(cluster, stack.getId(), MAINTENANCE_MODE_ENABLED, NotificationEventType.MAINTENANCE_MODE_ENABLED);
                 break;
             case DISABLED:
-                saveAndFireEventOnClusterStatusChange(cluster, stack.getId(), AVAILABLE, ResourceEvent.MAINTENANCE_MODE_DISABLED);
+                saveAndFireEventOnClusterStatusChange(cluster, stack.getId(), AVAILABLE, NotificationEventType.MAINTENANCE_MODE_DISABLED);
                 break;
             case VALIDATION_REQUESTED:
                 if (!MAINTENANCE_MODE_ENABLED.equals(cluster.getStatus())) {
@@ -208,11 +209,10 @@ public class ClusterCommonService {
         }
     }
 
-    private void saveAndFireEventOnClusterStatusChange(Cluster cluster, Long stackId, Status status, ResourceEvent event) {
+    private void saveAndFireEventOnClusterStatusChange(Cluster cluster, Long stackId, Status status, NotificationEventType event) {
         if (!status.equals(cluster.getStatus())) {
             cluster.setStatus(status);
-            clusterService.save(cluster);
-            cloudbreakEventService.fireCloudbreakEvent(stackId, event.name(), messagesService.getMessage(event.getMessage()));
+            cloudbreakEventService.fireCloudbreakEvent(stackId, event, messagesService.getMessage(event));
         }
     }
 }

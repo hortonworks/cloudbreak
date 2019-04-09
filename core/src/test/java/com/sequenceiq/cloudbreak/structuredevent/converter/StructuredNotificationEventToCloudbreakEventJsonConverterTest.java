@@ -18,6 +18,7 @@ import org.junit.runners.Parameterized;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
@@ -26,8 +27,6 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEve
 public class StructuredNotificationEventToCloudbreakEventJsonConverterTest extends AbstractEntityConverterTest<StructuredNotificationEvent> {
 
     private static final String MESSAGE = "someMessage";
-
-    private static final String TYPE = "eventType";
 
     private StructuredNotificationEvent source;
 
@@ -46,9 +45,12 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverterTest exten
         OperationDetails operation = new OperationDetails(Calendar.getInstance().getTimeInMillis(), NOTIFICATION, "stacks", 1L,
                 "usagestack", "cbId", "cbVersion", 1L, "horton@hortonworks.com", "Alma Ur", "tenant");
         return new Object[][]{
-                {new StructuredNotificationEvent(operation, TestUtil.notificationDetails(MESSAGE, TYPE)), List.of("ldapDetails", "rdsDetails")},
-                {new StructuredNotificationEvent(operation, TestUtil.ldapNotificationDetails(MESSAGE, TYPE)), getFieldNamesExcept(List.of("ldapDetails"))},
-                {new StructuredNotificationEvent(operation, TestUtil.rdsNotificationDetails(MESSAGE, TYPE)), getFieldNamesExcept(List.of("rdsDetails"))}
+                {new StructuredNotificationEvent(operation, TestUtil.notificationDetails(MESSAGE, NotificationEventType.CREATE_IN_PROGRESS)),
+                        List.of("ldapDetails", "rdsDetails")},
+                {new StructuredNotificationEvent(operation, TestUtil.ldapNotificationDetails(MESSAGE, NotificationEventType.CREATE_IN_PROGRESS)),
+                        getFieldNamesExcept(List.of("ldapDetails"))},
+                {new StructuredNotificationEvent(operation, TestUtil.rdsNotificationDetails(MESSAGE, NotificationEventType.CREATE_IN_PROGRESS)),
+                        getFieldNamesExcept(List.of("rdsDetails"))}
         };
     }
 
@@ -63,7 +65,7 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverterTest exten
 
         assertNotNull(result);
         assertEquals(MESSAGE, result.getEventMessage());
-        assertEquals(TYPE, result.getEventType());
+        assertEquals(NotificationEventType.CREATE_IN_PROGRESS.name(), result.getEventType());
         assertAllFieldsNotNull(result, skippedFields);
     }
 

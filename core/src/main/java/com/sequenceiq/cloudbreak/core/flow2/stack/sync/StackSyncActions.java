@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.sync;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
@@ -18,6 +17,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
@@ -98,7 +98,8 @@ public class StackSyncActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.error("Error during Stack synchronization flow:", payload.getException());
-                flowMessageService.fireEventAndLog(context.getStackView().getId(), Msg.STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE, UPDATE_FAILED.name());
+                flowMessageService.fireEventAndLog(context.getStackView().getId(), Msg.STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE,
+                        NotificationEventType.UPDATE_FAILED);
                 sendEvent(context);
             }
 

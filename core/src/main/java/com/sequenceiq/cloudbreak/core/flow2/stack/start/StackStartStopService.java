@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.start;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 import static java.lang.String.format;
 
@@ -14,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.InstancesStatusResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesResult;
@@ -22,7 +21,6 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
@@ -52,7 +50,7 @@ public class StackStartStopService {
     public void startStackStart(StackStartStopContext context) {
         Stack stack = context.getStack();
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_IN_PROGRESS, "Cluster infrastructure is now starting.");
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_STARTING, Status.START_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_STARTING, NotificationEventType.START_IN_PROGRESS);
     }
 
     public void validateStackStartResult(StackStartStopContext context, StartInstancesResult startInstancesResult) {
@@ -67,12 +65,12 @@ public class StackStartStopService {
         }
         metadatSetupService.saveInstanceMetaData(stack, coreInstanceMetaData, null);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STARTED, "Cluster infrastructure started successfully.");
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_STARTED, AVAILABLE.name());
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BILLING_STARTED, BillingStatus.BILLING_STARTED.name());
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_STARTED, NotificationEventType.AVAILABLE);
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BILLING_STARTED, NotificationEventType.BILLING_STARTED);
     }
 
     public void handleStackStartError(StackView stack, StackFailureEvent payload) {
-        handleError(stack, payload.getException(), DetailedStackStatus.START_FAILED, Msg.STACK_INFRASTRUCTURE_START_FAILED,
+        handleError(stack, payload.getException(), DetailedStackStatus.START_FAILED, NotificationEventType.START_FAILED, Msg.STACK_INFRASTRUCTURE_START_FAILED,
                 "Stack start failed: ");
     }
 
@@ -80,7 +78,7 @@ public class StackStartStopService {
         Stack stack = context.getStack();
         if (isStopPossible(stack)) {
             stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.STOP_IN_PROGRESS, "Cluster infrastructure is now stopping.");
-            flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_STOPPING, Status.STOP_IN_PROGRESS.name());
+            flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_STOPPING, NotificationEventType.STOP_IN_PROGRESS);
         }
     }
 
@@ -89,12 +87,13 @@ public class StackStartStopService {
         validateResourceResults(context.getCloudContext(), stopInstancesResult.getErrorDetails(), stopInstancesResult.getResults(), false);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOPPED, "Cluster infrastructure stopped successfully.");
 
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_STOPPED, STOPPED.name());
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BILLING_STOPPED, BillingStatus.BILLING_STOPPED.name());
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_STOPPED, NotificationEventType.STOPPED);
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BILLING_STOPPED, NotificationEventType.BILLING_STOPPED);
     }
 
     public void handleStackStopError(StackView stack, StackFailureEvent payload) {
-        handleError(stack, payload.getException(), DetailedStackStatus.STOP_FAILED, Msg.STACK_INFRASTRUCTURE_STOP_FAILED, "Stack stop failed: ");
+        handleError(stack, payload.getException(), DetailedStackStatus.STOP_FAILED, NotificationEventType.STOP_FAILED, Msg.STACK_INFRASTRUCTURE_STOP_FAILED,
+                "Stack stop failed: ");
     }
 
     public boolean isStopPossible(StackView stack) {
@@ -131,11 +130,11 @@ public class StackStartStopService {
         }
     }
 
-    private void handleError(StackView stackView, Exception exception, DetailedStackStatus detailedStackStatus, Msg msg, String logMessage) {
+    private void handleError(StackView stackView, Exception exception, DetailedStackStatus status, NotificationEventType eventType,
+            Msg msg, String logMessage) {
         LOGGER.debug(logMessage, exception);
-        Status stackStatus = detailedStackStatus.getStatus();
-        stackUpdater.updateStackStatus(stackView.getId(), detailedStackStatus, logMessage + exception.getMessage());
-        flowMessageService.fireEventAndLog(stackView.getId(), msg, stackStatus.name(), exception.getMessage());
+        stackUpdater.updateStackStatus(stackView.getId(), status, logMessage + exception.getMessage());
+        flowMessageService.fireEventAndLog(stackView.getId(), msg, eventType, exception.getMessage());
         if (stackView.getClusterView() != null) {
             clusterService.updateClusterStatusByStackId(stackView.getId(), STOPPED);
         }

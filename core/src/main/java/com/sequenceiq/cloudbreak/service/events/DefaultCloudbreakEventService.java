@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
@@ -62,14 +63,14 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     }
 
     @Override
-    public void fireCloudbreakEvent(Long entityId, String eventType, String eventMessage) {
+    public void fireCloudbreakEvent(Long entityId, NotificationEventType eventType, String eventMessage) {
         StructuredNotificationEvent eventData = structuredFlowEventFactory.createStructuredNotificationEvent(entityId, eventType, eventMessage, null);
         LOGGER.debug("Firing Cloudbreak event: entityId: {}, type: {}, message: {}", entityId, eventType, eventMessage);
         reactor.notify(CLOUDBREAK_EVENT, eventFactory.createEvent(eventData));
     }
 
     @Override
-    public void fireLdapEvent(LdapDetails ldapDetails, String eventType, String eventMessage, boolean notifyWorkspace) {
+    public void fireLdapEvent(LdapDetails ldapDetails, NotificationEventType eventType, String eventMessage, boolean notifyWorkspace) {
         StructuredNotificationEvent eventData = structuredFlowEventFactory.createStructuredNotificationEvent(ldapDetails, eventType, eventMessage,
                 notifyWorkspace);
         LOGGER.debug("Firing Ldap event: entityId: {}, entityName: {}, type: {}, message: {}", ldapDetails.getId(), ldapDetails.getName(), eventType,
@@ -78,7 +79,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     }
 
     @Override
-    public void fireRdsEvent(RdsDetails rdsDetails, String eventType, String eventMessage, boolean notifyWorkspace) {
+    public void fireRdsEvent(RdsDetails rdsDetails, NotificationEventType eventType, String eventMessage, boolean notifyWorkspace) {
         StructuredNotificationEvent eventData = structuredFlowEventFactory.createStructuredNotificationEvent(rdsDetails, eventType, eventMessage,
                 notifyWorkspace);
         LOGGER.debug("Firing RDS event: entityId: {}, entityName: {}, type: {}, message: {}", rdsDetails.getId(), rdsDetails.getName(), eventType,
@@ -87,7 +88,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     }
 
     @Override
-    public void fireCloudbreakInstanceGroupEvent(Long stackId, String eventType, String eventMessage, String instanceGroupName) {
+    public void fireCloudbreakInstanceGroupEvent(Long stackId, NotificationEventType eventType, String eventMessage, String instanceGroupName) {
         StructuredNotificationEvent eventData = structuredFlowEventFactory.createStructuredNotificationEvent(stackId, eventType, eventMessage,
                 instanceGroupName);
         LOGGER.debug("Firing Cloudbreak event: stackId: {}, type: {}, message: {}, instancegroup: {}", stackId, eventType, eventMessage, instanceGroupName);

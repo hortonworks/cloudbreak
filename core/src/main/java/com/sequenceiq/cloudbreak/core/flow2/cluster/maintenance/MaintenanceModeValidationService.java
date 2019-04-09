@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.maintenance;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.MAINTENANCE_MODE_ENABLED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 
 import java.util.ArrayList;
@@ -22,6 +20,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -87,7 +86,7 @@ public class MaintenanceModeValidationService {
     public void setUpValidationFlow(Long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_OPERATION, "Validating repos and images...");
-        flowMessageService.fireEventAndLog(stackId, Msg.MAINTENANCE_MODE_VALIDATION_STARTED, UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stackId, Msg.MAINTENANCE_MODE_VALIDATION_STARTED, NotificationEventType.UPDATE_IN_PROGRESS);
     }
 
     public List<Warning> validateStackRepository(Long clusterId, String stackRepo) {
@@ -179,10 +178,10 @@ public class MaintenanceModeValidationService {
                 String warningJson = new ObjectMapper().writeValueAsString(warnings);
                 LOGGER.warn(String.format("Found warnings: {%s}", warningJson));
                 flowMessageService.fireEventAndLog(stackId, Msg.MAINTENANCE_MODE_VALIDATION_FINISHED_FOUND_WARNINGS,
-                        AVAILABLE.name(), warningJson);
+                        NotificationEventType.AVAILABLE, warningJson);
             } else {
                 flowMessageService.fireEventAndLog(stackId, Msg.MAINTENANCE_MODE_VALIDATION_FINISHED_NO_WARNINGS,
-                        AVAILABLE.name());
+                        NotificationEventType.AVAILABLE);
             }
         } catch (JsonProcessingException e) {
             throw new CloudbreakServiceException("Validation result could not be serialized!", e);
@@ -195,7 +194,7 @@ public class MaintenanceModeValidationService {
         clusterService.updateClusterStatusByStackId(stackId, MAINTENANCE_MODE_ENABLED);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE,
                 String.format("Validation has been finished with error: %s", error));
-        flowMessageService.fireEventAndLog(stackId, Msg.MAINTENANCE_MODE_VALIDATION_FAILED, UPDATE_FAILED.name(),
+        flowMessageService.fireEventAndLog(stackId, Msg.MAINTENANCE_MODE_VALIDATION_FAILED, NotificationEventType.UPDATE_FAILED,
                 errorDetailes);
     }
 

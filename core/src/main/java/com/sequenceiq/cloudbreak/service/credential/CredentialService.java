@@ -24,12 +24,16 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialPrerequisitesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakV4Event;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.CredentialViewV4Response;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.view.CredentialToCredentialViewV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -45,6 +49,7 @@ import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
+import com.sequenceiq.cloudbreak.service.notification.NotificationAssemblingService;
 import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
@@ -98,6 +103,9 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
     @Inject
     private SecretService secretService;
 
+    @Inject
+    private CredentialToCredentialViewV4ResponseConverter credentialToCredentialViewV4ResponseConverter;
+
     public Set<Credential> listAvailablesByWorkspaceId(Long workspaceId) {
         return credentialRepository.findActiveForWorkspaceFilterByPlatforms(workspaceId, preferencesService.enabledPlatforms());
     }
@@ -119,15 +127,17 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
         User user = getLoggedInUser();
         credentialValidator.validateCredentialCloudPlatform(credential.cloudPlatform());
         Credential original = credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(credential.getName(), workspaceId,
-                        preferencesService.enabledPlatforms()).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, credential.getName()));
+                preferencesService.enabledPlatforms()).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, credential.getName()));
         if (!Objects.equals(credential.cloudPlatform(), original.cloudPlatform())) {
+            sendCredentialNotification(credential, NotificationEventType.UPDATE_FAILED);
             throw new BadRequestException("Modifying credential platform is forbidden");
         }
         credential.setId(original.getId());
         credential.setWorkspace(workspaceService.get(workspaceId, user));
         Credential updated = super.create(credentialAdapter.verify(credential, workspaceId, user.getUserId()), workspaceId, user);
         secretService.delete(original.getAttributesSecret());
-        sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_MODIFIED);
+        sendCredentialNotification(credential, NotificationEventType.UPDATE_SUCCESS);
+        sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_MODIFIED, NotificationEventType.UPDATE_SUCCESS);
         return updated;
     }
 
@@ -142,7 +152,8 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
         credentialValidator.validateCredentialCloudPlatform(credential.cloudPlatform());
         credentialValidator.validateParameters(Platform.platform(credential.cloudPlatform()), new Json(credential.getAttributes()).getMap());
         Credential created = super.create(credentialAdapter.verify(credential, workspaceId, user.getUserId()), workspaceId, user);
-        sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_CREATED);
+        sendCredentialNotification(credential, NotificationEventType.CREATE_SUCCESS);
+        sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_CREATED, NotificationEventType.CREATE_SUCCESS);
         return created;
     }
 
@@ -281,7 +292,8 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
         LOGGER.debug(String.format("Starting to delete credential [name: %s, workspace: %s]", credential.getName(), workspace.getName()));
         userProfileHandler.destroyProfileCredentialPreparation(credential);
         Credential archived = archiveCredential(credential);
-        sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_DELETED);
+        sendCredentialNotification(credential, NotificationEventType.DELETE_SUCCESS);
+        sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_DELETED, NotificationEventType.DELETE_SUCCESS);
         return archived;
     }
 
@@ -323,15 +335,22 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
         }
     }
 
-    private void sendCredentialNotification(Credential credential, ResourceEvent resourceEvent) {
+    private void sendCredentialNotification(Credential credential, ResourceEvent resourceEvent, NotificationEventType notificationEventType) {
         CloudbreakEventV4Response notification = new CloudbreakEventV4Response();
         notification.setEventType(resourceEvent.name());
         notification.setEventTimestamp(new Date().getTime());
-        notification.setEventMessage(messagesService.getMessage(resourceEvent.getMessage()));
+        notification.setEventMessage(messagesService.getMessage(WorkspaceResource.CREDENTIAL, notificationEventType));
         notification.setCloud(credential.cloudPlatform());
         notification.setWorkspaceId(credential.getWorkspace().getId());
         notification.setTenantName(credential.getWorkspace().getName());
         notificationSender.send(new Notification<>(notification));
+    }
+
+    private void sendCredentialNotification(Credential credential, NotificationEventType notificationEventType) {
+        CredentialViewV4Response payload = credentialToCredentialViewV4ResponseConverter.convert(credential);
+        CloudbreakV4Event response = NotificationAssemblingService.cloudbreakEvent(payload, notificationEventType, WorkspaceResource.CREDENTIAL);
+        response.setWorkspaceId(credential.getWorkspace().getId());
+        notificationSender.send(new Notification<>(response));
     }
 
     private void putToCredentialAttributes(Credential credential, Map<String, Object> attributesToAdd) {

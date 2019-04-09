@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @EntityType(entityClass = ImageCatalog.class)
 @Transactional(TxType.REQUIRED)
 @DisableHasPermission
-@WorkspaceResourceType(resource = WorkspaceResource.IMAGECATALOG)
+@WorkspaceResourceType(resource = WorkspaceResource.IMAGE_CATALOG)
 public interface ImageCatalogRepository extends WorkspaceResourceRepository<ImageCatalog, Long> {
 
     @CheckPermissionsByReturnValue

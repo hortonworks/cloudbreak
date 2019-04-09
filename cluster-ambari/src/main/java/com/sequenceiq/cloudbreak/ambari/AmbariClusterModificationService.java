@@ -14,7 +14,7 @@ import static com.sequenceiq.cloudbreak.ambari.AmbariOperationType.START_SERVICE
 import static com.sequenceiq.cloudbreak.ambari.AmbariOperationType.STOP_AMBARI_PROGRESS_STATE;
 import static com.sequenceiq.cloudbreak.ambari.AmbariOperationType.UPSCALE_AMBARI_PROGRESS_STATE;
 import static com.sequenceiq.cloudbreak.ambari.HostGroupAssociationBuilder.FQDN;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isTimeout;
 import static java.util.Collections.singletonMap;
@@ -169,7 +169,7 @@ public class AmbariClusterModificationService implements ClusterModificationServ
     private void stopHadoopServices(Stack stack, AmbariClient ambariClient) throws URISyntaxException, IOException, CloudbreakException {
         LOGGER.info("Stop all Hadoop services");
         eventService
-                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
+                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS,
                         cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_SERVICES_STOPPING.code()));
         int requestId = ambariClient.stopAllServices();
         if (requestId != -1) {
@@ -179,7 +179,7 @@ public class AmbariClusterModificationService implements ClusterModificationServ
             throw new CloudbreakException("Failed to stop Hadoop services.");
         }
         eventService
-                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
+                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS,
                         cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_SERVICES_STOPPED.code()));
     }
 
@@ -218,20 +218,13 @@ public class AmbariClusterModificationService implements ClusterModificationServ
         }
     }
 
-    private void waitForComponents(Stack stack, AmbariClient ambariClient, Set<HostMetadata> hostsInCluster) {
-        PollingResult componentsJoinedResult = ambariPollingServiceProvider.ambariComponentJoin(stack, ambariClient, hostsInCluster);
-        if (isExited(componentsJoinedResult)) {
-            throw new CancellationException("Cluster was terminated while waiting for Hadoop components to join.");
-        }
-    }
-
     private int startHadoopServices(Stack stack, AmbariClient ambariClient) throws CloudbreakException, IOException, URISyntaxException {
         LOGGER.info("Starting all Hadoop services");
-        eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
+        eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS,
                 cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_SERVICES_STARTING.code()));
         int requestId = ambariClient.startAllServices();
         if (requestId == -1) {
-            LOGGER.error("Failed to start Hadoop services.");
+            LOGGER.info("Failed to start Hadoop services.");
             throw new CloudbreakException("Failed to start Hadoop services.");
         }
         return requestId;

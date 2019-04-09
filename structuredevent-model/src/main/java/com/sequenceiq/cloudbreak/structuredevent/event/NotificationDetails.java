@@ -6,6 +6,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NotificationDetails implements Serializable {
+
+    /**
+     * See all notification event type in {@code com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType}
+     */
     private String notificationType;
 
     private String notification;

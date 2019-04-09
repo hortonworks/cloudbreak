@@ -17,12 +17,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4ViewResponses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.GeneratedCmTemplateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.RecommendationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.ServiceDependencyMatrixV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.SupportedVersionsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ParametersQueryV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
-import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
@@ -61,22 +62,25 @@ public class BlueprintV4Controller extends NotificationController implements Blu
     public BlueprintV4Response post(Long workspaceId, BlueprintV4Request request) {
         Blueprint blueprint = blueprintService.createForLoggedInUser(
                 converterUtil.convert(request, Blueprint.class), workspaceId);
-        notify(ResourceEvent.BLUEPRINT_CREATED);
-        return converterUtil.convert(blueprint, BlueprintV4Response.class);
+        BlueprintV4Response response = converterUtil.convert(blueprint, BlueprintV4Response.class);
+        notify(response, NotificationEventType.CREATE_SUCCESS, WorkspaceResource.BLUEPRINT, workspaceId);
+        return response;
     }
 
     @Override
     public BlueprintV4Response delete(Long workspaceId, String name) {
-        Blueprint deleted = blueprintService.deleteByNameFromWorkspace(name, workspaceId);
-        notify(ResourceEvent.BLUEPRINT_DELETED);
-        return converterUtil.convert(deleted, BlueprintV4Response.class);
+        Blueprint blueprint = blueprintService.deleteByNameFromWorkspace(name, workspaceId);
+        BlueprintV4Response response = converterUtil.convert(blueprint, BlueprintV4Response.class);
+        notify(response, NotificationEventType.DELETE_SUCCESS, WorkspaceResource.BLUEPRINT, workspaceId);
+        return response;
     }
 
     @Override
     public BlueprintV4Responses deleteMultiple(Long workspaceId, Set<String> names) {
         Set<Blueprint> deleted = blueprintService.deleteMultipleByNameFromWorkspace(names, workspaceId);
-        notify(ResourceEvent.BLUEPRINT_DELETED);
-        return new BlueprintV4Responses(converterUtil.convertAllAsSet(deleted, BlueprintV4Response.class));
+        Set<BlueprintV4Response> response = converterUtil.convertAllAsSet(deleted, BlueprintV4Response.class);
+        notify(response, NotificationEventType.DELETE_SUCCESS, WorkspaceResource.BLUEPRINT, workspaceId);
+        return new BlueprintV4Responses(response);
     }
 
     @Override

@@ -26,6 +26,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -150,7 +151,7 @@ public class ClusterBootstrapperErrorHandlerTest {
         underTest.terminateFailedNodes(null, orchestrator, TestUtil.stack(),
                 new GatewayConfig("10.0.0.1", "198.0.0.1", "10.0.0.1", 8443, false), prepareNodes(stack));
 
-        verify(eventService, times(4)).fireCloudbreakEvent(anyLong(), anyString(), nullable(String.class));
+        verify(eventService, times(4)).fireCloudbreakEvent(anyLong(), any(NotificationEventType.class), nullable(String.class));
         verify(instanceGroupService, times(3)).save(any(InstanceGroup.class));
         verify(instanceMetaDataService, times(3)).save(any(InstanceMetaData.class));
         verify(connector, times(3)).removeInstances(any(Stack.class), anySet(), anyString());

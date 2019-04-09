@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventBaseV4;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.domain.Subscription;
@@ -21,8 +22,6 @@ import com.sequenceiq.cloudbreak.service.subscription.SubscriptionService;
 @Service
 public class HttpNotificationSender implements NotificationSender {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpNotificationSender.class);
-
-    private static final String TEST_NOTIFICATION_TYPE = "TEST_NOTIFICATION";
 
     @Inject
     private SubscriptionService subscriptionService;
@@ -66,11 +65,11 @@ public class HttpNotificationSender implements NotificationSender {
 
     private CloudbreakEventBaseV4 createTestNotification(String userId) {
         CloudbreakEventBaseV4 baseEvent = new CloudbreakEventBaseV4();
-        baseEvent.setEventType(TEST_NOTIFICATION_TYPE);
+        baseEvent.setEventType(NotificationEventType.TEST_NOTIFICATION.name());
         baseEvent.setEventMessage("Test notification message.");
         baseEvent.setEventTimestamp(System.currentTimeMillis());
         baseEvent.setUserId(userId);
-        baseEvent.setNotificationType(TEST_NOTIFICATION_TYPE);
+        baseEvent.setNotificationType("TEST_NOTIFICATION");
         return baseEvent;
     }
 }

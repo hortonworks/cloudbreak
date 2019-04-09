@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_REQUESTED;
-
 import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -32,6 +29,7 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
@@ -124,7 +122,7 @@ public class InstanceMetadataUpdater {
 
     private void notifyIfPackagesHaveChangedVersions(Stack stack, Map<String, Multimap<String, String>> changedVersionsByHost) {
         if (!changedVersionsByHost.isEmpty()) {
-            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), UPDATE_REQUESTED.name(),
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), NotificationEventType.UPDATE_REQUESTED,
                     cloudbreakMessagesService.getMessage(Msg.PACKAGE_VERSIONS_ARE_CHANGED.code(),
                             Collections.singletonList(changedVersionsByHost.entrySet().stream()
                                     .map(entry -> String.format("On Instance ID: [%s], package versions have been changed: [%s]",
@@ -135,7 +133,7 @@ public class InstanceMetadataUpdater {
 
     private void notifyIfInstancesMissingPackageVersion(Stack stack, Map<String, List<String>> instancesWithMissingPackageVersions) {
         if (!instancesWithMissingPackageVersions.isEmpty()) {
-            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), NotificationEventType.AVAILABLE,
                     cloudbreakMessagesService.getMessage(Msg.PACKAGE_VERSIONS_ON_INSTANCES_ARE_MISSING.code(),
                             Collections.singletonList(instancesWithMissingPackageVersions.entrySet().stream()
                                     .map(entry -> String.format("Instance ID: [%s] Packages without version: [%s]",
@@ -146,7 +144,7 @@ public class InstanceMetadataUpdater {
 
     private void notifyIfPackagesHaveDifferentVersions(Stack stack, List<String> packagesWithMultipleVersions) {
         if (!packagesWithMultipleVersions.isEmpty()) {
-            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), NotificationEventType.AVAILABLE,
                     cloudbreakMessagesService.getMessage(Msg.PACKAGES_ON_INSTANCES_ARE_DIFFERENT.code(),
                             Collections.singletonList(String.join(",", packagesWithMultipleVersions))));
         }

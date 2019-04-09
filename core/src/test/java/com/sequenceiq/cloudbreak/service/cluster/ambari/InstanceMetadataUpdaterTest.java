@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -123,7 +124,7 @@ public class InstanceMetadataUpdaterTest {
     public void updatePackageVersionsOnAllInstances() throws Exception {
         underTest.updatePackageVersionsOnAllInstances(stack);
 
-        verify(cloudbreakEventService, times(0)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
+        verify(cloudbreakEventService, times(0)).fireCloudbreakEvent(anyLong(), any(NotificationEventType.class), anyString());
     }
 
     @Test
@@ -142,7 +143,7 @@ public class InstanceMetadataUpdaterTest {
 
         underTest.updatePackageVersionsOnAllInstances(stack);
 
-        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
+        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), any(NotificationEventType.class), anyString());
         verify(cloudbreakMessagesService, times(1))
                 .getMessage(eq(InstanceMetadataUpdater.Msg.PACKAGE_VERSIONS_ON_INSTANCES_ARE_MISSING.code()), anyCollection());
     }
@@ -163,7 +164,7 @@ public class InstanceMetadataUpdaterTest {
 
         underTest.updatePackageVersionsOnAllInstances(stack);
 
-        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
+        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), any(NotificationEventType.class), anyString());
         verify(cloudbreakMessagesService, times(1))
                 .getMessage(eq(InstanceMetadataUpdater.Msg.PACKAGES_ON_INSTANCES_ARE_DIFFERENT.code()), anyCollection());
     }

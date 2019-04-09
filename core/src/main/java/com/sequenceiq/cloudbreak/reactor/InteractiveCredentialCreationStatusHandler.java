@@ -7,11 +7,16 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.InteractiveCreationStatusV4Event;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveCredentialCreationStatus;
+import com.sequenceiq.cloudbreak.converter.events.ExtendedCloudCredentialToCredentialViewV4ResponseConverter;
 import com.sequenceiq.cloudbreak.notification.Notification;
 import com.sequenceiq.cloudbreak.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
+import com.sequenceiq.cloudbreak.service.notification.NotificationAssemblingService;
 
 import reactor.bus.Event;
 
@@ -23,6 +28,9 @@ public class InteractiveCredentialCreationStatusHandler implements ReactorEventH
 
     @Inject
     private NotificationSender notificationSender;
+
+    @Inject
+    private ExtendedCloudCredentialToCredentialViewV4ResponseConverter converter;
 
     @Override
     public String selector() {
@@ -43,6 +51,19 @@ public class InteractiveCredentialCreationStatusHandler implements ReactorEventH
         notification.setEventMessage(message);
         notification.setUserId(interactiveCredentialCreationStatus.getCloudContext().getUserId());
         notification.setCloud(interactiveCredentialCreationStatus.getExtendedCloudCredential().getCloudPlatform());
+        //TODO: remove notifiaction backward compatible
         notificationSender.send(new Notification<>(notification));
+        notificationSender.send(getNotification(interactiveCredentialCreationStatus));
+    }
+
+    private Notification<?> getNotification(InteractiveCredentialCreationStatus status) {
+        NotificationEventType eventType = status.isError()
+                ? NotificationEventType.CREATE_FAILED
+                : NotificationEventType.CREATE_IN_PROGRESS;
+
+        InteractiveCreationStatusV4Event payload = new InteractiveCreationStatusV4Event();
+        payload.setCredential(converter.convert(status.getExtendedCloudCredential()));
+        payload.setMessage(status.getMessage());
+        return new Notification<>(NotificationAssemblingService.cloudbreakEvent(payload, eventType, WorkspaceResource.CREDENTIAL));
     }
 }

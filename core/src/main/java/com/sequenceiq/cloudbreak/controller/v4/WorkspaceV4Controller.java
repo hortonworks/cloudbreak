@@ -12,6 +12,7 @@ import javax.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.NameComparator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.UserIdComparator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.WorkspaceV4Endpoint;
@@ -23,7 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.UserV4Respo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceV4Responses;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
@@ -51,8 +52,9 @@ public class WorkspaceV4Controller extends NotificationController implements Wor
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = converterUtil.convert(workspaceV4Request, Workspace.class);
         workspace = workspaceService.create(user, workspace);
-        notify(ResourceEvent.WORKSPACE_CREATED, false, Collections.singleton(workspace.getId()));
-        return converterUtil.convert(workspace, WorkspaceV4Response.class);
+        WorkspaceV4Response response = converterUtil.convert(workspace, WorkspaceV4Response.class);
+        notify(response, NotificationEventType.CREATE_SUCCESS, WorkspaceResource.WORKSPACE, null, Collections.singleton(workspace.getId()));
+        return response;
     }
 
     @Override
@@ -74,8 +76,9 @@ public class WorkspaceV4Controller extends NotificationController implements Wor
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace defaultWorkspace = workspaceService.getDefaultWorkspaceForUser(user);
         Workspace workspace = workspaceService.deleteByNameForUser(name, user, defaultWorkspace);
-        notify(ResourceEvent.WORKSPACE_DELETED, false, Collections.singleton(workspace.getId()));
-        return converterUtil.convert(workspace, WorkspaceV4Response.class);
+        WorkspaceV4Response response = converterUtil.convert(workspace, WorkspaceV4Response.class);
+        notify(response, NotificationEventType.CREATE_SUCCESS, WorkspaceResource.WORKSPACE, null, Collections.singleton(workspace.getId()));
+        return response;
     }
 
     @Override

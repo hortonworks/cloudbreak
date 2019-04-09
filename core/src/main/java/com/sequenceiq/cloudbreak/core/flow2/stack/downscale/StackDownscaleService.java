@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.downscale;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static java.util.stream.Collectors.toList;
 
 import java.util.Collection;
@@ -17,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
@@ -55,7 +53,7 @@ public class StackDownscaleService {
             instanceIdList = stackService.getInstanceIdsForPrivateIds(stack.getInstanceMetaDataAsList(), privateIds);
         }
         Object msgParam = instanceIdList.isEmpty() ? Math.abs(stackDownscaleTriggerEvent.getAdjustment()) : instanceIdList;
-        flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.STACK_DOWNSCALE_INSTANCES, UPDATE_IN_PROGRESS.name(), msgParam);
+        flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.STACK_DOWNSCALE_INSTANCES, NotificationEventType.UPDATE_IN_PROGRESS, msgParam);
     }
 
     public void finishStackDownscale(StackScalingFlowContext context, String instanceGroupName, Collection<String> instanceIds)
@@ -71,12 +69,12 @@ public class StackDownscaleService {
                 .collect(toList());
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_COMPLETED,
                 String.format("Downscale of the cluster infrastructure finished successfully. Terminated node(s): %s", fqdns));
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DOWNSCALE_SUCCESS, AVAILABLE.name(), fqdns);
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DOWNSCALE_SUCCESS, NotificationEventType.AVAILABLE, fqdns);
     }
 
     public void handleStackDownscaleError(StackFailureContext context, Exception errorDetails) {
         LOGGER.info("Exception during the downscaling of stack", errorDetails);
-        flowMessageService.fireEventAndLog(context.getStackView().getId(), Msg.STACK_DOWNSCALE_FAILED, UPDATE_FAILED.name());
+        flowMessageService.fireEventAndLog(context.getStackView().getId(), Msg.STACK_DOWNSCALE_FAILED, NotificationEventType.UPDATE_FAILED);
         stackUpdater.updateStackStatus(context.getStackView().getId(), DetailedStackStatus.DOWNSCALE_FAILED);
     }
 }

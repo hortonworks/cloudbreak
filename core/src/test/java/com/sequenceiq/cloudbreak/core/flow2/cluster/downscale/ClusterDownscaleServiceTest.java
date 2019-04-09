@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -64,35 +65,35 @@ public class ClusterDownscaleServiceTest {
 
     @Test
     public void testClusterDownscaleStartedWhenScalingAdjustmentIsGivenAndItIsPositiveThenInstanceGroupEventWillBeCalledThisNumber() {
-        doNothing().when(flowMessageService).fireEventAndLog(STACK_ID, Msg.CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
+        doNothing().when(flowMessageService).fireEventAndLog(STACK_ID, Msg.CLUSTER_SCALING_DOWN, NotificationEventType.UPDATE_IN_PROGRESS);
 
         underTest.clusterDownscaleStarted(STACK_ID, HOST_GROUP_NAME, 1, PRIVATE_IDS, details);
 
         verify(flowMessageService, times(1)).fireInstanceGroupEventAndLog(STACK_ID, Msg.CLUSTER_REMOVING_NODE_FROM_HOSTGROUP,
-                Status.UPDATE_IN_PROGRESS.name(), HOST_GROUP_NAME, 1, HOST_GROUP_NAME);
-        verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID, Msg.CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
+                NotificationEventType.UPDATE_IN_PROGRESS, HOST_GROUP_NAME, 1, HOST_GROUP_NAME);
+        verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID, Msg.CLUSTER_SCALING_DOWN, NotificationEventType.UPDATE_IN_PROGRESS);
         verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, Status.UPDATE_IN_PROGRESS);
         verify(stackService, times(0)).getByIdWithListsInTransaction(anyLong());
         verify(stackService, times(0)).getByIdWithListsInTransaction(STACK_ID);
         verify(stackService, times(0)).getHostNamesForPrivateIds(anyListOf(InstanceMetaData.class), anySet());
-        verify(flowMessageService, times(0)).fireInstanceGroupEventAndLog(eq(STACK_ID), any(Msg.class), anyString(), anyString(),
+        verify(flowMessageService, times(0)).fireInstanceGroupEventAndLog(eq(STACK_ID), any(Msg.class), any(NotificationEventType.class), anyString(),
                 anyListOf(String.class), anyString());
     }
 
     @Test
     public void testClusterDownscaleStartedWhenScalingAdjustmentIsGivenAndItIsNegativeThenInstanceGroupEventWillBeCalledWithTheAbsoluteValueOfThisNumber() {
-        doNothing().when(flowMessageService).fireEventAndLog(STACK_ID, Msg.CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
+        doNothing().when(flowMessageService).fireEventAndLog(STACK_ID, Msg.CLUSTER_SCALING_DOWN, NotificationEventType.UPDATE_IN_PROGRESS);
 
         underTest.clusterDownscaleStarted(STACK_ID, HOST_GROUP_NAME, -1, PRIVATE_IDS, details);
 
         verify(flowMessageService, times(1)).fireInstanceGroupEventAndLog(STACK_ID, Msg.CLUSTER_REMOVING_NODE_FROM_HOSTGROUP,
-                Status.UPDATE_IN_PROGRESS.name(), HOST_GROUP_NAME, 1, HOST_GROUP_NAME);
-        verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID, Msg.CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
+                NotificationEventType.UPDATE_IN_PROGRESS, HOST_GROUP_NAME, 1, HOST_GROUP_NAME);
+        verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID, Msg.CLUSTER_SCALING_DOWN, NotificationEventType.UPDATE_IN_PROGRESS);
         verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, Status.UPDATE_IN_PROGRESS);
         verify(stackService, times(0)).getByIdWithListsInTransaction(anyLong());
         verify(stackService, times(0)).getByIdWithListsInTransaction(STACK_ID);
         verify(stackService, times(0)).getHostNamesForPrivateIds(anyListOf(InstanceMetaData.class), anySet());
-        verify(flowMessageService, times(0)).fireInstanceGroupEventAndLog(eq(STACK_ID), any(Msg.class), anyString(), anyString(),
+        verify(flowMessageService, times(0)).fireInstanceGroupEventAndLog(eq(STACK_ID), any(Msg.class), any(NotificationEventType.class), anyString(),
                 anyListOf(String.class), anyString());
     }
 }

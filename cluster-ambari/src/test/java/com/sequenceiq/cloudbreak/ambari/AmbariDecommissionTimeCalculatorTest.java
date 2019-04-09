@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.ambari;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static org.mockito.Mockito.verify;
 
 import java.util.Collections;
@@ -15,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -48,7 +48,7 @@ public class AmbariDecommissionTimeCalculatorTest {
 
         underTest.calculateDecommissioningTime(stack, hostMetadata, dfsSpace, usedSpace, 50);
 
-        verify(flowMessageService).fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_DECOMMISSIONING_TIME, AVAILABLE.name(), "38 minutes");
+        verify(flowMessageService).fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_DECOMMISSIONING_TIME, NotificationEventType.AVAILABLE, "38 minutes");
     }
 
     @Test
@@ -60,7 +60,7 @@ public class AmbariDecommissionTimeCalculatorTest {
 
         underTest.calculateDecommissioningTime(stack, hostMetadata, dfsSpace, usedSpace, 50);
 
-        verify(flowMessageService).fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_DECOMMISSIONING_TIME, AVAILABLE.name(), "5 hours");
+        verify(flowMessageService).fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_DECOMMISSIONING_TIME, NotificationEventType.AVAILABLE, "5 hours");
     }
 
     @Test
@@ -73,7 +73,7 @@ public class AmbariDecommissionTimeCalculatorTest {
 
         underTest.calculateDecommissioningTime(stack, hostMetadata, dfsSpace, usedSpace, 50);
 
-        verify(flowMessageService).fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_DECOMMISSIONING_TIME, AVAILABLE.name(), "5 hours");
+        verify(flowMessageService).fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_DECOMMISSIONING_TIME, NotificationEventType.AVAILABLE, "5 hours");
     }
 
     private List<HostMetadata> createHostMetadataList() {

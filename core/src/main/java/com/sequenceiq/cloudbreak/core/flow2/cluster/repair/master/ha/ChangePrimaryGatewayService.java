@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -58,7 +59,7 @@ public class ChangePrimaryGatewayService {
     public void changePrimaryGatewayStarted(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_OPERATION, "Changing gateway.");
-        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_GATEWAY_CHANGE, UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_GATEWAY_CHANGE, NotificationEventType.UPDATE_IN_PROGRESS);
     }
 
     public void primaryGatewayChanged(long stackId, String newPrimaryGatewayFQDN) throws CloudbreakException, TransactionExecutionException {
@@ -93,13 +94,13 @@ public class ChangePrimaryGatewayService {
     public void ambariServerStarted(StackView stack) {
         clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Gateway successfully changed.");
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.CLUSTER_GATEWAY_CHANGED_SUCCESSFULLY, AVAILABLE.name(),
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.CLUSTER_GATEWAY_CHANGED_SUCCESSFULLY, NotificationEventType.AVAILABLE,
                 stackUtil.extractClusterManagerIp(stack));
     }
 
     public void changePrimaryGatewayFailed(long stackId, Exception exception) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_FAILED);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Cluster could not be started: " + exception.getMessage());
-        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_GATEWAY_CHANGE_FAILED, UPDATE_FAILED.name(), exception.getMessage());
+        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_GATEWAY_CHANGE_FAILED, NotificationEventType.UPDATE_FAILED, exception.getMessage());
     }
 }

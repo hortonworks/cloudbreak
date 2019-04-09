@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.termination;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType.DELETE_FAILED;
 
 import java.util.Optional;
 
@@ -58,7 +58,7 @@ public class ClusterTerminationFlowService {
     public void finishClusterTerminationNotAllowed(ClusterViewContext context, ClusterTerminationResult payload) {
         StackView stackView = context.getStack();
         Long stackId = stackView.getId();
-        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_DELETE_FAILED, DELETE_FAILED.name(), "Operation not allowed");
+        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_DELETE_FAILED, DELETE_FAILED, "Operation not allowed");
         clusterService.updateClusterStatusByStackId(stackId, AVAILABLE);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE);
     }
@@ -69,10 +69,10 @@ public class ClusterTerminationFlowService {
         LOGGER.info("Error during cluster termination flow: ", errorDetails);
         Optional<Cluster> cluster = clusterService.retrieveClusterByStackIdWithoutAuth(payload.getStackId());
         if (cluster.isPresent()) {
-            cluster.get().setStatus(DELETE_FAILED);
+            cluster.get().setStatus(Status.DELETE_FAILED);
             cluster.get().setStatusReason(errorDetails.getMessage());
             clusterService.updateCluster(cluster.get());
-            flowMessageService.fireEventAndLog(cluster.get().getStack().getId(), Msg.CLUSTER_DELETE_FAILED, DELETE_FAILED.name(), errorDetails.getMessage());
+            flowMessageService.fireEventAndLog(cluster.get().getStack().getId(), Msg.CLUSTER_DELETE_FAILED, DELETE_FAILED, errorDetails.getMessage());
         }
     }
 

@@ -17,8 +17,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.Credentia
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.InteractiveCredentialV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
@@ -48,22 +49,25 @@ public class CredentialV4Controller extends NotificationController implements Cr
     @Override
     public CredentialV4Response post(Long workspaceId, CredentialV4Request request) {
         Credential credential = credentialService.createForLoggedInUser(converterUtil.convert(request, Credential.class), workspaceId);
-        notify(ResourceEvent.CREDENTIAL_CREATED);
-        return converterUtil.convert(credential, CredentialV4Response.class);
+        CredentialV4Response response = converterUtil.convert(credential, CredentialV4Response.class);
+        notify(response, NotificationEventType.CREATE_SUCCESS, WorkspaceResource.CREDENTIAL, workspaceId);
+        return response;
     }
 
     @Override
     public CredentialV4Response delete(Long workspaceId, String name) {
         Credential deleted = credentialService.deleteByNameFromWorkspace(name, workspaceId);
-        notify(ResourceEvent.CREDENTIAL_DELETED);
-        return converterUtil.convert(deleted, CredentialV4Response.class);
+        CredentialV4Response response = converterUtil.convert(deleted, CredentialV4Response.class);
+        notify(response, NotificationEventType.DELETE_SUCCESS, WorkspaceResource.CREDENTIAL, workspaceId);
+        return response;
     }
 
     @Override
     public CredentialV4Responses deleteMultiple(Long workspaceId, Set<String> names) {
         Set<Credential> deleted = credentialService.deleteMultipleByNameFromWorkspace(names, workspaceId);
-        notify(ResourceEvent.CREDENTIAL_DELETED);
-        return new CredentialV4Responses(converterUtil.convertAllAsSet(deleted, CredentialV4Response.class));
+        CredentialV4Responses response = new CredentialV4Responses(converterUtil.convertAllAsSet(deleted, CredentialV4Response.class));
+        notify(response, NotificationEventType.DELETE_SUCCESS, WorkspaceResource.CREDENTIAL, workspaceId);
+        return response;
     }
 
     @Override
@@ -98,7 +102,8 @@ public class CredentialV4Controller extends NotificationController implements Cr
     @Override
     public CredentialV4Response authorizeCodeGrantFlow(Long workspaceId, String platform, String code, String state) {
         Credential credential = credentialService.authorizeCodeGrantFlow(code, state, workspaceId, platform);
-        notify(ResourceEvent.CREDENTIAL_CREATED);
-        return converterUtil.convert(credential, CredentialV4Response.class);
+        CredentialV4Response response = converterUtil.convert(credential, CredentialV4Response.class);
+        notify(response, NotificationEventType.CREATE_SUCCESS, WorkspaceResource.CREDENTIAL, workspaceId);
+        return response;
     }
 }

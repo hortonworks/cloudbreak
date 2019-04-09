@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -45,7 +46,7 @@ public class ClusterStatusUpdater {
             String msg = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_COULD_NOT_SYNC.code(), Arrays.asList(stack.getStatus(),
                     cluster == null ? "" : cluster.getStatus()));
             LOGGER.warn(msg);
-            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), msg);
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), NotificationEventType.valueOf(stack.getStatus().name()), msg);
         } else if (cluster != null && cluster.getAmbariIp() != null) {
             Long stackId = stack.getId();
             clusterService.updateClusterMetadata(stackId);
@@ -76,7 +77,8 @@ public class ClusterStatusUpdater {
                 statusReason = "The cluster's state is up to date.";
             }
         }
-        cloudbreakEventService.fireCloudbreakEvent(stackId, statusInEvent.name(), cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_SYNCHRONIZED.code(),
+        cloudbreakEventService.fireCloudbreakEvent(stackId, NotificationEventType.valueOf(statusInEvent.name()),
+                cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_SYNCHRONIZED.code(),
                 Collections.singletonList(statusReason)));
     }
 

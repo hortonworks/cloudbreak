@@ -4,6 +4,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.structuredevent.event.LdapNotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.NotificationDetails;
@@ -18,6 +20,9 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverter
     @Override
     public CloudbreakEventV4Response convert(StructuredNotificationEvent source) {
         CloudbreakEventV4Response cloudbreakEvent = new CloudbreakEventV4Response();
+        Object payload = null;
+        WorkspaceResource resource = null;
+        NotificationEventType eventType = null;
         if (source.getNotificationDetails() != null) {
             NotificationDetails notificationDetails = source.getNotificationDetails();
             setTypesAndMessage(cloudbreakEvent, notificationDetails);
@@ -36,18 +41,29 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverter
             if (notificationDetails.getClusterStatus() != null) {
                 cloudbreakEvent.setClusterStatus(Status.valueOf(notificationDetails.getClusterStatus()));
             }
+//            payload = notificationDetails;
+//            resource = WorkspaceResource.ALL;
+//            eventType = NotificationEventType.valueOf(notificationDetails.getNotificationType());
         } else if (source.getLdapNotificationDetails() != null) {
             LdapNotificationDetails notificationDetails = source.getLdapNotificationDetails();
             cloudbreakEvent.setEventType(notificationDetails.getNotificationType());
             cloudbreakEvent.setNotificationType(notificationDetails.getNotificationType());
             cloudbreakEvent.setEventMessage(notificationDetails.getNotification());
             cloudbreakEvent.setLdapDetails(notificationDetails.getLdapDetails());
+
+//            payload = notificationDetails;
+//            resource = WorkspaceResource.LDAP;
+//            eventType = NotificationEventType.valueOf(notificationDetails.getNotificationType());
         } else if (source.getRdsNotificationDetails() != null) {
             RdsNotificationDetails notificationDetails = source.getRdsNotificationDetails();
             cloudbreakEvent.setEventType(notificationDetails.getNotificationType());
             cloudbreakEvent.setNotificationType(notificationDetails.getNotificationType());
             cloudbreakEvent.setEventMessage(notificationDetails.getNotification());
             cloudbreakEvent.setRdsDetails(notificationDetails.getRdsDetails());
+
+//            payload = notificationDetails;
+//            resource = WorkspaceResource.RDS;
+//            eventType = NotificationEventType.valueOf(notificationDetails.getNotificationType());
         }
 
         OperationDetails operationDetails = source.getOperation();
@@ -63,6 +79,10 @@ public class StructuredNotificationEventToCloudbreakEventJsonConverter
             cloudbreakEvent.setRdsDetails(source.getRdsNotificationDetails().getRdsDetails());
         }
 
+        // we will return this
+//        CloudbreakV4Event cloudbreakV4Event = NotificationAssemblingService.cloudbreakEvent(payload, eventType, resource);
+
+        //TODO: remove notifiaction backward compatible
         return cloudbreakEvent;
     }
 

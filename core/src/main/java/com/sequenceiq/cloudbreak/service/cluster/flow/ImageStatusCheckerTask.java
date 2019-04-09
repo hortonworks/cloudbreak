@@ -9,6 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakV4Event;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.ProgressUpdateV4Event;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.common.type.ImageStatus;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -16,6 +20,7 @@ import com.sequenceiq.cloudbreak.notification.Notification;
 import com.sequenceiq.cloudbreak.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.notification.NotificationAssemblingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderSetupAdapter;
 
 @Component
@@ -31,18 +36,22 @@ public class ImageStatusCheckerTask extends StackBasedStatusCheckerTask<ImageChe
 
     @Override
     public boolean checkStatus(ImageCheckerContext t) {
+        ImageStatusResult imageStatusResult = getImageStatusResult(t);
+        NotificationEventType eventType = getNotificationEventType(imageStatusResult);
+
+        notificationSender.send(getImageCopyNotification(imageStatusResult, t.getStack(), eventType));
+        //TODO: remove notifiaction backward compatible
+        notificationSender.send(getImageCopyNotification(imageStatusResult, t.getStack()));
+
+        if (imageStatusResult.getImageStatus().equals(ImageStatus.CREATE_FAILED)) {
+            throw new CloudbreakServiceException("Image copy operation finished with failed status.");
+        }
+        return eventType == NotificationEventType.IMAGE_COPY_SUCCESS;
+    }
+
+    private ImageStatusResult getImageStatusResult(ImageCheckerContext t) {
         try {
-            ImageStatusResult imageStatusResult = provisioning.checkImage(t.getStack());
-            if (imageStatusResult.getImageStatus().equals(ImageStatus.CREATE_FAILED)) {
-                notificationSender.send(getImageCopyNotification(imageStatusResult, t.getStack()));
-                throw new CloudbreakServiceException("Image copy operation finished with failed status.");
-            } else if (imageStatusResult.getImageStatus().equals(ImageStatus.CREATE_FINISHED)) {
-                notificationSender.send(getImageCopyNotification(imageStatusResult, t.getStack()));
-                return true;
-            } else {
-                notificationSender.send(getImageCopyNotification(imageStatusResult, t.getStack()));
-                return false;
-            }
+            return provisioning.checkImage(t.getStack());
         } catch (Exception e) {
             throw new CloudbreakServiceException(e);
         }
@@ -62,6 +71,24 @@ public class ImageStatusCheckerTask extends StackBasedStatusCheckerTask<ImageChe
         notification.setStackStatus(stack.getStatus());
         notification.setTenantName(stack.getCreator().getTenant().getName());
         return new Notification<>(notification);
+    }
+
+    private NotificationEventType getNotificationEventType(ImageStatusResult imageStatusResult) {
+        NotificationEventType eventType = NotificationEventType.IMAGE_COPY_IN_PROGRESS;
+        if (imageStatusResult.getImageStatus().equals(ImageStatus.CREATE_FAILED)) {
+            eventType = NotificationEventType.IMAGE_COPY_FAILED;
+        } else if (imageStatusResult.getImageStatus().equals(ImageStatus.CREATE_FINISHED)) {
+            eventType = NotificationEventType.IMAGE_COPY_SUCCESS;
+        }
+        return eventType;
+    }
+
+    private Notification<CloudbreakV4Event> getImageCopyNotification(ImageStatusResult result, Stack stack, NotificationEventType eventType) {
+        ProgressUpdateV4Event payload = new ProgressUpdateV4Event().withProgress(result.getStatusProgressValue().longValue());
+        CloudbreakV4Event response = NotificationAssemblingService.cloudbreakEvent(payload, eventType, WorkspaceResource.IMAGE_CATALOG);
+        response.setWorkspaceId(stack.getWorkspace().getId());
+        response.setUser(stack.getCreator().getUserId());
+        return new Notification<>(response);
     }
 
     @Override

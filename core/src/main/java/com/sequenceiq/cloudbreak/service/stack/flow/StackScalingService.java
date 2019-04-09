@@ -14,9 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -80,26 +79,26 @@ public class StackScalingService {
                 // from HostGroup and per JPA, we would need to clear that up.
                 // Reference: http://stackoverflow.com/a/22315188
                 hostMetadataService.delete(hostMetadata);
-                eventService.fireCloudbreakEvent(stack.getId(), Status.AVAILABLE.name(),
+                eventService.fireCloudbreakEvent(stack.getId(), NotificationEventType.AVAILABLE,
                         cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_DELETED.code(),
                                 Collections.singletonList(instanceMetaData.getInstanceId())));
             } catch (Exception e) {
                 LOGGER.info("Host cannot be deleted from cluster: ", e);
-                eventService.fireCloudbreakEvent(stack.getId(), Status.DELETE_FAILED.name(),
+                eventService.fireCloudbreakEvent(stack.getId(), NotificationEventType.DELETE_FAILED,
                         cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_DELETE_FAILED.code(),
                                 Collections.singletonList(instanceMetaData.getInstanceId())));
 
             }
         } else {
             LOGGER.debug("Host cannot be deleted because it does not exist: {}", instanceMetaData.getInstanceId());
-            eventService.fireCloudbreakEvent(stack.getId(), Status.AVAILABLE.name(),
+            eventService.fireCloudbreakEvent(stack.getId(), NotificationEventType.AVAILABLE,
                     cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_NOT_FOUND.code(),
                             Collections.singletonList(instanceMetaData.getInstanceId())));
 
         }
     }
 
-    public int updateRemovedResourcesState(Stack stack, Collection<String> instanceIds, InstanceGroup instanceGroup) throws TransactionExecutionException {
+    public Integer updateRemovedResourcesState(Stack stack, Collection<String> instanceIds, InstanceGroup instanceGroup) throws TransactionExecutionException {
         return transactionService.required(() -> {
             int nodesRemoved = 0;
             for (InstanceMetaData instanceMetaData : instanceGroup.getNotTerminatedInstanceMetaDataSet()) {
@@ -110,9 +109,9 @@ public class StackScalingService {
                     nodesRemoved++;
                 }
             }
-            int nodeCount = instanceGroup.getNodeCount() - nodesRemoved;
+            Integer nodeCount = instanceGroup.getNodeCount() - nodesRemoved;
             LOGGER.debug("Successfully terminated metadata of instances '{}' in stack.", instanceIds);
-            eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
+            eventService.fireCloudbreakEvent(stack.getId(), NotificationEventType.BILLING_CHANGED,
                     cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_BILLING_CHANGED.code()));
             return nodeCount;
         });

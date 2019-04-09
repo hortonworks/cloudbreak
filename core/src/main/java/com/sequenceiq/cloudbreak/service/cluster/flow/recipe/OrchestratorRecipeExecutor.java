@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import com.google.api.client.util.Joiner;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Recipe;
@@ -240,7 +241,7 @@ class OrchestratorRecipeExecutor {
         if (!recipes.isEmpty()) {
             Collections.sort(recipes);
             String messageStr = Joiner.on(';').join(recipes);
-            cloudbreakEventService.fireCloudbreakEvent(stackId, status.name(),
+            cloudbreakEventService.fireCloudbreakEvent(stackId, NotificationEventType.valueOf(status.name()),
                     cloudbreakMessagesService.getMessage(Msg.UPLOAD_RECIPES.code(), Collections.singletonList(messageStr)));
         }
     }

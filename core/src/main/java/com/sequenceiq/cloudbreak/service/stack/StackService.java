@@ -1,9 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
@@ -27,6 +24,7 @@ import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -732,7 +730,7 @@ public class StackService {
         if (stack.isStopped()) {
             String statusDesc = cloudbreakMessagesService.getMessage(Msg.STACK_STOP_IGNORED.code());
             LOGGER.debug(statusDesc);
-            eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), statusDesc);
+            eventService.fireCloudbreakEvent(stack.getId(), NotificationEventType.STOPPED, statusDesc);
             result = false;
         } else if (reason != StopRestrictionReason.NONE) {
             throw new BadRequestException(
@@ -747,7 +745,7 @@ public class StackService {
     private void setStackStatusToStopRequested(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOP_REQUESTED, "Stopping of cluster infrastructure has been requested.");
         String message = cloudbreakMessagesService.getMessage(Msg.STACK_STOP_REQUESTED.code());
-        eventService.fireCloudbreakEvent(stack.getId(), STOP_REQUESTED.name(), message);
+        eventService.fireCloudbreakEvent(stack.getId(), NotificationEventType.STOP_REQUESTED, message);
     }
 
     private void start(Stack stack, Cluster cluster, boolean updateCluster, User user) {
@@ -755,7 +753,7 @@ public class StackService {
         if (stack.isAvailable()) {
             String statusDesc = cloudbreakMessagesService.getMessage(Msg.STACK_START_IGNORED.code());
             LOGGER.debug(statusDesc);
-            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), statusDesc);
+            eventService.fireCloudbreakEvent(stack.getId(), NotificationEventType.AVAILABLE, statusDesc);
         } else if ((!stack.isStopped() || (cluster != null && !cluster.isStopped())) && !stack.isStartFailed()) {
             throw new BadRequestException(
                     String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.", stack.getName()));

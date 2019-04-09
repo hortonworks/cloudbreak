@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_REQUESTED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType.RECOVERY;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.CUSTOM_VDF_REPO_KEY;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.MPACK_TAG;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.REPOSITORY_VERSION;
@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
@@ -57,6 +58,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.s
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
+import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
+import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
@@ -66,8 +69,6 @@ import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
-import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
-import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
@@ -108,8 +109,8 @@ import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
-import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.constraint.ConstraintService;
 import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
@@ -690,7 +691,7 @@ public class ClusterService {
             String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.CLUSTER_MANUALRECOVERY_REQUESTED.code(),
                     Collections.singletonList(recoveryMessageArgument));
             LOGGER.debug(recoveryMessage);
-            eventService.fireCloudbreakEvent(stackId, "RECOVERY", recoveryMessage);
+            eventService.fireCloudbreakEvent(stackId, RECOVERY, recoveryMessage);
         } else {
             throw new BadRequestException(String.format("Could not trigger cluster repair  for stack %s, because node list is incorrect", stackId));
         }
@@ -721,7 +722,7 @@ public class ClusterService {
             }
             if (!changedHosts.isEmpty()) {
                 LOGGER.debug(recoveryMessage);
-                eventService.fireCloudbreakEvent(cluster.getStack().getId(), "RECOVERY", recoveryMessage);
+                eventService.fireCloudbreakEvent(cluster.getStack().getId(), RECOVERY, recoveryMessage);
                 hostMetadataService.saveAll(changedHosts);
             }
             return null;
@@ -735,13 +736,13 @@ public class ClusterService {
     private void start(Stack stack, Cluster cluster) {
         if (stack.isStartInProgress()) {
             String message = cloudbreakMessagesService.getMessage(Msg.CLUSTER_START_REQUESTED.code());
-            eventService.fireCloudbreakEvent(stack.getId(), START_REQUESTED.name(), message);
+            eventService.fireCloudbreakEvent(stack.getId(), NotificationEventType.START_REQUESTED, message);
             updateClusterStatusByStackId(stack.getId(), START_REQUESTED);
         } else {
             if (cluster.isAvailable()) {
                 String statusDesc = cloudbreakMessagesService.getMessage(Msg.CLUSTER_START_IGNORED.code());
                 LOGGER.debug(statusDesc);
-                eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), statusDesc);
+                eventService.fireCloudbreakEvent(stack.getId(), NotificationEventType.valueOf(stack.getStatus().name()), statusDesc);
             } else if (!cluster.isClusterReadyForStart() && !cluster.isStartFailed()) {
                 throw new BadRequestException(
                         String.format("Cannot update the status of cluster '%s' to STARTED, because it isn't in STOPPED state.", cluster.getId()));
@@ -760,7 +761,7 @@ public class ClusterService {
         if (cluster.isStopped()) {
             String statusDesc = cloudbreakMessagesService.getMessage(Msg.CLUSTER_STOP_IGNORED.code());
             LOGGER.debug(statusDesc);
-            eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), statusDesc);
+            eventService.fireCloudbreakEvent(stack.getId(), NotificationEventType.valueOf(stack.getStatus().name()), statusDesc);
         } else if (reason != StopRestrictionReason.NONE) {
             throw new BadRequestException(
                     String.format("Cannot stop a cluster '%s'. Reason: %s", cluster.getId(), reason.getReason()));
@@ -1104,7 +1105,7 @@ public class ClusterService {
             stateChanged = true;
             hostMetadata.setHostMetadataState(newState);
             hostMetadataService.save(hostMetadata);
-            eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
+            eventService.fireCloudbreakEvent(stack.getId(), NotificationEventType.AVAILABLE,
                     cloudbreakMessagesService.getMessage(Msg.CLUSTER_HOST_STATUS_UPDATED.code(), Arrays.asList(hostName, newState.name())));
         }
         return stateChanged;

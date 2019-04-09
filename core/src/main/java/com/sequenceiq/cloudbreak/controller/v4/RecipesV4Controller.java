@@ -8,6 +8,7 @@ import javax.transaction.Transactional.TxType;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
@@ -15,7 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Respo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Responses;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.view.RecipeView;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
@@ -47,22 +48,25 @@ public class RecipesV4Controller extends NotificationController implements Recip
     @Override
     public RecipeV4Response post(Long workspaceId, RecipeV4Request request) {
         Recipe recipe = recipeService.createForLoggedInUser(converterUtil.convert(request, Recipe.class), workspaceId);
-        notify(ResourceEvent.RECIPE_CREATED);
-        return converterUtil.convert(recipe, RecipeV4Response.class);
+        RecipeV4Response response = converterUtil.convert(recipe, RecipeV4Response.class);
+        notify(response, NotificationEventType.CREATE_SUCCESS, WorkspaceResource.RECIPE, workspaceId);
+        return response;
     }
 
     @Override
     public RecipeV4Response delete(Long workspaceId, String name) {
         Recipe deleted = recipeService.deleteByNameFromWorkspace(name, workspaceId);
-        notify(ResourceEvent.RECIPE_DELETED);
-        return converterUtil.convert(deleted, RecipeV4Response.class);
+        RecipeV4Response response = converterUtil.convert(deleted, RecipeV4Response.class);
+        notify(response, NotificationEventType.DELETE_SUCCESS, WorkspaceResource.RECIPE, workspaceId);
+        return response;
     }
 
     @Override
     public RecipeV4Responses deleteMultiple(Long workspaceId, Set<String> names) {
         Set<Recipe> deleted = recipeService.deleteMultipleByNameFromWorkspace(names, workspaceId);
-        notify(ResourceEvent.RECIPE_DELETED);
-        return new RecipeV4Responses(converterUtil.convertAllAsSet(deleted, RecipeV4Response.class));
+        RecipeV4Responses responses = new RecipeV4Responses(converterUtil.convertAllAsSet(deleted, RecipeV4Response.class));
+        notify(responses, NotificationEventType.DELETE_SUCCESS, WorkspaceResource.RECIPE, workspaceId);
+        return responses;
     }
 
     @Override

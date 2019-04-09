@@ -89,6 +89,6 @@ public class ImageCatalog implements ProvisionEntity, WorkspaceAwareResource {
 
     @Override
     public WorkspaceResource getResource() {
-        return WorkspaceResource.IMAGECATALOG;
+        return WorkspaceResource.IMAGE_CATALOG;
     }
 }

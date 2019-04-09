@@ -17,6 +17,10 @@ import com.sequenceiq.ambari.client.AmbariConnectionException;
 import com.sequenceiq.cloudbreak.ambari.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.ambari.AmbariOperationType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakV4Event;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.ProgressUpdateV4Event;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.notification.Notification;
@@ -46,6 +50,9 @@ public class AmbariOperationsStatusCheckerTask extends ClusterBasedStatusChecker
             AmbariClient ambariClient = t.getAmbariClient();
             BigDecimal installProgress = getInstallProgressFromAmbari(request, ambariClient);
             LOGGER.debug("Ambari operation: '{}', Progress: {}", request.getKey(), installProgress);
+            notificationSender.send(getAmbariProgressNotification(installProgress.longValue(), t.getStack(),
+                    NotificationEventType.valueOf(t.getAmbariOperationType().name())));
+            //TODO: remove notifiaction backward compatible
             notificationSender.send(getAmbariProgressNotification(installProgress.longValue(), t.getStack(), t.getAmbariOperationType()));
             if (FAILED.compareTo(installProgress) == 0) {
                 boolean failed = true;
@@ -56,6 +63,9 @@ public class AmbariOperationsStatusCheckerTask extends ClusterBasedStatusChecker
                     }
                 }
                 if (failed) {
+                    notificationSender.send(getAmbariProgressNotification(Long.parseLong("100"), t.getStack(),
+                            NotificationEventType.valueOf(t.getAmbariOperationType().name())));
+                    //TODO: remove notifiaction backward compatible
                     notificationSender.send(getAmbariProgressNotification(Long.parseLong("100"), t.getStack(), t.getAmbariOperationType()));
                     throw new AmbariOperationFailedException(String.format("Ambari operation failed: [component: '%s', requestID: '%s']", request.getKey(),
                             request.getValue()));
@@ -96,6 +106,17 @@ public class AmbariOperationsStatusCheckerTask extends ClusterBasedStatusChecker
             notification.setClusterName(stack.getCluster().getName());
             notification.setClusterStatus(stack.getCluster().getStatus());
         }
+        return new Notification<>(notification);
+    }
+
+    private Notification<CloudbreakV4Event> getAmbariProgressNotification(Long progressValue, Stack stack, NotificationEventType eventType) {
+        CloudbreakV4Event notification = new CloudbreakV4Event();
+        notification.setEventType(eventType);
+        notification.setWorkspaceId(stack.getWorkspace().getId());
+        notification.setTimestamp(System.currentTimeMillis());
+        notification.setResourceName(WorkspaceResource.STACK.getShortName());
+        notification.setPayload(new ProgressUpdateV4Event().withProgress(progressValue).withStackName(stack.getName()));
+        notification.setUser("");
         return new Notification<>(notification);
     }
 

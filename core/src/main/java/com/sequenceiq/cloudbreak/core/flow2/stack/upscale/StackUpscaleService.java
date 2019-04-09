@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.upscale;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.CREATED;
 import static java.lang.String.format;
@@ -20,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.common.type.CommonResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
@@ -91,7 +90,7 @@ public class StackUpscaleService {
     public void addInstanceFireEventAndLog(Stack stack, Integer scalingAdjustment) {
         flowMessageService.fireEventAndLog(stack.getId(),
                 flowMessageService.message(Msg.STACK_ADDING_INSTANCES, scalingAdjustment),
-                UPDATE_IN_PROGRESS.name());
+                NotificationEventType.UPDATE_IN_PROGRESS);
     }
 
     public void finishAddInstances(StackScalingFlowContext context, UpscaleStackResult payload) {
@@ -126,9 +125,9 @@ public class StackUpscaleService {
             } catch (TransactionExecutionException e) {
                 throw e.getCause();
             }
-            eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
+            eventService.fireCloudbreakEvent(stack.getId(), NotificationEventType.BILLING_CHANGED,
                     flowMessageService.message(Msg.STACK_METADATA_SETUP_BILLING_CHANGED));
-            flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_METADATA_EXTEND, AVAILABLE.name());
+            flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_METADATA_EXTEND, NotificationEventType.AVAILABLE);
 
             return upscaleCandidateAddresses;
         });
@@ -145,7 +144,7 @@ public class StackUpscaleService {
 
     public void bootstrappingNewNodes(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.BOOTSTRAPPING_NEW_NODES);
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BOOTSTRAP_NEW_NODES, UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BOOTSTRAP_NEW_NODES, NotificationEventType.UPDATE_IN_PROGRESS);
     }
 
     public void extendingHostMetadata(Stack stack) {
@@ -157,7 +156,7 @@ public class StackUpscaleService {
         try {
             String errorReason = payload.getException().getMessage();
             stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_FAILED, "Stack update failed. " + errorReason);
-            flowMessageService.fireEventAndLog(stackId, Msg.STACK_INFRASTRUCTURE_UPDATE_FAILED, UPDATE_FAILED.name(), errorReason);
+            flowMessageService.fireEventAndLog(stackId, Msg.STACK_INFRASTRUCTURE_UPDATE_FAILED, NotificationEventType.UPDATE_FAILED, errorReason);
         } catch (Exception e) {
             LOGGER.info("Exception during the handling of stack scaling failure: {}", e.getMessage());
         }
@@ -226,8 +225,8 @@ public class StackUpscaleService {
 
     public void mountDisksOnNewHosts(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.MOUNTING_DISKS_ON_NEW_HOSTS);
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_MOUNT_DISKS_ON_NEW_HOSTS, UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_MOUNT_DISKS_ON_NEW_HOSTS, NotificationEventType.UPDATE_IN_PROGRESS);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.UPSCALE_COMPLETED, "Stack upscale has been finished successfully.");
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_UPSCALE_FINISHED, AVAILABLE.name());
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_UPSCALE_FINISHED, NotificationEventType.AVAILABLE);
     }
 }

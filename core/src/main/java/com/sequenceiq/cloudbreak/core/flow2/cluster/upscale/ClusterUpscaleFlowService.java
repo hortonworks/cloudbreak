@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
@@ -57,17 +58,17 @@ class ClusterUpscaleFlowService {
 
     void ambariRepairSingleMasterStarted(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, "Repairing single master of cluster finished.");
-        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_SINGLE_MASTER_REPAIR_STARTED, UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_SINGLE_MASTER_REPAIR_STARTED, NotificationEventType.UPDATE_IN_PROGRESS);
     }
 
     void ambariRepairSingleMasterFinished(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, "Repairing single master of cluster finished.");
-        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_SINGLE_MASTER_REPAIR_FINISHED, UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_SINGLE_MASTER_REPAIR_FINISHED, NotificationEventType.UPDATE_IN_PROGRESS);
     }
 
     void upscalingClusterManager(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, "Upscaling the cluster.");
-        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_SCALING_UP, UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_SCALING_UP, NotificationEventType.UPDATE_IN_PROGRESS);
     }
 
     void stopClusterManagementServer(long stackId) {
@@ -100,7 +101,7 @@ class ClusterUpscaleFlowService {
 
     private void sendMessage(long stackId, Msg ambariMessage, String statusReason) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, statusReason);
-        flowMessageService.fireEventAndLog(stackId, ambariMessage, UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stackId, ambariMessage, NotificationEventType.UPDATE_IN_PROGRESS);
     }
 
     void clusterUpscaleFinished(StackView stackView, String hostgroupName) {
@@ -109,11 +110,11 @@ class ClusterUpscaleFlowService {
         if (success) {
             LOGGER.debug("Cluster upscaled successfully");
             clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
-            flowMessageService.fireEventAndLog(stackView.getId(), Msg.CLUSTER_SCALED_UP, AVAILABLE.name());
+            flowMessageService.fireEventAndLog(stackView.getId(), Msg.CLUSTER_SCALED_UP, NotificationEventType.AVAILABLE);
         } else {
             LOGGER.debug("Cluster upscale failed. {} hosts failed to upscale", numOfFailedHosts);
             clusterService.updateClusterStatusByStackId(stackView.getId(), UPDATE_FAILED);
-            flowMessageService.fireEventAndLog(stackView.getId(), Msg.CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added to",
+            flowMessageService.fireEventAndLog(stackView.getId(), Msg.CLUSTER_SCALING_FAILED, NotificationEventType.UPDATE_FAILED, "added to",
                     String.format("Cluster upscale operation failed on %d node(s).", numOfFailedHosts));
         }
     }
@@ -123,7 +124,7 @@ class ClusterUpscaleFlowService {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_FAILED, errorDetails.getMessage());
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.PROVISIONED,
                 String.format("New node(s) could not be added to the cluster: %s", errorDetails));
-        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added to", errorDetails);
+        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_SCALING_FAILED, NotificationEventType.UPDATE_FAILED, "added to", errorDetails);
     }
 
     private int updateMetadata(StackView stackView, String hostGroupName) {

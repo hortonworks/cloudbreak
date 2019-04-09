@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.message.Msg;
@@ -24,18 +25,22 @@ public class CloudbreakFlowMessageService implements FlowMessageService {
     @Inject
     private CloudbreakEventService cloudbreakEventService;
 
-    public void fireEventAndLog(Long stackId, String message, String eventType) {
+    @Override
+    public void fireEventAndLog(Long stackId, String message, NotificationEventType eventType) {
         cloudbreakEventService.fireCloudbreakEvent(stackId, eventType, message);
     }
 
-    public void fireEventAndLog(Long stackId, Msg msgCode, String eventType, Object... args) {
+    @Override
+    public void fireEventAndLog(Long stackId, Msg msgCode, NotificationEventType eventType, Object... args) {
         cloudbreakEventService.fireCloudbreakEvent(stackId, eventType, message(msgCode, args));
     }
 
-    public void fireInstanceGroupEventAndLog(Long stackId, Msg msgCode, String eventType, String instanceGroup, Object... args) {
+    @Override
+    public void fireInstanceGroupEventAndLog(Long stackId, Msg msgCode, NotificationEventType eventType, String instanceGroup, Object... args) {
         cloudbreakEventService.fireCloudbreakInstanceGroupEvent(stackId, eventType, message(msgCode, args), instanceGroup);
     }
 
+    @Override
     public String message(Msg msgCode, Object... args) {
         LOGGER.debug("{} [STACK_FLOW_STEP].", msgCode);
         return messagesService.getMessage(msgCode.code(), Arrays.asList(args));

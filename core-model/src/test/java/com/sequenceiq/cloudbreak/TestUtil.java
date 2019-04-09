@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
@@ -837,30 +838,30 @@ public class TestUtil {
         return Stream.of(map1, map2).flatMap(m -> m.entrySet().stream()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    public static LdapNotificationDetails ldapNotificationDetails(String message, String type) {
+    public static LdapNotificationDetails ldapNotificationDetails(String message, NotificationEventType type) {
         LdapNotificationDetails ldapNotificationDetails = new LdapNotificationDetails();
         ldapNotificationDetails.setLdapDetails(ldapDetails());
         ldapNotificationDetails.setNotification(message);
-        ldapNotificationDetails.setNotificationType(type);
+        ldapNotificationDetails.setNotificationType(type.name());
         return ldapNotificationDetails;
     }
 
-    public static RdsNotificationDetails rdsNotificationDetails(String message, String type) {
+    public static RdsNotificationDetails rdsNotificationDetails(String message, NotificationEventType type) {
         RdsNotificationDetails rdsNotificationDetails = new RdsNotificationDetails();
         rdsNotificationDetails.setRdsDetails(rdsDetails());
         rdsNotificationDetails.setNotification(message);
-        rdsNotificationDetails.setNotificationType(type);
+        rdsNotificationDetails.setNotificationType(type.name());
         return rdsNotificationDetails;
     }
 
-    public static NotificationDetails notificationDetails(String message, String type) {
+    public static NotificationDetails notificationDetails(String message, NotificationEventType type) {
         NotificationDetails notification = new NotificationDetails();
         notification.setInstanceGroup("master");
         notification.setRegion("us");
         notification.setStackName("usagestack");
         notification.setStackId(1L);
         notification.setNotification(message);
-        notification.setNotificationType(type);
+        notification.setNotificationType(type.name());
         notification.setCloud(GCP);
         notification.setBlueprintName("blueprintName");
         notification.setBlueprintId(1L);

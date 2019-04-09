@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
@@ -51,12 +52,12 @@ public class ClusterCreationService {
 
     public void bootstrappingMachines(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.BOOTSTRAPPING_MACHINES);
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_BOOTSTRAP, UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_BOOTSTRAP, NotificationEventType.UPDATE_IN_PROGRESS);
     }
 
     public void collectingHostMetadata(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.COLLECTING_HOST_METADATA);
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_METADATA_SETUP, UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_METADATA_SETUP, NotificationEventType.UPDATE_IN_PROGRESS);
     }
 
     public void startingClusterServices(StackView stack) throws CloudbreakException {
@@ -64,9 +65,9 @@ public class ClusterCreationService {
         OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STARTING_AMBARI_SERVICES, "Running cluster services.");
         if (orchestratorType.containerOrchestrator()) {
-            flowMessageService.fireEventAndLog(stack.getId(), Msg.CLUSTER_RUN_CONTAINERS, UPDATE_IN_PROGRESS.name());
+            flowMessageService.fireEventAndLog(stack.getId(), Msg.CLUSTER_RUN_CONTAINERS, NotificationEventType.UPDATE_IN_PROGRESS);
         } else if (orchestratorType.hostOrchestrator()) {
-            flowMessageService.fireEventAndLog(stack.getId(), Msg.CLUSTER_RUN_SERVICES, UPDATE_IN_PROGRESS.name());
+            flowMessageService.fireEventAndLog(stack.getId(), Msg.CLUSTER_RUN_SERVICES, NotificationEventType.UPDATE_IN_PROGRESS);
         } else {
             String message = String.format("Please implement %s orchestrator because it is not on classpath.", orchestrator.getType());
             LOGGER.error(message);
@@ -83,14 +84,14 @@ public class ClusterCreationService {
         String clusterManagerIP = stackUtil.extractClusterManagerIp(stack);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_OPERATION,
                 String.format("Building the cluster. Cluster manager ip:%s", clusterManagerIP));
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.CLUSTER_BUILDING, UPDATE_IN_PROGRESS.name(), clusterManagerIP);
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.CLUSTER_BUILDING, NotificationEventType.UPDATE_IN_PROGRESS, clusterManagerIP);
     }
 
     public void clusterInstallationFinished(StackView stackView) {
         String clusterManagerIp = stackUtil.extractClusterManagerIp(stackView);
         clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
         stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE, "Cluster creation finished.");
-        flowMessageService.fireEventAndLog(stackView.getId(), Msg.CLUSTER_BUILT, AVAILABLE.name(), clusterManagerIp);
+        flowMessageService.fireEventAndLog(stackView.getId(), Msg.CLUSTER_BUILT, NotificationEventType.AVAILABLE, clusterManagerIp);
     }
 
     public void handleClusterCreationFailure(StackView stackView, Exception exception) {
@@ -99,7 +100,7 @@ public class ClusterCreationService {
             String errorMessage = getErrorMessageFromException(exception);
             clusterService.updateClusterStatusByStackId(stackView.getId(), CREATE_FAILED, errorMessage);
             stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE);
-            flowMessageService.fireEventAndLog(stackView.getId(), Msg.CLUSTER_CREATE_FAILED, CREATE_FAILED.name(), errorMessage);
+            flowMessageService.fireEventAndLog(stackView.getId(), Msg.CLUSTER_CREATE_FAILED, NotificationEventType.CREATE_FAILED, errorMessage);
             try {
                 OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stackView.getOrchestrator().getType());
                 if (cluster != null && orchestratorType.containerOrchestrator()) {
@@ -124,6 +125,6 @@ public class ClusterCreationService {
 
     public void mountDisks(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.MOUNTING_DISKS);
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_DISK_MOUNT, UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_DISK_MOUNT, NotificationEventType.UPDATE_IN_PROGRESS);
     }
 }

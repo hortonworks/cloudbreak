@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
-import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
@@ -53,8 +53,8 @@ public class StackTerminationService {
         LOGGER.debug("Terminate stack result: {}", payload);
         Stack stack = context.getStack();
         terminationService.finalizeTermination(stack.getId(), true);
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BILLING_TERMINATED, BillingStatus.BILLING_TERMINATED.name());
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DELETE_COMPLETED, DELETE_COMPLETED.name());
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BILLING_TERMINATED, NotificationEventType.BILLING_TERMINATED);
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DELETE_COMPLETED, NotificationEventType.DELETE_SUCCESS);
         clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
         if (deleteDependencies) {
             dependecyDeletionService.deleteDependencies(stack);
@@ -68,24 +68,24 @@ public class StackTerminationService {
     public void handleStackTerminationError(StackView stackView, StackFailureEvent payload, boolean forced, Boolean deleteDependencies) {
         String stackUpdateMessage;
         Msg eventMessage;
-        DetailedStackStatus status;
+        NotificationEventType eventType;
         if (!forced) {
             Exception errorDetails = payload.getException();
             stackUpdateMessage = "Termination failed: " + errorDetails.getMessage();
-            status = DetailedStackStatus.DELETE_FAILED;
+            eventType = NotificationEventType.DELETE_FAILED;
             eventMessage = Msg.STACK_INFRASTRUCTURE_DELETE_FAILED;
-            stackUpdater.updateStackStatus(stackView.getId(), status, stackUpdateMessage);
+            stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.DELETE_FAILED, stackUpdateMessage);
             LOGGER.debug("Error during stack termination flow: ", errorDetails);
         } else {
             terminationService.finalizeTermination(stackView.getId(), true);
             clusterService.updateClusterStatusByStackId(stackView.getId(), DELETE_COMPLETED);
             stackUpdateMessage = "Stack was force terminated.";
-            status = DetailedStackStatus.DELETE_COMPLETED;
+            eventType = NotificationEventType.DELETE_SUCCESS;
             eventMessage = Msg.STACK_FORCED_DELETE_COMPLETED;
             if (deleteDependencies) {
                 dependecyDeletionService.deleteDependencies(stackView);
             }
         }
-        flowMessageService.fireEventAndLog(stackView.getId(), eventMessage, status.name(), stackUpdateMessage);
+        flowMessageService.fireEventAndLog(stackView.getId(), eventMessage, eventType, stackUpdateMessage);
     }
 }

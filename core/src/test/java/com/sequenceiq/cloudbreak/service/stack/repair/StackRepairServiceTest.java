@@ -20,7 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -68,7 +68,7 @@ public class StackRepairServiceTest {
         underTest.add(stack, Collections.emptySet());
 
         verifyZeroInteractions(executorService);
-        verify(flowMessageService).fireEventAndLog(stack.getId(), Msg.STACK_REPAIR_COMPLETE_CLEAN, Status.AVAILABLE.name());
+        verify(flowMessageService).fireEventAndLog(stack.getId(), Msg.STACK_REPAIR_COMPLETE_CLEAN, NotificationEventType.AVAILABLE);
     }
 
     @Test
@@ -105,7 +105,7 @@ public class StackRepairServiceTest {
         expectedUnhealthyInstances.addInstance(instanceId3, slaveGroup2);
 
         verify(executorService).submit(argThat(new StackRepairFlowSubmitterMatcher(stack.getId(), expectedUnhealthyInstances)));
-        verify(flowMessageService).fireEventAndLog(stack.getId(), Msg.STACK_REPAIR_ATTEMPTING, Status.UPDATE_IN_PROGRESS.name());
+        verify(flowMessageService).fireEventAndLog(stack.getId(), Msg.STACK_REPAIR_ATTEMPTING, NotificationEventType.UPDATE_IN_PROGRESS);
     }
 
     private void setupHostMetadata(Long clusterId, String privateIp, String hostGroupName) {

@@ -24,7 +24,7 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.state.State;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
@@ -202,7 +202,7 @@ public class StackImageUpdateActionsTest {
         checkImageAction.execute(stateContext);
 
         verify(flowMessageService, times(1)).fireEventAndLog(anyLong(), eq(Msg.STACK_IMAGE_UPDATE_STARTED),
-                eq(Status.UPDATE_IN_PROGRESS.name()));
+                eq(NotificationEventType.UPDATE_IN_PROGRESS));
         verify(stackImageUpdateService, times(1)).getNewImageIfVersionsMatch(any(Stack.class), anyString(), eq(null), eq(null));
         verify(eventBus, times(1)).notify(eq(StackImageUpdateEvent.CHECK_IMAGE_VERESIONS_FINISHED_EVENT.event()), any(Event.class));
     }
@@ -218,7 +218,7 @@ public class StackImageUpdateActionsTest {
         checkImageAction.execute(stateContext);
 
         verify(flowMessageService, times(1)).fireEventAndLog(anyLong(), eq(Msg.STACK_IMAGE_UPDATE_STARTED),
-                eq(Status.UPDATE_IN_PROGRESS.name()));
+                eq(NotificationEventType.UPDATE_IN_PROGRESS));
         verify(stackImageUpdateService, times(0)).getNewImageIfVersionsMatch(any(Stack.class), anyString(), eq(null), eq(null));
         verify(eventBus, times(0)).notify(eq(StackImageUpdateEvent.CHECK_IMAGE_VERESIONS_FINISHED_EVENT.event()), any(Event.class));
         verify(eventBus, times(1)).notify(eq(StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILED_EVENT.event()), any(Event.class));
@@ -303,7 +303,7 @@ public class StackImageUpdateActionsTest {
         finishAction.execute(stateContext);
 
         verify(flowMessageService, times(1)).fireEventAndLog(anyLong(), eq(Msg.STACK_IMAGE_UPDATE_FINISHED),
-                eq(Status.AVAILABLE.name()));
+                eq(NotificationEventType.AVAILABLE));
     }
 
     @Test
@@ -318,7 +318,7 @@ public class StackImageUpdateActionsTest {
         handleImageUpdateFailureAction.execute(stateContext);
 
         verify(flowMessageService, times(1)).fireEventAndLog(anyLong(), eq(Msg.STACK_IMAGE_UPDATE_FAILED),
-                eq(Status.UPDATE_FAILED.name()), eq("test"));
+                eq(NotificationEventType.UPDATE_FAILED), eq("test"));
         verify(eventBus, times(1)).notify(eq(StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILE_HANDLED_EVENT.event()), any(Event.class));
 
     }

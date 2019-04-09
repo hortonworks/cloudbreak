@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -86,7 +86,7 @@ public class ClusterBootstrapperErrorHandler {
             String message = cloudbreakMessagesService.getMessage(Msg.BOOTSTRAPPER_ERROR_BOOTSTRAP_FAILED_ON_NODES.code(),
                     Collections.singletonList(missingNodes.size()));
             LOGGER.debug(message);
-            eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), message);
+            eventService.fireCloudbreakEvent(stack.getId(), NotificationEventType.UPDATE_IN_PROGRESS, message);
 
             for (Node missingNode : missingNodes) {
                 InstanceMetaData instanceMetaData =
@@ -102,7 +102,7 @@ public class ClusterBootstrapperErrorHandler {
                 message = cloudbreakMessagesService.getMessage(Msg.BOOTSTRAPPER_ERROR_DELETING_NODE.code(),
                         Arrays.asList(instanceMetaData.getInstanceId(), ig.getGroupName()));
                 LOGGER.debug(message);
-                eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), message);
+                eventService.fireCloudbreakEvent(stack.getId(), NotificationEventType.UPDATE_IN_PROGRESS, message);
                 deleteResourceAndDependencies(stack, instanceMetaData);
                 deleteInstanceResourceFromDatabase(stack, instanceMetaData);
                 instanceMetaData.setTerminationDate(clock.getCurrentTimeMillis());

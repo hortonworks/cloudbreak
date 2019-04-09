@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.start;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType.START_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType.UPDATE_IN_PROGRESS;
+
 import java.util.Date;
 
 import javax.inject.Inject;
@@ -39,7 +43,7 @@ public class ClusterStartService {
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.START_IN_PROGRESS);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_OPERATION, String.format("Starting the cluster. Cluster manager ip: %s",
                 stackUtil.extractClusterManagerIp(stack)));
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.CLUSTER_STARTING, Status.UPDATE_IN_PROGRESS.name(), stackUtil.extractClusterManagerIp(stack));
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.CLUSTER_STARTING, UPDATE_IN_PROGRESS, stackUtil.extractClusterManagerIp(stack));
     }
 
     public void clusterStartFinished(StackView stack) {
@@ -50,12 +54,12 @@ public class ClusterStartService {
         clusterService.updateCluster(cluster);
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.AVAILABLE);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Cluster started.");
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.CLUSTER_STARTED, Status.AVAILABLE.name(), ambariIp);
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.CLUSTER_STARTED, AVAILABLE, ambariIp);
     }
 
     public void handleClusterStartFailure(StackView stackView, String errorReason) {
         clusterService.updateClusterStatusByStackId(stackView.getId(), Status.START_FAILED);
         stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE, "Cluster could not be started: " + errorReason);
-        flowMessageService.fireEventAndLog(stackView.getId(), Msg.CLUSTER_START_FAILED, Status.START_FAILED.name(), errorReason);
+        flowMessageService.fireEventAndLog(stackView.getId(), Msg.CLUSTER_START_FAILED, START_FAILED, errorReason);
     }
 }

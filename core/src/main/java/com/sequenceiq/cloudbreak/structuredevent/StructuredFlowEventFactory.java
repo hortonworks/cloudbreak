@@ -14,6 +14,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -80,9 +81,10 @@ public class StructuredFlowEventFactory {
             : new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails, blueprintDetails);
     }
 
-    public StructuredNotificationEvent createStructuredNotificationEvent(Long stackId, String notificationType, String message, String instanceGroupName) {
+    public StructuredNotificationEvent createStructuredNotificationEvent(Long stackId, NotificationEventType eventType,
+            String message, String instanceGroupName) {
         NotificationDetails notificationDetails = new NotificationDetails();
-        notificationDetails.setNotificationType(notificationType);
+        notificationDetails.setNotificationType(eventType.name());
         notificationDetails.setNotification(message);
         notificationDetails.setStackId(stackId);
 
@@ -119,12 +121,12 @@ public class StructuredFlowEventFactory {
         return new StructuredNotificationEvent(operationDetails, notificationDetails);
     }
 
-    public StructuredNotificationEvent createStructuredNotificationEvent(LdapDetails ldapDetails, String notificationType, String message,
+    public StructuredNotificationEvent createStructuredNotificationEvent(LdapDetails ldapDetails, NotificationEventType notificationType, String message,
             boolean notifyWorkspace) {
         LdapNotificationDetails notificationDetails = new LdapNotificationDetails();
         notificationDetails.setLdapDetails(ldapDetails);
         notificationDetails.setNotification(message);
-        notificationDetails.setNotificationType(notificationType);
+        notificationDetails.setNotificationType(notificationType.name());
 
         OperationDetails operationDetails = new OperationDetails(
                 clock.getCurrentTimeMillis(),
@@ -147,12 +149,12 @@ public class StructuredFlowEventFactory {
         return new StructuredNotificationEvent(operationDetails, notificationDetails);
     }
 
-    public StructuredNotificationEvent createStructuredNotificationEvent(RdsDetails rdsDetails, String notificationType, String message,
+    public StructuredNotificationEvent createStructuredNotificationEvent(RdsDetails rdsDetails, NotificationEventType notificationType, String message,
             boolean notifyWorkspace) {
         RdsNotificationDetails notificationDetails = new RdsNotificationDetails();
         notificationDetails.setRdsDetails(rdsDetails);
         notificationDetails.setNotification(message);
-        notificationDetails.setNotificationType(notificationType);
+        notificationDetails.setNotificationType(notificationType.name());
 
         OperationDetails operationDetails = new OperationDetails(
                 clock.getCurrentTimeMillis(),

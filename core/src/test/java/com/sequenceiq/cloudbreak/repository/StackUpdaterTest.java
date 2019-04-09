@@ -16,6 +16,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.Clock;
@@ -56,7 +57,7 @@ public class StackUpdaterTest {
         Stack newStack = underTest.updateStackStatus(1L, DetailedStackStatus.DELETE_COMPLETED);
         assertEquals(newStatus.getStatus(), newStack.getStatus());
         assertEquals("", newStack.getStatusReason());
-        verify(cloudbreakEventService, times(0)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
+        verify(cloudbreakEventService, times(0)).fireCloudbreakEvent(anyLong(), any(NotificationEventType.class), anyString());
     }
 
     @Test

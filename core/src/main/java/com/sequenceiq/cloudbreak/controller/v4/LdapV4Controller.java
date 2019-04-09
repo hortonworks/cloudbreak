@@ -9,6 +9,7 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapTestV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
@@ -16,7 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapTestV4Respo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Responses;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
+import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
@@ -49,22 +50,25 @@ public class LdapV4Controller extends NotificationController implements LdapConf
     public LdapV4Response post(Long workspaceId, LdapV4Request request) {
         LdapConfig ldapConfig = converterUtil.convert(request, LdapConfig.class);
         ldapConfig = ldapConfigService.createInEnvironment(ldapConfig, request.getEnvironments(), workspaceId);
-        notify(ResourceEvent.LDAP_CREATED);
-        return converterUtil.convert(ldapConfig, LdapV4Response.class);
+        LdapV4Response response = converterUtil.convert(ldapConfig, LdapV4Response.class);
+        notify(response, NotificationEventType.CREATE_SUCCESS, WorkspaceResource.LDAP, workspaceId);
+        return response;
     }
 
     @Override
     public LdapV4Response delete(Long workspaceId, String name) {
         LdapConfig config = ldapConfigService.deleteByNameFromWorkspace(name, workspaceId);
-        notify(ResourceEvent.LDAP_DELETED);
-        return converterUtil.convert(config, LdapV4Response.class);
+        LdapV4Response response = converterUtil.convert(config, LdapV4Response.class);
+        notify(response, NotificationEventType.DELETE_SUCCESS, WorkspaceResource.LDAP, workspaceId);
+        return response;
     }
 
     @Override
     public LdapV4Responses deleteMultiple(Long workspaceId, Set<String> names) {
         Set<LdapConfig> deleted = ldapConfigService.deleteMultipleByNameFromWorkspace(names, workspaceId);
-        notify(ResourceEvent.LDAP_DELETED);
-        return new LdapV4Responses(converterUtil.convertAllAsSet(deleted, LdapV4Response.class));
+        LdapV4Responses response = new LdapV4Responses(converterUtil.convertAllAsSet(deleted, LdapV4Response.class));
+        notify(response, NotificationEventType.DELETE_SUCCESS, WorkspaceResource.LDAP, workspaceId);
+        return response;
     }
 
     @Override

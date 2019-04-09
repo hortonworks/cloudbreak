@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.reactor;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
-
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -13,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -115,7 +114,7 @@ public class CollectDownscaleCandidatesHandler implements ReactorEventHandler<Co
         Set<InstanceMetaData> instanceMetaDatasInStack = instanceMetaDataService.findAllInStack(stack.getId());
         Set<String> hostNames = clusterApiConnectors.getConnector(stack).clusterDecomissionService()
                 .collectDownscaleCandidates(hostGroup, request.getScalingAdjustment(), defaultRootVolumeSize, instanceMetaDatasInStack);
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_SELECT_FOR_DOWNSCALE, AVAILABLE.name(), hostNames);
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_SELECT_FOR_DOWNSCALE, NotificationEventType.AVAILABLE, hostNames);
         return stackService.getPrivateIdsForHostNames(stack.getInstanceMetaDataAsList(), hostNames);
     }
 

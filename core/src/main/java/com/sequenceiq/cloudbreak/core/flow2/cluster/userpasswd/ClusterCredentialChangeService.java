@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.NotificationEventType;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.message.Msg;
@@ -19,7 +20,7 @@ public class ClusterCredentialChangeService {
     private CloudbreakFlowMessageService flowMessageService;
 
     public void credentialChange(Long stackId) {
-        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_CHANGING_CREDENTIAL, Status.UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_CHANGING_CREDENTIAL, NotificationEventType.UPDATE_IN_PROGRESS);
     }
 
     public void finishCredentialReplace(Long stackId, Long clusterId, String user, String password) {
@@ -38,6 +39,6 @@ public class ClusterCredentialChangeService {
     private void finishCredentialChange(Long stackId, Cluster cluster) {
         clusterService.updateCluster(cluster);
         clusterService.updateClusterStatusByStackId(stackId, Status.AVAILABLE);
-        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_CHANGED_CREDENTIAL, Status.AVAILABLE.name());
+        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_CHANGED_CREDENTIAL, NotificationEventType.AVAILABLE);
     }
 }

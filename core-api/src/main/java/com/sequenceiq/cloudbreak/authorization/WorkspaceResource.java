@@ -4,7 +4,7 @@ public enum WorkspaceResource {
     ALL("All resources", "All"),
     WORKSPACE("Workspace", "Workspace"),
     BLUEPRINT("Blueprint", "ClusterDefinition"),
-    IMAGECATALOG("Image catalog", "ImageCatalog"),
+    IMAGE_CATALOG("Image catalog", "ImageCatalog"),
     CREDENTIAL("Credential", "Credential"),
     RECIPE("Recipe", "Recipe"),
     STACK("Stack", "Stack"),
