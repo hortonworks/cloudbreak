@@ -93,7 +93,7 @@ public class CentralCmTemplateUpdater implements ClusterDefinitionUpdater {
                 cmTemplateProcessor.addProduct(name, version);
                 cmTemplateProcessor.addRepositoryItem(parcel);
                 if (Objects.nonNull(name) && StackType.CDH.name().equals(name)) {
-                    cmTemplateProcessor.setCdhVersion(parsteDistroVersion(version));
+                    cmTemplateProcessor.setCdhVersion(parseDistroVersion(version));
                 }
             });
         }
@@ -101,7 +101,7 @@ public class CentralCmTemplateUpdater implements ClusterDefinitionUpdater {
 
     // longVersion example: 6.1.0-1.cdh6.1.0.p0.770702
     // return value: 6.1.0
-    private String parsteDistroVersion(String longVersion) {
+    private String parseDistroVersion(String longVersion) {
         return longVersion.split("-")[0];
     }
 
