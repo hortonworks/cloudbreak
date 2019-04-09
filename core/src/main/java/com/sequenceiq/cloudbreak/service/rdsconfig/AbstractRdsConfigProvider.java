@@ -94,7 +94,7 @@ public abstract class AbstractRdsConfigProvider {
         return rdsConfigs;
     }
 
-    protected List<String[]> createPathListFromConfingurations(String[] path, String[] configurations) {
+    protected List<String[]> createPathListFromConfigurations(String[] path, String[] configurations) {
         List<String[]> pathList = new ArrayList<>();
         Arrays.stream(configurations).forEach(configuration -> {
             List<String> pathWithConfig = Lists.newArrayList(path);

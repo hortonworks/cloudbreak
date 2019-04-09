@@ -69,7 +69,7 @@ public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
         if (clusterDefinitionService.isAmbariBlueprint(clusterDefinition)) {
             return blueprintProcessor.isComponentExistsInBlueprint("HIVE_METASTORE")
                     && !blueprintProcessor.isComponentExistsInBlueprint("MYSQL_SERVER")
-                    && !blueprintProcessor.isAllConfigurationExistsInPathUnderConfigurationNode(createPathListFromConfingurations(PATH, CONFIGURATIONS));
+                    && !blueprintProcessor.isAllConfigurationExistsInPathUnderConfigurationNode(createPathListFromConfigurations(PATH, CONFIGURATIONS));
         }
         return blueprintProcessor.isCMComponentExistsInBlueprint("HIVEMETASTORE");
     }
