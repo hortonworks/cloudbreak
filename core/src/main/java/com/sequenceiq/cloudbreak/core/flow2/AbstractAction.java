@@ -138,7 +138,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     }
 
     protected void initPayloadConverterMap(List<PayloadConverter<P>> payloadConverters) {
-        // By default payloadconvertermap is empty.
+        // By default payloadConverter map is empty.
     }
 
     protected void prepareExecution(P payload, Map<Object, Object> variables) {
