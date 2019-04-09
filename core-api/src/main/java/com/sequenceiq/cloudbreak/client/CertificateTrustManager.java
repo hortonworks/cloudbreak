@@ -37,7 +37,7 @@ public class CertificateTrustManager {
             // Install the all-trusting trust manager
             SSLContext sc = SslConfigurator.newInstance().createSSLContext();
             sc.init(null, trustAllCerts, new SecureRandom());
-            LOGGER.debug("Trust all SSL cerificates has been installed");
+            LOGGER.debug("Trust all SSL certificates has been installed");
             return sc;
         } catch (KeyManagementException e) {
             LOGGER.error(e.getMessage(), e);
