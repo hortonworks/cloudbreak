@@ -41,7 +41,7 @@ public class RangerRdsConfigProvider extends AbstractRdsConfigProvider {
             AmbariBlueprintTextProcessor blueprintProcessor = ambariBlueprintProcessorFactory.get(clusterDefinitionText);
             return blueprintProcessor.isComponentExistsInBlueprint("RANGER_ADMIN")
                     && !blueprintProcessor.isComponentExistsInBlueprint("MYSQL_SERVER")
-                    && !blueprintProcessor.isAllConfigurationExistsInPathUnderConfigurationNode(createPathListFromConfingurations(PATH, CONFIGURATIONS));
+                    && !blueprintProcessor.isAllConfigurationExistsInPathUnderConfigurationNode(createPathListFromConfigurations(PATH, CONFIGURATIONS));
         }
         return false;
     }
