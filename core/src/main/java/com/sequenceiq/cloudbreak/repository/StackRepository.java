@@ -68,6 +68,11 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     Stack findOneWithLists(@Param("id") Long id);
 
     @CheckPermissionsByReturnValue
+    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
+            + "LEFT JOIN FETCH s.cluster c LEFT JOIN FETCH c.components WHERE s.id= :id AND (s.type is not 'TEMPLATE' OR s.type is null)")
+    Stack findOneWithCluster(@Param("id") Long id);
+
+    @CheckPermissionsByReturnValue
     @Query("SELECT s FROM Stack s "
             + "WHERE s.datalakeResourceId= :id AND s.terminated = null AND s.stackStatus.status <> 'DELETE_IN_PROGRESS' "
             + "AND s.stackStatus.status <> 'REQUESTED' "

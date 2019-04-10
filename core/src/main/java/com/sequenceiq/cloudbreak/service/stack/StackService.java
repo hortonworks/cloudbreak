@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.clusterdefinition.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
@@ -287,6 +288,19 @@ public class StackService {
         Stack stack;
         try {
             stack = transactionService.required(() -> stackRepository.findOneWithLists(id));
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
+        if (stack == null) {
+            throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_ID_EXCEPTION_MESSAGE, id));
+        }
+        return stack;
+    }
+
+    public Stack getByIdWithClusterInTransaction(Long id) {
+        Stack stack;
+        try {
+            stack = transactionService.required(() -> stackRepository.findOneWithCluster(id));
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
@@ -791,7 +805,9 @@ public class StackService {
             throw new BadRequestException(String.format("Instancegroup '%s' not found or not part of stack '%s'",
                     instanceGroupAdjustmentJson.getInstanceGroup(), stack.getName()));
         }
-        ambariBlueprintValidator.validateHostGroupScalingRequest(clusterDefinition, hostGroup.get(), adjustment);
+        if (ClusterApi.AMBARI.equalsIgnoreCase(stack.getCluster().getVariant())) {
+            ambariBlueprintValidator.validateHostGroupScalingRequest(clusterDefinition, hostGroup.get(), adjustment);
+        }
     }
 
     private void validateStackStatus(Stack stack) {
