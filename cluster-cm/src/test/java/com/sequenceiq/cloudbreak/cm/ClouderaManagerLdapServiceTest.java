@@ -24,11 +24,13 @@ import com.cloudera.api.swagger.model.ApiAuthRoleRef;
 import com.cloudera.api.swagger.model.ApiExternalUserMapping;
 import com.cloudera.api.swagger.model.ApiExternalUserMappingList;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.workspace.User;
 
 public class ClouderaManagerLdapServiceTest {
     @Mock
@@ -43,6 +45,9 @@ public class ClouderaManagerLdapServiceTest {
     @Mock
     private ClouderaManagerClientFactory clouderaManagerClientFactory;
 
+    @Mock
+    private GrpcUmsClient umsClient;
+
     @InjectMocks
     private ClouderaManagerLdapService underTest = new ClouderaManagerLdapService();
 
@@ -54,12 +59,15 @@ public class ClouderaManagerLdapServiceTest {
 
     @Before
     public void init() {
+        User user = new User();
         stack = new Stack();
+        stack.setCreator(user);
         cluster = new Cluster();
         cluster.setName("clusterName");
         stack.setCluster(cluster);
         httpClientConfig = new HttpClientConfig("apiAddress");
         MockitoAnnotations.initMocks(this);
+        when(umsClient.isUmsUsable(anyString())).thenReturn(false);
         when(clouderaManagerClientFactory.getClouderaManagerResourceApi(stack, cluster, httpClientConfig)).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerClientFactory.getExternalUserMappingsResourceApi(stack, cluster, httpClientConfig)).thenReturn(externalUserMappingsResourceApi);
         when(clouderaManagerClientFactory.getAuthRolesResourceApi(stack, cluster, httpClientConfig)).thenReturn(authRolesResourceApi);
@@ -115,6 +123,7 @@ public class ClouderaManagerLdapServiceTest {
         // WHEN
         underTest.setupLdap(stack, cluster, httpClientConfig);
         // THEN
+        verify(clouderaManagerResourceApi).beginTrial();
         verify(clouderaManagerResourceApi, never()).updateConfig(anyString(), any());
         verify(authRolesResourceApi, never()).readAuthRolesMetadata(anyString());
         verify(externalUserMappingsResourceApi, never()).createExternalUserMappings(any(ApiExternalUserMappingList.class));

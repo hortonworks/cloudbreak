@@ -11,6 +11,8 @@ import java.util.concurrent.Semaphore;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.retry.RetryException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -33,6 +35,8 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Service
 public class UserService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
     private static final Map<CloudbreakUser, Semaphore> UNDER_OPERATION = new ConcurrentHashMap<>();
 
@@ -112,6 +116,7 @@ public class UserService {
                 User user = new User();
                 user.setUserId(cloudbreakUser.getUserId());
                 user.setUserName(cloudbreakUser.getUsername());
+                user.setUserCrn(cloudbreakUser.getUserCrn());
 
                 Tenant tenant = tenantRepository.findByName(cloudbreakUser.getTenant());
                 if (tenant == null) {

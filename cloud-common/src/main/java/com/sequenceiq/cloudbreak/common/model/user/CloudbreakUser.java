@@ -6,14 +6,17 @@ public class CloudbreakUser {
 
     private final String userId;
 
+    private final String userCrn;
+
     private final String username;
 
     private final String email;
 
     private final String tenant;
 
-    public CloudbreakUser(String userId, String username, String email, String tenant) {
+    public CloudbreakUser(String userId, String userCrn, String username, String email, String tenant) {
         this.userId = userId;
+        this.userCrn = userCrn;
         this.username = username;
         this.email = email;
         this.tenant = tenant;
@@ -21,6 +24,10 @@ public class CloudbreakUser {
 
     public String getUserId() {
         return userId;
+    }
+
+    public String getUserCrn() {
+        return userCrn;
     }
 
     public String getUsername() {

@@ -36,3 +36,12 @@ start_server:
   service.running:
     - enable: True
     - name: cloudera-scm-server
+
+{% if salt['pillar.get']('cloudera-manager:license', None) != None %}
+
+/etc/cloudera-scm-server/license.txt:
+  file.managed:
+    - source: salt://cloudera/manager/license.txt
+    - template: jinja
+
+{% endif %}

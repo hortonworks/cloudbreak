@@ -26,6 +26,8 @@ public class UserProfileHandlerTest {
 
     private static final String USER_ID_1 = "userId1";
 
+    private static final String USER_CRN_1 = "userCrn1";
+
     private static final String TENANT_A = "tenant";
 
     private static final String USERNAME_1 = "username";
@@ -81,7 +83,7 @@ public class UserProfileHandlerTest {
     }
 
     private CloudbreakUser createIdentityUser() {
-        return new CloudbreakUser(USER_ID_1, USERNAME_1, EMAIL_1, TENANT_A);
+        return new CloudbreakUser(USER_ID_1, USER_CRN_1, USERNAME_1, EMAIL_1, TENANT_A);
     }
 
     private User createUser() {

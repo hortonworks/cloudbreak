@@ -116,11 +116,11 @@ public class TestUtil {
     }
 
     public static CloudbreakUser cbAdminUser() {
-        return new CloudbreakUser("userid", "testuser", "email", "testaccount");
+        return new CloudbreakUser("userid", "testCrn", "testuser", "email", "testaccount");
     }
 
     public static CloudbreakUser cbUser() {
-        return new CloudbreakUser("userid", "testuser", "email", "testaccount");
+        return new CloudbreakUser("userid", "testCrn", "testuser", "email", "testaccount");
     }
 
     public static Credential awsCredential() {
@@ -158,6 +158,7 @@ public class TestUtil {
     public static Stack stack(Status stackStatus, Credential credential) {
         User user = new User();
         user.setUserId("horton@hortonworks.com");
+        user.setUserCrn("testCrn");
         user.setUserName("Alma ur");
         Workspace workspace = new Workspace();
         workspace.setId(1L);

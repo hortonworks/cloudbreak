@@ -12,6 +12,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsConfig;
 
+import java.util.Optional;
+
 @RunWith(MockitoJUnitRunner.class)
 public class GrpcUmsClientTest {
 
@@ -30,7 +32,7 @@ public class GrpcUmsClientTest {
 
         String exampleCrn = "crn:altus:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:f3b8ed82-e712-4f89-bda7-be07183720d3";
 
-        UserManagementProto.User user = testedClass.getUserDetails(exampleCrn, exampleCrn, "uuid");
+        UserManagementProto.User user = testedClass.getUserDetails(exampleCrn, exampleCrn, Optional.of("uuid"));
         user.getCrn();
     }
 }

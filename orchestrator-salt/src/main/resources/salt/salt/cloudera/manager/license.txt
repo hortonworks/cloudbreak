@@ -1,0 +1,1 @@
+{{ salt['pillar.get']('cloudera-manager:license') }}

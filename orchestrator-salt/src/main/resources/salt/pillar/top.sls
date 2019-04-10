@@ -43,6 +43,9 @@ base:
 
   'roles:manager_server':
     - match: grain
+{% if salt['file.file_exists']('/srv/pillar/cloudera-manager/license.sls') %}
+    - cloudera-manager.license
+{% endif %}
     - cloudera-manager.repo
     - cloudera-manager.database
     - gateway.init

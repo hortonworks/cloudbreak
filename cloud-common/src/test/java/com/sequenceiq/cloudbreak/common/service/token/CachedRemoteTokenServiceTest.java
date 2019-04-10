@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.common.service.token;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -58,7 +60,7 @@ public class CachedRemoteTokenServiceTest {
     @Test
     public void whenInvalidCrnIsProvidedThrowInvalidTokenException() {
         when(umsClient.isUmsUsable(crn)).thenReturn(true);
-        when(umsClient.getUserDetails(anyString(), anyString(), anyString())).thenThrow(new NullPointerException());
+        when(umsClient.getUserDetails(anyString(), anyString(), any(Optional.class))).thenThrow(new NullPointerException());
         thrown.expect(InvalidTokenException.class);
         thrown.expectMessage("Invalid CRN provided");
         CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret",
@@ -72,7 +74,7 @@ public class CachedRemoteTokenServiceTest {
         UserManagementProto.User user = UserManagementProto.User.newBuilder()
                 .setCrn(crn)
                 .setEmail("hansolo@cloudera.com").build();
-        when(umsClient.getUserDetails(anyString(), anyString(), anyString())).thenReturn(user);
+        when(umsClient.getUserDetails(anyString(), anyString(), any(Optional.class))).thenReturn(user);
         CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret",
                 "http://localhost:8089", umsClient, caasClient, identityClient);
         OAuth2Authentication authentication = (OAuth2Authentication) tokenService.loadAuthentication(crn);
@@ -82,7 +84,7 @@ public class CachedRemoteTokenServiceTest {
     @Test
     public void testCrnBasedAuth() {
         when(umsClient.isUmsUsable(crn)).thenReturn(true);
-        when(umsClient.getUserDetails(anyString(), anyString(), anyString())).thenThrow(new NullPointerException());
+        when(umsClient.getUserDetails(anyString(), anyString(), any(Optional.class))).thenThrow(new NullPointerException());
         thrown.expect(InvalidTokenException.class);
         thrown.expectMessage("Invalid CRN provided");
         CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret",
