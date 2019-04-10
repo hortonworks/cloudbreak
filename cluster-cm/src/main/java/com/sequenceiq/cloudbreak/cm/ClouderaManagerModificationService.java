@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -18,9 +19,13 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.ClustersResourceApi;
+import com.cloudera.api.swagger.HostTemplatesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
+import com.cloudera.api.swagger.model.ApiHost;
+import com.cloudera.api.swagger.model.ApiHostRef;
+import com.cloudera.api.swagger.model.ApiHostRefList;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
@@ -42,6 +47,8 @@ import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
 public class ClouderaManagerModificationService implements ClusterModificationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerModificationService.class);
+
+    private static final Boolean START_ROLES_ON_UPSCALED_NODES = Boolean.TRUE;
 
     @Inject
     private ClouderaManagerClientFactory clouderaManagerClientFactory;
@@ -72,8 +79,70 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void upscaleCluster(HostGroup hostGroup, Collection<HostMetadata> hostMetadata, List<InstanceMetaData> metas) {
+    public void upscaleCluster(HostGroup hostGroup, Collection<HostMetadata> hostMetadata, List<InstanceMetaData> instanceMetaDatas)
+            throws CloudbreakException {
+        ClustersResourceApi clustersResourceApi = clouderaManagerClientFactory.getClustersResourceApi(client);
+        try {
+            List<ApiHostRef> hostRefs = clustersResourceApi.listHosts(stack.getName()).getItems();
+            List<String> clusterHosts = hostRefs.stream().map(ApiHostRef::getHostname).collect(Collectors.toList());
+            List<String> upscaleHostNames = hostMetadata.stream()
+                    .map(HostMetadata::getHostName)
+                    .filter(hostname -> !clusterHosts.contains(hostname))
+                    .collect(Collectors.toList());
+            if (!upscaleHostNames.isEmpty()) {
+                List<ApiHost> hosts = clouderaManagerClientFactory.getHostsResourceApi(client).readHosts("SUMMARY").getItems();
+                ApiHostRefList body = createUpscaledHostRefList(upscaleHostNames, hosts);
+                clustersResourceApi.addHosts(stack.getName(), body);
+                activateParcel(clustersResourceApi);
+                applyHostGroupRolesOnUpscaledHosts(body, hostGroup.getName());
+            }
+        } catch (ApiException e) {
+            LOGGER.warn("Failed to upscale: {}", e.getResponseBody(), e);
+            throw new CloudbreakException("Failed to upscale", e);
+        }
 
+    }
+
+    private void applyHostGroupRolesOnUpscaledHosts(ApiHostRefList body, String hostGroupName) throws ApiException, CloudbreakException {
+        LOGGER.debug("Applying host template on upscaled hosts. Host group: [{}]", hostGroupName);
+        HostTemplatesResourceApi templatesResourceApi = clouderaManagerClientFactory.getHostTemplatesResourceApi(client);
+        ApiCommand applyHostTemplateCommand = templatesResourceApi.applyHostTemplate(stack.getName(), hostGroupName, START_ROLES_ON_UPSCALED_NODES, body);
+        PollingResult hostTemplatePollingResult = clouderaManagerPollingServiceProvider.applyHostTemplatePollingService(
+                stack, client, applyHostTemplateCommand.getId());
+        if (isExited(hostTemplatePollingResult)) {
+            throw new CancellationException("Cluster was terminated while waiting for host template to apply");
+        } else if (isTimeout(hostTemplatePollingResult)) {
+            throw new CloudbreakException("Timeout while Cloudera Manager was applying host template.");
+        }
+        LOGGER.debug("Applied host template on upscaled hosts.");
+    }
+
+    private void activateParcel(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
+        LOGGER.debug("Deploying client configurations on upscaled hosts.");
+        ApiCommand deployCommand = clustersResourceApi.deployClientConfig(stack.getName());
+        PollingResult deployPollingResult = clouderaManagerPollingServiceProvider.deployClientConfigPollingService(
+                stack, client, deployCommand.getId());
+        if (isExited(deployPollingResult)) {
+            throw new CancellationException("Cluster was terminated while waiting for client configurations to deploy");
+        } else if (isTimeout(deployPollingResult)) {
+            throw new CloudbreakException("Timeout while Cloudera Manager deployed client configurations.");
+        }
+        LOGGER.debug("Deployed client configurations on upscaled hosts.");
+    }
+
+    private ApiHostRefList createUpscaledHostRefList(List<String> upscaleHostNames, List<ApiHost> hosts) {
+        LOGGER.debug("Creating ApiHostRefList from upscaled hosts.");
+        ApiHostRefList body = new ApiHostRefList();
+        upscaleHostNames.forEach(hostname -> {
+            String hostId = hosts.stream()
+                    .filter(host -> hostname.equalsIgnoreCase(host.getHostname()))
+                    .findFirst().get()
+                    .getHostId();
+            body.addItemsItem(
+                    new ApiHostRef().hostname(hostname).hostId(hostId));
+        });
+        LOGGER.debug("Created ApiHostRefList from upscaled hosts. Host count: [{}]", body.getItems().size());
+        return body;
     }
 
     @Override

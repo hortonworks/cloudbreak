@@ -170,7 +170,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Override
     public void waitForHosts(Set<HostMetadata> hostsInCluster) {
-        clouderaManagerPollingServiceProvider.hostsPollingService(stack, clouderaManagerClientFactory.getDefaultClient(stack, clientConfig));
+        clouderaManagerPollingServiceProvider.hostsPollingService(stack, clouderaManagerClientFactory.getClient(stack, stack.getCluster(), clientConfig));
     }
 
     @Override

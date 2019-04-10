@@ -48,6 +48,10 @@ public class ClouderaManagerMock extends AbstractModelMock {
         dynamicRouteStack = new DynamicRouteStack(sparkService, defaultModel);
     }
 
+    public DynamicRouteStack getDynamicRouteStack() {
+        return dynamicRouteStack;
+    }
+
     public void addClouderaManagerMappings() {
         getEcho();
         getUsers();

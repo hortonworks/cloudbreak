@@ -128,7 +128,7 @@ public class ClusterUpscaleService {
     }
 
     public void installServicesOnNewHosts(Long stackId, String hostGroupName) throws CloudbreakException {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        Stack stack = stackService.getByIdWithClusterInTransaction(stackId);
         LOGGER.debug("Start installing Ambari services");
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
         Set<HostMetadata> hostMetadata = hostGroupService.findEmptyHostMetadataInHostGroup(hostGroup.getId());

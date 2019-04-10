@@ -305,6 +305,11 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public Stack findOneWithCluster(Long id) {
+            return null;
+        }
+
+        @Override
         public Set<Stack> findEphemeralClusters(Long id) {
             return null;
         }
