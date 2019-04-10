@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
 import static com.sequenceiq.cloudbreak.service.metrics.MetricType.STACK_PREPARATION;
-import static com.sequenceiq.cloudbreak.util.BenchMark.measure;
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.io.IOException;

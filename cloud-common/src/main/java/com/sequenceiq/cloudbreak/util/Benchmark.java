@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.util;
 
+import org.slf4j.Logger;
+
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.slf4j.Logger;
-
-public class BenchMark {
-    private BenchMark() {
+public class Benchmark {
+    private Benchmark() {
     }
 
     public static void measure(Runnable callback, Logger logger, String message, Object... params) {

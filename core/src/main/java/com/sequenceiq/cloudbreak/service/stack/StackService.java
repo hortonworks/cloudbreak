@@ -6,7 +6,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
 import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
-import static com.sequenceiq.cloudbreak.util.BenchMark.measure;
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.util.Collection;
 import java.util.Collections;

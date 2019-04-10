@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
-import static com.sequenceiq.cloudbreak.util.BenchMark.measure;
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.util.HashSet;
 import java.util.Map;
