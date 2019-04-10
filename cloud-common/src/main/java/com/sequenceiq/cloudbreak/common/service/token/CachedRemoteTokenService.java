@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Optional;
 
 import javax.ws.rs.ProcessingException;
 
@@ -106,7 +106,7 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
 
     private OAuth2Authentication getUmsAuthentication(String crn) {
         String requestId = MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString());
-        UserManagementProto.User user = umsClient.getUserDetails(crn, crn, requestId != null ? requestId : UUID.randomUUID().toString());
+        UserManagementProto.User user = umsClient.getUserDetails(crn, crn, Optional.ofNullable(requestId));
         Map<String, Object> tokenMap = new HashMap<>();
         tokenMap.put("tenant", Crn.fromString(crn).getAccountId());
         tokenMap.put("crn", user.getCrn());

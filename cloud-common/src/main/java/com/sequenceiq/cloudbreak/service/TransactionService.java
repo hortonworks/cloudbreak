@@ -37,7 +37,7 @@ public class TransactionService {
         try {
             return transactionExecutorService.required(callback);
         } catch (RuntimeException e) {
-            throw new TransactionExecutionException("Transaction went fail", e);
+            throw new TransactionExecutionException("Transaction failed", e);
         } finally {
             processTransactionDuration(start);
         }
@@ -48,7 +48,7 @@ public class TransactionService {
         try {
             return transactionExecutorService.requiresNew(callback);
         } catch (RuntimeException e) {
-            throw new TransactionExecutionException("Transaction went fail", e);
+            throw new TransactionExecutionException("Transaction failed", e);
         } finally {
             processTransactionDuration(start);
         }
@@ -59,7 +59,7 @@ public class TransactionService {
         try {
             return transactionExecutorService.mandatory(callback);
         } catch (RuntimeException e) {
-            throw new TransactionExecutionException("Transaction went fail", e);
+            throw new TransactionExecutionException("Transaction failed", e);
         } finally {
             processTransactionDuration(start);
         }
@@ -70,7 +70,7 @@ public class TransactionService {
         try {
             return transactionExecutorService.supports(callback);
         } catch (RuntimeException e) {
-            throw new TransactionExecutionException("Transaction went fail", e);
+            throw new TransactionExecutionException("Transaction failed", e);
         } finally {
             processTransactionDuration(start);
         }
@@ -81,7 +81,7 @@ public class TransactionService {
         try {
             return transactionExecutorService.notSupported(callback);
         } catch (RuntimeException e) {
-            throw new TransactionExecutionException("Transaction went fail", e);
+            throw new TransactionExecutionException("Transaction failed", e);
         } finally {
             processTransactionDuration(start);
         }
@@ -92,7 +92,7 @@ public class TransactionService {
         try {
             return transactionExecutorService.never(callback);
         } catch (RuntimeException e) {
-            throw new TransactionExecutionException("Transaction went fail", e);
+            throw new TransactionExecutionException("Transaction failed", e);
         } finally {
             processTransactionDuration(start);
         }

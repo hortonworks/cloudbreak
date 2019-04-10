@@ -212,7 +212,7 @@ public class EnvironmentServiceTest {
         when(kerberosService.findByNamesInWorkspace(anySet(), anyLong())).thenReturn(Collections.emptySet());
         when(environmentCreationValidator.validate(any(), any(), any())).thenReturn(ValidationResult.builder().build());
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);
-        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(new CloudbreakUser("", "", "", ""));
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(new CloudbreakUser("", "", "", "", ""));
         when(userService.getOrCreate(any())).thenReturn(new User());
         when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentV4Response.class))).thenReturn(new DetailedEnvironmentV4Response());
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);

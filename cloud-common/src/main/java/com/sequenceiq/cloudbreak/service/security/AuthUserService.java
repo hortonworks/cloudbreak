@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.service.security;
 
-import java.util.UUID;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.stereotype.Component;
@@ -21,6 +23,8 @@ import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
 @Component
 public class AuthUserService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthUserService.class);
+
     @Inject
     private CaasClient caasClient;
 
@@ -31,8 +35,10 @@ public class AuthUserService {
         CloudbreakUser user;
         String token = ((OAuth2AuthenticationDetails) auth.getDetails()).getTokenValue();
         if (umsClient.isUmsUsable(token)) {
+            LOGGER.debug("Using UMS.");
             user = createCbUserWithUms(auth);
         } else {
+            LOGGER.debug("Falling back on CAAS.");
             user = createCbUserWithCaas(auth);
         }
         return user;
@@ -42,13 +48,14 @@ public class AuthUserService {
         String username = (String) auth.getPrincipal();
         String tenant = AuthenticatedUserService.getTenant(auth);
         CaasUser userInfo = caasClient.getUserInfo(((OAuth2AuthenticationDetails) auth.getDetails()).getTokenValue());
-        return new CloudbreakUser(userInfo.getId(), username, userInfo.getEmail(), tenant);
+        return new CloudbreakUser(userInfo.getId(), null, username, userInfo.getEmail(), tenant);
     }
 
     private CloudbreakUser createCbUserWithUms(OAuth2Authentication auth) {
         String userCrn = ((OAuth2AuthenticationDetails) auth.getDetails()).getTokenValue();
         String requestId = MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString());
-        UserManagementProto.User userInfo = umsClient.getUserDetails(userCrn, userCrn, requestId != null ? requestId : UUID.randomUUID().toString());
-        return new CloudbreakUser(userInfo.getUserId(), (String) auth.getPrincipal(), userInfo.getEmail(), Crn.fromString(userCrn).getAccountId());
+        UserManagementProto.User userInfo = umsClient.getUserDetails(userCrn, userCrn, Optional.ofNullable(requestId));
+        return new CloudbreakUser(userInfo.getUserId(), userCrn,
+                (String) auth.getPrincipal(), userInfo.getEmail(), Crn.fromString(userCrn).getAccountId());
     }
 }

@@ -176,6 +176,7 @@ public class StackImageUpdateActionsTest {
 
         User user = new User();
         user.setUserId("horton@hortonworks.com");
+        user.setUserCrn("testCrn");
         user.setUserName("Alma ur");
         Workspace workspace = new Workspace();
         workspace.setId(1L);

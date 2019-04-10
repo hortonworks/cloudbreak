@@ -40,6 +40,9 @@ public class User implements ProvisionEntity {
     @Column(name = "userid")
     private String userId;
 
+    @Column(name = "usercrn")
+    private String userCrn;
+
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT", name = "cloudbreak_permissions")
     private Json cloudbreakPermissions;
@@ -79,6 +82,14 @@ public class User implements ProvisionEntity {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getUserCrn() {
+        return userCrn;
+    }
+
+    public void setUserCrn(String userCrn) {
+        this.userCrn = userCrn;
     }
 
     public Json getCloudbreakPermissions() {

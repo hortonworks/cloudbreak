@@ -4,7 +4,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc.UserManagementBlockingStub;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 
 import io.grpc.ManagedChannel;
@@ -47,6 +49,23 @@ public class UmsClient {
                         .setUserIdOrCrn(userCrn)
                         .build()
         ).getUser();
+    }
+
+    /**
+     * Wraps a call to getAccount.
+     *
+     * @param requestId the request ID for the request
+     * @param userCrn   the user CRN
+     * @return the account
+     */
+    public Account getAccount(String requestId, String userCrn) {
+        checkNotNull(requestId);
+        checkNotNull(userCrn);
+        return newStub(requestId).getAccount(
+                GetAccountRequest.newBuilder()
+                        .setAccountId(Crn.fromString(userCrn).getAccountId())
+                        .build()
+        ).getAccount();
     }
 
     /**

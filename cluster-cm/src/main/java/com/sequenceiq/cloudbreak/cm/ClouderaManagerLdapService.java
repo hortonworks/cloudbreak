@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import com.cloudera.api.swagger.model.ApiAuthRoleRef;
 import com.cloudera.api.swagger.model.ApiExternalUserMapping;
 import com.cloudera.api.swagger.model.ApiExternalUserMappingList;
 import com.cloudera.api.swagger.model.ApiExternalUserMappingType;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -32,10 +34,24 @@ public class ClouderaManagerLdapService {
     @Inject
     private ClouderaManagerClientFactory clouderaManagerClientFactory;
 
+    @Inject
+    private GrpcUmsClient umsClient;
+
     public void setupLdap(Stack stack, Cluster cluster, HttpClientConfig clientConfig) throws ApiException {
         LdapConfig ldapConfig = cluster.getLdapConfig();
         ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerClientFactory.getClouderaManagerResourceApi(stack, cluster, clientConfig);
-        clouderaManagerResourceApi.beginTrial();
+
+        // Begin the Cloudera Manager trial only if UMS is not enabled. Otherwise, we'll be using a
+        // license from UMS.
+        String userCrn = stack.getCreator().getUserCrn();
+        if (!umsClient.isUmsUsable(userCrn) || StringUtils.isEmpty(
+                umsClient.getAccountDetails(userCrn, userCrn, Optional.empty()).getClouderaManagerLicenseKey())) {
+            LOGGER.info("Enabling trial license.");
+            clouderaManagerResourceApi.beginTrial();
+        } else {
+            LOGGER.info("UMS detected and license key available, skipping trial license.");
+        }
+
         if (ldapConfig != null) {
             LOGGER.debug("Setup LDAP on ClouderaManager API for stack: {}", stack.getId());
             LdapView ldapView = new LdapView(ldapConfig, ldapConfig.getBindDn(), ldapConfig.getBindPassword());
