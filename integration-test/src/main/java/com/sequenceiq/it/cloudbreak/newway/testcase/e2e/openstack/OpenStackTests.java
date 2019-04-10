@@ -110,6 +110,8 @@ public class OpenStackTests extends AbstractE2ETest {
         ClusterDefinitionTestDto select = testContext
                 .given(ClusterDefinitionTestDto.class)
                 .when(clusterDefinitionTestClient.listV4());
+        select.validate();
+        testContext.cleanupTestContext();
         List<ClusterDefinitionV4ViewResponse> viewResponses = select.getViewResponses()
                 .stream()
                 .filter(e -> e.getStatus().equals(ResourceStatus.DEFAULT))
@@ -118,7 +120,9 @@ public class OpenStackTests extends AbstractE2ETest {
 
         Object[][] data = new Object[viewResponses.size()][5];
         for (int i = 0; i < viewResponses.size(); i++) {
-            data[i][0] = testContext;
+            SparklessTestContext tc = getBean(SparklessTestContext.class);
+            minimalSetupForClusterCreation(tc);
+            data[i][0] = tc;
             data[i][1] = viewResponses.get(i).getName();
             data[i][2] = getHdpGroups();
             data[i][3] = getHdpScaleGroup();
@@ -133,11 +137,10 @@ public class OpenStackTests extends AbstractE2ETest {
 
     @DataProvider(name = OPEN_STACK_HDF_TESTS_DATA_PROVIDER)
     public Object[][] openStackHdfTestsDataProvider() {
-        SparklessTestContext testContext = getBean(SparklessTestContext.class);
-        minimalSetupForClusterCreation(testContext);
-
         Object[][] data = new Object[getHdfClusterDefinition().size()][5];
         for (int i = 0; i < getHdfClusterDefinition().size(); i++) {
+            SparklessTestContext testContext = getBean(SparklessTestContext.class);
+            minimalSetupForClusterCreation(testContext);
             data[i][0] = testContext;
             data[i][1] = getHdfClusterDefinition().get(i);
             data[i][2] = getHdfGroups();
@@ -183,35 +186,36 @@ public class OpenStackTests extends AbstractE2ETest {
         testContext.cleanupTestContext();
     }
 
-    public String getHdpVersion() {
+    private String getHdpVersion() {
         return openStackProperties.getPrewarmed().getHdp().getVersion();
     }
 
-    public String getHdpScaleGroup() {
+    private String getHdpScaleGroup() {
         return openStackProperties.getPrewarmed().getHdp().getScaleGroup();
     }
 
-    public List<String> getHdpGroups() {
+    private List<String> getHdpGroups() {
         return openStackProperties.getPrewarmed().getHdp().getHostGroups();
     }
 
-    public boolean isHdpEnabled() {
+    private boolean isHdpEnabled() {
         return openStackProperties.getPrewarmed().getHdp().getEnabled();
     }
 
-    public List<String> getHdfClusterDefinition() {
+    private List<String> getHdfClusterDefinition() {
         return openStackProperties.getPrewarmed().getHdf().getClusterDefinitionNames();
     }
 
-    public String getHdfScaleGroup() {
+    private String getHdfScaleGroup() {
         return openStackProperties.getPrewarmed().getHdf().getScaleGroup();
     }
 
-    public List<String> getHdfGroups() {
+    private List<String> getHdfGroups() {
         return openStackProperties.getPrewarmed().getHdf().getHostGroups();
     }
 
-    public boolean isHdfEnabled() {
+    private boolean isHdfEnabled() {
         return openStackProperties.getPrewarmed().getHdf().getEnabled();
     }
+
 }
