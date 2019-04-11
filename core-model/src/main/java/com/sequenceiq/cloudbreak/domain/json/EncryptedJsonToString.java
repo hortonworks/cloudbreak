@@ -6,6 +6,7 @@ import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.jasypt.exceptions.EncryptionOperationNotPossibleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 public class EncryptedJsonToString extends JsonToString {
 
@@ -42,7 +43,7 @@ public class EncryptedJsonToString extends JsonToString {
                 json = legacyEncryptor.decrypt(dbData);
             } catch (EncryptionOperationNotPossibleException ex) {
                 json = dbData;
-                LOGGER.info("Cannot decrypt the data. {}", dbData, ex);
+                LOGGER.info("Cannot decrypt the data. Null or empty: [{}]", StringUtils.isEmpty(dbData), ex);
             }
         }
         return super.convertToEntityAttribute(json);

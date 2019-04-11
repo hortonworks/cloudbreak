@@ -18,6 +18,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -108,9 +109,10 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        workspaceMigrationRunner.run();
-        heartbeatService.heartbeat();
         try {
+            workspaceMigrationRunner.run();
+            heartbeatService.heartbeat();
+
             List<Long> stackIdsUnderOperation = restartOrUpdateUnassignedDisruptedFlows();
             stackIdsUnderOperation.addAll(restartMyAssignedDisruptedFlows());
             stackIdsUnderOperation.addAll(excludeStacksByFlowAssignment());
@@ -118,13 +120,16 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
             List<Cluster> clustersToSync = resetClusterStatus(stacksToSync, stackIdsUnderOperation);
             triggerSyncs(stacksToSync, clustersToSync);
             flowLogService.purgeTerminatedStacksFlowLogs();
-        } catch (TransactionExecutionException e) {
-            LOGGER.error("Unable to start node properly", e);
+
+            ambariDatabaseToRdsConfigMigrationService.migrateAmbariDatabaseClusterComponentsToRdsConfig();
+            credentialMigrationService.migrateGcpCredentials();
+            blueprintMigrationService.migrateBlueprints();
+            govCloudFlagMigrator.run();
+        } catch (Exception e) {
+            LOGGER.error("Clean up or the migration operations failed. Shutting down the node. ", e);
+            ConfigurableApplicationContext applicationContext = (ConfigurableApplicationContext) event.getApplicationContext();
+            applicationContext.close();
         }
-        ambariDatabaseToRdsConfigMigrationService.migrateAmbariDatabaseClusterComponentsToRdsConfig();
-        credentialMigrationService.migrateGcpCredentials();
-        blueprintMigrationService.migrateBlueprints();
-        govCloudFlagMigrator.run();
     }
 
     private List<Stack> resetStackStatus(Collection<Long> excludeStackIds) {
