@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4R
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedClusterDefinitionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action;
@@ -46,7 +45,6 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
-import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -89,9 +87,6 @@ public class StackCommonService {
     private StackCreatorService stackCreatorService;
 
     @Inject
-    private StackApiViewService stackApiViewService;
-
-    @Inject
     private TlsSecurityService tlsSecurityService;
 
     @Inject
@@ -122,10 +117,6 @@ public class StackCommonService {
 
     public StackV4Response get(Long id, Set<String> entries) {
         return stackService.getJsonById(id, entries);
-    }
-
-    public Set<StackViewV4Response> retrieveStacksByWorkspaceId(Long workspaceId, String environment, boolean onlyDatalakes) {
-        return stackApiViewService.retrieveStackViewsByWorkspaceId(workspaceId, environment, onlyDatalakes);
     }
 
     public StackV4Response findStackByNameAndWorkspaceId(String name, Long workspaceId, Set<String> entries) {

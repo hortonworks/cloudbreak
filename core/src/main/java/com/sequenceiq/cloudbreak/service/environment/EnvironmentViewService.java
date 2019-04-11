@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.service.environment;
 
+import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -47,5 +50,10 @@ public class EnvironmentViewService extends AbstractWorkspaceAwareResourceServic
 
     public Set<EnvironmentView> findAllByCredentialId(Long credentialId) {
         return environmentViewRepository.findAllByCredentialId(credentialId);
+    }
+
+    public Long getIdByName(String environmentName, Long workspaceId) {
+        return Optional.ofNullable(environmentViewRepository.getIdByNameAndWorkspaceId(environmentName, workspaceId))
+                .orElseThrow(notFound("Environment with name", environmentName));
     }
 }

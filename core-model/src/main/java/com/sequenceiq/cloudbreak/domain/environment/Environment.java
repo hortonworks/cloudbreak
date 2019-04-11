@@ -110,10 +110,12 @@ public class Environment implements WorkspaceAwareResource, ArchivableResource {
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "environment_id")
+    @Where(clause = "terminated IS NULL")
     private Set<StackApiView> stacks = new HashSet<>();
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "environment_id")
+    @Where(clause = "status != 'DELETE_COMPLETED'")
     private Set<ClusterApiView> clusters = new HashSet<>();
 
     @OneToMany(fetch = FetchType.EAGER)
