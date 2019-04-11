@@ -32,6 +32,12 @@ public class FixedSizePreloadCache<E> {
         return element;
     }
 
+    public int size() {
+        synchronized (stack) {
+            return stack.size();
+        }
+    }
+
     private void push(E item) {
         synchronized (stack) {
             if (stack.size() < maxSize) {
