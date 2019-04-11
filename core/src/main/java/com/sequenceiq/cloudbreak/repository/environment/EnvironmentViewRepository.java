@@ -28,4 +28,7 @@ public interface EnvironmentViewRepository extends WorkspaceResourceRepository<E
 
     @DisableCheckPermissions
     Set<EnvironmentView> findAllByCredentialId(Long credentialId);
+
+    @CheckPermissionsByWorkspaceId(action = READ, workspaceIdIndex = 1)
+    Long getIdByNameAndWorkspaceId(String name, Long workspaceId);
 }

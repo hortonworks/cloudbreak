@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
+import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -60,9 +61,15 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Inject
     private ConverterUtil converterUtil;
 
+    @Inject
+    private StackApiViewService stackApiViewService;
+
     @Override
     public StackViewV4Responses list(Long workspaceId, String environment, Boolean onlyDatalakes) {
-        Set<StackViewV4Response> stackViewResponses = stackCommonService.retrieveStacksByWorkspaceId(workspaceId, environment, onlyDatalakes);
+        Set<StackViewV4Response> stackViewResponses = converterUtil.convertAllAsSet(
+                stackApiViewService.retrieveStackViewsByWorkspaceId(workspaceId, environment, onlyDatalakes),
+                StackViewV4Response.class
+        );
         return new StackViewV4Responses(stackViewResponses);
     }
 

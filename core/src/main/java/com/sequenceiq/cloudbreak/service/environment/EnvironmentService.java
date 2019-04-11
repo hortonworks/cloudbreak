@@ -168,8 +168,11 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
 
     public DetailedEnvironmentV4Response get(String environmentName, Long workspaceId) {
         try {
-            return transactionService.required(() ->
-                    conversionService.convert(getByNameForWorkspaceId(environmentName, workspaceId), DetailedEnvironmentV4Response.class));
+            return transactionService.required(() -> {
+                Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
+                stackApiViewService.decorate(environment, workspaceId);
+                return conversionService.convert(environment, DetailedEnvironmentV4Response.class);
+            });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
@@ -240,8 +243,8 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
 
         try {
             return transactionService.required(() -> {
-                    Environment savedEnvironment = pureSave(environment);
-                    return conversionService.convert(savedEnvironment, DetailedEnvironmentV4Response.class);
+                Environment savedEnvironment = pureSave(environment);
+                return conversionService.convert(savedEnvironment, DetailedEnvironmentV4Response.class);
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
