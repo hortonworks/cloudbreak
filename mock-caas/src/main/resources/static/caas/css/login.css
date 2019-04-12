@@ -2,6 +2,8 @@ html,
 body,
 body > div {
     height: 100%;
+    font-family: Calibre,Calibri,Helvetica Neue,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
 .login-wrapper{
 	display: block;
@@ -26,15 +28,16 @@ body > div {
 
 .right-col {
 	padding: 49px 90px;
-	background: rgb(102, 102, 102);
-	color: #fff;
+	color: #49565f;
 	flex-grow: 1;
     padding-left: 100px;
     position: relative;
+    margin-left: 15%;
 }
 
 .group-title {
 	margin-bottom: 20px;
+	font-size: 30px;
 }
 
 .right-col .field-group {
@@ -55,7 +58,6 @@ body > div {
 }
 
 .hwk-logo {
-	background: url('images/logo.png') no-repeat;
 	width: 205px;
 	height: 82px;
 }
