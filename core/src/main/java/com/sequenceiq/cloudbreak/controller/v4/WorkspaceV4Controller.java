@@ -6,11 +6,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
 import javax.validation.Valid;
-
-import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.NameComparator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.UserIdComparator;
@@ -30,8 +26,8 @@ import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
-@Controller
-@Transactional(TxType.NEVER)
+//@Controller
+//@Transactional(TxType.NEVER)
 public class WorkspaceV4Controller extends NotificationController implements WorkspaceV4Endpoint {
 
     @Inject

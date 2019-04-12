@@ -23,7 +23,6 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.responses.UserProfileV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceV4Response;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.logsearch.LogSearchProps;
 import com.sequenceiq.it.cloudbreak.newway.logsearch.LogSearchUtil;
@@ -152,14 +151,8 @@ public class CloudbreakTest extends GherkinTest {
     }
 
     private void setWorkspaceByUserProfile(IntegrationTestContext testContext, UserProfileV4Response profile) {
-        WorkspaceV4Response workspace = CloudbreakClient.getSingletonCloudbreakClient()
-                .workspaceV4Endpoint().get(profile.getUsername());
-        if (workspace != null) {
-            LOGGER.info("put WORKSPACE_ID to context: {}", workspace.getId());
-            testContext.putContextParam(WORKSPACE_ID, workspace.getId());
-        } else {
-            throw new IllegalStateException("Can not find default workspace for user: " + profile.getUsername());
-        }
+        LOGGER.info("put WORKSPACE_ID to context: {}", 0L);
+        testContext.putContextParam(WORKSPACE_ID, 0L);
     }
 
     public TestParameter getTestParameter() {

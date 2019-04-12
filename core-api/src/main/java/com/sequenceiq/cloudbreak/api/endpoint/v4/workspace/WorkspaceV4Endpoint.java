@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.workspace;
 
 import javax.validation.Valid;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -18,16 +17,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.UserV4Respo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceV4Responses;
 import com.sequenceiq.cloudbreak.doc.ContentType;
-import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.WorkspaceOpDescription;
 
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/v4/workspaces")
-@Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v4/workspaces", description = ControllerDescription.WORKSPACE_V4_DESCRIPTION, protocols = "http,https")
+//@Path("/v4/workspaces")
+//@Consumes(MediaType.APPLICATION_JSON)
+//@Api(value = "/v4/workspaces", description = ControllerDescription.WORKSPACE_V4_DESCRIPTION, protocols = "http,https")
 public interface WorkspaceV4Endpoint {
 
     @POST
