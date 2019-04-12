@@ -56,12 +56,6 @@ echo_if_not_contains() {
 }
 
 setup_proxy_environments() {
-    env-import HTTP_PROXY_HOST ""
-    env-import HTTPS_PROXY_HOST ""
-    env-import PROXY_PORT ""
-    env-import PROXY_USER ""
-    env-import PROXY_PASSWORD ""
-    env-import NON_PROXY_HOSTS "*.consul"
     if [[ "$HTTP_PROXY_HOST" ]] || [[ "$HTTPS_PROXY_HOST" ]]; then
          if [[ "$HTTP_PROXY_HOST" ]]; then
             PROXY_HOST=$HTTP_PROXY_HOST
@@ -99,6 +93,7 @@ setup_proxy_environments() {
 }
 
 curl-proxy-aware() {
+    cloudbreak-conf-proxy
     env-import CURL_CONNECT_TIMEOUT 20
     local CURL_ARGS="--connect-timeout $CURL_CONNECT_TIMEOUT"
     setup_proxy_environments
