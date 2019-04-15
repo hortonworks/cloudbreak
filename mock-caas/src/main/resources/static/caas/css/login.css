@@ -74,8 +74,8 @@ body > div {
 }
 
 .right-col .action-group {
-	margin-top: 40px;
-	margin-bottom: 7px;
+	margin-top: 30px;
+	margin-bottom: 10px;
 }
 
 .error{
@@ -91,4 +91,9 @@ body > div {
 }
 .error:empty{
     display: none;
+}
+
+.description {
+    color: gray;
+    font-style: italic;
 }

@@ -12,7 +12,7 @@
     <div class="container-fluid">
         <div class="login-wrapper">
             <form class="right-col" id="loginform" action="../auth/in">
-                <div class="group-title">Mocked Sign In</div>
+                <div class="group-title">Mocked Sign In<span>*</span></div>
                 <div class="field-group">
                     <label for="tenant" aria-label="Tenant">Tenant</label>
                     <input type="text" class="form-control" name="tenant" id="tenant" required/>
@@ -23,6 +23,9 @@
                 </div>
                 <div class="action-group">
                     <button type="submit" id="loginBtn" class="btn btn-primary">Sign In</button>
+                </div>
+                <div class="description">
+                    <span>*</span> This is a mocked sign in form. It will accept every combination without any security.
                 </div>
             </form>
         </div>
