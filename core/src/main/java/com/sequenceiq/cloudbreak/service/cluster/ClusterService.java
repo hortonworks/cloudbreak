@@ -879,10 +879,9 @@ public class ClusterService {
             }
 
             try {
-                Set<HostGroup> newHostGroups = hostGroupService.saveOrUpdateWithMetadata(hostGroups, cluster);
                 cluster = prepareCluster(hostGroups, stackRepoDetails, clusterDefinition, stackWithLists, cluster);
                 triggerClusterInstall(stackWithLists, cluster);
-            } catch (TransactionExecutionException | CloudbreakException e) {
+            } catch (CloudbreakException e) {
                 throw new CloudbreakServiceException(e);
             }
             return stackWithLists.getCluster();

@@ -38,7 +38,6 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ReinstallV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -167,13 +166,6 @@ public interface StackV4Endpoint {
             @QueryParam("forced") @DefaultValue("false") Boolean forced, @QueryParam("instanceId") String instanceId);
 
     @PUT
-    @Path("{name}/reinstall")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = PUT_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
-            nickname = "putReinstallStackV4")
-    void putReinstall(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @Valid ReinstallV4Request reinstallRequestV2);
-
-    @PUT
     @Path("{name}/ambari_password")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = PUT_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
@@ -193,4 +185,5 @@ public interface StackV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = PUT_BY_STACK_ID, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES, nickname = "putClusterV4")
     void putCluster(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @Valid UpdateClusterV4Request updateJson);
+
 }

@@ -11,7 +11,6 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ReinstallV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -153,15 +152,6 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @Override
-    public void putReinstall(Long workspaceId, String name, @Valid ReinstallV4Request reinstallRequest) {
-        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
-        UpdateClusterV4Request updateCluster = converterUtil.convert(reinstallRequest, UpdateClusterV4Request.class);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        clusterCommonService.put(stack.getId(), updateCluster, user, workspace);
-    }
-
-    @Override
     public void putPassword(Long workspaceId, String name, @Valid UserNamePasswordV4Request userNamePasswordJson) {
         Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
         UpdateClusterV4Request updateClusterJson = converterUtil.convert(userNamePasswordJson, UpdateClusterV4Request.class);
@@ -183,4 +173,5 @@ public class StackV4Controller extends NotificationController implements StackV4
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         clusterCommonService.put(stack.getId(), updateJson, user, workspace);
     }
+
 }
