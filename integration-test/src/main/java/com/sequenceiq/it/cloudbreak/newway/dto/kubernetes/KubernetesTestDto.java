@@ -1,5 +1,14 @@
 package com.sequenceiq.it.cloudbreak.newway.dto.kubernetes;
 
+import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
+
+import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import javax.ws.rs.WebApplicationException;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.KubernetesV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.requests.KubernetesV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.responses.KubernetesV4Response;
@@ -13,14 +22,6 @@ import com.sequenceiq.it.cloudbreak.newway.ResourceAction;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.DeletableTestDto;
 import com.sequenceiq.it.cloudbreak.newway.v4.KubernetesAction;
-
-import javax.ws.rs.WebApplicationException;
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
 
 @Prototype
 public class KubernetesTestDto extends DeletableTestDto<KubernetesV4Request, KubernetesV4Response, KubernetesTestDto, KubernetesV4Response> {
@@ -51,7 +52,7 @@ public class KubernetesTestDto extends DeletableTestDto<KubernetesV4Request, Kub
     }
 
     public KubernetesTestDto valid() {
-        return withName(getNameCreator().getRandomNameForResource())
+        return withName(resourceProperyProvider().getName())
                 .withContent("content")
                 .withDesription("great kubernetes config");
     }

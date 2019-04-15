@@ -7,8 +7,6 @@ import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 
 import javax.inject.Inject;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
@@ -27,25 +25,14 @@ public class RecoveryItTest extends AbstractIntegrationTest {
     @Inject
     private StackTestClient stackTestClient;
 
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        MockedTestContext testContext = (MockedTestContext) data[0];
-        minimalSetupForClusterCreation(testContext);
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void tear(Object[] data) {
-        ((MockedTestContext) data[0]).cleanupTestContext();
-    }
-
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a created cluster",
             when = "calling test action which says there is an unhealthy node",
             then = "cluster status should be CREATE_FAILED")
     public void testWhenSyncTellsNodesAreUnhealthyThenClusterStatusHaveToChange(MockedTestContext testContext) {
-        String stackName = getNameGenerator().getRandomNameForResource();
-        String workerId = getNameGenerator().getRandomNameForResource();
+        String stackName = resourcePropertyProvider().getName();
+        String workerId = resourcePropertyProvider().getName();
 
         mockAmbari(testContext);
         testContext

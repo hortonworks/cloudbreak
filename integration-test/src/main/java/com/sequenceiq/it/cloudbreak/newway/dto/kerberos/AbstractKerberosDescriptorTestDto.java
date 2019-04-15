@@ -3,8 +3,8 @@ package com.sequenceiq.it.cloudbreak.newway.dto.kerberos;
 import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosTypeBase;
-import com.sequenceiq.it.cloudbreak.newway.dto.AbstractCloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.dto.AbstractCloudbreakTestDto;
 
 public abstract class AbstractKerberosDescriptorTestDto<R extends KerberosTypeBase, E extends AbstractKerberosDescriptorTestDto>
         extends AbstractCloudbreakTestDto<R, Response, E> {

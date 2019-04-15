@@ -16,8 +16,6 @@ import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 import org.springframework.http.HttpMethod;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -79,24 +77,13 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     @Inject
     private DatabaseTestClient databaseTestClient;
 
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        MockedTestContext testContext = (MockedTestContext) data[0];
-        minimalSetupForClusterCreation(testContext);
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void tearDown(Object[] data) {
-        ((MockedTestContext) data[0]).cleanupTestContext();
-    }
-
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(given = "a datalake cluster", when = "hive rds, ranger rds and ldap are attached", then = "the cluster will be available")
     public void testCreateDatalakeCluster(MockedTestContext testContext) {
-        String hiveRdsName = getNameGenerator().getRandomNameForResource();
-        String rangerRdsName = getNameGenerator().getRandomNameForResource();
-        String ldapName = getNameGenerator().getRandomNameForResource();
-        String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
+        String hiveRdsName = resourcePropertyProvider().getName();
+        String rangerRdsName = resourcePropertyProvider().getName();
+        String ldapName = resourcePropertyProvider().getName();
+        String clusterDefinitionName = resourcePropertyProvider().getName();
         DatabaseV4Request hiveRds = rdsRequest(DatabaseType.HIVE, hiveRdsName);
         DatabaseV4Request rangerRds = rdsRequest(DatabaseType.RANGER, rangerRdsName);
         testContext.getModel().getAmbariMock().postSyncLdap();
@@ -138,10 +125,10 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(given = "a datalake cluster", when = "hive rds, ranger rds and ldap are attached", then = "cluster creation is failed by invalid hostgroups")
     public void testCreateDatalakeClusterWithMoreHostgroupThanSpecifiedInClusterDefinition(TestContext testContext) {
-        String hiveRdsName = getNameGenerator().getRandomNameForResource();
-        String rangerRdsName = getNameGenerator().getRandomNameForResource();
-        String ldapName = getNameGenerator().getRandomNameForResource();
-        String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
+        String hiveRdsName = resourcePropertyProvider().getName();
+        String rangerRdsName = resourcePropertyProvider().getName();
+        String ldapName = resourcePropertyProvider().getName();
+        String clusterDefinitionName = resourcePropertyProvider().getName();
         testContext
                 .given(HIVE, DatabaseTestDto.class).valid().withType(DatabaseType.HIVE.name()).withName(hiveRdsName)
                 .when(databaseTestClient.createV4())
@@ -170,9 +157,9 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(given = "a datalake cluster", when = "hive rds, ranger rds are attached", then = "cluster creation is failed by missing ldap")
     public void testCreateDatalakeClusterWithoutLdap(TestContext testContext) {
-        String hiveRdsName = getNameGenerator().getRandomNameForResource();
-        String rangerRdsName = getNameGenerator().getRandomNameForResource();
-        String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
+        String hiveRdsName = resourcePropertyProvider().getName();
+        String rangerRdsName = resourcePropertyProvider().getName();
+        String clusterDefinitionName = resourcePropertyProvider().getName();
         testContext
                 .given(HIVE, DatabaseTestDto.class).valid().withType(DatabaseType.HIVE.name()).withName(hiveRdsName)
                 .when(databaseTestClient.createV4())
@@ -198,9 +185,9 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(given = "a datalake cluster", when = "hive rds and ldap are attached", then = "cluster creation is failed by missing ranger rds")
     public void testCreateDatalakeClusterWithOnlyOneRdsWhichIsHive(TestContext testContext) {
-        String hiveRdsName = getNameGenerator().getRandomNameForResource();
-        String ldapName = getNameGenerator().getRandomNameForResource();
-        String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
+        String hiveRdsName = resourcePropertyProvider().getName();
+        String ldapName = resourcePropertyProvider().getName();
+        String clusterDefinitionName = resourcePropertyProvider().getName();
         testContext
                 .given(HIVE, DatabaseTestDto.class).valid().withType(DatabaseType.HIVE.name()).withName(hiveRdsName)
                 .when(databaseTestClient.createV4())
@@ -227,9 +214,9 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(given = "a datalake cluster", when = "ranger rds and ldap are attached", then = "cluster creation is failed by missing hive rds")
     public void testCreateDatalakeClusterWithOnlyOneRdsWhichIsRanger(TestContext testContext) {
-        String rangerRdsName = getNameGenerator().getRandomNameForResource();
-        String ldapName = getNameGenerator().getRandomNameForResource();
-        String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
+        String rangerRdsName = resourcePropertyProvider().getName();
+        String ldapName = resourcePropertyProvider().getName();
+        String clusterDefinitionName = resourcePropertyProvider().getName();
         testContext
                 .given(RANGER, DatabaseTestDto.class).valid().withType(DatabaseType.RANGER.name()).withName(rangerRdsName)
                 .when(databaseTestClient.createV4())
@@ -256,8 +243,8 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(given = "a datalake cluster", when = "ldap are attached", then = "cluster creation is failed by missing hive and ranger rds")
     public void testCreateDatalakeClusterWithoutRds(TestContext testContext) {
-        String ldapName = getNameGenerator().getRandomNameForResource();
-        String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
+        String ldapName = resourcePropertyProvider().getName();
+        String clusterDefinitionName = resourcePropertyProvider().getName();
         testContext
                 .given(ClusterDefinitionTestDto.class).withName(clusterDefinitionName)
                 .withTag(of(SHARED_SERVICE_TAG), of(true)).withClusterDefinition(VALID_DL_BP)
@@ -284,7 +271,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     @Description(given = "a datalake cluster", when = "without ldap, ranger and hive rds",
             then = "cluster creation is failed by missing hive and ranger rds and ldap")
     public void testCreateDatalakeClusterWithoutRdsAndLdap(TestContext testContext) {
-        String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
+        String clusterDefinitionName = resourcePropertyProvider().getName();
         testContext
                 .given(ClusterDefinitionTestDto.class).withName(clusterDefinitionName)
                 .withTag(of(SHARED_SERVICE_TAG), of(true)).withClusterDefinition(VALID_DL_BP)

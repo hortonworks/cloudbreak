@@ -35,7 +35,7 @@ public class ClusterDefinitionTestDto extends AbstractCloudbreakTestDto<ClusterD
     }
 
     public ClusterDefinitionTestDto valid() {
-        return withName(getNameCreator().getRandomNameForResource())
+        return withName(resourceProperyProvider().getName())
                 .withClusterDefinition("someClusterDefinition");
     }
 

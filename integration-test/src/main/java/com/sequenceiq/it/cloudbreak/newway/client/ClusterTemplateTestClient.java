@@ -10,6 +10,7 @@ import com.sequenceiq.it.cloudbreak.newway.action.v4.clustertemplate.ClusterTemp
 import com.sequenceiq.it.cloudbreak.newway.action.v4.clustertemplate.DeleteClusterFromClusterTemplateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.clustertemplate.LaunchClusterFromClusterTemplateAction;
 import com.sequenceiq.it.cloudbreak.newway.dto.clustertemplate.ClusterTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTemplateTestDto;
 
 @Service
 public class ClusterTemplateTestClient {
@@ -34,7 +35,15 @@ public class ClusterTemplateTestClient {
         return new DeleteClusterFromClusterTemplateAction(stackTemplateKey);
     }
 
+    public Action<ClusterTemplateTestDto> deleteCluster(Class<StackTemplateTestDto> stackTemplateKey) {
+        return new DeleteClusterFromClusterTemplateAction(stackTemplateKey);
+    }
+
     public Action<ClusterTemplateTestDto> launchCluster(String stackTemplateKey) {
+        return new LaunchClusterFromClusterTemplateAction(stackTemplateKey);
+    }
+
+    public Action<ClusterTemplateTestDto> launchCluster(Class<StackTemplateTestDto> stackTemplateKey) {
         return new LaunchClusterFromClusterTemplateAction(stackTemplateKey);
     }
 

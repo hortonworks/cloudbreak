@@ -9,8 +9,6 @@ import java.util.UnknownFormatConversionException;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
@@ -27,23 +25,13 @@ public class LdapConfigTest extends AbstractIntegrationTest {
     @Inject
     private LdapTestClient ldapTestClient;
 
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        minimalSetupForClusterCreation((TestContext) data[0]);
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void tearDown(Object[] data) {
-        ((TestContext) data[0]).cleanupTestContext();
-    }
-
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "a valid ldap request",
             when = "calling create ldap",
             then = "the ldap should be created")
     public void testCreateValidLdap(TestContext testContext) {
-        String name = getNameGenerator().getRandomNameForResource();
+        String name = resourcePropertyProvider().getName();
         testContext
                 .given(LdapTestDto.class)
                 .valid()
@@ -63,7 +51,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
             when = "calling create ldap",
             then = "the ldap should be created")
     public void testCreateValidAd(TestContext testContext) {
-        String name = getNameGenerator().getRandomNameForResource();
+        String name = resourcePropertyProvider().getName();
         testContext
                 .given(LdapTestDto.class)
                 .valid()
@@ -84,7 +72,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
             when = "calling create ldap",
             then = "getting BadRequestException because ldap needs a valid name")
     public void testCreateLdapWithMissingName(TestContext testContext) {
-        String key = getNameGenerator().getRandomNameForResource();
+        String key = resourcePropertyProvider().getName();
         testContext
                 .given(LdapTestDto.class)
                 .valid()
@@ -137,7 +125,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
             when = "calling create ldap",
             then = "getting BadRequestException because ldap needs a valid description")
     public void testCreateLdapWithLongDesc(TestContext testContext) {
-        String name = getNameGenerator().getRandomNameForResource();
+        String name = resourcePropertyProvider().getName();
         String longDesc = getLongNameGenerator().stringGenerator(1001);
         testContext
                 .given(LdapTestDto.class)
@@ -157,7 +145,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
             when = "calling create ldap and delete and create again with the same name",
             then = "ldap should be created")
     public void testCreateDeleteCreateAgain(TestContext testContext) {
-        String name = getNameGenerator().getRandomNameForResource();
+        String name = resourcePropertyProvider().getName();
         testContext
                 .given(name, LdapTestDto.class)
                 .valid()
@@ -179,7 +167,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
             when = "calling create ldap and create again with the same name",
             then = "getting BadRequestException because only one ldap can exist with same name in a workspace at the same time")
     public void testCreateLdapWithSameName(TestContext testContext) {
-        String name = getNameGenerator().getRandomNameForResource();
+        String name = resourcePropertyProvider().getName();
         testContext
                 .given(name, LdapTestDto.class)
                 .valid()

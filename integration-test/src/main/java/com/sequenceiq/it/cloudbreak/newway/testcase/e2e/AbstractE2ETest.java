@@ -1,15 +1,15 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.e2e;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
-import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
+import static org.hamcrest.Matchers.equalToIgnoringCase;
+import static org.junit.Assert.assertThat;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
-import static org.hamcrest.Matchers.equalToIgnoringCase;
-import static org.junit.Assert.assertThat;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
+import com.sequenceiq.it.cloudbreak.newway.TestParameter;
+import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 public abstract class AbstractE2ETest extends AbstractIntegrationTest {
 
@@ -21,7 +21,7 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
     }
 
     @Override
-    protected void minimalSetupForClusterCreation(TestContext testContext) {
+    protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultEnvironment(testContext);

@@ -6,6 +6,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.stream.Collectors;
+
 import javax.ws.rs.WebApplicationException;
 
 import com.sequenceiq.it.cloudbreak.exception.ProxyMethodInvocationException;

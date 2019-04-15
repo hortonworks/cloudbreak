@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import javax.inject.Inject;
 
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
@@ -31,11 +30,6 @@ public class ClouderaManagerShowClusterDefinitionTest extends AbstractClouderaMa
     @Inject
     private StackTestClient stackTestClient;
 
-    @BeforeMethod
-    public void beforeMethod(Object[] data) throws IOException {
-        super.beforeMethod(data);
-    }
-
     @Override
     protected ClusterDefinitionTestClient clusterDefinitionTestClient() {
         return clusterDefinitionTestClient;
@@ -47,10 +41,10 @@ public class ClouderaManagerShowClusterDefinitionTest extends AbstractClouderaMa
             when = "the generated cluster definition is requested",
             then = "the valid future cluster definition is returned")
     public void testGetClusterDefinitionWhenClusterIsNotAliveThenShouldReturnWithClusterDefinition(MockedTestContext testContext) {
-        String clusterName = getNameGenerator().getRandomNameForResource();
+        String clusterName = resourcePropertyProvider().getName();
         String clusterDefinitionName = testContext.get(ClusterDefinitionTestDto.class).getRequest().getName();
-        String cmcluster = getNameGenerator().getRandomNameForResource();
-        String cm = getNameGenerator().getRandomNameForResource();
+        String cmcluster = resourcePropertyProvider().getName();
+        String cm = resourcePropertyProvider().getName();
 
         testContext
                 .given(cm, AmbariTestDto.class)
@@ -73,10 +67,10 @@ public class ClouderaManagerShowClusterDefinitionTest extends AbstractClouderaMa
             when = "the generated cluster definition is requested",
             then = "the valid generated cluster definition is returned")
     public void testGetClusterDefinitionWhenClusterIsAliveThenShouldReturnWithClusterDefinition(MockedTestContext testContext) {
-        String clusterName = getNameGenerator().getRandomNameForResource();
+        String clusterName = resourcePropertyProvider().getName();
         String clusterDefinitionName = testContext.get(ClusterDefinitionTestDto.class).getRequest().getName();
-        String cmcluster = getNameGenerator().getRandomNameForResource();
-        String cm = getNameGenerator().getRandomNameForResource();
+        String cmcluster = resourcePropertyProvider().getName();
+        String cm = resourcePropertyProvider().getName();
         testContext
                 .given(cm, ClouderaManagerTestDto.class)
                 .given(cmcluster, ClusterTestDto.class)

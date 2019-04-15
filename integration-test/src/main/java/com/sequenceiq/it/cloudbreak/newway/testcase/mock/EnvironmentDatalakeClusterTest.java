@@ -12,8 +12,6 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
@@ -23,7 +21,6 @@ import com.sequenceiq.it.cloudbreak.newway.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
-import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.AmbariTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
@@ -63,9 +60,8 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
     @Inject
     private CredentialTestClient credentialTestClient;
 
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        MockedTestContext testContext = (MockedTestContext) data[0];
+    @Override
+    protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
@@ -78,8 +74,8 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
             when = "create cluster and if available then delete",
             then = "the cluster should work")
     public void testCreateDalalakeDelete(TestContext testContext) {
-        String hivedb = getNameGenerator().getRandomNameForResource();
-        String rangerdb = getNameGenerator().getRandomNameForResource();
+        String hivedb = resourcePropertyProvider().getName();
+        String rangerdb = resourcePropertyProvider().getName();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentTestDto.class)
                 .withRegions(VALID_REGION)
@@ -120,9 +116,9 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
             when = "create cluster and then delete resources",
             then = "the resource deletion does not work because the resources attached to the cluster")
     public void testCreateDalalakeDeleteFails(TestContext testContext) {
-        String forbiddenKey = getNameGenerator().getRandomNameForResource();
-        String hivedb = getNameGenerator().getRandomNameForResource();
-        String rangerdb = getNameGenerator().getRandomNameForResource();
+        String forbiddenKey = resourcePropertyProvider().getName();
+        String hivedb = resourcePropertyProvider().getName();
+        String rangerdb = resourcePropertyProvider().getName();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentTestDto.class)
                 .withRegions(VALID_REGION)
@@ -153,8 +149,8 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
             when = "create cluster called twice",
             then = "the cluster creation should work in both case")
     public void testSameEnvironmentWithDifferentDatalakes(TestContext testContext) {
-        String hivedb = getNameGenerator().getRandomNameForResource();
-        String rangerdb = getNameGenerator().getRandomNameForResource();
+        String hivedb = resourcePropertyProvider().getName();
+        String rangerdb = resourcePropertyProvider().getName();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentTestDto.class)
                 .withRdsConfigs(rdsList)
@@ -171,9 +167,9 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
             when = "call create cluster and change credential",
             then = "the credential change will not work")
     public void testDatalakeChangeCredentialFails(TestContext testContext) {
-        String forbiddenKey = getNameGenerator().getRandomNameForResource();
-        String hivedb = getNameGenerator().getRandomNameForResource();
-        String rangerdb = getNameGenerator().getRandomNameForResource();
+        String forbiddenKey = resourcePropertyProvider().getName();
+        String hivedb = resourcePropertyProvider().getName();
+        String rangerdb = resourcePropertyProvider().getName();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentTestDto.class)
                 .withRdsConfigs(rdsList)
@@ -198,9 +194,9 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
             when = "call create cluster and detach resources",
             then = "will not work because the datalake still up and running")
     public void testDatalakeDetachFails(TestContext testContext) {
-        String forbiddenKey = getNameGenerator().getRandomNameForResource();
-        String hivedb = getNameGenerator().getRandomNameForResource();
-        String rangerdb = getNameGenerator().getRandomNameForResource();
+        String forbiddenKey = resourcePropertyProvider().getName();
+        String hivedb = resourcePropertyProvider().getName();
+        String rangerdb = resourcePropertyProvider().getName();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentTestDto.class)
                 .withRdsConfigs(rdsList)
@@ -222,9 +218,9 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
             when = "call create cluster with datalake and wiht workload config",
             then = "will work fine")
     public void testSameEnvironmentInDatalakeAndWorkload(TestContext testContext) {
-        String dlName = getNameGenerator().getRandomNameForResource();
-        String hivedb = getNameGenerator().getRandomNameForResource();
-        String rangerdb = getNameGenerator().getRandomNameForResource();
+        String dlName = resourcePropertyProvider().getName();
+        String hivedb = resourcePropertyProvider().getName();
+        String rangerdb = resourcePropertyProvider().getName();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentTestDto.class)
                 .withRdsConfigs(rdsList)
@@ -263,12 +259,6 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @AfterMethod(alwaysRun = true)
-    public void tearDown(Object[] data) {
-        MockedTestContext testContext = (MockedTestContext) data[0];
-        testContext.cleanupTestContext();
-    }
-
     private void createDatalake(TestContext testContext, Set<String> rdsList, String bpName) {
         testContext.given("placement", PlacementSettingsTestDto.class)
                 .given(ClusterTestDto.class).valid()
@@ -277,18 +267,12 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withAmbari(testContext.given(AmbariTestDto.class))
                 .withLdapConfigName(testContext.get(LdapTestDto.class).getName())
                 .given(StackTestDto.class)
-                .withName(getNameGenerator().getRandomNameForResource())
+                .withName(resourcePropertyProvider().getName())
                 .withPlacement("placement")
                 .withEnvironment(EnvironmentTestDto.class)
                 .withInstanceGroupsEntity(setInstanceGroup(testContext))
                 .when(stackTestClient.createV4())
                 .validate();
-    }
-
-    private Set<String> initRdsList(TestContext testContext) {
-        String hiveName = getNameGenerator().getRandomNameForResource();
-        String rangerName = getNameGenerator().getRandomNameForResource();
-        return createDatalakeResources(testContext, hiveName, rangerName);
     }
 
     private Set<String> createDatalakeResources(TestContext testContext, String hiveDb, String rangerDb) {
@@ -308,10 +292,6 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
     private Set<String> getLdapAsList(TestContext testContext) {
         return new HashSet<>(Collections.singletonList(testContext.get(LdapTestDto.class).getName()));
-    }
-
-    private Set<String> getRdsAsList(TestContext testContext) {
-        return new HashSet<>(Collections.singletonList(testContext.get(DatabaseTestDto.class).getName()));
     }
 
     private Collection<InstanceGroupTestDto> setInstanceGroup(TestContext testContext) {

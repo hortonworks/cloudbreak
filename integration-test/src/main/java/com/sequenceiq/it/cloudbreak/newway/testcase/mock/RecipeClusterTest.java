@@ -15,8 +15,6 @@ import javax.ws.rs.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -59,16 +57,6 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
     @Inject
     private StackTestClient stackTestClient;
 
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        minimalSetupForClusterCreation((TestContext) data[0]);
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void tear(Object[] data) {
-        ((TestContext) data[0]).cleanupTestContext();
-    }
-
     @Test(dataProvider = "dataProviderForNonPreTerminationRecipeTypes")
     public void testRecipeNotPreTerminationHasGotHighStateOnCluster(
             TestContext testContext,
@@ -76,9 +64,9 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
             int executionTime,
             @Description TestCaseDescription testCaseDescription) {
         LOGGER.info("testing recipe execution for type: {}", type.name());
-        String recipeName = getNameGenerator().getRandomNameForResource();
-        String stackName = getNameGenerator().getRandomNameForResource();
-        String instanceGroupName = getNameGenerator().getRandomNameForResource();
+        String recipeName = resourcePropertyProvider().getName();
+        String stackName = resourcePropertyProvider().getName();
+        String instanceGroupName = resourcePropertyProvider().getName();
 
         testContext
                 .given(recipeName, RecipeTestDto.class)
@@ -105,9 +93,9 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
             then = "badrequest exception is received")
     public void testDeletedRecipeCannotBeAssignedToCluster(TestContext testContext) {
         LOGGER.info("testing recipe execution for type: {}", PRE_AMBARI_START.name());
-        String recipeName = getNameGenerator().getRandomNameForResource();
-        String stackName = getNameGenerator().getRandomNameForResource();
-        String instanceGroupName = getNameGenerator().getRandomNameForResource();
+        String recipeName = resourcePropertyProvider().getName();
+        String stackName = resourcePropertyProvider().getName();
+        String instanceGroupName = resourcePropertyProvider().getName();
 
         testContext
                 .given(recipeName, RecipeTestDto.class)
@@ -134,7 +122,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
             when = "calling termination",
             then = "the pretermination highstate has to called on pretermination recipes")
     public void testRecipePreTerminationRecipeHasGotHighStateOnCluster(TestContext testContext) {
-        String recipeName = getNameGenerator().getRandomNameForResource();
+        String recipeName = resourcePropertyProvider().getName();
         testContext
                 .given(RecipeTestDto.class)
                 .withName(recipeName)
@@ -164,7 +152,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
     public void testWhenThereIsNoRecipeButLdapHasAttachedThenThePostAmbariRecipeShouldRunWhichResultThreeHighStateCall(MockedTestContext testContext) {
         testContext.getModel().getAmbariMock().postSyncLdap();
         testContext.getModel().getAmbariMock().putConfigureLdap();
-        String ldapName = getNameGenerator().getRandomNameForResource();
+        String ldapName = resourcePropertyProvider().getName();
         testContext
                 .given(LdapTestDto.class)
                 .withName(ldapName)
@@ -184,7 +172,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
             when = "upscaling cluster",
             then = "the post recipe should run on the new nodes as well")
     public void testWhenClusterGetUpScaledThenPostClusterInstallRecipeShouldBeExecuted(TestContext testContext) {
-        String recipeName = getNameGenerator().getRandomNameForResource();
+        String recipeName = resourcePropertyProvider().getName();
         testContext
                 .given(RecipeTestDto.class)
                 .withName(recipeName)
@@ -212,7 +200,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
             then = "the post recipe should not run on the new nodes because those recipe not configured on the upscaled hostgroup")
     public void testWhenRecipeProvidedToHostGroupAndAnotherHostGroupGetUpScaledThenThereIsNoFurtherRecipeExecutionOnTheNewNodeBesideTheDefaultOnes(
             TestContext testContext) {
-        String recipeName = getNameGenerator().getRandomNameForResource();
+        String recipeName = resourcePropertyProvider().getName();
         testContext
                 .given(RecipeTestDto.class)
                 .withName(recipeName)
@@ -239,8 +227,8 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
             when = "delete attached recipe",
             then = "getting BadRequestException")
     public void testTryToDeleteAttachedRecipe(TestContext testContext) {
-        String recipeName = getNameGenerator().getRandomNameForResource();
-        String key = getNameGenerator().getRandomNameForResource();
+        String recipeName = resourcePropertyProvider().getName();
+        String key = resourcePropertyProvider().getName();
 
         testContext
                 .given(RecipeTestDto.class).withName(recipeName).withContent(RECIPE_CONTENT).withRecipeType(POST_AMBARI_START)

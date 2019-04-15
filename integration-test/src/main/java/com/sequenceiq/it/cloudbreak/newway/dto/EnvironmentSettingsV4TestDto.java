@@ -5,9 +5,9 @@ import java.util.Set;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
-import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
 
 @Prototype
 public class EnvironmentSettingsV4TestDto extends AbstractCloudbreakTestDto<EnvironmentSettingsV4Request, DetailedEnvironmentV4Response,
@@ -42,7 +42,7 @@ public class EnvironmentSettingsV4TestDto extends AbstractCloudbreakTestDto<Envi
         if (credentialTestDto == null) {
             throw new IllegalArgumentException("Credential is mandatory for EnvironmentSettings");
         }
-        return withName(getNameCreator().getRandomNameForResource())
+        return withName(resourceProperyProvider().getName())
                 .withCredentialName(credentialTestDto.getName());
     }
 

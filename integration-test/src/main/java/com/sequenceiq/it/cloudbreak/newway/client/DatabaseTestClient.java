@@ -3,9 +3,9 @@ package com.sequenceiq.it.cloudbreak.newway.client;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
-import com.sequenceiq.it.cloudbreak.newway.action.v4.database.DatabaseDeleteAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.database.DatabaseCreateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.database.DatabaseCreateIfNotExistsAction;
+import com.sequenceiq.it.cloudbreak.newway.action.v4.database.DatabaseDeleteAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.database.DatabaseListAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.database.DatabaseTestConnectionAction;
 import com.sequenceiq.it.cloudbreak.newway.dto.database.DatabaseTestDto;

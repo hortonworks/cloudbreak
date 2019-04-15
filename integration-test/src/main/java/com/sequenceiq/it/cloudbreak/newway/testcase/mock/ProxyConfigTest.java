@@ -9,13 +9,10 @@ import java.util.UnknownFormatConversionException;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.client.ProxyTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
-import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
@@ -43,23 +40,13 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
     @Inject
     private ProxyTestClient proxyTestClient;
 
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        minimalSetupForClusterCreation((MockedTestContext) data[0]);
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void tearDown(Object[] data) {
-        ((MockedTestContext) data[0]).cleanupTestContext();
-    }
-
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "a valid http proxy request",
             when = "calling create proxy",
             then = "getting back a list which contains the proxy object")
     public void testCreateValidProxy(TestContext testContext) {
-        String name = getNameGenerator().getRandomNameForResource();
+        String name = resourcePropertyProvider().getName();
         testContext
                 .given(ProxyTestDto.class)
                 .withName(name)
@@ -84,7 +71,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             when = "calling create proxy",
             then = "getting back a list which contains the proxy object")
     public void testCreateValidHttpsProxy(TestContext testContext) {
-        String name = getNameGenerator().getRandomNameForResource();
+        String name = resourcePropertyProvider().getName();
         testContext
                 .given(ProxyTestDto.class)
                 .withName(name)
@@ -132,7 +119,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             when = "calling create proxy",
             then = "getting back a BadRequestException")
     public void testCreateProxyWithShortName(TestContext testContext) {
-        String name = getNameGenerator().getRandomNameForResource();
+        String name = resourcePropertyProvider().getName();
         testContext
                 .given(ProxyTestDto.class)
                 .withName(SHORT_PROXY_NAME)
@@ -199,7 +186,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             when = "calling create proxy",
             then = "getting back a BadRequestException")
     public void testCreateProxyLongDesc(TestContext testContext) {
-        String name = getNameGenerator().getRandomNameForResource();
+        String name = resourcePropertyProvider().getName();
         String longDescription = getLongNameGenerator().stringGenerator(1001);
         testContext
                 .given(ProxyTestDto.class)
@@ -223,7 +210,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             when = "calling create proxy",
             then = "getting back a BadRequestException")
     public void testCreateProxyWithoutHost(TestContext testContext) {
-        String name = getNameGenerator().getRandomNameForResource();
+        String name = resourcePropertyProvider().getName();
         String key = "nohost";
         testContext
                 .given(ProxyTestDto.class)
@@ -247,7 +234,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             when = "calling create proxy",
             then = "getting back a BadRequestException")
     public void testCreateProxyWithoutPort(TestContext testContext) {
-        String name = getNameGenerator().getRandomNameForResource();
+        String name = resourcePropertyProvider().getName();
         String key = "noport";
         testContext
                 .given(ProxyTestDto.class)
@@ -271,7 +258,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             when = "calling create proxy then delete that and create again",
             then = "getting back list with proxy which contains the proxy object")
     public void testCreateDeleteCreateAgain(TestContext testContext) {
-        String name = getNameGenerator().getRandomNameForResource();
+        String name = resourcePropertyProvider().getName();
         testContext
                 .given(name, ProxyTestDto.class)
                 .withName(name)
@@ -299,7 +286,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             then = "getting a BadRequestException")
     public void testCreateProxyWithSameName(TestContext testContext) {
 
-        String name = getNameGenerator().getRandomNameForResource();
+        String name = resourcePropertyProvider().getName();
         testContext
                 .given(name, ProxyTestDto.class)
                 .withName(name)

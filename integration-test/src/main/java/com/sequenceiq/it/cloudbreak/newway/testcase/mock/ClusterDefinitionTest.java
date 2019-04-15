@@ -13,8 +13,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.ClusterDefinitionV4ViewResponse;
@@ -38,19 +36,8 @@ public class ClusterDefinitionTest extends AbstractIntegrationTest {
     private ClusterDefinitionTestClient clusterDefinitionTestClient;
 
     @Override
-    protected void minimalSetupForClusterCreation(TestContext testContext) {
+    protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
-    }
-
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
-        createDefaultUser(testContext);
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void tearDown(Object[] data) {
-        ((TestContext) data[0]).cleanupTestContext();
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -59,7 +46,7 @@ public class ClusterDefinitionTest extends AbstractIntegrationTest {
             when = "a valid cluster definition create request is sent",
             then = "the cluster definition should be in the response")
     public void testCreateClusterDefinition(TestContext testContext) {
-        String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
+        String clusterDefinitionName = resourcePropertyProvider().getName();
         List<String> keys = Arrays.asList("key_1", "key_2", "key_3");
         List<Object> values = Arrays.asList("value_1", "value_2", "value_3");
         testContext.given(ClusterDefinitionTestDto.class)
@@ -84,7 +71,7 @@ public class ClusterDefinitionTest extends AbstractIntegrationTest {
             when = "a cluster definition create request with invalid name is sent",
             then = "a BadRequestException should be returned")
     public void testCreateClusterDefinitionWithInvalidCharacterName(TestContext testContext) {
-        String clusterDefinitionName = getNameGenerator().getInvalidRandomNameForResource();
+        String clusterDefinitionName = resourcePropertyProvider().getInvalidName();
         testContext.given(ClusterDefinitionTestDto.class)
                 .withName(clusterDefinitionName)
                 .withClusterDefinition(VALID_CD)
@@ -99,7 +86,7 @@ public class ClusterDefinitionTest extends AbstractIntegrationTest {
             when = "a cluster definition create request is sent with an invalid JSON",
             then = "a BadRequestException should be returned with 'Failed to parse JSON' message")
     public void testCreateClusterDefinitionWithInvalidJson(TestContext testContext) {
-        String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
+        String clusterDefinitionName = resourcePropertyProvider().getName();
         testContext.given(ClusterDefinitionTestDto.class)
                 .withName(clusterDefinitionName)
                 .withClusterDefinition("apple-tree")
@@ -126,7 +113,7 @@ public class ClusterDefinitionTest extends AbstractIntegrationTest {
             when = "the get cluster definition endpoint is called",
             then = "the cluster definition should be returned")
     public void testGetSpecificClusterDefinition(TestContext testContext) {
-        String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
+        String clusterDefinitionName = resourcePropertyProvider().getName();
         testContext.given(ClusterDefinitionTestDto.class)
                 .withName(clusterDefinitionName)
                 .withClusterDefinition(VALID_CD)
@@ -145,7 +132,7 @@ public class ClusterDefinitionTest extends AbstractIntegrationTest {
             when = "delete cluster definition is called for the specified cluster definition",
             then = "the cluster definition list response does not contain it")
     public void testDeleteSpecificClusterDefinition(TestContext testContext) {
-        String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
+        String clusterDefinitionName = resourcePropertyProvider().getName();
         testContext.given(ClusterDefinitionTestDto.class)
                 .withName(clusterDefinitionName)
                 .withClusterDefinition(VALID_CD)
@@ -175,7 +162,7 @@ public class ClusterDefinitionTest extends AbstractIntegrationTest {
             when = "the cluster definition request endpoint is called",
             then = "the valid request for thet cluster definition is returned")
     public void testRequestSpecificClusterDefinitionRequest(TestContext testContext) {
-        String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
+        String clusterDefinitionName = resourcePropertyProvider().getName();
         testContext
                 .given(ClusterDefinitionTestDto.class)
                 .withName(clusterDefinitionName)

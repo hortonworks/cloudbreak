@@ -75,7 +75,7 @@ public class RepairTest extends AbstractIntegrationTest {
     }
 
     @AfterMethod(alwaysRun = true)
-    public void tear(Object[] data) {
+    public void tearDown(Object[] data) {
         TestContext testContext = (TestContext) data[0];
         testContext.cleanupTestContext();
     }
@@ -86,9 +86,9 @@ public class RepairTest extends AbstractIntegrationTest {
             when = "repair the master node on the cluster",
             then = "after the process the master has to be available")
     public void testRepairMasterNodeNoKerberos(MockedTestContext testContext) {
-        String clusterName = getNameGenerator().getRandomNameForResource();
-        String ambariRdsName = getNameGenerator().getRandomNameForResource();
-        String hostnameKey = getNameGenerator().getRandomNameForResource();
+        String clusterName = resourcePropertyProvider().getName();
+        String ambariRdsName = resourcePropertyProvider().getName();
+        String hostnameKey = resourcePropertyProvider().getName();
         createEnvWithResources(testContext, ambariRdsName);
         addAmbariMocks(testContext, clusterName);
         testContext
@@ -138,10 +138,10 @@ public class RepairTest extends AbstractIntegrationTest {
             when = "repair the master node on the cluster",
             then = "after the process the master has to be available")
     public void testRepairMasterNodeWithKerberos(MockedTestContext testContext) {
-        String ambariRdsName = getNameGenerator().getRandomNameForResource();
+        String ambariRdsName = resourcePropertyProvider().getName();
         createEnvWithResources(testContext, ambariRdsName);
         KerberosV4Request kerberosRequest = getKerberosRequest();
-        String clusterName = getNameGenerator().getRandomNameForResource();
+        String clusterName = resourcePropertyProvider().getName();
         addAmbariMocks(testContext, clusterName);
         testContext
                 .given(KerberosTestDto.class).withRequest(kerberosRequest).withName(kerberosRequest.getName())

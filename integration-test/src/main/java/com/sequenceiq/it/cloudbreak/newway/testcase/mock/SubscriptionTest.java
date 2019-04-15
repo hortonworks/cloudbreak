@@ -35,7 +35,7 @@ public class SubscriptionTest extends AbstractIntegrationTest {
     @Test(dataProvider = DATA_PROVIDER_FOR_VALID_SUBSCRIPTION_TEST, enabled = false)
     public void testGetSubscription(MockedTestContext testContext, String endpointUrl,
             @Description TestCaseDescription testCaseDescription) {
-        String subscriptionKey = getNameGenerator().getRandomNameForResource();
+        String subscriptionKey = resourcePropertyProvider().getName();
         testContext
                 .given(SubscriptionTestDto.class)
                 .withEndpointUrl(endpointUrl)
@@ -50,7 +50,7 @@ public class SubscriptionTest extends AbstractIntegrationTest {
             MockedTestContext testContext,
             String endpointUrl,
             @Description TestCaseDescription testCaseDescription) {
-        String subscriptionKey = getNameGenerator().getRandomNameForResource();
+        String subscriptionKey = resourcePropertyProvider().getName();
         testContext
                 .given(SubscriptionTestDto.class)
                 .withEndpointUrl(endpointUrl)

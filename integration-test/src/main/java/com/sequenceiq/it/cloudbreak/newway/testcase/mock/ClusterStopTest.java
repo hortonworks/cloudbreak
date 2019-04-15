@@ -11,8 +11,6 @@ import static javax.ws.rs.core.Response.Status.OK;
 
 import javax.inject.Inject;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
@@ -33,17 +31,6 @@ public class ClusterStopTest extends AbstractIntegrationTest {
     @Inject
     private StackTestClient stackTestClient;
 
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        MockedTestContext testContext = (MockedTestContext) data[0];
-        minimalSetupForClusterCreation(testContext);
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void tear(Object[] data) {
-        ((MockedTestContext) data[0]).cleanupTestContext();
-    }
-
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "a running cluster",
@@ -51,7 +38,7 @@ public class ClusterStopTest extends AbstractIntegrationTest {
             then = "the cluster shoud stop"
     )
     public void testClusterStop(MockedTestContext testContext) {
-        String clusterName = getNameGenerator().getRandomNameForResource();
+        String clusterName = resourcePropertyProvider().getName();
         mockAmbari(testContext, clusterName);
         mockSpi(testContext);
         testContext

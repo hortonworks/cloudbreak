@@ -39,7 +39,7 @@ public class EncryptionKeysTest extends AbstractIntegrationTest {
             when = "calling get encryption keys endpoint",
             then = "the MOCK related encryption keys should be returned")
     public void getPlatformEncryptionKeysWithMockCredentialThenReturnWithPlatformRelatedKeys(MockedTestContext testContext) {
-        String credentialName = getNameGenerator().getRandomNameForResource();
+        String credentialName = resourcePropertyProvider().getName();
         testContext
                 .given(CredentialTestDto.class)
                 .withName(credentialName)
@@ -56,7 +56,7 @@ public class EncryptionKeysTest extends AbstractIntegrationTest {
             String credentialName,
             Class<Exception> exception,
             @Description TestCaseDescription testCaseDescription) {
-        String generatedKey = getNameGenerator().getRandomNameForResource();
+        String generatedKey = resourcePropertyProvider().getName();
         testContext
                 .given(PlatformEncryptionKeysTestDto.class)
                 .withCredentialName(credentialName)

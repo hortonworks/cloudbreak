@@ -1,5 +1,14 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.smoke;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_AMBARI_START;
+import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.MASTER;
+
+import java.io.IOException;
+
+import javax.inject.Inject;
+
+import org.testng.annotations.Test;
+
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
 import com.sequenceiq.it.cloudbreak.newway.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
@@ -12,15 +21,6 @@ import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.newway.util.AmbariUtil;
 import com.sequenceiq.it.util.ResourceUtil;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import javax.inject.Inject;
-import java.io.IOException;
-
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_AMBARI_START;
-import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.MASTER;
 
 public class YarnSmokeTest extends AbstractE2ETest {
 
@@ -39,12 +39,6 @@ public class YarnSmokeTest extends AbstractE2ETest {
     @Inject
     private CommonCloudProperties commonCloudProperties;
 
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
-        minimalSetupForClusterCreation(testContext);
-    }
-
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "a valid YARN cluster with POST_AMBARI_STAR recipe",
@@ -52,7 +46,7 @@ public class YarnSmokeTest extends AbstractE2ETest {
             then = "a new Ambari user has to be created"
     )
     public void testWhenCreatedYARNClusterShouldAmbariUserPresentByPostAmbariInstallRecipe(TestContext testContext) throws IOException {
-        String postAmbariStartRecipeName = getNameGenerator().getRandomNameForResource();
+        String postAmbariStartRecipeName = resourcePropertyProvider().getName();
 
         testContext.given(RecipeTestDto.class)
                 .withName(postAmbariStartRecipeName).withContent(generateCreateAmbariUserRecipeContent(CREATE_AMBARI_USER_SCRIPT_FILE))
@@ -66,12 +60,6 @@ public class YarnSmokeTest extends AbstractE2ETest {
                 .await(STACK_AVAILABLE)
                 .then(AmbariUtil::checkAmbariUser)
                 .validate();
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void teardown(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
-        testContext.cleanupTestContext();
     }
 
     private String generateCreateAmbariUserRecipeContent(String filePath) throws IOException {

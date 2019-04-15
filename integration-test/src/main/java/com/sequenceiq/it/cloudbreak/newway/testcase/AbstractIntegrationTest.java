@@ -1,9 +1,37 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.springframework.beans.BeansException;
+import org.springframework.boot.test.context.ConfigFileApplicationContextInitializer;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.ITestContext;
+import org.testng.ITestResult;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.DataProvider;
+
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.exception.TestCaseDescriptionMissingException;
-import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
+import com.sequenceiq.it.cloudbreak.newway.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.newway.actor.Actor;
 import com.sequenceiq.it.cloudbreak.newway.client.ClusterDefinitionTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
@@ -29,32 +57,6 @@ import com.sequenceiq.it.cloudbreak.newway.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-import org.springframework.beans.BeansException;
-import org.springframework.boot.test.context.ConfigFileApplicationContextInitializer;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.ITestContext;
-import org.testng.ITestResult;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.AfterSuite;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.DataProvider;
-
-import javax.inject.Inject;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 @ContextConfiguration(classes = {IntegrationTestConfiguration.class}, initializers = ConfigFileApplicationContextInitializer.class)
 public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContextTests {
@@ -74,7 +76,7 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
     @Inject
-    private RandomNameCreator nameGenerator;
+    private ResourcePropertyProvider resourcePropertyProvider;
 
     @Inject
     private LongStringGeneratorUtil longStringGeneratorUtil;
@@ -110,10 +112,30 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
         MDC.put("testlabel", "init of " + getClass().getSimpleName());
     }
 
+    @BeforeClass
+    public void createSharedObjects() {
+        String testClassName = getClass().getSimpleName();
+        MDC.put("testlabel", testClassName);
+        applicationContext.getBean(PurgeGarbageService.class).purge();
+    }
+
     @BeforeMethod
     public void beforeTest(Method method, Object[] params) {
         MDC.put("testlabel", method.getDeclaringClass().getSimpleName() + '.' + method.getName());
         collectTestCaseDescription(method, params);
+    }
+
+    @BeforeMethod
+    public final void minimalSetupForClusterCreation(Object[] data) {
+        setupTest((TestContext) data[0]);
+    }
+
+    protected void setupTest(TestContext testContext) {
+        createDefaultUser(testContext);
+        createDefaultCredential(testContext);
+        createDefaultEnvironment(testContext);
+        createDefaultImageCatalog(testContext);
+        initializeDefaultClusterDefinitions(testContext);
     }
 
     private TestCaseDescription collectTestCaseDescription(Method method, Object[] params) {
@@ -145,16 +167,14 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
                 .orElseThrow(() -> new TestCaseDescriptionMissingException(method.getName()));
     }
 
-    @BeforeClass
-    public void createSharedObjects() {
-        String testClassName = getClass().getSimpleName();
-        MDC.put("testlabel", testClassName);
-        applicationContext.getBean(PurgeGarbageService.class).purge();
-    }
-
     @AfterMethod
     public void afterMethod(Method method, ITestResult testResult) {
         MDC.put("testlabel", null);
+    }
+
+    @AfterMethod(alwaysRun = true)
+    public void tearDown(Object[] data) {
+        ((TestContext) data[0]).cleanupTestContext();
     }
 
     @AfterClass(alwaysRun = true)
@@ -184,8 +204,8 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
         return new Object[][]{{getBean(SparklessTestContext.class)}};
     }
 
-    public RandomNameCreator getNameGenerator() {
-        return nameGenerator;
+    public ResourcePropertyProvider resourcePropertyProvider() {
+        return resourcePropertyProvider;
     }
 
     public LongStringGeneratorUtil getLongNameGenerator() {
@@ -247,14 +267,6 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
         testContext
                 .init(ClusterDefinitionTestDto.class)
                 .when(clusterDefinitionTestClient.listV4());
-    }
-
-    protected void minimalSetupForClusterCreation(TestContext testContext) {
-        createDefaultUser(testContext);
-        createDefaultCredential(testContext);
-        createDefaultEnvironment(testContext);
-        createDefaultImageCatalog(testContext);
-        initializeDefaultClusterDefinitions(testContext);
     }
 
     /**

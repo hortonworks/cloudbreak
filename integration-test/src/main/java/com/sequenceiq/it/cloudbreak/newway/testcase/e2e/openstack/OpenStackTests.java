@@ -1,5 +1,14 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.e2e.openstack;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.ClusterDefinitionV4ViewResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.it.cloudbreak.newway.client.ClusterDefinitionTestClient;
@@ -15,14 +24,6 @@ import com.sequenceiq.it.cloudbreak.newway.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.clusterdefinition.ClusterDefinitionTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.e2e.AbstractE2ETest;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class OpenStackTests extends AbstractE2ETest {
 
@@ -38,6 +39,10 @@ public class OpenStackTests extends AbstractE2ETest {
 
     @Inject
     private OpenStackProperties openStackProperties;
+
+    @Override
+    protected void setupTest(TestContext testContext) {
+    }
 
     @Test(dataProvider = OPEN_STACK_HDP_TESTS_DATA_PROVIDER)
     public void testOpenStackWithDefaulkHDPClusterDefinitionAndPrewarmedImagesWithoutGateWaySetup(
@@ -106,13 +111,13 @@ public class OpenStackTests extends AbstractE2ETest {
     @DataProvider(name = OPEN_STACK_HDP_TESTS_DATA_PROVIDER)
     public Object[][] openStackHdpTestsDataProvider() {
         SparklessTestContext testContext = getBean(SparklessTestContext.class);
-        minimalSetupForClusterCreation(testContext);
-        ClusterDefinitionTestDto select = testContext
+        super.setupTest(testContext);
+        ClusterDefinitionTestDto clusterDefinition = testContext
                 .given(ClusterDefinitionTestDto.class)
                 .when(clusterDefinitionTestClient.listV4());
-        select.validate();
+        clusterDefinition.validate();
         testContext.cleanupTestContext();
-        List<ClusterDefinitionV4ViewResponse> viewResponses = select.getViewResponses()
+        List<ClusterDefinitionV4ViewResponse> viewResponses = clusterDefinition.getViewResponses()
                 .stream()
                 .filter(e -> e.getStatus().equals(ResourceStatus.DEFAULT))
                 .filter(e -> isHdp(e) && notASharedServiceClusterDefinition(e))
@@ -121,7 +126,7 @@ public class OpenStackTests extends AbstractE2ETest {
         Object[][] data = new Object[viewResponses.size()][5];
         for (int i = 0; i < viewResponses.size(); i++) {
             SparklessTestContext tc = getBean(SparklessTestContext.class);
-            minimalSetupForClusterCreation(tc);
+            super.setupTest(tc);
             data[i][0] = tc;
             data[i][1] = viewResponses.get(i).getName();
             data[i][2] = getHdpGroups();
@@ -140,7 +145,7 @@ public class OpenStackTests extends AbstractE2ETest {
         Object[][] data = new Object[getHdfClusterDefinition().size()][5];
         for (int i = 0; i < getHdfClusterDefinition().size(); i++) {
             SparklessTestContext testContext = getBean(SparklessTestContext.class);
-            minimalSetupForClusterCreation(testContext);
+            super.setupTest(testContext);
             data[i][0] = testContext;
             data[i][1] = getHdfClusterDefinition().get(i);
             data[i][2] = getHdfGroups();
@@ -178,12 +183,6 @@ public class OpenStackTests extends AbstractE2ETest {
 
     private boolean isHdp(ClusterDefinitionV4ViewResponse e) {
         return e.getStackType().equals("HDP") && e.getStackVersion().equals(getHdpVersion()) && isHdpEnabled();
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void teardown(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
-        testContext.cleanupTestContext();
     }
 
     private String getHdpVersion() {

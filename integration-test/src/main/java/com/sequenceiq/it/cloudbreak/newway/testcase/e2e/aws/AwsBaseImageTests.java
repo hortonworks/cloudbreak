@@ -5,8 +5,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -41,14 +39,9 @@ public class AwsBaseImageTests extends AbstractE2ETest {
     @Inject
     private AwsProperties awsProperties;
 
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
-        minimalSetupForClusterCreation(testContext);
-    }
-
     @Test(dataProvider = BASE_IMAGE_DATA_PROVIDER)
-    public void testBaseImagesOnAwsWithClusterDefs(TestContext testContext,
+    public void testBaseImagesOnAwsWithClusterDefs(
+            TestContext testContext,
             String osName,
             String imageId,
             String clusterDefinition,
@@ -69,12 +62,6 @@ public class AwsBaseImageTests extends AbstractE2ETest {
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .validate();
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void teardown(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
-        testContext.cleanupTestContext();
     }
 
     @DataProvider(name = BASE_IMAGE_DATA_PROVIDER)

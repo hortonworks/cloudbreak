@@ -13,8 +13,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.action.v4.stack.StackScalePostAction;
@@ -35,26 +33,13 @@ public class UpscaleTest extends AbstractIntegrationTest {
     @Inject
     private StackTestClient stackTestClient;
 
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        MockedTestContext testContext = (MockedTestContext) data[0];
-        LOGGER.info("All routes added: {}", testContext.getSparkServer().getSparkService().getPaths());
-        minimalSetupForClusterCreation(testContext);
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void tear(Object[] data) {
-        MockedTestContext testContext = (MockedTestContext) data[0];
-        testContext.cleanupTestContext();
-    }
-
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "a stack with stack scale",
             when = "upscale to 15 after it downscale to 6",
             then = "stack is running")
     public void testStackScaling(TestContext testContext) {
-        String stackName = getNameGenerator().getRandomNameForResource();
+        String stackName = resourcePropertyProvider().getName();
 
         testContext
                 .given(stackName, StackTestDto.class)
@@ -73,7 +58,7 @@ public class UpscaleTest extends AbstractIntegrationTest {
             when = "upscale to 15",
             then = "stack is running")
     public void testUpscale(MockedTestContext testContext) {
-        String clusterName = getNameGenerator().getRandomNameForResource();
+        String clusterName = resourcePropertyProvider().getName();
         int originalWorkedCount = 1;
         int desiredWorkedCount = 15;
         int addedNodes = desiredWorkedCount - originalWorkedCount;
@@ -110,7 +95,7 @@ public class UpscaleTest extends AbstractIntegrationTest {
             when = "ambari is failing",
             then = "stack state is failed")
     public void testAmbariFailure(MockedTestContext testContext) {
-        String stackName = getNameGenerator().getRandomNameForResource();
+        String stackName = resourcePropertyProvider().getName();
         mockAmbariClusterDefinitionFail(testContext);
         testContext
                 .given(stackName, StackTestDto.class)

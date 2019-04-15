@@ -1,10 +1,17 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud.v2.mock;
 
+import java.util.Collections;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.mock.MockCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.MockStackV4Parameters;
-import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
+import com.sequenceiq.it.cloudbreak.newway.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
@@ -19,11 +26,6 @@ import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDtoBase;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.Collections;
-import java.util.Set;
 
 @Component
 public class MockCloudProvider extends AbstractCloudProvider {
@@ -59,14 +61,14 @@ public class MockCloudProvider extends AbstractCloudProvider {
     public static final String DEFAULT_CLUSTER_DEFINTION_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
 
     @Inject
-    private RandomNameCreator randomNameCreator;
+    private ResourcePropertyProvider resourcePropertyProvider;
 
     @Override
     public CredentialTestDto credential(CredentialTestDto credentialEntity) {
         MockCredentialV4Parameters credentialParameters = new MockCredentialV4Parameters();
         MockedTestContext mockedTestContext = (MockedTestContext) credentialEntity.getTestContext();
         credentialParameters.setMockEndpoint(mockedTestContext.getSparkServer().getEndpoint());
-        return credentialEntity.withName(randomNameCreator.getRandomNameForResource())
+        return credentialEntity.withName(resourcePropertyProvider.getName())
                 .withDescription(commonCloudProperties().getDefaultCredentialDescription())
                 .withMockParameters(credentialParameters)
                 .withCloudPlatform(MOCK_CAPITAL);

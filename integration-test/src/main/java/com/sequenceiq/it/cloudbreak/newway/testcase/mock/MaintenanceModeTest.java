@@ -4,14 +4,11 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
-import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.StackRepositoryTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
@@ -25,16 +22,6 @@ public class MaintenanceModeTest extends AbstractIntegrationTest {
 
     @Inject
     private StackTestClient stackTestClient;
-
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        MockedTestContext testContext = (MockedTestContext) data[0];
-        createDefaultUser(testContext);
-        createDefaultCredential(testContext);
-        createDefaultEnvironment(testContext);
-        createDefaultImageCatalog(testContext);
-        initializeDefaultClusterDefinitions(testContext);
-    }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
@@ -70,11 +57,5 @@ public class MaintenanceModeTest extends AbstractIntegrationTest {
                 .when(MaintenanceModePostAction.disable())
                 .await(STACK_AVAILABLE)
                 .validate();
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void tear(Object[] data) {
-        MockedTestContext testContext = (MockedTestContext) data[0];
-        testContext.cleanupTestContext();
     }
 }

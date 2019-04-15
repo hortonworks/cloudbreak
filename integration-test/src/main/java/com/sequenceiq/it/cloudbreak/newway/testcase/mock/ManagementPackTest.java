@@ -6,8 +6,6 @@ import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.response.ManagementPackV4Response;
@@ -30,9 +28,9 @@ public class ManagementPackTest extends AbstractIntegrationTest {
     @Inject
     private MpackTestClient mpackTestClient;
 
-    @BeforeMethod
-    public void prepareUser(Object[] objects) {
-        createDefaultUser((TestContext) objects[0]);
+    @Override
+    protected void setupTest(TestContext testContext) {
+        createDefaultUser(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -57,8 +55,8 @@ public class ManagementPackTest extends AbstractIntegrationTest {
             then = "getting BadRequestException")
     public void testMpackCreateWithSameName(TestContext testContext) {
         createDefaultUser(testContext);
-        String name = getNameGenerator().getRandomNameForResource();
-        String generatedKey = getNameGenerator().getRandomNameForResource();
+        String name = resourcePropertyProvider().getName();
+        String generatedKey = resourcePropertyProvider().getName();
 
         testContext
                 .given(MPackTestDto.class)
@@ -93,7 +91,7 @@ public class ManagementPackTest extends AbstractIntegrationTest {
             then = "getting the list of mpack without that specific mpack")
     public void testDeleteWhenNotExist(TestContext testContext) {
         createDefaultUser(testContext);
-        String generatedKey = getNameGenerator().getRandomNameForResource();
+        String generatedKey = resourcePropertyProvider().getName();
 
         testContext
                 .given(MPackTestDto.class)
@@ -113,11 +111,6 @@ public class ManagementPackTest extends AbstractIntegrationTest {
                 .given(MPackTestDto.class)
                 .when(mpackTestClient.listV4())
                 .validate();
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void tear(Object[] data) {
-        ((TestContext) data[0]).cleanupTestContext();
     }
 
     private AssertionV2<MPackTestDto> assertMpackExist() {

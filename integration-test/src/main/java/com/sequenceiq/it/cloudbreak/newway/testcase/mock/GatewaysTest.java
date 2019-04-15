@@ -6,7 +6,6 @@ import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -28,9 +27,9 @@ public class GatewaysTest extends AbstractIntegrationTest {
     @Inject
     private CredentialTestClient credentialTestClient;
 
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        createDefaultUser((TestContext) data[0]);
+    @Override
+    protected void setupTest(TestContext testContext) {
+        createDefaultUser(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -39,20 +38,21 @@ public class GatewaysTest extends AbstractIntegrationTest {
             when = "calling gateways endpoint with that credential for getting cloud gateways",
             then = "getting a list with mock gateways")
     public void testGetPlatformGatewaysByCredentialName(MockedTestContext testContext) {
-        String credentialName = getNameGenerator().getRandomNameForResource();
+        String credentialName = resourcePropertyProvider().getName();
         testContext
                 .given(CredentialTestDto.class)
                 .withName(credentialName)
                 .when(credentialTestClient.createV4())
                 .given(PlatformGatewaysTestDto.class)
                 .withCredentialName(credentialName)
-                .when(connectorTestClient.gateways());
+                .when(connectorTestClient.gateways())
+                .validate();
     }
 
     @Test(dataProvider = "contextWithCredentialNameAndException")
     public void testGetPlatformGatewaysByCredentialNameWhenCredentialIsInvalid(MockedTestContext testContext, String credentialName,
             Class<Exception> exception, @Description TestCaseDescription testCaseDescription) {
-        String exceptionKey = getNameGenerator().getRandomNameForResource();
+        String exceptionKey = resourcePropertyProvider().getName();
         testContext
                 .given(PlatformGatewaysTestDto.class)
                 .withCredentialName(credentialName)

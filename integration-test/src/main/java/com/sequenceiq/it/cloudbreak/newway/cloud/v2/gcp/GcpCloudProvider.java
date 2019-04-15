@@ -1,5 +1,9 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud.v2.gcp;
 
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.gcp.GcpCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.gcp.JsonParameters;
@@ -14,9 +18,6 @@ import com.sequenceiq.it.cloudbreak.newway.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDtoBase;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
 
 @Component
 public class GcpCloudProvider extends AbstractCloudProvider {

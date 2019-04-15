@@ -41,14 +41,15 @@ public class VmTypesTest extends AbstractIntegrationTest {
             when = "retrive platform VMs by the credential name",
             then = "list of platform VMs")
     public void testGetPlatformVmtypesByCredentialName(MockedTestContext testContext) {
-        String credentialName = getNameGenerator().getRandomNameForResource();
+        String credentialName = resourcePropertyProvider().getName();
         testContext
                 .given(CredentialTestDto.class)
                 .withName(credentialName)
                 .when(credentialTestClient.createV4())
                 .given(PlatformVmTypesTestDto.class)
                 .withCredentialName(credentialName)
-                .when(connectorTestClient.vmTypes());
+                .when(connectorTestClient.vmTypes())
+                .validate();
     }
 
     @Test(dataProvider = "contextWithCredentialNameAndException")
@@ -57,7 +58,7 @@ public class VmTypesTest extends AbstractIntegrationTest {
             String credentialName,
             Class<Exception> exception,
             @Description TestCaseDescription description) {
-        String generatedKey = getNameGenerator().getRandomNameForResource();
+        String generatedKey = resourcePropertyProvider().getName();
 
         testContext
                 .given(PlatformRegionTestDto.class)

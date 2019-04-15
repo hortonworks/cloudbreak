@@ -31,7 +31,7 @@ public class CloudStorageMatrixTest extends AbstractIntegrationTest {
             when = "the cloudstorage endpoint is called",
             then = "a matrix with the supported cloud storages is returned")
     public void getCloudStorageMatrixThenReturnSupportedCloudStorages(MockedTestContext testContext) {
-        String generatedKey = getNameGenerator().getRandomNameForResource();
+        String generatedKey = resourcePropertyProvider().getName();
 
         testContext
                 .given(CloudStorageMatrixTestDto.class)

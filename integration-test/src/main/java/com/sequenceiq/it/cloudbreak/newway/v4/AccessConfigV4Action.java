@@ -8,13 +8,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.newway.dto.AccessConfigTestDto;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.Entity;
 import com.sequenceiq.it.cloudbreak.newway.PlatformResourceParameters;
 import com.sequenceiq.it.cloudbreak.newway.Region;
+import com.sequenceiq.it.cloudbreak.newway.dto.AccessConfigTestDto;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
 public class AccessConfigV4Action {

@@ -1,5 +1,9 @@
 package com.sequenceiq.it.cloudbreak.newway.dto.clustertemplate;
 
+import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
+
+import java.util.Collection;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.ClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
@@ -9,10 +13,6 @@ import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.DeletableTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTemplateTestDto;
-
-import java.util.Collection;
-
-import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
 
 @Prototype
 public class ClusterTemplateTestDto extends DeletableTestDto<ClusterTemplateV4Request, ClusterTemplateV4Response,
@@ -27,7 +27,7 @@ public class ClusterTemplateTestDto extends DeletableTestDto<ClusterTemplateV4Re
     }
 
     public ClusterTemplateTestDto valid() {
-        return withName(getNameCreator().getRandomNameForResource())
+        return withName(resourceProperyProvider().getName())
                 .withStackTemplate(getTestContext().init(StackTemplateTestDto.class));
     }
 
@@ -51,6 +51,10 @@ public class ClusterTemplateTestDto extends DeletableTestDto<ClusterTemplateV4Re
         StackTemplateTestDto stackTemplate = getTestContext().get(key);
         getRequest().setStackTemplate(stackTemplate.getRequest());
         return this;
+    }
+
+    public ClusterTemplateTestDto withStackTemplate(Class<StackTemplateTestDto> key) {
+        return withStackTemplate(key.getSimpleName());
     }
 
     public ClusterTemplateTestDto withDescription(String description) {

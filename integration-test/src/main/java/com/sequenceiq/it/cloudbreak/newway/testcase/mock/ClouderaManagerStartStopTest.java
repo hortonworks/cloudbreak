@@ -43,9 +43,9 @@ public class ClouderaManagerStartStopTest extends AbstractClouderaManagerTest {
             MockedTestContext testContext) {
         mockSpi(testContext);
         String name = testContext.get(ClusterDefinitionTestDto.class).getRequest().getName();
-        String cm = getNameGenerator().getRandomNameForResource();
-        String cmcluster = getNameGenerator().getRandomNameForResource();
-        String stack = getNameGenerator().getRandomNameForResource();
+        String cm = resourcePropertyProvider().getName();
+        String cmcluster = resourcePropertyProvider().getName();
+        String stack = resourcePropertyProvider().getName();
 
         // TODO: maybe this is good
         testContext

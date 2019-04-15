@@ -14,8 +14,6 @@ import javax.ws.rs.BadRequestException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.http.HttpMethod;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -32,7 +30,6 @@ import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription;
-import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.AmbariTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.InstanceGroupTestDto;
@@ -62,16 +59,6 @@ public class KerberosTest extends AbstractIntegrationTest {
 
     @Inject
     private StackTestClient stackTestClient;
-
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        minimalSetupForClusterCreation((MockedTestContext) data[0]);
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void tear(Object[] data) {
-        ((TestContext) data[0]).cleanupTestContext();
-    }
 
     @Test(dataProvider = "dataProviderForTest")
     public void testClusterCreationWithValidKerberos(MockedTestContext testContext, String clusterDefinitionName, KerberosTestData testData,
@@ -110,7 +97,7 @@ public class KerberosTest extends AbstractIntegrationTest {
             then = "the cluster should not been kerberized")
     public void testClusterCreationAttemptWithKerberosConfigWithoutName(MockedTestContext testContext) {
         mockAmbariClusterDefinitionPassLdapSync(testContext);
-        String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
+        String clusterDefinitionName = resourcePropertyProvider().getName();
         testContext
                 .given(ClusterDefinitionTestDto.class)
                 .withName(clusterDefinitionName)
@@ -137,7 +124,7 @@ public class KerberosTest extends AbstractIntegrationTest {
             then = "getting BadRequestException because kerberosname should not be empty")
     public void testClusterCreationAttemptWithKerberosConfigWithEmptyName(MockedTestContext testContext) {
         mockAmbariClusterDefinitionPassLdapSync(testContext);
-        String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
+        String clusterDefinitionName = resourcePropertyProvider().getName();
         KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
@@ -170,8 +157,8 @@ public class KerberosTest extends AbstractIntegrationTest {
             then = "getting BadRequestException because descriptor should be a valid JSON")
     public void testKerberosCreationAttemptWhenDescriptorIsAnInvalidJson(MockedTestContext testContext) {
         mockAmbariClusterDefinitionPassLdapSync(testContext);
-        String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
-        String badRequest = getNameGenerator().getRandomNameForResource();
+        String clusterDefinitionName = resourcePropertyProvider().getName();
+        String badRequest = resourcePropertyProvider().getName();
         KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
         String descriptor = "{\"kerberos-env\":{\"properties\":{\"kdc_type\":\"mit-kdc\",\"kdc_hosts\":\"kdc-host-value\",\"admin_server_host\""
                 + ":\"admin-server-host-value\",\"realm\":\"realm-value\"}}";
@@ -197,8 +184,8 @@ public class KerberosTest extends AbstractIntegrationTest {
             then = "getting BadRequestException because descriptor need all the required fields")
     public void testKerberosCreationAttemptWhenDescriptorDoesNotContainsAllTheRequiredFields(MockedTestContext testContext) {
         mockAmbariClusterDefinitionPassLdapSync(testContext);
-        String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
-        String badRequest = getNameGenerator().getRandomNameForResource();
+        String clusterDefinitionName = resourcePropertyProvider().getName();
+        String badRequest = resourcePropertyProvider().getName();
         KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
         request.getAmbariDescriptor().setDescriptor(
                 Base64.encodeBase64String("{\"kerberos-env\":{\"properties\":{\"kdc_type\":\"mit-kdc\",\"kdc_hosts\":\"kdc-host-value\"}}}".getBytes()));
@@ -223,8 +210,8 @@ public class KerberosTest extends AbstractIntegrationTest {
             then = "getting BadRequestException because krb5conf should be a valid JSON")
     public void testKerberosCreationAttemptWhenKrb5ConfIsNotAValidJson(MockedTestContext testContext) {
         mockAmbariClusterDefinitionPassLdapSync(testContext);
-        String clusterDefinitionName = getNameGenerator().getRandomNameForResource();
-        String badRequest = getNameGenerator().getRandomNameForResource();
+        String clusterDefinitionName = resourcePropertyProvider().getName();
+        String badRequest = resourcePropertyProvider().getName();
         KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
         request.getAmbariDescriptor().setKrb5Conf(Base64.encodeBase64String("{".getBytes()));
         request.setName(extendNameWithGeneratedPart(request.getName()));
@@ -246,7 +233,7 @@ public class KerberosTest extends AbstractIntegrationTest {
         return new Object[][]{
                 {
                         getBean(MockedTestContext.class),
-                        getNameGenerator().getRandomNameForResource(),
+                        resourcePropertyProvider().getName(),
                         KerberosTestData.FREEIPA,
                         new TestCaseDescription.TestCaseDescriptionBuilder()
                                 .given("a valid stack request and a FreeIPA based kerberos configuration")
@@ -255,7 +242,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                 },
                 {
                         getBean(MockedTestContext.class),
-                        getNameGenerator().getRandomNameForResource(),
+                        resourcePropertyProvider().getName(),
                         KerberosTestData.ACTIVE_DIRECTORY,
                         new TestCaseDescription.TestCaseDescriptionBuilder()
                                 .given("a valid stack request and a Active Directory based kerberos configuration")
@@ -264,7 +251,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                 },
                 {
                         getBean(MockedTestContext.class),
-                        getNameGenerator().getRandomNameForResource(),
+                        resourcePropertyProvider().getName(),
                         KerberosTestData.MIT,
                         new TestCaseDescription.TestCaseDescriptionBuilder()
                                 .given("a valid stack request and a MIT based kerberos configuration")
@@ -273,7 +260,7 @@ public class KerberosTest extends AbstractIntegrationTest {
                 },
                 {
                         getBean(MockedTestContext.class),
-                        getNameGenerator().getRandomNameForResource(),
+                        resourcePropertyProvider().getName(),
                         KerberosTestData.AMBARI_DESCRIPTOR,
                         new TestCaseDescription.TestCaseDescriptionBuilder()
                                 .given("a valid stack request and a Ambari Descriptor based kerberos configuration")
@@ -296,7 +283,7 @@ public class KerberosTest extends AbstractIntegrationTest {
     }
 
     private String extendNameWithGeneratedPart(String name) {
-        return String.format("%s-%s", name, getNameGenerator().getRandomNameForResource());
+        return String.format("%s-%s", name, resourcePropertyProvider().getName());
     }
 
     private enum KerberosTestData {

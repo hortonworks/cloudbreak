@@ -5,7 +5,6 @@ import static com.sequenceiq.it.cloudbreak.newway.assertion.util.SecurityRulesTe
 
 import javax.inject.Inject;
 
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -26,9 +25,9 @@ public class SecurityRulesTest extends AbstractIntegrationTest {
     @Inject
     private UtilTestClient utilTestClient;
 
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        createDefaultUser((TestContext) data[0]);
+    @Override
+    protected void setupTest(TestContext testContext) {
+        createDefaultUser(testContext);
     }
 
     @Test(dataProvider = DATA_PROVIDER_FOR_SECURITY_RULES_TEST)
@@ -48,10 +47,9 @@ public class SecurityRulesTest extends AbstractIntegrationTest {
 
     @DataProvider(name = DATA_PROVIDER_FOR_SECURITY_RULES_TEST)
     public Object[][] dataProvider() {
-        var testContext = getBean(MockedTestContext.class);
         return new Object[][]{
                 {
-                        testContext,
+                        getBean(MockedTestContext.class),
                         false,
                         new TestCaseDescriptionBuilder()
                                 .given("Query default security rules for cluster which is NOT knox enabled")
@@ -59,7 +57,7 @@ public class SecurityRulesTest extends AbstractIntegrationTest {
                                 .then("returns default security rules and knox port")
                 },
                 {
-                        testContext,
+                        getBean(MockedTestContext.class),
                         true,
                         new TestCaseDescriptionBuilder()
                                 .given("Query default security rules for cluster which is knox enabled")
@@ -67,7 +65,7 @@ public class SecurityRulesTest extends AbstractIntegrationTest {
                                 .then("returns default security rules without knox port")
                 },
                 {
-                        testContext,
+                        getBean(MockedTestContext.class),
                         null,
                         new TestCaseDescriptionBuilder()
                                 .given("Query default security rules for cluster with null")

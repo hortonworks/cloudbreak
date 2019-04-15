@@ -1,14 +1,15 @@
 package com.sequenceiq.it.cloudbreak;
 
-import org.opentest4j.MultipleFailuresError;
-import org.opentest4j.TestAbortedException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.Callable;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.Callable;
+
+import org.opentest4j.MultipleFailuresError;
+import org.opentest4j.TestAbortedException;
 
 public class RetryOnGatewayTimeout {
 

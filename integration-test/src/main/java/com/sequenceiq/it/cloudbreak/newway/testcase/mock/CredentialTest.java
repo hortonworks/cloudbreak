@@ -46,7 +46,7 @@ public class CredentialTest extends AbstractIntegrationTest {
             then = "the credential can be found in the list credentials response"
     )
     public void testCredentialCreationWithCorrectRequest(MockedTestContext testContext) {
-        String credentialName = getNameGenerator().getRandomNameForResource();
+        String credentialName = resourcePropertyProvider().getName();
         testContext
                 .given(CredentialTestDto.class)
                 .withName(credentialName)
@@ -63,7 +63,7 @@ public class CredentialTest extends AbstractIntegrationTest {
             then = "the credential can be found in the list credentials response"
     )
     public void testCreateDeleteCreate(MockedTestContext testContext) {
-        String credentialName = getNameGenerator().getRandomNameForResource();
+        String credentialName = resourcePropertyProvider().getName();
         testContext
                 .given(CredentialTestDto.class)
                 .withName(credentialName)
@@ -86,7 +86,7 @@ public class CredentialTest extends AbstractIntegrationTest {
             then = "a BadRequestException should be returned"
     )
     public void testCreateTwice(MockedTestContext testContext) {
-        String credentialName = getNameGenerator().getRandomNameForResource();
+        String credentialName = resourcePropertyProvider().getName();
         testContext
                 .given(CredentialTestDto.class)
                 .withName(credentialName)
@@ -106,7 +106,7 @@ public class CredentialTest extends AbstractIntegrationTest {
             then = "the credential is modified"
     )
     public void testModifyCredential(MockedTestContext testContext) {
-        String credentialName = getNameGenerator().getRandomNameForResource();
+        String credentialName = resourcePropertyProvider().getName();
         String modifiedDescription = "modified";
         testContext
                 .given(CredentialTestDto.class)
@@ -128,7 +128,7 @@ public class CredentialTest extends AbstractIntegrationTest {
             String credentialName,
             String expectedExceptionMessage,
             @Description TestCaseDescription testCaseDescription) {
-        String requestKey = getNameGenerator().getRandomNameForResource();
+        String requestKey = resourcePropertyProvider().getName();
         testContext
                 .given(CredentialTestDto.class)
                 .withName(credentialName)

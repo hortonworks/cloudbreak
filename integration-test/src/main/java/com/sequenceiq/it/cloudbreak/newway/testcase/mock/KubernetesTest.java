@@ -38,7 +38,7 @@ public class KubernetesTest extends AbstractIntegrationTest {
     }
 
     @AfterMethod(alwaysRun = true)
-    public void tear(Object[] data) {
+    public void tearDown(Object[] data) {
         ((TestContext) data[0]).cleanupTestContext();
     }
 
@@ -48,7 +48,7 @@ public class KubernetesTest extends AbstractIntegrationTest {
             when = "calling create kubernetes config",
             then = "the kubernetes list contains the newly created entity")
     public void testKubernetesCreationWithCorrectRequest(MockedTestContext testContext) {
-        String kubernetesName = getNameGenerator().getRandomNameForResource();
+        String kubernetesName = resourcePropertyProvider().getName();
         testContext
                 .given(KubernetesTestDto.class)
                 .withName(kubernetesName)
@@ -64,7 +64,7 @@ public class KubernetesTest extends AbstractIntegrationTest {
             when = "calling delete that specific kubernetes config",
             then = "the kubernetes list does not contain the entity")
     public void testCreateDeleteCreate(TestContext testContext) {
-        String kubernetesName = getNameGenerator().getRandomNameForResource();
+        String kubernetesName = resourcePropertyProvider().getName();
         testContext
                 .given(KubernetesTestDto.class)
                 .withName(kubernetesName)
@@ -88,7 +88,7 @@ public class KubernetesTest extends AbstractIntegrationTest {
             when = "calling create that kubernetes config again",
             then = "getting BadRequestException because two kubernetes config with same name should not exist")
     public void testCreateTwice(TestContext testContext) {
-        String kubernetesName = getNameGenerator().getRandomNameForResource();
+        String kubernetesName = resourcePropertyProvider().getName();
         testContext
                 .given(KubernetesTestDto.class)
                 .withName(kubernetesName)
@@ -107,7 +107,7 @@ public class KubernetesTest extends AbstractIntegrationTest {
             String content,
             String expectedErrorMessage,
             @Description TestCaseDescription testCaseDescription) {
-        String badRequestKey = getNameGenerator().getRandomNameForResource();
+        String badRequestKey = resourcePropertyProvider().getName();
         testContext
                 .given(KubernetesTestDto.class)
                 .withName(kubernetesName)
@@ -121,7 +121,7 @@ public class KubernetesTest extends AbstractIntegrationTest {
     public Object[][] provideInvalidAttributes() {
         return new Object[][]{
                 {
-                        getBean(TestContext.class),
+                        getBean(MockedTestContext.class),
                         getLongNameGenerator().stringGenerator(101),
                         KUBERNETES_CONTENT,
                         "The length of the config's name has to be in range of 5 to 100",
@@ -131,7 +131,7 @@ public class KubernetesTest extends AbstractIntegrationTest {
                                 .then("getting BadRequestException")
                 },
                 {
-                        getBean(TestContext.class),
+                        getBean(MockedTestContext.class),
                         "abc",
                         KUBERNETES_CONTENT,
                         "The length of the config's name has to be in range of 5 to 100",
@@ -141,7 +141,7 @@ public class KubernetesTest extends AbstractIntegrationTest {
                                 .then("getting BadRequestException")
                 },
                 {
-                        getBean(TestContext.class),
+                        getBean(MockedTestContext.class),
                         "a-@#$%|:&*;",
                         KUBERNETES_CONTENT,
                         "The config's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character",
@@ -151,8 +151,8 @@ public class KubernetesTest extends AbstractIntegrationTest {
                                 .then("getting BadRequestException")
                 },
                 {
-                        getBean(TestContext.class),
-                        getNameGenerator().getRandomNameForResource(),
+                        getBean(MockedTestContext.class),
+                        resourcePropertyProvider().getName(),
                         null,
                         "must not be null",
                         new TestCaseDescription.TestCaseDescriptionBuilder()

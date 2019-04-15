@@ -22,6 +22,10 @@ public class DeleteClusterFromClusterTemplateAction implements Action<ClusterTem
         this.stackTemplateKey = stackTemplateKey;
     }
 
+    public DeleteClusterFromClusterTemplateAction(Class<StackTemplateTestDto> stackTemplateKey) {
+        this.stackTemplateKey = stackTemplateKey.getSimpleName();
+    }
+
     @Override
     public ClusterTemplateTestDto action(TestContext testContext, ClusterTemplateTestDto testDto, CloudbreakClient client) throws Exception {
         if (testDto.getResponse() == null)  {

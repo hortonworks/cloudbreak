@@ -1,29 +1,35 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudProperties;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudProperties;
+
 @Component
-public class RandomNameCreator {
+public class ResourcePropertyProvider {
 
     private static final int MAX_LENGTH = 40;
 
-    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd--HH-mm-ss");
+    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_DATE_TIME;
 
     @Inject
     private CommonCloudProperties commonCloudProperties;
 
-    public String getRandomNameForResource() {
-        return trim(prefix() + '-' + dateTime() + '-' + uuid());
+    public String getName() {
+        return trim(prefix() + '-' + uuid());
     }
 
-    public String getInvalidRandomNameForResource() {
-        return trim(prefix() + "-?!;" + '-' + dateTime() + '-' + uuid());
+    public String getInvalidName() {
+        return trim(prefix() + "-?!;" + uuid());
+    }
+
+    public String getDescription(String typeName) {
+        return "Test " + typeName + ". Created at: " + dateTime();
     }
 
     public String prefix() {

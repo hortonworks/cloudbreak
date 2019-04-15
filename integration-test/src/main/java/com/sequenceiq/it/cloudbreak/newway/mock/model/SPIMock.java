@@ -1,5 +1,10 @@
 package com.sequenceiq.it.cloudbreak.newway.mock.model;
 
+import static com.sequenceiq.it.spark.ITResponse.MOCK_ROOT;
+
+import java.util.List;
+import java.util.Map;
+
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -9,12 +14,8 @@ import com.sequenceiq.it.cloudbreak.newway.mock.DefaultModel;
 import com.sequenceiq.it.spark.DynamicRouteStack;
 import com.sequenceiq.it.spark.spi.CloudMetaDataStatuses;
 import com.sequenceiq.it.spark.spi.CloudVmInstanceStatuses;
+
 import spark.Service;
-
-import java.util.List;
-import java.util.Map;
-
-import static com.sequenceiq.it.spark.ITResponse.MOCK_ROOT;
 
 public class SPIMock extends AbstractModelMock {
 

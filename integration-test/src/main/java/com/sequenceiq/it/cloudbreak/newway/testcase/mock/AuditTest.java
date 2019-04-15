@@ -4,8 +4,6 @@ import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 
 import javax.inject.Inject;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.ActiveDirectoryKerberosDescriptor;
@@ -26,9 +24,7 @@ import com.sequenceiq.it.cloudbreak.newway.client.ProxyTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
-import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.audit.AuditTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.clusterdefinition.ClusterDefinitionTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.clustertemplate.ClusterTemplateTestDto;
@@ -42,6 +38,7 @@ import com.sequenceiq.it.cloudbreak.newway.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.mpack.MPackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.recipe.RecipeTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
@@ -97,23 +94,11 @@ public class AuditTest extends AbstractIntegrationTest {
     private EnvironmentTestClient environmentTestClient;
 
     @Override
-    protected void minimalSetupForClusterCreation(TestContext testContext) {
-        createDefaultUser(testContext);
-    }
-
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        MockedTestContext testContext = (MockedTestContext) data[0];
-
+    protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultClusterDefinitions(testContext);
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void tearDown(Object[] data) {
-        ((MockedTestContext) data[0]).cleanupTestContext();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -122,7 +107,7 @@ public class AuditTest extends AbstractIntegrationTest {
             when = "a recipe is created",
             then = "an and audit record must be available in the database")
     public void createValidRecipeThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
-        String recipeName = getNameGenerator().getRandomNameForResource();
+        String recipeName = resourcePropertyProvider().getName();
         testContext
                 .given(RecipeTestDto.class)
                 .withName(recipeName)
@@ -142,7 +127,7 @@ public class AuditTest extends AbstractIntegrationTest {
             when = "a K8S config is created",
             then = "an audit record must be available in the database")
     public void createValidKubernetesConfigThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
-        String kubernetesName = getNameGenerator().getRandomNameForResource();
+        String kubernetesName = resourcePropertyProvider().getName();
         testContext
                 .given(KubernetesTestDto.class)
                 .withName(kubernetesName)
@@ -162,7 +147,7 @@ public class AuditTest extends AbstractIntegrationTest {
             when = "a Cluster Definition is created",
             then = "an audit record must be available in the database")
     public void createValidClusterDefinitionThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
-        String blueprintName = getNameGenerator().getRandomNameForResource();
+        String blueprintName = resourcePropertyProvider().getName();
         testContext
                 .given(ClusterDefinitionTestDto.class)
                 .withName(blueprintName)
@@ -183,7 +168,7 @@ public class AuditTest extends AbstractIntegrationTest {
             when = "a Cluster Template is created",
             then = "and audit record must be available in the database")
     public void createValidClusterTemplateThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
-        String clusterTemplateName = getNameGenerator().getRandomNameForResource();
+        String clusterTemplateName = resourcePropertyProvider().getName();
         testContext
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.createV4(), key(clusterTemplateName))
@@ -208,7 +193,7 @@ public class AuditTest extends AbstractIntegrationTest {
             when = "a Credential is created",
             then = "and audit record must be available in the database")
     public void createValidCredentialThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
-        String credentialName = getNameGenerator().getRandomNameForResource();
+        String credentialName = resourcePropertyProvider().getName();
         testContext
                 .given(CredentialTestDto.class)
                 .withName(credentialName)
@@ -228,7 +213,7 @@ public class AuditTest extends AbstractIntegrationTest {
             when = "a Database is created",
             then = "and audit record must be available in the database")
     public void createValidDatabaseThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
-        String databaseName = getNameGenerator().getRandomNameForResource();
+        String databaseName = resourcePropertyProvider().getName();
         testContext
                 .given(DatabaseTestDto.class)
                 .withName(databaseName)
@@ -248,7 +233,7 @@ public class AuditTest extends AbstractIntegrationTest {
             when = "an Environment is created",
             then = "and audit record must be available in the database")
     public void createValidEnvironmentThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
-        String environmentName = getNameGenerator().getRandomNameForResource();
+        String environmentName = resourcePropertyProvider().getName();
         testContext
                 .given(EnvironmentTestDto.class)
                 .withName(environmentName)
@@ -268,7 +253,7 @@ public class AuditTest extends AbstractIntegrationTest {
             when = "a Kerberos is created",
             then = "and audit record must be available in the database")
     public void createValidKerberosThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
-        String kerberosName = getNameGenerator().getRandomNameForResource();
+        String kerberosName = resourcePropertyProvider().getName();
         KerberosV4Request request = new KerberosV4Request();
         request.setName("adKerberos");
         ActiveDirectoryKerberosDescriptor activeDirectory = new ActiveDirectoryKerberosDescriptor();
@@ -301,7 +286,7 @@ public class AuditTest extends AbstractIntegrationTest {
             when = "an Ldap is created",
             then = "and audit record must be available in the database")
     public void createValidLdapThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
-        String ldapName = getNameGenerator().getRandomNameForResource();
+        String ldapName = resourcePropertyProvider().getName();
         testContext
                 .given(LdapTestDto.class)
                 .withName(ldapName)
@@ -321,7 +306,7 @@ public class AuditTest extends AbstractIntegrationTest {
             when = "an Mpack is created",
             then = "and audit record must be available in the database")
     public void createValidMpackThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
-        String mpackName = getNameGenerator().getRandomNameForResource();
+        String mpackName = resourcePropertyProvider().getName();
         testContext
                 .given(MPackTestDto.class)
                 .withName(mpackName)
@@ -341,7 +326,7 @@ public class AuditTest extends AbstractIntegrationTest {
             when = "a Proxy is created",
             then = "and audit record must be available in the database")
     public void createValidProxyThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
-        String proxyName = getNameGenerator().getRandomNameForResource();
+        String proxyName = resourcePropertyProvider().getName();
         testContext
                 .given(ProxyTestDto.class)
                 .withName(proxyName)
@@ -361,8 +346,8 @@ public class AuditTest extends AbstractIntegrationTest {
             when = "a Stack is created",
             then = "and audit record must be available in the database")
     public void createValidStackThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
-        String stackName = getNameGenerator().getRandomNameForResource();
-        String auditName = getNameGenerator().getRandomNameForResource();
+        String stackName = resourcePropertyProvider().getName();
+        String auditName = resourcePropertyProvider().getName();
         testContext
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.createV4())
@@ -384,7 +369,7 @@ public class AuditTest extends AbstractIntegrationTest {
             when = "an Image Catalog is created",
             then = "and audit record must be available in the database")
     public void createValidImageCatalogThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
-        String catalogName = getNameGenerator().getRandomNameForResource();
+        String catalogName = resourcePropertyProvider().getName();
         testContext
                 .given(ImageCatalogTestDto.class)
                 .withName(catalogName)
