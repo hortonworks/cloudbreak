@@ -291,19 +291,6 @@ func init() {
 				},
 			},
 			{
-				Name:   "generate-reinstall-template",
-				Hidden: true,
-				Usage:  "generates reinstall template",
-				Before: cf.CheckConfigAndCommandFlags,
-				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlClusterDefinitionName).AddAuthenticationFlags().AddOutputFlag().Build(),
-				Action: stack.GenerateReinstallTemplate,
-				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlClusterDefinitionName).AddAuthenticationFlags().AddOutputFlag().Build() {
-						fl.PrintFlagCompletion(f)
-					}
-				},
-			},
-			{
 				Name:   "generate-attached-cluster-template",
 				Usage:  "generates attached cluster template",
 				Before: cf.CheckConfigAndCommandFlags,
@@ -323,19 +310,6 @@ func init() {
 				Action: stack.ListStacks,
 				BashComplete: func(c *cli.Context) {
 					for _, f := range fl.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
-						fl.PrintFlagCompletion(f)
-					}
-				},
-			},
-			{
-				Name:   "reinstall",
-				Hidden: true,
-				Usage:  "reinstalls a cluster",
-				Before: cf.CheckConfigAndCommandFlags,
-				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlClusterDefinitionNameOptional, fl.FlKerberosPasswordOptional, fl.FlKerberosPrincipalOptional, fl.FlInputJson, fl.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
-				Action: stack.ReinstallStack,
-				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlClusterDefinitionNameOptional, fl.FlKerberosPasswordOptional, fl.FlKerberosPrincipalOptional, fl.FlInputJson, fl.FlWaitOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
 						fl.PrintFlagCompletion(f)
 					}
 				},

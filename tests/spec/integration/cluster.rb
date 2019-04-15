@@ -111,14 +111,6 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
     end
   end
 
-    it "Cluster - Generate re-install template " do
-    with_environment 'DEBUG' => '1' do
-      result = cb.cluster.generate_reinstall_template.name("test").cluster_definition_name("test").build(false)
-      expect(result.exit_status).to eql 0
-      expect(result.stdout.empty?).to be_falsy
-    end
-  end
-
   it "Cluster - Describe Failure" do
     requestBody = MockResponse.requestBodyCreate('getStackInWorkspaceV4', '{"message":"Stack \'az404\' not found"}', '404')
     url = ENV['BASE_URL'] + @mock_endpoint_setup

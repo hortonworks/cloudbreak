@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/hortonworks/cb-cli/dataplane/utils"
 	"strconv"
 	"strings"
 
@@ -423,46 +422,4 @@ func convertNodeToInstanceGroup(provider cloud.CloudProvider, node cloud.Node) *
 	}
 	provider.SetInstanceGroupParametersTemplate(ig, node)
 	return ig
-}
-
-func GenerateReinstallTemplate(c *cli.Context) {
-	template := &model.ReinstallV4Request{
-		ClusterDefinition: &(&types.S{S: c.String(fl.FlClusterDefinitionName.Name)}).S,
-		InstanceGroups:    []*model.InstanceGroupV4Request{},
-	}
-
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	stackName := c.String(fl.FlName.Name)
-	stackResp := fetchStack(workspaceID, stackName, stackClient(c.String(fl.FlServerOptional.Name), c.String(fl.FlRefreshTokenOptional.Name)))
-	cloudPlatform := utils.SafeCloudPlatformConvert(stackResp.Environment)
-	provider, ok := cloud.CloudProviders[cloud.CloudType(cloudPlatform)]
-	if !ok {
-		commonUtils.LogErrorMessageAndExit("not supported cloud provider")
-	}
-
-	bpName := c.String(fl.FlClusterDefinitionNameOptional.Name)
-	workspace := c.Int64(fl.FlWorkspaceOptional.Name)
-	bpResp := clusterdefinition.FetchClusterDefinition(workspace, bpName, getClusterDefinitionClient(c.String(fl.FlServerOptional.Name), c.String(fl.FlRefreshTokenOptional.Name)))
-	bp, err := base64.StdEncoding.DecodeString(bpResp.ClusterDefinition)
-	if err != nil {
-		commonUtils.LogErrorAndExit(err)
-	}
-
-	for _, node := range getNodesByClusterDefinition(bp) {
-		ig := &model.InstanceGroupV4Request{
-			Name:          &(&types.S{S: node.Name}).S,
-			NodeCount:     &(&types.I32{I: node.Count}).I,
-			RecoveryMode:  "AUTO",
-			SecurityGroup: provider.GenerateDefaultSecurityGroup(node),
-			Template:      provider.GenerateDefaultTemplate(),
-			Type:          node.GroupType,
-		}
-		template.InstanceGroups = append(template.InstanceGroups, ig)
-	}
-
-	resp, err := json.MarshalIndent(template, "", "\t")
-	if err != nil {
-		commonUtils.LogErrorAndExit(err)
-	}
-	fmt.Printf("%s\n", string(resp))
 }

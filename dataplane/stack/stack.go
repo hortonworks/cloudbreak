@@ -312,55 +312,6 @@ func RetryCluster(c *cli.Context) {
 	}
 }
 
-func ReinstallStack(c *cli.Context) {
-	defer commonutils.TimeTrack(time.Now(), "reinstall stack")
-
-	req := assembleReinstallRequest(c)
-	cbClient := CloudbreakStack(*oauth.NewCloudbreakHTTPClientFromContext(c))
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	name := c.String(fl.FlName.Name)
-	log.Infof("[RepairStack] reinstalling stack, name: %s", name)
-	err := cbClient.Cloudbreak.V4WorkspaceIDStacks.PutReinstallStackV4(v4stack.NewPutReinstallStackV4Params().WithWorkspaceID(workspaceID).WithName(name).WithBody(req))
-	if err != nil {
-		commonutils.LogErrorAndExit(err)
-	}
-	log.Infof("[ReinstallStack] stack reinstalled, name: %s", name)
-
-	if c.Bool(fl.FlWaitOptional.Name) {
-		cbClient.waitForOperationToFinish(workspaceID, name, AVAILABLE, AVAILABLE)
-	}
-}
-
-func assembleReinstallRequest(c *cli.Context) *model.ReinstallV4Request {
-	path := c.String(fl.FlInputJson.Name)
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		commonutils.LogErrorAndExit(err)
-	}
-
-	log.Infof("[assembleReinstallRequest] read cluster reinstall json from file: %s", path)
-	content := commonutils.ReadFile(path)
-
-	var req model.ReinstallV4Request
-	err := json.Unmarshal(content, &req)
-	if err != nil {
-		msg := fmt.Sprintf(`Invalid json format: %s. Please make sure that the json is valid (check for commas and double quotes).`, err.Error())
-		commonutils.LogErrorMessageAndExit(msg)
-	}
-
-	bpName := c.String(fl.FlClusterDefinitionNameOptional.Name)
-	if len(bpName) != 0 {
-		req.ClusterDefinition = &bpName
-	}
-	if req.ClusterDefinition == nil || len(*req.ClusterDefinition) == 0 {
-		commonutils.LogErrorMessageAndExit("Name of the cluster definition must be set either in the template or with the --cluster-definition-name command line option.")
-	}
-
-	req.KerberosPassword = c.String(fl.FlKerberosPasswordOptional.Name)
-	req.KerberosPrincipal = c.String(fl.FlKerberosPrincipalOptional.Name)
-
-	return &req
-}
-
 func DeleteStack(c *cli.Context) {
 	defer commonutils.TimeTrack(time.Now(), "delete stack")
 

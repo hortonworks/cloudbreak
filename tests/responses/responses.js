@@ -68,9 +68,6 @@ stackResponses = addResponseObject(stackResponses, datalake, OK, "return params[
 var stackOperationResponses = responseObjectWithCondition({"message":"Stack 'azstatus' not found"}, 404, "return params['name'].value === 'azstatus';");
 stackOperationResponses = addResponseObject(stackOperationResponses,null, OK , "return params['name'].value !== 'azstatus';");
 
-var stackReinstallResponses = responseObjectWithCondition({"message":"Stack 'aaaaa' not found"}, 404, "return params['name'].value === 'aaaaa';");
-stackReinstallResponses = addResponseObject(stackReinstallResponses,null, OK , "return params['name'].value !== 'aaaaa';");
-
 responses.getCloudbreakInfo= responseObject({ "app": { "name":"cloudbreak", "version":"MOCK" } }, OK);
 responses.getCloudbreakHealth= responseObject({ "status":"UP" }, OK);
 responses.evictCurrentUserDetails = responseObject({ username: 'mock@hortonworks.com' }, OK);
@@ -184,7 +181,6 @@ responses.putscalingStackV2 = stackOperationResponses;
 responses.putstopStackV2 = stackOperationResponses;
 responses.putrepairStackV2 = stackOperationResponses;
 responses.putsyncStackV2 = stackOperationResponses;
-responses.putreinstallStackV2 = stackReinstallResponses;
 
 responses.checkClientVersionV4 = responseObject({ "versionCheckOk" : true, "message" : "message" }, OK);
  

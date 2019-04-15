@@ -124,12 +124,5 @@ RSpec.describe 'Custer operation test cases', :type => :aruba do
     skip_if(cb, @os_cluster_name, "AVAILABLE", "Test is skipped because of cluster is not AVAILABLE")
     result = cb.cluster.change_ambari_password.name(@os_cluster_name).ambari_user(@ambari_user).old_password(@ambari_password).new_password("admintemp").build
     expect(result.exit_status).to eql 0          
-  end
-
-  it "Generate reinstall template" do 
-    result = cb.cluster.generate_reinstall_template.name(@os_cluster_name).cluster_definition_name(@default_clusterdefinition_name).build
-    expect(result.exit_status).to eql 0 
-    expect(result.stdout.empty?).to be_falsy 
-    expect(JSON.parse(result.stdout)["clusterDefinition"]).to eq(@default_clusterdefinition_name.gsub("'",""))
-  end           
+  end     
 end
