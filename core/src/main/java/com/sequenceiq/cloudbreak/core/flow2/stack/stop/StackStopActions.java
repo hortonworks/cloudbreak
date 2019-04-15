@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
-import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
+import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartStopContext;
@@ -106,7 +106,8 @@ public class StackStopActions {
         };
     }
 
-    private abstract static class AbstractStackStopAction<P extends Payload> extends AbstractAction<StackStopState, StackStopEvent, StackStartStopContext, P> {
+    private abstract static class AbstractStackStopAction<P extends Payload>
+            extends AbstractStackAction<StackStopState, StackStopEvent, StackStartStopContext, P> {
         @Inject
         private StackService stackService;
 

@@ -25,8 +25,6 @@ public enum MetricType implements Metric {
 
     STACK_PREPARATION("stack.preparation.duration"),
 
-    FLOW_STEP("flowstep"),
-    ACTIVE_FLOWS("activeflow"),
     HEARTBEAT_UPDATE_FAILED("heartbeat.update.failed");
 
     private final String metricName;

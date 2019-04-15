@@ -22,7 +22,7 @@ public final class FlowFinalizeAction extends AbstractAction<FlowState, FlowEven
 
     @Override
     protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) {
-        sendEvent(context.getFlowId(), Flow2Handler.FLOW_FINAL, payload);
+        sendEvent(context.getFlowId(), FlowConstants.FLOW_FINAL, payload);
     }
 
     @Override

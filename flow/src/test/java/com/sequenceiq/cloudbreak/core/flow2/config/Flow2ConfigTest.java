@@ -18,13 +18,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.helloworld.HelloWorldFlowConfig;
 
 public class Flow2ConfigTest {
-
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
 
@@ -43,8 +39,8 @@ public class Flow2ConfigTest {
     @Test
     public void testFlowConfigurationMapInit() {
         List<FlowConfiguration<?>> flowConfigs = new ArrayList<>();
-        flowConfigs.add(new StackSyncFlowConfig());
-        flowConfigs.add(new StackTerminationFlowConfig());
+        flowConfigs.add(new HelloWorldFlowConfig());
+        flowConfigs.add(new TestFlowConfig());
         given(this.flowConfigs.iterator()).willReturn(flowConfigs.iterator());
         Map<String, FlowConfiguration<?>> flowConfigMap = underTest.flowConfigurationMap();
         assertEquals("Not all flow type appeared in map!", countEvents(flowConfigs), flowConfigMap.size());
@@ -53,19 +49,13 @@ public class Flow2ConfigTest {
     @Test
     public void testFlowConfigurationMapInitIfAlreadyExists() {
         List<FlowConfiguration<?>> flowConfigs = new ArrayList<>();
-        StackSyncFlowConfig stackSyncFlowConfig = new StackSyncFlowConfig();
-        flowConfigs.add(stackSyncFlowConfig);
-        flowConfigs.add(stackSyncFlowConfig);
+        HelloWorldFlowConfig helloWorldFlowConfig = new HelloWorldFlowConfig();
+        flowConfigs.add(helloWorldFlowConfig);
+        flowConfigs.add(helloWorldFlowConfig);
         given(this.flowConfigs.iterator()).willReturn(flowConfigs.iterator());
         thrown.expect(UnsupportedOperationException.class);
-        thrown.expectMessage("Event already registered: STACK_SYNC_TRIGGER_EVENT");
+        thrown.expectMessage("Event already registered: START_HELLO_WORLD_EVENT");
         underTest.flowConfigurationMap();
-    }
-
-    private int countEvents(List<FlowConfiguration<?>> flowConfigs) {
-        return flowConfigs.stream()
-                .mapToInt(c -> c.getInitEvents().length)
-                .sum();
     }
 
     @Test
@@ -75,14 +65,20 @@ public class Flow2ConfigTest {
 
     @Test
     public void testFailHandledEvents() {
-        StackCreationFlowConfig stackCreationFlowConfig = new StackCreationFlowConfig();
-        ClusterCreationFlowConfig clusterCreationFlowConfig = new ClusterCreationFlowConfig();
+        HelloWorldFlowConfig helloWorldFlowConfig = new HelloWorldFlowConfig();
+        TestFlowConfig testFlowConfig = new TestFlowConfig();
 
-        List<RetryableFlowConfiguration<?>> retryableFlowConfigurations = Lists.newArrayList(stackCreationFlowConfig, clusterCreationFlowConfig);
+        List<RetryableFlowConfiguration<?>> retryableFlowConfigurations = Lists.newArrayList(helloWorldFlowConfig, testFlowConfig);
         List<String> failHandledEvents = underTest.failHandledEvents(retryableFlowConfigurations);
 
-        List<String> expected = Lists.newArrayList(stackCreationFlowConfig.getFailHandledEvent().event(),
-                clusterCreationFlowConfig.getFailHandledEvent().event());
+        List<String> expected = Lists.newArrayList(helloWorldFlowConfig.getFailHandledEvent().event(),
+                testFlowConfig.getFailHandledEvent().event());
         assertEquals(expected, failHandledEvents);
+    }
+
+    private int countEvents(List<FlowConfiguration<?>> flowConfigs) {
+        return flowConfigs.stream()
+                .mapToInt(c -> c.getInitEvents().length)
+                .sum();
     }
 }

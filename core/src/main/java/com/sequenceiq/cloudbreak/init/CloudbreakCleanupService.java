@@ -28,20 +28,19 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.controller.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
+import com.sequenceiq.cloudbreak.core.flow2.FlowLogService;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
-import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.startup.GovCloudFlagMigrator;
@@ -68,9 +67,6 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
 
     @Inject
     private CloudbreakEventService eventService;
-
-    @Inject
-    private FlowLogRepository flowLogRepository;
 
     @Inject
     private FlowLogService flowLogService;
@@ -152,7 +148,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
      */
     private Collection<Long> excludeStacksByFlowAssignment() {
         List<Long> exclusion = new ArrayList<>();
-        List<Object[]> allPending = flowLogRepository.findAllPending();
+        List<Object[]> allPending = flowLogService.findAllPending();
         allPending.stream().filter(o -> o[2] != null).forEach(o -> exclusion.add((Long) o[1]));
         return exclusion;
     }
@@ -163,7 +159,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
      */
     private List<Long> restartOrUpdateUnassignedDisruptedFlows() throws TransactionExecutionException {
         List<Long> stackIds = new ArrayList<>();
-        Set<FlowLog> unassignedFlowLogs = flowLogRepository.findAllUnassigned();
+        Set<FlowLog> unassignedFlowLogs = flowLogService.findAllUnassigned();
         if (!unassignedFlowLogs.isEmpty()) {
             if (cloudbreakNodeConfig.isNodeIdSpecified()) {
                 try {
@@ -194,7 +190,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
                 flowLog.setCloudbreakNodeId(nodeId);
             }
             transactionService.required(() -> {
-                flowLogRepository.saveAll(flowLogs);
+                flowLogService.saveAll(flowLogs);
                 return null;
             });
         }
@@ -233,9 +229,9 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
      * Retrieves my assigned flow logs and updates the version lock to avoid concurrency issues.
      */
     private Set<FlowLog> getMyFlowLogs() throws TransactionExecutionException {
-        Set<FlowLog> myFlowLogs = flowLogRepository.findAllByCloudbreakNodeId(cloudbreakNodeConfig.getId());
+        Set<FlowLog> myFlowLogs = flowLogService.findAllByCloudbreakNodeId(cloudbreakNodeConfig.getId());
         myFlowLogs.forEach(fl -> fl.setCreated(fl.getCreated() + 1));
-        transactionService.required(() -> flowLogRepository.saveAll(myFlowLogs));
+        transactionService.required(() -> flowLogService.saveAll(myFlowLogs));
         return myFlowLogs;
     }
 

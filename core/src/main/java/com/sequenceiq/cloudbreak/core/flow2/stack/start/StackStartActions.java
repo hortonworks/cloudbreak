@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
-import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
+import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -131,7 +131,7 @@ public class StackStartActions {
     }
 
     private abstract static class AbstractStackStartAction<P extends Payload>
-            extends AbstractAction<StackStartState, StackStartEvent, StackStartStopContext, P> {
+            extends AbstractStackAction<StackStartState, StackStartEvent, StackStartStopContext, P> {
         private static final Logger LOGGER = LoggerFactory.getLogger(AbstractStackStartAction.class);
 
         @Inject

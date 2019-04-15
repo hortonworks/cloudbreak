@@ -7,7 +7,7 @@ import javax.inject.Inject;
 
 import org.springframework.statemachine.StateContext;
 
-import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
+import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.Flow;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
@@ -17,7 +17,8 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
-public abstract class AbstractStackFailureAction<S extends FlowState, E extends FlowEvent> extends AbstractAction<S, E, StackFailureContext, StackFailureEvent> {
+public abstract class AbstractStackFailureAction<S extends FlowState, E extends FlowEvent>
+        extends AbstractStackAction<S, E, StackFailureContext, StackFailureEvent> {
     @Inject
     private StackService stackService;
 

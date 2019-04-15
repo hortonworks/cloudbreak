@@ -22,14 +22,14 @@ import com.sequenceiq.cloudbreak.domain.StateStatus;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 
 @RunWith(MockitoJUnitRunner.class)
-public class FlowLogServiceTest {
+public class FlowLogDBServiceTest {
 
     private static final String FLOW_ID = "flowId";
 
     private static final long ID = 1L;
 
     @InjectMocks
-    private FlowLogService underTest;
+    private FlowLogDBService underTest;
 
     @Mock
     private FlowLogRepository flowLogRepository;

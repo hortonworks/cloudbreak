@@ -14,8 +14,8 @@ import org.springframework.stereotype.Component;
 import com.cedarsoftware.util.io.JsonReader;
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.FlowLogService;
 import com.sequenceiq.cloudbreak.domain.FlowChainLog;
-import com.sequenceiq.cloudbreak.repository.FlowChainLogRepository;
 
 import reactor.bus.Event;
 import reactor.fn.Consumer;
@@ -30,7 +30,7 @@ public class FlowChainHandler implements Consumer<Event<? extends Payload>> {
     private FlowChains flowChains;
 
     @Inject
-    private FlowChainLogRepository flowChainLogRepository;
+    private FlowLogService flowLogService;
 
     @Override
     public void accept(Event<? extends Payload> event) {
@@ -43,7 +43,7 @@ public class FlowChainHandler implements Consumer<Event<? extends Payload>> {
     }
 
     public void restoreFlowChain(String flowChainId) {
-        FlowChainLog chainLog = flowChainLogRepository.findFirstByFlowChainIdOrderByCreatedDesc(flowChainId);
+        FlowChainLog chainLog = flowLogService.findFirstByFlowChainIdOrderByCreatedDesc(flowChainId);
         if (chainLog != null) {
             Queue<Selectable> chain = (Queue<Selectable>) JsonReader.jsonToJava(chainLog.getChain());
             flowChains.putFlowChain(flowChainId, chainLog.getParentFlowChainId(), chain);

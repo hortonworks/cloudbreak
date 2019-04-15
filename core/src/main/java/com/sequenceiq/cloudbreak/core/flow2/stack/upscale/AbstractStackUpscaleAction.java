@@ -20,14 +20,14 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
-import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
+import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
-abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractAction<StackUpscaleState, StackUpscaleEvent, StackScalingFlowContext, P> {
+abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractStackAction<StackUpscaleState, StackUpscaleEvent, StackScalingFlowContext, P> {
     static final String INSTANCEGROUPNAME = "INSTANCEGROUPNAME";
 
     static final String ADJUSTMENT = "ADJUSTMENT";

@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
-import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
+import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.StackCreationService;
@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
-abstract class AbstractStackImageUpdateAction<P extends Payload> extends AbstractAction<StackImageUpdateState, StackImageUpdateEvent, StackContext, P> {
+abstract class AbstractStackImageUpdateAction<P extends Payload> extends AbstractStackAction<StackImageUpdateState, StackImageUpdateEvent, StackContext, P> {
 
     public static final String ORIGINAL_IMAGE = "ORIGINAL_IMAGE";
 

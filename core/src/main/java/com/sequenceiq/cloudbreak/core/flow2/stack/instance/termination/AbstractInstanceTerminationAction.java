@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConver
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
-import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
+import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
-        extends AbstractAction<InstanceTerminationState, InstanceTerminationEvent, InstanceTerminationContext, P> {
+        extends AbstractStackAction<InstanceTerminationState, InstanceTerminationEvent, InstanceTerminationContext, P> {
 
     @Inject
     private StackService stackService;

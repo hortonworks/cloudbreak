@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
-import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
+import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 
 enum StackTerminationState implements FlowState {
@@ -11,17 +11,17 @@ enum StackTerminationState implements FlowState {
     TERMINATION_FINISHED_STATE(StackTerminationFinishedAction.class),
     FINAL_STATE;
 
-    private Class<? extends AbstractAction<?, ?, ?, ?>> action;
+    private Class<? extends AbstractStackAction<?, ?, ?, ?>> action;
 
     StackTerminationState() {
     }
 
-    StackTerminationState(Class<? extends AbstractAction<?, ?, ?, ?>> action) {
+    StackTerminationState(Class<? extends AbstractStackAction<?, ?, ?, ?>> action) {
         this.action = action;
     }
 
     @Override
-    public Class<? extends AbstractAction<?, ?, ?, ?>> action() {
+    public Class<? extends AbstractStackAction<?, ?, ?, ?>> action() {
         return action;
     }
 }

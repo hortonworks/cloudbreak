@@ -1,9 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
-import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.TERMINATION_EVENT;
-
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -22,65 +18,28 @@ import com.sequenceiq.cloudbreak.cloud.Acceptable;
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainHandler;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChains;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.repair.master.ha.ChangePrimaryGatewayFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.reset.ClusterResetFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.upgrade.ClusterUpgradeFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.userpasswd.ClusterCredentialChangeFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
-import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleConfig;
-import com.sequenceiq.cloudbreak.core.flow2.stack.instance.termination.InstanceTerminationFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.stack.repair.ManualStackRepairTriggerFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleConfig;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
-import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 
 import reactor.bus.Event;
 import reactor.fn.Consumer;
 
 @Component
 public class Flow2Handler implements Consumer<Event<? extends Payload>> {
-    public static final String FLOW_ID = "FLOW_ID";
+    public static final String FLOW_ID = FlowConstants.FLOW_ID;
 
-    public static final String FLOW_CHAIN_ID = "FLOW_CHAIN_ID";
+    public static final String FLOW_CHAIN_ID = FlowConstants.FLOW_CHAIN_ID;
 
-    public static final String FLOW_FINAL = "FLOWFINAL";
+    public static final String FLOW_FINAL = FlowConstants.FLOW_FINAL;
 
-    public static final String FLOW_CANCEL = "FLOWCANCEL";
+    public static final String FLOW_CANCEL = FlowConstants.FLOW_CANCEL;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Flow2Handler.class);
-
-    private static final List<String> ALLOWED_PARALLEL_FLOWS = Collections.singletonList(TERMINATION_EVENT.event());
-
-    private static final List<Class<? extends FlowConfiguration<?>>> RESTARTABLE_FLOWS = Arrays.asList(
-            StackCreationFlowConfig.class,
-            StackSyncFlowConfig.class, StackTerminationFlowConfig.class, StackStopFlowConfig.class, StackStartFlowConfig.class,
-            StackUpscaleConfig.class, StackDownscaleConfig.class,
-            InstanceTerminationFlowConfig.class,
-            ManualStackRepairTriggerFlowConfig.class,
-            ClusterCreationFlowConfig.class,
-            ClusterSyncFlowConfig.class, ClusterTerminationFlowConfig.class, ClusterCredentialChangeFlowConfig.class,
-            ClusterStartFlowConfig.class, ClusterStopFlowConfig.class,
-            ClusterUpscaleFlowConfig.class, ClusterDownscaleFlowConfig.class,
-            ClusterUpgradeFlowConfig.class, ClusterResetFlowConfig.class, ChangePrimaryGatewayFlowConfig.class
-    );
 
     @Inject
     private FlowLogService flowLogService;
@@ -104,10 +63,10 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     private FlowRegister runningFlows;
 
     @Inject
-    private FlowLogRepository flowLogRepository;
+    private TransactionService transactionService;
 
     @Inject
-    private TransactionService transactionService;
+    private ApplicationFlowInformation applicationFlowInformation;
 
     @Override
     public void accept(Event<? extends Payload> event) {
@@ -177,7 +136,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     private boolean isFlowAcceptable(String key, Payload payload) {
         if (payload instanceof Acceptable && ((Acceptable) payload).accepted() != null) {
             Acceptable acceptable = (Acceptable) payload;
-            if (!ALLOWED_PARALLEL_FLOWS.contains(key) && flowLogService.isOtherFlowRunning(payload.getStackId())) {
+            if (!applicationFlowInformation.getAllowedParallelFlows().contains(key) && flowLogService.isOtherFlowRunning(payload.getStackId())) {
                 acceptable.accepted().accept(Boolean.FALSE);
                 return false;
             }
@@ -195,7 +154,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     }
 
     private void cancelRunningFlows(Long stackId) throws TransactionExecutionException {
-        Set<String> flowIds = flowLogRepository.findAllRunningNonTerminationFlowIdsByStackId(stackId);
+        Set<String> flowIds = flowLogService.findAllRunningNonTerminationFlowIdsByStackId(stackId);
         LOGGER.debug("flow cancellation arrived: ids: {}", flowIds);
         for (String id : flowIds) {
             String flowChainId = runningFlows.getFlowChainId(id);
@@ -224,12 +183,12 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     }
 
     public void restartFlow(String flowId) {
-        FlowLog flowLog = flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(flowId);
+        FlowLog flowLog = flowLogService.findFirstByFlowIdOrderByCreatedDesc(flowId);
         restartFlow(flowLog);
     }
 
     public void restartFlow(FlowLog flowLog) {
-        if (RESTARTABLE_FLOWS.contains(flowLog.getFlowType())) {
+        if (applicationFlowInformation.getRestartableFlows().contains(flowLog.getFlowType())) {
             Optional<FlowConfiguration<?>> flowConfig = flowConfigs.stream()
                     .filter(fc -> fc.getClass().equals(flowLog.getFlowType())).findFirst();
             Payload payload = (Payload) JsonReader.jsonToJava(flowLog.getPayload());

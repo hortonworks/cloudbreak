@@ -31,7 +31,7 @@ import org.springframework.statemachine.transition.Transition;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
+import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.CommonContext;
 import com.sequenceiq.cloudbreak.core.flow2.Flow;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
@@ -516,7 +516,7 @@ public class OfflineStateGenerator {
         }
     }
 
-    static class CustomAction extends AbstractAction<FlowState, FlowEvent, CommonContext, Payload> {
+    static class CustomAction extends AbstractStackAction<FlowState, FlowEvent, CommonContext, Payload> {
         CustomAction() {
             super(Payload.class);
         }
