@@ -4,7 +4,6 @@ import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 
 import javax.inject.Inject;
 
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -24,9 +23,8 @@ public class RepoConfigValidationTest extends AbstractIntegrationTest {
     @Inject
     private UtilTestClient utilTestClient;
 
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        createDefaultUser((TestContext) data[0]);
+    @Override
+    protected void setupTest(TestContext testContext) {
     }
 
     @Test(dataProvider = DATA_PROVIDER_FOR_REPO_CONFIG_TEST)
@@ -34,8 +32,8 @@ public class RepoConfigValidationTest extends AbstractIntegrationTest {
             MockedTestContext testContext,
             RepoConfigValidationTestAssertion testData,
             @Description TestCaseDescription testCaseDescription) {
-        String generatedKey = getNameGenerator().getRandomNameForResource();
 
+        String generatedKey = resourcePropertyProvider().getName();
         testContext
                 .given(generatedKey, RepoConfigValidationTestDto.class)
                 .withRequest(testData.request())
@@ -48,8 +46,9 @@ public class RepoConfigValidationTest extends AbstractIntegrationTest {
     public Object[][] dataProvider() {
         var testDataValues = RepoConfigValidationTestAssertion.values();
         var data = new Object[testDataValues.length][3];
-        var testContext = getBean(MockedTestContext.class);
         for (int i = 0; i < testDataValues.length; i++) {
+            var testContext = getBean(MockedTestContext.class);
+            createDefaultUser(testContext);
             data[i][0] = testContext;
             data[i][1] = testDataValues[i];
             data[i][2] =

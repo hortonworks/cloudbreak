@@ -7,8 +7,6 @@ import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
@@ -49,14 +47,9 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
     @Inject
     private EnvironmentTestClient environmentTestClient;
 
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        createDefaultUser((TestContext) data[0]);
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void tear(Object[] data) {
-        ((TestContext) data[0]).cleanupTestContext();
+    @Override
+    protected void setupTest(TestContext testContext) {
+        createDefaultUser(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -65,7 +58,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             when = "calling create image catalog with that URL",
             then = "getting image catalog response so the creation success")
     public void testImageCatalogCreationWhenURLIsValidAndExists(TestContext testContext) {
-        String imgCatalogName = getNameGenerator().getRandomNameForResource();
+        String imgCatalogName = resourcePropertyProvider().getName();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
@@ -83,7 +76,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             when = "calling create image catalog with that URL and name",
             then = "getting a BadRequestException")
     public void testImageCatalogCreationWhenNameIsTooShort(TestContext testContext) {
-        String imgCatalogName = getNameGenerator().getRandomNameForResource().substring(0, 4);
+        String imgCatalogName = resourcePropertyProvider().getName().substring(0, 4);
 
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
@@ -101,7 +94,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             when = "calling create image catalog with that URL and name",
             then = "getting a BadRequestException")
     public void testImageCatalogCreationWhenNameIsTooLong(TestContext testContext) {
-        String imgCatalogName = getNameGenerator().getRandomNameForResource().concat(getLongNameGenerator().stringGenerator(100));
+        String imgCatalogName = resourcePropertyProvider().getName().concat(getLongNameGenerator().stringGenerator(100));
 
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
@@ -119,7 +112,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             when = "calling create image catalog with that URL and name",
             then = "getting a BadRequestException")
     public void testImageCatalogCreationWhenNameContainsSpecialCharacters(TestContext testContext) {
-        String imgCatalogName = getNameGenerator().getRandomNameForResource().concat(IMAGECATALOG_NAME_WITH_SPECIAL_CHARS);
+        String imgCatalogName = resourcePropertyProvider().getName().concat(IMAGECATALOG_NAME_WITH_SPECIAL_CHARS);
 
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
@@ -136,7 +129,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             when = "calling create image catalog with that URL",
             then = "getting a BadRequestException")
     public void testImageCatalogCreationWhenTheCatalogURLIsInvalid(TestContext testContext) {
-        String imgCatalogName = getNameGenerator().getRandomNameForResource();
+        String imgCatalogName = resourcePropertyProvider().getName();
         String invalidURL = "https:/google.com/imagecatalog";
 
         testContext
@@ -155,7 +148,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             when = "calling create image catalog with that URL",
             then = "getting a BadRequestException")
     public void testImageCatalogCreationWhenTheCatalogURLPointsNotToAnImageCatalogJson(TestContext testContext) {
-        String imgCatalogName = getNameGenerator().getRandomNameForResource();
+        String imgCatalogName = resourcePropertyProvider().getName();
 
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
@@ -173,7 +166,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             when = "calling create image catalog with that URL",
             then = "getting a BadRequestException")
     public void testImageCatalogCreationWhenTheCatalogURLPointsToAnInvalidImageCatalogJson(TestContext testContext) {
-        String imgCatalogName = getNameGenerator().getRandomNameForResource();
+        String imgCatalogName = resourcePropertyProvider().getName();
 
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
@@ -191,7 +184,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             when = "calling delete on the existing one and create a new one with the same name",
             then = "getting an image catalog response so the request was valid")
     public void testImageCatalogCreationWhenCatalogWithTheSameNameDeletedRightBeforeCreation(TestContext testContext) {
-        String imgCatalogName = getNameGenerator().getRandomNameForResource();
+        String imgCatalogName = resourcePropertyProvider().getName();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
@@ -219,8 +212,8 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             when = "calling delete on the existing one",
             then = "the deletion was success")
     public void testImageCatalogDeletion(TestContext testContext) {
-        String imgCatalogName = getNameGenerator().getRandomNameForResource();
-        String catalogKey = getNameGenerator().getRandomNameForResource();
+        String imgCatalogName = resourcePropertyProvider().getName();
+        String catalogKey = resourcePropertyProvider().getName();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
@@ -241,7 +234,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             when = "calling get on the default",
             then = "the response contains MOCK images")
     public void testGetImageCatalogWhenCatalogContainsTheRequestedProvider(TestContext testContext) {
-        String imgCatalogName = getNameGenerator().getRandomNameForResource();
+        String imgCatalogName = resourcePropertyProvider().getName();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
@@ -266,7 +259,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             when = "calling get on the default",
             then = "the response does not contains AWS images")
     public void testGetImageCatalogWhenCatalogDoesNotContainTheRequestedProvider(TestContext testContext) {
-        String imgCatalogName = getNameGenerator().getRandomNameForResource();
+        String imgCatalogName = resourcePropertyProvider().getName();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
@@ -291,7 +284,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             when = "calling get with that name",
             then = "getting a ForbiddenException")
     public void testGetImageCatalogWhenTheSpecifiedCatalogDoesNotExistWithName(TestContext testContext) {
-        String imgCatalogName = getNameGenerator().getRandomNameForResource();
+        String imgCatalogName = resourcePropertyProvider().getName();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
@@ -309,7 +302,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             when = "calling get AWS provider",
             then = "getting a list with AWS specific images")
     public void testGetImageCatalogWhenDefaultCatalogContainsTheRequestedProvider(TestContext testContext) {
-        String imgCatalogName = getNameGenerator().getRandomNameForResource();
+        String imgCatalogName = resourcePropertyProvider().getName();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
@@ -334,7 +327,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             when = "calling get AWS provider",
             then = "getting a list with AWS specific images")
     public void testGetImageCatalogWhenDefaultCatalogDoesNotContainTheRequestedProvider(TestContext testContext) {
-        String imgCatalogName = getNameGenerator().getRandomNameForResource();
+        String imgCatalogName = resourcePropertyProvider().getName();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
@@ -359,7 +352,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             when = "calling get request on catalog endpoint",
             then = "getting back the catalog request")
     public void testGetImageCatalogsRequestFromExistingImageCatalog(TestContext testContext) {
-        String imgCatalogName = getNameGenerator().getRandomNameForResource();
+        String imgCatalogName = resourcePropertyProvider().getName();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
@@ -392,7 +385,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             when = "calling update request with new url",
             then = "the image catalog list should contains the new url")
     public void testUpdateImageCatalog(TestContext testContext) {
-        String imgCatalogName = getNameGenerator().getRandomNameForResource();
+        String imgCatalogName = resourcePropertyProvider().getName();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
@@ -431,7 +424,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             when = "calling list all the catalog",
             then = "getting back the account related catalogs")
     public void testGetListOfImageCatalogs(TestContext testContext) {
-        String imgCatalogName = getNameGenerator().getRandomNameForResource();
+        String imgCatalogName = resourcePropertyProvider().getName();
 
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
@@ -455,9 +448,9 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
         createDefaultCredential(testContext);
         initializeDefaultClusterDefinitions(testContext);
 
-        String imgCatalogName = getNameGenerator().getRandomNameForResource();
-        String environmentName = getNameGenerator().getRandomNameForResource();
-        String stackName = getNameGenerator().getRandomNameForResource();
+        String imgCatalogName = resourcePropertyProvider().getName();
+        String environmentName = resourcePropertyProvider().getName();
+        String stackName = resourcePropertyProvider().getName();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext

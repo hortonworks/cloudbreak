@@ -1,5 +1,14 @@
 package com.sequenceiq.it.cloudbreak.newway.dto.database;
 
+import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
+
+import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import javax.ws.rs.WebApplicationException;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
@@ -10,14 +19,6 @@ import com.sequenceiq.it.cloudbreak.newway.GherkinTest;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.DeletableTestDto;
-
-import javax.ws.rs.WebApplicationException;
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
 
 @Prototype
 public class DatabaseTestDto extends DeletableTestDto<DatabaseV4Request, DatabaseV4Response, DatabaseTestDto, DatabaseV4Response> {
@@ -48,7 +49,8 @@ public class DatabaseTestDto extends DeletableTestDto<DatabaseV4Request, Databas
     }
 
     public DatabaseTestDto valid() {
-        return withName(getNameCreator().getRandomNameForResource())
+        return withName(resourceProperyProvider().getName())
+                .withDescription(resourceProperyProvider().getDescription("database"))
                 .withConnectionUserName("user")
                 .withConnectionPassword("password")
                 .withConnectionURL("jdbc:postgresql://somedb.com:5432/mydb")
@@ -63,6 +65,11 @@ public class DatabaseTestDto extends DeletableTestDto<DatabaseV4Request, Databas
     public DatabaseTestDto withName(String name) {
         getRequest().setName(name);
         setName(name);
+        return this;
+    }
+
+    public DatabaseTestDto withDescription(String description) {
+        getRequest().setDescription(description);
         return this;
     }
 

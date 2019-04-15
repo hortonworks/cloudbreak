@@ -1,5 +1,12 @@
 package com.sequenceiq.it.cloudbreak.newway.dto.ldap;
 
+import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.ws.rs.WebApplicationException;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
@@ -8,12 +15,6 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.DeletableTestDto;
-
-import javax.ws.rs.WebApplicationException;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
 
 @Prototype
 public class LdapTestDto extends DeletableTestDto<LdapV4Request, LdapV4Response, LdapTestDto, LdapV4Response> {
@@ -37,7 +38,8 @@ public class LdapTestDto extends DeletableTestDto<LdapV4Request, LdapV4Response,
     }
 
     public LdapTestDto valid() {
-        return withName(getNameCreator().getRandomNameForResource())
+        return withName(resourceProperyProvider().getName())
+                .withDescription(resourceProperyProvider().getDescription("LDAP"))
                 .withBindPassword("bindPassword")
                 .withAdminGroup("group")
                 .withBindDn("bindDn")

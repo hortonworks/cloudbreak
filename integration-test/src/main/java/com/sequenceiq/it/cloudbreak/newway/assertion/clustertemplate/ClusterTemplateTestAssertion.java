@@ -1,5 +1,17 @@
 package com.sequenceiq.it.cloudbreak.newway.assertion.clustertemplate;
 
+import static com.google.common.collect.Sets.newHashSet;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type.OTHER;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequired.OPTIONAL;
+
+import java.security.InvalidParameterException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
@@ -11,17 +23,6 @@ import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.newway.dto.clustertemplate.ClusterTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
-import org.apache.commons.lang3.StringUtils;
-
-import java.security.InvalidParameterException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import static com.google.common.collect.Sets.newHashSet;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type.OTHER;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequired.OPTIONAL;
 
 public class ClusterTemplateTestAssertion {
 

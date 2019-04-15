@@ -3,10 +3,10 @@ package com.sequenceiq.it.cloudbreak.newway.client;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
+import com.sequenceiq.it.cloudbreak.newway.action.v4.clusterdefinition.ClusterDefinitionCreateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.clusterdefinition.ClusterDefinitionDeleteAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.clusterdefinition.ClusterDefinitionGetAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.clusterdefinition.ClusterDefinitionListAction;
-import com.sequenceiq.it.cloudbreak.newway.action.v4.clusterdefinition.ClusterDefinitionCreateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.clusterdefinition.ClusterDefinitionRequestAction;
 import com.sequenceiq.it.cloudbreak.newway.dto.clusterdefinition.ClusterDefinitionTestDto;
 

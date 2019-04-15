@@ -11,8 +11,6 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -46,17 +44,11 @@ public class DatabaseTest extends AbstractIntegrationTest {
     @Inject
     private DatabaseTestClient databaseTestClient;
 
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
+    @Override
+    protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultEnvironment(testContext);
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void tear(Object[] data) {
-        ((TestContext) data[0]).cleanupTestContext();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -65,7 +57,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
             when = "the database is deleted and then a create request is sent with the same database name",
             then = "the database should be created again")
     public void createAndDeleteAndCreateWithSameNameThenShouldRecreatedDatabase(TestContext testContext) {
-        String databaseName = getNameGenerator().getRandomNameForResource();
+        String databaseName = resourcePropertyProvider().getName();
         testContext
                 .given(DatabaseTestDto.class)
                 .withName(databaseName)
@@ -87,7 +79,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
             when = "when a database create request is sent with the same database name",
             then = "the create should return a BadRequestException")
     public void createAndCreateWithSameNameThenShouldThrowBadRequestException(TestContext testContext) {
-        String databaseName = getNameGenerator().getRandomNameForResource();
+        String databaseName = resourcePropertyProvider().getName();
         testContext
                 .given(DatabaseTestDto.class)
                 .withName(databaseName)
@@ -104,7 +96,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
             TestContext testContext,
             DatabaseType type,
             @Description TestCaseDescription testCaseDescription) {
-        String databaseName = getNameGenerator().getRandomNameForResource();
+        String databaseName = resourcePropertyProvider().getName();
         testContext
                 .given(DatabaseTestDto.class)
                 .withType(type.name())
@@ -127,7 +119,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
             String connectionUrl,
             String expectedErrorMessage,
             @Description TestCaseDescription testCaseDescription) {
-        String generatedKey = getNameGenerator().getRandomNameForResource();
+        String generatedKey = resourcePropertyProvider().getName();
         testContext
                 .given(DatabaseTestDto.class)
                 .withName(databaseName)
@@ -150,7 +142,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
             String connectionUrl,
             String expectedErrorMessage,
             @Description TestCaseDescription testCaseDescription) {
-        String generatedKey = getNameGenerator().getRandomNameForResource();
+        String generatedKey = resourcePropertyProvider().getName();
 
         testContext
                 .given(DatabaseTestTestDto.class)
@@ -173,7 +165,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
             when = "calling test database endpoint with a non-existent database name",
             then = "the test connection should return access denied")
     public void testDatabaseTestConnectionWithNonExistingDbName(TestContext testContext) {
-        String generatedKey = getNameGenerator().getRandomNameForResource();
+        String generatedKey = resourcePropertyProvider().getName();
 
         testContext
                 .given(DatabaseTestTestDto.class)
@@ -241,7 +233,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
                 },
                 {
                         getBean(TEST_CONTEXT_CLASS),
-                        getNameGenerator().getRandomNameForResource(),
+                        resourcePropertyProvider().getName(),
                         null,
                         DATABASE_PASSWORD,
                         DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
@@ -253,7 +245,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
                 },
                 {
                         getBean(TEST_CONTEXT_CLASS),
-                        getNameGenerator().getRandomNameForResource(),
+                        resourcePropertyProvider().getName(),
                         DATABASE_USERNAME,
                         null,
                         DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
@@ -265,7 +257,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
                 },
                 {
                         getBean(TEST_CONTEXT_CLASS),
-                        getNameGenerator().getRandomNameForResource(),
+                        resourcePropertyProvider().getName(),
                         DATABASE_USERNAME,
                         DATABASE_PASSWORD,
                         DATABASE_HOST_PORT_DB,

@@ -1,7 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.assertion.kerberos;
 
-import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 
 public class KerberosTestAssertion {
 

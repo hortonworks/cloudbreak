@@ -37,18 +37,20 @@ public class SecurityGroupsTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(given = "platform security groups", when = "filter by a valid ceredential name", then = "get the list of security groups")
     public void testGetSecurityGroupsByCredentialName(MockedTestContext testContext) {
-        String credentialName = getNameGenerator().getRandomNameForResource();
+        String credentialName = resourcePropertyProvider().getName();
         testContext
                 .given(CredentialTestDto.class)
                 .withName(credentialName)
                 .when(credentialTestClient.createV4())
                 .given(PlatformSecurityGroupsTestDto.class)
                 .withCredentialName(credentialName)
-                .when(connectorTestClient.securityGroups());
+                .when(connectorTestClient.securityGroups())
+                .validate();
     }
 
     @Test(dataProvider = "contextWithCredentialNameAndException")
-    public void testGetSecurityGroupsByCredentialNameWhenCredentialIsInvalid(MockedTestContext testContext, String credentialName, String exceptionKey,
+    public void testGetSecurityGroupsByCredentialNameWhenCredentialIsInvalid(
+            MockedTestContext testContext, String credentialName, String exceptionKey,
             Class<Exception> exception, String msg, @Description TestCaseDescription testCaseDescription) {
         testContext
                 .given(PlatformSecurityGroupsTestDto.class)

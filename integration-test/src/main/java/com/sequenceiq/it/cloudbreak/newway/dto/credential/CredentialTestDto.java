@@ -1,5 +1,9 @@
 package com.sequenceiq.it.cloudbreak.newway.dto.credential;
 
+import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
+
+import java.util.Collection;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.AwsCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.azure.AzureCredentialV4RequestParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.cumulus.CumulusYarnCredentialV4Parameters;
@@ -16,10 +20,6 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.DeletableTestDto;
 import com.sequenceiq.it.cloudbreak.newway.v4.CredentialV4Action;
 
-import java.util.Collection;
-
-import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
-
 @Prototype
 public class CredentialTestDto extends DeletableTestDto<CredentialV4Request, CredentialV4Response, CredentialTestDto, CredentialV4Response> {
 
@@ -35,7 +35,8 @@ public class CredentialTestDto extends DeletableTestDto<CredentialV4Request, Cre
     }
 
     public CredentialTestDto valid() {
-        withName(getNameCreator().getRandomNameForResource());
+        withName(resourceProperyProvider().getName());
+        withDescription(resourceProperyProvider().getDescription("credential"));
         return getCloudProvider().credential(this);
     }
 

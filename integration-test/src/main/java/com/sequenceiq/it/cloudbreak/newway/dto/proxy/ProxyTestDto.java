@@ -4,10 +4,10 @@ import javax.ws.rs.WebApplicationException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.requests.ProxyV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
-import com.sequenceiq.it.cloudbreak.newway.dto.AbstractCloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.dto.AbstractCloudbreakTestDto;
 
 @Prototype
 public class ProxyTestDto extends AbstractCloudbreakTestDto<ProxyV4Request, ProxyV4Response, ProxyTestDto> {
@@ -32,8 +32,8 @@ public class ProxyTestDto extends AbstractCloudbreakTestDto<ProxyV4Request, Prox
 
     @Override
     public ProxyTestDto valid() {
-        return withName(getNameCreator().getRandomNameForResource())
-                .withDescription("Proxy config for integration test")
+        return withName(resourceProperyProvider().getName())
+                .withDescription(resourceProperyProvider().getDescription("proxy"))
                 .withServerHost("1.2.3.4")
                 .withServerUser("mock")
                 .withPassword("akarmi")

@@ -12,8 +12,8 @@ import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.Credential;
 import com.sequenceiq.it.cloudbreak.newway.Entity;
-import com.sequenceiq.it.cloudbreak.newway.dto.RecommendationTestDto;
 import com.sequenceiq.it.cloudbreak.newway.Region;
+import com.sequenceiq.it.cloudbreak.newway.dto.RecommendationTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.clusterdefinition.ClusterDefinitionTestDto;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 

@@ -1,14 +1,14 @@
 package com.sequenceiq.it.cloudbreak.newway.dto.mpack;
 
+import java.util.Collection;
+import java.util.List;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.request.ManagementPackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.response.ManagementPackV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.DeletableTestDto;
-
-import java.util.Collection;
-import java.util.List;
 
 @Prototype
 public class MPackTestDto extends DeletableTestDto<ManagementPackV4Request, ManagementPackV4Response, MPackTestDto, ManagementPackV4Response> {
@@ -18,8 +18,9 @@ public class MPackTestDto extends DeletableTestDto<ManagementPackV4Request, Mana
     }
 
     public MPackTestDto valid() {
-        return withName(getNameCreator().getRandomNameForResource())
-                .witMpackUrl("http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.2.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.2.0.0-520.tar.gz");
+        return withName(resourceProperyProvider().getName())
+                .witMpackUrl("http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.2.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.2.0.0-520.tar.gz")
+                .withDescription(resourceProperyProvider().getDescription("management pack"));
     }
 
     public MPackTestDto withName(String name) {

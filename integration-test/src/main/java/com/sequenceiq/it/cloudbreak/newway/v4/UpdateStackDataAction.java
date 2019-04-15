@@ -7,10 +7,10 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.StackRepositoryTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 
 public class UpdateStackDataAction implements Action<StackRepositoryTestDto> {
 

@@ -6,14 +6,12 @@ import static com.sequenceiq.it.spark.ITResponse.AMBARI_API_ROOT;
 import javax.inject.Inject;
 
 import org.springframework.http.HttpMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.newway.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
-import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
@@ -27,19 +25,14 @@ public class AmbariSetupTest extends AbstractIntegrationTest {
     @Inject
     private EnvironmentTestClient environmentTestClient;
 
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        minimalSetupForClusterCreation((MockedTestContext) data[0]);
-    }
-
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "a working environment",
             when = "a stack is created",
             then = "Ambari user endpoints should be invoked with the proper requests")
     public void verifyCallsAgainstAmbariUserCreation(TestContext testContext) {
-        String generatedKey = getNameGenerator().getRandomNameForResource();
-        String envName = getNameGenerator().getRandomNameForResource();
+        String generatedKey = resourcePropertyProvider().getName();
+        String envName = resourcePropertyProvider().getName();
 
         testContext
                 .given(EnvironmentTestDto.class)

@@ -1,5 +1,9 @@
 package com.sequenceiq.it.cloudbreak.newway.dto;
 
+import static com.google.common.collect.Sets.newHashSet;
+
+import java.util.Set;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
@@ -7,10 +11,6 @@ import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.ldap.LdapTestDto;
-
-import java.util.Set;
-
-import static com.google.common.collect.Sets.newHashSet;
 
 @Prototype
 public class ClusterTestDto extends AbstractCloudbreakTestDto<ClusterV4Request, ClusterV4Response, ClusterTestDto> {

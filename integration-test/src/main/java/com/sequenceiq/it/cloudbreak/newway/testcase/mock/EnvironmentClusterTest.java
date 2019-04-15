@@ -11,8 +11,6 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
@@ -70,22 +68,11 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     private ProxyTestClient proxyTestClient;
 
     @Override
-    protected void minimalSetupForClusterCreation(TestContext testContext) {
+    protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultClusterDefinitions(testContext);
-    }
-
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        MockedTestContext testContext = (MockedTestContext) data[0];
-        minimalSetupForClusterCreation(testContext);
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void tearDown(Object[] data) {
-        ((MockedTestContext) data[0]).cleanupTestContext();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -217,7 +204,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
             when = "calling create cluster with a different cluster name",
             then = "the second cluster should be created")
     public void testSameEnvironmentWithDifferentClusters(TestContext testContext) {
-        String newStack = getNameGenerator().getRandomNameForResource();
+        String newStack = resourcePropertyProvider().getName();
         testContext.given(EnvironmentTestDto.class)
                 .when(environmentTestClient.createV4())
                 .given(StackTestDto.class)
@@ -240,7 +227,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         Set<String> validRds = new HashSet<>();
         validRds.add(testContext.get(DatabaseTestDto.class).getName());
 
-        String newStack = getNameGenerator().getRandomNameForResource();
+        String newStack = resourcePropertyProvider().getName();
         testContext.given(EnvironmentTestDto.class)
                 .withRdsConfigs(validRds)
                 .when(environmentTestClient.createV4())
@@ -276,8 +263,8 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     public void testReuseRdsWithDifferentClustersInDifferentEnvs(TestContext testContext) {
         createDefaultRdsConfig(testContext);
         Set<String> validRds = Set.of(testContext.get(DatabaseTestDto.class).getName());
-        String newEnv = getNameGenerator().getRandomNameForResource();
-        String newStack = getNameGenerator().getRandomNameForResource();
+        String newEnv = resourcePropertyProvider().getName();
+        String newStack = resourcePropertyProvider().getName();
 
         testContext.given(EnvironmentTestDto.class)
                 .withRdsConfigs(validRds)
@@ -465,8 +452,10 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         return environment;
     }
 
-    private static EnvironmentTestDto checkNewCredentialAttachedToEnv(TestContext testContext,
+    private static EnvironmentTestDto checkNewCredentialAttachedToEnv(
+            TestContext testContext,
             EnvironmentTestDto environment, CloudbreakClient cloudbreakClient) {
+
         String credentialName = environment.getResponse().getCredentialName();
         if (!credentialName.equals(testContext.get(NEW_CREDENTIAL_KEY).getName())) {
             throw new TestFailException("Credential is not attached to environment");
@@ -474,8 +463,10 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         return environment;
     }
 
-    private <T extends CloudbreakTestDto> EnvironmentTestDto checkRdsDetachedFromEnv(TestContext testContext,
+    private <T extends CloudbreakTestDto> EnvironmentTestDto checkRdsDetachedFromEnv(
+            TestContext testContext,
             EnvironmentTestDto environment, Class<T> rdsKey, CloudbreakClient cloudbreakClient) {
+
         String rdsName = testContext.get(rdsKey).getName();
         return checkRdsDetachedFromEnv(environment, rdsName);
     }

@@ -1,5 +1,14 @@
 package com.sequenceiq.it.cloudbreak.newway.dto.environment;
 
+import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
+import javax.ws.rs.WebApplicationException;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.EnvironmentV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.LocationV4Request;
@@ -10,14 +19,6 @@ import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.DeletableTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
-
-import javax.ws.rs.WebApplicationException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
-import static com.sequenceiq.it.cloudbreak.newway.util.ResponseUtil.getErrorMessage;
 
 @Prototype
 public class EnvironmentTestDto extends DeletableTestDto<EnvironmentV4Request, DetailedEnvironmentV4Response, EnvironmentTestDto, SimpleEnvironmentV4Response> {
@@ -47,8 +48,8 @@ public class EnvironmentTestDto extends DeletableTestDto<EnvironmentV4Request, D
 
     @Override
     public EnvironmentTestDto valid() {
-        return getCloudProvider().environment(withName(getNameCreator().getRandomNameForResource())
-                .withDescription("Description for environment")
+        return getCloudProvider().environment(withName(resourceProperyProvider().getName())
+                .withDescription(resourceProperyProvider().getDescription("environment"))
                 .withCredentialName(getTestContext().get(CredentialTestDto.class).getName()));
     }
 

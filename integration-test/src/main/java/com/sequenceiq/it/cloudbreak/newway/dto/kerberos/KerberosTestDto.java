@@ -4,10 +4,10 @@ import javax.ws.rs.WebApplicationException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
-import com.sequenceiq.it.cloudbreak.newway.dto.AbstractCloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.Prototype;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.dto.AbstractCloudbreakTestDto;
 
 @Prototype
 public class KerberosTestDto extends AbstractCloudbreakTestDto<KerberosV4Request, KerberosV4Response, KerberosTestDto> {
@@ -39,7 +39,7 @@ public class KerberosTestDto extends AbstractCloudbreakTestDto<KerberosV4Request
 
     @Override
     public KerberosTestDto valid() {
-        return withName(getNameCreator().getRandomNameForResource());
+        return withName(resourceProperyProvider().getName());
     }
 
     public KerberosTestDto withRequest(KerberosV4Request request) {

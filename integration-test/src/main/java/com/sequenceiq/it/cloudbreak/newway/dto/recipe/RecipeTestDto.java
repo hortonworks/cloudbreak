@@ -44,7 +44,8 @@ public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Res
     }
 
     public RecipeTestDto valid() {
-        return withName(getNameCreator().getRandomNameForResource())
+        return withName(resourceProperyProvider().getName())
+                .withDescription(resourceProperyProvider().getDescription("recipe"))
                 .withRecipeType(RecipeV4Type.PRE_AMBARI_START)
                 .withContent(new String(Base64.getEncoder().encode("#!/bin/bash%necho ALMAA".getBytes())));
     }

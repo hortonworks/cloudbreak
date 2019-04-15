@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.newway.Entity;
-import com.sequenceiq.it.cloudbreak.newway.RandomNameCreator;
+import com.sequenceiq.it.cloudbreak.newway.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
@@ -36,7 +36,7 @@ public abstract class AbstractCloudbreakTestDto<R, S, T extends CloudbreakTestDt
     private CloudProvider cloudProvider;
 
     @Inject
-    private RandomNameCreator randomNameCreator;
+    private ResourcePropertyProvider resourcePropertyProvider;
 
     private String name;
 
@@ -217,8 +217,8 @@ public abstract class AbstractCloudbreakTestDto<R, S, T extends CloudbreakTestDt
         testContext.handleExecptionsDuringTest(false);
     }
 
-    public RandomNameCreator getNameCreator() {
-        return randomNameCreator;
+    public ResourcePropertyProvider resourceProperyProvider() {
+        return resourcePropertyProvider;
     }
 
     public <T extends CloudbreakTestDto> T deleteGiven(Class<T> clazz, Action<T> action, RunningParameter runningParameter) {

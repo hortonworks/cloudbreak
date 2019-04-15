@@ -69,8 +69,7 @@ public class StackActionV4 {
     }
 
     private static void delete(IntegrationTestContext integrationTestContext, StackTestDto entity, Boolean forced) {
-        CloudbreakClient client;
-        client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
+        CloudbreakClient client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" delete: " + entity.getName());
         client.getCloudbreakClient().stackV4Endpoint()

@@ -81,6 +81,7 @@ public class TerminationService {
                 }
                 stack.setCredential(null);
                 stack.setName(terminatedName);
+                stack.setTerminated(clock.getCurrentTimeMillis());
                 terminateInstanceGroups(stack);
                 terminateMetaDataInstances(stack);
                 stackService.save(stack);

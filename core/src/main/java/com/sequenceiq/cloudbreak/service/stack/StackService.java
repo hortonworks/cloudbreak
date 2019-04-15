@@ -108,9 +108,9 @@ public class StackService {
 
     public static final List<String> REATTACH_COMPATIBLE_PLATFORMS = List.of(CloudConstants.AWS, CloudConstants.AZURE, CloudConstants.GCP, CloudConstants.MOCK);
 
-    private static final String STACK_NOT_FOUND_EXCEPTION_ID_TXT = "Stack not found by id '%d'";
+    private static final String STACK_NOT_FOUND_BY_ID_EXCEPTION_MESSAGE = "Stack not found by id '%d'";
 
-    private static final String STACK_NOT_FOUND_EXCEPTION_TXT = "Stack not found by name '%s'";
+    private static final String STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE = "Stack not found by name '%s'";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackService.class);
 
@@ -291,7 +291,7 @@ public class StackService {
             throw new TransactionRuntimeExecutionException(e);
         }
         if (stack == null) {
-            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_ID_TXT, id));
+            throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_ID_EXCEPTION_MESSAGE, id));
         }
         return stack;
     }
@@ -344,7 +344,7 @@ public class StackService {
                         showTerminatedClustersAfterConfig.showAfterMillisecs()
                 );
                 if (stack == null) {
-                    throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_TXT, name));
+                    throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name));
                 }
                 StackV4Response stackResponse = converterUtil.convert(stack, StackV4Response.class);
                 stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entries);
@@ -360,7 +360,7 @@ public class StackService {
             return transactionService.required(() -> {
                 Stack stack = findByNameAndWorkspaceIdWithLists(name, workspaceId);
                 if (stack == null) {
-                    throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_TXT, name));
+                    throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name));
                 }
                 StackV4Request request = converterUtil.convert(stack, StackV4Request.class);
                 request.getCluster().setName(null);
@@ -374,7 +374,7 @@ public class StackService {
 
     public Stack getByNameInWorkspace(String name, Long workspaceId) {
         return Optional.ofNullable(stackRepository.findByNameAndWorkspaceId(name, workspaceId))
-                .orElseThrow(() -> new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_TXT, name)));
+                .orElseThrow(() -> new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name)));
     }
 
     public Stack getByNameInWorkspaceWithLists(String name, Long workspaceId) {
@@ -661,7 +661,7 @@ public class StackService {
     private Stack getByIdWithLists(Long id) {
         Stack retStack = stackRepository.findOneWithLists(id);
         if (retStack == null) {
-            throw new NotFoundException(String.format(STACK_NOT_FOUND_EXCEPTION_ID_TXT, id));
+            throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_ID_EXCEPTION_MESSAGE, id));
         }
         return retStack;
     }

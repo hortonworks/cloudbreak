@@ -2,8 +2,8 @@ package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.junit.Assert.assertThat;
 
@@ -12,8 +12,6 @@ import java.util.Collection;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
@@ -28,14 +26,9 @@ public class RecipeTest extends AbstractIntegrationTest {
     @Inject
     private RecipeTestClient recipeTestClient;
 
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        createDefaultUser((TestContext) data[0]);
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void tear(Object[] data) {
-        ((TestContext) data[0]).cleanupTestContext();
+    @Override
+    protected void setupTest(TestContext testContext) {
+        createDefaultUser(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -70,10 +63,10 @@ public class RecipeTest extends AbstractIntegrationTest {
             when = "create recipe",
             then = "getting a BadRequestException")
     public void testCreateSpecialNameRecipe(TestContext testContext) {
-        String spacialName = getNameGenerator().getRandomNameForResource();
+        String spacialName = resourcePropertyProvider().getName();
         testContext
                 .given(RecipeTestDto.class)
-                .withName(getNameGenerator().getInvalidRandomNameForResource())
+                .withName(resourcePropertyProvider().getInvalidName())
                 .when(recipeTestClient.createV4(), key(spacialName))
                 .expect(BadRequestException.class, key(spacialName)
                         .withExpectedMessage("The recipe's name can only contain lowercase alphanumeric characters and hyphens and has start "
@@ -87,7 +80,7 @@ public class RecipeTest extends AbstractIntegrationTest {
             when = "create recipe twice",
             then = "getting a BadRequestException")
     public void testCreateAgainRecipe(TestContext testContext) {
-        String againName = getNameGenerator().getRandomNameForResource();
+        String againName = resourcePropertyProvider().getName();
         testContext.given(RecipeTestDto.class)
                 .when(recipeTestClient.createV4())
                 .when(recipeTestClient.createV4(), key(againName))
@@ -102,7 +95,7 @@ public class RecipeTest extends AbstractIntegrationTest {
             when = "create recipe",
             then = "getting a BadRequestException")
     public void testCreateInvalidRecipeShortName(TestContext testContext) {
-        String shortName = getNameGenerator().getRandomNameForResource();
+        String shortName = resourcePropertyProvider().getName();
         testContext
                 .given(RecipeTestDto.class)
                 .withName(getLongNameGenerator().stringGenerator(3))
@@ -118,7 +111,7 @@ public class RecipeTest extends AbstractIntegrationTest {
             when = "create recipe",
             then = "getting a BadRequestException")
     public void testCreateInvalidRecipeLongName(TestContext testContext) {
-        String longName = getNameGenerator().getRandomNameForResource();
+        String longName = resourcePropertyProvider().getName();
         testContext
                 .given(RecipeTestDto.class)
                 .withName(getLongNameGenerator().stringGenerator(101))
@@ -134,7 +127,7 @@ public class RecipeTest extends AbstractIntegrationTest {
             when = "create recipe",
             then = "getting a BadRequestException")
     public void testCreateInvalidRecipeLongDescription(TestContext testContext) {
-        String longDesc = getNameGenerator().getRandomNameForResource();
+        String longDesc = resourcePropertyProvider().getName();
         testContext
                 .given(RecipeTestDto.class)
                 .withDescription(getLongNameGenerator().stringGenerator(1001))
@@ -150,7 +143,7 @@ public class RecipeTest extends AbstractIntegrationTest {
             when = "list recipes",
             then = "recipe is not present")
     public void testCreateDeleteValidAndList(TestContext testContext) {
-        String recipeName = getNameGenerator().getRandomNameForResource();
+        String recipeName = resourcePropertyProvider().getName();
         testContext
                 .given(RecipeTestDto.class)
                 .withName(recipeName)
@@ -171,7 +164,7 @@ public class RecipeTest extends AbstractIntegrationTest {
             when = "list recipes",
             then = "recipe is present")
     public void testCreateValidAndList(TestContext testContext) {
-        String recipeName = getNameGenerator().getRandomNameForResource();
+        String recipeName = resourcePropertyProvider().getName();
         testContext
                 .given(RecipeTestDto.class)
                 .withName(recipeName)

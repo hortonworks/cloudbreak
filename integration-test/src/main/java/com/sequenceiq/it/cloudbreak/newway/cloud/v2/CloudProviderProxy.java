@@ -1,5 +1,14 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud.v2;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.StackV4ParameterBase;
 import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
@@ -13,13 +22,6 @@ import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDtoBase;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Component
 public class CloudProviderProxy implements CloudProvider {

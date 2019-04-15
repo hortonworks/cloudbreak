@@ -1,5 +1,18 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.e2e.azure;
 
+import static com.sequenceiq.it.cloudbreak.newway.assertion.storage.azure.AdlsGen2TestAssertion.stackContainsAdlsGen2Properties;
+import static com.sequenceiq.it.cloudbreak.newway.assertion.storage.azure.AdlsGen2TestAssertion.stackContainsStorageLocations;
+import static com.sequenceiq.it.cloudbreak.newway.util.storagelocation.StorageComponent.HIVE;
+import static com.sequenceiq.it.cloudbreak.newway.util.storagelocation.StorageComponent.RANGER;
+import static com.sequenceiq.it.cloudbreak.newway.util.storagelocation.StorageComponent.SPARK2;
+import static com.sequenceiq.it.cloudbreak.newway.util.storagelocation.StorageComponent.TEZ;
+import static com.sequenceiq.it.cloudbreak.newway.util.storagelocation.StorageComponent.YARN;
+import static com.sequenceiq.it.cloudbreak.newway.util.storagelocation.StorageComponent.ZEPPELIN;
+
+import javax.inject.Inject;
+
+import org.testng.annotations.Test;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.AdlsGen2CloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
@@ -11,20 +24,6 @@ import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.newway.util.storagelocation.AzureTestStorageLocation;
 import com.sequenceiq.it.cloudbreak.newway.util.storagelocation.StorageComponent;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import javax.inject.Inject;
-
-import static com.sequenceiq.it.cloudbreak.newway.assertion.storage.azure.AdlsGen2TestAssertion.stackContainsAdlsGen2Properties;
-import static com.sequenceiq.it.cloudbreak.newway.assertion.storage.azure.AdlsGen2TestAssertion.stackContainsStorageLocations;
-import static com.sequenceiq.it.cloudbreak.newway.util.storagelocation.StorageComponent.HIVE;
-import static com.sequenceiq.it.cloudbreak.newway.util.storagelocation.StorageComponent.RANGER;
-import static com.sequenceiq.it.cloudbreak.newway.util.storagelocation.StorageComponent.SPARK2;
-import static com.sequenceiq.it.cloudbreak.newway.util.storagelocation.StorageComponent.TEZ;
-import static com.sequenceiq.it.cloudbreak.newway.util.storagelocation.StorageComponent.YARN;
-import static com.sequenceiq.it.cloudbreak.newway.util.storagelocation.StorageComponent.ZEPPELIN;
 
 public class AzureAdlsGen2Tests extends AbstractE2ETest {
 
@@ -35,12 +34,6 @@ public class AzureAdlsGen2Tests extends AbstractE2ETest {
 
     @Inject
     private AzureProperties azureProperties;
-
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
-        minimalSetupForClusterCreation(testContext);
-    }
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
@@ -72,7 +65,7 @@ public class AzureAdlsGen2Tests extends AbstractE2ETest {
             and = "the stack is started",
             then = "the stack should be available AND deletable")
     public void testCreateStopAndStartClusterWithAdlsGen2AndCloudStorage(TestContext testContext) {
-        String name = getNameGenerator().getRandomNameForResource();
+        String name = resourcePropertyProvider().getName();
         CloudStorageV4Request cloudStorageV4Request = adlsGen2CloudStorageV4RequestWithStorageLocations(name);
 
         testContext
@@ -92,12 +85,6 @@ public class AzureAdlsGen2Tests extends AbstractE2ETest {
                 .then(stackContainsAdlsGen2Properties())
 
                 .validate();
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void teardown(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
-        testContext.cleanupTestContext();
     }
 
     private CloudStorageV4Request adlsGen2CloudStorageV4RequestWithStorageLocations(String clusterName) {

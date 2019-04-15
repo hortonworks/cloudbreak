@@ -23,8 +23,8 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.validation.constraints.NotEmpty;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.it.cloudbreak.newway.MissingExpectedParameterException;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 

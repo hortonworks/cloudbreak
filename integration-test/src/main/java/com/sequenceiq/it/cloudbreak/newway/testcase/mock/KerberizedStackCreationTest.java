@@ -5,15 +5,12 @@ import static com.sequenceiq.it.cloudbreak.newway.assertion.kerberos.KerberosTes
 import javax.inject.Inject;
 
 import org.springframework.http.HttpMethod;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.newway.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
-import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.kerberos.ActiveDirectoryKerberosDescriptorTestDto;
@@ -30,16 +27,6 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
 
     @Inject
     private StackTestClient stackTestClient;
-
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        minimalSetupForClusterCreation((MockedTestContext) data[0]);
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void tear(Object[] data) {
-        ((MockedTestContext) data[0]).cleanupTestContext();
-    }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(

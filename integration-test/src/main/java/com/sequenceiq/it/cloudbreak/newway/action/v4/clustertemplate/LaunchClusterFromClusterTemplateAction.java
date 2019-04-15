@@ -22,6 +22,10 @@ public class LaunchClusterFromClusterTemplateAction implements Action<ClusterTem
         this.stackTemplateKey = stackTemplateKey;
     }
 
+    public LaunchClusterFromClusterTemplateAction(Class<StackTemplateTestDto> stackTemplateKey) {
+        this.stackTemplateKey = stackTemplateKey.getSimpleName();
+    }
+
     @Override
     public ClusterTemplateTestDto action(TestContext testContext, ClusterTemplateTestDto testDto, CloudbreakClient client) throws Exception {
         logJSON(LOGGER, "Stack from template post request:\n", testDto.getRequest().getStackTemplate());

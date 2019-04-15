@@ -2,8 +2,6 @@ package com.sequenceiq.it.cloudbreak.newway.testcase.e2e;
 
 import javax.inject.Inject;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
@@ -15,12 +13,6 @@ public class BasicStackTests extends AbstractE2ETest {
 
     @Inject
     private StackTestClient stackTestClient;
-
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
-        minimalSetupForClusterCreation(testContext);
-    }
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
@@ -53,11 +45,5 @@ public class BasicStackTests extends AbstractE2ETest {
                         .withDesiredCount(3))
                 .await(STACK_AVAILABLE)
                 .validate();
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void teardown(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
-        testContext.cleanupTestContext();
     }
 }

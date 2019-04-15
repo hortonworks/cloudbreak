@@ -22,15 +22,21 @@ public class TagSpecificationsTest extends AbstractIntegrationTest {
         createDefaultUser((TestContext) data[0]);
     }
 
+    @Override
+    protected void setupTest(TestContext testContext) {
+        createDefaultUser(testContext);
+    }
+
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "a tag specification",
             when = "list all tag specifications",
-            then = "retrive successfully")
+            then = "retrieve successfully")
     public void testGetTagSpecifications(MockedTestContext testContext) {
         testContext
                 .given(TagSpecificationsTestDto.class)
-                .when(utilTestClient.tagSpecificationsV4());
+                .when(utilTestClient.tagSpecificationsV4())
+                .validate();
     }
 
 }

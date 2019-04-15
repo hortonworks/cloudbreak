@@ -6,7 +6,6 @@ import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -28,9 +27,9 @@ public class IpPoolsTest extends AbstractIntegrationTest {
     @Inject
     private CredentialTestClient credentialTestClient;
 
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        createDefaultUser((TestContext) data[0]);
+    @Override
+    protected void setupTest(TestContext testContext) {
+        createDefaultUser(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -39,20 +38,21 @@ public class IpPoolsTest extends AbstractIntegrationTest {
             when = "calling get ip pools from the provider",
             then = "getting back the ip pool list")
     public void testGetIpPoolsByCredentialName(MockedTestContext testContext) {
-        String credentialName = getNameGenerator().getRandomNameForResource();
+        String credentialName = resourcePropertyProvider().getName();
         testContext
                 .given(CredentialTestDto.class)
                 .withName(credentialName)
                 .when(credentialTestClient.createV4())
                 .given(PlatformIpPoolsTestDto.class)
                 .withCredentialName(credentialName)
-                .when(connectorTestClient.ipPools());
+                .when(connectorTestClient.ipPools())
+                .validate();
     }
 
     @Test(dataProvider = "contextWithCredentialNameAndException")
     public void testGetIpPoolsByCredentialNameWhenCredentialIsInvalid(MockedTestContext testContext, String credentialName,
             Class<Exception> exception, @Description TestCaseDescription testCaseDescription) {
-        String exceptionKey = getNameGenerator().getRandomNameForResource();
+        String exceptionKey = resourcePropertyProvider().getName();
 
         testContext
                 .given(PlatformIpPoolsTestDto.class)

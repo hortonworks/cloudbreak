@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -404,7 +405,7 @@ public abstract class TestContext implements ApplicationContextAware {
             LOGGER.info("Should be skipped beacause of previous error. await [{}]", desiredStatuses);
             return entity;
         }
-        String key = getKey(entity.getClass(), runningParameter);
+        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
         CloudbreakTestDto awaitEntity = get(key);
         LOGGER.info("await {} for {}", key, desiredStatuses);
         try {
@@ -499,6 +500,16 @@ public abstract class TestContext implements ApplicationContextAware {
         return who;
     }
 
+    private <T> String getKeyForAwait(T entity, Class<? extends T> entityClass, RunningParameter runningParameter) {
+        Optional<Map.Entry<String, CloudbreakTestDto>> foundEntry = resources.entrySet().stream()
+                .filter(entry -> entry.getValue() == entity)
+                .findFirst();
+        if (foundEntry.isPresent()) {
+            return foundEntry.get().getKey();
+        }
+        return getKey(entityClass, runningParameter);
+    }
+
     private <T> String getKey(Class<T> entityClass, RunningParameter runningParameter) {
         String key = runningParameter.getKey();
         if (StringUtils.isEmpty(key)) {
@@ -524,16 +535,15 @@ public abstract class TestContext implements ApplicationContextAware {
             LOGGER.info("Cleanup skipped beacuse cleanupOnFail is false");
             return;
         }
-        List<CloudbreakTestDto> entities = new ArrayList<>(getResources().values());
-
-        entities.stream().sorted(new CompareByOrder()).forEach(entryset -> {
+        List<CloudbreakTestDto> testDtos = new ArrayList<>(getResources().values());
+        List<CloudbreakTestDto> orderedTestDtos = testDtos.stream().sorted(new CompareByOrder()).collect(Collectors.toList());
+        for (CloudbreakTestDto testDto : orderedTestDtos) {
             try {
-                //TODO this needs better implementation
-                entryset.cleanUp(this, getClients().get(getDefaultUser()));
+                testDto.cleanUp(this, getClients().get(getDefaultUser()));
             } catch (Exception e) {
-                LOGGER.error("Was not able to cleanup resource, possible that it was cleaned up before, {}", getErrorMessage(e), e);
+                LOGGER.error("Was not able to cleanup resource [{}]., {}", testDto.getName(), getErrorMessage(e), e);
             }
-        });
+        }
         shutdown();
     }
 

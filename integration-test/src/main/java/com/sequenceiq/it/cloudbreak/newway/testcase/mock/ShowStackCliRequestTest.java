@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
 import javax.inject.Inject;
 
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -19,23 +18,10 @@ public class ShowStackCliRequestTest extends AbstractIntegrationTest {
     @Inject
     private StackTestClient stackTestClient;
 
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        minimalSetupForClusterCreation((MockedTestContext) data[0]);
-    }
-
-    protected void minimalSetupForClusterCreation(TestContext testContext) {
-        createDefaultUser(testContext);
-        createDefaultCredential(testContext);
-        createDefaultEnvironment(testContext);
-        createDefaultImageCatalog(testContext);
-        initializeDefaultClusterDefinitions(testContext);
-    }
-
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(given = "stack", when = "cluster exist", then = "we should return with the cli json")
     public void testGetClusterDefinitionWhenClusterIsAliveThenShouldReturnWithClusterDefinition(MockedTestContext testContext) {
-        String clusterName = getNameGenerator().getRandomNameForResource();
+        String clusterName = resourcePropertyProvider().getName();
         testContext
                 .given(StackTestDto.class).valid()
                 .withName(clusterName)

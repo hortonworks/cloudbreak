@@ -13,8 +13,6 @@ import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
@@ -22,15 +20,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.client.EnvironmentTestClient;
-import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.assertion.environment.EnvironmentTestAssertion;
 import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
-import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.database.DatabaseTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
@@ -58,17 +55,11 @@ public class EnvironmentTest extends AbstractIntegrationTest {
     @Inject
     private EnvironmentTestClient environmentTestClient;
 
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        MockedTestContext testContext = (MockedTestContext) data[0];
+    @Override
+    protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         initializeDefaultClusterDefinitions(testContext);
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void tearDown(Object[] data) {
-        ((MockedTestContext) data[0]).cleanupTestContext();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -149,7 +140,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             when = "a create environment request is sent with an invalid region in it",
             then = "a BadRequestException should be returned")
     public void testCreateEnvironmentInvalidRegion(TestContext testContext) {
-        String forbiddenKey = getNameGenerator().getRandomNameForResource();
+        String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .init(EnvironmentTestDto.class)
                 .withRegions(INVALID_REGION)
@@ -164,7 +155,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             when = "a create environment request is sent with no region in it",
             then = "a BadRequestException should be returned")
     public void testCreateEnvironmentNoRegion(TestContext testContext) {
-        String forbiddenKey = getNameGenerator().getRandomNameForResource();
+        String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .init(EnvironmentTestDto.class)
                 .withRegions(null)
@@ -179,7 +170,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             when = "a create environment request with reference to a non-existing credential is sent",
             then = "a BadRequestException should be returned")
     public void testCreateEnvironmentNotExistCredential(TestContext testContext) {
-        String forbiddenKey = getNameGenerator().getRandomNameForResource();
+        String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .init(EnvironmentTestDto.class)
                 .withCredentialName("notexistingcredendital")
@@ -194,7 +185,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             when = "a create environment request with reference to a non-existing proxy is sent",
             then = "a BadRequestException should be returned")
     public void testCreateEnvironmentNotExistProxy(TestContext testContext) {
-        String forbiddenKey = getNameGenerator().getRandomNameForResource();
+        String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .init(EnvironmentTestDto.class)
                 .withProxyConfigs(INVALID_PROXY)
@@ -209,7 +200,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             when = "a create environment request with reference to a non-existing ldap is sent",
             then = "a BadRequestException should be returned")
     public void testCreateEnvironmentNotExistLdap(TestContext testContext) {
-        String forbiddenKey = getNameGenerator().getRandomNameForResource();
+        String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .init(EnvironmentTestDto.class)
                 .withLdapConfigs(INVALID_LDAP)
@@ -224,7 +215,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             when = "a create environment request with reference to a non-existing ldap is sent",
             then = "a BadRequestException should be returned")
     public void testCreateEnvironmentNotExistRds(TestContext testContext) {
-        String forbiddenKey = getNameGenerator().getRandomNameForResource();
+        String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .init(EnvironmentTestDto.class)
                 .withRdsConfigs(INVALID_RDS)
@@ -239,7 +230,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             when = "a create environment request with reference to an existing and a non-existing proxy is sent",
             then = "a BadRequestException should be returned")
     public void testCreateEnvWithExistingAndNotExistingProxy(TestContext testContext) {
-        String forbiddenKey = getNameGenerator().getRandomNameForResource();
+        String forbiddenKey = resourcePropertyProvider().getName();
         createDefaultProxyConfig(testContext);
         mixedProxy.add(testContext.get(ProxyTestDto.class).getName());
         mixedProxy.add("invalidProxy");
@@ -257,7 +248,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             when = "a create environment request with reference to an existing and a non-existing database is sent",
             then = "a BadRequestException should be returned")
     public void testCreateEnvWithExistingAndNotExistingRds(TestContext testContext) {
-        String forbiddenKey = getNameGenerator().getRandomNameForResource();
+        String forbiddenKey = resourcePropertyProvider().getName();
         createDefaultRdsConfig(testContext);
         mixedRds.add(testContext.get(DatabaseTestDto.class).getName());
         mixedRds.add("invalidRds");
@@ -275,7 +266,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             when = "a create environment request with reference to an existing and a non-existing ldap is sent",
             then = "a BadRequestException should be returned")
     public void testCreateEnvWithExistingAndNotExistingLdap(TestContext testContext) {
-        String forbiddenKey = getNameGenerator().getRandomNameForResource();
+        String forbiddenKey = resourcePropertyProvider().getName();
         createDefaultLdapConfig(testContext);
         mixedLdap.add(testContext.get(LdapTestDto.class).getName());
         mixedLdap.add("invalidLdap");
@@ -369,7 +360,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             when = "a delete request is sent for a non-existing environment",
             then = "a ForbiddenException should be returned")
     public void testDeleteEnvironmentNotExist(TestContext testContext) {
-        String forbiddenKey = getNameGenerator().getRandomNameForResource();
+        String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .init(EnvironmentTestDto.class)
                 .when(environmentTestClient.deleteV4(), key(forbiddenKey))
@@ -403,7 +394,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             when = "an ldap attach request is sent for that environment",
             then = "the ldap should be attached to the environment")
     public void testCreateEnvAttachLdap(TestContext testContext) {
-        String env = getNameGenerator().getRandomNameForResource();
+        String env = resourcePropertyProvider().getName();
         createDefaultLdapConfig(testContext);
         Set<String> validLdap = new HashSet<>();
         validLdap.add(testContext.get(LdapTestDto.class).getName());
@@ -424,7 +415,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             when = "an proxy attach request is sent for that environment",
             then = "the proxy should be attached to the environment")
     public void testCreateEnvAttachProxy(TestContext testContext) {
-        String env = getNameGenerator().getRandomNameForResource();
+        String env = resourcePropertyProvider().getName();
         createDefaultProxyConfig(testContext);
         Set<String> validProxy = new HashSet<>();
         validProxy.add(testContext.get(ProxyTestDto.class).getName());
@@ -445,7 +436,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             when = "an rds detach request is sent for that environment and rds config",
             then = "the rds config should be detached from the environment")
     public void testCreateEnvDetachRds(TestContext testContext) {
-        String env = getNameGenerator().getRandomNameForResource();
+        String env = resourcePropertyProvider().getName();
         createDefaultRdsConfig(testContext);
         Set<String> validRds = new HashSet<>();
         validRds.add(testContext.get(DatabaseTestDto.class).getName());
@@ -468,7 +459,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             when = "an ldap detach request is sent for that environment and ldap config",
             then = "the ldap config should be detached from the environment")
     public void testCreateEnvDetachLdap(TestContext testContext) {
-        String env = getNameGenerator().getRandomNameForResource();
+        String env = resourcePropertyProvider().getName();
         createDefaultLdapConfig(testContext);
         Set<String> validLdap = new HashSet<>();
         validLdap.add(testContext.get(LdapTestDto.class).getName());
@@ -491,7 +482,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             when = "an proxy detach request is sent for that environment and proxy config",
             then = "the proxy config should be detached from the environment")
     public void testCreateEnvDetachProxy(TestContext testContext) {
-        String env = getNameGenerator().getRandomNameForResource();
+        String env = resourcePropertyProvider().getName();
         createDefaultProxyConfig(testContext);
         Set<String> validProxy = new HashSet<>();
         validProxy.add(testContext.get(ProxyTestDto.class).getName());
@@ -514,8 +505,8 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             when = "an rds attach requests sent for each of the environments",
             then = "rds should be attached to both environments")
     public void testAttachRdsToMoreEnvs(TestContext testContext) {
-        String env1 = getNameGenerator().getRandomNameForResource();
-        String env2 = getNameGenerator().getRandomNameForResource();
+        String env1 = resourcePropertyProvider().getName();
+        String env2 = resourcePropertyProvider().getName();
         createDefaultRdsConfig(testContext);
         Set<String> validRds = new HashSet<>();
         validRds.add(testContext.get(DatabaseTestDto.class).getName());
@@ -529,8 +520,8 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             when = "an ldap attach requests sent for each of the environments",
             then = "ldap should be attached to both environments")
     public void testAttachLdapToMoreEnvs(TestContext testContext) {
-        String env1 = getNameGenerator().getRandomNameForResource();
-        String env2 = getNameGenerator().getRandomNameForResource();
+        String env1 = resourcePropertyProvider().getName();
+        String env2 = resourcePropertyProvider().getName();
         createDefaultLdapConfig(testContext);
         Set<String> validLdap = new HashSet<>();
         validLdap.add(testContext.get(LdapTestDto.class).getName());
@@ -544,8 +535,8 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             when = "an proxy attach requests sent for each of the environments",
             then = "proxy should be attached to both environments")
     public void testAttachProxyToMoreEnvs(TestContext testContext) {
-        String env1 = getNameGenerator().getRandomNameForResource();
-        String env2 = getNameGenerator().getRandomNameForResource();
+        String env1 = resourcePropertyProvider().getName();
+        String env2 = resourcePropertyProvider().getName();
         createDefaultProxyConfig(testContext);
         Set<String> validProxy = new HashSet<>();
         validProxy.add(testContext.get(ProxyTestDto.class).getName());
@@ -559,8 +550,8 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             when = "an rds config attach request is sent for a non-existing environment",
             then = "a ForbiddenException should be returned")
     public void testAttachRdsToNonExistingEnv(TestContext testContext) {
-        String env = getNameGenerator().getRandomNameForResource();
-        String forbiddenKey = getNameGenerator().getRandomNameForResource();
+        String env = resourcePropertyProvider().getName();
+        String forbiddenKey = resourcePropertyProvider().getName();
         createDefaultRdsConfig(testContext);
         Set<String> validRds = new HashSet<>();
         validRds.add(testContext.get(DatabaseTestDto.class).getName());
@@ -579,8 +570,8 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             when = "when an rds detach request is sent for that environment but with a different rds config name",
             then = "nothing should happen with the environment")
     public void testAttachAnRdsThenDetachAnotherOther(TestContext testContext) {
-        String notExistingRds = getNameGenerator().getRandomNameForResource();
-        String rds1 = getNameGenerator().getRandomNameForResource();
+        String notExistingRds = resourcePropertyProvider().getName();
+        String rds1 = resourcePropertyProvider().getName();
         createDefaultRdsConfig(testContext);
         Set<String> validRds = new HashSet<>();
         Set<String> notValidRds = new HashSet<>();
@@ -608,7 +599,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             when = "a modifyV4 credential request (with cred name) is sent for the environment",
             then = "the credential should change to the new credential in the environment")
     public void testCreateEnvironmentChangeCredWithCredName(TestContext testContext) {
-        String cred1 = getNameGenerator().getRandomNameForResource();
+        String cred1 = resourcePropertyProvider().getName();
         testContext
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.createV4())
@@ -628,7 +619,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             when = "a modifyV4 credential request (with cred request) is sent for the environment",
             then = "the credential should change to the new credential in the environment")
     public void testCreateEnvironmentChangeCredWithCredRequest(TestContext testContext) {
-        String cred1 = getNameGenerator().getRandomNameForResource();
+        String cred1 = resourcePropertyProvider().getName();
         testContext
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.createV4())
@@ -663,8 +654,8 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             when = "a modifyV4 credential request is sent for the environment with a non-existing credential",
             then = "a ForbiddenException should be returned")
     public void testCreateEnvironmentChangeCredNonExistingName(TestContext testContext) {
-        String notExistingCred = getNameGenerator().getRandomNameForResource();
-        String forbiddenKey = getNameGenerator().getRandomNameForResource();
+        String notExistingCred = resourcePropertyProvider().getName();
+        String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.createV4())

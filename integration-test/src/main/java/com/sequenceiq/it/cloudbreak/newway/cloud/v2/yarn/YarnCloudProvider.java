@@ -1,5 +1,9 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud.v2.yarn;
 
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.yarn.YarnCredentialV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.YarnNetworkV4Parameters;
@@ -17,9 +21,6 @@ import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDtoBase;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
 
 @Component
 public class YarnCloudProvider extends AbstractCloudProvider {

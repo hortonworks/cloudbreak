@@ -39,7 +39,7 @@ public class SSHKeysTest extends AbstractIntegrationTest {
             when = "get ssh keys",
             then = "getting back the MOCK related ssh keys")
     public void testGetSSHKeysByCredentialName(MockedTestContext testContext) {
-        String credentialName = getNameGenerator().getRandomNameForResource();
+        String credentialName = resourcePropertyProvider().getName();
         testContext
                 .given(CredentialTestDto.class)
                 .withName(credentialName)

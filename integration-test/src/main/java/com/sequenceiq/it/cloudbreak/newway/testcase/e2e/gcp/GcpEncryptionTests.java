@@ -11,8 +11,6 @@ import java.util.function.Function;
 import javax.inject.Inject;
 
 import org.testng.ITestContext;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -45,12 +43,6 @@ public class GcpEncryptionTests extends AbstractE2ETest {
         iTestContext.getSuite().getXmlSuite().getAllParameters();
         return new Object[][]{
                 {getBean(TestContext.class), HOSTGROUP_WORKER, KeyEncryptionMethod.RAW, DESIRED_COUNT_THREE}};
-    }
-
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
-        minimalSetupForClusterCreation(testContext);
     }
 
     @Test(dataProvider = PARAMETRIZED_CONTEXT)
@@ -111,12 +103,6 @@ public class GcpEncryptionTests extends AbstractE2ETest {
     Function<StackTestDto, StackTestDto> delete() {
         return stack ->
                 stack.then((tc, testDto, cc) -> stackTestClient.deleteV4().action(tc, testDto, cc));
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void teardown(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
-        testContext.cleanupTestContext();
     }
 }
 

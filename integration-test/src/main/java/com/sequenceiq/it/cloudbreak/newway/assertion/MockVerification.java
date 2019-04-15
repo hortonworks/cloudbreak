@@ -15,9 +15,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.verification.Call;
 
 import spark.Response;

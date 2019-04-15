@@ -11,13 +11,11 @@ import static javax.ws.rs.core.Response.Status.OK;
 
 import javax.inject.Inject;
 
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.mock.model.SPIMock;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
@@ -33,27 +31,14 @@ public class AmbariPasswordUpdateTest extends AbstractIntegrationTest {
     @Inject
     private StackTestClient stackTestClient;
 
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        minimalSetupForClusterCreation((MockedTestContext) data[0]);
-    }
-
-    protected void minimalSetupForClusterCreation(TestContext testContext) {
-        createDefaultUser(testContext);
-        createDefaultCredential(testContext);
-        createDefaultEnvironment(testContext);
-        createDefaultImageCatalog(testContext);
-        initializeDefaultClusterDefinitions(testContext);
-    }
-
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "a stack with an Ambari cluster",
             when = "password of the cluster is modified",
             then = "the cluster should still be available")
     public void createAmbariClusterAndModifyThePasswordOnItThenNoExceptionOccursTheStackIsAvailable(MockedTestContext testContext) {
-        String clusterName = getNameGenerator().getRandomNameForResource();
-        String generatedKey = getNameGenerator().getRandomNameForResource();
+        String clusterName = resourcePropertyProvider().getName();
+        String generatedKey = resourcePropertyProvider().getName();
 
         mockAmbari(testContext, clusterName);
         mockSpi(testContext);

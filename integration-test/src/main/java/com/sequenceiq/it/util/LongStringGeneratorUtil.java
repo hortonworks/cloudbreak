@@ -1,8 +1,8 @@
 package com.sequenceiq.it.util;
 
-import org.springframework.stereotype.Component;
-
 import java.util.Arrays;
+
+import org.springframework.stereotype.Component;
 
 @Component
 public class LongStringGeneratorUtil {

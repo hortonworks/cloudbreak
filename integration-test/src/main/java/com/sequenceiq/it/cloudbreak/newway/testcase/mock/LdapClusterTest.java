@@ -7,8 +7,6 @@ import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 import org.springframework.http.HttpMethod;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
@@ -16,9 +14,8 @@ import com.sequenceiq.it.cloudbreak.newway.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.dto.AmbariTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.AmbariRepositoryV4TestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.AmbariTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
@@ -32,16 +29,6 @@ public class LdapClusterTest extends AbstractIntegrationTest {
 
     @Inject
     private StackTestClient stackTestClient;
-
-    @BeforeMethod
-    public void beforeMethod(Object[] data) {
-        minimalSetupForClusterCreation((TestContext) data[0]);
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void tearDown(Object[] data) {
-        ((TestContext) data[0]).cleanupTestContext();
-    }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
@@ -77,9 +64,9 @@ public class LdapClusterTest extends AbstractIntegrationTest {
         testContext.getModel().getAmbariMock().postSyncLdap();
         testContext.getModel().getAmbariMock().putConfigureLdap();
 
-        String stackName = getNameGenerator().getRandomNameForResource();
-        String deleteFail = getNameGenerator().getRandomNameForResource();
-        String ldapName = getNameGenerator().getRandomNameForResource();
+        String stackName = resourcePropertyProvider().getName();
+        String deleteFail = resourcePropertyProvider().getName();
+        String ldapName = resourcePropertyProvider().getName();
 
         testContext.given(LdapTestDto.class).withName(ldapName)
                 .when(ldapTestClient.createV4())

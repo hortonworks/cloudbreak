@@ -4,9 +4,9 @@ import static com.sequenceiq.it.cloudbreak.newway.log.Log.logJSON;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 
 public class StackScalePostAction implements Action<StackTestDto> {
 

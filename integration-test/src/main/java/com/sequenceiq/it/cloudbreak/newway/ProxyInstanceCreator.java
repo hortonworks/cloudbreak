@@ -1,7 +1,8 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import javax.annotation.Nonnull;
 import java.lang.reflect.Proxy;
+
+import javax.annotation.Nonnull;
 
 final class ProxyInstanceCreator {
 

@@ -6,8 +6,8 @@ import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.newway.ClusterTemplateUtil;
-import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.newway.Entity;
+import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.newway.log.Log;
 
 public class ClusterTemplateV4Action {
