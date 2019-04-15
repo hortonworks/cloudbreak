@@ -1,20 +1,16 @@
 package com.sequenceiq.cloudbreak.core.flow2.config;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
+import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.SyncTaskExecutor;
@@ -28,14 +24,15 @@ import org.springframework.statemachine.listener.StateMachineListenerAdapter;
 
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.Flow;
+import com.sequenceiq.cloudbreak.core.flow2.FlowConstants;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
+import com.sequenceiq.cloudbreak.core.flow2.FlowEventListener;
 import com.sequenceiq.cloudbreak.core.flow2.FlowFinalizeAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.FlowEdgeConfig;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfigurationTest.TestFlowConfiguration.NotAcceptedException;
-import com.sequenceiq.cloudbreak.structuredevent.FlowStructuredEventHandler;
 
 public class AbstractFlowConfigurationTest {
 
@@ -51,7 +48,7 @@ public class AbstractFlowConfigurationTest {
     private AbstractAction<State, Event, ?, ?> action;
 
     @Mock
-    private FlowStructuredEventHandler<State, Event> flowStructuredEventHandler;
+    private FlowEventListener<State, Event> flowEventListener;
 
     private Flow flow;
 
@@ -63,9 +60,10 @@ public class AbstractFlowConfigurationTest {
     public void setup() throws Exception {
         underTest = new TestFlowConfiguration();
         MockitoAnnotations.initMocks(this);
-        given(applicationContext.getBean(anyString(), any(Class.class))).willReturn(action);
-        given(applicationContext.getBean(eq(FlowStructuredEventHandler.class), eq(State.INIT), eq(State.FINAL), anyString(), eq("flowId"),
-                ArgumentMatchers.anyLong())).willReturn(flowStructuredEventHandler);
+        BDDMockito.given(applicationContext.getBean(ArgumentMatchers.anyString(), ArgumentMatchers.any(Class.class))).willReturn(action);
+        BDDMockito.given(applicationContext.getBean(ArgumentMatchers.eq(FlowConstants.FLOW_EVENT_LISTENER), ArgumentMatchers.eq(State.INIT),
+                ArgumentMatchers.eq(State.FINAL), ArgumentMatchers.anyString(), ArgumentMatchers.eq("flowId"),
+                ArgumentMatchers.anyLong())).willReturn(flowEventListener);
         transitions = new Builder<State, Event>()
                 .defaultFailureEvent(Event.FAILURE)
                 .from(State.INIT).to(State.DO).event(Event.START).noFailureEvent()
@@ -75,7 +73,7 @@ public class AbstractFlowConfigurationTest {
                 .build();
         edgeConfig = new FlowEdgeConfig<>(State.INIT, State.FINAL, State.FAILED, Event.FAIL_HANDLED);
         ((AbstractFlowConfiguration<State, Event>) underTest).init();
-        verify(applicationContext, times(8)).getBean(anyString(), any(Class.class));
+        Mockito.verify(applicationContext, Mockito.times(8)).getBean(ArgumentMatchers.anyString(), ArgumentMatchers.any(Class.class));
         flow = underTest.createFlow("flowId", 0L);
         flow.initialize();
     }

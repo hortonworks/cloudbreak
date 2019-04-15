@@ -15,8 +15,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
-import com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.helloworld.HelloWorldFlowConfig;
 
 import reactor.bus.EventBus;
 import reactor.bus.selector.Selector;
@@ -45,8 +44,7 @@ public class Flow2InitializerTest {
     @Test
     public void testInitialize() {
         List<FlowConfiguration<?>> flowConfigs = new ArrayList<>();
-        flowConfigs.add(new StackSyncFlowConfig());
-        flowConfigs.add(new StackTerminationFlowConfig());
+        flowConfigs.add(new HelloWorldFlowConfig());
         given(this.flowConfigs.stream()).willReturn(flowConfigs.stream());
         underTest.init();
         verify(reactor, times(1)).on(any(Selector.class), any(Consumer.class));

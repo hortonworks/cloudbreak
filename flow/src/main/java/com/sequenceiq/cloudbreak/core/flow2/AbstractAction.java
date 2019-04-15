@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
-import static com.sequenceiq.cloudbreak.core.flow2.Flow2Handler.FLOW_CHAIN_ID;
-import static com.sequenceiq.cloudbreak.core.flow2.Flow2Handler.FLOW_ID;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,8 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.core.flow2.MessageFactory.HEADERS;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
-import com.sequenceiq.cloudbreak.service.metrics.MetricType;
+import com.sequenceiq.cloudbreak.service.metrics.MetricService;
 
 import reactor.bus.EventBus;
 
@@ -40,7 +36,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     private static final int MS_PER_SEC = 1000;
 
     @Inject
-    private CloudbreakMetricService metricService;
+    private MetricService metricService;
 
     @Inject
     private EventBus eventBus;
@@ -86,7 +82,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
                 long executionTime = execElapsed > flowElapsed ? execElapsed : flowElapsed;
                 LOGGER.debug("Stack: {}, flow state: {}, phase: {}, execution time {} sec", payload.getStackId(),
                     flowStateName, execElapsed > flowElapsed ? "doExec" : "service", executionTime);
-                metricService.submit(MetricType.FLOW_STEP, executionTime, Map.of("name", flowStateName.toLowerCase()));
+                metricService.submit(FlowMetricType.FLOW_STEP, executionTime, Map.of("name", flowStateName.toLowerCase()));
             }
             variables.put(FLOW_STATE_NAME, context.getStateMachine().getState().getId());
             variables.put(FLOW_START_EXEC_TIME, System.currentTimeMillis());
@@ -109,7 +105,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
         this.failureEvent = failureEvent;
     }
 
-    public CloudbreakMetricService getMetricService() {
+    public MetricService getMetricService() {
         return metricService;
     }
 
@@ -129,10 +125,10 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     protected void sendEvent(String flowId, String selector, Object payload) {
         LOGGER.debug("Triggering event: {}, payload: {}", selector, payload);
         Map<String, Object> headers = new HashMap<>();
-        headers.put(FLOW_ID, flowId);
+        headers.put(FlowConstants.FLOW_ID, flowId);
         String flowChainId = runningFlows.getFlowChainId(flowId);
         if (flowChainId != null) {
-            headers.put(FLOW_CHAIN_ID, flowChainId);
+            headers.put(FlowConstants.FLOW_CHAIN_ID, flowChainId);
         }
         eventBus.notify(selector, reactorEventFactory.createEvent(headers, payload));
     }

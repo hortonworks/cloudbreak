@@ -104,10 +104,6 @@ dependencyManagement {
       }
     }
 
-    dependency (group: 'org.springframework.statemachine',  name: 'spring-statemachine-core',    version: '1.0.1.RELEASE') {
-      exclude group: 'org.springframework', name: '*'
-    }
-
     dependency (group: 'com.google.oauth-client',           name: 'google-oauth-client-jetty',   version: '1.22.0') {
       exclude group: '*', name: 'servlet-api'
     }
@@ -169,7 +165,6 @@ dependencies {
 
   compile group: 'org.springframework.kafka',          name: 'spring-kafka'
   compile group: 'org.springframework.retry',          name: 'spring-retry'
-  compile group: 'org.springframework.statemachine',   name: 'spring-statemachine-core'
   compile group: 'org.springframework.security.oauth', name: 'spring-security-oauth2'
 
   compile group: 'io.projectreactor',                  name: 'reactor-core'
@@ -216,6 +211,7 @@ dependencies {
   compile project(':template-manager-recipe')
   compile project(':template-manager-cmtemplate')
   compile project(':cluster-api')
+  compile project(':flow')
 
   runtime project(':orchestrator-salt')
   runtime project(':orchestrator-salt')

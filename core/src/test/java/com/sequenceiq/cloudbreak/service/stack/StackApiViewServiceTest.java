@@ -13,9 +13,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.core.flow2.FlowLogService;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
-import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackApiViewServiceTest {

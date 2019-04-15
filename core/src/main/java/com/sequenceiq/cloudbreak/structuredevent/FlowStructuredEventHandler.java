@@ -13,12 +13,13 @@ import org.springframework.statemachine.transition.Transition;
 import org.springframework.statemachine.trigger.Trigger;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.core.flow2.FlowEventListener;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 
-@Component
+@Component("flowEventListener")
 @Scope("prototype")
-public class FlowStructuredEventHandler<S, E> extends StateMachineListenerAdapter<S, E> {
+public class FlowStructuredEventHandler<S, E> extends StateMachineListenerAdapter<S, E> implements FlowEventListener<S, E> {
     private static final Logger LOGGER = LoggerFactory.getLogger(FlowStructuredEventHandler.class);
 
     @Inject

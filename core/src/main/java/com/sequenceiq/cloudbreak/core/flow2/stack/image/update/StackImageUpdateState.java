@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
-import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
+import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 
 public enum StackImageUpdateState implements FlowState {
@@ -15,17 +15,17 @@ public enum StackImageUpdateState implements FlowState {
     STACK_IMAGE_UPDATE_FINISHED,
     FINAL_STATE;
 
-    private Class<? extends AbstractAction<?, ?, ?, ?>> action;
+    private Class<? extends AbstractStackAction<?, ?, ?, ?>> action;
 
     StackImageUpdateState() {
     }
 
-    StackImageUpdateState(Class<? extends AbstractAction<?, ?, ?, ?>> action) {
+    StackImageUpdateState(Class<? extends AbstractStackAction<?, ?, ?, ?>> action) {
         this.action = action;
     }
 
     @Override
-    public Class<? extends AbstractAction<?, ?, ?, ?>> action() {
+    public Class<? extends AbstractStackAction<?, ?, ?, ?>> action() {
         return action;
     }
 }

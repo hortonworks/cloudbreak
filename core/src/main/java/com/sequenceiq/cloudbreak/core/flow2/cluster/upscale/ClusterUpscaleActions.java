@@ -17,7 +17,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
+import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
@@ -383,7 +383,7 @@ public class ClusterUpscaleActions {
     }
 
     private abstract static class AbstractClusterUpscaleAction<P extends Payload>
-            extends AbstractAction<ClusterUpscaleState, ClusterUpscaleEvent, ClusterUpscaleContext, P> {
+            extends AbstractStackAction<ClusterUpscaleState, ClusterUpscaleEvent, ClusterUpscaleContext, P> {
         static final String HOSTGROUPNAME = "HOSTGROUPNAME";
 
         static final String ADJUSTMENT = "ADJUSTMENT";

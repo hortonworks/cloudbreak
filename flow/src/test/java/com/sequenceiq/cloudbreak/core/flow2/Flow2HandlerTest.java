@@ -25,6 +25,7 @@ import java.util.function.Supplier;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -40,23 +41,16 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cedarsoftware.util.io.JsonWriter;
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainHandler;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChains;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.helloworld.HelloWorldFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.restart.DefaultRestartAction;
-import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartFlowConfig;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.domain.StateStatus;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
-import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import reactor.bus.Event;
@@ -78,9 +72,6 @@ public class Flow2HandlerTest {
 
     @Mock
     private FlowLogService flowLogService;
-
-    @Mock
-    private FlowLogRepository flowLogRepository;
 
     @Mock
     private Map<String, FlowConfiguration<?>> flowConfigurationMap;
@@ -131,7 +122,7 @@ public class Flow2HandlerTest {
     private TransactionService transactionService;
 
     @Mock
-    private ClusterService clusterService;
+    private ApplicationFlowInformation applicationFlowInformation;
 
     private FlowState flowState;
 
@@ -156,9 +147,6 @@ public class Flow2HandlerTest {
         given(flowConfig.createFlow(anyString(), anyLong())).willReturn(flow);
         given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
         given(flowTriggerCondition.isFlowTriggerable(anyLong())).willReturn(true);
-        Cluster cluster = new Cluster();
-        cluster.setStatus(Status.AVAILABLE);
-        given(clusterService.findOneByStackId(anyLong())).willReturn(cluster);
         given(flow.getCurrentState()).willReturn(flowState);
         Event<Payload> event = new Event<>(payload);
         event.setKey("KEY");
@@ -172,24 +160,21 @@ public class Flow2HandlerTest {
 
     @Test
     public void testNewSyncFlowMaintenanceActive() {
-        ClusterSyncFlowConfig syncFlowConfig = Mockito.mock(ClusterSyncFlowConfig.class);
-        given(syncFlowConfig.getFlowTriggerCondition()).willReturn(new DefaultFlowTriggerCondition());
+        HelloWorldFlowConfig helloWorldFlowConfig = Mockito.mock(HelloWorldFlowConfig.class);
+        given(helloWorldFlowConfig.getFlowTriggerCondition()).willReturn(new DefaultFlowTriggerCondition());
 
-        BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(syncFlowConfig);
-        given(syncFlowConfig.createFlow(anyString(), anyLong())).willReturn(flow);
-        given(syncFlowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
+        BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(helloWorldFlowConfig);
+        given(helloWorldFlowConfig.createFlow(anyString(), anyLong())).willReturn(flow);
+        given(helloWorldFlowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
         given(flowTriggerCondition.isFlowTriggerable(anyLong())).willReturn(true);
-        Cluster cluster = new Cluster();
-        cluster.setStatus(Status.MAINTENANCE_MODE_ENABLED);
-        given(clusterService.findOneByStackId(anyLong())).willReturn(cluster);
         given(flow.getCurrentState()).willReturn(flowState);
         Event<Payload> event = new Event<>(payload);
         event.setKey("KEY");
         underTest.accept(event);
         verify(flowConfigurationMap, times(1)).get(anyString());
         verify(runningFlows, times(1)).put(eq(flow), isNull(String.class));
-        verify(flowLogService, times(1))
-                .save(anyString(), nullable(String.class), eq("KEY"), any(Payload.class), any(), eq(syncFlowConfig.getClass()), eq(flowState));
+        verify(flowLogService, times(1)).save(anyString(), nullable(String.class), eq("KEY"), any(Payload.class), any(),
+                ArgumentMatchers.eq(helloWorldFlowConfig.getClass()), eq(flowState));
         verify(flow, times(1)).sendEvent(anyString(), any());
     }
 
@@ -306,7 +291,7 @@ public class Flow2HandlerTest {
 
     @Test
     public void testCancelRunningFlows() throws TransactionExecutionException {
-        given(flowLogRepository.findAllRunningNonTerminationFlowIdsByStackId(anyLong())).willReturn(Collections.singleton(FLOW_ID));
+        given(flowLogService.findAllRunningNonTerminationFlowIdsByStackId(anyLong())).willReturn(Collections.singleton(FLOW_ID));
         given(runningFlows.remove(FLOW_ID)).willReturn(flow);
         given(runningFlows.getFlowChainId(eq(FLOW_ID))).willReturn(FLOW_CHAIN_ID);
         dummyEvent.setKey(Flow2Handler.FLOW_CANCEL);
@@ -319,7 +304,7 @@ public class Flow2HandlerTest {
     public void testRestartFlowNotRestartable() throws TransactionExecutionException {
         FlowLog flowLog = new FlowLog(STACK_ID, FLOW_ID, "START_STATE", true, StateStatus.SUCCESSFUL);
         flowLog.setFlowType(String.class);
-        when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLog);
+        when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLog);
         underTest.restartFlow(FLOW_ID);
 
         verify(flowLogService, times(1)).terminate(STACK_ID, FLOW_ID);
@@ -330,16 +315,17 @@ public class Flow2HandlerTest {
         ReflectionTestUtils.setField(underTest, "flowChainHandler", flowChainHandler);
 
         FlowLog flowLog = createFlowLog(FLOW_CHAIN_ID);
-        Payload payload = new StackEvent(STACK_ID);
+        Payload payload = new TestPayload(STACK_ID);
         flowLog.setPayload(JsonWriter.objectToJson(payload));
-        when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLog);
+        when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLog);
+        when(applicationFlowInformation.getRestartableFlows()).thenReturn(List.of(HelloWorldFlowConfig.class));
 
-        StackStartFlowConfig stackStartFlowConfig = new StackStartFlowConfig();
-        ReflectionTestUtils.setField(stackStartFlowConfig, "defaultRestartAction", defaultRestartAction);
+        HelloWorldFlowConfig helloWorldFlowConfig = new HelloWorldFlowConfig();
+        ReflectionTestUtils.setField(helloWorldFlowConfig, "defaultRestartAction", defaultRestartAction);
 
-        setUpFlowConfigCreateFlow(stackStartFlowConfig);
+        setUpFlowConfigCreateFlow(helloWorldFlowConfig);
 
-        List<FlowConfiguration<?>> flowConfigs = Lists.newArrayList(stackStartFlowConfig);
+        List<FlowConfiguration<?>> flowConfigs = Lists.newArrayList(helloWorldFlowConfig);
         ReflectionTestUtils.setField(underTest, "flowConfigs", flowConfigs);
 
         underTest.restartFlow(FLOW_ID);
@@ -359,15 +345,16 @@ public class Flow2HandlerTest {
         ReflectionTestUtils.setField(underTest, "flowChainHandler", flowChainHandler);
 
         FlowLog flowLog = createFlowLog(FLOW_CHAIN_ID);
-        Payload payload = new StackEvent(STACK_ID);
+        Payload payload = new TestPayload(STACK_ID);
         flowLog.setPayload(JsonWriter.objectToJson(payload));
-        when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLog);
+        when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLog);
+        when(applicationFlowInformation.getRestartableFlows()).thenReturn(List.of(HelloWorldFlowConfig.class));
 
-        StackStartFlowConfig stackStartFlowConfig = new StackStartFlowConfig();
+        HelloWorldFlowConfig helloWorldFlowConfig = new HelloWorldFlowConfig();
 
-        setUpFlowConfigCreateFlow(stackStartFlowConfig);
+        setUpFlowConfigCreateFlow(helloWorldFlowConfig);
 
-        List<FlowConfiguration<?>> flowConfigs = Lists.newArrayList(stackStartFlowConfig);
+        List<FlowConfiguration<?>> flowConfigs = Lists.newArrayList(helloWorldFlowConfig);
         ReflectionTestUtils.setField(underTest, "flowConfigs", flowConfigs);
 
         underTest.restartFlow(FLOW_ID);
@@ -382,15 +369,15 @@ public class Flow2HandlerTest {
         ReflectionTestUtils.setField(underTest, "flowChainHandler", flowChainHandler);
 
         FlowLog flowLog = createFlowLog(null);
-        Payload payload = new StackEvent(STACK_ID);
+        Payload payload = new TestPayload(STACK_ID);
         flowLog.setPayload(JsonWriter.objectToJson(payload));
-        when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLog);
+        when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLog);
+        when(applicationFlowInformation.getRestartableFlows()).thenReturn(List.of(HelloWorldFlowConfig.class));
+        HelloWorldFlowConfig helloWorldFlowConfig = new HelloWorldFlowConfig();
 
-        StackStartFlowConfig stackStartFlowConfig = new StackStartFlowConfig();
+        setUpFlowConfigCreateFlow(helloWorldFlowConfig);
 
-        setUpFlowConfigCreateFlow(stackStartFlowConfig);
-
-        List<FlowConfiguration<?>> flowConfigs = Lists.newArrayList(stackStartFlowConfig);
+        List<FlowConfiguration<?>> flowConfigs = Lists.newArrayList(helloWorldFlowConfig);
         ReflectionTestUtils.setField(underTest, "flowConfigs", flowConfigs);
 
         underTest.restartFlow(FLOW_ID);
@@ -402,14 +389,14 @@ public class Flow2HandlerTest {
 
     private FlowLog createFlowLog(String flowChainId) {
         FlowLog flowLog = new FlowLog(STACK_ID, FLOW_ID, "START_STATE", true, StateStatus.SUCCESSFUL);
-        flowLog.setFlowType(StackStartFlowConfig.class);
+        flowLog.setFlowType(HelloWorldFlowConfig.class);
         flowLog.setVariables(JsonWriter.objectToJson(new HashMap<>()));
         flowLog.setFlowChainId(flowChainId);
         flowLog.setNextEvent(NEXT_EVENT);
         return flowLog;
     }
 
-    private void setUpFlowConfigCreateFlow(StackStartFlowConfig stackStartFlowConfig) {
+    private void setUpFlowConfigCreateFlow(HelloWorldFlowConfig stackStartFlowConfig) {
         doReturn(stateMachine).when(stateMachineFactory).getStateMachine();
         doReturn(stateMachineAccessor).when(stateMachine).getStateMachineAccessor();
         doReturn(Collections.singletonList(stateMachineAccess)).when(stateMachineAccessor).withAllRegions();

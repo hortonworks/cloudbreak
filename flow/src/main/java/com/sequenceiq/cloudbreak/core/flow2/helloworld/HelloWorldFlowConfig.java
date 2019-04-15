@@ -17,9 +17,10 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.cloudbreak.core.flow2.config.RetryableFlowConfiguration;
 
 @Component
-public class HelloWorldFlowConfig extends AbstractFlowConfiguration<HelloWorldState, HelloWorldEvent> {
+public class HelloWorldFlowConfig extends AbstractFlowConfiguration<HelloWorldState, HelloWorldEvent> implements RetryableFlowConfiguration<HelloWorldEvent> {
     private static final List<Transition<HelloWorldState, HelloWorldEvent>> TRANSITIONS = new Builder<HelloWorldState, HelloWorldEvent>()
             .defaultFailureEvent(HELLO_WORLD_SOMETHING_WENT_WRONG)
             .from(INIT_STATE).to(HELLO_WORLD_START_STATE).event(START_HELLO_WORLD_EVENT).noFailureEvent()
@@ -44,6 +45,11 @@ public class HelloWorldFlowConfig extends AbstractFlowConfiguration<HelloWorldSt
         return new HelloWorldEvent[] {
                 START_HELLO_WORLD_EVENT
         };
+    }
+
+    @Override
+    public HelloWorldEvent getFailHandledEvent() {
+        return HELLO_WORLD_FAIL_HANDLED_EVENT;
     }
 
     @Override

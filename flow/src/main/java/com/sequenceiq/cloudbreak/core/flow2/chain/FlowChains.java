@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
-import static com.sequenceiq.cloudbreak.core.flow2.Flow2Handler.FLOW_CHAIN_ID;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
@@ -15,7 +13,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
+import com.sequenceiq.cloudbreak.core.flow2.FlowConstants;
+import com.sequenceiq.cloudbreak.core.flow2.FlowLogService;
 
 import reactor.bus.EventBus;
 
@@ -75,7 +74,7 @@ public class FlowChains {
     protected void sendEvent(String flowChainId, Selectable selectable) {
         LOGGER.debug("Triggering event: {}", selectable);
         Map<String, Object> headers = new HashMap<>();
-        headers.put(FLOW_CHAIN_ID, flowChainId);
+        headers.put(FlowConstants.FLOW_CHAIN_ID, flowChainId);
         eventBus.notify(selectable.selector(), eventFactory.createEvent(headers, selectable));
     }
 

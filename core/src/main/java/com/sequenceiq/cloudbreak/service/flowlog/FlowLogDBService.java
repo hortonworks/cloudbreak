@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.flowlog;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.cedarsoftware.util.io.JsonWriter;
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.FlowLogService;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 import com.sequenceiq.cloudbreak.domain.FlowChainLog;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
@@ -26,9 +28,9 @@ import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 
 @Service
-public class FlowLogService {
+public class FlowLogDBService implements FlowLogService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FlowLogService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlowLogDBService.class);
 
     @Inject
     private CloudbreakNodeConfig cloudbreakNodeConfig;
@@ -54,6 +56,11 @@ public class FlowLogService {
                 currentState.toString());
         flowLog.setCloudbreakNodeId(cloudbreakNodeConfig.getId());
         return flowLogRepository.save(flowLog);
+    }
+
+    @Override
+    public Iterable<FlowLog> saveAll(Iterable<FlowLog> flowLogs) {
+        return flowLogRepository.saveAll(flowLogs);
     }
 
     public FlowLog close(Long stackId, String flowId) throws TransactionExecutionException {
@@ -123,5 +130,35 @@ public class FlowLogService {
 
     public FlowLog getLastFlowLog(String flowId) {
         return flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(flowId);
+    }
+
+    @Override
+    public Set<String> findAllRunningNonTerminationFlowIdsByStackId(Long stackId) {
+        return flowLogRepository.findAllRunningNonTerminationFlowIdsByStackId(stackId);
+    }
+
+    @Override
+    public FlowLog findFirstByFlowIdOrderByCreatedDesc(String flowId) {
+        return flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(flowId);
+    }
+
+    @Override
+    public FlowChainLog findFirstByFlowChainIdOrderByCreatedDesc(String flowChainId) {
+        return flowChainLogRepository.findFirstByFlowChainIdOrderByCreatedDesc(flowChainId);
+    }
+
+    @Override
+    public List<Object[]> findAllPending() {
+        return flowLogRepository.findAllPending();
+    }
+
+    @Override
+    public Set<FlowLog> findAllUnassigned() {
+        return flowLogRepository.findAllUnassigned();
+    }
+
+    @Override
+    public Set<FlowLog> findAllByCloudbreakNodeId(String cloudbreakNodeId) {
+        return flowLogRepository.findAllByCloudbreakNodeId(cloudbreakNodeId);
     }
 }
