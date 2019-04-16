@@ -40,7 +40,7 @@ import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
 import spark.Route;
 
-public class KerberosTest extends AbstractIntegrationTest {
+public class KerberosConfigTest extends AbstractIntegrationTest {
 
     private static final String LDAP_SYNC_PATH = "/api/v1/ldap_sync_events";
 

@@ -1141,7 +1141,7 @@ public class ClusterService {
     }
 
     public Set<Cluster> findByLdapConfig(LdapConfig ldapConfig) {
-        return repository.findByLdapConfig(ldapConfig);
+        return repository.findByLdapConfigAndStatusNot(ldapConfig, Status.DELETE_COMPLETED);
     }
 
     public Set<Cluster> findAllClustersByLdapConfigInEnvironment(LdapConfig ldapConfig, Long environmentId) {
@@ -1149,7 +1149,7 @@ public class ClusterService {
     }
 
     public Set<Cluster> findByProxyConfig(ProxyConfig proxyConfig) {
-        return repository.findByProxyConfig(proxyConfig);
+        return repository.findByProxyConfigAndStatusNot(proxyConfig, Status.DELETE_COMPLETED);
     }
 
     public Set<Cluster> findAllClustersByProxyConfigInEnvironment(ProxyConfig proxyConfig, Long environmentId) {

@@ -83,10 +83,6 @@ public class KubernetesConfigService extends AbstractEnvironmentAwareService<Kub
     }
 
     @Override
-    protected void prepareCreation(KubernetesConfig resource) {
-    }
-
-    @Override
     public WorkspaceResource resource() {
         return WorkspaceResource.KUBERNETES;
     }

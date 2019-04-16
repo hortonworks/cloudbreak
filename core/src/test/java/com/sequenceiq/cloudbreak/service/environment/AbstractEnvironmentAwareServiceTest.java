@@ -17,6 +17,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.domain.ArchivableResource;
 import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
@@ -145,7 +146,7 @@ public class AbstractEnvironmentAwareServiceTest {
         return resources;
     }
 
-    private static class TestResource implements  EnvironmentAwareResource {
+    private static class TestResource implements  EnvironmentAwareResource, ArchivableResource {
         private Set<EnvironmentView> environments;
 
         @Override
@@ -181,6 +182,21 @@ public class AbstractEnvironmentAwareServiceTest {
         @Override
         public WorkspaceResource getResource() {
             return null;
+        }
+
+        @Override
+        public void setDeletionTimestamp(Long timestampMillisecs) {
+
+        }
+
+        @Override
+        public void setArchived(boolean archived) {
+
+        }
+
+        @Override
+        public void unsetRelationsToEntitiesToBeDeleted() {
+
         }
     }
 
