@@ -69,7 +69,7 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecution
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
-import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
+import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
@@ -99,7 +99,7 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
     private ProxyConfigService proxyConfigService;
 
     @Inject
-    private KerberosService kerberosService;
+    private KerberosConfigService kerberosConfigService;
 
     @Inject
     private EnvironmentCredentialOperationService environmentCredentialOperationService;
@@ -211,7 +211,7 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
         environment.setProxyConfigs(proxyConfigService.findByNamesInWorkspace(request.getProxies(), workspaceId));
         environment.setRdsConfigs(rdsConfigService.findByNamesInWorkspace(request.getDatabases(), workspaceId));
         environment.setKubernetesConfigs(kubernetesConfigService.findByNamesInWorkspace(request.getKubernetes(), workspaceId));
-        environment.setKerberosConfigs(kerberosService.findByNamesInWorkspace(request.getKerberoses(), workspaceId));
+        environment.setKerberosConfigs(kerberosConfigService.findByNamesInWorkspace(request.getKerberoses(), workspaceId));
         Credential credential = environmentCredentialOperationService.getCredentialFromRequest(request, workspaceId);
         environment.setCredential(credential);
         environment.setCloudPlatform(credential.cloudPlatform());
@@ -333,7 +333,7 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
                 Set<RDSConfig> rdssToAttach = rdsConfigService.findByNamesInWorkspace(request.getDatabases(), workspaceId);
                 Set<KubernetesConfig> kubesToAttach = kubernetesConfigService.findByNamesInWorkspace(request.getKubernetes(), workspaceId);
                 ValidationResult validationResult = environmentAttachValidator.validate(request, ldapsToAttach, proxiesToAttach, rdssToAttach);
-                Set<KerberosConfig> kerberosConfigsToAttach = kerberosService.findByNamesInWorkspace(request.getKerberoses(), workspaceId);
+                Set<KerberosConfig> kerberosConfigsToAttach = kerberosConfigService.findByNamesInWorkspace(request.getKerberoses(), workspaceId);
                 if (validationResult.hasError()) {
                     throw new BadRequestException(validationResult.getFormattedErrors());
                 }
@@ -423,7 +423,7 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
                 .filter(kerberosConfig -> request.getKerberoses().contains(kerberosConfig.getName())).collect(Collectors.toSet());
         Map<KerberosConfig, Set<Cluster>> kerberosConfigsToClusters = kerberosConfigsToDetach.stream()
                 .collect(Collectors.toMap(kerberosConfig -> kerberosConfig, kerberosConfig ->
-                        kerberosService.getClustersUsingResourceInEnvironment(kerberosConfig, environment.getId())));
+                        kerberosConfigService.getClustersUsingResourceInEnvironment(kerberosConfig, environment.getId())));
         validationResult = environmentDetachValidator.validate(environment, kerberosConfigsToClusters).merge(validationResult);
         environment.getKerberosConfigs().removeAll(kerberosConfigsToDetach);
         return validationResult;
@@ -474,7 +474,7 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
                     LdapConfig ldapConfig = isEmpty(registerDatalakeRequest.getLdapName()) ? null
                             : ldapConfigService.getByNameForWorkspaceId(registerDatalakeRequest.getLdapName(), workspaceId);
                     KerberosConfig kerberosConfig = isEmpty(registerDatalakeRequest.getKerberosName()) ? null
-                            : kerberosService.getByNameForWorkspaceId(registerDatalakeRequest.getKerberosName(), workspaceId);
+                            : kerberosConfigService.getByNameForWorkspaceId(registerDatalakeRequest.getKerberosName(), workspaceId);
                     Set<RDSConfig> rdssConfigs = CollectionUtils.isEmpty(registerDatalakeRequest.getDatabaseNames()) ? null
                             : rdsConfigService.findByNamesInWorkspace(registerDatalakeRequest.getDatabaseNames(), workspaceId);
                     URL ambariUrl = new URL(datalakeAmbariUrl);

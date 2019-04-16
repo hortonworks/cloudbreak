@@ -84,7 +84,7 @@ import com.sequenceiq.cloudbreak.service.KubernetesConfigService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
+import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
@@ -132,7 +132,7 @@ public class EnvironmentServiceTest {
     private ProxyConfigService proxyConfigService;
 
     @Mock
-    private KerberosService kerberosService;
+    private KerberosConfigService kerberosConfigService;
 
     @Mock
     private EnvironmentCredentialOperationService environmentCredentialOperationService;
@@ -209,7 +209,7 @@ public class EnvironmentServiceTest {
         when(ldapConfigService.findByNamesInWorkspace(anySet(), anyLong())).thenReturn(Collections.emptySet());
         when(rdsConfigService.findByNamesInWorkspace(anySet(), anyLong())).thenReturn(Collections.emptySet());
         when(proxyConfigService.findByNamesInWorkspace(anySet(), anyLong())).thenReturn(Collections.emptySet());
-        when(kerberosService.findByNamesInWorkspace(anySet(), anyLong())).thenReturn(Collections.emptySet());
+        when(kerberosConfigService.findByNamesInWorkspace(anySet(), anyLong())).thenReturn(Collections.emptySet());
         when(environmentCreationValidator.validate(any(), any(), any())).thenReturn(ValidationResult.builder().build());
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(new CloudbreakUser("", "", "", ""));
@@ -629,7 +629,7 @@ public class EnvironmentServiceTest {
         when(ldapConfigService.getClustersUsingResourceInEnvironment(ldap2, ENVIRONMENT_ID)).thenReturn(Sets.newHashSet(cluster1, cluster2));
         when(proxyConfigService.getClustersUsingResourceInEnvironment(proxy1, ENVIRONMENT_ID)).thenReturn(Sets.newHashSet(cluster1));
         when(rdsConfigService.getClustersUsingResourceInEnvironment(rds1, ENVIRONMENT_ID)).thenReturn(Sets.newHashSet(cluster1));
-        when(kerberosService.getClustersUsingResourceInEnvironment(kdc1, ENVIRONMENT_ID)).thenReturn(Sets.newHashSet(cluster1));
+        when(kerberosConfigService.getClustersUsingResourceInEnvironment(kdc1, ENVIRONMENT_ID)).thenReturn(Sets.newHashSet(cluster1));
 
         exceptionRule.expect(BadRequestException.class);
         exceptionRule.expectMessage(String.format("RDS config '%s' cannot be detached from environment 'EnvName' "

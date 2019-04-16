@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -148,12 +147,8 @@ public class ClusterTerminationService {
         }
         cluster.setClusterDefinition(null);
         cluster.setStack(null);
-        cluster.setLdapConfig(null);
-        cluster.setRdsConfigs(new HashSet<>());
-        cluster.setProxyConfig(null);
         cluster.setStatus(DELETE_COMPLETED);
         cluster.setFileSystem(null);
-        cluster.setKerberosConfig(null);
         transactionService.required(() -> {
             deleteClusterHostGroupsWithItsMetadata(cluster);
             rdsConfigService.deleteDefaultRdsConfigs(rdsConfigs);

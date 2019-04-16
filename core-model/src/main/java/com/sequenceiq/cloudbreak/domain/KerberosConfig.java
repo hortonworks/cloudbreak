@@ -19,6 +19,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
+import org.hibernate.annotations.Where;
+
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
@@ -27,7 +29,8 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 
 @Entity
-public class KerberosConfig implements ProvisionEntity, EnvironmentAwareResource {
+@Where(clause = "archived = false")
+public class KerberosConfig implements ProvisionEntity, EnvironmentAwareResource, ArchivableResource {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "kerberosconfig_generator")
     @SequenceGenerator(name = "kerberosconfig_generator", sequenceName = "kerberosconfig_id_seq", allocationSize = 1)
@@ -100,6 +103,10 @@ public class KerberosConfig implements ProvisionEntity, EnvironmentAwareResource
 
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
+
+    private boolean archived;
+
+    private Long deletionTimestamp = -1L;
 
     public Long getId() {
         return id;
@@ -289,5 +296,28 @@ public class KerberosConfig implements ProvisionEntity, EnvironmentAwareResource
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public void setDeletionTimestamp(Long timestampMillisecs) {
+        deletionTimestamp = timestampMillisecs;
+    }
+
+    @Override
+    public void setArchived(boolean archived) {
+        this.archived = archived;
+    }
+
+    public boolean isArchived() {
+        return archived;
+    }
+
+    public Long getDeletionTimestamp() {
+        return deletionTimestamp;
+    }
+
+    @Override
+    public void unsetRelationsToEntitiesToBeDeleted() {
+
     }
 }

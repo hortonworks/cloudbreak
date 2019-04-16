@@ -55,7 +55,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService
 import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
 import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionTextProcessorFactory;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
+import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -151,7 +151,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     private WorkspaceService workspaceService;
 
     @Mock
-    private KerberosService kerberosService;
+    private KerberosConfigService kerberosConfigService;
 
     @Mock
     private ClusterDefinitionTextProcessorFactory clusterDefinitionTextProcessorFactory;
@@ -200,14 +200,14 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     public void testConvertWhenKerberosNameIsNotNullInAmbariAndSecurityTrueThenExpectedKerberosConfigShouldBeStored() {
         KerberosConfig expected = new KerberosConfig();
         when(cluster.getKerberosName()).thenReturn(TEST_KERBEROS_NAME);
-        when(kerberosService.getByNameForWorkspaceId(eq(TEST_KERBEROS_NAME), anyLong())).thenReturn(expected);
+        when(kerberosConfigService.getByNameForWorkspaceId(eq(TEST_KERBEROS_NAME), anyLong())).thenReturn(expected);
 
         TemplatePreparationObject result = underTest.convert(source);
 
         assertNotNull(result);
         assertTrue(result.getKerberosConfig().isPresent());
         assertEquals(expected, result.getKerberosConfig().get());
-        verify(kerberosService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
+        verify(kerberosConfigService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
     }
 
     @Test

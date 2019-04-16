@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
-public class KerberosServiceTest {
+public class KerberosConfigServiceTest {
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -57,7 +57,7 @@ public class KerberosServiceTest {
     private WorkspaceService workspaceService;
 
     @InjectMocks
-    private KerberosService underTest;
+    private KerberosConfigService underTest;
 
     @Before
     public void setup() {

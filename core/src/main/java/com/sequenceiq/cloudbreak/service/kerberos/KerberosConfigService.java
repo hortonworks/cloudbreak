@@ -22,9 +22,9 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.AbstractEnvironmentAwareService;
 
 @Service
-public class KerberosService extends AbstractEnvironmentAwareService<KerberosConfig> {
+public class KerberosConfigService extends AbstractEnvironmentAwareService<KerberosConfig> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(KerberosService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(KerberosConfigService.class);
 
     @Inject
     private KerberosConfigRepository kerberosConfigRepository;

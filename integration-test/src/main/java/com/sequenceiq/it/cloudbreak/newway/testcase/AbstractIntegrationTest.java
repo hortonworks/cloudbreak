@@ -38,6 +38,7 @@ import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.DatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.ImageCatalogTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.ProxyTestClient;
 import com.sequenceiq.it.cloudbreak.newway.cloud.v2.CommonCloudProperties;
@@ -53,6 +54,8 @@ import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.database.DatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.kerberos.ActiveDirectoryKerberosDescriptorTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
@@ -98,6 +101,9 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     @Inject
     private LdapTestClient ldapTestClient;
+
+    @Inject
+    private KerberosTestClient kerberosTestClient;
 
     @Inject
     private DatabaseTestClient databaseTestClient;
@@ -244,6 +250,19 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
         Set<String> validLdap = new HashSet<>();
         validLdap.add(testContext.get(LdapTestDto.class).getName());
         return validLdap;
+    }
+
+    protected Set<String> createDefaultKerberosConfig(TestContext testContext) {
+        testContext
+                .given(ActiveDirectoryKerberosDescriptorTestDto.class)
+                .withDomain(null)
+                .withRealm("realm.addomain.com")
+                .given(KerberosTestDto.class)
+                .withActiveDirectoryDescriptor()
+                .when(kerberosTestClient.createV4());
+        Set<String> validKerberos = new HashSet<>();
+        validKerberos.add(testContext.get(KerberosTestDto.class).getName());
+        return validKerberos;
     }
 
     protected Set<String> createDefaultRdsConfig(TestContext testContext) {

@@ -29,6 +29,7 @@ import com.sequenceiq.it.cloudbreak.newway.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.database.DatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
@@ -82,12 +83,14 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withLocation(VALID_LOCATION)
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
+                .withKerberosConfigs(getKerberosAsList(testContext))
                 .when(environmentTestClient.createV4())
                 .given(ClusterTestDto.class).valid()
                 .withRdsConfigNames(rdsList)
                 .withClusterDefinitionName(BP_NAME_DL)
                 .withAmbari(testContext.given(AmbariTestDto.class))
                 .withLdapConfigName(testContext.get(LdapTestDto.class).getName())
+                .withKerberos(testContext.get(KerberosTestDto.class).getName())
                 .given("placement", PlacementSettingsTestDto.class)
 
                 .given(StackTestDto.class).withPlacement("placement")
@@ -102,11 +105,13 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withName(testContext.get(EnvironmentTestDto.class).getName())
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
+                .withKerberosConfigs(getKerberosAsList(testContext))
 
                 .when(environmentTestClient.detachV4())
                 .when(environmentTestClient.getV4())
                 .then(EnvironmentClusterTest::checkEnvHasNoRds)
                 .then(EnvironmentClusterTest::checkEnvHasNoLdap)
+                .then(EnvironmentClusterTest::checkEnvHasNoKerberos)
                 .validate();
     }
 
@@ -277,6 +282,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
     private Set<String> createDatalakeResources(TestContext testContext, String hiveDb, String rangerDb) {
         createDefaultLdapConfig(testContext);
+        createDefaultKerberosConfig(testContext);
         testContext
                 .given(DatabaseTestDto.class)
                 .withName(hiveDb)
@@ -292,6 +298,10 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
     private Set<String> getLdapAsList(TestContext testContext) {
         return new HashSet<>(Collections.singletonList(testContext.get(LdapTestDto.class).getName()));
+    }
+
+    private Set<String> getKerberosAsList(TestContext testContext) {
+        return new HashSet<>(Collections.singletonList(testContext.get(KerberosTestDto.class).getName()));
     }
 
     private Collection<InstanceGroupTestDto> setInstanceGroup(TestContext testContext) {

@@ -16,13 +16,14 @@ import org.springframework.util.CollectionUtils;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.environment.ResourceDetachValidator;
+import com.sequenceiq.cloudbreak.domain.ArchivableResource;
 import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentResourceRepository;
-import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
+import com.sequenceiq.cloudbreak.service.AbstractArchivistService;
 
-public abstract class AbstractEnvironmentAwareService<T extends EnvironmentAwareResource> extends AbstractWorkspaceAwareResourceService<T> {
+public abstract class AbstractEnvironmentAwareService<T extends EnvironmentAwareResource & ArchivableResource> extends AbstractArchivistService<T> {
 
     @Inject
     private EnvironmentViewService environmentViewService;
@@ -93,6 +94,9 @@ public abstract class AbstractEnvironmentAwareService<T extends EnvironmentAware
     @Override
     protected void prepareDeletion(T resource) {
         checkClustersForDeletion(resource);
+    }
+
+    protected void prepareCreation(T resource) {
     }
 
     protected void checkClustersForDeletion(T resource) {

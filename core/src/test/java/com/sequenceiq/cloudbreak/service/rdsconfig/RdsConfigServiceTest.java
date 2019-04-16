@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -8,7 +9,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -41,6 +42,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
+import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
@@ -85,6 +87,9 @@ public class RdsConfigServiceTest {
     @Mock
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
+    @Mock
+    private Clock clock;
+
     @Captor
     private ArgumentCaptor<RDSConfig> rdsConfigCaptor;
 
@@ -116,7 +121,7 @@ public class RdsConfigServiceTest {
 
         Set<RDSConfig> rdsConfigs = underTest.retrieveRdsConfigsInWorkspace(defaultWorkspace);
 
-        verify(rdsConfigRepository, times(1)).findAllByWorkspaceId(eq(1L));
+        verify(rdsConfigRepository).findAllByWorkspaceId(eq(1L));
         assertEquals(1, rdsConfigs.size());
     }
 
@@ -126,7 +131,7 @@ public class RdsConfigServiceTest {
 
         underTest.getByNameForWorkspace(TEST_RDS_CONFIG_NAME, defaultWorkspace);
 
-        verify(rdsConfigRepository, times(1)).findByNameAndWorkspaceId(anyString(), eq(1L));
+        verify(rdsConfigRepository).findByNameAndWorkspaceId(anyString(), eq(1L));
     }
 
     @Test
@@ -144,7 +149,7 @@ public class RdsConfigServiceTest {
 
         RDSConfig rdsConfig = underTest.get(1L);
 
-        verify(rdsConfigRepository, times(1)).findById(eq(1L));
+        verify(rdsConfigRepository).findById(eq(1L));
         assertEquals(TEST_RDS_CONFIG_NAME, rdsConfig.getName());
     }
 
@@ -181,8 +186,10 @@ public class RdsConfigServiceTest {
 
         underTest.delete(1L);
 
-        verify(rdsConfigRepository, times(1)).findById(eq(1L));
-        verify(rdsConfigRepository, times(1)).delete(any());
+        verify(rdsConfigRepository).findById(eq(1L));
+        verify(rdsConfigRepository, never()).delete(any());
+        verify(rdsConfigRepository).save(testRdsConfig);
+        assertTrue(testRdsConfig.isArchived());
     }
 
     @Test
@@ -211,13 +218,11 @@ public class RdsConfigServiceTest {
         mockClusterServiceWithEmptyList();
         when(rdsConfigRepository.findById(eq(1L))).thenReturn(Optional.of(testRdsConfig));
 
-        thrown.expect(BadRequestException.class);
-
         underTest.delete(1L);
 
-        verify(rdsConfigRepository, times(1)).save(rdsConfigCaptor.capture());
-        assertEquals(ResourceStatus.DEFAULT_DELETED, rdsConfigCaptor.getValue().getStatus());
-
+        verify(rdsConfigRepository).save(rdsConfigCaptor.capture());
+        assertEquals(ResourceStatus.DEFAULT, rdsConfigCaptor.getValue().getStatus());
+        assertTrue(rdsConfigCaptor.getValue().isArchived());
     }
 
     @Test
@@ -229,7 +234,7 @@ public class RdsConfigServiceTest {
 
         underTest.delete(1L);
 
-        verify(rdsConfigRepository, times(0)).delete(any());
+        verify(rdsConfigRepository, never()).delete(any());
     }
 
     @Test
@@ -240,8 +245,9 @@ public class RdsConfigServiceTest {
 
         RDSConfig deleted = underTest.delete(TEST_RDS_CONFIG_NAME);
 
-        verify(rdsConfigRepository, times(1)).findUserManagedByName(eq(TEST_RDS_CONFIG_NAME));
-        verify(rdsConfigRepository, times(1)).delete(any());
+        verify(rdsConfigRepository).findUserManagedByName(eq(TEST_RDS_CONFIG_NAME));
+        verify(rdsConfigRepository).save(any());
+        verify(rdsConfigRepository, never()).delete(any());
         assertEquals(TEST_RDS_CONFIG_NAME, deleted.getName());
     }
 
@@ -254,7 +260,7 @@ public class RdsConfigServiceTest {
 
         underTest.delete(TEST_RDS_CONFIG_NAME);
 
-        verify(rdsConfigRepository, times(0)).delete(any());
+        verify(rdsConfigRepository, never()).delete(any());
     }
 
     @Test
@@ -324,7 +330,7 @@ public class RdsConfigServiceTest {
 
         RDSConfig rdsConfig = underTest.createIfNotExists(new User(), testRdsConfig, 1L);
 
-        verify(workspaceService, times(0)).get(anyLong(), any(User.class));
+        verify(workspaceService, never()).get(anyLong(), any(User.class));
         verifyZeroInteractions(transactionService);
         assertEquals(testRdsConfig, rdsConfig);
     }
@@ -338,8 +344,10 @@ public class RdsConfigServiceTest {
 
         underTest.deleteDefaultRdsConfigs(Sets.newHashSet(testRdsConfig, rdsConfig));
 
+        verify(rdsConfigRepository).save(rdsConfig);
+        verify(rdsConfigRepository, never()).delete(rdsConfig);
         assertEquals(ResourceStatus.USER_MANAGED, testRdsConfig.getStatus());
-        assertEquals(ResourceStatus.DEFAULT_DELETED, rdsConfig.getStatus());
+        assertEquals(ResourceStatus.DEFAULT, rdsConfig.getStatus());
+        assertTrue(rdsConfig.isArchived());
     }
-
 }

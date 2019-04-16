@@ -22,6 +22,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Where;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
@@ -32,8 +34,9 @@ import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 
 @Entity
+@Where(clause = "archived = false")
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
-public class RDSConfig implements ProvisionEntity, EnvironmentAwareResource {
+public class RDSConfig implements ProvisionEntity, EnvironmentAwareResource, ArchivableResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "rdsconfig_generator")
@@ -86,6 +89,10 @@ public class RDSConfig implements ProvisionEntity, EnvironmentAwareResource {
 
     @ManyToOne
     private Workspace workspace;
+
+    private boolean archived;
+
+    private Long deletionTimestamp = -1L;
 
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(name = "env_rds", joinColumns = @JoinColumn(name = "rdsid"), inverseJoinColumns = @JoinColumn(name = "envid"))
@@ -248,5 +255,28 @@ public class RDSConfig implements ProvisionEntity, EnvironmentAwareResource {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    @Override
+    public void setDeletionTimestamp(Long timestampMillisecs) {
+        deletionTimestamp = timestampMillisecs;
+    }
+
+    @Override
+    public void setArchived(boolean archived) {
+        this.archived = true;
+    }
+
+    @Override
+    public void unsetRelationsToEntitiesToBeDeleted() {
+
+    }
+
+    public Long getDeletionTimestamp() {
+        return deletionTimestamp;
+    }
+
+    public boolean isArchived() {
+        return archived;
     }
 }
