@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
@@ -28,12 +29,15 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHInfo;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
+import com.sequenceiq.cloudbreak.clusterdefinition.utils.ClusterDefinitionUtils;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
 public class ClouderaManagerClusterCreationSetupService {
@@ -48,6 +52,9 @@ public class ClouderaManagerClusterCreationSetupService {
 
     @Inject
     private StackMatrixService stackMatrixService;
+
+    @Inject
+    private ClusterDefinitionUtils clusterDefinitionUtils;
 
     public List<ClusterComponent> prepareClouderaManagerCluster(ClusterV4Request request, Cluster cluster,
             Optional<Component> stackClouderaManagerRepoConfig,
@@ -101,7 +108,11 @@ public class ClouderaManagerClusterCreationSetupService {
             Optional<Component> stackImageComponent, Cluster cluster) throws IOException {
         Json json;
         if (Objects.isNull(stackClouderaManagerRepoConfig) || !stackClouderaManagerRepoConfig.isPresent()) {
-            ClouderaManagerRepo clouderaManagerRepo = defaultClouderaManagerRepoService.getDefault(getOsType(stackImageComponent));
+            JsonNode root = JsonUtil.readTree(cluster.getClusterDefinition().getClusterDefinitionText());
+            String cdhStackVersion = clusterDefinitionUtils.getCDHStackVersion(root);
+            String cdh = StackType.CDH.name();
+            ClouderaManagerRepo clouderaManagerRepo = defaultClouderaManagerRepoService.getDefault(
+                    getOsType(stackImageComponent), cdh, cdhStackVersion);
             if (clouderaManagerRepo == null) {
                 throw new BadRequestException(String.format("Couldn't determine Cloudera Manager repo for the stack: %s", cluster.getStack().getName()));
             }

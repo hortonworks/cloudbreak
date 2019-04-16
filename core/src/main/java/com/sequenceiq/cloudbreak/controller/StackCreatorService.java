@@ -321,7 +321,7 @@ public class StackCreatorService {
             try {
                 return f.get(1, TimeUnit.HOURS);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                throw new RuntimeException("Image catalog determaination failed", e);
+                throw new RuntimeException("Image catalog determination failed", e);
             }
         }).orElse(null);
     }
