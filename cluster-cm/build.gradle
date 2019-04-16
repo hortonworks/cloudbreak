@@ -21,6 +21,7 @@ dependencies {
     transitive = false
   }
   compile project(':cluster-api')
+  compile project(':common')
   compile project(':template-manager-cmtemplate')
 
   testCompile (group: 'junit', name: 'junit', version: junitVersion) {
@@ -31,6 +32,7 @@ dependencies {
   }
   testCompile 'org.hamcrest:java-hamcrest:2.0.0.0'
   testCompile        group: 'org.mockito',               name: 'mockito-junit-jupiter',          version: mockitoVersion
+  testCompile        group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
   testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-api',              version: junitJupiterVersion
   testRuntime        group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',           version: junitJupiterVersion
 }

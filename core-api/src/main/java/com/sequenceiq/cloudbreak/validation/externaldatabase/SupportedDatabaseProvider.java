@@ -30,6 +30,10 @@ public final class SupportedDatabaseProvider {
         SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Ambari", POSTGRES, MYSQL));
         SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Registry", POSTGRES, MYSQL, ORACLE11, ORACLE12));
         SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Cloudera Manager", POSTGRES));
+        SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Cloudera Manager Management Service Activity Monitor", POSTGRES));
+        SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Cloudera Manager Management Service Reports Manager", POSTGRES));
+        SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Cloudera Manager Management Service Navigator", POSTGRES));
+        SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Cloudera Manager Management Service Navigator Metaserver", POSTGRES));
     }
 
     public static Set<SupportedExternalDatabaseServiceEntry> supportedExternalDatabases() {

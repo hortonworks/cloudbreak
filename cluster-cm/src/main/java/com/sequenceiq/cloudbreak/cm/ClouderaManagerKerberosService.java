@@ -100,6 +100,11 @@ public class ClouderaManagerKerberosService {
         try {
             ClouderaManagerModificationService modificationService = applicationContext.getBean(ClouderaManagerModificationService.class, stack, clientConfig);
             modificationService.stopCluster();
+
+            ClouderaManagerClusterDecomissionService decomissionService = applicationContext.getBean(ClouderaManagerClusterDecomissionService.class,
+                    stack, clientConfig);
+            decomissionService.removeManagementServices();
+
             ApiCommand command = apiInstance.deleteCredentialsCommand("all");
             clouderaManagerPollingServiceProvider.kerberosConfigurePollingService(stack, client, command.getId());
         } catch (ApiException | CloudbreakException e) {
