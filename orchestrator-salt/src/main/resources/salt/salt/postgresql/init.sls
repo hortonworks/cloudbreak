@@ -1,6 +1,13 @@
+init-db-with-utf8:
+  cmd.run:
+    - name: rm -rf /var/lib/pgsql/data && su postgres sh -c 'initdb --locale=en_US.UTF-8 /var/lib/pgsql/data > /var/lib/pgsql/initdb.log' && rm /var/log/pgsql_listen_address_configured
+    - unless: grep -q UTF-8 /var/lib/pgsql/initdb.log
+
 start-postgresql:
   service.running:
     - enable: True
+    - require:
+      - cmd: init-db-with-utf8
     - name: postgresql
 
 /opt/salt/scripts/conf_pgsql_listen_address.sh:
@@ -20,6 +27,8 @@ configure-listen-address:
 /opt/salt/scripts/init_db.sh:
   file.managed:
     - makedirs: True
+    - require:
+      - cmd: configure-listen-address
     - mode: 755
     - source: salt://postgresql/scripts/init_db.sh
     - template: jinja

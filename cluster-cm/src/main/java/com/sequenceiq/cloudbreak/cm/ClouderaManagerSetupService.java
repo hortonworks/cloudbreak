@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isSuccess;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -33,6 +35,7 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralCmTemplateUpdater;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -64,6 +67,9 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Inject
     private ClusterComponentConfigProvider clusterComponentProvider;
+
+    @Inject
+    private ClouderaManagerMgmtSetupService mgmtSetupService;
 
     @Inject
     private ClouderaManagerKerberosService kerberosService;
@@ -104,6 +110,10 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         Cluster cluster = stack.getCluster();
         Long clusterId = cluster.getId();
         try {
+            Optional<RDSConfig> mgmtRdsConfigOpt = templatePreparationObject.getRdsConfigs().stream()
+                    .filter(rds -> CLOUDERA_MANAGER_MANAGEMENT_SERVICE.name().equals(rds.getType())).findFirst();
+            mgmtSetupService.setupMgmtServices(stack, client, mgmtRdsConfigOpt);
+
             Map<String, List<Map<String, String>>> hostGroupMappings = hostGroupAssociationBuilder.buildHostGroupAssociations(instanceMetaDataByHostGroup);
             ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(clusterId);
             List<ClouderaManagerProduct> clouderaManagerProductDetails = clusterComponentProvider.getClouderaManagerProductDetails(clusterId);
@@ -125,6 +135,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             LOGGER.debug("Cloudera cluster template has been submitted, cluster install is in progress");
 
             clouderaManagerPollingServiceProvider.templateInstallCheckerService(stack, client, apiCommand.getId());
+
             if (!CMRepositoryVersionUtil.isEnableKerberosSupportedViaBlueprint(clouderaManagerRepoDetails)) {
                 kerberosService.configureKerberosViaApi(client, clientConfig, stack, clouderaManagerRepoDetails);
             }
