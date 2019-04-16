@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service;
 import static com.sequenceiq.cloudbreak.RepoTestUtil.getDefaultCDHInfo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
+import com.sequenceiq.cloudbreak.clusterdefinition.utils.ClusterDefinitionUtils;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
@@ -62,6 +64,9 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
 
     @Mock
     private DefaultClouderaManagerRepoService defaultClouderaManagerRepoService;
+
+    @Mock
+    private ClusterDefinitionUtils clusterDefinitionUtils;
 
     @InjectMocks
     private ClouderaManagerClusterCreationSetupService underTest;
@@ -109,6 +114,7 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
         KerberosConfig kerberosConfig = new KerberosConfig();
         kerberosConfig.setDomain("domain");
         cluster.setKerberosConfig(kerberosConfig);
+        cluster.setClusterDefinition(clusterDefinition);
         DefaultCDHInfo defaultCDHInfo = getDefaultCDHInfo(DEFAULT_CM_VERSION, DEFAULT_CDH_VERSION);
         setupDefaultClouderaManagerEntries();
 
@@ -116,6 +122,7 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
         StackMatrixV4Response stackMatrixV4Response = new StackMatrixV4Response();
         stackMatrixV4Response.setCdh(Collections.singletonMap(DEFAULT_CDH_VERSION, null));
         when(stackMatrixService.getStackMatrix()).thenReturn(stackMatrixV4Response);
+        when(clusterDefinitionUtils.getCDHStackVersion(any())).thenReturn(CDH_VERSION);
     }
 
     @Test
@@ -164,6 +171,6 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
 
         Mockito.when(defaultClouderaManagerRepoService.getEntries()).thenReturn(clouderaManagerEntries);
         ClouderaManagerRepo clouderaManagerRepo = getClouderaManagerRepo(true);
-        Mockito.when(defaultClouderaManagerRepoService.getDefault(REDHAT_7)).thenReturn(clouderaManagerRepo);
+        Mockito.when(defaultClouderaManagerRepoService.getDefault(REDHAT_7, "CDH", CM_VERSION)).thenReturn(clouderaManagerRepo);
     }
 }
