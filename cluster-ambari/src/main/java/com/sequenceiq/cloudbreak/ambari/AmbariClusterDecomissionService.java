@@ -81,9 +81,14 @@ public class AmbariClusterDecomissionService implements ClusterDecomissionServic
     }
 
     @Override
-    public boolean deleteHostFromCluster(HostMetadata data) {
+    public void removeManagementServices() {
+        // Do nothing
+    }
+
+    @Override
+    public void deleteHostFromCluster(HostMetadata data) {
         try {
-            return ambariDecommissioner.deleteHostFromAmbari(stack, data, ambariClient);
+            ambariDecommissioner.deleteHostFromAmbari(stack, data, ambariClient);
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
         }

@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.polling.PollingResult.isSuccess;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -17,12 +18,15 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
+import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiConfigList;
+import com.cloudera.api.swagger.model.ApiHost;
+import com.cloudera.api.swagger.model.ApiHostRef;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -30,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
+import com.sequenceiq.cloudbreak.cm.client.DataView;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralCmTemplateUpdater;
@@ -64,6 +69,9 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Inject
     private ClusterComponentConfigProvider clusterComponentProvider;
+
+    @Inject
+    private ClouderaManagerMgmtSetupService mgmtSetupService;
 
     @Inject
     private ClouderaManagerKerberosService kerberosService;
@@ -104,6 +112,21 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         Cluster cluster = stack.getCluster();
         Long clusterId = cluster.getId();
         try {
+            HostsResourceApi hostsResourceApi = new HostsResourceApi(client);
+            Optional<ApiHost> optionalCmHost = hostsResourceApi.readHosts(DataView.SUMMARY.name()).getItems().stream()
+                    .filter(host -> host.getIpAddress().equals(stack.getAmbariIp()))
+                    .findFirst();
+
+            if (optionalCmHost.isPresent()) {
+                ApiHost cmHost = optionalCmHost.get();
+                ApiHostRef cmHostRef = new ApiHostRef();
+                cmHostRef.setHostId(cmHost.getHostId());
+                cmHostRef.setHostname(cmHost.getHostname());
+                mgmtSetupService.setupMgmtServices(stack, client, cmHostRef, templatePreparationObject.getRdsConfigs());
+            } else {
+                LOGGER.warn("Unable to determine Cloudera Manager host. Skipping management services installation.");
+            }
+
             Map<String, List<Map<String, String>>> hostGroupMappings = hostGroupAssociationBuilder.buildHostGroupAssociations(instanceMetaDataByHostGroup);
             ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(clusterId);
             List<ClouderaManagerProduct> clouderaManagerProductDetails = clusterComponentProvider.getClouderaManagerProductDetails(clusterId);
@@ -125,6 +148,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             LOGGER.debug("Cloudera cluster template has been submitted, cluster install is in progress");
 
             clouderaManagerPollingServiceProvider.templateInstallCheckerService(stack, client, apiCommand.getId());
+
             if (!CMRepositoryVersionUtil.isEnableKerberosSupportedViaBlueprint(clouderaManagerRepoDetails)) {
                 kerberosService.configureKerberosViaApi(client, clientConfig, stack, clouderaManagerRepoDetails);
             }

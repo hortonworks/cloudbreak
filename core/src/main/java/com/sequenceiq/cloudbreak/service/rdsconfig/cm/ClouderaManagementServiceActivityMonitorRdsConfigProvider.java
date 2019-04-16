@@ -1,23 +1,24 @@
-package com.sequenceiq.cloudbreak.service.rdsconfig;
+package com.sequenceiq.cloudbreak.service.rdsconfig.cm;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.service.rdsconfig.AbstractRdsConfigProvider;
 
 @Component
-public class ClouderaManagerRdsConfigProvider extends AbstractRdsConfigProvider {
+public class ClouderaManagementServiceActivityMonitorRdsConfigProvider extends AbstractRdsConfigProvider {
 
-    private static final String PILLAR_KEY = "clouderamanager";
+    private static final String PILLAR_KEY = "cmmanagement_am";
 
-    @Value("${cb.clouderamanager.service.database.port:5432}")
+    @Value("${cb.clouderamanager.management.service.port:5432}")
     private String port;
 
-    @Value("${cb.clouderamanager.service.database.user:clouderamanager}")
+    @Value("${cb.clouderamanager.management.service.database.user:cmmanagement_am}")
     private String userName;
 
-    @Value("${cb.clouderamanager.service.database.db:clouderamanager}")
+    @Value("${cb.clouderamanager.management.service.database.db:cmmanagement_am}")
     private String db;
 
     @Override
@@ -42,7 +43,7 @@ public class ClouderaManagerRdsConfigProvider extends AbstractRdsConfigProvider 
 
     @Override
     protected DatabaseType getRdsType() {
-        return DatabaseType.CLOUDERA_MANAGER;
+        return DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE_ACTIVITY_MONITOR;
     }
 
     @Override

@@ -1,14 +1,12 @@
 package com.sequenceiq.cloudbreak.validation;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
+import com.sequenceiq.cloudbreak.util.DatabaseCommon;
 
 public class RDSConfigJsonValidator implements ConstraintValidator<ValidRDSConfigJson, DatabaseV4Base> {
 
@@ -21,12 +19,6 @@ public class RDSConfigJsonValidator implements ConstraintValidator<ValidRDSConfi
     private static final int MAX_TYPE_LENGTH = 16;
 
     private static final int MAX_CONNECTOR_JAR_URL_LENGTH = 150;
-
-    private static final int HOST_GROUP_INDEX = 1;
-
-    private static final int HOST_PORT_INDEX = 2;
-
-    private static final int DATABASE_GROUP_INDEX = 3;
 
     private String failMessage = "";
 
@@ -47,7 +39,7 @@ public class RDSConfigJsonValidator implements ConstraintValidator<ValidRDSConfi
     }
 
     private boolean isConnectionUrlValid(String url) {
-        if (!url.matches("^(?:jdbc:(?:oracle|mysql|postgresql)(:(?:.*))?):(@|//)(?:.*?):(?:\\d*)[:/](?:\\w+)(?:-*\\w*)*(?:[?](?:[^=&]*=[^&=]*&?)*)?")) {
+        if (!url.matches(DatabaseCommon.JDBC_REGEX)) {
             if (!isSupportedDatabseType(url)) {
                 failMessage = "Unsupported database type. Supported databases: PostgreSQL, Oracle, MySQL.";
             } else if (!isValidSeparator(url)) {
@@ -101,23 +93,11 @@ public class RDSConfigJsonValidator implements ConstraintValidator<ValidRDSConfi
     }
 
     private boolean isValidHostPortAndDatabaseName(String connectionURL) {
-        String splitter;
-        splitter = connectionURL.indexOf("//") > 0 ? "//" : "@";
-        String[] split = connectionURL.split(splitter);
-
-        String withoutJDBCPrefix = split[split.length - 1];
-
-        Pattern compile = Pattern.compile("^(.*?):(\\d*)[:/]?(\\w+)?");
-        Matcher matcher = compile.matcher(withoutJDBCPrefix);
-
-        return matcher.find() && matcher.groupCount() == DATABASE_GROUP_INDEX
-                && !StringUtils.isEmpty(matcher.group(HOST_GROUP_INDEX))
-                && !StringUtils.isEmpty(matcher.group(HOST_PORT_INDEX))
-                && !StringUtils.isEmpty(matcher.group(DATABASE_GROUP_INDEX));
+        return DatabaseCommon.getHostPortAndDatabaseName(connectionURL).isPresent();
     }
 
     private boolean isSupportedDatabseType(String connectionURL) {
-        return connectionURL.matches("jdbc:(oracle|mysql|postgresql).*");
+        return DatabaseCommon.getDatabaseType(connectionURL).isPresent();
     }
 
 }

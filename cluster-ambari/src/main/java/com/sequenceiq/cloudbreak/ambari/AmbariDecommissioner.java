@@ -191,9 +191,9 @@ public class AmbariDecommissioner {
         return hostsToRemove;
     }
 
-    public boolean deleteHostFromAmbari(Stack stack, HostMetadata data, AmbariClient ambariClient) throws IOException, URISyntaxException {
+    public void deleteHostFromAmbari(Stack stack, HostMetadata data, AmbariClient ambariClient) throws IOException, URISyntaxException {
         Map<String, Map<String, String>> runningComponents = ambariClient.getHostComponentsStates();
-        return deleteHostFromAmbari(data, runningComponents, ambariClient);
+        deleteHostFromAmbari(data, runningComponents, ambariClient);
     }
 
     public Map<String, Long> selectNodes(Map<String, Long> sortedAscending, Collection<HostMetadata> filteredHostList, int removeCount) {
@@ -216,20 +216,16 @@ public class AmbariDecommissioner {
         return select;
     }
 
-    private boolean deleteHostFromAmbari(HostMetadata data, Map<String, Map<String, String>> runningComponents, ServiceAndHostService ambariClient)
+    private void deleteHostFromAmbari(HostMetadata data, Map<String, Map<String, String>> runningComponents, ServiceAndHostService ambariClient)
             throws IOException, URISyntaxException {
-        boolean hostDeleted = false;
         if (ambariClient.getClusterHosts().contains(data.getHostName())) {
             String hostState = ambariClient.getHostState(data.getHostName());
             if ("UNKNOWN".equals(hostState)) {
                 deleteHosts(singletonList(data.getHostName()), runningComponents, ambariClient);
-                hostDeleted = true;
             }
         } else {
             LOGGER.debug("Host is already deleted.");
-            hostDeleted = true;
         }
-        return hostDeleted;
     }
 
     private Collection<HostMetadata> decommissionAmbariNodes(Stack stack, Map<String, HostMetadata> hostsToRemove,
