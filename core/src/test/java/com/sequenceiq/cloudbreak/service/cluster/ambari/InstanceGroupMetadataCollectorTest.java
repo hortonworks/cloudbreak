@@ -23,8 +23,8 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceGroupMetadataCollector;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InstanceGroupMetadataCollectorTest {
@@ -33,7 +33,7 @@ public class InstanceGroupMetadataCollectorTest {
     public final ExpectedException thrown = ExpectedException.none();
 
     @Mock
-    private InstanceMetaDataRepository instanceMetadataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @InjectMocks
     private final InstanceGroupMetadataCollector underTest = new InstanceGroupMetadataCollector();
@@ -43,7 +43,7 @@ public class InstanceGroupMetadataCollectorTest {
         Stack stack = TestUtil.stack();
 
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            when(instanceMetadataRepository.findAliveInstancesInInstanceGroup(instanceGroup.getId()))
+            when(instanceMetaDataService.findAliveInstancesInInstanceGroup(instanceGroup.getId()))
                     .thenReturn(Lists.newArrayList(instanceGroup.getAllInstanceMetaData().iterator()));
         }
 
@@ -52,6 +52,7 @@ public class InstanceGroupMetadataCollectorTest {
         Assert.assertEquals(3L, stringListMap.size());
         Assert.assertTrue(stringListMap.keySet().containsAll(Sets.newHashSet("is1", "is2", "is3")));
 
-        verify(instanceMetadataRepository, times(3)).findAliveInstancesInInstanceGroup(anyLong());
+        verify(instanceMetaDataService, times(3)).findAliveInstancesInInstanceGroup(anyLong());
     }
+
 }

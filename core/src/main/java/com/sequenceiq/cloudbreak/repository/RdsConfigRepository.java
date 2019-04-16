@@ -48,7 +48,7 @@ public interface RdsConfigRepository extends EnvironmentResourceRepository<RDSCo
     @CheckPermissionsByWorkspaceId(action = READ, workspaceIdIndex = 1)
     @Query("SELECT r FROM RDSConfig r LEFT JOIN FETCH r.clusters WHERE r.name= :name AND r.status = 'USER_MANAGED'"
             + "AND r.workspace.id = :workspaceId")
-    RDSConfig findByNameAndWorkspaceId(@Param("name") String name, @Param("workspaceId") Long workspaceId);
+    Optional<RDSConfig> findByNameAndWorkspaceId(@Param("name") String name, @Param("workspaceId") Long workspaceId);
 
     @Override
     @CheckPermissionsByWorkspaceId(action = READ, workspaceIdIndex = 1)
@@ -60,7 +60,7 @@ public interface RdsConfigRepository extends EnvironmentResourceRepository<RDSCo
     @CheckPermissionsByWorkspace(action = READ, workspaceIndex = 1)
     @Query("SELECT r FROM RDSConfig r LEFT JOIN FETCH r.clusters WHERE r.name= :name AND r.status = 'USER_MANAGED'"
             + "AND r.workspace = :org")
-    RDSConfig findByNameAndWorkspace(@Param("name") String name, @Param("org") Workspace org);
+    Optional<RDSConfig> findByNameAndWorkspace(@Param("name") String name, @Param("org") Workspace org);
 
     @CheckPermissionsByReturnValue(action = READ)
     @Query("SELECT r FROM RDSConfig r LEFT JOIN FETCH r.clusters WHERE r.id= :id AND r.status <> 'DEFAULT_DELETED'")

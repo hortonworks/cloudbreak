@@ -122,7 +122,7 @@ public class RdsConfigServiceTest {
 
     @Test
     public void testGetExistingRdsConfigByNameAndDefaultWorkspace() {
-        when(rdsConfigRepository.findByNameAndWorkspaceId(eq(TEST_RDS_CONFIG_NAME), eq(1L))).thenReturn(testRdsConfig);
+        when(rdsConfigRepository.findByNameAndWorkspaceId(eq(TEST_RDS_CONFIG_NAME), eq(1L))).thenReturn(Optional.ofNullable(testRdsConfig));
 
         underTest.getByNameForWorkspace(TEST_RDS_CONFIG_NAME, defaultWorkspace);
 
@@ -131,7 +131,7 @@ public class RdsConfigServiceTest {
 
     @Test
     public void testGetNonExistingRdsConfigByNameAndDefaultWorkspace() {
-        when(rdsConfigRepository.findByNameAndWorkspaceId(anyString(), eq(1L))).thenReturn(null);
+        when(rdsConfigRepository.findByNameAndWorkspaceId(anyString(), eq(1L))).thenReturn(Optional.empty());
 
         thrown.expect(NotFoundException.class);
 
@@ -288,7 +288,7 @@ public class RdsConfigServiceTest {
 
     @Test
     public void testRdsConnectionTestByName() {
-        when(rdsConfigRepository.findByNameAndWorkspaceId(any(), any())).thenReturn(testRdsConfig);
+        when(rdsConfigRepository.findByNameAndWorkspaceId(any(), any())).thenReturn(Optional.ofNullable(testRdsConfig));
         doNothing().when(rdsConnectionValidator).validateRdsConnection(any());
 
         String result = underTest.testRdsConnection(1L, TEST_RDS_CONFIG_NAME, null);
@@ -298,7 +298,7 @@ public class RdsConfigServiceTest {
 
     @Test
     public void testRdsConnectionTestByNameWithException() {
-        when(rdsConfigRepository.findByNameAndWorkspaceId(eq(TEST_RDS_CONFIG_NAME), eq(defaultWorkspace.getId()))).thenReturn(null);
+        when(rdsConfigRepository.findByNameAndWorkspaceId(eq(TEST_RDS_CONFIG_NAME), eq(defaultWorkspace.getId()))).thenReturn(Optional.empty());
 
         String result = underTest.testRdsConnection(1L, TEST_RDS_CONFIG_NAME, null);
 
@@ -307,7 +307,7 @@ public class RdsConfigServiceTest {
 
     @Test
     public void testNewRdsConfigCreation() throws TransactionExecutionException {
-        when(rdsConfigRepository.findByNameAndWorkspaceId(eq(TEST_RDS_CONFIG_NAME), eq(1L))).thenReturn(null);
+        when(rdsConfigRepository.findByNameAndWorkspaceId(eq(TEST_RDS_CONFIG_NAME), eq(1L))).thenReturn(Optional.empty());
         when(workspaceService.get(eq(1L), any(User.class))).thenReturn(defaultWorkspace);
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any());
         when(workspaceService.retrieveForUser(any())).thenReturn(Collections.singleton(defaultWorkspace));
@@ -320,7 +320,7 @@ public class RdsConfigServiceTest {
 
     @Test
     public void testExistingRdsConfigCreation() {
-        when(rdsConfigRepository.findByNameAndWorkspaceId(eq(TEST_RDS_CONFIG_NAME), eq(1L))).thenReturn(testRdsConfig);
+        when(rdsConfigRepository.findByNameAndWorkspaceId(eq(TEST_RDS_CONFIG_NAME), eq(1L))).thenReturn(Optional.ofNullable(testRdsConfig));
 
         RDSConfig rdsConfig = underTest.createIfNotExists(new User(), testRdsConfig, 1L);
 

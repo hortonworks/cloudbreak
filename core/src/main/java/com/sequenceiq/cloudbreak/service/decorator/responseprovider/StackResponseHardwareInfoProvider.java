@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.decorator.responseprovider;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,8 +24,8 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 
 @Component
 public class StackResponseHardwareInfoProvider implements ResponseProvider {
@@ -32,7 +33,7 @@ public class StackResponseHardwareInfoProvider implements ResponseProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackResponseHardwareInfoProvider.class);
 
     @Inject
-    private HostMetadataRepository hostMetadataRepository;
+    private HostMetadataService hostMetadataService;
 
     @Inject
     private HostGroupService hostGroupService;
@@ -58,15 +59,13 @@ public class StackResponseHardwareInfoProvider implements ResponseProvider {
 
         Template template = instanceGroup.getTemplate();
         Set<InstanceMetaData> allInstanceMetaData = instanceGroup.getAllInstanceMetaData();
-        HostGroup hostGroup = null;
+        Optional<HostGroup> hostGroup = Optional.empty();
         if (stack.getCluster() != null) {
-            hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), instanceGroup.getGroupName());
+            hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(), instanceGroup.getGroupName());
         }
 
         HardwareInfoGroupV4Response hardwareInfoGroupResponse = new HardwareInfoGroupV4Response();
-        if (hostGroup != null) {
-            hardwareInfoGroupResponse.setRecoveryMode(hostGroup.getRecoveryMode());
-        }
+        hostGroup.ifPresent(group -> hardwareInfoGroupResponse.setRecoveryMode(group.getRecoveryMode()));
         hardwareInfoGroupResponse.setName(instanceGroup.getGroupName());
 
 
@@ -83,18 +82,18 @@ public class StackResponseHardwareInfoProvider implements ResponseProvider {
             hardwareInfoResponse.setPublicIp(instanceMetaData.getPublicIp());
             hardwareInfoResponse.setSshPort(instanceMetaData.getSshPort());
 
-            HostMetadata hostMetadata = null;
+            Optional<HostMetadata> hostMetadata = Optional.empty();
             if (stack.getCluster() != null) {
-                hostMetadata = hostMetadataRepository.findHostInClusterByName(stack.getCluster().getId(), instanceMetaData.getDiscoveryFQDN());
+                hostMetadata = hostMetadataService.findHostInClusterByName(stack.getCluster().getId(), instanceMetaData.getDiscoveryFQDN());
                 if (template != null) {
                     hardwareInfoResponse.setTemplate(converterUtil.convert(template, InstanceTemplateV4Response.class));
                 }
             }
 
-            if (hostMetadata != null) {
-                hardwareInfoResponse.setGroupName(hostMetadata.getHostGroup().getName());
-                hardwareInfoResponse.setName(hostMetadata.getHostName());
-                hardwareInfoResponse.setState(hostMetadata.getHostMetadataState().name());
+            if (hostMetadata.isPresent()) {
+                hardwareInfoResponse.setGroupName(hostMetadata.get().getHostGroup().getName());
+                hardwareInfoResponse.setName(hostMetadata.get().getHostName());
+                hardwareInfoResponse.setState(hostMetadata.get().getHostMetadataState().name());
             }
 
             try {

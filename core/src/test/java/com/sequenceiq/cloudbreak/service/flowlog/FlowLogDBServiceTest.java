@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,7 +59,7 @@ public class FlowLogDBServiceTest {
         FlowLog flowLog = new FlowLog();
         flowLog.setId(ID);
 
-        when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLog);
+        when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
 
         FlowLog lastFlowLog = underTest.getLastFlowLog(FLOW_ID);
         assertEquals(flowLog, lastFlowLog);

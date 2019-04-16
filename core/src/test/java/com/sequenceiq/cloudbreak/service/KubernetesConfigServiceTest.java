@@ -7,6 +7,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -59,7 +60,7 @@ public class KubernetesConfigServiceTest {
         originalConfig.setId(1L);
         originalConfig.setWorkspace(new Workspace());
         originalConfig.setEnvironments(Set.of(new EnvironmentView()));
-        when(kubernetesConfigRepository.findByNameAndWorkspaceId(any(), anyLong())).thenReturn(originalConfig);
+        when(kubernetesConfigRepository.findByNameAndWorkspaceId(any(), anyLong())).thenReturn(Optional.of(originalConfig));
 
         KubernetesConfig result = underTest.updateByWorkspaceId(1L, new KubernetesConfig());
 

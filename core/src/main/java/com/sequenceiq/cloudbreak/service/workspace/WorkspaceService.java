@@ -290,4 +290,5 @@ public class WorkspaceService {
         return Crn.isCrn(user.getUserCrn()) ? Crn.fromString(user.getUserCrn()).getAccountId()
                 : user.getTenant().getName();
     }
+
 }

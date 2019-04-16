@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.Optional;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -27,7 +28,7 @@ public interface HostMetadataRepository extends DisabledBaseRepository<HostMetad
 
     @Query("SELECT h FROM HostMetadata h "
             + "WHERE h.hostGroup.cluster.id= :clusterId AND h.hostName = :hostName")
-    HostMetadata findHostInClusterByName(@Param("clusterId") Long clusterId, @Param("hostName") String hostName);
+    Optional<HostMetadata> findHostInClusterByName(@Param("clusterId") Long clusterId, @Param("hostName") String hostName);
 
     @Query("SELECT h FROM HostMetadata h "
             + "WHERE h.hostGroup.cluster.id= :clusterId AND h.hostName = :hostName")

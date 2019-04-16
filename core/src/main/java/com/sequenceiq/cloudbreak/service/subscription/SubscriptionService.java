@@ -28,4 +28,9 @@ public class SubscriptionService {
         }
         return subscriptionRepository.save(subscription).getId();
     }
+
+    public Iterable<Subscription> findAll() {
+        return subscriptionRepository.findAll();
+    }
+
 }

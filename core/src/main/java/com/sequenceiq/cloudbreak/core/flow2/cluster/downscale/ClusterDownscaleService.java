@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cluster.service.NotEnoughNodeException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -73,7 +74,8 @@ public class ClusterDownscaleService {
         StackView stackView = stackService.getViewByIdWithoutAuth(stackId);
         ClusterView clusterView = stackView.getClusterView();
         hostNames.forEach(hn -> {
-            HostGroup hostGroup = hostGroupService.getByClusterIdAndName(clusterView.getId(), hostGroupName);
+            HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(clusterView.getId(), hostGroupName)
+                    .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
             List<HostMetadata> hostMetaToRemove = hostGroup.getHostMetadata().stream()
                     .filter(md -> hostNames.contains(md.getHostName())).collect(Collectors.toList());
             hostGroup.getHostMetadata().removeAll(hostMetaToRemove);

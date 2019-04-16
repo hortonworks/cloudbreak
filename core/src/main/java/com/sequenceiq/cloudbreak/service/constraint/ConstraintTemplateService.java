@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.ConstraintTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.ConstraintTemplateRepository;
@@ -38,7 +39,8 @@ public class ConstraintTemplateService extends AbstractWorkspaceAwareResourceSer
 
     @Override
     public ConstraintTemplate deleteByNameFromWorkspace(String name, Long workspaceId) {
-        ConstraintTemplate constraintTemplate = constraintTemplateRepository.findByNameAndWorkspaceId(name, workspaceId);
+        ConstraintTemplate constraintTemplate = constraintTemplateRepository.findByNameAndWorkspaceId(name, workspaceId)
+                .orElseThrow(NotFoundException.notFound("constraintTemplate", name));
         return delete(constraintTemplate);
     }
 

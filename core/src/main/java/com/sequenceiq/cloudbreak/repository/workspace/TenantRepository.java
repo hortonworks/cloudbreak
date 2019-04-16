@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.repository.workspace;
 
+import java.util.Optional;
+
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
@@ -13,5 +15,6 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @DisableHasPermission
 public interface TenantRepository extends DisabledBaseRepository<Tenant, Long> {
 
-    Tenant findByName(String name);
+    Optional<Tenant> findByName(String name);
+
 }

@@ -57,7 +57,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 
@@ -76,7 +76,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Mock
-    private ComponentConfigProvider componentConfigProvider;
+    private ComponentConfigProviderService componentConfigProviderService;
 
     @Mock
     private ConverterUtil converterUtil;
@@ -93,13 +93,13 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         MockitoAnnotations.initMocks(this);
         when(imageService.getImage(anyLong())).thenReturn(new Image("cb-centos66-amb200-2015-05-25", Collections.emptyMap(), "redhat6",
                 "redhat6", "", "default", "default-id", new HashMap<>()));
-        when(componentConfigProvider.getCloudbreakDetails(anyLong())).thenReturn(new CloudbreakDetails("version"));
-        when(componentConfigProvider.getStackTemplate(anyLong())).thenReturn(new StackTemplate("{}", "version"));
+        when(componentConfigProviderService.getCloudbreakDetails(anyLong())).thenReturn(new CloudbreakDetails("version"));
+        when(componentConfigProviderService.getStackTemplate(anyLong())).thenReturn(new StackTemplate("{}", "version"));
         when(clusterComponentConfigProvider.getHDPRepo(anyLong())).thenReturn(new StackRepoDetails());
         when(clusterComponentConfigProvider.getAmbariRepo(anyLong())).thenReturn(new AmbariRepo());
         DatalakeResources datalakeResources = new DatalakeResources();
         datalakeResources.setName("name");
-        when(datalakeResourcesService.getDatalakeResourcesById(anyLong())).thenReturn(Optional.of(datalakeResources));
+        when(datalakeResourcesService.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
     }
 
     @Test

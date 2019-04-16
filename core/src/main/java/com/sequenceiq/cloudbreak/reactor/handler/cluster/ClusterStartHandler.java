@@ -12,8 +12,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartResult;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import reactor.bus.Event;
@@ -31,7 +31,7 @@ public class ClusterStartHandler implements ReactorEventHandler<ClusterStartRequ
     private EventBus eventBus;
 
     @Inject
-    private HostMetadataRepository hostMetadataRepository;
+    private HostMetadataService hostMetadataService;
 
     @Override
     public String selector() {
@@ -44,7 +44,7 @@ public class ClusterStartHandler implements ReactorEventHandler<ClusterStartRequ
         ClusterStartResult result;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getStackId());
-            Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
+            Set<HostMetadata> hostsInCluster = hostMetadataService.findHostsInCluster(stack.getCluster().getId());
             int requestId = apiConnectors.getConnector(stack).startCluster(hostsInCluster);
             result = new ClusterStartResult(request, requestId);
         } catch (Exception e) {

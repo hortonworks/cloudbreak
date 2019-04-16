@@ -174,10 +174,10 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             }).collect(Collectors.toList());
             selectedImage = getLatestImageDefaultPreferred(matchingVersionImages);
         }
-        if (!selectedImage.isPresent()) {
+        if (selectedImage.isEmpty()) {
             selectedImage = getLatestBaseImageDefaultPreferred(statedImages);
         }
-        if (!selectedImage.isPresent()) {
+        if (selectedImage.isEmpty()) {
             throw new CloudbreakImageNotFoundException(imageNotFoundErrorMessage(platform));
         }
         return statedImage(selectedImage.get(), statedImages.getImageCatalogUrl(), statedImages.getImageCatalogName());
@@ -208,11 +208,11 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             CloudbreakImageCatalogException {
         Images images = imageCatalogProvider.getImageCatalogV2(catalogUrl).getImages();
         Optional<? extends Image> image = getImage(imageId, images);
-        if (!image.isPresent()) {
+        if (image.isEmpty()) {
             images = imageCatalogProvider.getImageCatalogV2(catalogUrl, true).getImages();
             image = getImage(imageId, images);
         }
-        if (!image.isPresent()) {
+        if (image.isEmpty()) {
             throw new CloudbreakImageNotFoundException(String.format("Could not find any image with id: '%s'.", imageId));
         }
         return statedImage(image.get(), catalogUrl, catalogName);
@@ -240,7 +240,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     public Set<ImageCatalog> deleteMultiple(Long workspaceId, Set<String> names) {
         Set<String> envDefaults = names.stream()
-            .filter(name -> isEnvDefault(name))
+            .filter(this::isEnvDefault)
             .collect(Collectors.toSet());
         if (!envDefaults.isEmpty()) {
             throw new BadRequestException(String.format("The following image catalogs cannot be deleted because they are environment defaults: %s", names));
@@ -321,13 +321,13 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     private Optional<? extends Image> getImage(String imageId, Images images) {
         Optional<? extends Image> image = findFirstWithImageId(imageId, images.getBaseImages());
-        if (!image.isPresent()) {
+        if (image.isEmpty()) {
             image = findFirstWithImageId(imageId, images.getHdpImages());
         }
-        if (!image.isPresent()) {
+        if (image.isEmpty()) {
             image = findFirstWithImageId(imageId, images.getHdfImages());
         }
-        if (!image.isPresent()) {
+        if (image.isEmpty()) {
             image = findFirstWithImageId(imageId, images.getCdhImages());
         }
         return image;

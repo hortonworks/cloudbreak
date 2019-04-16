@@ -42,9 +42,9 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 
 @Component
 @ConfigurationProperties(prefix = "cb.instance")
@@ -62,7 +62,7 @@ public class InstanceMetadataUpdater {
     private GatewayConfigService gatewayConfigService;
 
     @Inject
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private CloudbreakEventService cloudbreakEventService;
@@ -116,7 +116,7 @@ public class InstanceMetadataUpdater {
                 }
                 image = updatePackageVersions(image, packageVersionsOnHost);
                 im.setImage(new Json(image));
-                instanceMetaDataRepository.save(im);
+                instanceMetaDataService.save(im);
             }
         }
         return changedVersionsByHost;

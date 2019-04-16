@@ -31,4 +31,5 @@ public interface TopologyRepository extends WorkspaceResourceRepository<Topology
     @Override
     @DisableCheckPermissions
     Optional<Topology> findById(Long id);
+
 }

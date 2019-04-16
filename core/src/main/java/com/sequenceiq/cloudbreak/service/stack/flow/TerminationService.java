@@ -17,18 +17,19 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
 public class TerminationService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(TerminationService.class);
 
     private static final String DELIMITER = "_";
@@ -37,13 +38,13 @@ public class TerminationService {
     private StackService stackService;
 
     @Inject
-    private InstanceGroupRepository instanceGroupRepository;
+    private InstanceGroupService instanceGroupService;
 
     @Inject
     private StackUpdater stackUpdater;
 
     @Inject
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private ClusterTerminationService clusterTerminationService;
@@ -98,7 +99,7 @@ public class TerminationService {
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             instanceGroup.setSecurityGroup(null);
             instanceGroup.setTemplate(null);
-            instanceGroupRepository.save(instanceGroup);
+            instanceGroupService.save(instanceGroup);
         }
     }
 
@@ -109,6 +110,7 @@ public class TerminationService {
             metaData.setInstanceStatus(InstanceStatus.TERMINATED);
             instanceMetaDatas.add(metaData);
         }
-        instanceMetaDataRepository.saveAll(instanceMetaDatas);
+        instanceMetaDataService.saveAll(instanceMetaDatas);
     }
+
 }

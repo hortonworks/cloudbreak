@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.chain;
 import static com.sequenceiq.cloudbreak.core.flow2.Flow2Handler.FLOW_CHAIN_ID;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
 
@@ -43,12 +44,12 @@ public class FlowChainHandler implements Consumer<Event<? extends Payload>> {
     }
 
     public void restoreFlowChain(String flowChainId) {
-        FlowChainLog chainLog = flowLogService.findFirstByFlowChainIdOrderByCreatedDesc(flowChainId);
-        if (chainLog != null) {
-            Queue<Selectable> chain = (Queue<Selectable>) JsonReader.jsonToJava(chainLog.getChain());
-            flowChains.putFlowChain(flowChainId, chainLog.getParentFlowChainId(), chain);
-            if (chainLog.getParentFlowChainId() != null) {
-                restoreFlowChain(chainLog.getParentFlowChainId());
+        Optional<FlowChainLog> chainLog = flowLogService.findFirstByFlowChainIdOrderByCreatedDesc(flowChainId);
+        if (chainLog.isPresent()) {
+            Queue<Selectable> chain = (Queue<Selectable>) JsonReader.jsonToJava(chainLog.get().getChain());
+            flowChains.putFlowChain(flowChainId, chainLog.get().getParentFlowChainId(), chain);
+            if (chainLog.get().getParentFlowChainId() != null) {
+                restoreFlowChain(chainLog.get().getParentFlowChainId());
             }
         }
     }

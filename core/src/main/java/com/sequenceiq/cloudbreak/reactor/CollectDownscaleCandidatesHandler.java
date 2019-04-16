@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -25,6 +26,7 @@ import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -46,6 +48,9 @@ public class CollectDownscaleCandidatesHandler implements ReactorEventHandler<Co
 
     @Inject
     private HostGroupService hostGroupService;
+
+    @Inject
+    private HostMetadataService hostMetadataService;
 
     @Inject
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
@@ -97,17 +102,16 @@ public class CollectDownscaleCandidatesHandler implements ReactorEventHandler<Co
 
         Multimap<Long, HostMetadata> hostGroupWithInstances = ArrayListMultimap.create();
         for (InstanceMetaData instanceMetaData : instancesWithHostName) {
-            HostMetadata hostMetadata = hostGroupService.getHostMetadataByClusterAndHostName(stack.getCluster(), instanceMetaData.getDiscoveryFQDN());
-            if (hostMetadata != null) {
-                hostGroupWithInstances.put(hostMetadata.getHostGroup().getId(), hostMetadata);
-            }
+            hostMetadataService.findHostInClusterByName(stack.getCluster().getId(), instanceMetaData.getDiscoveryFQDN())
+                    .ifPresent(metadata -> hostGroupWithInstances.put(metadata.getHostGroup().getId(), metadata));
         }
         return hostGroupWithInstances;
     }
 
     private Set<Long> collectCandidates(CollectDownscaleCandidatesRequest request, Stack stack, int defaultRootVolumeSize)
             throws CloudbreakException {
-        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), request.getHostGroupName());
+        HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(), request.getHostGroupName())
+                .orElseThrow(NotFoundException.notFound("hostgroup", request.getHostGroupName()));
         Set<InstanceMetaData> instanceMetaDatasInStack = instanceMetaDataService.findAllInStack(stack.getId());
         Set<String> hostNames = clusterApiConnectors.getConnector(stack).clusterDecomissionService()
                 .collectDownscaleCandidates(hostGroup, request.getScalingAdjustment(), defaultRootVolumeSize, instanceMetaDatasInStack);

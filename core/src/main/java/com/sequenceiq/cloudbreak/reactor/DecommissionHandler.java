@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cluster.api.ClusterDecomissionService;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -33,12 +34,12 @@ import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import reactor.bus.Event;
@@ -68,7 +69,7 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
     private GatewayConfigService gatewayConfigService;
 
     @Inject
-    private HostMetadataRepository hostMetadataRepository;
+    private HostMetadataService hostMetadataService;
 
     @Inject
     private ClusterApiConnectors clusterApiConnectors;
@@ -87,7 +88,8 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
             Stack stack = stackService.getByIdWithListsInTransaction(request.getStackId());
             ClusterDecomissionService clusterDecomissionService = clusterApiConnectors.getConnector(stack).clusterDecomissionService();
             Set<String> hostNames = getHostNamesForPrivateIds(request, stack);
-            HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
+            HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(), hostGroupName)
+                    .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
             Map<String, HostMetadata> hostsToRemove = clusterDecomissionService.collectHostsToRemove(hostGroup, hostNames);
             Set<String> decomissionedHostNames;
             if (skipClusterDecomission(request, hostsToRemove)) {
@@ -95,7 +97,7 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
             } else {
                 executePreTerminationRecipes(stack, request.getHostGroupName(), hostsToRemove.keySet());
                 Set<HostMetadata> decomissionedHostMetadatas = clusterDecomissionService.decommissionClusterNodes(hostsToRemove);
-                decomissionedHostMetadatas.forEach(hostMetadata -> hostMetadataRepository.delete(hostMetadata));
+                decomissionedHostMetadatas.forEach(hostMetadata -> hostMetadataService.delete(hostMetadata));
                 decomissionedHostNames = decomissionedHostMetadatas.stream().map(HostMetadata::getHostName).collect(Collectors.toSet());
             }
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
@@ -120,14 +122,14 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
     private Set<String> getHostNamesForPrivateIds(DecommissionRequest request, Stack stack) {
         return request.getPrivateIds().stream().map(privateId -> {
             Optional<InstanceMetaData> instanceMetadata = stackService.getInstanceMetadata(stack.getInstanceMetaDataAsList(), privateId);
-            return instanceMetadata.isPresent() ? instanceMetadata.get().getDiscoveryFQDN() : null;
+            return instanceMetadata.map(InstanceMetaData::getDiscoveryFQDN).orElse(null);
         }).filter(StringUtils::isNotEmpty).collect(Collectors.toSet());
     }
 
     private void executePreTerminationRecipes(Stack stack, String hostGroupName, Set<String> hostNames) {
         try {
-            HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
-            recipeEngine.executePreTerminationRecipes(stack, Collections.singleton(hostGroup), hostNames);
+            Optional<HostGroup> hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(), hostGroupName);
+            recipeEngine.executePreTerminationRecipes(stack, hostGroup.map(Collections::singleton).orElse(Collections.emptySet()), hostNames);
         } catch (Exception ex) {
             LOGGER.warn(ex.getLocalizedMessage(), ex);
         }
@@ -151,4 +153,5 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
         }
         return SUCCESS;
     }
+
 }

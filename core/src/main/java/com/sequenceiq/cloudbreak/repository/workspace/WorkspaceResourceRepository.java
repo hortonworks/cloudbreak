@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.repository.workspace;
 import static com.sequenceiq.cloudbreak.authorization.ResourceAction.READ;
 
 import java.io.Serializable;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -29,10 +30,10 @@ public interface WorkspaceResourceRepository<T extends WorkspaceAwareResource, I
     Set<T> findAllByWorkspaceId(Long workspaceId);
 
     @CheckPermissionsByWorkspace(action = READ, workspaceIndex = 1)
-    T findByNameAndWorkspace(String name, Workspace workspace);
+    Optional<T> findByNameAndWorkspace(String name, Workspace workspace);
 
     @CheckPermissionsByWorkspaceId(action = READ, workspaceIdIndex = 1)
-    T findByNameAndWorkspaceId(String name, Long workspaceId);
+    Optional<T> findByNameAndWorkspaceId(String name, Long workspaceId);
 
     @CheckPermissionsByWorkspaceId(action = READ, workspaceIdIndex = 1)
     Set<T> findByNameInAndWorkspaceId(Set<String> names, Long workspaceId);

@@ -51,7 +51,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
-import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
+import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
@@ -73,7 +73,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
     private CloudStorageValidationUtil cloudStorageValidationUtil;
 
     @Inject
-    private KerberosService kerberosService;
+    private KerberosConfigService kerberosConfigService;
 
     @Inject
     private ClusterDefinitionService clusterDefinitionService;
@@ -102,7 +102,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         cluster.setExecutorType(source.getExecutorType());
 
         if (source.getKerberosName() != null) {
-            KerberosConfig kerberosConfig = kerberosService.getByNameForWorkspaceId(source.getKerberosName(), workspace.getId());
+            KerberosConfig kerberosConfig = kerberosConfigService.getByNameForWorkspaceId(source.getKerberosName(), workspace.getId());
             cluster.setKerberosConfig(kerberosConfig);
         }
         cluster.setCloudbreakAmbariUser(ambariUserName);

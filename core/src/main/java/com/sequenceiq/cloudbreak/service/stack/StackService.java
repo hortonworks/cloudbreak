@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
@@ -78,16 +79,9 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
-import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.repository.OrchestratorRepository;
-import com.sequenceiq.cloudbreak.repository.SaltSecurityConfigRepository;
-import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.repository.StackStatusRepository;
-import com.sequenceiq.cloudbreak.repository.StackViewRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
@@ -100,8 +94,12 @@ import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
+import com.sequenceiq.cloudbreak.service.saltsecurityconf.SaltSecurityConfigService;
+import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.ShowTerminatedClusterConfigService.ShowTerminatedClustersAfterConfig;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
+import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Service
@@ -121,28 +119,31 @@ public class StackService {
     private ShowTerminatedClusterConfigService showTerminatedClusterConfigService;
 
     @Inject
+    private ComponentConfigProviderService componentConfigProviderService;
+
+    @Inject
     private NetworkConfigurationValidator networkConfigurationValidator;
 
     @Inject
     private ContainerOrchestratorResolver containerOrchestratorResolver;
 
     @Inject
-    private SaltSecurityConfigRepository saltSecurityConfigRepository;
-
-    @Inject
     private StackDownscaleValidatorService downscaleValidatorService;
 
     @Inject
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private SaltSecurityConfigService saltSecurityConfigService;
 
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 
     @Inject
-    private SecurityConfigRepository securityConfigRepository;
+    private AmbariBlueprintValidator ambariBlueprintValidator;
 
     @Inject
-    private ComponentConfigProvider componentConfigProvider;
+    private DatalakeResourcesService datalakeResourcesService;
+
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private PermissionCheckingUtils permissionCheckingUtils;
@@ -151,34 +152,34 @@ public class StackService {
     private OpenSshPublicKeyValidator rsaPublicKeyValidator;
 
     @Inject
-    private InstanceGroupRepository instanceGroupRepository;
-
-    @Inject
-    private OrchestratorRepository orchestratorRepository;
-
-    @Inject
     private StackResponseDecorator stackResponseDecorator;
 
     @Inject
-    private StackStatusRepository stackStatusRepository;
+    private SecurityConfigService securityConfigService;
 
     @Inject
     private ServiceProviderConnectorAdapter connector;
 
     @Inject
-    private StackViewRepository stackViewRepository;
+    private InstanceGroupService instanceGroupService;
+
+    @Inject
+    private OrchestratorService orchestratorService;
 
     @Inject
     private TlsSecurityService tlsSecurityService;
 
     @Inject
-    private AmbariBlueprintValidator ambariBlueprintValidator;
+    private StackStatusService stackStatusService;
 
     @Inject
     private TransactionService transactionService;
 
     @Inject
     private CloudbreakEventService eventService;
+
+    @Inject
+    private StackViewService stackViewService;
 
     @Inject
     private WorkspaceService workspaceService;
@@ -201,9 +202,6 @@ public class StackService {
     @Inject
     private StackUpdater stackUpdater;
 
-    @Inject
-    private DatalakeResourcesService datalakeResourcesService;
-
     @Value("${cb.nginx.port}")
     private Integer nginxPort;
 
@@ -223,7 +221,7 @@ public class StackService {
         }
     }
 
-    public Stack findStackByNameAndWorkspaceId(String name, Long workspaceId) {
+    public Optional<Stack> findStackByNameAndWorkspaceId(String name, Long workspaceId) {
         return findByNameAndWorkspaceIdWithLists(name, workspaceId);
     }
 
@@ -255,7 +253,7 @@ public class StackService {
 
     @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
     public Tenant getTenant(Long stackId) {
-        Workspace workspace = stackRepository.findWorkspaceById(stackId);
+        Workspace workspace = stackRepository.findWorkspaceById(stackId).orElseThrow(NotFoundException.notFound("workspace", stackId));
         return workspace.getTenant();
     }
 
@@ -280,14 +278,14 @@ public class StackService {
     }
 
     public Set<Stack> findClustersConnectedToDatalakeByDatalakeStackId(Long datalakeStackId) {
-        DatalakeResources datalakeResources = datalakeResourcesService.getDatalakeResourcesByDatalakeStackId(datalakeStackId);
-        return datalakeResources == null ? Collections.emptySet() : stackRepository.findEphemeralClusters(datalakeResources.getId());
+        Optional<DatalakeResources> datalakeResources = datalakeResourcesService.findByDatalakeStackId(datalakeStackId);
+        return datalakeResources.isEmpty() ? Collections.emptySet() : stackRepository.findEphemeralClusters(datalakeResources.get().getId());
     }
 
     public Stack getByIdWithListsInTransaction(Long id) {
         Stack stack;
         try {
-            stack = transactionService.required(() -> stackRepository.findOneWithLists(id));
+            stack = transactionService.required(() -> stackRepository.findOneWithLists(id).orElse(null));
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
@@ -300,7 +298,7 @@ public class StackService {
     public Stack getByIdWithClusterInTransaction(Long id) {
         Stack stack;
         try {
-            stack = transactionService.required(() -> stackRepository.findOneWithCluster(id));
+            stack = transactionService.required(() -> stackRepository.findOneWithCluster(id).orElse(null));
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
@@ -328,19 +326,20 @@ public class StackService {
 
     public StackView getViewByIdWithoutAuth(Long id) {
         try {
-            return transactionService.required(() -> stackViewRepository.findById(id).orElseThrow(notFound("Stack", id)));
+            return transactionService.required(() -> stackViewService.findById(id).orElseThrow(notFound("Stack", id)));
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
     }
 
     public StackStatus getCurrentStatusByStackId(long stackId) {
-        return stackStatusRepository.findFirstByStackIdOrderByCreatedDesc(stackId);
+        return stackStatusService.findFirstByStackIdOrderByCreatedDesc(stackId).orElseThrow(NotFoundException.notFound("stackStatus", stackId));
     }
 
     public StackV4Response getByAmbariAddress(String ambariAddress) {
         try {
-            return transactionService.required(() -> converterUtil.convert(stackRepository.findByAmbari(ambariAddress), StackV4Response.class));
+            return transactionService.required(() -> converterUtil.convert(stackRepository.findByAmbari(ambariAddress)
+                    .orElseThrow(NotFoundException.notFound("stack", ambariAddress)), StackV4Response.class));
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
@@ -351,17 +350,17 @@ public class StackService {
             return transactionService.required(() -> {
                 Workspace workspace = workspaceService.get(workspaceId, user);
                 ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.get();
-                Stack stack = stackRepository.findByNameAndWorkspaceIdWithLists(
+                Optional<Stack> stack = stackRepository.findByNameAndWorkspaceIdWithLists(
                         name,
                         workspace.getId(),
                         showTerminatedClustersAfterConfig.isActive(),
                         showTerminatedClustersAfterConfig.showAfterMillisecs()
                 );
-                if (stack == null) {
+                if (stack.isEmpty()) {
                     throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name));
                 }
-                StackV4Response stackResponse = converterUtil.convert(stack, StackV4Response.class);
-                stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entries);
+                StackV4Response stackResponse = converterUtil.convert(stack.get(), StackV4Response.class);
+                stackResponse = stackResponseDecorator.decorate(stackResponse, stack.get(), entries);
                 return stackResponse;
             });
         } catch (TransactionExecutionException e) {
@@ -372,11 +371,11 @@ public class StackService {
     public StackV4Request getStackRequestByNameInWorkspaceId(String name, Long workspaceId) {
         try {
             return transactionService.required(() -> {
-                Stack stack = findByNameAndWorkspaceIdWithLists(name, workspaceId);
-                if (stack == null) {
+                Optional<Stack> stack = findByNameAndWorkspaceIdWithLists(name, workspaceId);
+                if (stack.isEmpty()) {
                     throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name));
                 }
-                StackV4Request request = converterUtil.convert(stack, StackV4Request.class);
+                StackV4Request request = converterUtil.convert(stack.get(), StackV4Request.class);
                 request.getCluster().setName(null);
                 request.setName(name);
                 return request;
@@ -387,11 +386,11 @@ public class StackService {
     }
 
     public Stack getByNameInWorkspace(String name, Long workspaceId) {
-        return Optional.ofNullable(stackRepository.findByNameAndWorkspaceId(name, workspaceId))
+        return stackRepository.findByNameAndWorkspaceId(name, workspaceId)
                 .orElseThrow(() -> new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name)));
     }
 
-    public Stack getByNameInWorkspaceWithLists(String name, Long workspaceId) {
+    public Optional<Stack> getByNameInWorkspaceWithLists(String name, Long workspaceId) {
         return findByNameAndWorkspaceIdWithLists(name, workspaceId);
     }
 
@@ -415,7 +414,7 @@ public class StackService {
             rsaPublicKeyValidator.validate(stack.getStackAuthentication().getPublicKey());
         }
         if (stack.getOrchestrator() != null) {
-            orchestratorRepository.save(stack.getOrchestrator());
+            orchestratorService.save(stack.getOrchestrator());
         }
         stack.getStackAuthentication().setLoginUserName(SSH_USER_CB);
 
@@ -427,10 +426,10 @@ public class StackService {
         measure(() -> addCloudbreakDetailsForStack(savedStack),
                 LOGGER, "Add Cloudbreak details took {} ms for stack {}", stackName);
 
-        measure(() -> instanceGroupRepository.saveAll(savedStack.getInstanceGroups()),
+        measure(() -> instanceGroupService.saveAll(savedStack.getInstanceGroups()),
                 LOGGER, "Instance groups saved in {} ms for stack {}", stackName);
 
-        measure(() -> instanceMetaDataRepository.saveAll(savedStack.getInstanceMetaDataAsList()),
+        measure(() -> instanceMetaDataService.saveAll(savedStack.getInstanceMetaDataAsList()),
                 LOGGER, "Instance metadatas saved in {} ms for stack {}", stackName);
 
         SecurityConfig securityConfig = tlsSecurityService.generateSecurityKeys(workspace);
@@ -438,8 +437,8 @@ public class StackService {
         securityConfig.setStack(savedStack);
 
         measure(() -> {
-            saltSecurityConfigRepository.save(securityConfig.getSaltSecurityConfig());
-            securityConfigRepository.save(securityConfig);
+            saltSecurityConfigService.save(securityConfig.getSaltSecurityConfig());
+            securityConfigService.save(securityConfig);
         }, LOGGER, "Security config save took {} ms for stack {}", stackName);
         savedStack.setSecurityConfig(securityConfig);
 
@@ -471,7 +470,7 @@ public class StackService {
     }
 
     public void delete(String name, Long workspaceId, Boolean forced, Boolean deleteDependencies, User user) {
-        Optional.ofNullable(stackRepository.findByNameAndWorkspaceId(name, workspaceId)).map(stack -> {
+        stackRepository.findByNameAndWorkspaceId(name, workspaceId).map(stack -> {
             delete(stack, forced, deleteDependencies, user);
             return stack;
         }).orElseThrow(notFound("Stack", name));
@@ -486,7 +485,7 @@ public class StackService {
         Stack stack = getByIdWithLists(stackId);
         Cluster cluster = null;
         if (stack.getCluster() != null) {
-            cluster = clusterService.findOneWithLists(stack.getCluster().getId());
+            cluster = clusterService.findOneWithLists(stack.getCluster().getId()).orElse(null);
         }
         switch (status) {
             case SYNC:
@@ -540,12 +539,12 @@ public class StackService {
     }
 
     public void updateMetaDataStatusIfFound(Long id, String hostName, InstanceStatus status) {
-        InstanceMetaData metaData = instanceMetaDataRepository.findHostInStack(id, hostName);
-        if (metaData == null) {
+        Optional<InstanceMetaData> metaData = instanceMetaDataService.findHostInStack(id, hostName);
+        if (metaData.isEmpty()) {
             LOGGER.debug("Metadata not found on stack:'{}' with hostname: '{}'.", id, hostName);
         } else {
-            metaData.setInstanceStatus(status);
-            instanceMetaDataRepository.save(metaData);
+            metaData.get().setInstanceStatus(status);
+            instanceMetaDataService.save(metaData.get());
         }
     }
 
@@ -630,7 +629,7 @@ public class StackService {
         return stackRepository.findAllStackForTemplate(id);
     }
 
-    public Stack getForCluster(Long id) {
+    public Optional<Stack> getForCluster(Long id) {
         return stackRepository.findStackForCluster(id);
     }
 
@@ -657,27 +656,25 @@ public class StackService {
         }
     }
 
-    private Stack findByNameAndWorkspaceIdWithLists(String name, Long workspaceId) {
+    public Set<Stack> findByCredential(Credential credential) {
+        return stackRepository.findByCredential(credential);
+    }
+
+    private Optional<Stack> findByNameAndWorkspaceIdWithLists(String name, Long workspaceId) {
         return stackRepository.findByNameAndWorkspaceIdWithLists(name, workspaceId, false, 0L);
     }
 
     private InstanceMetaData validateInstanceForDownscale(String instanceId, Stack stack, Long workspaceId, User user) {
         permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(workspaceId, WorkspaceResource.STACK, ResourceAction.WRITE, user);
-        InstanceMetaData metaData = instanceMetaDataRepository.findByInstanceId(stack.getId(), instanceId);
-        if (metaData == null) {
-            throw new NotFoundException(String.format("Metadata for instance %s has not found.", instanceId));
-        }
+        InstanceMetaData metaData = instanceMetaDataService.findByStackIdAndInstanceId(stack.getId(), instanceId)
+                .orElseThrow(() -> new NotFoundException(String.format("Metadata for instance %s has not found.", instanceId)));
         downscaleValidatorService.checkInstanceIsTheAmbariServerOrNot(metaData.getPublicIp(), metaData.getInstanceMetadataType());
         downscaleValidatorService.checkClusterInValidStatus(stack.getCluster());
         return metaData;
     }
 
     private Stack getByIdWithLists(Long id) {
-        Stack retStack = stackRepository.findOneWithLists(id);
-        if (retStack == null) {
-            throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_ID_EXCEPTION_MESSAGE, id));
-        }
-        return retStack;
+        return stackRepository.findOneWithLists(id).orElseThrow(() -> new NotFoundException(String.format(STACK_NOT_FOUND_BY_ID_EXCEPTION_MESSAGE, id)));
     }
 
     private void repairFailedNodes(Stack stack, User user) {
@@ -788,7 +785,7 @@ public class StackService {
                         instanceGroup.getNodeCount(), instanceGroup.getGroupName(),
                         -1 * instanceGroupAdjustmentJson.getScalingAdjustment()));
             }
-            int removableHosts = instanceMetaDataRepository.findRemovableInstances(stack.getId(), instanceGroupAdjustmentJson.getInstanceGroup()).size();
+            int removableHosts = instanceMetaDataService.findRemovableInstances(stack.getId(), instanceGroupAdjustmentJson.getInstanceGroup()).size();
             if (removableHosts < -1 * instanceGroupAdjustmentJson.getScalingAdjustment()) {
                 throw new BadRequestException(
                         String.format("There are %s unregistered instances in instance group '%s' but %s were requested. Decommission nodes from the cluster!",
@@ -857,7 +854,7 @@ public class StackService {
         StackTemplate stackTemplate = new StackTemplate(template, cbVersion);
         try {
             Component stackTemplateComponent = new Component(ComponentType.STACK_TEMPLATE, ComponentType.STACK_TEMPLATE.name(), new Json(stackTemplate), stack);
-            componentConfigProvider.store(stackTemplateComponent);
+            componentConfigProviderService.store(stackTemplateComponent);
         } catch (JsonProcessingException e) {
             LOGGER.info("Could not create Cloudbreak details component.", e);
         }
@@ -867,7 +864,7 @@ public class StackService {
         CloudbreakDetails cbDetails = new CloudbreakDetails(cbVersion);
         try {
             Component cbDetailsComponent = new Component(ComponentType.CLOUDBREAK_DETAILS, ComponentType.CLOUDBREAK_DETAILS.name(), new Json(cbDetails), stack);
-            componentConfigProvider.store(cbDetailsComponent);
+            componentConfigProviderService.store(cbDetailsComponent);
         } catch (JsonProcessingException e) {
             LOGGER.info("Could not create Cloudbreak details component.", e);
         }

@@ -101,12 +101,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
-import com.sequenceiq.cloudbreak.repository.GatewayRepository;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.repository.KerberosConfigRepository;
-import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
@@ -116,10 +110,16 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecution
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.constraint.ConstraintService;
 import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
+import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
+import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -139,25 +139,22 @@ public class ClusterService {
     private ClusterDefinitionService clusterDefinitionService;
 
     @Inject
-    private ClusterRepository clusterRepository;
+    private ClusterRepository repository;
 
     @Inject
-    private GatewayRepository gatewayRepository;
+    private GatewayService gatewayService;
 
     @Inject
     private FileSystemConfigService fileSystemConfigService;
 
     @Inject
-    private KerberosConfigRepository kerberosConfigRepository;
+    private KerberosConfigService kerberosConfigService;
 
     @Inject
-    private ConstraintRepository constraintRepository;
+    private ConstraintService constraintService;
 
     @Inject
-    private HostMetadataRepository hostMetadataRepository;
-
-    @Inject
-    private InstanceMetaDataRepository instanceMetadataRepository;
+    private HostMetadataService hostMetadataService;
 
     @Inject
     private ReactorFlowManager flowManager;
@@ -187,7 +184,7 @@ public class ClusterService {
     private StatusToPollGroupConverter statusToPollGroupConverter;
 
     @Inject
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
@@ -205,7 +202,7 @@ public class ClusterService {
     private ClusterDefinitionUtils clusterDefinitionUtils;
 
     @Inject
-    private ResourceRepository resourceRepository;
+    private ResourceService resourceService;
 
     @Inject
     private ResourceAttributeUtil resourceAttributeUtil;
@@ -225,7 +222,7 @@ public class ClusterService {
             cluster.setEnvironment(stack.getEnvironment());
 
             long start = System.currentTimeMillis();
-            if (clusterRepository.findByNameAndWorkspace(cluster.getName(), stack.getWorkspace()) != null) {
+            if (repository.findByNameAndWorkspace(cluster.getName(), stack.getWorkspace()).isPresent()) {
                 throw new DuplicateKeyValueException(APIResourceType.CLUSTER, cluster.getName());
             }
             LOGGER.debug("Cluster name collision check took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
@@ -245,7 +242,7 @@ public class ClusterService {
             LOGGER.debug("Filesystem config saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             if (cluster.getKerberosConfig() != null) {
-                kerberosConfigRepository.save(cluster.getKerberosConfig());
+                kerberosConfigService.save(cluster.getKerberosConfig());
             }
             cluster.setStack(stack);
             stack.setCluster(cluster);
@@ -267,7 +264,7 @@ public class ClusterService {
     }
 
     public Long countAliveByEnvironment(Environment environment) {
-        return clusterRepository.countAliveOnesByWorkspaceAndEnvironment(environment.getWorkspace().getId(), environment.getId());
+        return repository.countAliveOnesByWorkspaceAndEnvironment(environment.getWorkspace().getId(), environment.getId());
     }
 
     private void setWorkspace(Cluster cluster, Workspace workspace) {
@@ -284,9 +281,9 @@ public class ClusterService {
         Cluster savedCluster;
         try {
             long start = System.currentTimeMillis();
-            savedCluster = clusterRepository.save(cluster);
+            savedCluster = repository.save(cluster);
             if (savedCluster.getGateway() != null) {
-                gatewayRepository.save(savedCluster.getGateway());
+                gatewayService.save(savedCluster.getGateway());
             }
             LOGGER.debug("Cluster object saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
             clusterComponentConfigProvider.store(components, savedCluster);
@@ -309,7 +306,7 @@ public class ClusterService {
             Gateway gateway = cluster.getGateway();
             if (gateway != null) {
                 gateway.setCluster(savedCluster);
-                gatewayRepository.save(gateway);
+                gatewayService.save(gateway);
             }
             List<ClusterComponent> store = clusterComponentConfigProvider.store(cluster.getComponents(), savedCluster);
             savedCluster.setComponents(new HashSet<>(store));
@@ -325,7 +322,7 @@ public class ClusterService {
         cluster.getHostGroups().stream()
                 .map(HostGroup::getConstraint)
                 .filter(Objects::nonNull)
-                .forEach(it -> constraintRepository.save(it));
+                .forEach(it -> constraintService.save(it));
     }
 
     public boolean isMultipleGateway(Stack stack) {
@@ -351,20 +348,20 @@ public class ClusterService {
             return;
         }
 
-        Set<HostMetadata> primaryGateways = hostMetadataRepository.findHostsInClusterByName(clusterId, hostName);
+        Set<HostMetadata> primaryGateways = hostMetadataService.findHostsInClusterByName(clusterId, hostName);
 
         List<HostMetadata> oldPrimaryGateways = primaryGateways.stream()
                 .filter(hmd -> hmd.getHostMetadataState() != HostMetadataState.SERVICES_RUNNING)
                 .collect(Collectors.toList());
-        hostMetadataRepository.deleteAll(oldPrimaryGateways);
+        hostMetadataService.deleteAll(oldPrimaryGateways);
     }
 
     public Iterable<Cluster> saveAll(Iterable<Cluster> clusters) {
-        return clusterRepository.saveAll(clusters);
+        return repository.saveAll(clusters);
     }
 
     public Cluster save(Cluster cluster) {
-        return clusterRepository.save(cluster);
+        return repository.save(cluster);
     }
 
     public void delete(Long stackId, Boolean withStackDelete, Boolean deleteDependencies) {
@@ -386,15 +383,15 @@ public class ClusterService {
             transactionService.required(() -> {
                 List<Resource> resources = stack.getResourcesByType(ResourceType.AWS_ENCRYPTED_VOLUME);
                 resources.forEach(resource -> updateDeleteVolumesFlag(Boolean.TRUE, resource));
-                return resourceRepository.saveAll(resources);
+                return resourceService.saveAll(resources);
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
     }
 
-    public Cluster retrieveClusterByStackIdWithoutAuth(Long stackId) {
-        return clusterRepository.findOneByStackId(stackId);
+    public Optional<Cluster> retrieveClusterByStackIdWithoutAuth(Long stackId) {
+        return repository.findOneByStackId(stackId);
     }
 
     public ClusterV4Response retrieveClusterForCurrentUser(Long stackId) {
@@ -405,7 +402,7 @@ public class ClusterService {
     public Cluster updateAmbariClientConfig(Long clusterId, HttpClientConfig ambariClientConfig) {
         Cluster cluster = getCluster(clusterId);
         cluster.setAmbariIp(ambariClientConfig.getApiAddress());
-        cluster = clusterRepository.save(cluster);
+        cluster = repository.save(cluster);
         LOGGER.debug("Updated cluster: [ambariIp: '{}'].", ambariClientConfig.getApiAddress());
         return cluster;
     }
@@ -414,9 +411,9 @@ public class ClusterService {
         try {
             transactionService.required(() -> {
                 for (Entry<String, List<String>> hostGroupEntry : hostsPerHostGroup.entrySet()) {
-                    HostGroup hostGroup = hostGroupService.getByClusterIdAndName(clusterId, hostGroupEntry.getKey());
-                    if (hostGroup != null) {
-                        Set<String> existingHosts = hostMetadataRepository.findEmptyHostsInHostGroup(hostGroup.getId()).stream()
+                    Optional<HostGroup> hostGroup = hostGroupService.findHostGroupInClusterByName(clusterId, hostGroupEntry.getKey());
+                    if (hostGroup.isPresent()) {
+                        Set<String> existingHosts = hostMetadataService.findEmptyHostsInHostGroup(hostGroup.get().getId()).stream()
                                 .map(HostMetadata::getHostName)
                                 .collect(Collectors.toSet());
                         hostGroupEntry.getValue().stream()
@@ -424,11 +421,11 @@ public class ClusterService {
                                 .forEach(hostName -> {
                                     HostMetadata hostMetadataEntry = new HostMetadata();
                                     hostMetadataEntry.setHostName(hostName);
-                                    hostMetadataEntry.setHostGroup(hostGroup);
+                                    hostMetadataEntry.setHostGroup(hostGroup.get());
                                     hostMetadataEntry.setHostMetadataState(hostMetadataState);
-                                    hostGroup.getHostMetadata().add(hostMetadataEntry);
+                                    hostGroup.get().getHostMetadata().add(hostMetadataEntry);
                                 });
-                        hostGroupService.save(hostGroup);
+                        hostGroupService.save(hostGroup.get());
                     }
                 }
                 return null;
@@ -514,19 +511,19 @@ public class ClusterService {
                 Map<String, HostMetadata> autoRecoveryHostMetadata = new HashMap<>();
                 Map<String, HostMetadata> failedHostMetadata = new HashMap<>();
                 for (String failedNode : failedNodes) {
-                    HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(cluster.getId(), failedNode);
-                    if (hostMetadata == null) {
+                    Optional<HostMetadata> hostMetadata = hostMetadataService.findHostInClusterByName(cluster.getId(), failedNode);
+                    if (hostMetadata.isEmpty()) {
                         throw new BadRequestException("No metadata information for the node: " + failedNode);
                     }
-                    HostGroup hostGroup = hostMetadata.getHostGroup();
+                    HostGroup hostGroup = hostMetadata.get().getHostGroup();
                     if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
-                        validateRepair(stack, hostMetadata, false);
+                        validateRepair(stack, hostMetadata.get(), false);
                     }
                     String hostGroupName = hostGroup.getName();
                     if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
-                        prepareForAutoRecovery(stack, autoRecoveryNodesMap, autoRecoveryHostMetadata, failedNode, hostMetadata, hostGroupName);
+                        prepareForAutoRecovery(stack, autoRecoveryNodesMap, autoRecoveryHostMetadata, failedNode, hostMetadata.get(), hostGroupName);
                     } else if (hostGroup.getRecoveryMode() == RecoveryMode.MANUAL) {
-                        failedHostMetadata.put(failedNode, hostMetadata);
+                        failedHostMetadata.put(failedNode, hostMetadata.get());
                     }
                 }
                 try {
@@ -672,7 +669,7 @@ public class ClusterService {
     }
 
     private void updateNodeVolumeSetsDeleteVolumesFlag(Stack stack, List<String> nodeIds, boolean deleteVolumes) {
-        resourceRepository.saveAll(stack.getDiskResources().stream()
+        resourceService.saveAll(stack.getDiskResources().stream()
                 .filter(resource -> nodeIds.contains(resource.getInstanceId()))
                 .map(volumeSet -> updateDeleteVolumesFlag(deleteVolumes, volumeSet))
                 .collect(Collectors.toList()));
@@ -710,7 +707,7 @@ public class ClusterService {
 
     private void updateChangedHosts(Cluster cluster, Map<String, HostMetadata> failedHostMetadata, HostMetadataState healthyState,
             HostMetadataState unhealthyState, String recoveryMessage) throws TransactionExecutionException {
-        Set<HostMetadata> hosts = hostMetadataRepository.findHostsInCluster(cluster.getId());
+        Set<HostMetadata> hosts = hostMetadataService.findHostsInCluster(cluster.getId());
         Collection<HostMetadata> changedHosts = new HashSet<>();
         transactionService.required(() -> {
             for (HostMetadata host : hosts) {
@@ -725,7 +722,7 @@ public class ClusterService {
             if (!changedHosts.isEmpty()) {
                 LOGGER.debug(recoveryMessage);
                 eventService.fireCloudbreakEvent(cluster.getStack().getId(), "RECOVERY", recoveryMessage);
-                hostMetadataRepository.saveAll(changedHosts);
+                hostMetadataService.saveAll(changedHosts);
             }
             return null;
         });
@@ -782,24 +779,24 @@ public class ClusterService {
     public Cluster updateClusterStatusByStackId(Long stackId, Status status, String statusReason) {
         LOGGER.debug("Updating cluster status. stackId: {}, status: {}, statusReason: {}", stackId, status, statusReason);
         StackStatus stackStatus = stackService.getCurrentStatusByStackId(stackId);
-        Cluster cluster = retrieveClusterByStackIdWithoutAuth(stackId);
-        if (cluster != null) {
-            cluster.setStatus(status);
-            cluster.setStatusReason(statusReason);
-            cluster = clusterRepository.save(cluster);
+        Optional<Cluster> cluster = retrieveClusterByStackIdWithoutAuth(stackId);
+        if (cluster.isPresent()) {
+            cluster.get().setStatus(status);
+            cluster.get().setStatusReason(statusReason);
+            cluster = Optional.ofNullable(repository.save(cluster.get()));
             if (status.isRemovableStatus()) {
-                InMemoryStateStore.deleteCluster(cluster.getId());
+                InMemoryStateStore.deleteCluster(cluster.get().getId());
                 if (stackStatus.getStatus().isRemovableStatus()) {
                     InMemoryStateStore.deleteStack(stackId);
                 }
             } else {
-                InMemoryStateStore.putCluster(cluster.getId(), statusToPollGroupConverter.convert(status));
+                InMemoryStateStore.putCluster(cluster.get().getId(), statusToPollGroupConverter.convert(status));
                 if (InMemoryStateStore.getStack(stackId) == null) {
                     InMemoryStateStore.putStack(stackId, statusToPollGroupConverter.convert(stackStatus.getStatus()));
                 }
             }
         }
-        return cluster;
+        return cluster.orElse(null);
     }
 
     public Cluster updateClusterStatusByStackId(Long stackId, Status status) {
@@ -812,7 +809,7 @@ public class ClusterService {
 
     public Cluster updateCluster(Cluster cluster) {
         LOGGER.debug("Updating cluster. clusterId: {}", cluster.getId());
-        cluster = clusterRepository.save(cluster);
+        cluster = repository.save(cluster);
         return cluster;
     }
 
@@ -828,7 +825,7 @@ public class ClusterService {
         Stack stack = stackService.getById(stackId);
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
         Map<String, HostMetadataState> hostStatuses = connector.clusterStatusService().getHostStatuses();
-        Set<HostMetadata> hosts = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
+        Set<HostMetadata> hosts = hostMetadataService.findHostsInCluster(stack.getCluster().getId());
         try {
             return transactionService.required(() -> {
                 for (HostMetadata host : hosts) {
@@ -848,10 +845,10 @@ public class ClusterService {
     }
 
     private void updateInstanceMetadataStateToRegistered(Long stackId, HostMetadata host) {
-        InstanceMetaData instanceMetaData = instanceMetaDataRepository.findHostInStack(stackId, host.getHostName());
-        if (instanceMetaData != null) {
-            instanceMetaData.setInstanceStatus(InstanceStatus.REGISTERED);
-            instanceMetadataRepository.save(instanceMetaData);
+        Optional<InstanceMetaData> instanceMetaData = instanceMetaDataService.findHostInStack(stackId, host.getHostName());
+        if (instanceMetaData.isPresent()) {
+            instanceMetaData.get().setInstanceStatus(InstanceStatus.REGISTERED);
+            instanceMetaDataService.save(instanceMetaData.get());
         }
     }
 
@@ -904,7 +901,7 @@ public class ClusterService {
         kerberosConfig.setPassword(kerberosPassword);
         kerberosConfig.setPrincipal(kerberosPrincipal);
 
-        kerberosConfigRepository.save(kerberosConfig);
+        kerberosConfigService.save(kerberosConfig);
     }
 
     private void checkClusterDefinitionIdAndHostGroups(String clusterDefinition, Set<HostGroup> hostGroups) {
@@ -922,7 +919,7 @@ public class ClusterService {
         LOGGER.debug("Cluster requested [ClusterDefinitionId: {}]", cluster.getClusterDefinition().getId());
         cluster.setStatus(REQUESTED);
         cluster.setStack(stack);
-        cluster = clusterRepository.save(cluster);
+        cluster = repository.save(cluster);
         return cluster;
     }
 
@@ -931,7 +928,7 @@ public class ClusterService {
     }
 
     private Cluster getCluster(Long clusterId) {
-        return clusterRepository.findById(clusterId)
+        return repository.findById(clusterId)
                 .orElseThrow(notFound("Cluster", clusterId));
     }
 
@@ -1061,7 +1058,7 @@ public class ClusterService {
     }
 
     private void validateUnusedHosts(InstanceGroup instanceGroup, int scalingAdjustment) {
-        Set<InstanceMetaData> unusedHostsInInstanceGroup = instanceMetadataRepository.findUnusedHostsInInstanceGroup(instanceGroup.getId());
+        Set<InstanceMetaData> unusedHostsInInstanceGroup = instanceMetaDataService.findUnusedHostsInInstanceGroup(instanceGroup.getId());
         if (unusedHostsInInstanceGroup.size() < scalingAdjustment) {
             throw new BadRequestException(String.format(
                     "There are %s unregistered instances in instance group '%s'. %s more instances needed to complete this request.",
@@ -1071,7 +1068,8 @@ public class ClusterService {
 
     private void validateRegisteredHosts(Stack stack, HostGroupAdjustmentV4Request hostGroupAdjustment) {
         String hostGroup = hostGroupAdjustment.getHostGroup();
-        int hostsCount = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroup).getHostMetadata().size();
+        int hostsCount = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(), hostGroup)
+                .orElseThrow(NotFoundException.notFound("hostgroup", hostGroup)).getHostMetadata().size();
         int adjustment = Math.abs(hostGroupAdjustment.getScalingAdjustment());
         Boolean validateNodeCount = hostGroupAdjustment.getValidateNodeCount();
         if (validateNodeCount == null || validateNodeCount) {
@@ -1085,23 +1083,24 @@ public class ClusterService {
     }
 
     private HostGroup getHostGroup(Stack stack, HostGroupAdjustmentV4Request hostGroupAdjustment) {
-        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupAdjustment.getHostGroup());
-        if (hostGroup == null) {
+        Optional<HostGroup> hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(), hostGroupAdjustment.getHostGroup());
+        if (hostGroup.isEmpty()) {
             throw new BadRequestException(String.format(
                     "Invalid host group: cluster '%s' does not contain a host group named '%s'.",
                     stack.getCluster().getName(), hostGroupAdjustment.getHostGroup()));
         }
-        return hostGroup;
+        return hostGroup.get();
     }
 
     private boolean updateHostMetadataByHostState(Stack stack, String hostName, HostMetadataState newState) {
         boolean stateChanged = false;
-        HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(stack.getCluster().getId(), hostName);
+        HostMetadata hostMetadata = hostMetadataService.findHostInClusterByName(stack.getCluster().getId(), hostName)
+                .orElseThrow(NotFoundException.notFound("hostmetadata", hostName));
         HostMetadataState oldState = hostMetadata.getHostMetadataState();
         if (!oldState.equals(newState)) {
             stateChanged = true;
             hostMetadata.setHostMetadataState(newState);
-            hostMetadataRepository.save(hostMetadata);
+            hostMetadataService.save(hostMetadata);
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.CLUSTER_HOST_STATUS_UPDATED.code(), Arrays.asList(hostName, newState.name())));
         }
@@ -1109,11 +1108,7 @@ public class ClusterService {
     }
 
     public Cluster getById(Long id) {
-        Cluster cluster = clusterRepository.findOneWithLists(id);
-        if (cluster == null) {
-            throw new NotFoundException(String.format("Cluster '%s' not found", id));
-        }
-        return cluster;
+        return repository.findOneWithLists(id).orElseThrow(() -> new NotFoundException(String.format("Cluster '%s' not found", id)));
     }
 
     public Map<String, String> getHostStatuses(Long stackId) {
@@ -1122,59 +1117,59 @@ public class ClusterService {
     }
 
     public Set<Cluster> findByClusterDefinition(ClusterDefinition clusterDefinition) {
-        return clusterRepository.findByClusterDefinition(clusterDefinition);
+        return repository.findByClusterDefinition(clusterDefinition);
     }
 
     public List<Cluster> findByStatuses(Collection<Status> statuses) {
-        return clusterRepository.findByStatuses(statuses);
+        return repository.findByStatuses(statuses);
     }
 
-    public Cluster findOneByStackId(Long stackId) {
-        return clusterRepository.findOneByStackId(stackId);
+    public Optional<Cluster> findOneByStackId(Long stackId) {
+        return repository.findOneByStackId(stackId);
     }
 
-    public Cluster findOneWithLists(Long id) {
-        return clusterRepository.findOneWithLists(id);
+    public Optional<Cluster> findOneWithLists(Long id) {
+        return repository.findOneWithLists(id);
     }
 
     public Optional<Cluster> findById(Long clusterId) {
-        return clusterRepository.findById(clusterId);
+        return repository.findById(clusterId);
     }
 
     public List<Cluster> findAllClustersForConstraintTemplate(Long constraintTemplateId) {
-        return clusterRepository.findAllClustersForConstraintTemplate(constraintTemplateId);
+        return repository.findAllClustersForConstraintTemplate(constraintTemplateId);
     }
 
     public Set<Cluster> findByLdapConfig(LdapConfig ldapConfig) {
-        return clusterRepository.findByLdapConfig(ldapConfig);
+        return repository.findByLdapConfig(ldapConfig);
     }
 
     public Set<Cluster> findAllClustersByLdapConfigInEnvironment(LdapConfig ldapConfig, Long environmentId) {
-        return clusterRepository.findByLdapConfigAndEnvironment(ldapConfig, environmentId);
+        return repository.findByLdapConfigAndEnvironment(ldapConfig, environmentId);
     }
 
     public Set<Cluster> findByProxyConfig(ProxyConfig proxyConfig) {
-        return clusterRepository.findByProxyConfig(proxyConfig);
+        return repository.findByProxyConfig(proxyConfig);
     }
 
     public Set<Cluster> findAllClustersByProxyConfigInEnvironment(ProxyConfig proxyConfig, Long environmentId) {
-        return clusterRepository.findByProxyConfigAndEnvironment(proxyConfig, environmentId);
+        return repository.findByProxyConfigAndEnvironment(proxyConfig, environmentId);
     }
 
     public Set<Cluster> findByRdsConfig(Long rdsConfigId) {
-        return clusterRepository.findByRdsConfig(rdsConfigId);
+        return repository.findByRdsConfig(rdsConfigId);
     }
 
     public Set<Cluster> findAllClustersByRdsConfigInEnvironment(RDSConfig rdsConfig, Long environmentId) {
-        return clusterRepository.findByRdsConfigAndEnvironment(rdsConfig.getId(), environmentId);
+        return repository.findByRdsConfigAndEnvironment(rdsConfig.getId(), environmentId);
     }
 
     public Set<Cluster> findByKerberosConfig(Long kerberosConfigId) {
-        return clusterRepository.findByKerberosConfig(kerberosConfigId);
+        return repository.findByKerberosConfig(kerberosConfigId);
     }
 
     public Set<Cluster> findAllClustersByKerberosConfigInEnvironment(KerberosConfig kerberosConfig, Long environmentId) {
-        return clusterRepository.findByKerberosConfigAndEnvironment(kerberosConfig.getId(), environmentId);
+        return repository.findByKerberosConfigAndEnvironment(kerberosConfig.getId(), environmentId);
     }
 
     public void updateAmbariRepoDetails(Long clusterId, StackRepositoryV4Request stackRepository) {
@@ -1309,7 +1304,7 @@ public class ClusterService {
     }
 
     public void pureDelete(Cluster cluster) {
-        clusterRepository.delete(cluster);
+        repository.delete(cluster);
     }
 
     private enum Msg {

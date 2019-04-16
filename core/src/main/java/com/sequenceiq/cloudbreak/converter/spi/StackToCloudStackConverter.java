@@ -49,9 +49,9 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
 
@@ -61,13 +61,13 @@ public class StackToCloudStackConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackToCloudStackConverter.class);
 
     @Inject
-    private SecurityRuleRepository securityRuleRepository;
+    private SecurityRuleService securityRuleService;
 
     @Inject
     private ImageService imageService;
 
     @Inject
-    private ComponentConfigProvider componentConfigProvider;
+    private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
@@ -99,7 +99,7 @@ public class StackToCloudStackConverter {
             LOGGER.debug(e.getMessage());
         }
         Network network = buildNetwork(stack);
-        StackTemplate stackTemplate = componentConfigProvider.getStackTemplate(stack.getId());
+        StackTemplate stackTemplate = componentConfigProviderService.getStackTemplate(stack.getId());
         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stack.getStackAuthentication());
         SpiFileSystem cloudFileSystem = buildCloudFileSystem(stack);
         String template = null;
@@ -238,7 +238,7 @@ public class StackToCloudStackConverter {
             return new Security(rules, Collections.emptyList());
         }
         Long id = ig.getSecurityGroup().getId();
-        List<com.sequenceiq.cloudbreak.domain.SecurityRule> securityRules = securityRuleRepository.findAllBySecurityGroupId(id);
+        List<com.sequenceiq.cloudbreak.domain.SecurityRule> securityRules = securityRuleService.findAllBySecurityGroupId(id);
         for (com.sequenceiq.cloudbreak.domain.SecurityRule securityRule : securityRules) {
             List<PortDefinition> portDefinitions = new ArrayList<>();
             for (String actualPort : securityRule.getPorts()) {

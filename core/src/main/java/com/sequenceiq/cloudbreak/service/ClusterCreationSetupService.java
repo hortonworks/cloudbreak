@@ -78,7 +78,7 @@ public class ClusterCreationSetupService {
     private ClusterService clusterService;
 
     @Inject
-    private ComponentConfigProvider componentConfigProvider;
+    private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
     private ClusterDefinitionService clusterDefinitionService;
@@ -144,7 +144,7 @@ public class ClusterCreationSetupService {
 
         List<ClusterComponent> components = checkedMeasure((MultiCheckedSupplier<List<ClusterComponent>, IOException, CloudbreakImageNotFoundException>) () -> {
             if (clusterDefinition != null) {
-                Set<Component> allComponent = componentConfigProvider.getAllComponentsByStackIdAndType(stack.getId(),
+                Set<Component> allComponent = componentConfigProviderService.getAllComponentsByStackIdAndType(stack.getId(),
                         Sets.newHashSet(ComponentType.AMBARI_REPO_DETAILS,
                                 ComponentType.HDP_REPO_DETAILS,
                                 ComponentType.CM_REPO_DETAILS,

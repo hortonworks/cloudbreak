@@ -17,11 +17,12 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
@@ -39,14 +40,15 @@ public class StackImageFilterService {
     private ImageCatalogService imageCatalogService;
 
     @Inject
-    private ComponentConfigProvider componentConfigProvider;
+    private ComponentConfigProviderService componentConfigProviderService;
 
     public Images getApplicableImages(Long workspaceId, String stackName) throws CloudbreakImageCatalogException {
         return getApplicableImages(workspaceId, CLOUDBREAK_DEFAULT_CATALOG_NAME, stackName);
     }
 
     public Images getApplicableImages(Long workspaceId, String imageCatalogName, String stackName) throws CloudbreakImageCatalogException {
-        Stack stack = stackService.getByNameInWorkspaceWithLists(stackName, workspaceId);
+        Stack stack = stackService.getByNameInWorkspaceWithLists(stackName, workspaceId)
+                .orElseThrow(NotFoundException.notFound("stack", stackName));
         StatedImages statedImages = imageCatalogService.getImages(workspaceId, imageCatalogName, stack.cloudPlatform());
         return getApplicableImages(imageCatalogName, statedImages, stack);
     }
@@ -80,7 +82,7 @@ public class StackImageFilterService {
 
     private String getCurrentImageUuid(Stack stack) {
         try {
-            return componentConfigProvider.getImage(stack.getId()).getImageId();
+            return componentConfigProviderService.getImage(stack.getId()).getImageId();
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.info("Could not find last used image when preparing upgrade image list for current cluster", e);
             return "";

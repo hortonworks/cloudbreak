@@ -52,11 +52,11 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.repository.cluster.DatalakeResourcesRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceGroupMetadataCollector;
 import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionTextProcessorFactory;
+import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -146,7 +146,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     private AmbariBlueprintViewProvider ambariBlueprintViewProvider;
 
     @Mock
-    private DatalakeResourcesRepository datalakeResourcesRepository;
+    private DatalakeResourcesService datalakeResourcesService;
 
     @Mock
     private ClusterDefinitionTextProcessorFactory clusterDefinitionTextProcessorFactory;
@@ -332,7 +332,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         SharedServiceConfigsView expected = new SharedServiceConfigsView();
         when(sharedServiceConfigProvider.createSharedServiceConfigs(source, datalakeResources)).thenReturn(expected);
         when(source.getDatalakeResourceId()).thenReturn(1L);
-        when(datalakeResourcesRepository.findById(anyLong())).thenReturn(datalakeResources);
+        when(datalakeResourcesService.findById(anyLong())).thenReturn(datalakeResources);
 
         TemplatePreparationObject result = underTest.convert(source);
 

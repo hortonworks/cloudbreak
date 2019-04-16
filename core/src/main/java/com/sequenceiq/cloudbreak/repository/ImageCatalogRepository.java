@@ -21,4 +21,5 @@ public interface ImageCatalogRepository extends WorkspaceResourceRepository<Imag
 
     @CheckPermissionsByReturnValue
     Set<ImageCatalog> findAllByWorkspaceIdAndArchived(Long workspaceId, boolean archived);
+
 }

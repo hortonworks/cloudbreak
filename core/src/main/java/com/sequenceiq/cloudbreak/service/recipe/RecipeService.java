@@ -22,11 +22,11 @@ import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.view.RecipeView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeViewRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractArchivistService;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 
 @Service
 public class RecipeService extends AbstractArchivistService<Recipe> {
@@ -40,7 +40,7 @@ public class RecipeService extends AbstractArchivistService<Recipe> {
     private RecipeViewRepository recipeViewRepository;
 
     @Inject
-    private HostGroupRepository hostGroupRepository;
+    private HostGroupService hostGroupService;
 
     public Set<Recipe> getRecipesByNamesForWorkspace(Workspace workspace, Set<String> recipeNames) {
         if (recipeNames.isEmpty()) {
@@ -86,7 +86,7 @@ public class RecipeService extends AbstractArchivistService<Recipe> {
             throw new NotFoundException("Recipe not found.");
         }
         LOGGER.debug("Check if recipe can be deleted. {} - {}", recipe.getId(), recipe.getName());
-        List<HostGroup> hostGroupsWithRecipe = new ArrayList<>(hostGroupRepository.findAllHostGroupsByRecipe(recipe.getId()));
+        List<HostGroup> hostGroupsWithRecipe = new ArrayList<>(hostGroupService.findAllHostGroupsByRecipe(recipe.getId()));
         if (!hostGroupsWithRecipe.isEmpty()) {
             if (hostGroupsWithRecipe.size() > 1) {
                 String clusters = hostGroupsWithRecipe

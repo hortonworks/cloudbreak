@@ -17,9 +17,9 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackScalingServiceTest {
@@ -28,7 +28,7 @@ public class StackScalingServiceTest {
     private StackScalingService stackScalingService;
 
     @Mock
-    private HostMetadataRepository hostMetadataRepository;
+    private HostMetadataService hostMetadataService;
 
     @Mock
     private CloudbreakEventService eventService;
@@ -58,6 +58,6 @@ public class StackScalingServiceTest {
 
         stackScalingService.removeHostmetadataIfExists(stack, instanceMetaData, hostMetadata);
 
-        verify(hostMetadataRepository).delete(hostMetadata);
+        verify(hostMetadataService).delete(hostMetadata);
     }
 }

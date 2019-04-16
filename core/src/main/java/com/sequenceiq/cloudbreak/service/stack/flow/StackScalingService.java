@@ -22,13 +22,13 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 
 @Service
 public class StackScalingService {
@@ -38,10 +38,10 @@ public class StackScalingService {
     private CloudbreakEventService eventService;
 
     @Inject
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
-    private HostMetadataRepository hostMetadataRepository;
+    private HostMetadataService hostMetadataService;
 
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
@@ -79,7 +79,7 @@ public class StackScalingService {
                 // Deleting by entity will not work because HostMetadata has a reference pointed
                 // from HostGroup and per JPA, we would need to clear that up.
                 // Reference: http://stackoverflow.com/a/22315188
-                hostMetadataRepository.delete(hostMetadata);
+                hostMetadataService.delete(hostMetadata);
                 eventService.fireCloudbreakEvent(stack.getId(), Status.AVAILABLE.name(),
                         cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_HOST_DELETED.code(),
                                 Collections.singletonList(instanceMetaData.getInstanceId())));
@@ -106,7 +106,7 @@ public class StackScalingService {
                 if (instanceIds.contains(instanceMetaData.getInstanceId())) {
                     instanceMetaData.setTerminationDate(clock.getCurrentTimeMillis());
                     instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
-                    instanceMetaDataRepository.save(instanceMetaData);
+                    instanceMetaDataService.save(instanceMetaData);
                     nodesRemoved++;
                 }
             }

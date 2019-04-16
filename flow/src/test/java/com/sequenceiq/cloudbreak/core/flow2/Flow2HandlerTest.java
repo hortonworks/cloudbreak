@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.junit.Before;
@@ -304,7 +305,7 @@ public class Flow2HandlerTest {
     public void testRestartFlowNotRestartable() throws TransactionExecutionException {
         FlowLog flowLog = new FlowLog(STACK_ID, FLOW_ID, "START_STATE", true, StateStatus.SUCCESSFUL);
         flowLog.setFlowType(String.class);
-        when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLog);
+        when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
         underTest.restartFlow(FLOW_ID);
 
         verify(flowLogService, times(1)).terminate(STACK_ID, FLOW_ID);
@@ -317,8 +318,8 @@ public class Flow2HandlerTest {
         FlowLog flowLog = createFlowLog(FLOW_CHAIN_ID);
         Payload payload = new TestPayload(STACK_ID);
         flowLog.setPayload(JsonWriter.objectToJson(payload));
-        when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLog);
         when(applicationFlowInformation.getRestartableFlows()).thenReturn(List.of(HelloWorldFlowConfig.class));
+        when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
 
         HelloWorldFlowConfig helloWorldFlowConfig = new HelloWorldFlowConfig();
         ReflectionTestUtils.setField(helloWorldFlowConfig, "defaultRestartAction", defaultRestartAction);
@@ -347,7 +348,7 @@ public class Flow2HandlerTest {
         FlowLog flowLog = createFlowLog(FLOW_CHAIN_ID);
         Payload payload = new TestPayload(STACK_ID);
         flowLog.setPayload(JsonWriter.objectToJson(payload));
-        when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLog);
+        when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
         when(applicationFlowInformation.getRestartableFlows()).thenReturn(List.of(HelloWorldFlowConfig.class));
 
         HelloWorldFlowConfig helloWorldFlowConfig = new HelloWorldFlowConfig();
@@ -371,7 +372,7 @@ public class Flow2HandlerTest {
         FlowLog flowLog = createFlowLog(null);
         Payload payload = new TestPayload(STACK_ID);
         flowLog.setPayload(JsonWriter.objectToJson(payload));
-        when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLog);
+        when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
         when(applicationFlowInformation.getRestartableFlows()).thenReturn(List.of(HelloWorldFlowConfig.class));
         HelloWorldFlowConfig helloWorldFlowConfig = new HelloWorldFlowConfig();
 

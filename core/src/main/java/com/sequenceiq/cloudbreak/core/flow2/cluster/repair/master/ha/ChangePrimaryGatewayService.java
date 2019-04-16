@@ -19,20 +19,20 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.message.Msg;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
 public class ChangePrimaryGatewayService {
     @Inject
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private GatewayConfigService gatewayConfigService;
@@ -62,7 +62,7 @@ public class ChangePrimaryGatewayService {
     }
 
     public void primaryGatewayChanged(long stackId, String newPrimaryGatewayFQDN) throws CloudbreakException, TransactionExecutionException {
-        Set<InstanceMetaData> imds = instanceMetaDataRepository.findNotTerminatedForStack(stackId);
+        Set<InstanceMetaData> imds = instanceMetaDataService.findNotTerminatedForStack(stackId);
         Optional<InstanceMetaData> formerPrimaryGateway =
                 imds.stream().filter(imd -> imd.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY).findFirst();
         Optional<InstanceMetaData> newPrimaryGateway =
@@ -72,11 +72,11 @@ public class ChangePrimaryGatewayService {
             fpg.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
             fpg.setAmbariServer(Boolean.FALSE);
             transactionService.required(() -> {
-                instanceMetaDataRepository.save(fpg);
+                instanceMetaDataService.save(fpg);
                 InstanceMetaData npg = newPrimaryGateway.get();
                 npg.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
                 npg.setAmbariServer(Boolean.TRUE);
-                instanceMetaDataRepository.save(npg);
+                instanceMetaDataService.save(npg);
                 Stack updatedStack = stackService.getByIdWithListsInTransaction(stackId);
                 String gatewayIp = gatewayConfigService.getPrimaryGatewayIp(updatedStack);
 

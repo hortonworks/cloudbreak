@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
 import com.sequenceiq.cloudbreak.domain.environment.Region;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
-import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
+import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
@@ -35,7 +35,7 @@ public class ClusterCreationEnvironmentValidator {
     private RdsConfigService rdsConfigService;
 
     @Inject
-    private KerberosService kerberosService;
+    private KerberosConfigService kerberosConfigService;
 
     public ValidationResult validate(ClusterV4Request clusterRequest, Stack stack) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
@@ -65,7 +65,7 @@ public class ClusterCreationEnvironmentValidator {
             validateEnvironmentAwareResource(rdsConfigService.getByNameForWorkspaceId(rdsConfigName, workspaceId), environmentName, resultBuilder);
         }
         if (StringUtils.isNoneEmpty(registerDatalakeRequest.getKerberosName())) {
-            validateEnvironmentAwareResource(kerberosService.getByNameForWorkspaceId(registerDatalakeRequest.getKerberosName(), workspaceId),
+            validateEnvironmentAwareResource(kerberosConfigService.getByNameForWorkspaceId(registerDatalakeRequest.getKerberosName(), workspaceId),
                     environmentName, resultBuilder);
         }
         return resultBuilder.build();

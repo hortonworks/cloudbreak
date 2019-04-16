@@ -41,7 +41,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.ImageUpdateEvent;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
@@ -126,7 +126,7 @@ public class StackImageUpdateActions {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 CloudStack cloudStack = getCloudStackConverter().convert(context.getStack());
-                List<Resource> resources = getResourceRepository().findAllByStackId(context.getStack().getId());
+                List<Resource> resources = getResourceService().findAllByStackId(context.getStack().getId());
                 List<CloudResource> cloudResources =
                         resources.stream().map(resource -> getResourceToCloudResourceConverter().convert(resource)).collect(Collectors.toList());
                 UpdateImageRequest<Selectable> request =
@@ -158,7 +158,7 @@ public class StackImageUpdateActions {
             private StackUpdater stackUpdater;
 
             @Inject
-            private ComponentConfigProvider componentConfigProvider;
+            private ComponentConfigProviderService componentConfigProviderService;
 
             @Inject
             private StackService stackService;
@@ -172,7 +172,7 @@ public class StackImageUpdateActions {
                     try {
                         Stack stack = stackService.getByIdWithTransaction(context.getStackView().getId());
                         Component component = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(originalImage), stack);
-                        componentConfigProvider.replaceImageComponentWithNew(component);
+                        componentConfigProviderService.replaceImageComponentWithNew(component);
                         LOGGER.debug("Image restored");
                     } catch (JsonProcessingException e) {
                         LOGGER.info("Could not parse JSON. Image restore failed");

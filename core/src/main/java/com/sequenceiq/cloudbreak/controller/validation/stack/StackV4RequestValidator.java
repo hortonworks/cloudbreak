@@ -41,7 +41,7 @@ import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionServ
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
-import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
+import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -68,7 +68,7 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
     private RdsConfigService rdsConfigService;
 
     @Inject
-    private KerberosService kerberosService;
+    private KerberosConfigService kerberosConfigService;
 
     @Inject
     private PlatformParameterService platformParameterService;
@@ -130,7 +130,7 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
     }
 
     private void validateAvailableDatalakeStack(ValidationResultBuilder validationBuilder, Optional<Stack> stack) {
-        Optional<Cluster> cluster = Optional.ofNullable(clusterService.retrieveClusterByStackIdWithoutAuth(stack.get().getId()));
+        Optional<Cluster> cluster = clusterService.retrieveClusterByStackIdWithoutAuth(stack.get().getId());
         if (cluster.isPresent() && !AVAILABLE.equals(cluster.get().getStatus())) {
             validationBuilder.error("Ambari installation in progress or some of it's components has failed. "
                     + "Please check Ambari before trying to attach cluster to datalake.");
@@ -226,7 +226,7 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
         if (kerberosName != null && kerberosName.isEmpty()) {
             validationBuilder.error("kerberosName should not be empty. Should be either filled or null!");
         } else if (isNotEmpty(kerberosName)) {
-            kerberosService.getByNameForWorkspaceId(kerberosName, workspaceId);
+            kerberosConfigService.getByNameForWorkspaceId(kerberosName, workspaceId);
         }
     }
 

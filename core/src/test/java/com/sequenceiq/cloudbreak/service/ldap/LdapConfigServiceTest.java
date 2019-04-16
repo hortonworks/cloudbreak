@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Before;
@@ -158,7 +159,7 @@ public class LdapConfigServiceTest {
         Set<EnvironmentView> environmentViews = Set.of(env1, env2);
 
         when(environmentViewService.findByNamesInWorkspace(environments, WORKSPACE_ID)).thenReturn(environmentViews);
-        when(ldapConfigRepository.findByNameAndWorkspaceId(LDAP_1, WORKSPACE_ID)).thenReturn(ldapConfig);
+        when(ldapConfigRepository.findByNameAndWorkspaceId(LDAP_1, WORKSPACE_ID)).thenReturn(Optional.ofNullable(ldapConfig));
 
         LdapConfig created = underTest.attachToEnvironments(LDAP_1, environments, WORKSPACE_ID);
 
@@ -188,7 +189,7 @@ public class LdapConfigServiceTest {
         Set<EnvironmentView> environmentViews = Sets.newHashSet(env1, env2);
 
         when(environmentViewService.findByNamesInWorkspace(environments, WORKSPACE_ID)).thenReturn(environmentViews);
-        when(ldapConfigRepository.findByNameAndWorkspaceId(LDAP_1, WORKSPACE_ID)).thenReturn(ldapConfig);
+        when(ldapConfigRepository.findByNameAndWorkspaceId(LDAP_1, WORKSPACE_ID)).thenReturn(Optional.ofNullable(ldapConfig));
 
         LdapConfig created = underTest.attachToEnvironments(LDAP_1, environments, WORKSPACE_ID);
 
@@ -199,7 +200,7 @@ public class LdapConfigServiceTest {
 
     @Test
     public void testDelete() {
-        when(ldapConfigRepository.findByNameAndWorkspaceId(LDAP_1, WORKSPACE_ID)).thenReturn(ldapConfig);
+        when(ldapConfigRepository.findByNameAndWorkspaceId(LDAP_1, WORKSPACE_ID)).thenReturn(Optional.ofNullable(ldapConfig));
         when(clusterService.findByLdapConfig(ldapConfig)).thenReturn(Collections.emptySet());
 
         underTest.deleteByNameFromWorkspace(ldapConfig.getName(), WORKSPACE_ID);
@@ -212,7 +213,7 @@ public class LdapConfigServiceTest {
         Cluster cluster = new Cluster();
         cluster.setId(1L);
         cluster.setName("cluster1");
-        when(ldapConfigRepository.findByNameAndWorkspaceId(LDAP_1, WORKSPACE_ID)).thenReturn(ldapConfig);
+        when(ldapConfigRepository.findByNameAndWorkspaceId(LDAP_1, WORKSPACE_ID)).thenReturn(Optional.ofNullable(ldapConfig));
         when(clusterService.findByLdapConfig(ldapConfig)).thenReturn(Set.of(cluster));
 
         exceptionRule.expect(BadRequestException.class);
@@ -234,7 +235,7 @@ public class LdapConfigServiceTest {
         cluster2.setId(2L);
         String clusterName2 = "cluster2";
         cluster2.setName(clusterName2);
-        when(ldapConfigRepository.findByNameAndWorkspaceId(LDAP_1, WORKSPACE_ID)).thenReturn(ldapConfig);
+        when(ldapConfigRepository.findByNameAndWorkspaceId(LDAP_1, WORKSPACE_ID)).thenReturn(Optional.ofNullable(ldapConfig));
         when(clusterService.findByLdapConfig(ldapConfig)).thenReturn(Set.of(cluster1, cluster2));
 
         exceptionRule.expect(BadRequestException.class);
@@ -273,7 +274,7 @@ public class LdapConfigServiceTest {
         ldapConfig.setEnvironments(Sets.newHashSet(env1, env2, env3));
 
         when(environmentViewService.findByNamesInWorkspace(envNames, WORKSPACE_ID)).thenReturn(environments);
-        when(ldapConfigRepository.findByNameAndWorkspaceId(ldapConfig.getName(), WORKSPACE_ID)).thenReturn(ldapConfig);
+        when(ldapConfigRepository.findByNameAndWorkspaceId(ldapConfig.getName(), WORKSPACE_ID)).thenReturn(Optional.ofNullable(ldapConfig));
         when(clusterService.findAllClustersByLdapConfigInEnvironment(ldapConfig, envId1)).thenReturn(Collections.emptySet());
         when(clusterService.findAllClustersByLdapConfigInEnvironment(ldapConfig, envId2)).thenReturn(Collections.emptySet());
 
@@ -323,7 +324,7 @@ public class LdapConfigServiceTest {
         env2Cluster2.setEnvironment(env2);
 
         when(environmentViewService.findByNamesInWorkspace(envNames, WORKSPACE_ID)).thenReturn(environments);
-        when(ldapConfigRepository.findByNameAndWorkspaceId(ldapConfig.getName(), WORKSPACE_ID)).thenReturn(ldapConfig);
+        when(ldapConfigRepository.findByNameAndWorkspaceId(ldapConfig.getName(), WORKSPACE_ID)).thenReturn(Optional.ofNullable(ldapConfig));
         when(clusterService.findAllClustersByLdapConfigInEnvironment(ldapConfig, envId1)).thenReturn(Sets.newHashSet(env1Cluster1, env1Cluster2));
         when(clusterService.findAllClustersByLdapConfigInEnvironment(ldapConfig, envId2)).thenReturn(Sets.newHashSet(env2Cluster1, env2Cluster2));
 
@@ -347,7 +348,7 @@ public class LdapConfigServiceTest {
     public void testConnectionWithNameWhenValidatorThrowsAnException() {
         String exceptionMessage = "test connection failed";
         doThrow(new BadRequestException(exceptionMessage)).when(ldapConfigValidator).validateLdapConnection(any(LdapConfig.class));
-        when(ldapConfigRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(new LdapConfig());
+        when(ldapConfigRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.of(new LdapConfig()));
 
         String result = underTest.testConnection(1L, "LDAP", null);
 
@@ -359,7 +360,7 @@ public class LdapConfigServiceTest {
     @Test
     public void testConnectionWithName() {
         doNothing().when(ldapConfigValidator).validateLdapConnection(any(LdapConfig.class));
-        when(ldapConfigRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(new LdapConfig());
+        when(ldapConfigRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.of(new LdapConfig()));
 
         String result = underTest.testConnection(1L, "LDAP", null);
 

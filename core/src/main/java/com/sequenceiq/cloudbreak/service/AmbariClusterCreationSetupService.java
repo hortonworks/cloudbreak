@@ -66,7 +66,7 @@ public class AmbariClusterCreationSetupService {
     private ClusterApiConnectors clusterApiConnectors;
 
     @Inject
-    private ComponentConfigProvider componentConfigProvider;
+    private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
     private ClusterDefinitionService clusterDefinitionService;
@@ -272,7 +272,7 @@ public class AmbariClusterCreationSetupService {
     }
 
     private String getOsType(Long stackId) throws CloudbreakImageNotFoundException {
-        Image image = componentConfigProvider.getImage(stackId);
+        Image image = componentConfigProviderService.getImage(stackId);
         return image.getOsType();
     }
 

@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
@@ -49,10 +50,10 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataRe
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.MountDisksOnNewHostsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.MountDisksOnNewHostsResult;
-import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -73,7 +74,7 @@ public class StackUpscaleActions {
     private StackToCloudStackConverter cloudStackConverter;
 
     @Inject
-    private InstanceGroupRepository instanceGroupRepository;
+    private InstanceGroupService instanceGroupService;
 
     @Inject
     private InstanceMetaDataToCloudInstanceConverter metadataConverter;
@@ -199,7 +200,8 @@ public class StackUpscaleActions {
                     throws TransactionExecutionException {
                 Set<String> upscaleCandidateAddresses = stackUpscaleService.finishExtendMetadata(context.getStack(), context.getInstanceGroupName(), payload);
                 variables.put(UPSCALE_CANDIDATE_ADDRESSES, upscaleCandidateAddresses);
-                InstanceGroup ig = instanceGroupRepository.findOneByGroupNameInStack(payload.getStackId(), context.getInstanceGroupName());
+                InstanceGroup ig = instanceGroupService.findOneByGroupNameInStack(payload.getStackId(), context.getInstanceGroupName())
+                        .orElseThrow(NotFoundException.notFound("instanceGroup", context.getInstanceGroupName()));
                 if (InstanceGroupType.GATEWAY == ig.getInstanceGroupType()) {
                     Stack stack = stackService.getByIdWithListsInTransaction(context.getStack().getId());
                     InstanceMetaData gatewayMetaData = stack.getPrimaryGatewayInstance();

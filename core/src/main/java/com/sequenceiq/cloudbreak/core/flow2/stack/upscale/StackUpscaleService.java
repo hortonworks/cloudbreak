@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.common.type.CommonResourceType;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
@@ -39,7 +40,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
 
@@ -62,7 +63,7 @@ public class StackUpscaleService {
     private CloudbreakFlowMessageService flowMessageService;
 
     @Inject
-    private InstanceGroupRepository instanceGroupRepository;
+    private InstanceGroupService instanceGroupService;
 
     @Inject
     private MetadataSetupService metadataSetupService;
@@ -117,7 +118,8 @@ public class StackUpscaleService {
             for (CloudVmMetaDataStatus cloudVmMetaDataStatus : coreInstanceMetaData) {
                 upscaleCandidateAddresses.add(cloudVmMetaDataStatus.getMetaData().getPrivateIp());
             }
-            InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), instanceGroupName);
+            InstanceGroup instanceGroup = instanceGroupService.findOneByGroupNameInStack(stack.getId(), instanceGroupName)
+                    .orElseThrow(NotFoundException.notFound("instanceGroup", instanceGroupName));
             int nodeCount = instanceGroup.getNodeCount() + newInstances;
             try {
                 clusterService.updateClusterStatusByStackIdOutOfTransaction(stack.getId(), AVAILABLE);

@@ -12,21 +12,22 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 
 @Service
 public class InstanceGroupMetadataCollector {
 
     @Inject
-    private InstanceMetaDataRepository instanceMetadataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     public Map<String, List<InstanceMetaData>> collectMetadata(Stack stack) {
         Map<String, List<InstanceMetaData>> result = new HashMap<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             result.put(
                     instanceGroup.getGroupName(),
-                    new ArrayList<>(instanceMetadataRepository.findAliveInstancesInInstanceGroup(instanceGroup.getId())));
+                    new ArrayList<>(instanceMetaDataService.findAliveInstancesInInstanceGroup(instanceGroup.getId())));
         }
         return result;
     }
+
 }

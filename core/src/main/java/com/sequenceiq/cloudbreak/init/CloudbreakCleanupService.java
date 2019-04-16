@@ -35,13 +35,13 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.startup.GovCloudFlagMigrator;
 
@@ -63,7 +63,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     private ClusterService clusterService;
 
     @Inject
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private CloudbreakEventService eventService;
@@ -113,7 +113,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
                         loggingStatusChange("Stack", s.getId(), s.getStatus(), WAIT_FOR_SYNC);
                         stackUpdater.updateStackStatus(s.getId(), DetailedStackStatus.WAIT_FOR_SYNC, s.getStatusReason());
                     }
-                    cleanInstanceMetaData(instanceMetaDataRepository.findAllInStack(s.getId()));
+                    cleanInstanceMetaData(instanceMetaDataService.findAllInStack(s.getId()));
                 }).collect(Collectors.toList());
     }
 
@@ -121,7 +121,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
         for (InstanceMetaData metadata : metadataSet) {
             if (InstanceStatus.REQUESTED.equals(metadata.getInstanceStatus()) && metadata.getInstanceId() == null) {
                 LOGGER.debug("InstanceMetaData [privateId: '{}'] is deleted at CB start.", metadata.getPrivateId());
-                instanceMetaDataRepository.delete(metadata);
+                instanceMetaDataService.delete(metadata);
             }
         }
     }

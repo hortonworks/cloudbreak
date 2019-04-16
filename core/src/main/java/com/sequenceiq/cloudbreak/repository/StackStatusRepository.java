@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.Optional;
+
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
@@ -13,5 +15,6 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @DisableHasPermission
 public interface StackStatusRepository extends DisabledBaseRepository<StackStatus, Long> {
 
-    StackStatus findFirstByStackIdOrderByCreatedDesc(long stackId);
+    Optional<StackStatus> findFirstByStackIdOrderByCreatedDesc(long stackId);
+
 }

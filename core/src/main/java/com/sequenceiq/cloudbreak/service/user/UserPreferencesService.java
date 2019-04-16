@@ -32,13 +32,10 @@ public class UserPreferencesService {
     @Inject
     private TransactionService transactionService;
 
-    public Optional<UserPreferences> getByUser(User user) {
-        LOGGER.debug("Get user preferences for user '{}'", user.getUserId());
-        return userPreferencesRepository.findByUser(user);
-    }
-
     public Optional<UserPreferences> getByUserId(String userId) {
-        return getByUser(userService.getByUserId(userId));
+        User user = userService.getByUserId(userId)
+                .orElseThrow(NotFoundException.notFound("User", userId));
+        return getByUser(user);
     }
 
     public UserPreferences getWithExternalId(User user) {
@@ -56,6 +53,15 @@ public class UserPreferencesService {
         throw new NotFoundException(String.format("User preferences could not be found for user that has id '%s'.", user.getUserId()));
     }
 
+    public UserPreferences save(UserPreferences userPreferences) {
+        return userPreferencesRepository.save(userPreferences);
+    }
+
+    private Optional<UserPreferences> getByUser(User user) {
+        LOGGER.debug("Get user preferences for user '{}'", user.getUserId());
+        return userPreferencesRepository.findByUser(user);
+    }
+
     private String generateExternalId() {
         return UUID.randomUUID().toString();
     }
@@ -70,4 +76,5 @@ public class UserPreferencesService {
             throw new TransactionRuntimeExecutionException(e);
         }
     }
+
 }

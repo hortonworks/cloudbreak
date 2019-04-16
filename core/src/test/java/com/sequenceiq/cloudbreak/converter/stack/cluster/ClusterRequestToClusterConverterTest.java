@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
-import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
+import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
@@ -44,7 +44,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     private ConversionService conversionService;
 
     @Mock
-    private KerberosService kerberosService;
+    private KerberosConfigService kerberosConfigService;
 
     @Mock
     private CloudStorageValidationUtil cloudStorageValidationUtil;
@@ -91,7 +91,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         ClusterV4Request request = getRequest("cluster-with-cloud-storage.json");
 
         given(conversionService.convert(request.getGateway(), Gateway.class)).willReturn(new Gateway());
-        given(kerberosService.getByNameForWorkspaceId(eq("somename"), anyLong())).willReturn(new KerberosConfig());
+        given(kerberosConfigService.getByNameForWorkspaceId(eq("somename"), anyLong())).willReturn(new KerberosConfig());
         given(conversionService.convert(request.getCloudStorage(), FileSystem.class)).willReturn(new FileSystem());
         given(cloudStorageValidationUtil.isCloudStorageConfigured(request.getCloudStorage())).willReturn(true);
         ClusterDefinition clusterDefinition = new ClusterDefinition();

@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -54,7 +55,7 @@ import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -143,7 +144,7 @@ public class ImageCatalogServiceTest {
     private StackImageFilterService stackImageFilterService;
 
     @Mock
-    private ComponentConfigProvider componentConfigProvider;
+    private ComponentConfigProviderService componentConfigProviderService;
 
     @Mock
     private WorkspaceService workspaceService;
@@ -394,7 +395,7 @@ public class ImageCatalogServiceTest {
     public void testGetImagesWhenCustomImageCatalogExists() throws Exception {
         ImageCatalog ret = new ImageCatalog();
         ret.setImageCatalogUrl("");
-        when(imageCatalogRepository.findByNameAndWorkspaceId("name", ORG_ID)).thenReturn(ret);
+        when(imageCatalogRepository.findByNameAndWorkspaceId("name", ORG_ID)).thenReturn(Optional.of(ret));
         when(imageCatalogProvider.getImageCatalogV2("")).thenReturn(null);
         underTest.getImages(ORG_ID, "name", "aws");
 
@@ -421,7 +422,7 @@ public class ImageCatalogServiceTest {
         imageCatalog.setName(name);
         imageCatalog.setArchived(false);
         doNothing().when(userProfileHandler).destroyProfileImageCatalogPreparation(any(ImageCatalog.class));
-        when(imageCatalogRepository.findByNameAndWorkspaceId(name, ORG_ID)).thenReturn(imageCatalog);
+        when(imageCatalogRepository.findByNameAndWorkspaceId(name, ORG_ID)).thenReturn(Optional.of(imageCatalog));
         setupUserProfileService();
 
         underTest.delete(ORG_ID, name);
@@ -446,7 +447,7 @@ public class ImageCatalogServiceTest {
     public void testGet() {
         String name = "img-name";
         ImageCatalog imageCatalog = new ImageCatalog();
-        when(imageCatalogRepository.findByNameAndWorkspaceId(name, ORG_ID)).thenReturn(imageCatalog);
+        when(imageCatalogRepository.findByNameAndWorkspaceId(name, ORG_ID)).thenReturn(Optional.of(imageCatalog));
         ImageCatalog actual = underTest.get(ORG_ID, name);
 
         assertEquals(actual, imageCatalog);
@@ -536,7 +537,7 @@ public class ImageCatalogServiceTest {
     public void testGetImagesWithPlatform() throws CloudbreakImageCatalogException, IOException {
         setupUserProfileService();
         setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, V2_CATALOG_FILE);
-        when(imageCatalogRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(new ImageCatalog());
+        when(imageCatalogRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.of(new ImageCatalog()));
 
         underTest.getImagesByCatalogName(ORG_ID, "catalog", null, "AWS");
 

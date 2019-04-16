@@ -39,7 +39,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 
 @Component
@@ -48,7 +48,7 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
     private static final Logger LOGGER = LoggerFactory.getLogger(StackToStackV4RequestConverter.class);
 
     @Inject
-    private ComponentConfigProvider componentConfigProvider;
+    private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
     private ProviderParameterCalculator providerParameterCalculator;
@@ -77,7 +77,7 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
 
     private void prepareDatalakeRequest(Stack source, StackV4Request stackRequest) {
         if (source.getDatalakeResourceId() != null) {
-            Optional<DatalakeResources> datalakeResources = datalakeResourcesService.getDatalakeResourcesById(source.getDatalakeResourceId());
+            Optional<DatalakeResources> datalakeResources = datalakeResourcesService.findById(source.getDatalakeResourceId());
             if (datalakeResources.isPresent()) {
                 SharedServiceV4Request sharedServiceRequest = new SharedServiceV4Request();
                 sharedServiceRequest.setDatalakeName(datalakeResources.get().getName());
@@ -116,7 +116,7 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
 
     private void prepareImage(Stack source, StackV4Request stackV2Request) {
         try {
-            Image image = componentConfigProvider.getImage(source.getId());
+            Image image = componentConfigProviderService.getImage(source.getId());
             ImageSettingsV4Request is = new ImageSettingsV4Request();
             is.setId(Strings.isNullOrEmpty(image.getImageId()) ? "" : image.getImageId());
             is.setCatalog(Strings.isNullOrEmpty(image.getImageCatalogName()) ? "" : image.getImageCatalogName());

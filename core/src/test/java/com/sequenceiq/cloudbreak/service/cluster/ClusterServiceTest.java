@@ -41,11 +41,11 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -61,7 +61,7 @@ public class ClusterServiceTest {
     private TransactionService transactionService;
 
     @Mock
-    private ResourceRepository resourceRepository;
+    private ResourceService resourceService;
 
     @Mock
     private ReactorFlowManager flowManager;
@@ -174,7 +174,7 @@ public class ClusterServiceTest {
         verify(stack).getDiskResources();
         @SuppressWarnings("unchecked")
         ArgumentCaptor<List<Resource>> saveCaptor = ArgumentCaptor.forClass(List.class);
-        verify(resourceRepository).saveAll(saveCaptor.capture());
+        verify(resourceService).saveAll(saveCaptor.capture());
         assertFalse(resourceAttributeUtil.getTypedAttributes(saveCaptor.getValue().get(0), VolumeSetAttributes.class).get().getDeleteOnTermination());
         verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1Name.healthy"))), eq(false));
     }

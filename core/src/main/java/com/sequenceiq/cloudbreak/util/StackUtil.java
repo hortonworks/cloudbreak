@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -129,21 +130,18 @@ public class StackUtil {
     }
 
     private String extractClusterManagerIp(long stackId, String orchestratorName, String ambariIp) {
-        String result = null;
+        AtomicReference<String> result = new AtomicReference<>(null);
         try {
             OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestratorName);
             if (orchestratorType != null && orchestratorType.containerOrchestrator()) {
-                result = ambariIp;
+                result.set(ambariIp);
             } else {
-                InstanceMetaData gatewayInstance = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(stackId);
-                if (gatewayInstance != null) {
-                    result = gatewayInstance.getPublicIpWrapper();
-                }
+                instanceMetaDataService.getPrimaryGatewayInstanceMetadata(stackId).ifPresent(imd -> result.set(imd.getPublicIpWrapper()));
             }
         } catch (CloudbreakException ex) {
             LOGGER.error("Could not resolve orchestrator type: ", ex);
         }
-        return result;
+        return result.get();
     }
 
     public long getUptimeForCluster(Cluster cluster, boolean addUpsinceToUptime) {

@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -36,13 +35,12 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderMetadataAdapter;
 
@@ -62,13 +60,10 @@ public class StackSyncService {
     private CloudbreakEventService eventService;
 
     @Inject
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
-    private HostMetadataRepository hostMetadataRepository;
-
-    @Inject
-    private ResourceRepository resourceRepository;
+    private HostMetadataService hostMetadataService;
 
     @Inject
     private ServiceProviderMetadataAdapter metadata;
@@ -119,7 +114,7 @@ public class StackSyncService {
 
     private void sync(Stack stack, boolean stackStatusUpdateEnabled) {
         Long stackId = stack.getId();
-        Set<InstanceMetaData> instances = instanceMetaDataRepository.findNotTerminatedForStack(stackId);
+        Set<InstanceMetaData> instances = instanceMetaDataService.findNotTerminatedForStack(stackId);
         Map<InstanceSyncState, Integer> instanceStateCounts = initInstanceStateCounts();
         for (InstanceMetaData instance : instances) {
             InstanceGroup instanceGroup = instance.getInstanceGroup();
@@ -143,7 +138,7 @@ public class StackSyncService {
         if (instanceMetaData.getImage() == null) {
             instanceMetaData.setImage(imageJson);
         }
-        instanceMetaDataRepository.save(instanceMetaData);
+        instanceMetaDataService.save(instanceMetaData);
     }
 
     private void syncInstanceStatusByState(Stack stack, Map<InstanceSyncState, Integer> counts, InstanceMetaData metaData, InstanceSyncState state) {
@@ -163,7 +158,7 @@ public class StackSyncService {
         if (!instance.isTerminated()) {
             LOGGER.debug("Instance '{}' is reported as stopped on the cloud provider, setting its state to STOPPED.", instance.getInstanceId());
             instance.setInstanceStatus(InstanceStatus.STOPPED);
-            instanceMetaDataRepository.save(instance);
+            instanceMetaDataService.save(instance);
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_UPDATED.code(), Arrays.asList(instance.getInstanceId(), "stopped")));
         }
@@ -175,7 +170,7 @@ public class StackSyncService {
             LOGGER.debug("Instance '{}' is reported as created on the cloud provider but not member of the cluster, setting its state to FAILED.",
                     instance.getInstanceId());
             instance.setInstanceStatus(InstanceStatus.FAILED);
-            instanceMetaDataRepository.save(instance);
+            instanceMetaDataService.save(instance);
             eventService.fireCloudbreakEvent(stack.getId(), CREATE_FAILED.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_FAILED.code(), Collections.singletonList(instance.getDiscoveryFQDN())));
         } else if (!instance.isRunning() && !instance.isDecommissioned() && !instance.isCreated() && !instance.isFailed()) {
@@ -191,7 +186,7 @@ public class StackSyncService {
                 LOGGER.debug("Instance with private id '{}' don't have instanceId, setting its state to DELETED.",
                         instance.getPrivateId());
                 instance.setInstanceStatus(InstanceStatus.TERMINATED);
-                instanceMetaDataRepository.save(instance);
+                instanceMetaDataService.save(instance);
             } else {
                 instanceStateCounts.put(InstanceSyncState.DELETED_ON_PROVIDER_SIDE, instanceStateCounts.get(InstanceSyncState.DELETED_ON_PROVIDER_SIDE) + 1);
                 LOGGER.debug("Instance '{}' is reported as deleted on the cloud provider, setting its state to DELETED_ON_PROVIDER_SIDE.",
@@ -201,15 +196,8 @@ public class StackSyncService {
         }
     }
 
-    private void deleteResourceIfNeeded(Stack stack, InstanceMetaData instance) {
-        Resource resource = resourceRepository.findByStackIdAndResourceNameOrReference(stack.getId(), instance.getInstanceId());
-        if (resource != null) {
-            resourceRepository.delete(resource);
-        }
-    }
-
     private void handleSyncResult(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, boolean stackStatusUpdateEnabled) {
-        Set<InstanceMetaData> instances = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
+        Set<InstanceMetaData> instances = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
         if (instanceStateCounts.get(InstanceSyncState.UNKNOWN) > 0) {
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE.code()));
@@ -253,7 +241,7 @@ public class StackSyncService {
 
     private void updateMetaDataToDeletedOnProviderSide(Stack stack, InstanceMetaData instanceMetaData) {
         instanceMetaData.setInstanceStatus(InstanceStatus.DELETED_ON_PROVIDER_SIDE);
-        instanceMetaDataRepository.save(instanceMetaData);
+        instanceMetaDataService.save(instanceMetaData);
         String name;
         name = instanceMetaData.getDiscoveryFQDN() == null ? instanceMetaData.getInstanceId() : String.format("%s (%s)", instanceMetaData.getInstanceId(),
                 instanceMetaData.getDiscoveryFQDN());
@@ -264,15 +252,15 @@ public class StackSyncService {
     }
 
     private void updateMetaDataToRunning(Long stackId, Cluster cluster, InstanceMetaData instanceMetaData) {
-        HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(cluster.getId(), instanceMetaData.getDiscoveryFQDN());
-        if (hostMetadata != null) {
+        Optional<HostMetadata> hostMetadata = hostMetadataService.findHostInClusterByName(cluster.getId(), instanceMetaData.getDiscoveryFQDN());
+        if (hostMetadata.isPresent()) {
             LOGGER.debug("Instance '{}' was found in the cluster metadata, setting it's state to REGISTERED.", instanceMetaData.getInstanceId());
             instanceMetaData.setInstanceStatus(InstanceStatus.REGISTERED);
         } else {
             LOGGER.debug("Instance '{}' was not found in the cluster metadata, setting it's state to UNREGISTERED.", instanceMetaData.getInstanceId());
             instanceMetaData.setInstanceStatus(InstanceStatus.UNREGISTERED);
         }
-        instanceMetaDataRepository.save(instanceMetaData);
+        instanceMetaDataService.save(instanceMetaData);
         eventService.fireCloudbreakEvent(stackId, AVAILABLE.name(),
                 cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_UPDATED.code(), Arrays.asList(instanceMetaData.getDiscoveryFQDN(), "running")));
     }

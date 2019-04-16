@@ -26,7 +26,7 @@ public class ClusterTemplateToClusterTemplateV4ResponseConverter extends Abstrac
         ClusterTemplateV4Response clusterTemplateV4Response = new ClusterTemplateV4Response();
         clusterTemplateV4Response.setName(source.getName());
         clusterTemplateV4Response.setDescription(source.getDescription());
-        Stack stack = stackTemplateService.getByIdWithLists(source.getStackTemplate().getId());
+        Stack stack = stackTemplateService.getByIdWithLists(source.getStackTemplate().getId()).orElse(null);
         clusterTemplateV4Response.setStackTemplate(converterUtil.convert(stack, StackV4Request.class));
         clusterTemplateV4Response.setCloudPlatform(source.getCloudPlatform());
         clusterTemplateV4Response.setStatus(source.getStatus());
@@ -36,4 +36,5 @@ public class ClusterTemplateToClusterTemplateV4ResponseConverter extends Abstrac
         clusterTemplateV4Response.setType(source.getType());
         return clusterTemplateV4Response;
     }
+
 }

@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.cluster;
 import static java.util.Arrays.asList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -11,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Before;
@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
-import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.clusterdefinition.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
@@ -36,10 +35,10 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -59,7 +58,7 @@ public class AmbariClusterHostServiceTypeTest {
     private ClusterRepository clusterRepository;
 
     @Mock
-    private InstanceMetaDataRepository instanceMetadataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Mock
     private TlsSecurityService tlsSecurityService;
@@ -87,8 +86,6 @@ public class AmbariClusterHostServiceTypeTest {
         stack.setCluster(cluster);
         when(stackService.getById(anyLong())).thenReturn(stack);
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
-        given(tlsSecurityService.buildTLSClientConfigForPrimaryGateway(anyLong(), anyString())).willReturn(new HttpClientConfig("", "", "/tmp",
-                "/tmp"));
     }
 
     @Test
@@ -115,7 +112,7 @@ public class AmbariClusterHostServiceTypeTest {
         hga1.setHostGroup("slave_1");
         hga1.setScalingAdjustment(0);
 
-        when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(new HostGroup());
+        when(hostGroupService.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(Optional.of(new HostGroup()));
 
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("No scaling adjustments specified. Nothing to do.");
@@ -130,7 +127,7 @@ public class AmbariClusterHostServiceTypeTest {
         hga1.setHostGroup("slave_1");
         hga1.setScalingAdjustment(-2);
 
-        when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(new HostGroup());
+        when(hostGroupService.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(Optional.of(new HostGroup()));
 
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("The host group must contain at least 1 host after the decommission: [hostGroup: 'slave_1', current hosts: 0, "
@@ -151,7 +148,7 @@ public class AmbariClusterHostServiceTypeTest {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
-        when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
+        when(hostGroupService.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(Optional.of(hostGroup));
 
         underTest.updateHosts(stack.getId(), json);
     }
@@ -169,7 +166,7 @@ public class AmbariClusterHostServiceTypeTest {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
-        when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
+        when(hostGroupService.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(Optional.of(hostGroup));
 
         underTest.updateHosts(stack.getId(), json);
 
@@ -191,7 +188,7 @@ public class AmbariClusterHostServiceTypeTest {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
-        when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
+        when(hostGroupService.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(Optional.of(hostGroup));
 
         underTest.updateHosts(stack.getId(), json);
 
@@ -213,7 +210,7 @@ public class AmbariClusterHostServiceTypeTest {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
-        when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
+        when(hostGroupService.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(Optional.of(hostGroup));
 
         underTest.updateHosts(stack.getId(), json);
 
@@ -236,7 +233,7 @@ public class AmbariClusterHostServiceTypeTest {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
-        when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
+        when(hostGroupService.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(Optional.of(hostGroup));
 
         underTest.updateHosts(stack.getId(), json);
 
@@ -258,7 +255,7 @@ public class AmbariClusterHostServiceTypeTest {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
-        when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
+        when(hostGroupService.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(Optional.of(hostGroup));
 
         underTest.updateHosts(stack.getId(), json);
 

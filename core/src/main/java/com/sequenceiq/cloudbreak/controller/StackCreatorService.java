@@ -285,10 +285,9 @@ public class StackCreatorService {
     }
 
     private void ensureStackDoesNotExists(String stackName, Workspace workspace) {
-        Stack stack = stackService.findStackByNameAndWorkspaceId(stackName, workspace.getId());
-        if (stack != null) {
+        stackService.findStackByNameAndWorkspaceId(stackName, workspace.getId()).ifPresent(stack -> {
             throw new BadRequestException("Cluster already exists: " + stackName);
-        }
+        });
     }
 
     private ClusterDefinition determineClusterDefinition(StackV4Request stackRequest, Workspace workspace) {
@@ -325,4 +324,5 @@ public class StackCreatorService {
             }
         }).orElse(null);
     }
+
 }

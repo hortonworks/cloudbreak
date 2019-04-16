@@ -12,6 +12,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -62,7 +64,7 @@ public class SharedServiceValidatorTest {
     @Test
     public void testWithValidRequest() {
         StackV4Request stackRequest = getStackV4Request(CloudPlatform.GCP, LDAP_NAME);
-        when(stackViewService.findByName(eq(DATALAKE_NAME), anyLong())).thenReturn(getStackView());
+        when(stackViewService.findByName(eq(DATALAKE_NAME), anyLong())).thenReturn(Optional.ofNullable(getStackView()));
         when(rdsConfigService.getByNameForWorkspace(eq(RANGER_DB_NAME), any())).thenReturn(getDatabase(RANGER_TYPE_STRING));
         when(rdsConfigService.getByNameForWorkspace(eq(HIVE_DB_NAME), any())).thenReturn(getDatabase(HIVE_TYPE_STRING));
         when(clusterDefinitionService.getByNameForWorkspaceId(anyString(), anyLong())).thenReturn(mock(ClusterDefinition.class));
@@ -76,7 +78,7 @@ public class SharedServiceValidatorTest {
     @Test
     public void testWithMissingHive() {
         StackV4Request stackRequest = getStackV4Request(CloudPlatform.GCP, LDAP_NAME);
-        when(stackViewService.findByName(eq(DATALAKE_NAME), anyLong())).thenReturn(getStackView());
+        when(stackViewService.findByName(eq(DATALAKE_NAME), anyLong())).thenReturn(Optional.ofNullable(getStackView()));
         when(rdsConfigService.getByNameForWorkspace(eq(RANGER_DB_NAME), any())).thenReturn(getDatabase(RANGER_TYPE_STRING));
         when(rdsConfigService.getByNameForWorkspace(eq(HIVE_DB_NAME), any())).thenReturn(null);
         when(clusterDefinitionService.getByNameForWorkspaceId(anyString(), anyLong())).thenReturn(mock(ClusterDefinition.class));
@@ -92,7 +94,7 @@ public class SharedServiceValidatorTest {
     @Test
     public void testWithMissingRangerAndWrongCloudPlatform() {
         StackV4Request stackRequest = getStackV4Request(CloudPlatform.AWS, LDAP_NAME);
-        when(stackViewService.findByName(eq(DATALAKE_NAME), anyLong())).thenReturn(getStackView());
+        when(stackViewService.findByName(eq(DATALAKE_NAME), anyLong())).thenReturn(Optional.ofNullable(getStackView()));
         when(rdsConfigService.getByNameForWorkspace(eq(HIVE_DB_NAME), any())).thenReturn(getDatabase(HIVE_TYPE_STRING));
         when(rdsConfigService.getByNameForWorkspace(eq(RANGER_DB_NAME), any())).thenReturn(null);
         when(clusterDefinitionService.getByNameForWorkspaceId(anyString(), anyLong())).thenReturn(mock(ClusterDefinition.class));
@@ -109,7 +111,7 @@ public class SharedServiceValidatorTest {
     @Test
     public void testWithMissingLdap() {
         StackV4Request stackRequest = getStackV4Request(CloudPlatform.GCP, null);
-        when(stackViewService.findByName(eq(DATALAKE_NAME), anyLong())).thenReturn(getStackView());
+        when(stackViewService.findByName(eq(DATALAKE_NAME), anyLong())).thenReturn(Optional.ofNullable(getStackView()));
         when(rdsConfigService.getByNameForWorkspace(eq(RANGER_DB_NAME), any())).thenReturn(getDatabase(RANGER_TYPE_STRING));
         when(rdsConfigService.getByNameForWorkspace(eq(HIVE_DB_NAME), any())).thenReturn(getDatabase(HIVE_TYPE_STRING));
         when(clusterDefinitionService.getByNameForWorkspaceId(anyString(), anyLong())).thenReturn(mock(ClusterDefinition.class));

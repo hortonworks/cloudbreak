@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
@@ -51,13 +52,13 @@ public class ClouderaManagerClusterDecomissionService implements ClusterDecomiss
     }
 
     @Override
-    public Set<String> collectDownscaleCandidates(HostGroup hostGroup, Integer scalingAdjustment, int defaultRootVolumeSize,
+    public Set<String> collectDownscaleCandidates(@Nonnull HostGroup hostGroup, Integer scalingAdjustment, int defaultRootVolumeSize,
             Set<InstanceMetaData> instanceMetaDatasInStack) {
         return Collections.emptySet();
     }
 
     @Override
-    public Map<String, HostMetadata> collectHostsToRemove(HostGroup hostGroup, Set<String> hostNames) {
+    public Map<String, HostMetadata> collectHostsToRemove(@Nonnull HostGroup hostGroup, Set<String> hostNames) {
         return Collections.emptyMap();
     }
 

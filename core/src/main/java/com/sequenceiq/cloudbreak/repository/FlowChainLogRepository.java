@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.Optional;
+
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
@@ -16,7 +18,7 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @DisableHasPermission
 public interface FlowChainLogRepository extends DisabledBaseRepository<FlowChainLog, Long> {
 
-    FlowChainLog findFirstByFlowChainIdOrderByCreatedDesc(String flowChainId);
+    Optional<FlowChainLog> findFirstByFlowChainIdOrderByCreatedDesc(String flowChainId);
 
     @Modifying
     @Query("DELETE FROM FlowChainLog fch WHERE fch.flowChainId NOT IN ( SELECT DISTINCT fl.flowChainId FROM FlowLog fl )")

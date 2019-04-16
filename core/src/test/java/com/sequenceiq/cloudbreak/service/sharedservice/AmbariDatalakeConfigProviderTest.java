@@ -21,9 +21,9 @@ import com.sequenceiq.cloudbreak.clusterdefinition.CentralClusterDefinitionParam
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ServiceDescriptor;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ServiceDescriptorDefinition;
-import com.sequenceiq.cloudbreak.repository.cluster.DatalakeResourcesRepository;
-import com.sequenceiq.cloudbreak.repository.cluster.ServiceDescriptorRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
+import com.sequenceiq.cloudbreak.service.servicedescriptor.ServiceDescriptorService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariDatalakeConfigProviderTest {
@@ -34,10 +34,10 @@ public class AmbariDatalakeConfigProviderTest {
     private CentralClusterDefinitionParameterQueryService centralClusterDefinitionParameterQueryService;
 
     @Mock
-    private DatalakeResourcesRepository datalakeResourcesRepository;
+    private DatalakeResourcesService datalakeResourcesService;
 
     @Mock
-    private ServiceDescriptorRepository serviceDescriptorRepository;
+    private ServiceDescriptorService serviceDescriptorService;
 
     @Mock
     private TransactionService transactionService;

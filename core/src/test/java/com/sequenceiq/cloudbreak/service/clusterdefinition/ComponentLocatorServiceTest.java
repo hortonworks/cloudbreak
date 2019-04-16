@@ -23,15 +23,15 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ComponentLocatorServiceTest {
@@ -46,7 +46,7 @@ public class ComponentLocatorServiceTest {
     private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
 
     @Mock
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @InjectMocks
     private ComponentLocatorService underTest;

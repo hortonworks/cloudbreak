@@ -29,9 +29,9 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
-import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -50,7 +50,7 @@ public class MountDisks {
     private ResourceAttributeUtil resourceAttributeUtil;
 
     @Inject
-    private ResourceRepository resourceRepository;
+    private ResourceService resourceService;
 
     @Inject
     private GatewayConfigService gatewayConfigService;
@@ -106,7 +106,7 @@ public class MountDisks {
     }
 
     private void persistUuidAndFstab(Stack stack, String instanceId, String uuids, String fstab) {
-        resourceRepository.saveAll(stack.getDiskResources().stream()
+        resourceService.saveAll(stack.getDiskResources().stream()
                 .filter(volumeSet -> instanceId.equals(volumeSet.getInstanceId()))
                 .peek(volumeSet -> resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class).ifPresent(volumeSetAttributes -> {
                     volumeSetAttributes.setUuids(uuids);

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -46,12 +48,12 @@ public class SharedServiceValidator {
     }
 
     private void checkCloudPlatform(StackV4Request request, Long workspaceId, ValidationResultBuilder resultBuilder) {
-        StackView datalakeStack = stackViewService.findByName(request.getSharedService().getDatalakeName(), workspaceId);
-        if (datalakeStack == null) {
+        Optional<StackView> datalakeStack = stackViewService.findByName(request.getSharedService().getDatalakeName(), workspaceId);
+        if (datalakeStack.isEmpty()) {
             resultBuilder.error("Datalake stack with the requested name (in sharedService/sharedClusterName field) was not found.");
         } else {
             CloudPlatform requestedCloudPlatform = request.getCloudPlatform();
-            String datalakeCloudPlatform = datalakeStack.cloudPlatform();
+            String datalakeCloudPlatform = datalakeStack.get().cloudPlatform();
             if (!datalakeCloudPlatform.equals(requestedCloudPlatform.name())) {
                 resultBuilder.error(String.format("Requested cloud platform [%s] does not match with the datalake"
                         + " cluser's cloud platform [%s].", requestedCloudPlatform, datalakeCloudPlatform));

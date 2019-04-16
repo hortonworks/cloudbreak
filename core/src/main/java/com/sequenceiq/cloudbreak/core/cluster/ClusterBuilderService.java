@@ -21,8 +21,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
@@ -31,7 +29,9 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterCreationSuccessHandler;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 import com.sequenceiq.cloudbreak.service.sharedservice.AmbariDatalakeConfigProvider;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
@@ -66,13 +66,13 @@ public class ClusterBuilderService {
     private HostGroupService hostGroupService;
 
     @Inject
-    private InstanceMetaDataRepository instanceMetadataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private RecipeEngine recipeEngine;
 
     @Inject
-    private HostMetadataRepository hostMetadataRepository;
+    private HostMetadataService hostMetadataService;
 
     public void startCluster(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithTransaction(stackId);
@@ -88,7 +88,7 @@ public class ClusterBuilderService {
         Cluster cluster = stack.getCluster();
         clusterService.updateCreationDateOnCluster(cluster);
         TemplatePreparationObject templatePreparationObject = conversionService.convert(stack, TemplatePreparationObject.class);
-        Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
+        Set<HostMetadata> hostsInCluster = hostMetadataService.findHostsInCluster(cluster.getId());
         Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup = loadInstanceMetadataForHostGroups(hostGroups);
         recipeEngine.executePostAmbariStartRecipes(stack, instanceMetaDataByHostGroup.keySet());
         String clusterDefinitionText = cluster.getClusterDefinition().getClusterDefinitionText();
@@ -114,7 +114,7 @@ public class ClusterBuilderService {
         Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup = new HashMap<>();
         for (HostGroup hostGroup : hostGroups) {
             Long instanceGroupId = hostGroup.getConstraint().getInstanceGroup().getId();
-            List<InstanceMetaData> metas = instanceMetadataRepository.findAliveInstancesInInstanceGroup(instanceGroupId);
+            List<InstanceMetaData> metas = instanceMetaDataService.findAliveInstancesInInstanceGroup(instanceGroupId);
             instanceMetaDataByHostGroup.put(hostGroup, metas);
         }
         return instanceMetaDataByHostGroup;

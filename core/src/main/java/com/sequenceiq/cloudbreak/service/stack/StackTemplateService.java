@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
@@ -20,7 +22,7 @@ public class StackTemplateService extends AbstractWorkspaceAwareResourceService<
     @Inject
     private ClusterService clusterService;
 
-    public Stack getByIdWithLists(Long id) {
+    public Optional<Stack> getByIdWithLists(Long id) {
         return stackRepository.findTemplateWithLists(id);
     }
 
@@ -43,4 +45,5 @@ public class StackTemplateService extends AbstractWorkspaceAwareResourceService<
     public WorkspaceResource resource() {
         return WorkspaceResource.STACK;
     }
+
 }

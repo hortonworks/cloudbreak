@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ClusterContainerRunner;
@@ -30,13 +31,12 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -75,10 +75,7 @@ public class ClusterUpscaleService {
     private ClusterServiceRunner clusterServiceRunner;
 
     @Inject
-    private InstanceMetaDataRepository instanceMetadataRepository;
-
-    @Inject
-    private HostMetadataRepository hostMetadataRepository;
+    private HostMetadataService hostMetadataService;
 
     public void upscaleClusterManager(Long stackId, String hostGroupName, Integer scalingAdjustment, boolean primaryGatewayChanged) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
@@ -115,14 +112,15 @@ public class ClusterUpscaleService {
         }
         instanceMetaDataService.updateInstanceStatus(stack.getInstanceGroups(), InstanceStatus.UNREGISTERED, allHosts);
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
-        Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
+        Set<HostMetadata> hostsInCluster = hostMetadataService.findHostsInCluster(stack.getCluster().getId());
         connector.waitForHosts(stackService.getByIdWithListsInTransaction(stackId), hostsInCluster);
     }
 
     public void uploadRecipesOnNewHosts(Long stackId, String hostGroupName) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         LOGGER.debug("Start executing pre recipes");
-        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
+        HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(), hostGroupName)
+                .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
         Set<HostGroup> hostGroups = hostGroupService.getByCluster(stack.getCluster().getId());
         recipeEngine.uploadUpscaleRecipes(stack, hostGroup, hostGroups);
     }
@@ -130,10 +128,11 @@ public class ClusterUpscaleService {
     public void installServicesOnNewHosts(Long stackId, String hostGroupName) throws CloudbreakException {
         Stack stack = stackService.getByIdWithClusterInTransaction(stackId);
         LOGGER.debug("Start installing Ambari services");
-        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
+        HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(), hostGroupName)
+                .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
         Set<HostMetadata> hostMetadata = hostGroupService.findEmptyHostMetadataInHostGroup(hostGroup.getId());
         Long instanceGroupId = hostGroup.getConstraint().getInstanceGroup().getId();
-        List<InstanceMetaData> metas = instanceMetadataRepository.findAliveInstancesInInstanceGroup(instanceGroupId);
+        List<InstanceMetaData> metas = instanceMetaDataService.findAliveInstancesInInstanceGroup(instanceGroupId);
         recipeEngine.executePostAmbariStartRecipes(stack, Sets.newHashSet(hostGroup));
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
         connector.upscaleCluster(hostGroup, hostMetadata, metas);

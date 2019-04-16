@@ -27,8 +27,8 @@ import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
+import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.util.FixedSizePreloadCache;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
@@ -36,10 +36,10 @@ import com.sequenceiq.cloudbreak.util.PasswordUtil;
 public class TlsSecurityService {
 
     @Inject
-    private SecurityConfigRepository securityConfigRepository;
+    private SecurityConfigService securityConfigService;
 
     @Inject
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Value("${cb.security.keypair.cache.size:10}")
     private int keyPairCacheSize;
@@ -97,7 +97,7 @@ public class TlsSecurityService {
 
     public GatewayConfig buildGatewayConfig(Long stackId, InstanceMetaData gatewayInstance, Integer gatewayPort,
             SaltClientConfig saltClientConfig, Boolean knoxGatewayEnabled) {
-        SecurityConfig securityConfig = securityConfigRepository.findOneByStackId(stackId);
+        SecurityConfig securityConfig = getSecurityConfigByStackIdOrThrowNotFound(stackId);
         String connectionIp = getGatewayIp(securityConfig, gatewayInstance);
         HttpClientConfig conf = buildTLSClientConfig(stackId, connectionIp, gatewayInstance);
         SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
@@ -118,28 +118,32 @@ public class TlsSecurityService {
     }
 
     public HttpClientConfig buildTLSClientConfigForPrimaryGateway(Long stackId, String apiAddress) {
-        InstanceMetaData primaryGateway = instanceMetaDataRepository.getPrimaryGatewayInstanceMetadata(stackId);
+        InstanceMetaData primaryGateway = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(stackId).orElse(null);
         return buildTLSClientConfig(stackId, apiAddress, primaryGateway);
     }
 
     public HttpClientConfig buildTLSClientConfig(Long stackId, String apiAddress, InstanceMetaData gateway) {
-        SecurityConfig securityConfig = securityConfigRepository.findOneByStackId(stackId);
-        if (securityConfig == null) {
+        Optional<SecurityConfig> securityConfig = securityConfigService.findOneByStackId(stackId);
+        if (securityConfig.isEmpty()) {
             return new HttpClientConfig(apiAddress);
         } else {
             String serverCert = gateway == null ? null : gateway.getServerCert() == null ? null : new String(decodeBase64(gateway.getServerCert()));
-            String clientCertB64 = securityConfig.getClientCert();
-            String clientKeyB64 = securityConfig.getClientKey();
+            String clientCertB64 = securityConfig.get().getClientCert();
+            String clientKeyB64 = securityConfig.get().getClientKey();
             return new HttpClientConfig(apiAddress, serverCert,
                     new String(decodeBase64(clientCertB64)), new String(decodeBase64(clientKeyB64)));
         }
     }
 
     public CertificateV4Response getCertificates(Long stackId) {
-        SecurityConfig securityConfig = Optional.ofNullable(securityConfigRepository.findOneByStackId(stackId))
-                .orElseThrow(() -> new NotFoundException("Security config doesn't exist."));
-        String serverCert = Optional.ofNullable(instanceMetaDataRepository.getServerCertByStackId(stackId))
+        SecurityConfig securityConfig = getSecurityConfigByStackIdOrThrowNotFound(stackId);
+        String serverCert = instanceMetaDataService.getServerCertByStackId(stackId)
                 .orElseThrow(() -> new NotFoundException("Server certificate was not found."));
         return new CertificateV4Response(serverCert, securityConfig.getClientKeySecret(), securityConfig.getClientCertSecret());
     }
+
+    private SecurityConfig getSecurityConfigByStackIdOrThrowNotFound(Long stackId) {
+        return securityConfigService.findOneByStackId(stackId).orElseThrow(() -> new NotFoundException("Security config doesn't exist."));
+    }
+
 }

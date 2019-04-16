@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.structuredevent.event.InstanceGroupDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 
@@ -30,7 +30,7 @@ public class StackToStackDetailsConverter extends AbstractConversionServiceAware
     private static final Logger LOGGER = LoggerFactory.getLogger(StackToStackDetailsConverter.class);
 
     @Inject
-    private ComponentConfigProvider componentConfigProvider;
+    private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
     private ConverterUtil converterUtil;
@@ -58,24 +58,24 @@ public class StackToStackDetailsConverter extends AbstractConversionServiceAware
 
     private void convertComponents(StackDetails stackDetails, Stack stack) {
         Long stackId = stack.getId();
-        CloudbreakDetails cloudbreakDetails = componentConfigProvider.getCloudbreakDetails(stackId);
+        CloudbreakDetails cloudbreakDetails = componentConfigProviderService.getCloudbreakDetails(stackId);
         if (cloudbreakDetails != null) {
             stackDetails.setCloudbreakVersion(cloudbreakDetails.getVersion());
         }
         try {
-            Image image = componentConfigProvider.getImage(stackId);
+            Image image = componentConfigProviderService.getImage(stackId);
             stackDetails.setImageIdentifier(image.getImageName());
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.warn("Image not found! {}", e.getMessage());
         }
-        AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(stackId);
+        AmbariRepo ambariRepo = componentConfigProviderService.getAmbariRepo(stackId);
         if (ambariRepo != null) {
             stackDetails.setPrewarmedImage(ambariRepo.getPredefined());
             stackDetails.setAmbariVersion(ambariRepo.getVersion());
         } else {
             stackDetails.setPrewarmedImage(Boolean.FALSE);
         }
-        StackRepoDetails stackRepoDetails = componentConfigProvider.getHDPRepo(stackId);
+        StackRepoDetails stackRepoDetails = componentConfigProviderService.getHDPRepo(stackId);
         if (stackRepoDetails != null) {
             stackDetails.setClusterType(stackRepoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG));
             stackDetails.setClusterVersion(stackRepoDetails.getHdpVersion());

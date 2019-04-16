@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.stack.repair;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -13,8 +14,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 
 @Component
 public class CandidateUnhealthyInstanceSelector {
@@ -25,7 +26,7 @@ public class CandidateUnhealthyInstanceSelector {
     private ClusterService clusterService;
 
     @Inject
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     public Set<InstanceMetaData> selectCandidateUnhealthyInstances(long stackId) {
         Map<String, String> hostStatuses = clusterService.getHostStatuses(stackId);
@@ -34,7 +35,9 @@ public class CandidateUnhealthyInstanceSelector {
                 .filter(entry -> isUnhealthyStatus(entry.getValue()))
                 .map(Map.Entry::getKey)
                 .filter(Objects::nonNull)
-                .map(hostName -> instanceMetaDataRepository.findHostInStack(stackId, hostName))
+                .map(hostName -> instanceMetaDataService.findHostInStack(stackId, hostName))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .filter(CandidateUnhealthyInstanceSelector::isAWorker)
                 .collect(Collectors.toSet());
         LOGGER.debug("Candidate Unhealthy Instances: {}", candidateUnhealthyInstances);
