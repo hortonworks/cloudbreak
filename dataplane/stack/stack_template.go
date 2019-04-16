@@ -34,13 +34,13 @@ var maxCardinality = map[string]int{
 	"ALL": 3,
 }
 
-var getClusterDefinitionClient = func(server, refreshToken string) clusterdefinition.GetClusterDefinitionInWorkspace {
-	cbClient := oauth.NewCloudbreakHTTPClient(server, refreshToken)
+var getClusterDefinitionClient = func(server, apiKeyID, privateKey string) clusterdefinition.GetClusterDefinitionInWorkspace {
+	cbClient := oauth.NewCloudbreakHTTPClient(server, apiKeyID, privateKey)
 	return cbClient.Cloudbreak.V4WorkspaceIDClusterDefinitions
 }
 
-var stackClient = func(server, refreshToken string) getStackInWorkspace {
-	cbClient := oauth.NewCloudbreakHTTPClient(server, refreshToken)
+var stackClient = func(server, apiKeyID, privateKey string) getStackInWorkspace {
+	cbClient := oauth.NewCloudbreakHTTPClient(server, apiKeyID, privateKey)
 	return cbClient.Cloudbreak.V4WorkspaceIDStacks
 }
 
@@ -122,7 +122,7 @@ func getStringPointer(skippedFields map[string]bool, fieldName string, defaultVa
 	return &defaultValue
 }
 
-func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string) string, boolFinder func(string) bool, int64Finder func(string) int64, getClusterDefinitionClient func(string, string) clusterdefinition.GetClusterDefinitionInWorkspace, storageType cloud.CloudStorageType) *model.StackV4Request {
+func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string) string, boolFinder func(string) bool, int64Finder func(string) int64, getClusterDefinitionClient func(string, string, string) clusterdefinition.GetClusterDefinitionInWorkspace, storageType cloud.CloudStorageType) *model.StackV4Request {
 	provider := cloud.GetProvider()
 	skippedFields := provider.SkippedFields()
 
@@ -151,7 +151,7 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 	nodes := defaultNodes
 	if bpName := stringFinder(fl.FlClusterDefinitionNameOptional.Name); len(bpName) != 0 {
 		workspace := int64Finder(fl.FlWorkspaceOptional.Name)
-		bpResp := clusterdefinition.FetchClusterDefinition(workspace, bpName, getClusterDefinitionClient(stringFinder(fl.FlServerOptional.Name), stringFinder(fl.FlRefreshTokenOptional.Name)))
+		bpResp := clusterdefinition.FetchClusterDefinition(workspace, bpName, getClusterDefinitionClient(stringFinder(fl.FlServerOptional.Name), stringFinder(fl.FlApiKeyIDOptional.Name), stringFinder(fl.FlPrivateKeyOptional.Name)))
 		bp, err := base64.StdEncoding.DecodeString(bpResp.ClusterDefinition)
 		if err != nil {
 			commonUtils.LogErrorAndExit(err)
@@ -171,7 +171,7 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 }
 
 func generateAttachedTemplateImpl(stringFinder func(string) string, boolFinder func(string) bool, int64Finder func(string) int64, storageType cloud.CloudStorageType) error {
-	datalake := fetchStack(int64Finder(fl.FlWorkspaceOptional.Name), stringFinder(fl.FlWithSourceCluster.Name), stackClient(stringFinder(fl.FlServerOptional.Name), stringFinder(fl.FlRefreshTokenOptional.Name)))
+	datalake := fetchStack(int64Finder(fl.FlWorkspaceOptional.Name), stringFinder(fl.FlWithSourceCluster.Name), stackClient(stringFinder(fl.FlServerOptional.Name), stringFinder(fl.FlApiKeyIDOptional.Name), stringFinder(fl.FlPrivateKeyOptional.Name)))
 	isSharedServiceReady, _ := datalake.Cluster.ClusterDefinition.Tags["shared_services_ready"].(bool)
 	if !isSharedServiceReady {
 		commonUtils.LogErrorMessageAndExit("The source cluster must be a datalake")

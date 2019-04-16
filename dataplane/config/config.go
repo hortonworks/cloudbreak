@@ -11,9 +11,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/dataplane/common"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
-	u "github.com/hortonworks/cb-cli/dataplane/utils"
 	ws "github.com/hortonworks/cb-cli/dataplane/workspace"
-	"github.com/hortonworks/dp-cli-common/caasauth"
 	"github.com/hortonworks/dp-cli-common/utils"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/urfave/cli"
@@ -25,6 +23,8 @@ type Config struct {
 	Workspace    string `json:"workspace,omitempty" yaml:"workspace,omitempty"`
 	Output       string `json:"output,omitempty" yaml:"output,omitempty"`
 	RefreshToken string `json:"refreshtoken,omitempty" yaml:"refreshtoken,omitempty"`
+	ApiKeyID     string `json:"apikeyid" yaml:"apikeyid"`
+	PrivateKey   string `json:"privatekey" yaml:"privatekey"`
 }
 
 type ConfigList map[string]Config
@@ -48,8 +48,9 @@ func CheckConfigAndCommandFlags(c *cli.Context) error {
 	err := fl.CheckRequiredFlagsAndArguments(c)
 	if err == nil {
 		resp := configRead(c)
+		validateContext(c, []fl.StringFlag{fl.FlServerOptional, fl.FlApiKeyIDOptional, fl.FlPrivateKeyOptional})
 		setWorkspaceInContext(c)
-		validateContext(c, []fl.StringFlag{fl.FlServerOptional, fl.FlWorkspaceOptional})
+		validateContext(c, []fl.StringFlag{fl.FlWorkspaceOptional})
 		return resp
 	}
 	return err
@@ -59,7 +60,7 @@ func CheckConfigAndCommandFlagsWithoutWorkspace(c *cli.Context) error {
 	err := fl.CheckRequiredFlagsAndArguments(c)
 	if err == nil {
 		resp := configRead(c)
-		validateContext(c, []fl.StringFlag{fl.FlServerOptional})
+		validateContext(c, []fl.StringFlag{fl.FlServerOptional, fl.FlApiKeyIDOptional, fl.FlPrivateKeyOptional})
 		return resp
 	}
 	return err
@@ -125,7 +126,8 @@ func configRead(c *cli.Context) error {
 	server := c.String(fl.FlServerOptional.Name)
 	output := c.String(fl.FlOutputOptional.Name)
 	profile := c.String(fl.FlProfileOptional.Name)
-	refreshToken := c.String(fl.FlRefreshTokenOptional.Name)
+	apiKeyID := c.String(fl.FlApiKeyIDOptional.Name)
+	privateKey := c.String(fl.FlPrivateKeyOptional.Name)
 
 	if len(profile) == 0 {
 		profile = "default"
@@ -149,25 +151,18 @@ func configRead(c *cli.Context) error {
 	if len(server) == 0 {
 		set(fl.FlServerOptional.Name, config.Server)
 	}
-	if len(refreshToken) == 0 {
-		if len(config.RefreshToken) == 0 {
-			address := c.String(fl.FlServerOptional.Name)
-			u.CheckServerAddress(address)
-			token := caasauth.NewRefreshToken(address)
-			err = WriteConfigToFile(GetHomeDirectory(), config.Server, config.Output, profile, config.Workspace, token)
-			if err != nil {
-				utils.LogErrorAndExit(err)
-			}
-			set(fl.FlRefreshTokenOptional.Name, token)
-		} else {
-			set(fl.FlRefreshTokenOptional.Name, config.RefreshToken)
-		}
+	if len(apiKeyID) == 0 {
+		set(fl.FlApiKeyIDOptional.Name, config.ApiKeyID)
 	}
+	if len(privateKey) == 0 {
+		set(fl.FlPrivateKeyOptional.Name, config.PrivateKey)
+	}
+
 	return nil
 }
 
 func PrintConfig(cfg Config) {
-	cfg.RefreshToken = "*"
+	cfg.PrivateKey = "*"
 	log.Infof("[CheckConfigAndCommandFlags] Config read from file, setting as global variable:\n%s", cfg.Yaml())
 }
 
@@ -202,7 +197,7 @@ func ReadConfig(baseDir string, profile string) (*Config, error) {
 	}
 }
 
-func WriteConfigToFile(baseDir, server, output, profile, workspace, token string) error {
+func WriteConfigToFile(baseDir, server, output, profile, workspace, apiKeyID, privateKey string) error {
 	configDir := baseDir + "/" + common.Config_dir
 	configFile := configDir + "/" + common.Config_file
 	if len(profile) == 0 {
@@ -228,9 +223,11 @@ func WriteConfigToFile(baseDir, server, output, profile, workspace, token string
 		}
 	}
 
-	configList[profile] = Config{Server: server,
-		Output:       output,
-		RefreshToken: token,
+	configList[profile] = Config{
+		Server:     server,
+		Output:     output,
+		ApiKeyID:   apiKeyID,
+		PrivateKey: privateKey,
 	}
 
 	// in the case the token is empty and command is of type caas we don't want to overide workspace value

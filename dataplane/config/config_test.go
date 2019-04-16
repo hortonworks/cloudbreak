@@ -16,7 +16,7 @@ func TestWriteConfigToFileDirExists(t *testing.T) {
 	defer os.RemoveAll(tempDirName)
 	os.MkdirAll(tempDirName+string(filepath.Separator)+common.Config_dir, 0700)
 
-	WriteConfigToFile(tempDirName, "server", "output", "default", "workspace", "refreshtoken")
+	WriteConfigToFile(tempDirName, "server", "output", "default", "workspace", "apikeyid", "privatekey")
 
 	validateConfigContent(tempDirName, t)
 }
@@ -27,7 +27,7 @@ func TestWriteConfigToFileDirNotExists(t *testing.T) {
 	tempDirName, _ := ioutil.TempDir("", "configwritetest")
 	defer os.RemoveAll(tempDirName)
 
-	WriteConfigToFile(tempDirName, "server", "output", "default", "workspace", "refreshtoken")
+	WriteConfigToFile(tempDirName, "server", "output", "default", "workspace", "apikeyid", "privatekey")
 
 	validateConfigContent(tempDirName, t)
 }
@@ -35,7 +35,7 @@ func TestWriteConfigToFileDirNotExists(t *testing.T) {
 func validateConfigContent(tempDirName string, t *testing.T) {
 	content, _ := ioutil.ReadFile(tempDirName + string(filepath.Separator) + common.Config_dir + string(filepath.Separator) + common.Config_file)
 
-	expected := "default:\n  server: server\n  workspace: workspace\n  output: output\n  refreshtoken: refreshtoken\n"
+	expected := "default:\n  server: server\n  workspace: workspace\n  output: output\n  apikeyid: apikeyid\n  privatekey: privatekey\n"
 	if string(content) != expected {
 		t.Errorf("content not match %s == %s", expected, string(content))
 	}

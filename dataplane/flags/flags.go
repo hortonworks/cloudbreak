@@ -1034,13 +1034,6 @@ var (
 			Usage: "latitude of the environment's location. must be specified if the location is made-up and not supported on the cloud provider",
 		},
 	}
-	FlRefreshTokenOptional = StringFlag{
-		RequiredFlag: OPTIONAL,
-		StringFlag: cli.StringFlag{
-			Name:  "refreshtoken",
-			Usage: "caas refresh token",
-		},
-	}
 	FlRangerAdminPasswordOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
@@ -1188,6 +1181,21 @@ var (
 			Usage: "shows the internal commands as well",
 		},
 	}
+
+	FlApiKeyIDOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "apikeyid",
+			Usage: "API key ID",
+		},
+	}
+	FlPrivateKeyOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "privatekey",
+			Usage: "API private key",
+		},
+	}
 )
 
 type RequiredFlag struct {
@@ -1330,14 +1338,14 @@ func (fb *FlagBuilder) AddFlags(flags ...cli.Flag) *FlagBuilder {
 }
 
 func (fb *FlagBuilder) AddAuthenticationFlags() *FlagBuilder {
-	for _, f := range []cli.Flag{FlServerOptional, FlWorkspaceOptional, FlProfileOptional, FlRefreshTokenOptional} {
+	for _, f := range []cli.Flag{FlServerOptional, FlWorkspaceOptional, FlProfileOptional, FlApiKeyIDOptional, FlPrivateKeyOptional} {
 		fb.flags = append(fb.flags, f)
 	}
 	return fb
 }
 
 func (fb *FlagBuilder) AddAuthenticationFlagsWithoutWorkspace() *FlagBuilder {
-	for _, f := range []cli.Flag{FlServerOptional, FlProfileOptional, FlRefreshTokenOptional} {
+	for _, f := range []cli.Flag{FlServerOptional, FlProfileOptional, FlApiKeyIDOptional, FlPrivateKeyOptional} {
 		fb.flags = append(fb.flags, f)
 	}
 	return fb
