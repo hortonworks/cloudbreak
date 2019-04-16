@@ -98,7 +98,7 @@ RSpec.describe 'Custer operation test cases', :type => :aruba do
     end
   end
 
-  it "Downscale cluster" do
+  xit "Downscale cluster - CB-1050" do
     scale(cb, @os_cluster_name, "compute", -1) do 
       result = wait_for_status_cluster(cb, @os_cluster_name, "UPDATE_IN_PROGRESS")
       expect(result).to eq("UPDATE_IN_PROGRESS")
