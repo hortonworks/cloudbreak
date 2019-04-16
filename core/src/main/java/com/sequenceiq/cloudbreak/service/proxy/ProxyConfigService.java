@@ -53,7 +53,4 @@ public class ProxyConfigService extends AbstractEnvironmentAwareService<ProxyCon
         return WorkspaceResource.PROXY;
     }
 
-    @Override
-    protected void prepareCreation(ProxyConfig resource) {
-    }
 }

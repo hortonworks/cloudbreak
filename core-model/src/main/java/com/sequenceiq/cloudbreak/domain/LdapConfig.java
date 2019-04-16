@@ -22,6 +22,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Where;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
@@ -30,8 +32,9 @@ import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 
 @Entity
+@Where(clause = "archived = false")
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
-public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource {
+public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource, ArchivableResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "ldapconfig_generator")
@@ -95,6 +98,10 @@ public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource {
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(name = "env_ldap", joinColumns = @JoinColumn(name = "ldapid"), inverseJoinColumns = @JoinColumn(name = "envid"))
     private Set<EnvironmentView> environments = new HashSet<>();
+
+    private boolean archived;
+
+    private Long deletionTimestamp = -1L;
 
     public LdapConfig copyWithoutWorkspace() {
         LdapConfig copy = new LdapConfig();
@@ -330,4 +337,26 @@ public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource {
         return Objects.hash(id);
     }
 
+    @Override
+    public void setDeletionTimestamp(Long timestampMillisecs) {
+        deletionTimestamp = timestampMillisecs;
+    }
+
+    @Override
+    public void setArchived(boolean archived) {
+        this.archived = archived;
+    }
+
+    public boolean isArchived() {
+        return archived;
+    }
+
+    public Long getDeletionTimestamp() {
+        return deletionTimestamp;
+    }
+
+    @Override
+    public void unsetRelationsToEntitiesToBeDeleted() {
+
+    }
 }

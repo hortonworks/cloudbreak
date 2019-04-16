@@ -59,10 +59,6 @@ public class LdapConfigService extends AbstractEnvironmentAwareService<LdapConfi
         return WorkspaceResource.LDAP;
     }
 
-    @Override
-    protected void prepareCreation(LdapConfig resource) {
-    }
-
     public String testConnection(Long workspaceId, String existingName, LdapMinimalV4Request existingLdapConfig) {
         if (existingName == null && existingLdapConfig == null) {
             throw new BadRequestException("Either an existing resource 'name' or an LDAP 'validationRequest' needs to be specified in the request. ");

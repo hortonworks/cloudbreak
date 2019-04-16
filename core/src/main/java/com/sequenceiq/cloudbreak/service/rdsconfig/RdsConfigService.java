@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.n
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -30,7 +31,6 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecution
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.AbstractEnvironmentAwareService;
-import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
 public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig> {
@@ -115,13 +115,10 @@ public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig>
     }
 
     public void deleteDefaultRdsConfigs(Set<RDSConfig> rdsConfigs) {
-        rdsConfigs.stream().filter(rdsConfig -> ResourceStatus.DEFAULT == rdsConfig.getStatus()).forEach(this::setStatusToDeleted);
-    }
-
-    private void setStatusToDeleted(RDSConfig rdsConfig) {
-        rdsConfig.setName(NameUtil.postfixWithTimestamp(rdsConfig.getName()));
-        rdsConfig.setStatus(ResourceStatus.DEFAULT_DELETED);
-        rdsConfigRepository.save(rdsConfig);
+        delete(rdsConfigs.stream()
+                .filter(rdsConfig -> ResourceStatus.DEFAULT == rdsConfig.getStatus())
+                .collect(Collectors.toSet())
+        );
     }
 
     public Set<RDSConfig> findAllByWorkspaceId(Long workspaceId) {
@@ -146,19 +143,6 @@ public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig>
     @Override
     public WorkspaceResource resource() {
         return WorkspaceResource.DATABASE;
-    }
-
-    @Override
-    protected void prepareDeletion(RDSConfig rdsConfig) {
-        checkClustersForDeletion(rdsConfig);
-        if (!ResourceStatus.USER_MANAGED.equals(rdsConfig.getStatus())) {
-            setStatusToDeleted(rdsConfig);
-            throw new BadRequestException(String.format("RDS config '%s' is not user managed", rdsConfig.getName()));
-        }
-    }
-
-    @Override
-    protected void prepareCreation(RDSConfig resource) {
     }
 
     public String testRdsConnection(Long workspaceId, String existingRDSConfigName, RDSConfig existingRds) {

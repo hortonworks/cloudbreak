@@ -20,6 +20,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Where;
+
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
@@ -27,8 +29,9 @@ import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 
 @Entity
+@Where(clause = "archived = false")
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
-public class ProxyConfig implements ProvisionEntity, EnvironmentAwareResource {
+public class ProxyConfig implements ProvisionEntity, EnvironmentAwareResource, ArchivableResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "proxyconfig_generator")
@@ -64,6 +67,10 @@ public class ProxyConfig implements ProvisionEntity, EnvironmentAwareResource {
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(name = "env_proxy", joinColumns = @JoinColumn(name = "proxyid"), inverseJoinColumns = @JoinColumn(name = "envid"))
     private Set<EnvironmentView> environments = new HashSet<>();
+
+    private boolean archived;
+
+    private Long deletionTimestamp = -1L;
 
     public Long getId() {
         return id;
@@ -176,5 +183,28 @@ public class ProxyConfig implements ProvisionEntity, EnvironmentAwareResource {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    @Override
+    public void setDeletionTimestamp(Long timestampMillisecs) {
+        deletionTimestamp = timestampMillisecs;
+    }
+
+    @Override
+    public void setArchived(boolean archived) {
+        this.archived = archived;
+    }
+
+    public boolean isArchived() {
+        return archived;
+    }
+
+    public Long getDeletionTimestamp() {
+        return deletionTimestamp;
+    }
+
+    @Override
+    public void unsetRelationsToEntitiesToBeDeleted() {
+
     }
 }

@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
+import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
@@ -86,6 +87,9 @@ public class LdapConfigServiceTest {
 
     @Mock
     private LdapConfigValidator ldapConfigValidator;
+
+    @Mock
+    private Clock clock;
 
     @Spy
     private ResourceDetachValidator resourceDetachValidator = new ResourceDetachValidator();
@@ -205,7 +209,8 @@ public class LdapConfigServiceTest {
 
         underTest.deleteByNameFromWorkspace(ldapConfig.getName(), WORKSPACE_ID);
 
-        verify(ldapConfigRepository, times(1)).delete(ldapConfig);
+        verify(ldapConfigRepository, never()).delete(ldapConfig);
+        assertTrue(ldapConfig.isArchived());
     }
 
     @Test

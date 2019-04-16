@@ -59,33 +59,33 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     Set<Cluster> findByClusterDefinition(ClusterDefinition clusterDefinition);
 
     @CheckPermissionsByReturnValue
-    Set<Cluster> findByLdapConfig(LdapConfig ldapConfig);
+    Set<Cluster> findByLdapConfigAndStatusNot(LdapConfig ldapConfig, Status status);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT c FROM Cluster c WHERE c.environment.id = :environmentId AND c.ldapConfig = :ldapConfig")
+    @Query("SELECT c FROM Cluster c WHERE c.environment.id = :environmentId AND c.ldapConfig = :ldapConfig AND c.status != 'DELETE_COMPLETED'")
     Set<Cluster> findByLdapConfigAndEnvironment(@Param("ldapConfig") LdapConfig ldapConfig, @Param("environmentId") Long environmentId);
 
     @CheckPermissionsByReturnValue
-    Set<Cluster> findByProxyConfig(ProxyConfig proxyConfig);
+    Set<Cluster> findByProxyConfigAndStatusNot(ProxyConfig proxyConfig, Status status);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT c FROM Cluster c WHERE c.environment.id = :environmentId AND c.proxyConfig = :proxyConfig")
+    @Query("SELECT c FROM Cluster c WHERE c.environment.id = :environmentId AND c.proxyConfig = :proxyConfig AND c.status != 'DELETE_COMPLETED'")
     Set<Cluster> findByProxyConfigAndEnvironment(@Param("proxyConfig") ProxyConfig proxyConfig, @Param("environmentId") Long environmentId);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT c FROM Cluster c INNER JOIN c.rdsConfigs rc WHERE rc.id= :id")
+    @Query("SELECT c FROM Cluster c INNER JOIN c.rdsConfigs rc WHERE rc.id= :id AND c.status != 'DELETE_COMPLETED'")
     Set<Cluster> findByRdsConfig(@Param("id") Long rdsConfigId);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT c FROM Cluster c INNER JOIN c.rdsConfigs rc WHERE c.environment.id = :environmentId AND rc.id= :id")
+    @Query("SELECT c FROM Cluster c INNER JOIN c.rdsConfigs rc WHERE c.environment.id = :environmentId AND rc.id= :id AND c.status != 'DELETE_COMPLETED'")
     Set<Cluster> findByRdsConfigAndEnvironment(@Param("id") Long rdsConfigId, @Param("environmentId") Long environmentId);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT c FROM Cluster c INNER JOIN c.kerberosConfig kc WHERE kc.id= :id")
+    @Query("SELECT c FROM Cluster c INNER JOIN c.kerberosConfig kc WHERE kc.id= :id AND c.status != 'DELETE_COMPLETED'")
     Set<Cluster> findByKerberosConfig(@Param("id") Long kerberosConfigId);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT c FROM Cluster c INNER JOIN c.kerberosConfig kc WHERE c.environment.id = :environmentId AND kc.id= :id")
+    @Query("SELECT c FROM Cluster c INNER JOIN c.kerberosConfig kc WHERE c.environment.id = :environmentId AND kc.id= :id AND c.status != 'DELETE_COMPLETED'")
     Set<Cluster> findByKerberosConfigAndEnvironment(@Param("id") Long id, @Param("environmentId") Long environmentId);
 
     @CheckPermissionsByWorkspaceId
