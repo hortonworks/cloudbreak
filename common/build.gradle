@@ -1,0 +1,19 @@
+apply plugin: 'java'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url = "$repoUrl" }
+}
+
+jar {
+    baseName = 'common'
+    archiveName = 'common.jar'
+}
+
+dependencies {
+    compile group: 'org.springframework.boot',     name: 'spring-boot-starter',      version: springBootVersion
+
+    testCompile group: 'junit',                    name: 'junit',                    version: junitVersion
+    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
+}

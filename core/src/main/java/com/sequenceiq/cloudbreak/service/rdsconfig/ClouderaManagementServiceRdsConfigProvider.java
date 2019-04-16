@@ -7,17 +7,17 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 
 @Component
-public class ClouderaManagerRdsConfigProvider extends AbstractRdsConfigProvider {
+public class ClouderaManagementServiceRdsConfigProvider extends AbstractRdsConfigProvider {
 
-    private static final String PILLAR_KEY = "clouderamanager";
+    private static final String PILLAR_KEY = "cmmanagement";
 
-    @Value("${cb.clouderamanager.service.database.port:5432}")
+    @Value("${cb.clouderamanager.management.service.port:5432}")
     private String port;
 
-    @Value("${cb.clouderamanager.service.database.user:clouderamanager}")
+    @Value("${cb.clouderamanager.management.service.database.user:cmmanagement}")
     private String userName;
 
-    @Value("${cb.clouderamanager.service.database.db:clouderamanager}")
+    @Value("${cb.clouderamanager.management.service.database.db:cmmanagement}")
     private String db;
 
     @Override
@@ -42,7 +42,7 @@ public class ClouderaManagerRdsConfigProvider extends AbstractRdsConfigProvider 
 
     @Override
     protected DatabaseType getRdsType() {
-        return DatabaseType.CLOUDERA_MANAGER;
+        return DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE;
     }
 
     @Override
