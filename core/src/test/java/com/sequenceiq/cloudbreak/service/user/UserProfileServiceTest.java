@@ -9,6 +9,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -83,7 +85,7 @@ public class UserProfileServiceTest {
         foundProfile.setUser(user);
         foundProfile.setUserName(USERNAME);
 
-        when(userProfileRepository.findOneByUser(anyLong())).thenReturn(foundProfile);
+        when(userProfileRepository.findOneByUser(anyLong())).thenReturn(Optional.of(foundProfile));
         when(userProfileRepository.save(any(UserProfile.class))).thenReturn(new UserProfile());
 
         UserProfile returnedUserProfile = userProfileService.getOrCreate(user);

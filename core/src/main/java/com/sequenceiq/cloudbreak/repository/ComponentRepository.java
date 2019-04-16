@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.Optional;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -20,7 +21,7 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 public interface ComponentRepository extends DisabledBaseRepository<Component, Long> {
 
     @Query("SELECT cv FROM Component cv WHERE cv.stack.id = :stackId AND cv.componentType = :componentType AND cv.name = :name")
-    Component findComponentByStackIdComponentTypeName(@Param("stackId") Long stackId, @Param("componentType") ComponentType componentType,
+    Optional<Component> findComponentByStackIdComponentTypeName(@Param("stackId") Long stackId, @Param("componentType") ComponentType componentType,
         @Param("name") String name);
 
     @Query("SELECT cv FROM Component cv WHERE cv.stack.id = :stackId")

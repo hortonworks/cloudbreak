@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainHandler;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChains;
 import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.exception.FlowNotFoundException;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -183,7 +184,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     }
 
     public void restartFlow(String flowId) {
-        FlowLog flowLog = flowLogService.findFirstByFlowIdOrderByCreatedDesc(flowId);
+        FlowLog flowLog = flowLogService.findFirstByFlowIdOrderByCreatedDesc(flowId).orElseThrow(() -> new FlowNotFoundException(flowId));
         restartFlow(flowLog);
     }
 

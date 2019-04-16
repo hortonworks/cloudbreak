@@ -66,9 +66,6 @@ public class AmbariClusterServiceTest {
     private ClusterTerminationService clusterTerminationService;
 
     @Mock
-    private ClusterRepository clusterRepository;
-
-    @Mock
     private HostGroupService hostGroupService;
 
     @Mock
@@ -86,6 +83,9 @@ public class AmbariClusterServiceTest {
     @Mock
     private TransactionService transactionService;
 
+    @Mock
+    private ClusterRepository repository;
+
     @InjectMocks
     private ClusterService clusterService;
 
@@ -98,7 +98,7 @@ public class AmbariClusterServiceTest {
         Stack stack = new Stack();
         stack.setOrchestrator(new Orchestrator());
         stack.setCluster(cluster);
-        when(clusterRepository.findById(any(Long.class))).thenReturn(Optional.of(cluster));
+        when(clusterService.findById(any(Long.class))).thenReturn(Optional.of(cluster));
         when(stackService.getByIdWithListsInTransaction(any(Long.class))).thenReturn(stack);
         when(orchestratorTypeResolver.resolveType(nullable(Orchestrator.class))).thenReturn(OrchestratorType.HOST);
         when(orchestratorTypeResolver.resolveType(nullable(String.class))).thenReturn(OrchestratorType.HOST);

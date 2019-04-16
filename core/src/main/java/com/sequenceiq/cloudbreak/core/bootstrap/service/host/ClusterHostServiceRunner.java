@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -40,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.clusterdefinition.kerberos.KerberosDetailService;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
@@ -64,11 +66,9 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.repository.StackViewRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -79,7 +79,9 @@ import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.template.views.LdapView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
@@ -95,7 +97,7 @@ public class ClusterHostServiceRunner {
     private StackService stackService;
 
     @Inject
-    private StackViewRepository stackViewRepository;
+    private StackViewService stackViewService;
 
     @Inject
     private HostOrchestratorResolver hostOrchestratorResolver;
@@ -107,7 +109,7 @@ public class ClusterHostServiceRunner {
     private HostGroupService hostGroupService;
 
     @Inject
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
@@ -146,7 +148,7 @@ public class ClusterHostServiceRunner {
     private DefaultClouderaManagerRepoService clouderaManagerRepoService;
 
     @Inject
-    private ComponentConfigProvider componentConfigProvider;
+    private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
     private ClusterApiConnectors clusterApiConnectors;
@@ -154,7 +156,7 @@ public class ClusterHostServiceRunner {
     @Inject
     private GrpcUmsClient umsClient;
 
-    public void runClusterServices(Stack stack, Cluster cluster) {
+    public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster) {
         try {
             Set<Node> nodes = stackUtil.collectNodes(stack);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
@@ -353,7 +355,7 @@ public class ClusterHostServiceRunner {
     private void decoratePillarWithClouderaManagerRepo(Long stackId, Long clusterId, Map<String, SaltPillarProperties> servicePillar)
             throws CloudbreakOrchestratorFailedException {
         try {
-            String osType = componentConfigProvider.getImage(stackId).getOsType();
+            String osType = componentConfigProviderService.getImage(stackId).getOsType();
             ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(clusterId);
 
             servicePillar.put("cloudera-manager-repo", new SaltPillarProperties("/cloudera-manager/repo.sls",
@@ -397,7 +399,7 @@ public class ClusterHostServiceRunner {
     private void saveDatalakeNameservers(Stack stack, Map<String, SaltPillarProperties> servicePillar) {
         Long datalakeResourceId = stack.getDatalakeResourceId();
         if (datalakeResourceId != null) {
-            Optional<DatalakeResources> datalakeResource = datalakeResourcesService.getDatalakeResourcesById(datalakeResourceId);
+            Optional<DatalakeResources> datalakeResource = datalakeResourcesService.findById(datalakeResourceId);
             if (datalakeResource.isPresent() && datalakeResource.get().getDatalakeStackId() != null) {
                 Long datalakeStackId = datalakeResource.get().getDatalakeStackId();
                 Stack dataLakeStack = stackService.getByIdWithListsInTransaction(datalakeStackId);
@@ -410,7 +412,7 @@ public class ClusterHostServiceRunner {
     }
 
     private StackView getStackView(Long datalakeId) {
-        return stackViewRepository.findById(datalakeId).orElseThrow(notFound("Stack view", datalakeId));
+        return stackViewService.findById(datalakeId).orElseThrow(notFound("Stack view", datalakeId));
     }
 
     private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Map<String, SaltPillarProperties> servicePillar,
@@ -506,11 +508,12 @@ public class ClusterHostServiceRunner {
     }
 
     private Map<String, String> collectUpscaleCandidates(Long clusterId, String hostGroupName, Integer adjustment) {
-        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(clusterId, hostGroupName);
+        HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(clusterId, hostGroupName)
+                .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
         if (hostGroup.getConstraint().getInstanceGroup() != null) {
             Long instanceGroupId = hostGroup.getConstraint().getInstanceGroup().getId();
             Map<String, String> hostNames = new HashMap<>();
-            instanceMetaDataRepository.findUnusedHostsInInstanceGroup(instanceGroupId).stream()
+            instanceMetaDataService.findUnusedHostsInInstanceGroup(instanceGroupId).stream()
                     .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                     .sorted(Comparator.comparing(InstanceMetaData::getStartDate))
                     .limit(adjustment.longValue())

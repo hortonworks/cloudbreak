@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
-import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
+import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
@@ -24,7 +24,7 @@ public class StackUpdater {
     private StatusToPollGroupConverter statusToPollGroupConverter;
 
     @Inject
-    private SecurityConfigRepository securityConfigRepository;
+    private SecurityConfigService securityConfigService;
 
     public Stack updateStackStatus(Long stackId, DetailedStackStatus detailedStatus) {
         return doUpdateStackStatus(stackId, detailedStatus, "");
@@ -35,7 +35,7 @@ public class StackUpdater {
     }
 
     public void updateStackSecurityConfig(Stack stack, SecurityConfig securityConfig) {
-        securityConfig = securityConfigRepository.save(securityConfig);
+        securityConfig = securityConfigService.save(securityConfig);
         stack.setSecurityConfig(securityConfig);
         stackService.save(stack);
     }
@@ -57,4 +57,5 @@ public class StackUpdater {
         }
         return stack;
     }
+
 }

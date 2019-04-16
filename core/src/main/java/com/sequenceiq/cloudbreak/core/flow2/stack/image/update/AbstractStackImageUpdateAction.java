@@ -25,9 +25,9 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.StackCreation
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 abstract class AbstractStackImageUpdateAction<P extends Payload> extends AbstractStackAction<StackImageUpdateState, StackImageUpdateEvent, StackContext, P> {
@@ -59,7 +59,7 @@ abstract class AbstractStackImageUpdateAction<P extends Payload> extends Abstrac
     private StackUpdater stackUpdater;
 
     @Inject
-    private ResourceRepository resourceRepository;
+    private ResourceService resourceService;
 
     @Inject
     private ResourceToCloudResourceConverter resourceToCloudResourceConverter;
@@ -113,8 +113,8 @@ abstract class AbstractStackImageUpdateAction<P extends Payload> extends Abstrac
         return stackUpdater;
     }
 
-    protected ResourceRepository getResourceRepository() {
-        return resourceRepository;
+    protected ResourceService getResourceService() {
+        return resourceService;
     }
 
     protected ResourceToCloudResourceConverter getResourceToCloudResourceConverter() {

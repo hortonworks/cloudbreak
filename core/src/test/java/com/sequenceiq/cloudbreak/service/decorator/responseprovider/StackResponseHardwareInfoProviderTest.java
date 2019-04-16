@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -25,8 +26,8 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 
 public class StackResponseHardwareInfoProviderTest {
 
@@ -34,7 +35,7 @@ public class StackResponseHardwareInfoProviderTest {
     private StackResponseHardwareInfoProvider underTest;
 
     @Mock
-    private HostMetadataRepository hostMetadataRepository;
+    private HostMetadataService hostMetadataService;
 
     @Mock
     private HostGroupService hostGroupService;
@@ -60,7 +61,7 @@ public class StackResponseHardwareInfoProviderTest {
 
     @Test
     public void testProviderEntriesToStackResponseWhenOneInstanceMetadataPresented() {
-        when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(TestUtil.hostGroup());
+        when(hostGroupService.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(Optional.of(TestUtil.hostGroup()));
 
         Stack stack = TestUtil.stack();
         stack.setInstanceGroups(Sets.newHashSet(TestUtil.instanceGroup(1L, InstanceGroupType.GATEWAY, TestUtil.gcpTemplate(1L))));
@@ -81,12 +82,12 @@ public class StackResponseHardwareInfoProviderTest {
 
         Assert.assertEquals(1L, actual.getHardwareInfoGroups().size());
 
-        Mockito.verify(hostMetadataRepository, Mockito.times(0)).findHostInClusterByName(anyLong(), anyString());
+        Mockito.verify(hostMetadataService, Mockito.times(0)).findHostInClusterByName(anyLong(), anyString());
     }
 
     @Test
     public void testProviderEntriesToStackResponseClusterNotNullButFQDNNull() {
-        when(hostMetadataRepository.findHostInClusterByName(anyLong(), anyString())).thenReturn(null);
+        when(hostMetadataService.findHostInClusterByName(anyLong(), anyString())).thenReturn(null);
 
         Stack stack = new Stack();
         InstanceMetaData instanceMetaData = new InstanceMetaData();
@@ -96,7 +97,7 @@ public class StackResponseHardwareInfoProviderTest {
 
         Assert.assertEquals(1L, actual.getHardwareInfoGroups().size());
 
-        Mockito.verify(hostMetadataRepository, Mockito.times(0)).findHostInClusterByName(anyLong(), anyString());
+        Mockito.verify(hostMetadataService, Mockito.times(0)).findHostInClusterByName(anyLong(), anyString());
     }
 
     @Test
@@ -116,7 +117,7 @@ public class StackResponseHardwareInfoProviderTest {
 
         Assert.assertEquals(1L, actual.getHardwareInfoGroups().size());
 
-        Mockito.verify(hostMetadataRepository, Mockito.times(1)).findHostInClusterByName(1L, "fqdn");
+        Mockito.verify(hostMetadataService, Mockito.times(1)).findHostInClusterByName(1L, "fqdn");
     }
 
     @Test
@@ -132,7 +133,7 @@ public class StackResponseHardwareInfoProviderTest {
 
         Assert.assertEquals(2L, actual.getHardwareInfoGroups().size());
 
-        Mockito.verify(hostMetadataRepository, Mockito.times(0)).findHostInClusterByName(anyLong(), anyString());
+        Mockito.verify(hostMetadataService, Mockito.times(0)).findHostInClusterByName(anyLong(), anyString());
     }
 
     @Test
@@ -150,13 +151,13 @@ public class StackResponseHardwareInfoProviderTest {
         HostMetadata hostMetadata = new HostMetadata();
         hostMetadata.setHostGroup(TestUtil.hostGroup());
 
-        when(hostMetadataRepository.findHostInClusterByName(1L, "fqdn")).thenReturn(hostMetadata);
+        when(hostMetadataService.findHostInClusterByName(1L, "fqdn")).thenReturn(Optional.of(hostMetadata));
 
         StackV4Response actual = underTest.providerEntriesToStackResponse(stack, new StackV4Response());
 
         Assert.assertEquals(1L, actual.getHardwareInfoGroups().size());
 
-        Mockito.verify(hostMetadataRepository, Mockito.times(1)).findHostInClusterByName(1L, "fqdn");
+        Mockito.verify(hostMetadataService, Mockito.times(1)).findHostInClusterByName(1L, "fqdn");
 
     }
 

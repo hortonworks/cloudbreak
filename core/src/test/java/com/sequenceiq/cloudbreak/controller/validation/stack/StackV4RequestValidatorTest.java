@@ -27,6 +27,7 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -115,7 +116,7 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
     @Before
     public void setUp() {
         when(clusterDefinitionService.getByNameForWorkspaceId(anyString(), eq(WORKSPACE_ID))).thenReturn(clusterDefinition);
-        when(credential.cloudPlatform()).thenReturn("AWS");
+        when(credential.cloudPlatform()).thenReturn(CloudPlatform.AWS.name());
         when(credentialService.getByNameForWorkspaceId(CREDENTIAL_NAME, WORKSPACE_ID)).thenReturn(credential);
         when(environmentService.get(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(new DetailedEnvironmentV4Response());
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
@@ -449,7 +450,7 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
 
     private StackV4Request stackRequest() {
         InstanceTemplateV4Request templateRequest = new InstanceTemplateV4Request();
-        InstanceGroupV4Request instanceGroupRequest = getInstanceGroupV4Request(templateRequest, "master");
+        InstanceGroupV4Request instanceGroupRequest = getInstanceGroupV4Request(templateRequest);
         ClusterV4Request clusterRequest = getCluster();
         return getStackV4Request(Collections.singletonList(instanceGroupRequest), clusterRequest);
     }
@@ -457,7 +458,7 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
     private StackV4Request stackRequestWithRootVolumeSize(Integer rootVolumeSize) {
         InstanceTemplateV4Request templateRequest = new InstanceTemplateV4Request();
         templateRequest.setRootVolume(getRootVolume(rootVolumeSize));
-        InstanceGroupV4Request instanceGroupRequest = getInstanceGroupV4Request(templateRequest, "master");
+        InstanceGroupV4Request instanceGroupRequest = getInstanceGroupV4Request(templateRequest);
         ClusterV4Request clusterRequest = getCluster();
         return getStackV4Request(Collections.singletonList(instanceGroupRequest), clusterRequest);
     }
@@ -468,9 +469,9 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
         return root;
     }
 
-    private InstanceGroupV4Request getInstanceGroupV4Request(InstanceTemplateV4Request templateRequest, String master) {
+    private InstanceGroupV4Request getInstanceGroupV4Request(InstanceTemplateV4Request templateRequest) {
         InstanceGroupV4Request instanceGroupRequest = new InstanceGroupV4Request();
-        instanceGroupRequest.setName(master);
+        instanceGroupRequest.setName("master");
         instanceGroupRequest.setTemplate(templateRequest);
         return instanceGroupRequest;
     }

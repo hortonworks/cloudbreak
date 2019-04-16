@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.db;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -55,12 +56,12 @@ public interface StructuredEventRepository extends WorkspaceResourceRepository<S
     List<StructuredEventEntity> findAllWithoutWorkspaceOrUser();
 
     @Override
-    default StructuredEventEntity findByNameAndWorkspace(String name, Workspace workspace) {
+    default Optional<StructuredEventEntity> findByNameAndWorkspace(String name, Workspace workspace) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    default StructuredEventEntity findByNameAndWorkspaceId(String name, Long workspaceId) {
+    default Optional<StructuredEventEntity> findByNameAndWorkspaceId(String name, Long workspaceId) {
         throw new UnsupportedOperationException();
     }
 

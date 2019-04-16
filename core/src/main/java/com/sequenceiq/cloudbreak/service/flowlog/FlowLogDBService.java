@@ -17,12 +17,12 @@ import com.cedarsoftware.util.io.JsonWriter;
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.FlowLogService;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 import com.sequenceiq.cloudbreak.domain.FlowChainLog;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.domain.StateStatus;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
-import com.sequenceiq.cloudbreak.repository.FlowChainLogRepository;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
@@ -39,7 +39,7 @@ public class FlowLogDBService implements FlowLogService {
     private FlowLogRepository flowLogRepository;
 
     @Inject
-    private FlowChainLogRepository flowChainLogRepository;
+    private FlowChainLogService flowChainLogService;
 
     @Inject
     @Qualifier("JsonWriterOptions")
@@ -81,7 +81,7 @@ public class FlowLogDBService implements FlowLogService {
             int purgedTerminatedStackLogs = flowLogRepository.purgeTerminatedStackLogs();
             LOGGER.debug("Deleted flowlog count: {}", purgedTerminatedStackLogs);
             LOGGER.debug("Cleaning orphan flowchainlogs");
-            int purgedOrphanFLowChainLogs = flowChainLogRepository.purgeOrphanFLowChainLogs();
+            int purgedOrphanFLowChainLogs = flowChainLogService.purgeOrphanFLowChainLogs();
             LOGGER.debug("Deleted flowchainlog count: {}", purgedOrphanFLowChainLogs);
             return null;
         });
@@ -100,7 +100,7 @@ public class FlowLogDBService implements FlowLogService {
     public void saveChain(String flowChainId, String parentFlowChainId, Queue<Selectable> chain) {
         String chainJson = JsonWriter.objectToJson(chain);
         FlowChainLog chainLog = new FlowChainLog(flowChainId, parentFlowChainId, chainJson);
-        flowChainLogRepository.save(chainLog);
+        flowChainLogService.save(chainLog);
     }
 
     public void updateLastFlowLogStatus(FlowLog lastFlowLog, boolean failureEvent) {
@@ -129,7 +129,7 @@ public class FlowLogDBService implements FlowLogService {
     }
 
     public FlowLog getLastFlowLog(String flowId) {
-        return flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(flowId);
+        return flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(flowId).orElseThrow(NotFoundException.notFound("FlowLog", flowId));
     }
 
     @Override
@@ -138,13 +138,13 @@ public class FlowLogDBService implements FlowLogService {
     }
 
     @Override
-    public FlowLog findFirstByFlowIdOrderByCreatedDesc(String flowId) {
+    public Optional<FlowLog> findFirstByFlowIdOrderByCreatedDesc(String flowId) {
         return flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(flowId);
     }
 
     @Override
-    public FlowChainLog findFirstByFlowChainIdOrderByCreatedDesc(String flowChainId) {
-        return flowChainLogRepository.findFirstByFlowChainIdOrderByCreatedDesc(flowChainId);
+    public Optional<FlowChainLog> findFirstByFlowChainIdOrderByCreatedDesc(String flowChainId) {
+        return flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(flowChainId);
     }
 
     @Override
@@ -161,4 +161,14 @@ public class FlowLogDBService implements FlowLogService {
     public Set<FlowLog> findAllByCloudbreakNodeId(String cloudbreakNodeId) {
         return flowLogRepository.findAllByCloudbreakNodeId(cloudbreakNodeId);
     }
+
+    public List<FlowLog> findAllByStackIdOrderByCreatedDesc(Long id) {
+        return flowLogRepository.findAllByStackIdOrderByCreatedDesc(id);
+    }
+
+    @Override
+    public Set<Long> findTerminatingStacksByCloudbreakNodeId(String id) {
+        return flowLogRepository.findTerminatingStacksByCloudbreakNodeId(id);
+    }
+
 }

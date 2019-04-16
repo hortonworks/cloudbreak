@@ -20,7 +20,7 @@ public class DatalakeResourcesService extends AbstractWorkspaceAwareResourceServ
     @Inject
     private DatalakeResourcesRepository datalakeResourcesRepository;
 
-    public DatalakeResources getDatalakeResourcesByDatalakeStackId(Long datalakeStackId) {
+    public Optional<DatalakeResources> findByDatalakeStackId(Long datalakeStackId) {
         return datalakeResourcesRepository.findByDatalakeStackId(datalakeStackId);
     }
 
@@ -28,7 +28,7 @@ public class DatalakeResourcesService extends AbstractWorkspaceAwareResourceServ
         return datalakeResourcesRepository.findDatalakeResourcesNamesByWorkspaceAndEnvironment(workspaceId, envId);
     }
 
-    public Optional<DatalakeResources> getDatalakeResourcesById(Long datalakeResourceId) {
+    public Optional<DatalakeResources> findById(Long datalakeResourceId) {
         return datalakeResourcesRepository.findById(datalakeResourceId);
     }
 
@@ -55,4 +55,9 @@ public class DatalakeResourcesService extends AbstractWorkspaceAwareResourceServ
     public Long countDatalakeResourcesInEnvironment(EnvironmentView environment) {
         return datalakeResourcesRepository.countDatalakeResourcesByEnvironment(environment);
     }
+
+    public DatalakeResources save(DatalakeResources resources) {
+        return datalakeResourcesRepository.save(resources);
+    }
+
 }

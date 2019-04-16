@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,9 +30,9 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 public class ClusterRepairFlowEventChainFactoryTest {
@@ -57,7 +58,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
     private HostGroupService hostGroupService;
 
     @Mock
-    private InstanceMetaDataRepository instanceMetadataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Mock
     private ClusterService clusterService;
@@ -172,13 +173,13 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     private void setupHostGroup(boolean gatewayInstanceGroup) {
         HostGroup hostGroup = setupHostGroup(setupInstanceGroup(gatewayInstanceGroup ? InstanceGroupType.GATEWAY : InstanceGroupType.CORE));
-        when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
+        when(hostGroupService.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(Optional.of(hostGroup));
         setupPrimaryGateway();
     }
 
     private void setupPrimaryGateway() {
         List<InstanceMetaData> primaryGatewayIm = getPrimaryGatewayByInstanceGroup();
-        when(instanceMetadataRepository.getPrimaryGatewayByInstanceGroup(anyLong(), anyLong())).thenReturn(primaryGatewayIm);
+        when(instanceMetaDataService.getPrimaryGatewayByInstanceGroup(anyLong(), anyLong())).thenReturn(primaryGatewayIm);
     }
 
     private Stack getStack() {

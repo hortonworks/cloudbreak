@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -70,12 +71,12 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
 
     @Override
     public T getByNameForWorkspace(String name, Workspace workspace) {
-        T object = repository().findByNameAndWorkspace(name, workspace);
-        if (object == null) {
+        Optional<T> object = repository().findByNameAndWorkspace(name, workspace);
+        if (object.isEmpty()) {
             throw new NotFoundException(String.format("No %s found with name '%s'", resource().getShortName(), name));
         }
-        MDCBuilder.buildMdcContext(object);
-        return object;
+        MDCBuilder.buildMdcContext(object.get());
+        return object.get();
     }
 
     @Override
@@ -94,12 +95,12 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
 
     @Override
     public T getByNameForWorkspaceId(String name, Long workspaceId) {
-        T object = repository().findByNameAndWorkspaceId(name, workspaceId);
-        if (object == null) {
+        Optional<T> object = repository().findByNameAndWorkspaceId(name, workspaceId);
+        if (object.isEmpty()) {
             throw new NotFoundException(String.format("No %s found with name '%s'", resource().getShortName(), name));
         }
-        MDCBuilder.buildMdcContext(object);
-        return object;
+        MDCBuilder.buildMdcContext(object.get());
+        return object.get();
     }
 
     @Override

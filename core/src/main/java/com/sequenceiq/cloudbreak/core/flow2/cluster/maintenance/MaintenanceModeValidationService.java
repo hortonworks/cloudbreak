@@ -36,7 +36,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
@@ -48,7 +48,7 @@ public class MaintenanceModeValidationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MaintenanceModeValidationService.class);
 
     @Inject
-    private ComponentConfigProvider componentConfigProvider;
+    private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
@@ -153,7 +153,7 @@ public class MaintenanceModeValidationService {
     public List<Warning> validateImageCatalog(Stack stack) {
         List<Warning> warnings = new ArrayList<>();
         try {
-            Image image = componentConfigProvider.getImage(stack.getId());
+            Image image = componentConfigProviderService.getImage(stack.getId());
             StatedImage statedImage = imageCatalogService.getImage(image.getImageCatalogUrl(),
                     image.getImageCatalogName(), image.getImageId());
 

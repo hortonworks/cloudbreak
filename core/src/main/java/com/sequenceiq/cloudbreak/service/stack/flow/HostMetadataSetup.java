@@ -19,9 +19,9 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
@@ -33,7 +33,7 @@ public class HostMetadataSetup {
     private StackService stackService;
 
     @Inject
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private GatewayConfigService gatewayConfigService;
@@ -50,7 +50,7 @@ public class HostMetadataSetup {
         if (!orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
             Set<InstanceMetaData> allInstanceMetaData = stack.getNotDeletedInstanceMetaDataSet();
             updateWithHostData(stack, stack.getNotDeletedInstanceMetaDataSet());
-            instanceMetaDataRepository.saveAll(allInstanceMetaData);
+            instanceMetaDataService.saveAll(allInstanceMetaData);
         }
     }
 
@@ -62,7 +62,7 @@ public class HostMetadataSetup {
                     .filter(instanceMetaData -> newAddresses.contains(instanceMetaData.getPrivateIp()))
                     .collect(Collectors.toSet());
             updateWithHostData(stack, newInstanceMetadata);
-            instanceMetaDataRepository.saveAll(newInstanceMetadata);
+            instanceMetaDataService.saveAll(newInstanceMetadata);
         }
     }
 

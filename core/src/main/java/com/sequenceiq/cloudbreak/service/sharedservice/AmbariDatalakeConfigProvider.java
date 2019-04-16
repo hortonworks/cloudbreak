@@ -32,11 +32,11 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.ServiceDescriptor;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ServiceDescriptorDefinition;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.repository.cluster.DatalakeResourcesRepository;
-import com.sequenceiq.cloudbreak.repository.cluster.ServiceDescriptorRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.servicedescriptor.ServiceDescriptorService;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 
 @Component
@@ -52,10 +52,10 @@ public class AmbariDatalakeConfigProvider {
     private CentralClusterDefinitionParameterQueryService centralClusterDefinitionParameterQueryService;
 
     @Inject
-    private DatalakeResourcesRepository datalakeResourcesRepository;
+    private DatalakeResourcesService datalakeResourcesService;
 
     @Inject
-    private ServiceDescriptorRepository serviceDescriptorRepository;
+    private ServiceDescriptorService serviceDescriptorService;
 
     @Inject
     private TransactionService transactionService;
@@ -84,7 +84,7 @@ public class AmbariDatalakeConfigProvider {
         try {
             return transactionService.required(() -> {
                 try {
-                    DatalakeResources datalakeResources = datalakeResourcesRepository.findByDatalakeStackId(datalakeStack.getId());
+                    DatalakeResources datalakeResources = datalakeResourcesService.findByDatalakeStackId(datalakeStack.getId()).orElse(null);
                     if (datalakeResources == null) {
                         Map<String, Map<String, String>> serviceSecretParamMap = Map.ofEntries(Map.entry(ServiceDescriptorDefinitionProvider.RANGER_SERVICE,
                                 Map.ofEntries(Map.entry(ServiceDescriptorDefinitionProvider.RANGER_ADMIN_PWD_KEY, cluster.getPassword()))));
@@ -213,8 +213,8 @@ public class AmbariDatalakeConfigProvider {
     private DatalakeResources storeDatalakeResources(DatalakeResources datalakeResources, Workspace workspace) {
         datalakeResources.setWorkspace(workspace);
         datalakeResources.getServiceDescriptorMap().forEach((k, sd) -> sd.setWorkspace(workspace));
-        DatalakeResources savedDatalakeResources = datalakeResourcesRepository.save(datalakeResources);
-        savedDatalakeResources.getServiceDescriptorMap().forEach((k, sd) -> serviceDescriptorRepository.save(sd));
+        DatalakeResources savedDatalakeResources = datalakeResourcesService.save(datalakeResources);
+        savedDatalakeResources.getServiceDescriptorMap().forEach((k, sd) -> serviceDescriptorService.save(sd));
         return savedDatalakeResources;
     }
 

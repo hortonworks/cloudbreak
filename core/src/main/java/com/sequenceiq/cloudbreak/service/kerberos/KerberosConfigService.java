@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.kerberos;
 
 import static java.lang.String.format;
 
-import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -22,12 +21,12 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.AbstractEnvironmentAwareService;
 
 @Service
-public class KerberosService extends AbstractEnvironmentAwareService<KerberosConfig> {
+public class KerberosConfigService extends AbstractEnvironmentAwareService<KerberosConfig> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(KerberosService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(KerberosConfigService.class);
 
     @Inject
-    private KerberosConfigRepository kerberosConfigRepository;
+    private KerberosConfigRepository repository;
 
     @Inject
     private ClusterService clusterService;
@@ -37,15 +36,16 @@ public class KerberosService extends AbstractEnvironmentAwareService<KerberosCon
 
     @Override
     protected EnvironmentResourceRepository<KerberosConfig, Long> repository() {
-        return kerberosConfigRepository;
+        return repository;
     }
 
     @Override
     protected void prepareCreation(KerberosConfig resource) {
-        Optional.ofNullable(repository().findByNameAndWorkspaceId(resource.getName(), restRequestThreadLocalService.getRequestedWorkspaceId()))
+        repository().findByNameAndWorkspaceId(resource.getName(), restRequestThreadLocalService.getRequestedWorkspaceId())
                 .ifPresent(kerberosConfig -> {
-                    LOGGER.info(format("KerberosConfig – in the given workspace – with name [%s] is already exists", resource.getName()));
-                    throw new BadRequestException("KerberosConfig is already exists in the given workspace ");
+                    String message = format("KerberosConfig – in the given workspace – with name [%s] is already exists", resource.getName());
+                    LOGGER.info(message);
+                    throw new BadRequestException(message);
                 });
     }
 
@@ -62,6 +62,10 @@ public class KerberosService extends AbstractEnvironmentAwareService<KerberosCon
     @Override
     public WorkspaceResource resource() {
         return WorkspaceResource.KERBEROS_CONFIG;
+    }
+
+    public KerberosConfig save(KerberosConfig kerberosConfig) {
+        return repository.save(kerberosConfig);
     }
 
 }

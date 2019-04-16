@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 
@@ -39,13 +40,18 @@ public interface FlowLogService {
 
     Set<String> findAllRunningNonTerminationFlowIdsByStackId(Long stackId);
 
-    FlowLog findFirstByFlowIdOrderByCreatedDesc(String flowId);
+    Optional<FlowLog> findFirstByFlowIdOrderByCreatedDesc(String flowId);
 
-    FlowChainLog findFirstByFlowChainIdOrderByCreatedDesc(String flowChainId);
+    Optional<FlowChainLog> findFirstByFlowChainIdOrderByCreatedDesc(String flowChainId);
 
     List<Object[]> findAllPending();
 
     Set<FlowLog> findAllUnassigned();
 
     Set<FlowLog> findAllByCloudbreakNodeId(String cloudbreakNodeId);
+
+    List<FlowLog> findAllByStackIdOrderByCreatedDesc(Long id);
+
+    Set<Long> findTerminatingStacksByCloudbreakNodeId(String id);
+
 }

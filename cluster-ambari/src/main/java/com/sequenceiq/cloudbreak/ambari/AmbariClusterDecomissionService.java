@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
@@ -59,14 +60,14 @@ public class AmbariClusterDecomissionService implements ClusterDecomissionServic
     }
 
     @Override
-    public Set<String> collectDownscaleCandidates(HostGroup hostGroup, Integer scalingAdjustment, int defaultRootVolumeSize,
+    public Set<String> collectDownscaleCandidates(@Nonnull HostGroup hostGroup, Integer scalingAdjustment, int defaultRootVolumeSize,
             Set<InstanceMetaData> instanceMetaDatasInStack) throws CloudbreakException {
         return ambariDecommissioner.collectDownscaleCandidates(ambariClient, stack, hostGroup, scalingAdjustment, defaultRootVolumeSize,
                 instanceMetaDatasInStack);
     }
 
     @Override
-    public Map<String, HostMetadata> collectHostsToRemove(HostGroup hostGroup, Set<String> hostNames) {
+    public Map<String, HostMetadata> collectHostsToRemove(@Nonnull HostGroup hostGroup, Set<String> hostNames) {
         return ambariDecommissioner.collectHostsToRemove(stack, hostGroup, hostNames, ambariClient);
     }
 

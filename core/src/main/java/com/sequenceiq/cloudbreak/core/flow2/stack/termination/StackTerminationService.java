@@ -14,13 +14,12 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.repository.cluster.DatalakeResourcesRepository;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
@@ -48,7 +47,7 @@ public class StackTerminationService {
     private CloudbreakMetricService metricService;
 
     @Inject
-    private DatalakeResourcesRepository datalakeResourcesRepository;
+    private DatalakeResourcesService datalakeResourcesService;
 
     public void finishStackTermination(StackTerminationContext context, TerminateStackResult payload, Boolean deleteDependencies) {
         LOGGER.debug("Terminate stack result: {}", payload);
@@ -61,10 +60,7 @@ public class StackTerminationService {
             dependecyDeletionService.deleteDependencies(stack);
         }
         if (stack.getType() == StackType.DATALAKE) {
-            DatalakeResources datalakeResources = datalakeResourcesRepository.findByDatalakeStackId(stack.getId());
-            if (datalakeResources != null) {
-                datalakeResourcesRepository.delete(datalakeResources);
-            }
+            datalakeResourcesService.findByDatalakeStackId(stack.getId()).ifPresent(datalakeResources -> datalakeResourcesService.delete(datalakeResources));
         }
         metricService.incrementMetricCounter(MetricType.STACK_TERMINATION_SUCCESSFUL, stack);
     }

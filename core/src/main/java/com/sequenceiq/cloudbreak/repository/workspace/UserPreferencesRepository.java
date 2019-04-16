@@ -17,4 +17,5 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 public interface UserPreferencesRepository extends DisabledBaseRepository<UserPreferences, Long> {
 
     Optional<UserPreferences> findByUser(User user);
+
 }

@@ -51,7 +51,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AuthenticatedUserService;
@@ -227,10 +226,8 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
                 WorkspaceResourceRepository<?, ?> resourceRepository = pathRepositoryEntry.getValue();
                 String resourceName = params.get(RESOURCE_NAME);
                 if (resourceName != null) {
-                    WorkspaceAwareResource resource = resourceRepository.findByNameAndWorkspaceId(resourceName, Long.valueOf(workspaceId));
-                    if (resource != null) {
-                        params.put(RESOURCE_ID, Long.toString(resource.getId()));
-                    }
+                    resourceRepository.findByNameAndWorkspaceId(resourceName, Long.valueOf(workspaceId))
+                            .ifPresent(resource -> params.put(RESOURCE_ID, Long.toString(resource.getId())));
                 }
                 break;
             }

@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Before;
@@ -33,7 +34,7 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
-public class KerberosServiceTest {
+public class KerberosConfigServiceTest {
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -57,7 +58,7 @@ public class KerberosServiceTest {
     private WorkspaceService workspaceService;
 
     @InjectMocks
-    private KerberosService underTest;
+    private KerberosConfigService underTest;
 
     @Before
     public void setup() {
@@ -79,7 +80,7 @@ public class KerberosServiceTest {
         when(workspaceService.retrieveForUser(eq(user))).thenReturn(Sets.newHashSet(workspace));
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);
         when(environmentViewService.findByNamesInWorkspace(any(), anyLong())).thenReturn(Sets.newHashSet());
-        when(kerberosConfigRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(resource);
+        when(kerberosConfigRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.of(resource));
 
         thrown.expect(BadRequestException.class);
 
@@ -101,7 +102,7 @@ public class KerberosServiceTest {
         when(workspaceService.retrieveForUser(eq(user))).thenReturn(Sets.newHashSet(workspace));
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);
         when(environmentViewService.findByNamesInWorkspace(any(), anyLong())).thenReturn(Sets.newHashSet());
-        when(kerberosConfigRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(null);
+        when(kerberosConfigRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.empty());
         when(kerberosConfigRepository.save(any())).thenReturn(resource);
 
         KerberosConfig kerberosConfig = underTest.createInEnvironment(resource, Sets.newHashSet(), 1L);

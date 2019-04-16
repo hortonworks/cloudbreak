@@ -275,8 +275,8 @@ public class OfflineStateGenerator {
     static class CustomStackRepository implements StackRepository {
 
         @Override
-        public Stack findByAmbari(String ambariIp) {
-            return null;
+        public Optional<Stack> findByAmbari(String ambariIp) {
+            return Optional.empty();
         }
 
         @Override
@@ -285,8 +285,8 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Stack findByNameAndWorkspaceId(String name, Long workspaceId) {
-            return null;
+        public Optional<Stack> findByNameAndWorkspaceId(String name, Long workspaceId) {
+            return Optional.empty();
         }
 
         @Override
@@ -295,18 +295,18 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Stack findByNameAndWorkspaceIdWithLists(String name, Long workspaceId, Boolean showTerminated, Long terminatedAfter) {
-            return null;
+        public Optional<Stack> findByNameAndWorkspaceIdWithLists(String name, Long workspaceId, Boolean showTerminated, Long terminatedAfter) {
+            return Optional.empty();
         }
 
         @Override
-        public Stack findOneWithLists(Long id) {
-            return null;
+        public Optional<Stack> findOneWithLists(Long id) {
+            return Optional.empty();
         }
 
         @Override
-        public Stack findOneWithCluster(Long id) {
-            return null;
+        public Optional<Stack> findOneWithCluster(Long id) {
+            return Optional.empty();
         }
 
         @Override
@@ -325,13 +325,13 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Stack findStackForCluster(Long id) {
-            return null;
+        public Optional<Stack> findStackForCluster(Long id) {
+            return Optional.empty();
         }
 
         @Override
-        public Stack findByNameInWorkspaceWithLists(String name, Workspace workspace) {
-            return null;
+        public Optional<Stack> findByNameInWorkspaceWithLists(String name, Workspace workspace) {
+            return Optional.empty();
         }
 
         @Override
@@ -400,13 +400,13 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Workspace findWorkspaceById(Long id) {
-            return null;
+        public Optional<Workspace> findWorkspaceById(Long id) {
+            return Optional.empty();
         }
 
         @Override
-        public Stack findTemplateWithLists(Long id) {
-            return null;
+        public Optional<Stack> findTemplateWithLists(Long id) {
+            return Optional.empty();
         }
 
         @Override
@@ -483,8 +483,8 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Stack findByNameAndWorkspace(String name, Workspace workspace) {
-            return null;
+        public Optional<Stack> findByNameAndWorkspace(String name, Workspace workspace) {
+            return Optional.empty();
         }
 
         @Override

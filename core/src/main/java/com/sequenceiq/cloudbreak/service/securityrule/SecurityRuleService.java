@@ -3,17 +3,22 @@ package com.sequenceiq.cloudbreak.service.securityrule;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRuleV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4Response;
+import com.sequenceiq.cloudbreak.domain.SecurityRule;
+import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 
-@Component
+@Service
 public class SecurityRuleService {
 
     private static final String TCP_PROTOCOL = "tcp";
@@ -32,6 +37,9 @@ public class SecurityRuleService {
 
     @Value("#{'${cb.default.gateway.cidr:0.0.0.0/0}'.split(',')}")
     private Set<String> defaultGatewayCidr;
+
+    @Inject
+    private SecurityRuleRepository repository;
 
     public SecurityRulesV4Response getDefaultSecurityRules(Boolean knoxEnabled) {
         SecurityRulesV4Response ret = new SecurityRulesV4Response();
@@ -67,6 +75,10 @@ public class SecurityRuleService {
             }
         }
         return rules;
+    }
+
+    public List<SecurityRule> findAllBySecurityGroupId(Long securityGroupId) {
+        return repository.findAllBySecurityGroupId(securityGroupId);
     }
 
 }

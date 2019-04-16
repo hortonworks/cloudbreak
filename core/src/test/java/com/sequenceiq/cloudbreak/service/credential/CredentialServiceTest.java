@@ -21,6 +21,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -50,12 +51,12 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.secret.SecretService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -108,7 +109,7 @@ public class CredentialServiceTest {
     private CloudbreakMessagesService messagesService;
 
     @Mock
-    private StackRepository stackRepository;
+    private StackService stackService;
 
     @Mock
     private WorkspaceService workspaceService;
@@ -161,7 +162,7 @@ public class CredentialServiceTest {
 
     @Test
     public void testGetWhenCredentialDoesNotExistsWithIdThenNotFoundExceptionShouldCome() {
-        when(credentialRepository.findActiveByIdAndWorkspaceFilterByPlatforms(TEST_CREDENTIAL_ID, WORKSPACE_ID, CLOUD_PLATFORMS)).thenReturn(null);
+        when(credentialRepository.findActiveByIdAndWorkspaceFilterByPlatforms(TEST_CREDENTIAL_ID, WORKSPACE_ID, CLOUD_PLATFORMS)).thenReturn(Optional.empty());
 
         thrown.expect(NotFoundException.class);
         thrown.expectMessage(format("Credential with id: '%d' not found", TEST_CREDENTIAL_ID));
@@ -174,7 +175,8 @@ public class CredentialServiceTest {
     @Test
     public void testGetWhenCredentialExistsAndObtainableThenItWillBeReturned() {
         Credential expected = createCredential(TEST_CREDENTIAL_NAME);
-        when(credentialRepository.findActiveByIdAndWorkspaceFilterByPlatforms(TEST_CREDENTIAL_ID, WORKSPACE_ID, CLOUD_PLATFORMS)).thenReturn(expected);
+        when(credentialRepository.findActiveByIdAndWorkspaceFilterByPlatforms(TEST_CREDENTIAL_ID, WORKSPACE_ID, CLOUD_PLATFORMS))
+                .thenReturn(Optional.ofNullable(expected));
 
         Credential result = underTest.get(TEST_CREDENTIAL_ID, workspace);
 
@@ -214,7 +216,8 @@ public class CredentialServiceTest {
 
     @Test
     public void testUpdateByWorkspaceIdWhenCredentialDoesNotExistsOrItIsInAnotherWorkspaceWhereUserHasNoRightThenNotFoundExceptionShouldCome() {
-        when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, WORKSPACE_ID, CLOUD_PLATFORMS)).thenReturn(null);
+        when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, WORKSPACE_ID, CLOUD_PLATFORMS))
+                .thenReturn(Optional.empty());
 
         thrown.expect(NotFoundException.class);
         thrown.expectMessage(format("Credential with name: '%s' not found", TEST_CREDENTIAL_NAME));
@@ -235,7 +238,8 @@ public class CredentialServiceTest {
         when(original.cloudPlatform()).thenReturn("AWS");
         when(testCredential.cloudPlatform()).thenReturn("GCP");
         doNothing().when(credentialValidator).validateCredentialCloudPlatform(anyString());
-        when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, WORKSPACE_ID, CLOUD_PLATFORMS)).thenReturn(original);
+        when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, WORKSPACE_ID, CLOUD_PLATFORMS))
+                .thenReturn(Optional.of(original));
 
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Modifying credential platform is forbidden");
@@ -257,7 +261,8 @@ public class CredentialServiceTest {
         when(original.cloudPlatform()).thenReturn(TEST_CLOUD_PLATFORM);
         when(testCredential.cloudPlatform()).thenReturn(TEST_CLOUD_PLATFORM);
         doNothing().when(credentialValidator).validateCredentialCloudPlatform(anyString());
-        when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, WORKSPACE_ID, CLOUD_PLATFORMS)).thenReturn(original);
+        when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, WORKSPACE_ID, CLOUD_PLATFORMS))
+                .thenReturn(Optional.of(original));
         when(credentialAdapter.verify(testCredential, WORKSPACE_ID, USER_ID)).thenReturn(testCredential);
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);
         when(workspaceService.retrieveForUser(any())).thenReturn(Set.of(workspace));
@@ -363,8 +368,8 @@ public class CredentialServiceTest {
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn(stackName);
         when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, WORKSPACE_ID, CLOUD_PLATFORMS))
-                .thenReturn(testCredential);
-        when(stackRepository.findByCredential(testCredential)).thenReturn(Set.of(stack));
+                .thenReturn(Optional.ofNullable(testCredential));
+        when(stackService.findByCredential(testCredential)).thenReturn(Set.of(stack));
 
         try {
             underTest.delete(TEST_CREDENTIAL_NAME, workspace);
@@ -374,7 +379,7 @@ public class CredentialServiceTest {
             assertEquals(msg, ex.getMessage());
         }
 
-        verify(stackRepository, times(1)).findByCredential(testCredential);
+        verify(stackService, times(1)).findByCredential(testCredential);
         verify(userProfileHandler, times(0)).destroyProfileCredentialPreparation(testCredential);
         verify(credentialRepository, times(0)).save(testCredential);
     }
@@ -388,8 +393,8 @@ public class CredentialServiceTest {
         when(stack1.getName()).thenReturn(stack1Name);
         when(stack2.getName()).thenReturn(stack2Name);
         when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, WORKSPACE_ID, CLOUD_PLATFORMS))
-                .thenReturn(testCredential);
-        when(stackRepository.findByCredential(testCredential)).thenReturn(Set.of(stack1, stack2));
+                .thenReturn(Optional.ofNullable(testCredential));
+        when(stackService.findByCredential(testCredential)).thenReturn(Set.of(stack1, stack2));
 
         try {
             underTest.delete(TEST_CREDENTIAL_NAME, workspace);
@@ -399,7 +404,7 @@ public class CredentialServiceTest {
             assertEquals(msg, ex.getMessage());
         }
 
-        verify(stackRepository, times(1)).findByCredential(testCredential);
+        verify(stackService, times(1)).findByCredential(testCredential);
         verify(userProfileHandler, times(0)).destroyProfileCredentialPreparation(testCredential);
         verify(credentialRepository, times(0)).save(testCredential);
     }
@@ -417,19 +422,20 @@ public class CredentialServiceTest {
         Set<EnvironmentView> envs = new HashSet<>();
         envs.add(env1);
         envs.add(env2);
-        when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, WORKSPACE_ID, CLOUD_PLATFORMS)).thenReturn(credential);
-        when(stackRepository.findByCredential(credential)).thenReturn(Collections.emptySet());
+        when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, WORKSPACE_ID, CLOUD_PLATFORMS))
+                .thenReturn(Optional.ofNullable(credential));
+        when(stackService.findByCredential(credential)).thenReturn(Collections.emptySet());
         when(environmentViewService.findAllByCredentialId(credential.getId())).thenReturn(envs);
         // WHEN
         try {
             underTest.delete(TEST_CREDENTIAL_NAME, workspace);
         } catch (BadRequestException ex) {
             String msg = format("Credential '%s' cannot be deleted because the following environments are using it: [%s].",
-                TEST_CREDENTIAL_NAME, envs.stream().map(EnvironmentView::getName).collect(Collectors.joining(", ")));
+                    TEST_CREDENTIAL_NAME, envs.stream().map(EnvironmentView::getName).collect(Collectors.joining(", ")));
             assertEquals(msg, ex.getMessage());
         }
         // THEN
-        verify(stackRepository, times(1)).findByCredential(credential);
+        verify(stackService, times(1)).findByCredential(credential);
         verify(environmentViewService, times(1)).findAllByCredentialId(credential.getId());
         verify(userProfileHandler, times(0)).destroyProfileCredentialPreparation(credential);
         verify(credentialRepository, times(0)).save(credential);
@@ -438,8 +444,9 @@ public class CredentialServiceTest {
     @Test
     public void testDeleteByNameWhenCredentialIsDeletableThenItWillBeArchivedProperly() {
         Credential credential = createCredential(TEST_CREDENTIAL_NAME);
-        when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, WORKSPACE_ID, CLOUD_PLATFORMS)).thenReturn(credential);
-        when(stackRepository.findByCredential(credential)).thenReturn(Collections.emptySet());
+        when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, WORKSPACE_ID, CLOUD_PLATFORMS))
+                .thenReturn(Optional.ofNullable(credential));
+        when(stackService.findByCredential(credential)).thenReturn(Collections.emptySet());
         when(environmentViewService.findAllByCredentialId(credential.getId())).thenReturn(Collections.emptySet());
 
         underTest.delete(TEST_CREDENTIAL_NAME, workspace);
@@ -457,8 +464,10 @@ public class CredentialServiceTest {
         when(workspaceService.getByIdForCurrentUser(WORKSPACE_ID)).thenReturn(workspace);
         when(credentialRepository.findByNameInAndWorkspaceId(ImmutableSet.of(credential1Name, credential2Name),
                 WORKSPACE_ID)).thenReturn(ImmutableSet.of(credential1, credential2));
-        when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(credential1Name, WORKSPACE_ID, CLOUD_PLATFORMS)).thenReturn(credential1);
-        when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(credential2Name, WORKSPACE_ID, CLOUD_PLATFORMS)).thenReturn(credential2);
+        when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(credential1Name, WORKSPACE_ID, CLOUD_PLATFORMS))
+                .thenReturn(Optional.of(credential1));
+        when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(credential2Name, WORKSPACE_ID, CLOUD_PLATFORMS))
+                .thenReturn(Optional.of(credential2));
 
         underTest.deleteMultipleByNameFromWorkspace(ImmutableSet.of(credential1Name, credential2Name), WORKSPACE_ID);
 
@@ -471,10 +480,8 @@ public class CredentialServiceTest {
         String credential2Name = TEST_CREDENTIAL_NAME + '2';
 
         Credential credential1 = createCredential(credential1Name);
-        when(workspaceService.getByIdForCurrentUser(WORKSPACE_ID)).thenReturn(workspace);
         when(credentialRepository.findByNameInAndWorkspaceId(ImmutableSet.of(credential1Name, credential2Name),
                 WORKSPACE_ID)).thenReturn(ImmutableSet.of(credential1));
-        when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(credential1Name, WORKSPACE_ID, CLOUD_PLATFORMS)).thenReturn(credential1);
 
         try {
             underTest.deleteMultipleByNameFromWorkspace(ImmutableSet.of(credential1Name, credential2Name), WORKSPACE_ID);
@@ -604,7 +611,8 @@ public class CredentialServiceTest {
 
     @Test
     public void testInitCodeGrantFlowWhenCredentialIsNotAvailableFromRepositoryThenNotFoundExceptionComes() {
-        when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, WORKSPACE_ID, CLOUD_PLATFORMS)).thenReturn(null);
+        when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, WORKSPACE_ID, CLOUD_PLATFORMS))
+                .thenReturn(Optional.empty());
 
         thrown.expect(NotFoundException.class);
         thrown.expectMessage(String.format("%s '%s' not found.", "Credential with name:", TEST_CREDENTIAL_NAME));
@@ -621,7 +629,7 @@ public class CredentialServiceTest {
     @Test
     public void testInitCodeGrantFlowWhenCredentialAttributesContainsCodeGrantFlowKeyAndItIsFalseThenUnsupportedOperationExceptionComes() {
         when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, WORKSPACE_ID, CLOUD_PLATFORMS))
-                .thenReturn(testCredential);
+                .thenReturn(Optional.ofNullable(testCredential));
         when(testCredential.getAttributes()).thenReturn("{\"codeGrantFlow\":false}");
 
         thrown.expect(UnsupportedOperationException.class);
@@ -644,7 +652,7 @@ public class CredentialServiceTest {
         Credential updatedCredential = mock(Credential.class);
         when(updatedCredential.getAttributes()).thenReturn(format("{\"%s\":\"%s\"}", key, expected));
         when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, WORKSPACE_ID, CLOUD_PLATFORMS))
-                .thenReturn(testCredential);
+                .thenReturn(Optional.ofNullable(testCredential));
         when(testCredential.getAttributes()).thenReturn(originalAttributes);
         when(workspaceService.retrieveForUser(user)).thenReturn(Set.of(workspace));
         when(workspaceService.get(WORKSPACE_ID, user)).thenReturn(workspace);
@@ -670,7 +678,7 @@ public class CredentialServiceTest {
         Credential updatedCredential = mock(Credential.class);
         when(updatedCredential.getAttributes()).thenReturn("{}");
         when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, WORKSPACE_ID, CLOUD_PLATFORMS))
-                .thenReturn(testCredential);
+                .thenReturn(Optional.ofNullable(testCredential));
         when(testCredential.getAttributes()).thenReturn(originalAttributes);
         when(workspaceService.retrieveForUser(user)).thenReturn(Set.of(workspace));
         when(workspaceService.get(WORKSPACE_ID, user)).thenReturn(workspace);
@@ -765,7 +773,7 @@ public class CredentialServiceTest {
 
     private void verifyCredentialsAreArchived(Credential... credentials) {
         for (Credential credential : credentials) {
-            verify(stackRepository, times(1)).findByCredential(credential);
+            verify(stackService, times(1)).findByCredential(credential);
             verify(userProfileHandler, times(1)).destroyProfileCredentialPreparation(credential);
             verify(credentialRepository, times(1)).save(credential);
         }

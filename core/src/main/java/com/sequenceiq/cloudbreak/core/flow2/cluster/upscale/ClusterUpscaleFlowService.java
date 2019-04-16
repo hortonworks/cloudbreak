@@ -19,15 +19,16 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.message.Msg;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
@@ -52,7 +53,7 @@ class ClusterUpscaleFlowService {
     private HostGroupService hostGroupService;
 
     @Inject
-    private HostMetadataRepository hostMetadataRepository;
+    private HostMetadataService hostMetadataService;
 
     void ambariRepairSingleMasterStarted(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, "Repairing single master of cluster finished.");
@@ -127,7 +128,8 @@ class ClusterUpscaleFlowService {
 
     private int updateMetadata(StackView stackView, String hostGroupName) {
         LOGGER.debug("Start update metadata");
-        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stackView.getClusterView().getId(), hostGroupName);
+        HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(stackView.getClusterView().getId(), hostGroupName)
+                .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
         Set<HostMetadata> hostMetadata = hostGroupService.findEmptyHostMetadataInHostGroup(hostGroup.getId());
         updateFailedHostMetaData(hostMetadata);
         int failedHosts = 0;
@@ -153,7 +155,7 @@ class ClusterUpscaleFlowService {
         for (HostMetadata metaData : hostMetadata) {
             if (!successHosts.contains(metaData.getHostName())) {
                 metaData.setHostMetadataState(HostMetadataState.UNHEALTHY);
-                hostMetadataRepository.save(metaData);
+                hostMetadataService.save(metaData);
             }
         }
     }

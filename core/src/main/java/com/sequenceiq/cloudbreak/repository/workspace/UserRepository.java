@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.repository.workspace;
 
+import java.util.Optional;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -19,10 +20,10 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @DisableHasPermission
 public interface UserRepository extends DisabledBaseRepository<User, Long> {
 
-    User findByUserId(String userId);
+    Optional<User> findByUserId(String userId);
 
     @Query("SELECT u FROM User u INNER JOIN u.tenant t WHERE u.userId = :userId AND t.name = :tenantName")
-    User findByTenantNameAndUserId(@Param("tenantName") String tenantName, @Param("userId") String userId);
+    Optional<User> findByTenantNameAndUserId(@Param("tenantName") String tenantName, @Param("userId") String userId);
 
     @Query("SELECT u FROM User u WHERE u.tenant = :tenant")
     Set<User> findAllByTenant(@Param("tenant") Tenant tenant);

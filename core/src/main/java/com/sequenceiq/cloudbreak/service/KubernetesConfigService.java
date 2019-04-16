@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service;
 import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
 
 import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -55,8 +54,7 @@ public class KubernetesConfigService extends AbstractEnvironmentAwareService<Kub
     }
 
     public KubernetesConfig updateByWorkspaceId(Long workspaceId, KubernetesConfig kubernetesConfig) {
-        KubernetesConfig original = Optional.ofNullable(
-                kubernetesConfigRepository.findByNameAndWorkspaceId(kubernetesConfig.getName(), workspaceId))
+        KubernetesConfig original = kubernetesConfigRepository.findByNameAndWorkspaceId(kubernetesConfig.getName(), workspaceId)
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, kubernetesConfig.getName()));
         kubernetesConfig.setId(original.getId());
         kubernetesConfig.setWorkspace(original.getWorkspace());

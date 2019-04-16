@@ -69,7 +69,7 @@ public class ClusterCreationSetupServiceTest {
     private ClusterDecorator clusterDecorator;
 
     @Mock
-    private ComponentConfigProvider componentConfigProvider;
+    private ComponentConfigProviderService componentConfigProviderService;
 
     @Mock
     private ClusterDefinitionUtils clusterDefinitionUtils;
@@ -135,7 +135,7 @@ public class ClusterCreationSetupServiceTest {
         kerberosConfig.setDomain("domain");
         cluster.setKerberosConfig(kerberosConfig);
         when(clusterDecorator.decorate(any(), any(), any(), any(), any(), any())).thenReturn(cluster);
-        when(componentConfigProvider.getAllComponentsByStackIdAndType(any(), any())).thenReturn(Sets.newHashSet(ambariRepoComponent, imageComponent));
+        when(componentConfigProviderService.getAllComponentsByStackIdAndType(any(), any())).thenReturn(Sets.newHashSet(ambariRepoComponent, imageComponent));
         when(clusterDefinitionUtils.getBlueprintStackVersion(any())).thenReturn(HDP_VERSION);
         when(clusterDefinitionUtils.getBlueprintStackName(any())).thenReturn("HDP");
 
@@ -146,7 +146,7 @@ public class ClusterCreationSetupServiceTest {
 
         when(defaultHDPEntries.getEntries()).thenReturn(Collections.singletonMap(HDP_VERSION, defaultHDPInfo));
         when(defaultCDHEntries.getEntries()).thenReturn(Collections.singletonMap(CDH_VERSION, defaultCDHInfo));
-        when(componentConfigProvider.getImage(anyLong())).thenReturn(image);
+        when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
         StackMatrixV4Response stackMatrixV4Response = new StackMatrixV4Response();
         stackMatrixV4Response.setHdp(Collections.singletonMap(HDP_VERSION, null));
         stackMatrixV4Response.setCdh(Collections.singletonMap(CDH_VERSION, null));

@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.repair.master.ha.ChangePrimaryGatewayEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
@@ -35,9 +36,9 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ChangePrimaryGatewayTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.EphemeralClustersUpgradeTriggerEvent;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
@@ -51,7 +52,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     private HostGroupService hostGroupService;
 
     @Inject
-    private InstanceMetaDataRepository instanceMetadataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private ClusterService clusterService;
@@ -70,10 +71,11 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         for (Entry<String, List<String>> failedNodes : failedNodesMap.entrySet()) {
             String hostGroupName = failedNodes.getKey();
             List<String> hostNames = failedNodes.getValue();
-            HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
+            HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(), hostGroupName)
+                    .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
             InstanceGroup instanceGroup = hostGroup.getConstraint().getInstanceGroup();
             boolean gatewayInstanceGroup = InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType());
-            List<String> primaryGatewayHostNames = instanceMetadataRepository.getPrimaryGatewayByInstanceGroup(stack.getId(), instanceGroup.getId()).stream()
+            List<String> primaryGatewayHostNames = instanceMetaDataService.getPrimaryGatewayByInstanceGroup(stack.getId(), instanceGroup.getId()).stream()
                     .filter(imd -> hostNames.contains(imd.getDiscoveryFQDN()) && imd.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY)
                     .map(InstanceMetaData::getDiscoveryFQDN)
                     .collect(Collectors.toList());

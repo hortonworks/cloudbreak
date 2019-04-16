@@ -19,22 +19,23 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 
 @Service
 public class MetadataSetupService {
+
     @Inject
     private ImageService imageService;
 
     @Inject
-    private InstanceGroupRepository instanceGroupRepository;
+    private InstanceGroupService instanceGroupService;
 
     @Inject
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private Clock clock;
@@ -42,7 +43,7 @@ public class MetadataSetupService {
     public int saveInstanceMetaData(Stack stack, Iterable<CloudVmMetaDataStatus> cloudVmMetaDataStatusList, InstanceStatus status) {
         try {
             int newInstances = 0;
-            Set<InstanceMetaData> allInstanceMetadata = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
+            Set<InstanceMetaData> allInstanceMetadata = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
             boolean primaryIgSelected = allInstanceMetadata.stream().anyMatch(imd -> imd.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY);
             Json imageJson = new Json(imageService.getImage(stack.getId()));
             for (CloudVmMetaDataStatus cloudVmMetaDataStatus : cloudVmMetaDataStatusList) {
@@ -57,7 +58,7 @@ public class MetadataSetupService {
                 // CB 1.0.x clusters do not have private id thus we cannot correlate them with instance groups thus keep the original one
                 InstanceGroup ig = instanceMetaDataEntry.getInstanceGroup();
                 String group = ig == null ? cloudInstance.getTemplate().getGroupName() : ig.getGroupName();
-                InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), group);
+                InstanceGroup instanceGroup = instanceGroupService.findOneByGroupNameInStack(stack.getId(), group).orElse(null);
                 instanceMetaDataEntry.setPrivateIp(md.getPrivateIp());
                 instanceMetaDataEntry.setPublicIp(md.getPublicIp());
                 instanceMetaDataEntry.setSshPort(md.getSshPort());
@@ -90,7 +91,7 @@ public class MetadataSetupService {
                     instanceMetaDataEntry.setInstanceStatus(status);
                     instanceMetaDataEntry.setImage(imageJson);
                 }
-                instanceMetaDataRepository.save(instanceMetaDataEntry);
+                instanceMetaDataService.save(instanceMetaDataEntry);
             }
             return newInstances;
         } catch (CloudbreakImageNotFoundException | JsonProcessingException ex) {
@@ -114,4 +115,5 @@ public class MetadataSetupService {
         }
         return new InstanceMetaData();
     }
+
 }

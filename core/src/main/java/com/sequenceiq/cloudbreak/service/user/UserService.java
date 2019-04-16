@@ -18,16 +18,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.UserPreferences;
-import com.sequenceiq.cloudbreak.repository.workspace.TenantRepository;
-import com.sequenceiq.cloudbreak.repository.workspace.UserPreferencesRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.UserRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.service.tenant.TenantService;
 
 @Service
 public class UserService {
@@ -43,13 +43,13 @@ public class UserService {
     private UserRepository userRepository;
 
     @Inject
-    private TenantRepository tenantRepository;
+    private TenantService tenantService;
 
     @Inject
     private TransactionService transactionService;
 
     @Inject
-    private UserPreferencesRepository userPreferencesRepository;
+    private UserPreferencesService userPreferencesService;
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -73,7 +73,10 @@ public class UserService {
         Semaphore semaphore = UNDER_OPERATION.computeIfAbsent(cloudbreakUser, iu -> new Semaphore(1));
         semaphore.acquire();
         try {
-            return cachedUserService.getUser(cloudbreakUser, userRepository::findByTenantNameAndUserId, this::createUser);
+            return cachedUserService.getUser(
+                    cloudbreakUser,
+                    (tenantName, userId) -> userRepository.findByTenantNameAndUserId(tenantName, userId).orElse(null),
+                    this::createUser);
         } finally {
             semaphore.release();
             UNDER_OPERATION.remove(cloudbreakUser);
@@ -84,7 +87,7 @@ public class UserService {
         return userRepository.findById(id);
     }
 
-    public User getByUserId(String userId) {
+    public Optional<User> getByUserId(String userId) {
         return userRepository.findByUserId(userId);
     }
 
@@ -93,7 +96,8 @@ public class UserService {
     }
 
     public Set<User> getAll(CloudbreakUser cloudbreakUser) {
-        User user = userRepository.findByUserId(cloudbreakUser.getUserId());
+        User user = userRepository.findByUserId(cloudbreakUser.getUserId())
+                .orElseThrow(NotFoundException.notFound("User", cloudbreakUser.getUserId()));
         return userRepository.findAllByTenant(user.getTenant());
     }
 
@@ -110,11 +114,11 @@ public class UserService {
                 user.setUserId(cloudbreakUser.getUserId());
                 user.setUserName(cloudbreakUser.getUsername());
 
-                Tenant tenant = tenantRepository.findByName(cloudbreakUser.getTenant());
+                Tenant tenant = tenantService.findByName(cloudbreakUser.getTenant()).orElse(null);
                 if (tenant == null) {
                     tenant = new Tenant();
                     tenant.setName(cloudbreakUser.getTenant());
-                    tenant = tenantRepository.save(tenant);
+                    tenant = tenantService.save(tenant);
                 }
                 user.setTenant(tenant);
                 if (!StringUtils.isEmpty(cloudbreakUser.getUserCrn())) {
@@ -123,7 +127,7 @@ public class UserService {
                 user = userRepository.save(user);
 
                 UserPreferences userPreferences = new UserPreferences(null, user);
-                userPreferences = userPreferencesRepository.save(userPreferences);
+                userPreferences = userPreferencesService.save(userPreferences);
                 user.setUserPreferences(userPreferences);
                 user = userRepository.save(user);
                 return user;
@@ -132,4 +136,5 @@ public class UserService {
             throw new TransactionRuntimeExecutionException(e);
         }
     }
+
 }

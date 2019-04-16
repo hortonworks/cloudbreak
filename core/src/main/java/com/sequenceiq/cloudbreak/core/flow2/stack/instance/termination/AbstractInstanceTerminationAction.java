@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
@@ -29,7 +30,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
@@ -39,7 +40,7 @@ abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
     private StackService stackService;
 
     @Inject
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
@@ -72,7 +73,8 @@ abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
         List<InstanceMetaData> instanceMetaDataList = new ArrayList<>();
         List<CloudInstance> cloudInstances = new ArrayList<>();
         for (String instanceId : instanceIds) {
-            InstanceMetaData instanceMetaData = instanceMetaDataRepository.findByInstanceId(stack.getId(), instanceId);
+            InstanceMetaData instanceMetaData = instanceMetaDataService.findByStackIdAndInstanceId(stack.getId(), instanceId)
+                    .orElseThrow(NotFoundException.notFound("instanceMetadata", instanceId));
             CloudInstance cloudInstance = metadataConverter.convert(instanceMetaData);
             instanceMetaDataList.add(instanceMetaData);
             cloudInstances.add(cloudInstance);
@@ -84,4 +86,5 @@ abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
     protected Object getFailurePayload(P payload, Optional<InstanceTerminationContext> flowContext, Exception ex) {
         return new StackFailureEvent(payload.getStackId(), ex);
     }
+
 }

@@ -50,9 +50,9 @@ public class ClusterSyncHandler implements ReactorEventHandler<ClusterSyncReques
         ClusterSyncResult result;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getStackId());
-            Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(request.getStackId());
+            Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(request.getStackId()).orElse(null);
             clusterStatusUpdater.updateClusterStatus(stack, cluster);
-            if (cluster.isAvailable() || cluster.isMaintenanceModeEnabled()) {
+            if (cluster != null && (cluster.isAvailable() || cluster.isMaintenanceModeEnabled())) {
                 instanceMetadataUpdater.updatePackageVersionsOnAllInstances(stack);
                 if (stack.isDatalake()) {
                     ambariDatalakeConfigProvider.collectAndStoreDatalakeResources(stack, cluster);
@@ -64,4 +64,5 @@ public class ClusterSyncHandler implements ReactorEventHandler<ClusterSyncReques
         }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
+
 }

@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -64,7 +65,7 @@ public class UserProfileService {
     }
 
     public UserProfile getOrCreate(User user) {
-        UserProfile userProfile = getSilently(user);
+        UserProfile userProfile = getSilently(user).orElse(null);
         if (userProfile == null) {
             userProfile = new UserProfile();
             userProfile.setUserName(user.getUserName());
@@ -82,11 +83,11 @@ public class UserProfileService {
         return userProfile;
     }
 
-    private UserProfile getSilently(User user) {
+    private Optional<UserProfile> getSilently(User user) {
         try {
             return userProfileRepository.findOneByUser(user.getId());
         } catch (AccessDeniedException ignore) {
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -100,10 +101,6 @@ public class UserProfileService {
 
     public Set<UserProfile> findByImageCatalogId(Long catalogId) {
         return userProfileRepository.findOneByImageCatalogName(catalogId);
-    }
-
-    public UserProfile findByUser(Long userId) {
-        return userProfileRepository.findOneByUser(userId);
     }
 
     private void addUiProperties(UserProfile userProfile) {

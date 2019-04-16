@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.Optional;
+
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
@@ -13,6 +15,6 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @DisableHasPermission
 public interface SecurityConfigRepository extends DisabledBaseRepository<SecurityConfig, Long> {
 
-    SecurityConfig findOneByStackId(Long stackId);
+    Optional<SecurityConfig> findOneByStackId(Long stackId);
 
 }

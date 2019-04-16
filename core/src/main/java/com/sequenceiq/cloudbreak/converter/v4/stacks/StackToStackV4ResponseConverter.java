@@ -41,7 +41,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -55,7 +55,7 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
     private ImageService imageService;
 
     @Inject
-    private ComponentConfigProvider componentConfigProvider;
+    private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
     private ConverterUtil converterUtil;
@@ -133,7 +133,7 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
 
     private void convertComponentConfig(StackV4Response stackV4Response, Stack source) {
         try {
-            CloudbreakDetails cloudbreakDetails = componentConfigProvider.getCloudbreakDetails(source.getId());
+            CloudbreakDetails cloudbreakDetails = componentConfigProviderService.getCloudbreakDetails(source.getId());
             if (cloudbreakDetails != null) {
                 stackV4Response.setCloudbreakDetails(getConversionService().convert(cloudbreakDetails, CloudbreakDetailsV4Response.class));
             }
@@ -188,16 +188,16 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
     private void addSharedServiceResponse(Stack stack, StackV4Response stackResponse) {
         SharedServiceV4Response sharedServiceResponse = new SharedServiceV4Response();
         if (stack.getDatalakeResourceId() != null) {
-            Optional<DatalakeResources> datalakeResources = datalakeResourcesService.getDatalakeResourcesById(stack.getDatalakeResourceId());
+            Optional<DatalakeResources> datalakeResources = datalakeResourcesService.findById(stack.getDatalakeResourceId());
             if (datalakeResources.isPresent()) {
                 DatalakeResources datalakeResource = datalakeResources.get();
                 sharedServiceResponse.setSharedClusterId(datalakeResource.getDatalakeStackId());
                 sharedServiceResponse.setSharedClusterName(datalakeResource.getName());
             }
         } else {
-            DatalakeResources datalakeResources = datalakeResourcesService.getDatalakeResourcesByDatalakeStackId(stack.getId());
-            if (datalakeResources != null) {
-                for (Stack connectedStacks : stackService.findClustersConnectedToDatalakeByDatalakeResourceId(datalakeResources.getId())) {
+            Optional<DatalakeResources> datalakeResources = datalakeResourcesService.findByDatalakeStackId(stack.getId());
+            if (datalakeResources.isPresent()) {
+                for (Stack connectedStacks : stackService.findClustersConnectedToDatalakeByDatalakeResourceId(datalakeResources.get().getId())) {
                     AttachedClusterInfoV4Response attachedClusterInfoResponse = new AttachedClusterInfoV4Response();
                     attachedClusterInfoResponse.setId(connectedStacks.getId());
                     attachedClusterInfoResponse.setName(connectedStacks.getName());

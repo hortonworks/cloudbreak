@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -47,7 +47,7 @@ public class StackImageUpdateService {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackImageUpdateService.class);
 
     @Inject
-    private ComponentConfigProvider componentConfigProvider;
+    private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
@@ -74,7 +74,7 @@ public class StackImageUpdateService {
             throw new CloudbreakServiceException("Failed to create json", e);
         }
 
-        componentConfigProvider.replaceImageComponentWithNew(imageComponent);
+        componentConfigProviderService.replaceImageComponentWithNew(imageComponent);
     }
 
     private Image getImageModelFromStatedImage(Stack stack, StatedImage image) {
@@ -133,7 +133,7 @@ public class StackImageUpdateService {
     }
 
     private Image getCurrentImage(Stack stack) throws CloudbreakImageNotFoundException {
-        return componentConfigProvider.getImage(stack.getId());
+        return componentConfigProviderService.getImage(stack.getId());
     }
 
     private boolean isOsVersionsMatch(Image currentImage, StatedImage newImage) {
@@ -151,7 +151,7 @@ public class StackImageUpdateService {
     }
 
     public boolean isCbVersionOk(Stack stack) {
-        CloudbreakDetails cloudbreakDetails = componentConfigProvider.getCloudbreakDetails(stack.getId());
+        CloudbreakDetails cloudbreakDetails = componentConfigProviderService.getCloudbreakDetails(stack.getId());
         VersionComparator versionComparator = new VersionComparator();
         String version = StringUtils.substringBefore(cloudbreakDetails.getVersion(), "-");
         int compare = versionComparator.compare(() -> version, () -> MIN_VERSION);

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.Optional;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -23,10 +24,11 @@ public interface InstanceGroupRepository extends DisabledBaseRepository<Instance
 
     @EntityGraph(value = "InstanceGroup.instanceMetaData", type = EntityGraphType.LOAD)
     @Query("SELECT i from InstanceGroup i WHERE i.stack.id = :stackId AND i.groupName = :groupName")
-    InstanceGroup findOneByGroupNameInStack(@Param("stackId") Long stackId, @Param("groupName") String groupName);
+    Optional<InstanceGroup> findOneByGroupNameInStack(@Param("stackId") Long stackId, @Param("groupName") String groupName);
 
     Set<InstanceGroup> findBySecurityGroup(SecurityGroup securityGroup);
 
     @EntityGraph(value = "InstanceGroup.instanceMetaData", type = EntityGraphType.LOAD)
     Set<InstanceGroup> findByStackId(@Param("stackId") Long stackId);
+
 }

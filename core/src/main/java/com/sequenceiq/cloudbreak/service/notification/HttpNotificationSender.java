@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.domain.Subscription;
 import com.sequenceiq.cloudbreak.notification.Notification;
 import com.sequenceiq.cloudbreak.notification.NotificationSender;
-import com.sequenceiq.cloudbreak.repository.SubscriptionRepository;
+import com.sequenceiq.cloudbreak.service.subscription.SubscriptionService;
 
 @Service
 public class HttpNotificationSender implements NotificationSender {
@@ -25,13 +25,13 @@ public class HttpNotificationSender implements NotificationSender {
     private static final String TEST_NOTIFICATION_TYPE = "TEST_NOTIFICATION";
 
     @Inject
-    private SubscriptionRepository subscriptionRepository;
+    private SubscriptionService subscriptionService;
 
     private final Client restClient = RestClientUtil.get(new ConfigKey(false, false, false));
 
     @Override
     public <T> void send(Notification<T> notification) {
-        Iterable<Subscription> subscriptions = subscriptionRepository.findAll();
+        Iterable<Subscription> subscriptions = subscriptionService.findAll();
         for (Subscription subscription : subscriptions) {
             String endpoint = subscription.getEndpoint();
             try {
@@ -48,7 +48,7 @@ public class HttpNotificationSender implements NotificationSender {
 
     @Override
     public void sendTestNotification(String userId) {
-        Iterable<Subscription> subscriptions = subscriptionRepository.findAll();
+        Iterable<Subscription> subscriptions = subscriptionService.findAll();
         for (Subscription subscription : subscriptions) {
             String endpoint = subscription.getEndpoint();
             LOGGER.debug("Sending test notification to the specified endpoint: '{}'", endpoint);

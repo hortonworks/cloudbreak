@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.MAINTENANC
 
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -120,12 +121,14 @@ public class ClusterCommonService {
         }
         LOGGER.debug("Cluster host adjustment request received. Stack id: {} ", stackId);
         ClusterDefinition clusterDefinition = stack.getCluster().getClusterDefinition();
-        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), updateJson.getHostGroupAdjustment().getHostGroup());
-        if (hostGroup == null) {
+        Optional<HostGroup> hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(),
+                updateJson.getHostGroupAdjustment().getHostGroup());
+        if (hostGroup.isEmpty()) {
             throw new BadRequestException(String.format("Host group '%s' not found or not member of the cluster '%s'",
                     updateJson.getHostGroupAdjustment().getHostGroup(), stack.getName()));
         }
-        ambariBlueprintValidator.validateHostGroupScalingRequest(clusterDefinition, hostGroup, updateJson.getHostGroupAdjustment().getScalingAdjustment());
+        ambariBlueprintValidator.validateHostGroupScalingRequest(clusterDefinition, hostGroup.get(),
+                updateJson.getHostGroupAdjustment().getScalingAdjustment());
         clusterService.updateHosts(stackId, updateJson.getHostGroupAdjustment());
     }
 

@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -65,12 +67,13 @@ public class ClusterTerminationFlowService {
         LOGGER.debug("Handling cluster delete failure event.");
         Exception errorDetails = payload.getException();
         LOGGER.info("Error during cluster termination flow: ", errorDetails);
-        Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(payload.getStackId());
-        if (cluster != null) {
-            cluster.setStatus(DELETE_FAILED);
-            cluster.setStatusReason(errorDetails.getMessage());
-            clusterService.updateCluster(cluster);
-            flowMessageService.fireEventAndLog(cluster.getStack().getId(), Msg.CLUSTER_DELETE_FAILED, DELETE_FAILED.name(), errorDetails.getMessage());
+        Optional<Cluster> cluster = clusterService.retrieveClusterByStackIdWithoutAuth(payload.getStackId());
+        if (cluster.isPresent()) {
+            cluster.get().setStatus(DELETE_FAILED);
+            cluster.get().setStatusReason(errorDetails.getMessage());
+            clusterService.updateCluster(cluster.get());
+            flowMessageService.fireEventAndLog(cluster.get().getStack().getId(), Msg.CLUSTER_DELETE_FAILED, DELETE_FAILED.name(), errorDetails.getMessage());
         }
     }
+
 }

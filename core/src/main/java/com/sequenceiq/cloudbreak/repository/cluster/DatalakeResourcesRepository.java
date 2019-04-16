@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.repository.cluster;
 
+import java.util.Optional;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -24,8 +25,9 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @Transactional(TxType.REQUIRED)
 @WorkspaceResourceType(resource = WorkspaceResource.STACK)
 public interface DatalakeResourcesRepository extends WorkspaceResourceRepository<DatalakeResources, Long> {
+
     @CheckPermissionsByReturnValue
-    DatalakeResources findByDatalakeStackId(Long datalakeStackId);
+    Optional<DatalakeResources> findByDatalakeStackId(Long datalakeStackId);
 
     @CheckPermissionsByWorkspaceId
     @Query("SELECT dr.name FROM DatalakeResources dr WHERE dr.workspace.id = :workspaceId AND dr.environment.id = :envId")
@@ -33,4 +35,5 @@ public interface DatalakeResourcesRepository extends WorkspaceResourceRepository
 
     @DisableCheckPermissions
     Long countDatalakeResourcesByEnvironment(EnvironmentView environment);
+
 }

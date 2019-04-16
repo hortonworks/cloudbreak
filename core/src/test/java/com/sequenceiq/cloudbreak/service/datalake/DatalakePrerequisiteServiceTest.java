@@ -38,7 +38,7 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.service.events.DefaultCloudbreakEventService;
-import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
+import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.structuredevent.event.LdapDetails;
@@ -63,7 +63,7 @@ public class DatalakePrerequisiteServiceTest {
     private LdapConfigService ldapConfigService;
 
     @Mock
-    private KerberosService kerberosService;
+    private KerberosConfigService kerberosConfigService;
 
     @Mock
     private RdsConnectionValidator rdsConnectionValidator;
@@ -125,7 +125,7 @@ public class DatalakePrerequisiteServiceTest {
         doNothing().when(rdsConnectionValidator).validateRdsConnection(any(RDSConfig.class));
         doNothing().when(defaultCloudbreakEventService).fireRdsEvent(any(RdsDetails.class), anyString(), anyString(), anyBoolean());
 
-        when(kerberosService.createInEnvironment(any(KerberosConfig.class), anySet(), anyLong())).thenReturn(kerberosConfig());
+        when(kerberosConfigService.createInEnvironment(any(KerberosConfig.class), anySet(), anyLong())).thenReturn(kerberosConfig());
         when(ldapConfigService.createInEnvironment(any(LdapConfig.class), anySet(), anyLong())).thenReturn(ldapConfig());
         when(rdsConfigService.createInEnvironment(any(RDSConfig.class), anySet(), anyLong())).thenReturn(rdsConfig());
 

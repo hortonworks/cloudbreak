@@ -22,4 +22,9 @@ public class ContainerService {
     public Set<Container> findContainersInCluster(Long clusterId) {
         return containerRepository.findContainersInCluster(clusterId);
     }
+
+    public void deleteAll(Iterable<Container> containers) {
+        containerRepository.deleteAll(containers);
+    }
+
 }

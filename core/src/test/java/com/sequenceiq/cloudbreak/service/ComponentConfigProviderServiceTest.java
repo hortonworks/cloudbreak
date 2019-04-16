@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -18,13 +20,13 @@ import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.ComponentRepository;
 
-public class ComponentConfigProviderTest {
+public class ComponentConfigProviderServiceTest {
 
     @Mock
     private ComponentRepository componentRepository;
 
     @InjectMocks
-    private ComponentConfigProvider componentConfigProvider;
+    private ComponentConfigProviderService componentConfigProviderService;
 
     @Before
     public void init() {
@@ -38,8 +40,8 @@ public class ComponentConfigProviderTest {
         Component original = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json("asdf"), stack);
         Component modified = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json("fdas"), stack);
         when(componentRepository.findComponentByStackIdComponentTypeName(eq(stack.getId()), eq(original.getComponentType()), eq(original.getName())))
-                .thenReturn(original);
-        componentConfigProvider.replaceImageComponentWithNew(modified);
+                .thenReturn(Optional.of(original));
+        componentConfigProviderService.replaceImageComponentWithNew(modified);
         ArgumentCaptor<Component> argument = ArgumentCaptor.forClass(Component.class);
         verify(componentRepository).save(argument.capture());
         assertEquals(modified.getAttributes(), argument.getValue().getAttributes());

@@ -16,4 +16,5 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 public interface SubscriptionRepository extends DisabledBaseRepository<Subscription, Long> {
 
     List<Subscription> findByClientIdAndEndpoint(String clientId, String endpoint);
+
 }

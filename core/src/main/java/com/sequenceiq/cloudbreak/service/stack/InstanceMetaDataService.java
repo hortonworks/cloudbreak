@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -28,7 +29,7 @@ public class InstanceMetaDataService {
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceMetaDataService.class);
 
     @Inject
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private InstanceMetaDataRepository repository;
 
     public void updateInstanceStatus(Iterable<InstanceGroup> instanceGroup,
             Map<InstanceGroupType, com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus> newStatusByGroupType) {
@@ -37,7 +38,7 @@ public class InstanceMetaDataService {
             if (newStatus != null) {
                 for (InstanceMetaData instanceMetaData : group.getNotDeletedInstanceMetaDataSet()) {
                     instanceMetaData.setInstanceStatus(newStatus);
-                    instanceMetaDataRepository.save(instanceMetaData);
+                    repository.save(instanceMetaData);
                 }
             }
         }
@@ -49,7 +50,7 @@ public class InstanceMetaDataService {
             for (InstanceMetaData instanceMetaData : group.getNotDeletedInstanceMetaDataSet()) {
                 if (candidateAddresses.contains(instanceMetaData.getDiscoveryFQDN())) {
                     instanceMetaData.setInstanceStatus(newStatus);
-                    instanceMetaDataRepository.save(instanceMetaData);
+                    repository.save(instanceMetaData);
                 }
             }
         }
@@ -64,7 +65,7 @@ public class InstanceMetaDataService {
                 instanceMetaData.setInstanceStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED);
                 instanceMetaData.setInstanceGroup(instanceGroup);
                 if (save) {
-                    instanceMetaDataRepository.save(instanceMetaData);
+                    repository.save(instanceMetaData);
                 }
                 instanceGroup.getInstanceMetaDataSet().add(instanceMetaData);
             }
@@ -76,7 +77,7 @@ public class InstanceMetaDataService {
         Set<InstanceGroup> instanceGroups = stack.getInstanceGroups();
         for (Group group : groups) {
             InstanceGroup instanceGroup = getInstanceGroup(instanceGroups, group.getName());
-            List<InstanceMetaData> existingInGroup = instanceMetaDataRepository.findAllByInstanceGroupAndInstanceStatus(instanceGroup,
+            List<InstanceMetaData> existingInGroup = repository.findAllByInstanceGroupAndInstanceStatus(instanceGroup,
                     com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED);
             for (CloudInstance cloudInstance : group.getInstances()) {
                 InstanceTemplate instanceTemplate = cloudInstance.getTemplate();
@@ -86,28 +87,28 @@ public class InstanceMetaDataService {
                     instanceMetaData.setPrivateId(instanceTemplate.getPrivateId());
                     instanceMetaData.setInstanceStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED);
                     instanceMetaData.setInstanceGroup(instanceGroup);
-                    instanceMetaDataRepository.save(instanceMetaData);
+                    repository.save(instanceMetaData);
                 }
             }
         }
     }
 
     public void deleteInstanceRequest(Long stackId, Long privateId) {
-        Set<InstanceMetaData> instanceMetaData = instanceMetaDataRepository.findAllInStack(stackId);
+        Set<InstanceMetaData> instanceMetaData = repository.findAllInStack(stackId);
         for (InstanceMetaData metaData : instanceMetaData) {
             if (metaData.getPrivateId().equals(privateId)) {
-                instanceMetaDataRepository.delete(metaData);
+                repository.delete(metaData);
                 break;
             }
         }
     }
 
     public Set<InstanceMetaData> unusedInstancesInInstanceGroupByName(Long stackId, String instanceGroupName) {
-        return instanceMetaDataRepository.findUnusedHostsInInstanceGroup(stackId, instanceGroupName);
+        return repository.findUnusedHostsInInstanceGroup(stackId, instanceGroupName);
     }
 
     public Set<InstanceMetaData> getAllInstanceMetadataByStackId(Long stackId) {
-        return instanceMetaDataRepository.findAllInStack(stackId);
+        return repository.findAllInStack(stackId);
     }
 
     private InstanceGroup getInstanceGroup(Iterable<InstanceGroup> instanceGroups, String groupName) {
@@ -119,20 +120,69 @@ public class InstanceMetaDataService {
         return null;
     }
 
-    public InstanceMetaData getPrimaryGatewayInstanceMetadata(long stackId) {
+    public Optional<InstanceMetaData> getPrimaryGatewayInstanceMetadata(long stackId) {
         try {
-            return instanceMetaDataRepository.getPrimaryGatewayInstanceMetadata(stackId);
+            return repository.getPrimaryGatewayInstanceMetadata(stackId);
         } catch (AccessDeniedException ignore) {
             LOGGER.debug("No primary gateway for stack [{}]", stackId);
-            return null;
+            return Optional.empty();
         }
     }
 
-    public InstanceMetaData pureSave(InstanceMetaData instanceMetaData) {
-        return instanceMetaDataRepository.save(instanceMetaData);
+    public InstanceMetaData save(InstanceMetaData instanceMetaData) {
+        return repository.save(instanceMetaData);
     }
 
     public Set<InstanceMetaData> findAllInStack(Long stackId) {
-        return instanceMetaDataRepository.findAllInStack(stackId);
+        return repository.findAllInStack(stackId);
     }
+
+    public Set<InstanceMetaData> findNotTerminatedForStack(Long stackId) {
+        return repository.findNotTerminatedForStack(stackId);
+    }
+
+    public Optional<InstanceMetaData> findByStackIdAndInstanceId(Long stackId, String instanceId) {
+        return repository.findByStackIdAndInstanceId(stackId, instanceId);
+    }
+
+    public Optional<InstanceMetaData> findHostInStack(Long stackId, String hostName) {
+        return repository.findHostInStack(stackId, hostName);
+    }
+
+    public Set<InstanceMetaData> findUnusedHostsInInstanceGroup(Long instanceGroupId) {
+        return repository.findUnusedHostsInInstanceGroup(instanceGroupId);
+    }
+
+    public void delete(InstanceMetaData instanceMetaData) {
+        repository.delete(instanceMetaData);
+    }
+
+    public Optional<InstanceMetaData> findNotTerminatedByPrivateAddress(Long stackId, String privateAddress) {
+        return repository.findNotTerminatedByPrivateAddress(stackId, privateAddress);
+    }
+
+    public List<InstanceMetaData> findAliveInstancesInInstanceGroup(Long instanceGroupId) {
+        return repository.findAliveInstancesInInstanceGroup(instanceGroupId);
+    }
+
+    public Iterable<InstanceMetaData> saveAll(Iterable<InstanceMetaData> instanceMetaData) {
+        return repository.saveAll(instanceMetaData);
+    }
+
+    public List<InstanceMetaData> getPrimaryGatewayByInstanceGroup(Long stackId, Long instanceGroupId) {
+        return repository.getPrimaryGatewayByInstanceGroup(stackId, instanceGroupId);
+    }
+
+    public Optional<String> getServerCertByStackId(Long stackId) {
+        return repository.getServerCertByStackId(stackId);
+    }
+
+    public Optional<InstanceMetaData> findById(Long id) {
+        return repository.findById(id);
+    }
+
+    public Set<InstanceMetaData> findRemovableInstances(Long stackId, String groupName) {
+        return repository.findRemovableInstances(stackId, groupName);
+    }
+
 }

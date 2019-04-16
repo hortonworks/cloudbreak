@@ -48,10 +48,10 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
-import com.sequenceiq.cloudbreak.repository.OrchestratorRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -69,7 +69,7 @@ public class ClusterBootstrapper {
     private StackService stackService;
 
     @Inject
-    private OrchestratorRepository orchestratorRepository;
+    private OrchestratorService orchestratorService;
 
     @Inject
     private PollingService<HostBootstrapApiContext> hostBootstrapApiPollingService;
@@ -102,7 +102,7 @@ public class ClusterBootstrapper {
     private ClusterComponentConfigProvider clusterComponentProvider;
 
     @Inject
-    private ComponentConfigProvider componentConfigProvider;
+    private ComponentConfigProviderService componentConfigProviderService;
 
     public void bootstrapMachines(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
@@ -154,7 +154,7 @@ public class ClusterBootstrapper {
 
             BootstrapParams params = new BootstrapParams();
             params.setCloud(stack.cloudPlatform());
-            Image image = componentConfigProvider.getImage(stack.getId());
+            Image image = componentConfigProviderService.getImage(stack.getId());
             params.setOs(image.getOs());
 
             hostOrchestrator.bootstrap(allGatewayConfig, nodes, params, clusterDeletionBasedModel(stack.getId(), null));
@@ -170,7 +170,7 @@ public class ClusterBootstrapper {
             Orchestrator orchestrator = stack.getOrchestrator();
             orchestrator.setApiEndpoint(gatewayIp + ':' + stack.getGatewayPort());
             orchestrator.setType(hostOrchestrator.name());
-            orchestratorRepository.save(orchestrator);
+            orchestratorService.save(orchestrator);
             if (TIMEOUT.equals(allNodesAvailabilityPolling)) {
                 clusterBootstrapperErrorHandler.terminateFailedNodes(hostOrchestrator, null, stack, gatewayConfig, nodes);
             }
@@ -256,7 +256,7 @@ public class ClusterBootstrapper {
         params.setCloud(stack.cloudPlatform());
         Image image;
         try {
-            image = componentConfigProvider.getImage(stack.getId());
+            image = componentConfigProviderService.getImage(stack.getId());
             params.setOs(image.getOs());
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.info("Image not found for stack: {}, err: {}", stack.getId(), e.getMessage());

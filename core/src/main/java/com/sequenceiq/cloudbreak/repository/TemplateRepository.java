@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @HasPermission
 public interface TemplateRepository extends BaseRepository<Template, Long> {
 
-    Long countByTopology(Topology topology);
-
     Set<Template> findByTopology(Topology topology);
+
 }

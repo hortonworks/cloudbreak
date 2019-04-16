@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -16,20 +17,22 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.repository.ComponentRepository;
 
 @Service
-public class ComponentConfigProvider {
+public class ComponentConfigProviderService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ComponentConfigProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComponentConfigProviderService.class);
 
     @Inject
     private ComponentRepository componentRepository;
 
+    @Nullable
     public Component getComponent(Long stackId, ComponentType componentType, String name) {
-        return componentRepository.findComponentByStackIdComponentTypeName(stackId, componentType, name);
+        return componentRepository.findComponentByStackIdComponentTypeName(stackId, componentType, name).orElse(null);
     }
 
     public Set<Component> getAllComponentsByStackIdAndType(Long stackId, Set<ComponentType> componentTypes) {
@@ -123,7 +126,7 @@ public class ComponentConfigProvider {
 
     public void replaceImageComponentWithNew(Component component) {
         Component componentEntity = componentRepository.findComponentByStackIdComponentTypeName(component.getStack().getId(), component.getComponentType(),
-                component.getName());
+                component.getName()).orElseThrow(NotFoundException.notFound("component", component.getName()));
         componentEntity.setAttributes(component.getAttributes());
         componentEntity.setName(component.getName());
         componentRepository.save(componentEntity);

@@ -35,5 +35,5 @@ public interface SecurityGroupRepository extends WorkspaceResourceRepository<Sec
 
     @Override
     @DisableCheckPermissions
-    SecurityGroup findByNameAndWorkspace(String name, Workspace workspace);
+    Optional<SecurityGroup> findByNameAndWorkspace(String name, Workspace workspace);
 }

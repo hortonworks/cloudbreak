@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -21,7 +22,7 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @DisableHasPermission
 public interface FlowLogRepository extends DisabledBaseRepository<FlowLog, Long> {
 
-    FlowLog findFirstByFlowIdOrderByCreatedDesc(String flowId);
+    Optional<FlowLog> findFirstByFlowIdOrderByCreatedDesc(String flowId);
 
     @Query("SELECT DISTINCT fl.flowId FROM FlowLog fl "
             + "WHERE fl.stateStatus = 'PENDING' AND fl.stackId = :stackId "

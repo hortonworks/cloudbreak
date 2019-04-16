@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Rule;
@@ -36,12 +37,12 @@ import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
-import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.repository.ResourceRepository;
 import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -51,16 +52,16 @@ public class ClusterBootstrapperErrorHandlerTest {
     public final ExpectedException thrown = ExpectedException.none();
 
     @Mock
-    private ResourceRepository resourceRepository;
+    private ResourceService resourceService;
 
     @Mock
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Mock
-    private InstanceGroupRepository instanceGroupRepository;
+    private InstanceGroupService instanceGroupService;
 
     @Mock
-    private HostMetadataRepository hostMetadataRepository;
+    private HostMetadataService hostMetadataService;
 
     @Mock
     private CloudbreakEventService eventService;
@@ -85,27 +86,27 @@ public class ClusterBootstrapperErrorHandlerTest {
         Stack stack = TestUtil.stack();
 
         when(orchestrator.getAvailableNodes(any(GatewayConfig.class), anySet())).thenReturn(new ArrayList<>());
-        when(instanceMetaDataRepository.findNotTerminatedByPrivateAddress(anyLong(), anyString())).thenAnswer((Answer<InstanceMetaData>) invocation -> {
+        when(instanceMetaDataService.findNotTerminatedByPrivateAddress(anyLong(), anyString())).thenAnswer((Answer<Optional<InstanceMetaData>>) invocation -> {
             Object[] args = invocation.getArguments();
             String ip = (String) args[1];
             for (InstanceMetaData instanceMetaData : stack.getNotDeletedInstanceMetaDataSet()) {
                 if (instanceMetaData.getPrivateIp().equals(ip)) {
-                    return instanceMetaData;
+                    return Optional.of(instanceMetaData);
                 }
             }
-            return null;
+            return Optional.empty();
         });
-        when(instanceGroupRepository.findOneByGroupNameInStack(anyLong(), anyString())).thenAnswer((Answer<InstanceGroup>) invocation -> {
+        when(instanceGroupService.findOneByGroupNameInStack(anyLong(), anyString())).thenAnswer((Answer<Optional<InstanceGroup>>) invocation -> {
             Object[] args = invocation.getArguments();
             String name = (String) args[1];
             for (InstanceMetaData instanceMetaData : stack.getNotDeletedInstanceMetaDataSet()) {
                 if (instanceMetaData.getInstanceGroup().getGroupName().equals(name)) {
                     InstanceGroup instanceGroup = instanceMetaData.getInstanceGroup();
                     instanceGroup.getInstanceMetaDataSet().forEach(im -> im.setInstanceStatus(InstanceStatus.TERMINATED));
-                    return instanceGroup;
+                    return Optional.of(instanceGroup);
                 }
             }
-            return null;
+            return Optional.empty();
         });
         when(cloudbreakMessagesService.getMessage(eq("bootstrapper.error.invalide.nodecount"), any())).thenReturn("invalide.nodecount");
         thrown.expect(CloudbreakOrchestratorFailedException.class);
@@ -121,41 +122,41 @@ public class ClusterBootstrapperErrorHandlerTest {
         Stack stack = TestUtil.stack();
 
         when(orchestrator.getAvailableNodes(any(GatewayConfig.class), anySet())).thenReturn(new ArrayList<>());
-        when(instanceGroupRepository.save(any(InstanceGroup.class))).then(returnsFirstArg());
-        when(instanceMetaDataRepository.save(any(InstanceMetaData.class))).then(returnsFirstArg());
-        when(resourceRepository.findByStackIdAndNameAndType(nullable(Long.class), nullable(String.class), nullable(ResourceType.class)))
-                .thenReturn(new Resource());
+        when(instanceGroupService.save(any(InstanceGroup.class))).then(returnsFirstArg());
+        when(instanceMetaDataService.save(any(InstanceMetaData.class))).then(returnsFirstArg());
+        when(resourceService.findByStackIdAndNameAndType(nullable(Long.class), nullable(String.class), nullable(ResourceType.class)))
+                .thenReturn(Optional.of(new Resource()));
         when(connector.removeInstances(any(Stack.class), anySet(), anyString())).thenReturn(new HashSet<>());
-        when(instanceMetaDataRepository.findNotTerminatedByPrivateAddress(anyLong(), anyString())).thenAnswer((Answer<InstanceMetaData>) invocation -> {
+        when(instanceMetaDataService.findNotTerminatedByPrivateAddress(anyLong(), anyString())).thenAnswer((Answer<Optional<InstanceMetaData>>) invocation -> {
             Object[] args = invocation.getArguments();
             String ip = (String) args[1];
             for (InstanceMetaData instanceMetaData : stack.getNotDeletedInstanceMetaDataSet()) {
                 if (instanceMetaData.getPrivateIp().equals(ip)) {
-                    return instanceMetaData;
+                    return Optional.of(instanceMetaData);
                 }
             }
-            return null;
+            return Optional.empty();
         });
-        when(instanceGroupRepository.findOneByGroupNameInStack(anyLong(), anyString())).thenAnswer((Answer<InstanceGroup>) invocation -> {
+        when(instanceGroupService.findOneByGroupNameInStack(anyLong(), anyString())).thenAnswer((Answer<Optional<InstanceGroup>>) invocation -> {
             Object[] args = invocation.getArguments();
             String name = (String) args[1];
             for (InstanceMetaData instanceMetaData : stack.getNotDeletedInstanceMetaDataSet()) {
                 if (instanceMetaData.getInstanceGroup().getGroupName().equals(name)) {
-                    return instanceMetaData.getInstanceGroup();
+                    return Optional.ofNullable(instanceMetaData.getInstanceGroup());
                 }
             }
-            return null;
+            return Optional.empty();
         });
         underTest.terminateFailedNodes(null, orchestrator, TestUtil.stack(),
                 new GatewayConfig("10.0.0.1", "198.0.0.1", "10.0.0.1", 8443, false), prepareNodes(stack));
 
         verify(eventService, times(4)).fireCloudbreakEvent(anyLong(), anyString(), nullable(String.class));
-        verify(instanceGroupRepository, times(3)).save(any(InstanceGroup.class));
-        verify(instanceMetaDataRepository, times(3)).save(any(InstanceMetaData.class));
+        verify(instanceGroupService, times(3)).save(any(InstanceGroup.class));
+        verify(instanceMetaDataService, times(3)).save(any(InstanceMetaData.class));
         verify(connector, times(3)).removeInstances(any(Stack.class), anySet(), anyString());
-        verify(resourceRepository, times(3)).findByStackIdAndNameAndType(anyLong(), anyString(), nullable(ResourceType.class));
-        verify(resourceRepository, times(3)).delete(nullable(Resource.class));
-        verify(instanceGroupRepository, times(3)).findOneByGroupNameInStack(anyLong(), anyString());
+        verify(resourceService, times(3)).findByStackIdAndNameAndType(anyLong(), anyString(), nullable(ResourceType.class));
+        verify(resourceService, times(3)).delete(nullable(Resource.class));
+        verify(instanceGroupService, times(3)).findOneByGroupNameInStack(anyLong(), anyString());
 
     }
 

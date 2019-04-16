@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.repository.cluster;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -35,12 +36,12 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     Cluster save(Cluster entity);
 
     @CheckPermissionsByReturnValue
-    Cluster findOneByStackId(long stackId);
+    Optional<Cluster> findOneByStackId(long stackId);
 
     @CheckPermissionsByReturnValue
     @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.hostGroups LEFT JOIN FETCH c.containers LEFT JOIN FETCH c.components "
             + "LEFT JOIN FETCH c.rdsConfigs WHERE c.id= :id")
-    Cluster findOneWithLists(@Param("id") Long id);
+    Optional<Cluster> findOneWithLists(@Param("id") Long id);
 
     @CheckPermissionsByReturnValue
     @Query("SELECT c FROM Cluster c WHERE c.stack IS NOT NULL AND c.stack.terminated IS NULL AND c.status IN :statuses")

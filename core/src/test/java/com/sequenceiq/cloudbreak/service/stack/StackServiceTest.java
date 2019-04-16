@@ -53,12 +53,8 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
-import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.repository.SaltSecurityConfigRepository;
-import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
@@ -68,6 +64,8 @@ import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.saltsecurityconf.SaltSecurityConfigService;
+import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -106,7 +104,7 @@ public class StackServiceTest {
     private StackRepository stackRepository;
 
     @Mock
-    private InstanceMetaDataRepository instanceMetaDataRepository;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Mock
     private ReactorFlowManager flowManager;
@@ -130,10 +128,10 @@ public class StackServiceTest {
     private StackAuthentication stackAuthentication;
 
     @Mock
-    private ComponentConfigProvider componentConfigProvider;
+    private ComponentConfigProviderService componentConfigProviderService;
 
     @Mock
-    private InstanceGroupRepository instanceGroupRepository;
+    private InstanceGroupService instanceGroupService;
 
     @Mock
     private TlsSecurityService tlsSecurityService;
@@ -142,10 +140,10 @@ public class StackServiceTest {
     private SecurityConfig securityConfig;
 
     @Mock
-    private SecurityConfigRepository securityConfigRepository;
+    private SecurityConfigService securityConfigService;
 
     @Mock
-    private SaltSecurityConfigRepository saltSecurityConfigRepository;
+    private SaltSecurityConfigService saltSecurityConfigService;
 
     @Mock
     private ImageService imageService;
@@ -192,7 +190,7 @@ public class StackServiceTest {
         DatalakeResources datalakeResources = new DatalakeResources();
         datalakeResources.setDatalakeStackId(STACK_ID);
         datalakeResources.setId(DATALAKE_RESOURCE_ID);
-        when(datalakeResourcesService.getDatalakeResourcesByDatalakeStackId(anyLong())).thenReturn(datalakeResources);
+        when(datalakeResourcesService.findByDatalakeStackId(anyLong())).thenReturn(Optional.of(datalakeResources));
     }
 
     @Test
@@ -205,7 +203,7 @@ public class StackServiceTest {
 
     @Test
     public void testDeleteWhenStackCouldNotFindByItsNameForWorkspaceAndForcedAndDeleteDepsThenExceptionShouldCome() {
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(null);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.empty());
 
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_NAME));
@@ -220,7 +218,7 @@ public class StackServiceTest {
 
     @Test
     public void testDeleteWhenStackCouldNotFindByItsNameForWorkspaceAndDeleteDepsButNotForcedThenExceptionShouldCome() {
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(null);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.empty());
 
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_NAME));
@@ -235,7 +233,7 @@ public class StackServiceTest {
 
     @Test
     public void testDeleteWhenStackCouldNotFindByItsNameForWorkspaceAndForcedButNotDeleteDepsThenExceptionShouldCome() {
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(null);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.empty());
 
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_NAME));
@@ -250,7 +248,7 @@ public class StackServiceTest {
 
     @Test
     public void testDeleteWhenStackCouldNotFindByItsNameForWorkspaceAndNotForcedAndNotDeleteDepsThenExceptionShouldCome() {
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(null);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.empty());
 
         expectedException.expect(NotFoundException.class);
         expectedException.expectMessage(String.format(STACK_NOT_FOUND_BY_NAME_MESSAGE, STACK_NAME));
@@ -323,8 +321,9 @@ public class StackServiceTest {
     @Test
     public void testDeleteByIdWhenStackIsAlreadyDeletedThenDeletionWillNotTrigger() {
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
         doNothing().when(permissionCheckingUtils).checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
         when(stack.isDeleteCompleted()).thenReturn(true);
 
         underTest.delete(STACK_ID, true, true, user);
@@ -338,7 +337,7 @@ public class StackServiceTest {
 
     @Test
     public void testDeleteByNameAndWorkspaceIdWhenStackIsAlreadyDeletedThenDeletionWillNotTrigger() {
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
         doNothing().when(permissionCheckingUtils).checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
         when(stack.isDeleteCompleted()).thenReturn(true);
 
@@ -354,7 +353,7 @@ public class StackServiceTest {
     @Test
     public void testDeleteByIdWhenUserHasNoWriteRightOverStackThenExceptionShouldComeAndTerminationShouldNotBeCalled() {
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
         doThrow(new AccessDeniedException(STACK_DELETE_ACCESS_DENIED)).when(permissionCheckingUtils).checkPermissionByWorkspaceIdForUser(WORKSPACE_ID,
                 WorkspaceResource.STACK, ResourceAction.WRITE, user);
 
@@ -372,7 +371,7 @@ public class StackServiceTest {
 
     @Test
     public void testDeleteByNameAndWorkspaceIdWhenUserHasNoWriteRightOverStackThenExceptionShouldComeAndTerminationShouldNotBeCalled() {
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
         doThrow(new AccessDeniedException(STACK_DELETE_ACCESS_DENIED)).when(permissionCheckingUtils)
                 .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
 
@@ -391,8 +390,8 @@ public class StackServiceTest {
     @Test
     public void testDeleteByIdWhenUserHasWriteRightOverStackAndStackIsNotDeletedThenTerminationShouldBeCalled() {
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
         doNothing().when(permissionCheckingUtils).checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
 
         underTest.delete(STACK_ID, true, true, user);
 
@@ -406,8 +405,8 @@ public class StackServiceTest {
 
     @Test
     public void testDeleteByNameAndWorkspaceIdWhenUserHasWriteRightOverStackAndStackIsNotDeletedThenTerminationShouldBeCalled() {
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
         doNothing().when(permissionCheckingUtils).checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
 
         underTest.delete(STACK_NAME, WORKSPACE_ID, true, true, user);
 
@@ -425,7 +424,7 @@ public class StackServiceTest {
         Stack stack2 = mock(Stack.class);
         when(stack1.getName()).thenReturn("stack1");
         when(stack2.getName()).thenReturn("stack2");
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
         when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack1, stack2));
 
 
@@ -447,7 +446,7 @@ public class StackServiceTest {
         Stack stack2 = mock(Stack.class);
         when(stack1.getName()).thenReturn("stack1");
         when(stack2.getName()).thenReturn("stack2");
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
         when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack1, stack2));
 
 
@@ -469,7 +468,7 @@ public class StackServiceTest {
         Stack stack2 = mock(Stack.class);
         when(stack1.getName()).thenReturn("stack1");
         when(stack2.getName()).thenReturn("stack2");
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
         when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack1, stack2));
 
 
@@ -491,7 +490,7 @@ public class StackServiceTest {
         Stack stack2 = mock(Stack.class);
         when(stack1.getName()).thenReturn("stack1");
         when(stack2.getName()).thenReturn("stack2");
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
         when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack1, stack2));
 
 
@@ -511,7 +510,7 @@ public class StackServiceTest {
     public void testDeleteWithForceAndDeleteDepsByNameWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn("stack");
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(this.stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(this.stack));
         when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack));
 
 
@@ -531,7 +530,7 @@ public class StackServiceTest {
     public void testDeleteWithForceButWithoutDeleteDepsByNameWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn("stack");
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(this.stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(this.stack));
         when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack));
 
 
@@ -551,7 +550,7 @@ public class StackServiceTest {
     public void testDeleteWithOutForceButWithDeleteDepsByNameWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn("stack");
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(this.stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(this.stack));
         when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack));
 
 
@@ -571,7 +570,7 @@ public class StackServiceTest {
     public void testDeleteWithOutForceAndDeleteDepsByNameWhenStachHasOneAttachedClustersThenExceptionShouldComeAndNoTerminationProcessShouldStart() {
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn("stack");
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(this.stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(this.stack));
         when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack));
 
 
@@ -594,7 +593,7 @@ public class StackServiceTest {
         when(stack1.getName()).thenReturn("stack1");
         when(stack2.getName()).thenReturn("stack2");
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
         when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack1, stack2));
 
 
@@ -617,7 +616,7 @@ public class StackServiceTest {
         when(stack1.getName()).thenReturn("stack1");
         when(stack2.getName()).thenReturn("stack2");
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
         when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack1, stack2));
 
 
@@ -640,7 +639,7 @@ public class StackServiceTest {
         when(stack1.getName()).thenReturn("stack1");
         when(stack2.getName()).thenReturn("stack2");
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
         when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack1, stack2));
 
 
@@ -663,7 +662,7 @@ public class StackServiceTest {
         when(stack1.getName()).thenReturn("stack1");
         when(stack2.getName()).thenReturn("stack2");
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(stack));
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
         when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack1, stack2));
 
 
@@ -684,7 +683,7 @@ public class StackServiceTest {
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn("stack");
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(this.stack));
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(this.stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(this.stack));
         when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack));
 
 
@@ -705,7 +704,7 @@ public class StackServiceTest {
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn("stack");
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(this.stack));
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(this.stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(this.stack));
         when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack));
 
 
@@ -726,7 +725,7 @@ public class StackServiceTest {
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn("stack");
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(this.stack));
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(this.stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(this.stack));
         when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack));
 
 
@@ -747,7 +746,7 @@ public class StackServiceTest {
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn("stack");
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.of(this.stack));
-        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(this.stack);
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(this.stack));
         when(stackRepository.findEphemeralClusters(DATALAKE_RESOURCE_ID)).thenReturn(Set.of(stack));
 
 
@@ -788,7 +787,7 @@ public class StackServiceTest {
         } finally {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
             verify(securityConfig, times(1)).setStack(stack);
-            verify(securityConfigRepository, times(1)).save(securityConfig);
+            verify(securityConfigService, times(1)).save(securityConfig);
         }
     }
 
@@ -810,7 +809,7 @@ public class StackServiceTest {
         } finally {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
             verify(securityConfig, times(1)).setStack(stack);
-            verify(securityConfigRepository, times(1)).save(securityConfig);
+            verify(securityConfigService, times(1)).save(securityConfig);
 
             verify(stackUpdater, times(0)).updateStackStatus(eq(Long.MAX_VALUE), eq(DetailedStackStatus.PROVISION_FAILED), anyString());
         }

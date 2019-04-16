@@ -93,8 +93,8 @@ public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig>
     }
 
     public RDSConfig createIfNotExists(User user, RDSConfig rdsConfig, Long workspaceId) {
-        RDSConfig configByName = rdsConfigRepository.findByNameAndWorkspaceId(rdsConfig.getName(), workspaceId);
-        if (configByName == null) {
+        Optional<RDSConfig> configByName = rdsConfigRepository.findByNameAndWorkspaceId(rdsConfig.getName(), workspaceId);
+        if (configByName.isEmpty()) {
             Workspace workspace = getWorkspaceService().get(workspaceId, user);
             return create(rdsConfig, workspace, user);
         }
@@ -200,4 +200,5 @@ public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig>
         config.setConnectionPassword(password);
         return config;
     }
+
 }

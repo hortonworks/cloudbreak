@@ -67,7 +67,7 @@ public class AmbariClusterCreationSetupServiceTest {
     private ClusterDecorator clusterDecorator;
 
     @Mock
-    private ComponentConfigProvider componentConfigProvider;
+    private ComponentConfigProviderService componentConfigProviderService;
 
     @Mock
     private ClusterDefinitionUtils clusterDefinitionUtils;
@@ -139,7 +139,7 @@ public class AmbariClusterCreationSetupServiceTest {
         cluster.setKerberosConfig(kerberosConfig);
         cluster.setClusterDefinition(clusterDefinition);
         when(clusterDecorator.decorate(any(), any(), any(), any(), any(), any())).thenReturn(cluster);
-        when(componentConfigProvider.getAllComponentsByStackIdAndType(any(), any())).thenReturn(Sets.newHashSet(ambariComponent, imageComponent));
+        when(componentConfigProviderService.getAllComponentsByStackIdAndType(any(), any())).thenReturn(Sets.newHashSet(ambariComponent, imageComponent));
         when(clusterDefinitionUtils.getBlueprintStackVersion(any())).thenReturn(DEFAULT_HDP_VERSION);
         when(clusterDefinitionUtils.getBlueprintStackName(any())).thenReturn("HDP");
 
@@ -147,7 +147,7 @@ public class AmbariClusterCreationSetupServiceTest {
         setupDefaultAmbariEntries();
 
         when(defaultHDPEntries.getEntries()).thenReturn(Collections.singletonMap(DEFAULT_HDP_VERSION, defaultHDPInfo));
-        when(componentConfigProvider.getImage(anyLong())).thenReturn(image);
+        when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
         StackMatrixV4Response stackMatrixV4Response = new StackMatrixV4Response();
         stackMatrixV4Response.setHdp(Collections.singletonMap(DEFAULT_HDP_VERSION, null));
         when(stackMatrixService.getStackMatrix()).thenReturn(stackMatrixV4Response);

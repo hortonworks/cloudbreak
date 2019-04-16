@@ -19,7 +19,8 @@ public class StackViewService {
         return stackViewRepository.findById(id);
     }
 
-    public StackView findByName(String name, Long workspaceId) {
+    public Optional<StackView> findByName(String name, Long workspaceId) {
         return stackViewRepository.findByNameAndWorkspaceId(name, workspaceId);
     }
+
 }

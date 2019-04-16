@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
@@ -37,7 +38,8 @@ public class ClusterStopService {
     }
 
     private void updateClusterUptime(long stackId) {
-        Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(stackId);
+        Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(stackId)
+                .orElseThrow(NotFoundException.notFound("cluster", stackId));
         cluster.setUptime(Duration.ofMillis(stackUtil.getUptimeForCluster(cluster, true)).toString());
         clusterService.updateCluster(cluster);
     }

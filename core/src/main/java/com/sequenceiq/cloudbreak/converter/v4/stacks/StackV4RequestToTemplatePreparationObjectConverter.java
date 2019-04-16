@@ -41,7 +41,7 @@ import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteServic
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
-import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
+import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.AmbariDatalakeConfigProvider;
@@ -100,7 +100,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
     private EnvironmentViewService environmentViewService;
 
     @Inject
-    private KerberosService kerberosService;
+    private KerberosConfigService kerberosConfigService;
 
     @Inject
     private AmbariDatalakeConfigProvider ambariDatalakeConfigProvider;
@@ -248,7 +248,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
     private KerberosConfig getKerberosConfig(StackV4Request source) {
         KerberosConfig kerberosConfig = null;
         if (StringUtils.isNotBlank(source.getCluster().getKerberosName())) {
-            kerberosConfig = kerberosService.getByNameForWorkspaceId(source.getCluster().getKerberosName(),
+            kerberosConfig = kerberosConfigService.getByNameForWorkspaceId(source.getCluster().getKerberosName(),
                     restRequestThreadLocalService.getRequestedWorkspaceId());
         }
         return kerberosConfig;

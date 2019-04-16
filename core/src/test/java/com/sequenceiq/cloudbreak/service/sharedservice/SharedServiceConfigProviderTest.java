@@ -42,9 +42,9 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.repository.cluster.DatalakeResourcesRepository;
 import com.sequenceiq.cloudbreak.service.cluster.KerberosConfigProvider;
 import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteService;
+import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 public class SharedServiceConfigProviderTest {
@@ -79,7 +79,7 @@ public class SharedServiceConfigProviderTest {
     private KerberosConfigProvider kerberosConfigProvider;
 
     @Mock
-    private DatalakeResourcesRepository datalakeResourcesRepository;
+    private DatalakeResourcesService datalakeResourcesService;
 
     @Mock
     private CredentialPrerequisiteService credentialPrerequisiteService;
@@ -112,7 +112,7 @@ public class SharedServiceConfigProviderTest {
         Cluster result = underTest.configureCluster(cluster, user, workspace);
 
         Assert.assertEquals(cluster, result);
-        verify(datalakeResourcesRepository, times(0)).findById(anyLong());
+        verify(datalakeResourcesService, times(0)).findById(anyLong());
         verify(kerberosConfigProvider, times(0)).setKerberosConfigForWorkloadCluster(any(Cluster.class), any(DatalakeResources.class));
         assertNull(cluster.getLdapConfig());
         assertNull(cluster.getKerberosConfig());
@@ -128,13 +128,13 @@ public class SharedServiceConfigProviderTest {
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
-        when(datalakeResourcesRepository.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
+        when(datalakeResourcesService.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
 
         Cluster result = underTest.configureCluster(requestedCluster, user, workspace);
 
         Assert.assertEquals(ldapConfig, result.getLdapConfig());
         Assert.assertTrue(result.getRdsConfigs().isEmpty());
-        verify(datalakeResourcesRepository, times(1)).findById(anyLong());
+        verify(datalakeResourcesService, times(1)).findById(anyLong());
         verify(kerberosConfigProvider, times(1)).setKerberosConfigForWorkloadCluster(requestedCluster, datalakeResources);
     }
 
@@ -148,7 +148,7 @@ public class SharedServiceConfigProviderTest {
         when(publicStack.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStackCluster.getId()).thenReturn(TEST_LONG_VALUE);
         when(publicStack.getCluster()).thenReturn(publicStackCluster);
-        when(datalakeResourcesRepository.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
+        when(datalakeResourcesService.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
 
         Cluster result = underTest.configureCluster(requestedCluster, user, workspace);
 
@@ -166,7 +166,7 @@ public class SharedServiceConfigProviderTest {
 
         assertNull(stack.getDatalakeResourceId());
         assertEquals(publicStack.getInputs(), stack.getInputs());
-        verify(datalakeResourcesRepository, times(0)).findById(anyLong());
+        verify(datalakeResourcesService, times(0)).findById(anyLong());
         verify(credentialPrerequisiteService, times(0)).isCumulusCredential(anyString());
     }
 
@@ -178,7 +178,7 @@ public class SharedServiceConfigProviderTest {
         credential.setAttributes("attr");
         stackIn.setCredential(credential);
         DatalakeResources datalakeResources = new DatalakeResources();
-        when(datalakeResourcesRepository.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
+        when(datalakeResourcesService.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
         when(credentialPrerequisiteService.isCumulusCredential(anyString())).thenReturn(Boolean.TRUE);
 
         DatalakeConfigApi connector = mock(DatalakeConfigApi.class);
@@ -209,7 +209,7 @@ public class SharedServiceConfigProviderTest {
         DatalakeResources datalakeResources = new DatalakeResources();
         long datalakeStackId = 11L;
         datalakeResources.setDatalakeStackId(datalakeStackId);
-        when(datalakeResourcesRepository.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
+        when(datalakeResourcesService.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
         when(credentialPrerequisiteService.isCumulusCredential(anyString())).thenReturn(Boolean.FALSE);
         when(ambariDatalakeConfigProvider.getAdditionalParameters(stackIn, datalakeResources)).thenReturn(Collections.singletonMap("test", "data"));
         when(ambariDatalakeConfigProvider.getBlueprintConfigParameters(eq(datalakeResources), eq(stackIn), any(DatalakeConfigApi.class)))

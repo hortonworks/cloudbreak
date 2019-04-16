@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
+import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
@@ -50,7 +51,8 @@ public class DownscaleFlowEventChainFactory implements FlowEventChainFactory<Clu
         flowEventChain.add(cste);
         if (event.getScalingType() == ScalingType.DOWNSCALE_TOGETHER) {
             StackView stackView = stackService.getViewByIdWithoutAuth(event.getStackId());
-            HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stackView.getClusterView().getId(), event.getHostGroupName());
+            HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(stackView.getClusterView().getId(), event.getHostGroupName())
+                    .orElseThrow(NotFoundException.notFound("hostgroup", event.getHostGroupName()));
             Constraint hostGroupConstraint = hostGroup.getConstraint();
             String instanceGroupName = Optional.ofNullable(hostGroupConstraint.getInstanceGroup()).map(InstanceGroup::getGroupName).orElse(null);
             StackScaleTriggerEvent sste;

@@ -50,7 +50,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -65,7 +65,7 @@ public class ImageService {
     private UserDataBuilder userDataBuilder;
 
     @Inject
-    private ComponentConfigProvider componentConfigProvider;
+    private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
     private ImageCatalogService imageCatalogService;
@@ -81,7 +81,7 @@ public class ImageService {
     private StackMatrixService stackMatrixService;
 
     public Image getImage(Long stackId) throws CloudbreakImageNotFoundException {
-        return componentConfigProvider.getImage(stackId);
+        return componentConfigProviderService.getImage(stackId);
     }
 
     @Measure(ImageService.class)
@@ -109,7 +109,7 @@ public class ImageService {
                     imgFromCatalog.getImageCatalogUrl(),
                     imgFromCatalog.getImageCatalogName(),
                     imgFromCatalog.getImage().getUuid());
-            componentConfigProvider.store(components);
+            componentConfigProviderService.store(components);
         } catch (JsonProcessingException e) {
             throw new CloudbreakServiceException("Failed to create json", e);
         }

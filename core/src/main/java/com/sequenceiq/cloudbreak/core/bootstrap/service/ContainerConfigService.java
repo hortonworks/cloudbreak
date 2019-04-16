@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 
 @Service
 public class ContainerConfigService {
@@ -33,14 +33,14 @@ public class ContainerConfigService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ContainerConfigService.class);
 
     @Inject
-    private ComponentConfigProvider componentConfigProvider;
+    private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
     private ContainerOrchestratorResolver containerOrchestratorResolver;
 
     public ContainerConfig get(Stack stack, DockerContainer dc) {
         try {
-            Component component = componentConfigProvider.getComponent(stack.getId(), ComponentType.CONTAINER, dc.name());
+            Component component = componentConfigProviderService.getComponent(stack.getId(), ComponentType.CONTAINER, dc.name());
             if (component == null) {
                 component = create(stack, dc);
                 LOGGER.debug("Container component definition created: {}", component);
@@ -76,7 +76,7 @@ public class ContainerConfigService {
             }
 
             Component component = new Component(ComponentType.CONTAINER, dc.name(), new Json(config), stack);
-            return componentConfigProvider.store(component);
+            return componentConfigProviderService.store(component);
         } catch (IOException ignored) {
             throw new CloudbreakServiceException(String.format("Failed to parse component ContainerConfig for stack: %d, container: %s",
                     stack.getId(), dc.getName()));
