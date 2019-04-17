@@ -38,7 +38,7 @@ public class ClusterStatusUpdater {
 
     public void updateClusterStatus(Stack stack, Cluster cluster) {
         if (isStackOrClusterStatusInvalid(stack, cluster)) {
-            if (stack.isStackInStopPhase() && cluster != null) {
+            if ((stack.isStackInStopPhase() || stack.isDeleteCompleted()) && cluster != null) {
                 updateClusterStatus(stack.getId(), cluster, stack.getStatus());
                 cluster.setStatus(stack.getStatus());
             }
@@ -54,7 +54,6 @@ public class ClusterStatusUpdater {
                     clusterApiConnectors.getConnector(stack).clusterStatusService().getStatus(StringUtils.isNotBlank(blueprintName));
             LOGGER.debug("Ambari cluster status: [{}] Status reason: [{}]", clusterStatusResult.getClusterStatus(), clusterStatusResult.getStatusReason());
             updateClusterStatus(stackId, stack.getStatus(), cluster, clusterStatusResult);
-
         }
     }
 

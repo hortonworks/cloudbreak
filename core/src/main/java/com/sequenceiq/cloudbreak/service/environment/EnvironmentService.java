@@ -62,11 +62,13 @@ import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.service.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.KubernetesConfigService;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosService;
@@ -79,7 +81,6 @@ import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeConfigApiConnecto
 import com.sequenceiq.cloudbreak.service.sharedservice.ServiceDescriptorDefinitionProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.AbstractArchivistService;
 
 @Service
 public class EnvironmentService extends AbstractArchivistService<Environment> {
@@ -118,6 +119,9 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private ClusterService clusterService;
 
     @Inject
     private StackApiViewService stackApiViewService;
@@ -503,10 +507,11 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
 
     @Override
     protected void prepareDeletion(Environment environment) {
-        Long aliveEnvs = stackService.countAliveByEnvironment(environment);
-        if (aliveEnvs > 0) {
+        Long aliveStacks = stackService.countAliveByEnvironment(environment);
+        Long aliveClusters = clusterService.countAliveByEnvironment(environment);
+        if (aliveStacks > 0 || aliveClusters > 0) {
             throw new BadRequestException("Cannot delete environment. "
-                    + "All clusters must be terminated before environment deletion. Alive clusters: " + aliveEnvs);
+                    + "All clusters must be terminated before environment deletion. Alive clusters: " + aliveStacks);
         }
     }
 
