@@ -42,7 +42,7 @@ public class CentralCmTemplateUpdater implements ClusterDefinitionUpdater {
         try {
             CmTemplateProcessor processor = getCmTemplateProcessor(source);
             updateCmTemplateRepoDetails(processor, clouderaManagerRepoDetails, clouderaManagerProductDetails);
-            updateCmTemplateConfiguration(processor, source, hostGroupMappings);
+            updateCmTemplateConfiguration(processor, clouderaManagerRepoDetails, source, hostGroupMappings);
             return processor.getTemplate();
         } catch (IOException e) {
             String message = String.format("Unable to update cmTemplate with default properties which was: %s",
@@ -69,10 +69,9 @@ public class CentralCmTemplateUpdater implements ClusterDefinitionUpdater {
         return ClusterApi.CLOUDERA_MANAGER;
     }
 
-    private CmTemplateProcessor updateCmTemplateConfiguration(CmTemplateProcessor processor, TemplatePreparationObject source,
-            Map<String, List<Map<String, String>>> hostGroupMappings) {
-
-        processor.addInstantiator(source.getGeneralClusterConfigs().getClusterName());
+    private CmTemplateProcessor updateCmTemplateConfiguration(CmTemplateProcessor processor, ClouderaManagerRepo clouderaManagerRepoDetails,
+            TemplatePreparationObject source, Map<String, List<Map<String, String>>> hostGroupMappings) {
+        processor.addInstantiator(clouderaManagerRepoDetails, source);
         processor.addHosts(hostGroupMappings);
         processor = cmTemplateComponentConfigProcessor.process(processor, source);
         return processor;

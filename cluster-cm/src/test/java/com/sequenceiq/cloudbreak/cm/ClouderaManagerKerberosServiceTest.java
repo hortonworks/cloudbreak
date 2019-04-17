@@ -31,8 +31,10 @@ import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiConfigureForKerberosArguments;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -99,12 +101,7 @@ public class ClouderaManagerKerberosServiceTest {
         cluster.setKerberosConfig(kerberosConfig);
         when(clouderaManagerResourceApi.importAdminCredentials(password, principal)).thenReturn(new ApiCommand().id(BigDecimal.ONE));
 
-        when(clustersResourceApi.configureForKerberos(eq(cluster.getName()), any(ApiConfigureForKerberosArguments.class)))
-                .thenReturn(new ApiCommand().id(BigDecimal.TEN));
-        when(clouderaManagerResourceApi.generateCredentialsCommand()).thenReturn(new ApiCommand().id(BigDecimal.ZERO));
-        when(clustersResourceApi.deployClientConfig(cluster.getName())).thenReturn(new ApiCommand().id(BigDecimal.valueOf(2L)));
-
-        underTest.setupKerberos(client, clientConfig, stack);
+        underTest.setupKerberos(client, stack);
 
         ArgumentCaptor<ApiConfigList> apiConfigListArgumentCaptor = ArgumentCaptor.forClass(ApiConfigList.class);
         verify(clouderaManagerResourceApi).updateConfig(anyString(), apiConfigListArgumentCaptor.capture());
@@ -117,6 +114,31 @@ public class ClouderaManagerKerberosServiceTest {
         assertEquals(kerberosConfig.getContainerDn(), apiConfigMap.get("ad_kdc_domain"));
         assertEquals(5L, apiConfigMap.size());
         verify(clouderaManagerPollingServiceProvider).kerberosConfigurePollingService(stack, client, BigDecimal.ONE);
+    }
+
+    @Test
+    public void testConfigureKerberosViaApi() throws CloudbreakException, ApiException {
+        KerberosConfig kerberosConfig = spy(new KerberosConfig());
+        kerberosConfig.setType(KerberosType.ACTIVE_DIRECTORY);
+        kerberosConfig.setRealm("TESTREALM");
+        kerberosConfig.setUrl("kdcs");
+        kerberosConfig.setAdminUrl("adminhosts");
+        kerberosConfig.setContainerDn("container");
+        String principal = "principal";
+        when(kerberosConfig.getPrincipal()).thenReturn(principal);
+        String password = "pw";
+        when(kerberosConfig.getPassword()).thenReturn(password);
+        cluster.setKerberosConfig(kerberosConfig);
+        ClouderaManagerRepo clouderaManagerRepoDetails = new ClouderaManagerRepo();
+        clouderaManagerRepoDetails.setVersion(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_6_2_0.getVersion());
+
+        when(clustersResourceApi.configureForKerberos(eq(cluster.getName()), any(ApiConfigureForKerberosArguments.class)))
+                .thenReturn(new ApiCommand().id(BigDecimal.TEN));
+        when(clouderaManagerResourceApi.generateCredentialsCommand()).thenReturn(new ApiCommand().id(BigDecimal.ZERO));
+        when(clustersResourceApi.deployClientConfig(cluster.getName())).thenReturn(new ApiCommand().id(BigDecimal.valueOf(2L)));
+
+        underTest.configureKerberosViaApi(client, clientConfig, stack, clouderaManagerRepoDetails);
+
         verify(modificationService).stopCluster();
         verify(clouderaManagerPollingServiceProvider).kerberosConfigurePollingService(stack, client, BigDecimal.TEN);
         verify(clouderaManagerPollingServiceProvider).kerberosConfigurePollingService(stack, client, BigDecimal.ZERO);
@@ -126,7 +148,7 @@ public class ClouderaManagerKerberosServiceTest {
 
     @Test
     public void testSetupKerberosWithoutKerberos() throws CloudbreakException, ApiException {
-        underTest.setupKerberos(client, clientConfig, stack);
+        underTest.setupKerberos(client, stack);
 
         verify(clouderaManagerResourceApi, never()).updateConfig(anyString(), any());
         verify(modificationService, never()).stopCluster();

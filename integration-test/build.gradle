@@ -97,7 +97,7 @@ dependencies {
     exclude group: "velocity"
   }
   compile group: 'com.google.code.findbugs',      name: 'annotations',                    version: '3.0.1'
-  compile (group: 'com.cloudera.api',           name: 'cloudera-manager-api',version: cmClientVersion) {
+  compile (group: 'com.cloudera.api.swagger',           name: 'cloudera-manager-api-swagger',version: cmClientVersion) {
     transitive = false
   }
   runtime group: 'com.google.inject',             name: 'guice',                          version: '3.0'

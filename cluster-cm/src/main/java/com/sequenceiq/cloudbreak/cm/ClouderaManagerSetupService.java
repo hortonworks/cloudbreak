@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralCmTemplateUpdater;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -118,13 +119,15 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                 removeRemoteParcelRepos(clouderaManagerResourceApi);
                 refreshParcelRepos(clouderaManagerResourceApi);
             }
+            kerberosService.setupKerberos(client, stack);
             // addRepositories - if true the parcels repositories in the cluster template will be added.
             ApiCommand apiCommand = clouderaManagerResourceApi.importClusterTemplate(!prewarmed, apiClusterTemplate);
             LOGGER.debug("Cloudera cluster template has been submitted, cluster install is in progress");
 
             clouderaManagerPollingServiceProvider.templateInstallCheckerService(stack, client, apiCommand.getId());
-
-            kerberosService.setupKerberos(client, clientConfig, stack);
+            if (!CMRepositoryVersionUtil.isEnableKerberosSupportedViaClusterDefinition(clouderaManagerRepoDetails)) {
+                kerberosService.configureKerberosViaApi(client, clientConfig, stack, clouderaManagerRepoDetails);
+            }
         } catch (CancellationException cancellationException) {
             throw cancellationException;
         } catch (Exception e) {
