@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
 import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByReturnValue;
+import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspaceId;
 import com.sequenceiq.cloudbreak.aspect.workspace.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
@@ -42,7 +43,7 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     Cluster findOneWithLists(@Param("id") Long id);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT c FROM Cluster c WHERE c.status IN :statuses")
+    @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.environment WHERE c.status IN :statuses")
     List<Cluster> findByStatuses(@Param("statuses") Collection<Status> statuses);
 
     @CheckPermissionsByReturnValue
@@ -85,4 +86,9 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     @CheckPermissionsByReturnValue
     @Query("SELECT c FROM Cluster c INNER JOIN c.kerberosConfig kc WHERE c.environment.id = :environmentId AND kc.id= :id")
     Set<Cluster> findByKerberosConfigAndEnvironment(@Param("id") Long id, @Param("environmentId") Long environmentId);
+
+    @CheckPermissionsByWorkspaceId
+    @Query("SELECT COUNT(c) FROM Cluster c WHERE c.workspace.id = :workspaceId AND c.environment.id = :environmentId "
+            + "AND c.status != 'DELETE_COMPLETED'")
+    Long countAliveOnesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("environmentId") Long environmentId);
 }

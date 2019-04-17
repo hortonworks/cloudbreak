@@ -87,6 +87,7 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -263,6 +264,10 @@ public class ClusterService {
             }
             return savedCluster;
         });
+    }
+
+    public Long countAliveByEnvironment(Environment environment) {
+        return clusterRepository.countAliveOnesByWorkspaceAndEnvironment(environment.getWorkspace().getId(), environment.getId());
     }
 
     private void setWorkspace(Cluster cluster, Workspace workspace) {
