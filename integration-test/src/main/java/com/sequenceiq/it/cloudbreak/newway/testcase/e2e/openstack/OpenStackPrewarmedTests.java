@@ -25,7 +25,7 @@ import com.sequenceiq.it.cloudbreak.newway.dto.clusterdefinition.ClusterDefiniti
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.e2e.AbstractE2ETest;
 
-public class OpenStackTests extends AbstractE2ETest {
+public class OpenStackPrewarmedTests extends AbstractE2ETest {
 
     private static final String OPEN_STACK_HDF_TESTS_DATA_PROVIDER = "openStackHdfTestsDataProvider";
 
@@ -142,18 +142,18 @@ public class OpenStackTests extends AbstractE2ETest {
 
     @DataProvider(name = OPEN_STACK_HDF_TESTS_DATA_PROVIDER)
     public Object[][] openStackHdfTestsDataProvider() {
-        Object[][] data = new Object[getHdfClusterDefinition().size()][5];
-        for (int i = 0; i < getHdfClusterDefinition().size(); i++) {
+        Object[][] data = new Object[getHdfClusterDefinitions().size()][5];
+        for (int i = 0; i < getHdfClusterDefinitions().size(); i++) {
             SparklessTestContext testContext = getBean(SparklessTestContext.class);
             super.setupTest(testContext);
             data[i][0] = testContext;
-            data[i][1] = getHdfClusterDefinition().get(i);
+            data[i][1] = getHdfClusterDefinitions().get(i);
             data[i][2] = getHdfGroups();
             data[i][3] = getHdfScaleGroup();
             data[i][4] = new TestCaseDescription.TestCaseDescriptionBuilder()
                     .given("there is an available cloudbreak")
                     .when("a stack create request with "
-                            + getHdfClusterDefinition().get(i) + " cluster definition is sent AND scale AND stop AND start requests are sent")
+                            + getHdfClusterDefinitions().get(i) + " cluster definition is sent AND scale AND stop AND start requests are sent")
                     .then("all stack operation should succeed and the stack should be deletable");
         }
         if (isHdfEnabled()) {
@@ -201,7 +201,7 @@ public class OpenStackTests extends AbstractE2ETest {
         return openStackProperties.getPrewarmed().getHdp().getEnabled();
     }
 
-    private List<String> getHdfClusterDefinition() {
+    private List<String> getHdfClusterDefinitions() {
         return openStackProperties.getPrewarmed().getHdf().getClusterDefinitionNames();
     }
 

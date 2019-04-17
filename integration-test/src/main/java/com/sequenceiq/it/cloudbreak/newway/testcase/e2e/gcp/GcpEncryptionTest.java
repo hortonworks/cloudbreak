@@ -25,7 +25,7 @@ import com.sequenceiq.it.cloudbreak.newway.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.e2e.AbstractE2ETest;
 
-public class GcpEncryptionTests extends AbstractE2ETest {
+public class GcpEncryptionTest extends AbstractE2ETest {
 
     public static final String KEY = "helloworld";
 
@@ -48,8 +48,8 @@ public class GcpEncryptionTests extends AbstractE2ETest {
     @Test(dataProvider = PARAMETRIZED_CONTEXT)
     @Description(
             given = "there is a running cloudbreak",
-            when = "a valid stack create request is sent where a given disks are encrypted in given hostgroup",
-            then = "crreate is successful, the stack is stopable, startable, and scalable")
+            when = "a valid stack create request is sent where given disks are encrypted in given a hostgroup",
+            then = "create is successful, the stack is stoppable, startable, and scalable")
     public void testGcpClusterWithEncryptedDisks(TestContext onTestContext, String hostgroupName, KeyEncryptionMethod keyEncryptionMethod,
             int desiredCountToScale) {
         test(givenStackWithEncryptedDiskInHostgroup(hostgroupName, keyEncryptionMethod)
