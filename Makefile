@@ -37,3 +37,6 @@ build-autoscale-dockerhub:
 
 build-datalake-dockerhub:
 	 make -C docker-datalake dockerhub
+
+build-redbeams-dockerhub:
+	 make -C docker-redbeams dockerhub
