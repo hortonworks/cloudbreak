@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -27,8 +28,11 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroupInfo;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
+import com.cloudera.api.swagger.model.ApiConfigureForKerberosArguments;
 import com.cloudera.api.swagger.model.ApiProductVersion;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.template.ClusterDefinitionProcessingException;
+import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.processor.ClusterDefinitionTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.ClusterManagerType;
 import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfigurations;
@@ -106,11 +110,15 @@ public class CmTemplateProcessor implements ClusterDefinitionTextProcessor {
         return result;
     }
 
-    public void addInstantiator(String clusterName) {
+    public void addInstantiator(ClouderaManagerRepo clouderaManagerRepoDetails, TemplatePreparationObject templatePreparationObject) {
         ApiClusterTemplateInstantiator instantiator = cmTemplate.getInstantiator();
         if (instantiator == null) {
             instantiator = new ApiClusterTemplateInstantiator();
-            instantiator.setClusterName(clusterName);
+            instantiator.setClusterName(templatePreparationObject.getGeneralClusterConfigs().getClusterName());
+        }
+        if (Objects.nonNull(clouderaManagerRepoDetails) && CMRepositoryVersionUtil.isEnableKerberosSupportedViaClusterDefinition(clouderaManagerRepoDetails)
+                && templatePreparationObject.getKerberosConfig().isPresent()) {
+            instantiator.setEnableKerberos(new ApiConfigureForKerberosArguments());
         }
         for (ApiClusterTemplateService service : cmTemplate.getServices()) {
             List<String> nonBaseRefs = ofNullable(service.getRoleConfigGroups()).orElse(new ArrayList<>())

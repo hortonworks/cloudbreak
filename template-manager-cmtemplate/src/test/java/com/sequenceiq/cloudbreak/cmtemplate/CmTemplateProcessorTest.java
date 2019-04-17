@@ -20,6 +20,9 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateInstantiator;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroupInfo;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -148,8 +151,14 @@ public class CmTemplateProcessorTest {
     public void testAddInstantiatorWithBaseRoles() {
         getClusterDefinitionText("input/clouderamanager.bp");
         underTest = new CmTemplateProcessor(getClusterDefinitionText("input/clouderamanager.bp"));
+        ClouderaManagerRepo clouderaManagerRepoDetails = new ClouderaManagerRepo();
+        clouderaManagerRepoDetails.setVersion(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_6_2_0.getVersion());
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setClusterName("cluster");
+        TemplatePreparationObject.Builder tpoBuilder = new TemplatePreparationObject.Builder().withGeneralClusterConfigs(generalClusterConfigs);
+        TemplatePreparationObject templatePreparationObject = tpoBuilder.build();
 
-        underTest.addInstantiator("cluster");
+        underTest.addInstantiator(clouderaManagerRepoDetails, templatePreparationObject);
 
         ApiClusterTemplateInstantiator instantiator = underTest.getTemplate().getInstantiator();
         List<ApiClusterTemplateRoleConfigGroupInfo> roleConfigGroups = instantiator.getRoleConfigGroups();
@@ -163,8 +172,14 @@ public class CmTemplateProcessorTest {
     public void testAddInstantiatorWithoutBaseRoles() {
         getClusterDefinitionText("input/clouderamanager.bp");
         underTest = new CmTemplateProcessor(getClusterDefinitionText("input/clouderamanager-custom-ref.bp"));
+        ClouderaManagerRepo clouderaManagerRepoDetails = new ClouderaManagerRepo();
+        clouderaManagerRepoDetails.setVersion(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_6_2_0.getVersion());
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setClusterName("cluster");
+        TemplatePreparationObject.Builder tpoBuilder = new TemplatePreparationObject.Builder().withGeneralClusterConfigs(generalClusterConfigs);
+        TemplatePreparationObject templatePreparationObject = tpoBuilder.build();
 
-        underTest.addInstantiator("cluster");
+        underTest.addInstantiator(clouderaManagerRepoDetails, templatePreparationObject);
 
         ApiClusterTemplateInstantiator instantiator = underTest.getTemplate().getInstantiator();
         List<ApiClusterTemplateRoleConfigGroupInfo> roleConfigGroups = instantiator.getRoleConfigGroups();
