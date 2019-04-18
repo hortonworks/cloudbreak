@@ -169,6 +169,14 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
     }
 
     @Override
+    public Set<Credential> deleteMultipleByNameFromWorkspace(Set<String> names, Long workspaceId) {
+        Set<Credential> toBeDeleted = getByNamesForWorkspaceId(names, workspaceId);
+        return toBeDeleted.stream()
+                .map(credential -> deleteByNameFromWorkspace(credential.getName(), workspaceId))
+                .collect(Collectors.toSet());
+    }
+
+    @Override
     public Credential create(Credential resource, Workspace workspace, User user) {
         Credential created = super.create(resource, workspace, user);
         userProfileHandler.createProfilePreparation(created, user);
