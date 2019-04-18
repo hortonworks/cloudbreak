@@ -116,6 +116,10 @@ public class CmTemplateProcessor implements ClusterDefinitionTextProcessor {
             instantiator = new ApiClusterTemplateInstantiator();
             instantiator.setClusterName(templatePreparationObject.getGeneralClusterConfigs().getClusterName());
         }
+        if (Objects.nonNull(clouderaManagerRepoDetails)
+                && CMRepositoryVersionUtil.isKeepHostTemplateSupportedViaClusterDefinition(clouderaManagerRepoDetails)) {
+            instantiator.keepHostTemplates(Boolean.TRUE);
+        }
         if (Objects.nonNull(clouderaManagerRepoDetails) && CMRepositoryVersionUtil.isEnableKerberosSupportedViaClusterDefinition(clouderaManagerRepoDetails)
                 && templatePreparationObject.getKerberosConfig().isPresent()) {
             instantiator.setEnableKerberos(new ApiConfigureForKerberosArguments());
