@@ -23,7 +23,8 @@ public class RequestContextServerInterceptor implements ServerInterceptor {
             Metadata metadata,
             ServerCallHandler<R, S> serverCallHandler) {
 
-        if (!"usermanagement.UserManagement/VerifyInteractiveUserSessionToken".equals(serverCall.getMethodDescriptor().getFullMethodName())) {
+        if (!"usermanagement.UserManagement/VerifyInteractiveUserSessionToken".equals(serverCall.getMethodDescriptor().getFullMethodName())
+                && !"usermanagement.UserManagement/Authenticate".equals(serverCall.getMethodDescriptor().getFullMethodName())) {
             String requestId = metadata.get(REQUEST_ID_METADATA_KEY);
             checkNotNull(requestId);
             String actorCrn = metadata.get(ACTOR_CRN_METADATA_KEY);

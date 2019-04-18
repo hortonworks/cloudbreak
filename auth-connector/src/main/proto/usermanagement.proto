@@ -13,274 +13,283 @@ import "resources.proto";
 // For future compatibility, all rpcs must take a request and return a response
 // even if there is initially no content for these messages.
 service UserManagement {
-    // Handles an interactive login for a user in a regular account.
-    // A user record will be created if necessary.
-    // The account record must alreeady exist.
-    rpc InteractiveLogin (InteractiveLoginRequest)
+  // Handles an interactive login for a user in a regular account.
+  // A user record will be created if necessary.
+  // The account record must alreeady exist.
+  rpc InteractiveLogin (InteractiveLoginRequest)
     returns (InteractiveLoginResponse) {}
 
-    // Handles an interactive login for a user in a trial account.
-    // User and account records will be created if necessary.
-    rpc InteractiveLoginTrial (InteractiveLoginTrialRequest)
+  // Handles an interactive login for a user in a trial account.
+  // User and account records will be created if necessary.
+  rpc InteractiveLoginTrial (InteractiveLoginTrialRequest)
     returns (InteractiveLoginTrialResponse) {}
 
-    // Handles an interactive login for a user in who is logging in using a
-    // their own IdP. We assume that the account is created. The user will be
-    // be created and their group membership synchronized with their Altus state.
-    rpc InteractiveLogin3rdParty (InteractiveLogin3rdPartyRequest)
+  // Handles an interactive login for a user in who is logging in using a
+  // their own IdP. We assume that the account is created. The user will be
+  // be created and their group membership synchronized with their Altus state.
+  rpc InteractiveLogin3rdParty (InteractiveLogin3rdPartyRequest)
     returns (InteractiveLogin3rdPartyResponse) {}
 
-    // Deletes the account from Altus tests only.
-    rpc DeleteAccount (DeleteAccountRequest)
+  // Deletes the account from Altus tests only.
+  rpc DeleteAccount (DeleteAccountRequest)
     returns (DeleteAccountResponse) {}
 
-    // Delete an actor from Altus.
-    rpc DeleteActor (DeleteActorRequest)
+  // Delete an actor from Altus.
+  rpc DeleteActor (DeleteActorRequest)
     returns (DeleteActorResponse) {}
 
-    // Delete trial user from Altus for tests only.
-    rpc DeleteTrialUser (DeleteTrialUserRequest)
+  // Delete trial user from Altus for tests only.
+  rpc DeleteTrialUser (DeleteTrialUserRequest)
     returns (DeleteTrialUserResponse) {}
 
-    // Gets all the information associated with an access key needed to verify a
-    // request signature produced that key.
-    rpc GetAccessKeyVerificationData (GetAccessKeyVerificationDataRequest)
+  // Gets all the information associated with an access key needed to verify a
+  // request signature produced that key.
+  rpc GetAccessKeyVerificationData (GetAccessKeyVerificationDataRequest)
     returns (GetAccessKeyVerificationDataResponse) {}
 
-    // Verifies an interactive user session key. If the session key is expired an
-    // exception is thrown. If the session key is found and is valid,
-    // information about the user and their account is returned.
-    rpc VerifyInteractiveUserSessionToken (VerifyInteractiveUserSessionTokenRequest)
+  // Verifies an interactive user session key. If the session key is expired an
+  // exception is thrown. If the session key is found and is valid,
+  // information about the user and their account is returned.
+  rpc VerifyInteractiveUserSessionToken (VerifyInteractiveUserSessionTokenRequest)
     returns (VerifyInteractiveUserSessionTokenResponse) {}
 
-    // Handles access key usage, marking the last time it was used and the last
-    // service on which it was used.
-    rpc AccessKeyUsage (AccessKeyUsageRequest)
+  // Authenticate an actor. This method currently supports session tokens and
+  // access key authentication.
+  rpc Authenticate (AuthenticateRequest)
+    returns (AuthenticateResponse) {}
+
+  // Handles access key usage, marking the last time it was used and the last
+  // service on which it was used.
+  rpc AccessKeyUsage (AccessKeyUsageRequest)
     returns (AccessKeyUsageResponse) {}
 
-    // Get user.
-    rpc GetUser (GetUserRequest)
+  // Get user.
+  rpc GetUser (GetUserRequest)
     returns (GetUserResponse) {}
 
-    // List users.
-    rpc ListUsers (ListUsersRequest)
+  // List users.
+  rpc ListUsers (ListUsersRequest)
     returns (ListUsersResponse) {}
 
-    // Find users.
-    rpc FindUsersByEmail (FindUsersByEmailRequest)
+  // Find users.
+  rpc FindUsersByEmail (FindUsersByEmailRequest)
     returns (FindUsersByEmailResponse) {}
 
-    // Creates a new access key.
-    rpc CreateAccessKey (CreateAccessKeyRequest)
+  // Creates a new access key.
+  rpc CreateAccessKey (CreateAccessKeyRequest)
     returns (CreateAccessKeyResponse) {}
 
-    // Updates an access key.
-    rpc UpdateAccessKey (UpdateAccessKeyRequest)
+  // Updates an access key.
+  rpc UpdateAccessKey (UpdateAccessKeyRequest)
     returns (UpdateAccessKeyResponse) {}
 
-    // Deletes an access key.
-    rpc DeleteAccessKey (DeleteAccessKeyRequest)
+  // Deletes an access key.
+  rpc DeleteAccessKey (DeleteAccessKeyRequest)
     returns (DeleteAccessKeyResponse) {}
 
-    // Get access key.
-    rpc GetAccessKey (GetAccessKeyRequest)
+  // Get access key.
+  rpc GetAccessKey (GetAccessKeyRequest)
     returns (GetAccessKeyResponse) {}
 
-    // List access keys.
-    rpc ListAccessKeys (ListAccessKeysRequest)
+  // List access keys.
+  rpc ListAccessKeys (ListAccessKeysRequest)
     returns (ListAccessKeysResponse) {}
 
-    // Get the service version.
-    rpc GetVersion (version.VersionRequest)
+  // Get the service version.
+  rpc GetVersion (version.VersionRequest)
     returns (version.VersionResponse) {}
 
-    // Get account.
-    rpc GetAccount(GetAccountRequest)
+  // Get account.
+  rpc GetAccount(GetAccountRequest)
     returns (GetAccountResponse) {}
 
-    // Get account.
-    rpc ListAccounts(ListAccountsRequest)
+  // Get account.
+  rpc ListAccounts(ListAccountsRequest)
     returns (ListAccountsResponse) {}
 
-    // Get the rights for an actor.
-    rpc GetRights(GetRightsRequest)
+  // Get the rights for an actor.
+  rpc GetRights(GetRightsRequest)
     returns (GetRightsResponse) {}
 
-    // Checks if an actor has the input rights on the input resources.
-    rpc CheckRights(CheckRightsRequest)
+  // Checks if an actor has the input rights on the input resources.
+  rpc CheckRights(CheckRightsRequest)
     returns (CheckRightsResponse) {}
 
-    // Create an account.
-    rpc CreateAccount (CreateAccountRequest)
+  // Create an account.
+  rpc CreateAccount (CreateAccountRequest)
     returns (CreateAccountResponse) {}
 
-    // Grant Entitlement to an Account
-    rpc GrantEntitlement (GrantEntitlementRequest)
+  // Grant Entitlement to an Account
+  rpc GrantEntitlement (GrantEntitlementRequest)
     returns (GrantEntitlementResponse) {}
 
-    // Revoke Entitlement from an Account
-    rpc RevokeEntitlement (RevokeEntitlementRequest)
+  // Revoke Entitlement from an Account
+  rpc RevokeEntitlement (RevokeEntitlementRequest)
     returns (RevokeEntitlementResponse) {}
 
-    // Assign a role to an assignee
-    rpc AssignRole (AssignRoleRequest)
+  // Assign a role to an assignee
+  rpc AssignRole (AssignRoleRequest)
     returns (AssignRoleResponse) {}
 
-    // Unassign a role from an assignee
-    rpc UnassignRole (UnassignRoleRequest)
+  // Unassign a role from an assignee
+  rpc UnassignRole (UnassignRoleRequest)
     returns (UnassignRoleResponse) {}
 
-    // List the assigned roles for an assignee:
-    rpc ListAssignedRoles (ListAssignedRolesRequest)
+  // List the assigned roles for an assignee:
+  rpc ListAssignedRoles (ListAssignedRolesRequest)
     returns (ListAssignedRolesResponse) {}
 
-    // Assign a resource role to an assignee
-    rpc AssignResourceRole (AssignResourceRoleRequest)
+  // Assign a resource role to an assignee
+  rpc AssignResourceRole (AssignResourceRoleRequest)
     returns (AssignResourceRoleResponse) {}
 
-    // Unassign a resource role from an assignee
-    rpc UnassignResourceRole (UnassignResourceRoleRequest)
+  // Unassign a resource role from an assignee
+  rpc UnassignResourceRole (UnassignResourceRoleRequest)
     returns (UnassignResourceRoleResponse) {}
 
-    // List the assigned resource roles for an assignee:
-    rpc ListAssignedResourceRoles (ListAssignedResourceRolesRequest)
+  // List the assigned resource roles for an assignee:
+  rpc ListAssignedResourceRoles (ListAssignedResourceRolesRequest)
     returns (ListAssignedResourceRolesResponse) {}
 
-    // List roles.
-    rpc ListRoles (ListRolesRequest)
+  // List roles.
+  rpc ListRoles (ListRolesRequest)
     returns (ListRolesResponse) {}
 
-    // List resource roles.
-    rpc ListResourceRoles (ListResourceRolesRequest)
+  // List resource roles.
+  rpc ListResourceRoles (ListResourceRolesRequest)
     returns (ListResourceRolesResponse) {}
 
-    // List resource assignees.
-    rpc ListResourceAssignees (ListResourceAssigneesRequest)
+  // List resource assignees.
+  rpc ListResourceAssignees (ListResourceAssigneesRequest)
     returns (ListResourceAssigneesResponse) {}
 
-    // Update Cloudera Manager License Key
-    rpc UpdateClouderaManagerLicenseKey (UpdateClouderaManagerLicenseKeyRequest)
+  // Update Cloudera Manager License Key
+  rpc UpdateClouderaManagerLicenseKey (UpdateClouderaManagerLicenseKeyRequest)
     returns (UpdateClouderaManagerLicenseKeyResponse) {}
 
-    // Initiates a support case creation pipeline.
-    rpc InitiateSupportCase (InitiateSupportCaseRequest)
+  // Initiates a support case creation pipeline.
+  rpc InitiateSupportCase (InitiateSupportCaseRequest)
     returns (InitiateSupportCaseResponse) {}
 
-    // Notify that a resource was deleted. All resource role assignments
-    // associated with this resource will be deleted.
-    rpc NotifyResourceDeleted (NotifyResourceDeletedRequest)
+  // Notify that a resource was deleted. All resource role assignments
+  // associated with this resource will be deleted.
+  rpc NotifyResourceDeleted (NotifyResourceDeletedRequest)
     returns (NotifyResourceDeletedResponse) {}
 
-    // Create a machine user
-    rpc CreateMachineUser (CreateMachineUserRequest)
+  // Create a machine user
+  rpc CreateMachineUser (CreateMachineUserRequest)
     returns (CreateMachineUserResponse) {}
 
-    // list machine users
-    rpc ListMachineUsers (ListMachineUsersRequest)
+  // list machine users
+  rpc ListMachineUsers (ListMachineUsersRequest)
     returns (ListMachineUsersResponse) {}
 
-    // Delete a machine user
-    rpc DeleteMachineUser (DeleteMachineUserRequest)
+  // Delete a machine user
+  rpc DeleteMachineUser (DeleteMachineUserRequest)
     returns (DeleteMachineUserResponse) {}
 
-    rpc ListResourceRoleAssignments (ListResourceRoleAssignmentsRequest)
+  rpc ListResourceRoleAssignments (ListResourceRoleAssignmentsRequest)
     returns (ListResourceRoleAssignmentsResponse) {}
 
-    // Sets the account messages.
-    rpc SetAccountMessages (SetAccountMessagesRequest)
+  // Sets the account messages.
+  rpc SetAccountMessages (SetAccountMessagesRequest)
     returns (SetAccountMessagesResponse) {}
 
-    // Terms acceptance
-    rpc AcceptTerms (AcceptTermsRequest)
+  // Terms acceptance
+  rpc AcceptTerms (AcceptTermsRequest)
     returns (AcceptTermsResponse) {}
 
-    // Clearing accepted terms. This will clear the accepted terms with the
-    // same version as the current Terms found in the TermsProvider.
-    rpc ClearAcceptedTerms (ClearAcceptedTermsRequest)
+  // Clearing accepted terms. This will clear the accepted terms with the
+  // same version as the current Terms found in the TermsProvider.
+  rpc ClearAcceptedTerms (ClearAcceptedTermsRequest)
     returns (ClearAcceptedTermsResponse) {}
 
-    // Terms description
-    rpc DescribeTerms (DescribeTermsRequest)
+  // Terms description
+  rpc DescribeTerms (DescribeTermsRequest)
     returns (DescribeTermsResponse) {}
 
-    // Terms listing
-    rpc ListTerms (ListTermsRequest)
+  // Terms listing
+  rpc ListTerms (ListTermsRequest)
     returns (ListTermsResponse) {}
 
-    // Entitlements listing
-    rpc ListEntitlements (ListEntitlementsRequest)
+  // Entitlements listing
+  rpc ListEntitlements (ListEntitlementsRequest)
     returns (ListEntitlementsResponse) {}
 
-    // Set terms acceptance expiry
-    rpc SetTermsAcceptanceExpiry (SetTermsAcceptanceExpiryRequest)
+  // Set terms acceptance expiry
+  rpc SetTermsAcceptanceExpiry (SetTermsAcceptanceExpiryRequest)
     returns (SetTermsAcceptanceExpiryResponse) {}
 
-    // Confirm whether Altus account and Azure Subscription Id
-    rpc ConfirmAzureSubscriptionVerified (ConfirmAzureSubscriptionVerifiedRequest)
+  // Confirm whether Altus account and Azure Subscription Id
+  rpc ConfirmAzureSubscriptionVerified (ConfirmAzureSubscriptionVerifiedRequest)
     returns (ConfirmAzureSubscriptionVerifiedResponse) {}
 
-    // Insert Azure Subscriptions
-    rpc InsertAzureSubscription (InsertAzureSubscriptionInformationRequest)
+  // Insert Azure Subscriptions
+  rpc InsertAzureSubscription (InsertAzureSubscriptionInformationRequest)
     returns (InsertAzureSubscriptionInformationResponse) {}
 
-    // Create group
-    rpc CreateGroup (CreateGroupRequest)
+  // Create group
+  rpc CreateGroup (CreateGroupRequest)
     returns (CreateGroupResponse) {}
 
-    // Delete group
-    rpc DeleteGroup (DeleteGroupRequest)
+  // Delete group
+  rpc DeleteGroup (DeleteGroupRequest)
     returns (DeleteGroupResponse) {}
 
-    // List groups
-    rpc ListGroups (ListGroupsRequest)
+  // List groups
+  rpc ListGroups (ListGroupsRequest)
     returns (ListGroupsResponse) {}
 
-    // Add member to group
-    rpc AddMemberToGroup (AddMemberToGroupRequest)
+  // Add member to group
+  rpc AddMemberToGroup (AddMemberToGroupRequest)
     returns (AddMemberToGroupResponse) {}
 
-    // Remove member from group
-    rpc RemoveMemberFromGroup (RemoveMemberFromGroupRequest)
+  // Remove member from group
+  rpc RemoveMemberFromGroup (RemoveMemberFromGroupRequest)
     returns (RemoveMemberFromGroupResponse) {}
 
-    // List group members
-    rpc ListGroupMembers (ListGroupMembersRequest)
+  // List group members
+  rpc ListGroupMembers (ListGroupMembersRequest)
     returns (ListGroupMembersResponse) {}
 
-    // List of groupCRNs corresponding to the member
-    rpc ListGroupsForMember (ListGroupsForMemberRequest)
+  // List of groupCRNs corresponding to the member
+  rpc ListGroupsForMember (ListGroupsForMemberRequest)
     returns (ListGroupsForMemberResponse) {}
 
-    // Creates a new cluster ssh private key.
-    rpc CreateClusterSshPrivateKey (CreateClusterSshPrivateKeyRequest)
+  // Creates a new cluster ssh private key.
+  rpc CreateClusterSshPrivateKey (CreateClusterSshPrivateKeyRequest)
     returns (CreateClusterSshPrivateKeyResponse) {}
 
-    // Get cluster ssh private key.
-    rpc GetClusterSshPrivateKey (GetClusterSshPrivateKeyRequest)
+  // Get cluster ssh private key.
+  rpc GetClusterSshPrivateKey (GetClusterSshPrivateKeyRequest)
     returns (GetClusterSshPrivateKeyResponse) {}
 
-    // Get the authorization information about an assignee.
-    rpc GetAssigneeAuthorizationInformation (GetAssigneeAuthorizationInformationRequest)
+  // Get the authorization information about an assignee.
+  rpc GetAssigneeAuthorizationInformation (GetAssigneeAuthorizationInformationRequest)
     returns (GetAssigneeAuthorizationInformationResponse) {}
 
-    // Creates the identity provider connector
-    rpc CreateIdentityProviderConnector (CreateIdentityProviderConnectorRequest)
+  // Creates the identity provider connector
+  rpc CreateIdentityProviderConnector (CreateIdentityProviderConnectorRequest)
     returns (CreateIdentityProviderConnectorResponse) {}
 
-    // Lists identity provider connectors
-    rpc ListIdentityProviderConnectors(ListIdentityProviderConnectorsRequest)
+  // Lists identity provider connectors
+  rpc ListIdentityProviderConnectors(ListIdentityProviderConnectorsRequest)
     returns (ListIdentityProviderConnectorsResponse) {}
 
-    // Deletes identity provider connector
-    rpc DeleteIdentityProviderConnector(DeleteIdentityProviderConnectorRequest)
+  // Deletes identity provider connector
+  rpc DeleteIdentityProviderConnector(DeleteIdentityProviderConnectorRequest)
     returns (DeleteIdentityProviderConnectorResponse) {}
 
-    // Describes an identity provider connector
-    rpc DescribeIdentityProviderConnector (DescribeIdentityProviderConnectorRequest)
+  // Describes an identity provider connector
+  rpc DescribeIdentityProviderConnector (DescribeIdentityProviderConnectorRequest)
     returns (DescribeIdentityProviderConnectorResponse) {}
 
-    // Set whether login using Cloudera SSO is enabled.
-    rpc SetClouderaSSOLoginEnabled (SetClouderaSSOLoginEnabledRequest)
+  // Update an identity provider connector
+  rpc UpdateIdentityProviderConnector (UpdateIdentityProviderConnectorRequest)
+    returns (UpdateIdentityProviderConnectorResponse) {}
+
+  // Set whether login using Cloudera SSO is enabled.
+  rpc SetClouderaSSOLoginEnabled (SetClouderaSSOLoginEnabledRequest)
     returns (SetClouderaSSOLoginEnabledResponse) {}
 }
 
@@ -288,32 +297,32 @@ service UserManagement {
 // can interactively login, be assigned roles to, and can be designated account
 // administrators.
 message User {
-    string externalUserId = 1;
-    string userId = 2;
-    string sfdcContactId = 3;
-    string crn = 4;
-    string email = 5;
-    bool thunderheadAdmin = 6;
-    // This may be an empty string.
-    string firstName = 7;
-    // This may be an empty string.
-    string lastName = 8;
-    // This field is deprecated and will be removed. Use creationDateMs instead.
-    string creationDate = 9;
-    // The creation date in ms from the Java epoch of 1970-01-01T00:00:00Z.
-    uint64 creationDateMs = 11;
-    // This field is deprecated and will be removed. Use lastInteractiveLoginMs
-    // instead.
-    string lastInteractiveLogin = 10;
-    // The last interactive login in ms from the Java epoch of 1970-01-01T00:00:00Z.
-    // A value of zero means this is not set.
-    uint64 lastInteractiveLoginMs = 12;
-    // The identity provider ID the user belongs to. It can be one of the
-    // following: (1) Cloudera default IdP (Okta) "Cloudera-Default", (2) Cloudera
-    // Altus administration IdP "Cloudera-Administration", or (3) a customer
-    // defined IdP and in this case this field will contain the CRN of the identity
-    // provider.
-    string identityProviderCrn = 13;
+  string externalUserId = 1;
+  string userId = 2;
+  string sfdcContactId = 3;
+  string crn = 4;
+  string email = 5;
+  bool thunderheadAdmin = 6;
+  // This may be an empty string.
+  string firstName = 7;
+  // This may be an empty string.
+  string lastName = 8;
+  // This field is deprecated and will be removed. Use creationDateMs instead.
+  string creationDate = 9;
+  // The creation date in ms from the Java epoch of 1970-01-01T00:00:00Z.
+  uint64 creationDateMs = 11;
+  // This field is deprecated and will be removed. Use lastInteractiveLoginMs
+  // instead.
+  string lastInteractiveLogin = 10;
+  // The last interactive login in ms from the Java epoch of 1970-01-01T00:00:00Z.
+  // A value of zero means this is not set.
+  uint64 lastInteractiveLoginMs = 12;
+  // The identity provider ID the user belongs to. It can be one of the
+  // following: (1) Cloudera default IdP (Okta) "Cloudera-Default", (2) Cloudera
+  // Altus administration IdP "Cloudera-Administration", or (3) a customer
+  // defined IdP and in this case this field will contain the CRN of the identity
+  // provider.
+  string identityProviderCrn = 13;
 }
 
 // A MachineUser is an internal Altus identity, used by applications to call
@@ -321,122 +330,122 @@ message User {
 // have access keys associated with them but they cannot interactively login or
 // be designated account administrators.
 message MachineUser {
-    // The machine user's id.
-    string machineUserId = 1;
-    // The machine user's name.
-    string machineUserName = 2;
-    // The machine user's crn.
-    string crn = 3;
-    // The creation date in ms from the Java epoch of 1970-01-01T00:00:00Z.
-    uint64 creationDateMs = 4;
+  // The machine user's id.
+  string machineUserId = 1;
+  // The machine user's name.
+  string machineUserName = 2;
+  // The machine user's crn.
+  string crn = 3;
+  // The creation date in ms from the Java epoch of 1970-01-01T00:00:00Z.
+  uint64 creationDateMs = 4;
 }
 
 // A Group is a Altus resource that contains a collection of Actors. Groups
 // can contain users and machine users and can be assigned roles and resource
 // roles.
 message Group {
-    // Global unique Id generated by altus.
-    string groupId = 1;
-    // Name assigned to the group by the creator. Must be unique within the
-    // account. Cannot be empty string.
-    string groupName = 2;
-    // The group crn.
-    string crn = 3;
-    // The creation date in ms from the Java epoch of 1970-01-01T00:00:00Z.
-    uint64 creationDate = 4;
+  // Global unique Id generated by altus.
+  string groupId = 1;
+  // Name assigned to the group by the creator. Must be unique within the
+  // account. Cannot be empty string.
+  string groupName = 2;
+  // The group crn.
+  string crn = 3;
+  // The creation date in ms from the Java epoch of 1970-01-01T00:00:00Z.
+  uint64 creationDate = 4;
 }
 
 message AccessKeyUsage {
-    // This field is deprecated and will be removed. Use timestampMs instead.
-    string datetime = 1;
-    // In ms from the Java epoch of 1970-01-01T00:00:00Z.
-    uint64 timestampMs = 3;
-    string service = 2;
+  // This field is deprecated and will be removed. Use timestampMs instead.
+  string datetime = 1;
+  // In ms from the Java epoch of 1970-01-01T00:00:00Z.
+  uint64 timestampMs = 3;
+  string service = 2;
 }
 
 message AccessKeyType {
-    enum Value {
-        UNSET = 0;
-        // Private keys are encoded in PKCS#8
-        // Public keys are encoded in X.509
-        RSA = 1;
-        // Private keys are 32 bytes encoded in base64 (44 bytes)
-        // Public keys are 32 bytes
-        ED25519 = 2;
-    }
+  enum Value {
+    UNSET = 0;
+    // Private keys are encoded in PKCS#8
+    // Public keys are encoded in X.509
+    RSA = 1;
+    // Private keys are 32 bytes encoded in base64 (44 bytes)
+    // Public keys are 32 bytes
+    ED25519 = 2;
+  }
 }
 
 message AccessKey {
-    enum Status {
-        UNAVAILABLE = 0;
-        ACTIVE = 1;
-        INACTIVE = 2;
-    }
+  enum Status {
+    UNAVAILABLE = 0;
+    ACTIVE = 1;
+    INACTIVE = 2;
+  }
 
-    // This is deprecated. Use actorCrn instead.
-    string externalUserId = 7;
-    // This field is deprecated and will be removed. User actorCrn instead.
-    string userId = 1;
-    // This is the crn of the user or machine user
-    string actorCrn = 9;
-    string accessKeyId = 2;
-    string crn = 3;
-    Status status = 4;
-    AccessKeyType.Value type = 10;
-    // This field is deprecated and will be removed. Use creationDateMs instead.
-    string creationDate = 5;
-    // The creation date in ms from the Java epoch of 1970-01-01T00:00:00Z.
-    uint64 creationDateMs = 8;
-    AccessKeyUsage lastUsage = 6;
+  // This is deprecated. Use actorCrn instead.
+  string externalUserId = 7;
+  // This field is deprecated and will be removed. User actorCrn instead.
+  string userId = 1;
+  // This is the crn of the user or machine user
+  string actorCrn = 9;
+  string accessKeyId = 2;
+  string crn = 3;
+  Status status = 4;
+  AccessKeyType.Value type = 10;
+  // This field is deprecated and will be removed. Use creationDateMs instead.
+  string creationDate = 5;
+  // The creation date in ms from the Java epoch of 1970-01-01T00:00:00Z.
+  uint64 creationDateMs = 8;
+  AccessKeyUsage lastUsage = 6;
 }
 
 
 message ClusterSshPrivateKey {
-    string accountId = 1;
-    string clusterSshPrivateKeyId = 2;
-    // This is the contents of a PEM file containing a PKCS#8 private key for SSHing to
-    // clusters.
-    string encryptedClusterSshPrivateKey = 3 [(options.sensitive) = true];
-    string awsAccountId = 4;
-    string awsRegion = 5;
-    // The creation date in ms from the Java epoch of 1970-01-01T00:00:00Z.
-    uint64 creationDateMs = 6;
+  string accountId = 1;
+  string clusterSshPrivateKeyId = 2;
+  // This is the contents of a PEM file containing a PKCS#8 private key for SSHing to
+  // clusters.
+  string encryptedClusterSshPrivateKey = 3 [(options.sensitive) = true];
+  string awsAccountId = 4;
+  string awsRegion = 5;
+  // The creation date in ms from the Java epoch of 1970-01-01T00:00:00Z.
+  uint64 creationDateMs = 6;
 }
 
 
 // Note that this intentionally lacks a request context as this is called during
 // the interactive login process.
 message InteractiveLoginRequest {
-    reserved 9;
-    // The SFDC account id the user logging in belong to.
-    string sfdcAccountId = 1;
-    // Optional. The identity provider id the interactive login request is
-    // associated with. If not given the default Cloudera identity provider ID
-    // is assumed.
-    string identityProviderId = 7;
-    // Okta user Id. The Okta user ID is the unique, global, and never changing
-    // id for a user. This is the ID used to lookup the user.
-    string oktaUserId = 8;
-    // SFDC contact ID. This uniquely identifies the user in SFDC but can change
-    // over time (merging SFDC contacts, SFDC refreshes in stage/dev).
-    string sfdcContactId = 2;
-    // The user's email. This is unique idetifier but can change over time. Cannot
-    // be null or empty but is not used to identify a user.
-    string email = 3;
-    // Whether or not the user is an account admin, or "owner". Users who are
-    // flagged as thunderhead admins have all possible rights within the account.
-    bool thunderheadAdmin = 4;
-    // This may be an empty string.
-    string firstName = 5;
-    // This may be an empty string.
-    string lastName = 6;
+  reserved 9;
+  // The SFDC account id the user logging in belong to.
+  string sfdcAccountId = 1;
+  // Optional. The identity provider id the interactive login request is
+  // associated with. If not given the default Cloudera identity provider ID
+  // is assumed.
+  string identityProviderId = 7;
+  // Okta user Id. The Okta user ID is the unique, global, and never changing
+  // id for a user. This is the ID used to lookup the user.
+  string oktaUserId = 8;
+  // SFDC contact ID. This uniquely identifies the user in SFDC but can change
+  // over time (merging SFDC contacts, SFDC refreshes in stage/dev).
+  string sfdcContactId = 2;
+  // The user's email. This is unique idetifier but can change over time. Cannot
+  // be null or empty but is not used to identify a user.
+  string email = 3;
+  // Whether or not the user is an account admin, or "owner". Users who are
+  // flagged as thunderhead admins have all possible rights within the account.
+  bool thunderheadAdmin = 4;
+  // This may be an empty string.
+  string firstName = 5;
+  // This may be an empty string.
+  string lastName = 6;
 }
 
 // The message to verify if the given account has been verified with
 // the azure subscription Id
 message ConfirmAzureSubscriptionVerifiedRequest {
-    string accountId = 1;
-    string azureSubscriptionId = 2;
+  string accountId = 1;
+  string azureSubscriptionId = 2;
 }
 
 // Will throw an exception if the verification fails.
@@ -445,8 +454,8 @@ message ConfirmAzureSubscriptionVerifiedResponse {
 
 // Used to insert the altus account Id and the azure subscription Id.
 message InsertAzureSubscriptionInformationRequest {
-    string accountId = 1;
-    string azureSubscriptionId = 2;
+  string accountId = 1;
+  string azureSubscriptionId = 2;
 }
 
 // Will throw an exception if the insertion fails.
@@ -454,704 +463,735 @@ message InsertAzureSubscriptionInformationResponse {
 }
 
 message InteractiveLoginResponse {
-    reserved 4, 5;
-    // The user's CRN.
-    string crn = 1;
-    string accessKeyId = 2;
-    // See AccessKeyKeyPairGenerator.AccessKeyPair.
-    // Ed25519 private key is 32 bytes encoded in base64
-    string privateKey = 3 [(options.sensitive) = true];
-    // A JWT that can be used to authenticate with DP2 CAAS in man-o-war. This is
-    // only set when UMS is configured to generate JWTs and will be removed
-    // shortly.
-    string jwt = 6;
-    // A session token that can be used by consoles to authenticate users.
-    string sessionToken = 7 [(options.sensitive) = true];
+  reserved 4, 5;
+  // The user's CRN.
+  string crn = 1;
+  string accessKeyId = 2;
+  // See AccessKeyKeyPairGenerator.AccessKeyPair.
+  // Ed25519 private key is 32 bytes encoded in base64
+  string privateKey = 3 [(options.sensitive) = true];
+  // A JWT that can be used to authenticate with DP2 CAAS in man-o-war. This is
+  // only set when UMS is configured to generate JWTs and will be removed
+  // shortly.
+  string jwt = 6;
+  // A session token that can be used by consoles to authenticate users.
+  string sessionToken = 7 [(options.sensitive) = true];
 }
 
 message InteractiveLoginTrialRequest {
-    reserved 7;
-    // Trial users must have unique okta user Id. Trial users are identified with
-    // okta user Id.
-    string oktaUserId = 1;
-    // The SFDC account ID the user belong to.
-    // Will not be set if the user is not associated with an SFDC account.
-    string sfdcAccountId = 2;
-    // SFDC contact ID.
-    // Will not be set if the user is not associated with an SFDC account
-    string sfdcContactId = 3;
-    // The Users email.
-    string email = 4;
-    // This may be an empty string.
-    string firstName = 5;
-    // This may be an empty string.
-    string lastName = 6;
+  reserved 7;
+  // Trial users must have unique okta user Id. Trial users are identified with
+  // okta user Id.
+  string oktaUserId = 1;
+  // The SFDC account ID the user belong to.
+  // Will not be set if the user is not associated with an SFDC account.
+  string sfdcAccountId = 2;
+  // SFDC contact ID.
+  // Will not be set if the user is not associated with an SFDC account
+  string sfdcContactId = 3;
+  // The Users email.
+  string email = 4;
+  // This may be an empty string.
+  string firstName = 5;
+  // This may be an empty string.
+  string lastName = 6;
 }
 
 message InteractiveLoginTrialResponse {
-    reserved 4, 5;
-    // The user's CRN.
-    string crn = 1;
-    string accessKeyId = 2;
-    // See AccessKeyKeyPairGenerator.AccessKeyPair.
-    // Ed25519 private key is 32 bytes encoded in base64
-    string privateKey = 3 [(options.sensitive) = true];
-    // A session token that can be used by consoles to authenticate users.
-    string sessionToken = 6 [(options.sensitive) = true];
+  reserved 4, 5;
+  // The user's CRN.
+  string crn = 1;
+  string accessKeyId = 2;
+  // See AccessKeyKeyPairGenerator.AccessKeyPair.
+  // Ed25519 private key is 32 bytes encoded in base64
+  string privateKey = 3 [(options.sensitive) = true];
+  // A session token that can be used by consoles to authenticate users.
+  string sessionToken = 6 [(options.sensitive) = true];
 }
 
 message InteractiveLogin3rdPartyRequest {
-    // A user ID generated by the 3rd party IdP. The ID must be globally unique
-    // and immutable over time.
-    string idpUserId = 1;
-    // The identity provider ID used for this login request.
-    string identityProviderId = 2;
-    // The user's email.
-    string email = 3;
-    // The groups the user belongs to. Empty group list will be treated as if no
-    // group information was given to us. That is, the UMS will not perform any
-    // group synchronization.
-    repeated string group = 4;
-    // This may be an empty string.
-    string firstName = 5;
-    // This may be an empty string.
-    string lastName = 6;
+  // A user ID generated by the 3rd party IdP. The ID must be globally unique
+  // and immutable over time.
+  string idpUserId = 1;
+  // The identity provider ID used for this login request.
+  string identityProviderId = 2;
+  // The user's email.
+  string email = 3;
+  // The groups the user belongs to. Empty group list will be treated as if no
+  // group information was given to us. That is, the UMS will not perform any
+  // group synchronization.
+  repeated string group = 4;
+  // This may be an empty string.
+  string firstName = 5;
+  // This may be an empty string.
+  string lastName = 6;
 }
 
 message InteractiveLogin3rdPartyResponse {
-    // The user's CRN.
-    string crn = 1;
-    string accessKeyId = 2;
-    // See AccessKeyKeyPairGenerator.AccessKeyPair.
-    // Ed25519 private key is 32 bytes encoded in base64
-    string privateKey = 3 [(options.sensitive) = true];
-    // A session token that can be used by consoles to authenticate users.
-    string sessionToken = 4 [(options.sensitive) = true];
+  // The user's CRN.
+  string crn = 1;
+  string accessKeyId = 2;
+  // See AccessKeyKeyPairGenerator.AccessKeyPair.
+  // Ed25519 private key is 32 bytes encoded in base64
+  string privateKey = 3 [(options.sensitive) = true];
+  // A session token that can be used by consoles to authenticate users.
+  string sessionToken = 4 [(options.sensitive) = true];
 }
 
 // Note that this intentionally lacks a request context as this is called during
 // the API authentication process.
 message GetAccessKeyVerificationDataRequest {
-    string accessKeyId = 1;
+  string accessKeyId = 1;
 }
 
 message GetAccessKeyVerificationDataResponse {
-    string accessKeyId = 1;
-    string externalAccountId = 2;
-    string accountId = 3;
-    // The type of altus account.
-    AccountType accountType = 8;
-    // Deprecated. Use actor CRN instead.
-    string externalUserId = 4;
-    // Deprecated. Use actor CRN instead.
-    string userId = 5;
-    // The actor CRN associated with the access key.
-    string actorCrn = 7;
-    AccessKeyType.Value type = 9;
-    // See AccessKeyType for key format
-    bytes publicKey = 6 [(options.skipLogging) = true];
+  string accessKeyId = 1;
+  string externalAccountId = 2;
+  string accountId = 3;
+  // The type of altus account.
+  AccountType accountType = 8;
+  // Deprecated. Use actor CRN instead.
+  string externalUserId = 4;
+  // Deprecated. Use actor CRN instead.
+  string userId = 5;
+  // The actor CRN associated with the access key.
+  string actorCrn = 7;
+  AccessKeyType.Value type = 9;
+  // See AccessKeyType for key format
+  bytes publicKey = 6 [(options.skipLogging) = true];
 }
 
 message VerifyInteractiveUserSessionTokenRequest {
-    // The interactive user's session token.
-    string sessionToken = 1 [(options.sensitive) = true];
+  // The interactive user's session token.
+  string sessionToken = 1 [(options.sensitive) = true];
 }
 
 message VerifyInteractiveUserSessionTokenResponse {
-    // The Altus account ID.
-    string accountId = 1;
-    // The Altus external account ID.
-    string externalAccountId = 4;
-    // The type of Altus account.
-    AccountType accountType = 2;
-    // The CRN of the user bearing the session token.
-    string userCrn = 3;
+  // The Altus account ID.
+  string accountId = 1;
+  // The Altus external account ID. This is going to go away at some point.
+  string externalAccountId = 4;
+  // The type of Altus account.
+  AccountType accountType = 2;
+  // The CRN of the user bearing the session token.
+  string userCrn = 3;
+}
+
+// A request to authenticate a payload that was signed by using access key
+// request signing V1 protocol.
+message AccessKeyRequestSigningV1AuthRequest {
+  // The authentication header as was received from the caller in the
+  // x-altus-auth-header HTTP header.
+  string authHeader = 1 [(options.skipLogging) = true];
+  // The message that was signed. For V1 this includes the HTTP method, content
+  // type, date, and path of the request. See V1Authenticator for more details.
+  string msgToVerify = 2 [(options.skipLogging) = true];
+}
+
+// A request to authenticate a session token.
+message SessionTokenAuthRequest {
+  // The session token to authenticate.
+  string sessionToken = 1 [(options.sensitive) = true];
+}
+
+message AuthenticateRequest {
+  oneof authenticationMethod {
+    // Access key request signing V1 auth request.
+    AccessKeyRequestSigningV1AuthRequest accessKeyV1AuthRequest = 1;
+    // Session token auth request.
+    SessionTokenAuthRequest sessionTokenAuthRequest = 2;
+  }
+}
+
+message AuthenticateResponse {
+  // The authenticated actor CRN.
+  string actorCrn = 1;
 }
 
 message AccessKeyUsageRequest {
-    string accessKeyId = 1;
-    string service = 2;
+  string accessKeyId = 1;
+  string service = 2;
 }
 
 message AccessKeyUsageResponse {
 }
 
 message GetUserRequest {
-    reserved 1;
-    string accountId = 2;
-    string userIdOrCrn = 3;
+  reserved 1;
+  string accountId = 2;
+  string userIdOrCrn = 3;
 }
 
 message GetUserResponse {
-    User user = 1;
+  User user = 1;
 }
 
 message ListUsersRequest {
-    reserved 1;
-    // The account in which to list users.
-    string accountId = 4;
-    // The list is optional. The default is to return all users.
-    repeated string userIdOrCrn = 5;
-    // See the PageToken comment in paging.proto on paging usage.
-    int32 pageSize = 2;
-    paging.PageToken pageToken = 3;
+  reserved 1;
+  // The account in which to list users.
+  string accountId = 4;
+  // The list is optional. The default is to return all users.
+  repeated string userIdOrCrn = 5;
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 2;
+  paging.PageToken pageToken = 3;
 }
 
 message ListUsersResponse {
-    repeated User user = 1;
-    // See the PageToken comment in paging.proto on paging usage.
-    paging.PageToken nextPageToken = 2;
+  repeated User user = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  paging.PageToken nextPageToken = 2;
 }
 
 message DeleteActorRequest {
-    // Actor Crn to be deleted.
-    string actorCrn = 1;
+  // Actor Crn to be deleted.
+  string actorCrn = 1;
 }
 
 message DeleteActorResponse {
 }
 
 message DeleteTrialUserRequest {
-    // User Crn to be deleted.
-    string userCrn = 1;
+  // User Crn to be deleted.
+  string userCrn = 1;
 }
 
 message DeleteTrialUserResponse {
 }
 
 message FindUsersByEmailRequest {
-    // Find users based on email address. It will find users across accounts.
-    string email = 1;
-    // See the PageToken comment in paging.proto on paging usage.
-    int32 pageSize = 2;
-    paging.PageToken pageToken = 3;
+  // Find users based on email address. It will find users across accounts.
+  string email = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 2;
+  paging.PageToken pageToken = 3;
 }
 
 message FindUsersByEmailResponse {
-    // The users.
-    repeated User user = 1;
-    // See the PageToken comment in paging.proto on paging usage.
-    paging.PageToken nextPageToken = 2;
+  // The users.
+  repeated User user = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  paging.PageToken nextPageToken = 2;
 }
 
 message CreateAccessKeyRequest {
-    // The account id to which the user or machine user belongs to.
-    string accountId = 2;
-    // A union containing an actor identifier.
-    oneof actor {
-        // The machine user name or CRN.
-        string machineUserNameOrCrn = 3;
-        // The user id or CRN.
-        string userIdOrCrn = 4;
-    }
-    // The type of access key to create
-    AccessKeyType.Value type = 5;
+  // The account id to which the user or machine user belongs to.
+  string accountId = 2;
+  // A union containing an actor identifier.
+  oneof actor {
+    // The machine user name or CRN.
+    string machineUserNameOrCrn = 3;
+    // The user id or CRN.
+    string userIdOrCrn = 4;
+  }
+  // The type of access key to create
+  AccessKeyType.Value type = 5;
 }
 
 message CreateAccessKeyResponse {
-    AccessKey accessKey = 1;
-    // See AccessKeyType for key format
-    string privateKey = 2 [(options.sensitive) = true];
+  AccessKey accessKey = 1;
+  // See AccessKeyType for key format
+  string privateKey = 2 [(options.sensitive) = true];
 }
 
 message UpdateAccessKeyRequest {
-    reserved 1;
-    string accountId = 3;
-    string accessKeyIdOrCrn = 4;
-    // The CRN of the actor requesting to update the key.
-    AccessKey.Status status = 2;
+  reserved 1;
+  string accountId = 3;
+  string accessKeyIdOrCrn = 4;
+  // The CRN of the actor requesting to update the key.
+  AccessKey.Status status = 2;
 }
 
 message UpdateAccessKeyResponse {
-    AccessKey accessKey = 1;
+  AccessKey accessKey = 1;
 }
 
 message DeleteAccessKeyRequest {
-    reserved 1;
-    string accountId = 2;
-    string accessKeyIdOrCrn = 3;
+  reserved 1;
+  string accountId = 2;
+  string accessKeyIdOrCrn = 3;
 }
 
 message DeleteAccessKeyResponse {
 }
 
 message GetAccessKeyRequest {
-    reserved 1;
-    string accountId = 2;
-    string accessKeyIdOrCrn = 3;
+  reserved 1;
+  string accountId = 2;
+  string accessKeyIdOrCrn = 3;
 }
 
 message GetAccessKeyResponse {
-    AccessKey accessKey = 1;
+  AccessKey accessKey = 1;
 }
 
 message ListAccessKeysRequest {
-    reserved 1;
-    string accountId = 4;
-    repeated string accessKeyIdOrCrn = 5;
-    // This optionally filters the request to the given actor, a user or a
-    // machine user.
-    Actor keyAssignee = 6;
-    // See the PageToken comment in paging.proto on paging usage.
-    int32 pageSize = 2;
-    paging.PageToken pageToken = 3;
+  reserved 1;
+  string accountId = 4;
+  repeated string accessKeyIdOrCrn = 5;
+  // This optionally filters the request to the given actor, a user or a
+  // machine user.
+  Actor keyAssignee = 6;
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 2;
+  paging.PageToken pageToken = 3;
 }
 
 message ListAccessKeysResponse {
-    repeated AccessKey accessKey = 1;
-    // See the PageToken comment in paging.proto on paging usage.
-    paging.PageToken nextPageToken = 2;
+  repeated AccessKey accessKey = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  paging.PageToken nextPageToken = 2;
 }
 
 // Request object to create a new cluster SSH private key.
 message CreateClusterSshPrivateKeyRequest {
-    // The Altus account ID
-    string accountId = 1;
-    // The AWS account ID
-    string awsAccountId = 2;
-    // AWS region
-    string awsRegion = 3;
-    // Encrypted cluster SSH private key
-    string encryptedClusterSshPrivateKey = 4;
+  // The Altus account ID
+  string accountId = 1;
+  // The AWS account ID
+  string awsAccountId = 2;
+  // AWS region
+  string awsRegion = 3;
+  // Encrypted cluster SSH private key
+  string encryptedClusterSshPrivateKey = 4;
 }
 
 // Response object for creating a new cluster SSH private key.
 message CreateClusterSshPrivateKeyResponse {
-    // The ClusterSshPrivateKey object
-    ClusterSshPrivateKey clusterSshPrivateKey= 1;
+  // The ClusterSshPrivateKey object
+  ClusterSshPrivateKey clusterSshPrivateKey= 1;
 }
 
 // Request object to retrieve cluster ssh private key for a given set of parameters.
 message GetClusterSshPrivateKeyRequest {
-    // The Altus account ID
-    string accountId = 1;
-    // The AWS account ID
-    string awsAccountId = 2;
-    // AWS region
-    string awsRegion = 3;
+  // The Altus account ID
+  string accountId = 1;
+  // The AWS account ID
+  string awsAccountId = 2;
+  // AWS region
+  string awsRegion = 3;
 }
 
 // Response object that contains cluster SSH private key details.
 message GetClusterSshPrivateKeyResponse {
-    // The ClusterSshPrivateKey object
-    ClusterSshPrivateKey clusterSshPrivateKey = 1;
+  // The ClusterSshPrivateKey object
+  ClusterSshPrivateKey clusterSshPrivateKey = 1;
 }
 
 // EntitlementGrant lists name of entitlement associated with account.
 // This object is used in GRPC to communicate to/from UMS, i.e. is stashed
 // into the Account record.
 message EntitlementGrant {
-    // Entitlement name
-    string entitlementName = 1;
-    // Date Entitlemet is granted.
-    uint64 grantDateMs = 2;
-    // Crn of grantor
-    string actorGrantorCrn = 3;
+  // Entitlement name
+  string entitlementName = 1;
+  // Date Entitlemet is granted.
+  uint64 grantDateMs = 2;
+  // Crn of grantor
+  string actorGrantorCrn = 3;
 }
 
 // A wrapper around the message string.
 message AccountMessage {
-    // the message
-    string message = 1;
+  // the message
+  string message = 1;
 }
 
 // Contains account-wide user configurable messages
 message AccountMessages {
-    // A message the user sees when they don't have sufficient rights to perform
-    // an operation.
-    AccountMessage contactYourAdministrator = 1;
+  // A message the user sees when they don't have sufficient rights to perform
+  // an operation.
+  AccountMessage contactYourAdministrator = 1;
 }
 
 enum AccountType {
-    // Regular accounts have an SFDC account id associated with them and are
-    // multi-tenant
-    REGULAR = 0;
-    // Trial accounts are single-user accounts that do not necessarily have
-    // SFDC account id associated with them
-    TRIAL = 1;
+  // Regular accounts have an SFDC account id associated with them and are
+  // multi-tenant
+  REGULAR = 0;
+  // Trial accounts are single-user accounts that do not necessarily have
+  // SFDC account id associated with them
+  TRIAL = 1;
 }
 
 message Account {
-    // The external account id. The id uniquely identifies the account within
-    // Altus.
-    string externalAccountId = 1;
-    // The SFDC account id associated with the account. Note that there may be
-    // more than one Altus account associated with an SFDC account.
-    string sfdcAccountId = 8;
-    // The identity provider id. This is generated by Altus to uniquely identify
-    // the specific identity provider used to authenticate users in the account.
-    // All Altus accounts always support the default Cloudera identity provider
-    // (Okta Altus Application).
-    string identifyProviderId = 9;
-    string accountId = 2;
-    // This field is deprecated and will be removed. Use creationDateMs instead.
-    string creationDate = 3;
-    // The creation date in ms from the Java epoch of 1970-01-01T00:00:00Z.
-    uint64 creationDateMs = 7;
-    // May be empty string
-    string clouderaManagerLicenseKey = 4 [(options.skipLogging) = true];
-    string externalIdForAWSDelegatedAccess = 5;
-    // Contains account-wide user configurable messages
-    AccountMessages accountMessages = 10;
-    // List of entitlements associated with account.
-    // These entitlements supersede the legacy entitlements
-    repeated Entitlement entitlements = 11;
-    // Account type can be regular or trial. By default it is regular account
-    AccountType accountType = 12;
-    // Whether login using Cloudera SSO is enabled
-    bool clouderaSSOLoginEnabled = 13;
+  // The external account id. The id uniquely identifies the account within
+  // Altus.
+  string externalAccountId = 1;
+  // The SFDC account id associated with the account. Note that there may be
+  // more than one Altus account associated with an SFDC account.
+  string sfdcAccountId = 8;
+  // The identity provider id. This is generated by Altus to uniquely identify
+  // the specific identity provider used to authenticate users in the account.
+  // All Altus accounts always support the default Cloudera identity provider
+  // (Okta Altus Application).
+  string identifyProviderId = 9;
+  string accountId = 2;
+  // This field is deprecated and will be removed. Use creationDateMs instead.
+  string creationDate = 3;
+  // The creation date in ms from the Java epoch of 1970-01-01T00:00:00Z.
+  uint64 creationDateMs = 7;
+  // May be empty string
+  string clouderaManagerLicenseKey = 4 [(options.skipLogging) = true];
+  string externalIdForAWSDelegatedAccess = 5;
+  // Contains account-wide user configurable messages
+  AccountMessages accountMessages = 10;
+  // List of entitlements associated with account.
+  // These entitlements supersede the legacy entitlements
+  repeated Entitlement entitlements = 11;
+  // Account type can be regular or trial. By default it is regular account
+  AccountType accountType = 12;
+  // Whether login using Cloudera SSO is enabled
+  bool clouderaSSOLoginEnabled = 13;
 }
 
 // Either the accountId or externalAccountId is required to get
 // the Account details
 message GetAccountRequest {
-    // The external account id. The id uniquely identifies the account within
-    // Altus.
-    string externalAccountId = 1;
-    string accountId = 2;
+  // The external account id. The id uniquely identifies the account within
+  // Altus.
+  string externalAccountId = 1;
+  string accountId = 2;
 }
 
 message GetAccountResponse {
-    Account account = 1;
+  Account account = 1;
 }
 
 // Request object for a list accounts request.
 message ListAccountsRequest {
-    // See the PageToken comment in paging.proto on paging usage.
-    int32 pageSize = 1;
-    paging.PageToken pageToken = 2;
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 1;
+  paging.PageToken pageToken = 2;
 }
 
 message ListAccountsResponse {
-    repeated Account account = 1;
-    // See the PageToken comment in paging.proto on paging usage.
-    paging.PageToken nextPageToken = 2;
+  repeated Account account = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  paging.PageToken nextPageToken = 2;
 }
 
 message DeleteAccountRequest {
-    // Account Id identifies the account.
-    string accountId = 1;
+  // Account Id identifies the account.
+  string accountId = 1;
 }
 
 message DeleteAccountResponse {
 }
 
 message GetRightsRequest {
-    string actorCrn = 1;
-    // To collect rights relevant to a specific resource specify the
-    // resource CRN. To collect rights relevent to resource indepedent
-    // service rights pass '*' (Resource.WILDCARD).
-    string resourceCrn = 2;
+  string actorCrn = 1;
+  // To collect rights relevant to a specific resource specify the
+  // resource CRN. To collect rights relevent to resource indepedent
+  // service rights pass '*' (Resource.WILDCARD).
+  string resourceCrn = 2;
 }
 
 message PolicyStatement {
-    repeated string right = 1;
-    repeated string resource = 2;
+  repeated string right = 1;
+  repeated string resource = 2;
 }
 
 message PolicyDefinition {
-    repeated PolicyStatement statement = 1;
+  repeated PolicyStatement statement = 1;
 }
 
 message Policy {
-    string crn = 1;
-    PolicyDefinition policyDefinition = 2;
-    uint64 creationDateMs = 3;
+  string crn = 1;
+  PolicyDefinition policyDefinition = 2;
+  uint64 creationDateMs = 3;
 }
 
 message Role {
-    string crn = 1;
-    uint64 creationDateMs = 2;
-    repeated Policy policy = 3;
-    string requiredEntitlement = 4;
+  string crn = 1;
+  uint64 creationDateMs = 2;
+  repeated Policy policy = 3;
+  string requiredEntitlement = 4;
 }
 
 message ResourceRole {
-    string crn = 1;
-    uint64 creationDateMs = 2;
-    repeated string right = 3;
-    string requiredEntitlement = 4;
+  string crn = 1;
+  uint64 creationDateMs = 2;
+  repeated string right = 3;
+  string requiredEntitlement = 4;
 }
 
 message ResourceRoleAssignment {
-    ResourceRole resourceRole = 1;
-    repeated string resource = 2;
+  ResourceRole resourceRole = 1;
+  repeated string resource = 2;
 }
 
 message RoleAssignment {
-    Role role = 1;
+  Role role = 1;
 }
 
 message ResourceRoleAssignmentRecord {
-    // AssigneeCrn of the user who assigned resource role to resource role crn
-    string assigneeCrn = 1;
-    // ResourceCrn is crn/name of the resource which is assigned to resource role crn
-    string resourceCrn = 2;
-    // resource role crn is resource role crn name to which resource crn is assigned.
-    string resourceRoleCrn = 3;
+  // AssigneeCrn of the user who assigned resource role to resource role crn
+  string assigneeCrn = 1;
+  // ResourceCrn is crn/name of the resource which is assigned to resource role crn
+  string resourceCrn = 2;
+  // resource role crn is resource role crn name to which resource crn is assigned.
+  string resourceRoleCrn = 3;
 }
 
 message ResourceAssignment {
-    string resourceCrn = 1;
-    string resourceRoleCrn = 2;
+  string resourceCrn = 1;
+  string resourceRoleCrn = 2;
 }
 
 message ResourceAssignee {
-    string assigneeCrn = 1;
-    string resourceRoleCrn = 2;
+  string assigneeCrn = 1;
+  string resourceRoleCrn = 2;
 }
 
 message GetRightsResponse {
-    repeated ResourceRoleAssignment resourceRolesAssignment = 1;
-    repeated RoleAssignment roleAssignment = 2;
-    bool thunderheadAdmin = 3;
-    repeated string groupCrn = 4;
+  repeated ResourceRoleAssignment resourceRolesAssignment = 1;
+  repeated RoleAssignment roleAssignment = 2;
+  bool thunderheadAdmin = 3;
+  repeated string groupCrn = 4;
 }
 
 message RightsCheck {
-    string resourceCrn = 1;
-    repeated string right = 2;
+  string resourceCrn = 1;
+  repeated string right = 2;
 }
 
 message CheckRightsRequest {
-    string actorCrn = 1;
-    repeated RightsCheck check = 2;
+  string actorCrn = 1;
+  repeated RightsCheck check = 2;
 }
 
 message CheckRightsResponse {
-    repeated bool result = 1;
+  repeated bool result = 1;
 }
 
 message CreateAccountRequest {
-    string externalAccountId = 1;
-    string clouderaManagerLicenseKey = 2 [(options.skipLogging) = true];
-    // if none is passed, the default cloudera provider id will be used
-    string identityProviderId = 3;
+  string externalAccountId = 1;
+  string clouderaManagerLicenseKey = 2 [(options.skipLogging) = true];
+  // if none is passed, the default cloudera provider id will be used
+  string identityProviderId = 3;
 }
 
 message CreateAccountResponse {
-    Account account = 1;
+  Account account = 1;
 }
 
 message AccountId {
-    // A union containing an external account id or thunderhead account id.
-    oneof account_oneof {
-        // External AccountId for which entitlement is granted.
-        string externalAccountId = 1;
-        // Thunderhead Account Id.
-        string accountId = 2;
-    }
+  // A union containing an external account id or thunderhead account id.
+  oneof account_oneof {
+    // External AccountId for which entitlement is granted.
+    string externalAccountId = 1;
+    // Thunderhead Account Id.
+    string accountId = 2;
+  }
 }
 
 message GrantEntitlementRequest {
-    // SFDC AccountId for which entitlement is granted.
-    // Deprecated. Use AccountId instead.
-    string sfdcAccountId = 1;
-    // Entitlement to add to an account.
-    string entitlementName = 2;
-    // A union containing an external account id or thunderhead account id.
-    AccountId accountId = 3;
+  // SFDC AccountId for which entitlement is granted.
+  // Deprecated. Use AccountId instead.
+  string sfdcAccountId = 1;
+  // Entitlement to add to an account.
+  string entitlementName = 2;
+  // A union containing an external account id or thunderhead account id.
+  AccountId accountId = 3;
 }
 
 message GrantEntitlementResponse {
-    // Account details
-    Account account = 1;
+  // Account details
+  Account account = 1;
 }
 
 message RevokeEntitlementRequest {
-    // SFDC AccountId for which entitlement is revoked.
-    // Deprecated. Use AccountId instead.
-    string sfdcAccountId = 1;
-    // Entitlement name which is revoked.
-    string entitlementName = 2;
-    // A union containing an sfdc account id or thunderhead account id.
-    AccountId accountId = 3;
+  // SFDC AccountId for which entitlement is revoked.
+  // Deprecated. Use AccountId instead.
+  string sfdcAccountId = 1;
+  // Entitlement name which is revoked.
+  string entitlementName = 2;
+  // A union containing an sfdc account id or thunderhead account id.
+  AccountId accountId = 3;
 }
 
 message RevokeEntitlementResponse {
-    // Account Details
-    Account account = 1;
+  // Account Details
+  Account account = 1;
 }
 
 // A union containing an actor identifier, a user or a machine-user.
 message Actor {
-    // The account the actor belongs to.
-    string accountId = 1;
-    oneof actor_oneof {
-        // The machine user name or CRN.
-        string machineUserNameOrCrn = 2;
-        // The user id or CRN.
-        string userIdOrCrn = 3;
-    }
+  // The account the actor belongs to.
+  string accountId = 1;
+  oneof actor_oneof {
+    // The machine user name or CRN.
+    string machineUserNameOrCrn = 2;
+    // The user id or CRN.
+    string userIdOrCrn = 3;
+  }
 }
 
 // A union containing an assignee identifier, a user or a machine-user or a group.
 message Assignee {
-    // The account the assignee belongs to.
-    string accountId = 1;
-    oneof assignee_oneof {
-        // The machine user name or CRN.
-        string machineUserNameOrCrn = 2;
-        // The user id or CRN.
-        string userIdOrCrn = 3;
-        // The group name or CRN.
-        string groupNameOrCrn = 4;
-    }
+  // The account the assignee belongs to.
+  string accountId = 1;
+  oneof assignee_oneof {
+    // The machine user name or CRN.
+    string machineUserNameOrCrn = 2;
+    // The user id or CRN.
+    string userIdOrCrn = 3;
+    // The group name or CRN.
+    string groupNameOrCrn = 4;
+  }
 }
 
 message AssignRoleRequest {
-    // This is a deprecated assignee object and will be removed shortly.
-    // Please use Assignee instead.
-    Actor actor = 4;
-    Assignee assignee = 5;
-    string roleNameOrCrn = 3;
+  // This is a deprecated assignee object and will be removed shortly.
+  // Please use Assignee instead.
+  Actor actor = 4;
+  Assignee assignee = 5;
+  string roleNameOrCrn = 3;
 }
 
 message AssignRoleResponse {
 }
 
 message UnassignRoleRequest {
-    // This is a deprecated assignee object and will be removed shortly.
-    // Please use Assignee instead.
-    Actor actor = 4;
-    Assignee assignee = 5;
-    string roleNameOrCrn = 3;
+  // This is a deprecated assignee object and will be removed shortly.
+  // Please use Assignee instead.
+  Actor actor = 4;
+  Assignee assignee = 5;
+  string roleNameOrCrn = 3;
 }
 
 message UnassignRoleResponse {
 }
 
 message ListAssignedRolesRequest {
-    // This is a deprecated assignee object and will be removed shortly.
-    // Please use Assignee instead.
-    Actor actor = 5;
-    Assignee assignee = 6;
-    // See the PageToken comment in paging.proto on paging usage.
-    int32 pageSize = 3;
-    paging.PageToken pageToken = 4;
+  // This is a deprecated assignee object and will be removed shortly.
+  // Please use Assignee instead.
+  Actor actor = 5;
+  Assignee assignee = 6;
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 3;
+  paging.PageToken pageToken = 4;
 }
 
 message ListAssignedRolesResponse {
-    repeated string roleCrn = 1;
-    // See the PageToken comment in paging.proto on paging usage.
-    paging.PageToken nextPageToken = 2;
+  repeated string roleCrn = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  paging.PageToken nextPageToken = 2;
 }
 
 message AssignResourceRoleRequest {
-    // This is a deprecated assignee object and will be removed shortly.
-    // Please use Assignee instead.
-    Actor actor = 5;
-    Assignee assignee = 6;
-    string resourceCrn = 3;
-    string resourceRoleCrn = 4;
+  // This is a deprecated assignee object and will be removed shortly.
+  // Please use Assignee instead.
+  Actor actor = 5;
+  Assignee assignee = 6;
+  string resourceCrn = 3;
+  string resourceRoleCrn = 4;
 }
 
 message AssignResourceRoleResponse {
 }
 
 message UnassignResourceRoleRequest {
-    // This is a deprecated assignee object and will be removed shortly.
-    // Please use Assignee instead.
-    Actor actor = 5;
-    Assignee assignee = 6;
-    string resourceCrn = 3;
-    string resourceRoleCrn = 4;
+  // This is a deprecated assignee object and will be removed shortly.
+  // Please use Assignee instead.
+  Actor actor = 5;
+  Assignee assignee = 6;
+  string resourceCrn = 3;
+  string resourceRoleCrn = 4;
 }
 
 message UnassignResourceRoleResponse {
 }
 
 message ListAssignedResourceRolesRequest {
-    // This is a deprecated assignee object and will be removed shortly.
-    // Please use Assignee instead.
-    Actor actor = 5;
-    Assignee assignee = 6;
-    // See the PageToken comment in paging.proto on paging usage.
-    int32 pageSize = 3;
-    paging.PageToken pageToken = 4;
+  // This is a deprecated assignee object and will be removed shortly.
+  // Please use Assignee instead.
+  Actor actor = 5;
+  Assignee assignee = 6;
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 3;
+  paging.PageToken pageToken = 4;
 }
 
 message ListAssignedResourceRolesResponse {
-    repeated ResourceAssignment resourceAssignment = 1;
-    // See the PageToken comment in paging.proto on paging usage.
-    paging.PageToken nextPageToken = 2;
+  repeated ResourceAssignment resourceAssignment = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  paging.PageToken nextPageToken = 2;
 }
 
 message ListRolesRequest {
-    // The account in which to list the roles.
-    string accountId = 1;
-    // The list is optional. The default is to return all roles.
-    repeated string roleNameOrCrn = 2;
-    // See the PageToken comment in paging.proto on paging usage.
-    int32 pageSize = 3;
-    paging.PageToken pageToken = 4;
+  // The account in which to list the roles.
+  string accountId = 1;
+  // The list is optional. The default is to return all roles.
+  repeated string roleNameOrCrn = 2;
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 3;
+  paging.PageToken pageToken = 4;
 }
 
 message ListRolesResponse {
-    repeated Role role = 1;
-    // See the PageToken comment in paging.proto on paging usage.
-    paging.PageToken nextPageToken = 2;
+  repeated Role role = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  paging.PageToken nextPageToken = 2;
 }
 
 message ListResourceRoleAssignmentsRequest {
-    // Account for which to list the resource role assignments
-    string accountId = 1;
-    // The resourceRoleNameOrCrn is optional. It is name of resourceRoleCrn
-    // Default is to list all the resource role assignments.
-    string resourceRoleNameOrCrn = 2;
-    // See the PageToken comment in paging.proto on paging usage.
-    int32 pageSize = 3;
-    paging.PageToken pageToken = 4;
+  // Account for which to list the resource role assignments
+  string accountId = 1;
+  // The resourceRoleNameOrCrn is optional. It is name of resourceRoleCrn
+  // Default is to list all the resource role assignments.
+  string resourceRoleNameOrCrn = 2;
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 3;
+  paging.PageToken pageToken = 4;
 }
 
 message ListResourceRoleAssignmentsResponse {
-    // Array of resourceRoleAssignmentRecord.
-    repeated ResourceRoleAssignmentRecord resourceRoleAssignmentRecord = 1;
+  // Array of resourceRoleAssignmentRecord.
+  repeated ResourceRoleAssignmentRecord resourceRoleAssignmentRecord = 1;
     // See the PageToken comment in paging.proto on paging usage.
-    paging.PageToken nextPageToken = 2;
+  paging.PageToken nextPageToken = 2;
 }
 
 message ListResourceRolesRequest {
-    // The account in which to list the roles.
-    string accountId = 1;
-    // The list is optional. The default is to return all resource roles.
-    repeated string resourceRoleCrn = 2;
-    // See the PageToken comment in paging.proto on paging usage.
-    int32 pageSize = 3;
-    paging.PageToken pageToken = 4;
+  // The account in which to list the roles.
+  string accountId = 1;
+  // The list is optional. The default is to return all resource roles.
+  repeated string resourceRoleCrn = 2;
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 3;
+  paging.PageToken pageToken = 4;
 }
 
 message ListResourceRolesResponse {
-    repeated ResourceRole resourceRole = 1;
-    // See the PageToken comment in paging.proto on paging usage.
-    paging.PageToken nextPageToken = 2;
+  repeated ResourceRole resourceRole = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  paging.PageToken nextPageToken = 2;
 }
 
 message ListResourceAssigneesRequest {
-    string accountId = 1;
-    string resourceCrn = 2;
-    // See the PageToken comment in paging.proto on paging usage.
-    int32 pageSize = 3;
-    paging.PageToken pageToken = 4;
+  string accountId = 1;
+  string resourceCrn = 2;
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 3;
+  paging.PageToken pageToken = 4;
 }
 
 message ListResourceAssigneesResponse {
-    repeated ResourceAssignee resourceAssignee = 1;
-    // See the PageToken comment in paging.proto on paging usage.
-    paging.PageToken nextPageToken = 2;
+  repeated ResourceAssignee resourceAssignee = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  paging.PageToken nextPageToken = 2;
 }
 
 message UpdateClouderaManagerLicenseKeyRequest {
-    string externalAccountId = 1;
-    string clouderaManagerLicenseKey = 2;
+  string externalAccountId = 1;
+  string clouderaManagerLicenseKey = 2;
 }
 
 message UpdateClouderaManagerLicenseKeyResponse {
-    Account account = 1;
+  Account account = 1;
 }
 
 message NotifyResourceDeletedRequest {
-    string resourceCrn = 1;
+  string resourceCrn = 1;
 }
 
 message NotifyResourceDeletedResponse {
@@ -1160,117 +1200,117 @@ message NotifyResourceDeletedResponse {
 // This structure is used to serialize the redis access key entry and not
 // used in our rpc system.
 message RedisAccessKeyCacheEntry {
-    // Deprecated. Use actorCrn instead.
-    string externalUserId = 6;
-    // Deprecated. Use actorCrn instead.
-    string userId = 1;
-    string actorCrn = 9;
-    string externalAccountId = 7;
-    string accountId = 2;
-    // The type of altus account.
-    AccountType accountType = 10;
-    AccessKeyType.Value accessKeyType = 11;
-    bytes publicKey = 3 [(options.skipLogging) = true];
-    int64 lastAccessed = 4;
-    int32 inactivityDurationSec = 5;
-    // Marks the entry as a "do not use" entry. Used by the UMS to prevent
-    // creation of bad cache entries. See UserManagementService.java for
-    // more details.
-    bool doNotUseAccessKey = 8;
+  // Deprecated. Use actorCrn instead.
+  string externalUserId = 6;
+  // Deprecated. Use actorCrn instead.
+  string userId = 1;
+  string actorCrn = 9;
+  string externalAccountId = 7;
+  string accountId = 2;
+  // The type of altus account.
+  AccountType accountType = 10;
+  AccessKeyType.Value accessKeyType = 11;
+  bytes publicKey = 3 [(options.skipLogging) = true];
+  int64 lastAccessed = 4;
+  int32 inactivityDurationSec = 5;
+  // Marks the entry as a "do not use" entry. Used by the UMS to prevent
+  // creation of bad cache entries. See UserManagementService.java for
+  // more details.
+  bool doNotUseAccessKey = 8;
 }
 
 // This structure is used to serialize the redis actor tombstone entry and not
 // used in our rpc system.
 message RedisActorTombstoneCacheEntry {
-    // Redis does not allow null values, so in order to serialize a tombstone we
-    // have to some mbmer that we set to a non default value. Let's use a bool for
-    // that. This is always set to 'true' and the actual value is ignored.
-    bool created = 1;
+  // Redis does not allow null values, so in order to serialize a tombstone we
+  // have to some mbmer that we set to a non default value. Let's use a bool for
+  // that. This is always set to 'true' and the actual value is ignored.
+  bool created = 1;
 }
 
 message SessionTokenVerificationAlgorithm {
-    enum Value {
-        UNSET = 0;
-        // The public key is a x.509 encoded key (65 bytes). Use jose4j
-        // ECDSA_USING_P256_CURVE_AND_SHA256 algorithm to verify the session token.
-        ECDSA_USING_P256_CURVE_AND_SHA256 = 1;
-    }
+  enum Value {
+    UNSET = 0;
+    // The public key is a x.509 encoded key (65 bytes). Use jose4j
+    // ECDSA_USING_P256_CURVE_AND_SHA256 algorithm to verify the session token.
+    ECDSA_USING_P256_CURVE_AND_SHA256 = 1;
+  }
 }
 
 // This structure is used to serialize the redis session token entry and is not
 // used in our rpc system. Session tokens are generated for interactive login
 // sessions - that is for users.
 message RedisSessionTokenCacheEntry {
-    // The user's CRN
-    string userCrn = 1;
-    // The user's external account ID.
-    string externalAccountId = 7;
-    // The type of the Altus account.
-    AccountType accountType = 2;
-    // The verification algorithm to use.
-    SessionTokenVerificationAlgorithm.Value verificationAlgo = 3;
-    // The public key to use to verify the session token.
-    bytes publicKey = 4 [(options.skipLogging) = true];
-    int64 lastAccessed = 5;
-    int32 inactivityDurationSec = 6;
+  // The user's CRN
+  string userCrn = 1;
+  // The user's external account ID. This is going to go away at some point.
+  string externalAccountId = 7;
+  // The type of the Altus account.
+  AccountType accountType = 2;
+  // The verification algorithm to use.
+  SessionTokenVerificationAlgorithm.Value verificationAlgo = 3;
+  // The public key to use to verify the session token.
+  bytes publicKey = 4 [(options.skipLogging) = true];
+  int64 lastAccessed = 5;
+  int32 inactivityDurationSec = 6;
 }
 
 // This is used to serialize all the Role dynamoDB related information that is
 // not indexed.
 message RoleDetails {
-    repeated string policyCrns = 1;
+  repeated string policyCrns = 1;
 }
 
 message InitiateSupportCaseRequest {
-    string accountId = 5;
-    // The CRN of the user initiating the support case.
-    string submitterCrn = 6;
-    string component = 1;
-    string subComponent = 2;
-    string resourceCrn = 3;
-    string clientData = 4;
+  string accountId = 5;
+  // The CRN of the user initiating the support case.
+  string submitterCrn = 6;
+  string component = 1;
+  string subComponent = 2;
+  string resourceCrn = 3;
+  string clientData = 4;
 }
 
 message InitiateSupportCaseResponse {
-    string caseFormUrl = 1;
+  string caseFormUrl = 1;
 }
 
 message CreateMachineUserRequest {
-    // The account id in which to create the machine user. This is deprecated and
-    // will be removed shortly. Use account ID instead.
-    resources.Id accountResourceId = 1;
-    // The machine user name. Must be unique within the account.
-    string machineUserName = 2;
-    // The account id the machine user belongs to.
-    string accountId = 3;
+  // The account id in which to create the machine user. This is deprecated and
+  // will be removed shortly. Use account ID instead.
+  resources.Id accountResourceId = 1;
+  // The machine user name. Must be unique within the account.
+  string machineUserName = 2;
+  // The account id the machine user belongs to.
+  string accountId = 3;
 }
 
 message CreateMachineUserResponse {
-    MachineUser machineUser = 1;
+  MachineUser machineUser = 1;
 }
 
 message ListMachineUsersRequest {
-    // The account id the machine user belongs to.
-    string accountId = 1;
-    // A list of MachineUsers name or CRN to retrieve. The list is optional if
-    // not provided all MachineUsers in the account will be returned.
-    repeated string machineUserNameOrCrn = 2;
-    // See the PageToken comment in paging.proto on paging usage.
-    int32 pageSize = 3;
-    paging.PageToken pageToken = 4;
+  // The account id the machine user belongs to.
+  string accountId = 1;
+  // A list of MachineUsers name or CRN to retrieve. The list is optional if
+  // not provided all MachineUsers in the account will be returned.
+  repeated string machineUserNameOrCrn = 2;
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 3;
+  paging.PageToken pageToken = 4;
 }
 
 message ListMachineUsersResponse {
-    repeated MachineUser machineUser = 1;
-    // See the PageToken comment in paging.proto on paging usage.
-    paging.PageToken nextPageToken = 2;
+  repeated MachineUser machineUser = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  paging.PageToken nextPageToken = 2;
 }
 
 message DeleteMachineUserRequest {
-    // The account id from which to delete the machine user.
-    string accountId = 1;
-    // The name or crn of the machine user to delete.
-    string machineUserNameOrCrn = 2;
+  // The account id from which to delete the machine user.
+  string accountId = 1;
+  // The name or crn of the machine user to delete.
+  string machineUserNameOrCrn = 2;
 }
 
 message DeleteMachineUserResponse {
@@ -1279,21 +1319,21 @@ message DeleteMachineUserResponse {
 // Object used to serialize account metadata that does not require its own
 // columns.
 message AccountDetails {
-    // Contact your administrator message shown to user
-    // when user does not have sufficient rights.
-    string contactYourAdministratorMessage = 1;
-    // List of entitlements associated with an account
-    repeated EntitlementGrant entitlement = 2;
-    // Whether login using Cloudera SSO is disabled
-    bool clouderaSSOLoginDisabled = 3;
+  // Contact your administrator message shown to user
+  // when user does not have sufficient rights.
+  string contactYourAdministratorMessage = 1;
+  // List of entitlements associated with an account
+  repeated EntitlementGrant entitlement = 2;
+  // Whether login using Cloudera SSO is disabled
+  bool clouderaSSOLoginDisabled = 3;
 }
 
 // Set Account Messages request object.
 message SetAccountMessagesRequest {
-    // Account id for which messages are stored
-    resources.Id accountId = 1;
-    // The account messages to set.
-    AccountMessages accountMessages = 2;
+  // Account id for which messages are stored
+  resources.Id accountId = 1;
+  // The account messages to set.
+  AccountMessages accountMessages = 2;
 }
 
 // Set Account messages response object.
@@ -1302,10 +1342,10 @@ message SetAccountMessagesResponse {
 
 // Object used to submit a request for terms acceptance.
 message AcceptTermsRequest {
-    // Account Resource.id which the terms are being accepted
-    resources.Id accountId = 1;
-    // The termsName for the terms being accepted
-    string termsName = 2;
+  // Account Resource.id which the terms are being accepted
+  resources.Id accountId = 1;
+  // The termsName for the terms being accepted
+  string termsName = 2;
 }
 
 message AcceptTermsResponse {
@@ -1313,10 +1353,10 @@ message AcceptTermsResponse {
 
 // Object used to submit a request to clear accepted terms.
 message ClearAcceptedTermsRequest {
-    // Account id which the terms are being cleared
-    string accountId = 1;
-    // The termsName for the terms being cleared
-    string termsName = 2;
+  // Account id which the terms are being cleared
+  string accountId = 1;
+  // The termsName for the terms being cleared
+  string termsName = 2;
 }
 
 message ClearAcceptedTermsResponse {
@@ -1324,317 +1364,325 @@ message ClearAcceptedTermsResponse {
 
 // Object used to submit a request to describe a particular set of Terms
 message DescribeTermsRequest {
-    // Account Id for which the request is being made
-    string accountId = 1;
-    // The termsName for the terms to be described
-    string termsName = 2;
+  // Account Id for which the request is being made
+  string accountId = 1;
+  // The termsName for the terms to be described
+  string termsName = 2;
 }
 
 // A common enum used to describe whether terms have been accepted or not
 enum AcceptanceState {
-    // Default value, in case this object has not been explicitly initialized
-    UNSET = 0;
-    // There IS an AccountTermsAcceptance record for these terms
-    NOT_ACCEPTED = 1;
-    // There IS NOT an AccountTermsAcceptance record for these terms
-    ACCEPTED = 2;
-    // A previous vesion of the terms has been accepted. The new version needs
-    // to be accepted.
-    NOT_ACCEPTED_UPDATED_TERMS = 3;
-    // AccountTermsAcceptance record for these terms has expired. If both
-    // NOT_ACCEPTED_UPDATED_TERMS and EXPIRED are valid states, EXPIRED
-    // takes the priority.
-    EXPIRED = 4;
+  // Default value, in case this object has not been explicitly initialized
+  UNSET = 0;
+  // There IS an AccountTermsAcceptance record for these terms
+  NOT_ACCEPTED = 1;
+  // There IS NOT an AccountTermsAcceptance record for these terms
+  ACCEPTED = 2;
+  // A previous vesion of the terms has been accepted. The new version needs
+  // to be accepted.
+  NOT_ACCEPTED_UPDATED_TERMS = 3;
+  // AccountTermsAcceptance record for these terms has expired. If both
+  // NOT_ACCEPTED_UPDATED_TERMS and EXPIRED are valid states, EXPIRED
+  // takes the priority.
+  EXPIRED = 4;
 }
 
 message DescribeTermsResponse {
-    // The termsName for these terms
-    string termsName = 1;
-    // The text of the terms
-    string termsText = 2;
-    // The acceptance state of the terms
-    AcceptanceState acceptanceState = 3;
-    // The date the terms were accepted, if they have been accepted
-    uint64 acceptanceDateMs = 4;
-    // The user that accepted the terms, if they have been accepted
-    string acceptorCrn = 5;
-    // The terms acceptance expiry date in ms from the Java epoch
-    // of 1970-01-01T00:00:00Z. If the value is 0, the terms acceptance
-    // never expires.
-    uint64 expiryDateMs = 6;
+  // The termsName for these terms
+  string termsName = 1;
+  // The text of the terms
+  string termsText = 2;
+  // The acceptance state of the terms
+  AcceptanceState acceptanceState = 3;
+  // The date the terms were accepted, if they have been accepted
+  uint64 acceptanceDateMs = 4;
+  // The user that accepted the terms, if they have been accepted
+  string acceptorCrn = 5;
+  // The terms acceptance expiry date in ms from the Java epoch
+  // of 1970-01-01T00:00:00Z. If the value is 0, the terms acceptance
+  // never expires.
+  uint64 expiryDateMs = 6;
 }
 
 // Object used to submit a request to list entitlements for an account
 message ListEntitlementsRequest {
-    // The account Resource.id to query entitlements of.
-    resources.Id accountId = 1;
-    // See the PageToken comment in paging.proto on paging usage.
-    int32 pageSize = 2;
-    paging.PageToken pageToken = 3;
+  // The account Resource.id to query entitlements of.
+  resources.Id accountId = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 2;
+  paging.PageToken pageToken = 3;
 }
 
 // Entitlement which is granted to account or revoked from an account. This
 // is the public-facing Entitlement structure.
 message Entitlement {
-    // Entitlement name
-    string entitlementName = 1;
-    // Date Entitlemet is granted.
-    uint64 grantDateMs = 2;
-    // Crn of grantor
-    string actorGrantorCrn = 3;
+  // Entitlement name
+  string entitlementName = 1;
+  // Date Entitlemet is granted.
+  uint64 grantDateMs = 2;
+  // Crn of grantor
+  string actorGrantorCrn = 3;
 }
 
 message ListEntitlementsResponse {
-    // The list of entitlements
-    repeated Entitlement entitlement = 1;
-    // See the PageToken comment in paging.proto on paging usage.
-    paging.PageToken nextPageToken = 2;
+  // The list of entitlements
+  repeated Entitlement entitlement = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  paging.PageToken nextPageToken = 2;
 }
 
 // Object used to submit a request to list terms for an account
 message ListTermsRequest {
-    // The account Resource.id to query entitlements of.
-    resources.Id accountId = 1;
-    // See the PageToken comment in paging.proto on paging usage.
-    int32 pageSize = 2;
-    paging.PageToken pageToken = 3;
+  // The account Resource.id to query entitlements of.
+  resources.Id accountId = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 2;
+  paging.PageToken pageToken = 3;
 }
 
 message TermsSummary {
-    // The termsName for these terms
-    string termsName = 1;
-    // The acceptance state of the terms
-    AcceptanceState acceptanceState = 2;
-    // The date the terms were accepted, if they have been accepted
-    uint64 acceptanceDateMs = 3;
-    // The user that accepted the terms, if they have been accepted
-    string acceptorCrn = 4;
-    // The terms acceptance expiry date in ms from the Java epoch
-    // of 1970-01-01T00:00:00Z. 0 indicates that the terms acceptance
-    // never expires.
-    uint64 expiryDateMs = 5;
+  // The termsName for these terms
+  string termsName = 1;
+  // The acceptance state of the terms
+  AcceptanceState acceptanceState = 2;
+  // The date the terms were accepted, if they have been accepted
+  uint64 acceptanceDateMs = 3;
+  // The user that accepted the terms, if they have been accepted
+  string acceptorCrn = 4;
+  // The terms acceptance expiry date in ms from the Java epoch
+  // of 1970-01-01T00:00:00Z. 0 indicates that the terms acceptance
+  // never expires.
+  uint64 expiryDateMs = 5;
 }
 
 message ListTermsResponse {
-    // The list of terms
-    repeated TermsSummary termsAcceptanceStates = 1;
-    // See the PageToken comment in paging.proto on paging usage.
-    paging.PageToken nextPageToken = 2;
+  // The list of terms
+  repeated TermsSummary termsAcceptanceStates = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  paging.PageToken nextPageToken = 2;
 }
 
 message SetTermsAcceptanceExpiryRequest {
-    // Account Id for which the request is being made
-    string accountId = 1;
-    // The termsName of the terms for which expiry is being set.
-    string termsName = 2;
-    // The terms acceptance expiry date in ms from the Java epoch
-    // of 1970-01-01T00:00:00Z. 0 indicates that the terms acceptance
-    // never expires.
-    uint64 expiryDateInMs = 3;
+  // Account Id for which the request is being made
+  string accountId = 1;
+  // The termsName of the terms for which expiry is being set.
+  string termsName = 2;
+  // The terms acceptance expiry date in ms from the Java epoch
+  // of 1970-01-01T00:00:00Z. 0 indicates that the terms acceptance
+  // never expires.
+  uint64 expiryDateInMs = 3;
 }
 
 message SetTermsAcceptanceExpiryResponse {
 }
 
 message CreateGroupRequest {
-    // Account Id for which the request is being made
-    string accountId = 1;
-    // The name of the group being created
-    string groupName = 2;
+  // Account Id for which the request is being made
+  string accountId = 1;
+  // The name of the group being created
+  string groupName = 2;
 }
 
 message CreateGroupResponse {
-    Group group = 1;
+  Group group = 1;
 }
 
 message DeleteGroupRequest {
-    // Account Id for which the request is being made
-    string accountId = 1;
-    // The name or CRN of the group being deleted
-    string groupNameOrCrn = 2;
+  // Account Id for which the request is being made
+  string accountId = 1;
+  // The name or CRN of the group being deleted
+  string groupNameOrCrn = 2;
 }
 
 message DeleteGroupResponse {
 }
 
 message ListGroupsRequest {
-    // Account Id for which the request is being made
-    string accountId = 1;
-    // The list is optional. The default is to return all groups.
-    repeated string groupNameOrCrn = 2;
-    // See the PageToken comment in paging.proto on paging usage.
-    int32 pageSize = 3;
-    paging.PageToken pageToken = 4;
+  // Account Id for which the request is being made
+  string accountId = 1;
+  // The list is optional. The default is to return all groups.
+  repeated string groupNameOrCrn = 2;
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 3;
+  paging.PageToken pageToken = 4;
 }
 
 message ListGroupsResponse {
-    repeated Group group = 1;
-    // See the PageToken comment in paging.proto on paging usage.
-    paging.PageToken nextPageToken = 2;
+  repeated Group group = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  paging.PageToken nextPageToken = 2;
 }
 
 message AddMemberToGroupRequest {
-    // The member being added to group
-    Actor member = 1;
-    // The group name or CRN to which the user is being added
-    string groupNameOrCrn = 2;
+  // The member being added to group
+  Actor member = 1;
+  // The group name or CRN to which the user is being added
+  string groupNameOrCrn = 2;
 }
 
 message AddMemberToGroupResponse {
 }
 
 message RemoveMemberFromGroupRequest {
-    // The member being removed from group
-    Actor member = 1;
-    // The group name or CRN from which the user is being removed
-    string groupNameOrCrn = 2;
+  // The member being removed from group
+  Actor member = 1;
+  // The group name or CRN from which the user is being removed
+  string groupNameOrCrn = 2;
 }
 
 message RemoveMemberFromGroupResponse {
 }
 
 message ListGroupMembersRequest {
-    // Account Id for which the request is being made
-    string accountId = 1;
-    // The group name or CRN
-    string groupNameOrCrn = 2;
-    // See the PageToken comment in paging.proto on paging usage.
-    int32 pageSize = 3;
-    paging.PageToken pageToken = 4;
+  // Account Id for which the request is being made
+  string accountId = 1;
+  // The group name or CRN
+  string groupNameOrCrn = 2;
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 3;
+  paging.PageToken pageToken = 4;
 }
 
 message ListGroupMembersResponse {
-    // The list of members within the group
-    repeated string memberCrn = 1;
-    // See the PageToken comment in paging.proto on paging usage.
-    paging.PageToken nextPageToken = 2;
+  // The list of members within the group
+  repeated string memberCrn = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  paging.PageToken nextPageToken = 2;
 }
 
 message ListGroupsForMemberRequest {
-    // Actor for which the group membership details is requested
-    Actor member = 1;
-    // See the PageToken comment in paging.proto on paging usage.
-    int32 pageSize = 2;
-    paging.PageToken pageToken = 3;
+  // Actor for which the group membership details is requested
+  Actor member = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 2;
+  paging.PageToken pageToken = 3;
 }
 
 message ListGroupsForMemberResponse {
-    repeated string groupCrn = 1;
-    // See the PageToken comment in paging.proto on paging usage.
-    paging.PageToken nextPageToken = 2;
+  repeated string groupCrn = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  paging.PageToken nextPageToken = 2;
 }
 
 // Information about a group an actor belongs to. Includes information about
 // the roles and resource roles assigned to the group.
 message GroupMembershipInfo {
-    // The group crn.
-    string groupCrn = 1;
-    // The list of resource role assignments of the group
-    repeated ResourceAssignment resourceAssignment = 2;
-    // The list of role assignments of the group
-    repeated RoleAssignment roleAssignment = 3;
+  // The group crn.
+  string groupCrn = 1;
+  // The list of resource role assignments of the group
+  repeated ResourceAssignment resourceAssignment = 2;
+  // The list of role assignments of the group
+  repeated RoleAssignment roleAssignment = 3;
 }
 
 message GetAssigneeAuthorizationInformationRequest {
-    // Assignee can be a user, machine user or group.
-    string assigneeCrn = 1;
+  // Assignee can be a user, machine user or group.
+  string assigneeCrn = 1;
 }
 
 message GetAssigneeAuthorizationInformationResponse {
-    // The list of direct resource role assignments of the assignee
-    repeated ResourceAssignment resourceAssignment = 1;
-    // The list of direct role assignments of the assignee
-    repeated RoleAssignment roleAssignment = 2;
-    // For each group the user or machine user belongs to, this list includes a
-    // GroupMembershipInfo object. If the assignee is a group this would return
-    // an empty list.
-    repeated GroupMembershipInfo groupMembershipInfo = 3;
+  // The list of direct resource role assignments of the assignee
+  repeated ResourceAssignment resourceAssignment = 1;
+  // The list of direct role assignments of the assignee
+  repeated RoleAssignment roleAssignment = 2;
+  // For each group the user or machine user belongs to, this list includes a
+  // GroupMembershipInfo object. If the assignee is a group this would return
+  // an empty list.
+  repeated GroupMembershipInfo groupMembershipInfo = 3;
 }
 
 // Saml provider attributes used to create a SAML identity provider connector.
 message SamlProviderDetails {
-    // The SAML provider metadata. This must be a well-formed XML document that
-    // conforms to the SAML 2.0 specifications and contains at least one
-    // IDPSSODescriptor node and one or more valid certificates that can be used
-    // to validate the IdP assertions. The metadata needs to support 'persistent'
-    // NameId and
-    string metadata = 1;
+  // The SAML provider metadata. This must be a well-formed XML document that
+  // conforms to the SAML 2.0 specifications and contains at least one
+  // IDPSSODescriptor node and one or more valid certificates that can be used
+  // to validate the IdP assertions. The metadata needs to support 'persistent'
+  // NameId and
+  string metadata = 1;
 }
 
 message CreateIdentityProviderConnectorRequest {
-    // Account id for which external identity provider connector is created.
-    string accountId = 1;
-    // Identity provider connector name.
-    string identityProviderConnectorName = 2;
-    oneof providerDetails_oneof {
-        // Covers SAML provider attributes.
-        SamlProviderDetails samlDetails = 3;
-    }
+  // Account id for which external identity provider connector is created.
+  string accountId = 1;
+  // Identity provider connector name.
+  string identityProviderConnectorName = 2;
+  oneof providerDetails_oneof {
+    // Covers SAML provider attributes.
+    SamlProviderDetails samlDetails = 3;
+  }
+  // Whether to sync groups on login or not. This flag is reversed as the default
+  // behavior before this flag was introduced was to sync group on login and the
+  // default value for protobuf for booleans is 'false'.
+  bool skipGroupSyncOnLogin = 4;
 }
 
 // Information about a SAML identity provider connector. Certain fields may not
 // be set for ListIdentityProviderConnectors, see below for details.
 message SamlProviderInfo {
-    // The original metadata that was passed to us. This field will not be set for
-    // ListIdentityProviderConnector responses.
-    string metadata = 1;
-    // The certs provided to us in the IdP metadata xml.
-    repeated SamlCert certs = 2;
+  // The original metadata that was passed to us. This field will not be set for
+  // ListIdentityProviderConnector responses.
+  string metadata = 1;
+  // The certs provided to us in the IdP metadata xml.
+  repeated SamlCert certs = 2;
 }
 
 message IdentityProviderConnector {
-    // Name of the identity provider connector.
-    string identityProviderConnectorName = 1;
-    // The identity provider connector CRN.
-    string crn = 2;
-    // The creation date in ms from the java epoch of 1970-01-01T00:00:00Z.
-    uint64 creationDate = 3;
-    oneof providerDetails_oneof {
-        // Covers SAML provider attributes.
-        SamlProviderInfo samlDetails = 4;
-    }
-    // Identity provider connector id.
-    string identityProviderConnectorId = 5;
+  // Name of the identity provider connector.
+  string identityProviderConnectorName = 1;
+  // The identity provider connector CRN.
+  string crn = 2;
+  // The creation date in ms from the java epoch of 1970-01-01T00:00:00Z.
+  uint64 creationDate = 3;
+  oneof providerDetails_oneof {
+    // Covers SAML provider attributes.
+    SamlProviderInfo samlDetails = 4;
+  }
+  // Identity provider connector id.
+  string identityProviderConnectorId = 5;
+  // Whether to sync groups on login or not. This flag is reversed as the default
+  // behavior before this flag was introduced was to sync group on login and the
+  // default value for protobuf for booleans is 'false'.
+  bool skipGroupSyncOnLogin = 6;
 }
 
 message IdpNameOrCrnInfo {
-    // Account id for which the request is being made.
-    string accountId = 1;
-    // Names or CRNs of the identity provider connector.
-    repeated string nameOrCrns = 2;
+  // Account id for which the request is being made.
+  string accountId = 1;
+  // Names or CRNs of the identity provider connector.
+  repeated string nameOrCrns = 2;
 }
 
 message CreateIdentityProviderConnectorResponse {
-    IdentityProviderConnector identityProviderConnector = 1;
+  IdentityProviderConnector identityProviderConnector = 1;
 }
 
 message ListIdentityProviderConnectorsRequest {
-    reserved 1, 2;
-    int32 pageSize = 3;
-    paging.PageToken pageToken = 4;
-    // Filter list is optional. The default is to return all connectors.
-    oneof filter_oneof {
-        // IdpNameOrCrnInfo encapsulates accountId and namesOrCrn list. NameOrCrns
-        // list can be empty. If nameOrCrns list is set, accountId is required.
-        IdpNameOrCrnInfo idpNameOrCrnInfo = 5;
-        // Identity provider connector id. This parameter is set only by console
-        // auth service to fetch SAML details from back end.
-        string idpConnectorId = 6;
-    }
+  reserved 1, 2;
+  int32 pageSize = 3;
+  paging.PageToken pageToken = 4;
+  // Filter list is optional. The default is to return all connectors.
+  oneof filter_oneof {
+    // IdpNameOrCrnInfo encapsulates accountId and namesOrCrn list. NameOrCrns
+    // list can be empty. If nameOrCrns list is set, accountId is required.
+    IdpNameOrCrnInfo idpNameOrCrnInfo = 5;
+    // Identity provider connector id. This parameter is set only by console
+    // auth service to fetch SAML details from back end.
+    string idpConnectorId = 6;
+  }
 }
 
 message ListIdentityProviderConnectorsResponse {
-    // List of identity provider connectors.
-    repeated IdentityProviderConnector connector = 1;
-    // See the pageToken comment in paging.proto on paging usage.
-    paging.PageToken nextPageToken = 2;
+  // List of identity provider connectors.
+  repeated IdentityProviderConnector connector = 1;
+  // See the pageToken comment in paging.proto on paging usage.
+  paging.PageToken nextPageToken = 2;
 }
 
 message DeleteIdentityProviderConnectorRequest {
-    // Account id for which the request is being made.
-    string accountId = 1;
-    // Name or Crn of the identity provider connector.
-    string connectorNameOrCrn = 2;
+  // Account id for which the request is being made.
+  string accountId = 1;
+  // Name or Crn of the identity provider connector.
+  string connectorNameOrCrn = 2;
 }
 
 message DeleteIdentityProviderConnectorResponse {
@@ -1643,63 +1691,82 @@ message DeleteIdentityProviderConnectorResponse {
 // The intended usage for the certificate referred to in a SAML metadata
 // xml.
 message SamlCertType {
-    enum Value {
-        UNSET = 0;
-        // Used for SAML assertions signing.
-        SIGNING = 1;
-        // Use for SAML assertions encryption.
-        ENCRYPTION = 2;
-        // The type was not set in the xml metadata. This means that the certificate
-        // can be used for both signing and encryption.
-        SIGNING_ENCRYPTION = 3;
-    }
+  enum Value {
+    UNSET = 0;
+    // Used for SAML assertions signing.
+    SIGNING = 1;
+    // Use for SAML assertions encryption.
+    ENCRYPTION = 2;
+    // The type was not set in the xml metadata. This means that the certificate
+    // can be used for both signing and encryption.
+    SIGNING_ENCRYPTION = 3;
+  }
 }
 
 // Information about a certificate referred in a SAML Idp metadata xml.
 // Certificates can be used for signing, assertion encryption, or both.
 // This is used for both storage and wire protocol.
 message SamlCert {
-    // The type of the certificate;
-    SamlCertType.Value type = 1;
-    // The X.509 PEM encoded public key.
-    string cert = 2 [(options.skipLogging) = true];
+  // The type of the certificate;
+  SamlCertType.Value type = 1;
+  // The X.509 PEM encoded public key.
+  string cert = 2 [(options.skipLogging) = true];
 }
 
 // The IdP connector details for a SAML typed connector. Used only for
 // dynamo db storage
 message SamlIdpDetails {
-    // The original metadata xml provided to us when the IdP connector was defined.
-    string metadataXml = 1 [(options.skipLogging) = true];
-    // The certs provided to us in the IdP metadata xml.
-    repeated SamlCert certs = 2;
+  // The original metadata xml provided to us when the IdP connector was defined.
+  string metadataXml = 1 [(options.skipLogging) = true];
+  // The certs provided to us in the IdP metadata xml.
+  repeated SamlCert certs = 2;
 }
 
 // An object used to serialize the IdP connector details to the dynamo db table.
 message IdpDetails {
-    oneof details {
-        // The SAML IdP connector details.
-        SamlIdpDetails saml = 1;
-    }
+  oneof details {
+    // The SAML IdP connector details.
+    SamlIdpDetails saml = 1;
+  }
 }
 
 message DescribeIdentityProviderConnectorRequest {
-    // Account ID for which request is being made.
-    string accountId = 1;
-    // Name or CRN of the identity provider connector.
-    string nameOrCrn = 2;
+  // Account ID for which request is being made.
+  string accountId = 1;
+  // Name or CRN of the identity provider connector.
+  string nameOrCrn = 2;
 }
 
 message DescribeIdentityProviderConnectorResponse {
-    // Identity provider connector.
-    IdentityProviderConnector connector = 1;
+  // Identity provider connector.
+  IdentityProviderConnector connector = 1;
+}
+
+message UpdateIdentityProviderConnectorRequest {
+  // Account id for which external identity provider connector is created.
+  string accountId = 1;
+  // Identity provider connector name.
+  string identityProviderConnectorNameOrCrn = 2;
+  oneof providerDetails_oneof {
+    // Covers SAML provider attributes.
+    SamlProviderDetails samlDetails = 3;
+  }
+  // Whether to sync groups on login or not. This flag is reversed as the default
+  // behavior before this flag was introduced was to sync group on login and the
+  // default value for protobuf for booleans is 'false'.
+  bool skipGroupSyncOnLogin = 4;
+}
+
+message UpdateIdentityProviderConnectorResponse {
+  IdentityProviderConnector identityProviderConnector = 1;
 }
 
 message SetClouderaSSOLoginEnabledRequest {
-    // Account ID for which request is being made.
-    string accountId = 1;
-    // If 'true' login using Cloudera SSO will be enabled, otherwise it will be
-    // disabled.
-    bool enableClouderaSSOLogin = 2;
+  // Account ID for which request is being made.
+  string accountId = 1;
+  // If 'true' login using Cloudera SSO will be enabled, otherwise it will be
+  // disabled.
+  bool enableClouderaSSOLogin = 2;
 }
 
 message SetClouderaSSOLoginEnabledResponse {

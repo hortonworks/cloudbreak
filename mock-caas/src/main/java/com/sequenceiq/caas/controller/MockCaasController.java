@@ -7,11 +7,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sequenceiq.caas.model.AltusKey;
 import com.sequenceiq.caas.model.CaasUser;
 import com.sequenceiq.caas.model.CaasUserList;
 import com.sequenceiq.caas.model.IntrospectRequest;
@@ -19,6 +22,7 @@ import com.sequenceiq.caas.model.IntrospectResponse;
 import com.sequenceiq.caas.model.TokenRequest;
 import com.sequenceiq.caas.model.TokenResponse;
 import com.sequenceiq.caas.service.MockCaasService;
+import com.sequenceiq.caas.util.CrnHelper;
 
 @RestController
 public class MockCaasController {
@@ -68,5 +72,11 @@ public class MockCaasController {
     @GetMapping("/auth/out")
     public void out(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         mockCaasService.out(httpServletRequest, httpServletResponse);
+    }
+
+    @GetMapping("/auth/mockkey/{tenant}/{user}")
+    @ResponseBody
+    public AltusKey getKeys(@PathVariable("tenant") String tenant, @PathVariable("user") String user) {
+        return CrnHelper.generateAltusApiKey(tenant, user);
     }
 }
