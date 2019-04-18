@@ -43,7 +43,7 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     Cluster findOneWithLists(@Param("id") Long id);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.environment WHERE c.status IN :statuses")
+    @Query("SELECT c FROM Cluster c WHERE c.stack IS NOT NULL AND c.stack.terminated IS NULL AND c.status IN :statuses")
     List<Cluster> findByStatuses(@Param("statuses") Collection<Status> statuses);
 
     @CheckPermissionsByReturnValue
