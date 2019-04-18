@@ -7,9 +7,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -24,8 +21,6 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiAuthRoleMetadata;
 import com.cloudera.api.swagger.model.ApiAuthRoleMetadataList;
 import com.cloudera.api.swagger.model.ApiAuthRoleRef;
-import com.cloudera.api.swagger.model.ApiConfig;
-import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiExternalUserMapping;
 import com.cloudera.api.swagger.model.ApiExternalUserMappingList;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
@@ -79,20 +74,6 @@ public class ClouderaManagerLdapServiceTest {
         // WHEN
         underTest.setupLdap(stack, cluster, httpClientConfig);
         // THEN
-        ArgumentCaptor<ApiConfigList> apiConfigListArgumentCaptor = ArgumentCaptor.forClass(ApiConfigList.class);
-        verify(clouderaManagerResourceApi).updateConfig(anyString(), apiConfigListArgumentCaptor.capture());
-        Map<String, String> apiConfigMap =
-                apiConfigListArgumentCaptor.getValue().getItems().stream().collect(Collectors.toMap(ApiConfig::getName, ApiConfig::getValue));
-        assertEquals("LDAP", apiConfigMap.get("ldap_type"));
-        assertEquals(ldapConfig.getProtocol() + "://" + ldapConfig.getServerHost() + ":" + ldapConfig.getServerPort(), apiConfigMap.get("ldap_url"));
-        assertEquals(ldapConfig.getBindDn(), apiConfigMap.get("ldap_bind_dn"));
-        assertEquals(ldapConfig.getBindPassword(), apiConfigMap.get("ldap_bind_pw"));
-        assertEquals(ldapConfig.getDomain(), apiConfigMap.get("nt_domain"));
-        assertEquals(ldapConfig.getUserNameAttribute() + "={0}", apiConfigMap.get("ldap_user_search_filter"));
-        assertEquals(ldapConfig.getUserSearchBase(), apiConfigMap.get("ldap_user_search_base"));
-        assertEquals(ldapConfig.getGroupMemberAttribute() + "={0}", apiConfigMap.get("ldap_group_search_filter"));
-        assertEquals(ldapConfig.getGroupSearchBase(), apiConfigMap.get("ldap_group_search_base"));
-        assertEquals(ldapConfig.getUserDnPattern(), apiConfigMap.get("ldap_dn_pattern"));
         verify(externalUserMappingsResourceApi, never()).createExternalUserMappings(any(ApiExternalUserMappingList.class));
     }
 
