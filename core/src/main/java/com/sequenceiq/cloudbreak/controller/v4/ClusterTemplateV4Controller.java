@@ -82,7 +82,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
 
     @Override
     public ClusterTemplateV4Responses deleteMultiple(Long workspaceId, Set<String> names) {
-        Set<ClusterTemplate> clusterTemplates = clusterTemplateService.deleteMultipleByNameFromWorkspace(names, workspaceId);
+        Set<ClusterTemplate> clusterTemplates = clusterTemplateService.deleteMultiple(names, workspaceId);
         return new ClusterTemplateV4Responses(converterUtil.convertAllAsSet(clusterTemplates, ClusterTemplateV4Response.class));
     }
 }
