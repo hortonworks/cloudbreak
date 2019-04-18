@@ -13,6 +13,14 @@ public class CMRepositoryVersionUtil {
     }
 
     public static boolean isEnableKerberosSupportedViaClusterDefinition(ClouderaManagerRepo clouderaManagerRepoDetails) {
+        return isClouderaManagerVersionNewOrEqualThanV620(clouderaManagerRepoDetails);
+    }
+
+    public static boolean isKeepHostTemplateSupportedViaClusterDefinition(ClouderaManagerRepo clouderaManagerRepoDetails) {
+        return isClouderaManagerVersionNewOrEqualThanV620(clouderaManagerRepoDetails);
+    }
+
+    private static boolean isClouderaManagerVersionNewOrEqualThanV620(ClouderaManagerRepo clouderaManagerRepoDetails) {
         return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_6_2_0);
     }
 
