@@ -12,6 +12,8 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
@@ -19,12 +21,15 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.caas.grpc.GrpcActorContext;
 import com.sequenceiq.caas.model.AltusToken;
+import com.sequenceiq.caas.util.CrnHelper;
 import com.sequenceiq.caas.util.JsonUtil;
 
 import io.grpc.stub.StreamObserver;
 
 @Service
 public class MockUserManagementService extends UserManagementGrpc.UserManagementImplBase {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MockUserManagementService.class);
 
     @Inject
     private JsonUtil jsonUtil;
@@ -66,6 +71,20 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
                         .setAccountType(UserManagementProto.AccountType.REGULAR)
                         .setUserCrn(userIdOrCrn)
                         .build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void authenticate(UserManagementProto.AuthenticateRequest request,
+            StreamObserver<UserManagementProto.AuthenticateResponse> responseObserver) {
+        String authHeader = request.getAccessKeyV1AuthRequest().getAuthHeader();
+        String crn = CrnHelper.extractCrnFromAuthHeader(authHeader);
+        LOG.info("Crn: {}", crn);
+
+        responseObserver.onNext(
+                UserManagementProto.AuthenticateResponse.newBuilder()
+                    .setActorCrn(crn)
+                    .build());
         responseObserver.onCompleted();
     }
 }

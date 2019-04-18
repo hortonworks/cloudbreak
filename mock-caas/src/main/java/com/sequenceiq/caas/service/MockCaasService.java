@@ -34,6 +34,7 @@ import com.sequenceiq.caas.model.CaasUserList;
 import com.sequenceiq.caas.model.IntrospectRequest;
 import com.sequenceiq.caas.model.IntrospectResponse;
 import com.sequenceiq.caas.model.TokenResponse;
+import com.sequenceiq.caas.util.CrnHelper;
 import com.sequenceiq.caas.util.JsonUtil;
 
 @Service
@@ -203,7 +204,7 @@ public class MockCaasService {
         altusToken.setIat(Instant.now().toEpochMilli());
         altusToken.setExp(Instant.now().plus(PLUS_QUANTITY, DAYS).toEpochMilli());
         altusToken.setIat(Instant.now().toEpochMilli());
-        altusToken.setSub("crn:altus:iam:us-west-1:" + tenant + ":user:" + user);
+        altusToken.setSub(CrnHelper.generateCrn(tenant, user));
         String token = encode(jsonUtil.toJsonString(altusToken), SIGNATURE_VERIFIER).getEncoded();
         LOGGER.info(format("Token generated for Altus: %s", token));
         return token;
