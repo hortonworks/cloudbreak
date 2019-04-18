@@ -90,6 +90,8 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     @Inject
     private GovCloudFlagMigrator govCloudFlagMigrator;
 
+    private final List<Status> syncRequiredStates = Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC, START_IN_PROGRESS, STOP_IN_PROGRESS);
+
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         heartbeatService.heartbeat();
@@ -108,8 +110,8 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     }
 
     private List<Stack> resetStackStatus(Collection<Long> excludeStackIds) {
-        return stackService.getByStatuses(Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC, START_IN_PROGRESS, STOP_IN_PROGRESS))
-                .stream().filter(s -> !excludeStackIds.contains(s.getId()) || WAIT_FOR_SYNC.equals(s.getStatus()))
+        return stackService.getByStatuses(syncRequiredStates).stream()
+                .filter(s -> !excludeStackIds.contains(s.getId()) || WAIT_FOR_SYNC.equals(s.getStatus()))
                 .peek(s -> {
                     if (!WAIT_FOR_SYNC.equals(s.getStatus())) {
                         loggingStatusChange("Stack", s.getId(), s.getStatus(), WAIT_FOR_SYNC);
@@ -129,8 +131,8 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     }
 
     private List<Cluster> resetClusterStatus(Collection<Stack> stacksToSync, Collection<Long> excludeStackIds) {
-        return clusterService.findByStatuses(Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC, START_IN_PROGRESS, STOP_IN_PROGRESS))
-                .stream().filter(c -> !excludeStackIds.contains(c.getStack().getId()))
+        return clusterService.findByStatuses(syncRequiredStates).stream()
+                .filter(c -> !excludeStackIds.contains(c.getStack().getId()))
                 .peek(c -> {
                     if (!WAIT_FOR_SYNC.equals(c.getStatus())) {
                         loggingStatusChange("Cluster", c.getId(), c.getStatus(), WAIT_FOR_SYNC);
