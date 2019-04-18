@@ -81,7 +81,7 @@ public class AbstractWorkspaceAwareResourceServiceTest {
             when(testRepository.findByNameInAndWorkspaceId(names, 1L))
                     .thenReturn(ImmutableSet.of(r1));
             underTest.deleteMultipleByNameFromWorkspace(names, 1L);
-            fail();
+            fail("Expected a NotFoundException");
         } catch (NotFoundException e) {
             assertTrue(e.getMessage().contains("badname1") && e.getMessage().contains("badname3")
                     && !e.getMessage().contains("name2"));
