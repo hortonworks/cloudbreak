@@ -28,27 +28,3 @@ run_post_cluster_install_script_{{ script_name }}:
 
 {% endif %}
 {% endfor %}
-
-{% if "manager_server" in grains.get('roles', []) %}
-{% if salt['pillar.get']('ldap', None) != None and salt['pillar.get']('ldap:local', None) == None %}
-
-stop_cmserver:
-  service.dead:
-    - name: cloudera-scm-server
-    - onlyif:
-      - test ! -f /var/cmserver-restarted
-
-start_cmserver:
-  service.running:
-    - enable: True
-    - name: cloudera-scm-server
-    - onlyif:
-      - test ! -f /var/cmserver-restarted
-
-/var/cmserver-restarted:
-  file.touch:
-    - onlyif:
-      - test ! -f /var/cmserver-restarted
-
-{% endif %}
-{% endif %}

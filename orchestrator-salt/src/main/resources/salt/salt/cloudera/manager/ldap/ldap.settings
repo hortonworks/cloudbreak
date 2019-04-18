@@ -1,0 +1,15 @@
+{% if ldap.ldap %}
+setsettings LDAP_TYPE LDAP
+{% endif %}
+#this is to specify authentication backend
+setsettings AUTH_BACKEND_ORDER DB_THEN_LDAP
+# this is to specify authorization backend
+setsettings LDAP_URL {{ ldap.connectionURL }}
+setsettings LDAP_BIND_DN {{ ldap.bindDn }}
+setsettings LDAP_BIND_PW {{ ldap.bindPassword }}
+setsettings NT_DOMAIN {{ ldap.domain }}
+setsettings LDAP_USER_SEARCH_FILTER {{ ldap.userNameAttribute }}={0}
+setsettings LDAP_USER_SEARCH_BASE {{ ldap.userSearchBase }}
+setsettings LDAP_GROUP_SEARCH_FILTER {{ ldap.groupMemberAttribute }}={0}
+setsettings LDAP_GROUP_SEARCH_BASE {{ ldap.groupSearchBase }}
+setsettings LDAP_DN_PATTERN {{ ldap.userDnPattern }}
