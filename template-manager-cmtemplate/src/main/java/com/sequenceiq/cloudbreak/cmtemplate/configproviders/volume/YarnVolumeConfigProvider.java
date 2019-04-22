@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
+import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
@@ -37,7 +38,7 @@ public class YarnVolumeConfigProvider extends AbstractVolumeConfigProvider {
     }
 
     @Override
-    List<ApiClusterTemplateVariable> getVariables(String roleType, HostgroupView hostGroupView) {
+    List<ApiClusterTemplateVariable> getVariables(String roleType, HostgroupView hostGroupView, TemplatePreparationObject templatePreparationObject) {
         List<ApiClusterTemplateVariable> variables = new ArrayList<>();
 
         switch (roleType) {
