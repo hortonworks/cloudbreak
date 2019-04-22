@@ -57,7 +57,7 @@ public abstract class AbstractVolumeConfigProvider implements CmTemplateComponen
                     for (String roleType : getRoleTypes()) {
                         Optional<String> roleRefOpt = findRoleRef(cmTemplate.getTemplate(), hostTemplate, roleType);
                         if (roleRefOpt.isPresent()) {
-                            result.addAll(getVariables(roleType, hostGroupView));
+                            result.addAll(getVariables(roleType, hostGroupView, templatePreparationObject));
                         }
                     }
                 }
@@ -102,7 +102,7 @@ public abstract class AbstractVolumeConfigProvider implements CmTemplateComponen
 
     abstract List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView);
 
-    abstract List<ApiClusterTemplateVariable> getVariables(String roleType, HostgroupView hostgroupView);
+    abstract List<ApiClusterTemplateVariable> getVariables(String roleType, HostgroupView hostgroupView, TemplatePreparationObject templatePreparationObject);
 
     String getRoleTypeVariableName(String hostGroup, String roleType, String propertyKey) {
         return String.format("%s_%s_%s", hostGroup, roleType.toLowerCase(), propertyKey);
