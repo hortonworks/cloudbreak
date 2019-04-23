@@ -1,0 +1,166 @@
+import org.ajoberstar.grgit.Grgit
+
+plugins {
+  id "java"
+  id "checkstyle"
+  id "jacoco"
+  id 'maven'
+  id "org.springframework.boot" version "2.1.2.RELEASE"
+}
+
+repositories {
+  mavenLocal()
+  maven { url = "$repoUrl" }
+  mavenCentral()
+  maven { url "https://cloudbreak-maven.s3.amazonaws.com/releases" }
+  maven { url "https://repo.spring.io/release" }
+  maven { url "https://plugins.gradle.org/m2/" }
+}
+
+dependencies {
+  implementation     group: 'com.google.code.gson',      name: 'gson'
+  implementation     group: 'dnsjava',                   name: 'dnsjava'
+  implementation     group: 'io.micrometer',             name: 'micrometer-core'
+  implementation     group: 'io.micrometer',             name: 'micrometer-jersey2'
+  implementation     group: 'io.micrometer',             name: 'micrometer-registry-prometheus'
+  implementation     group: 'io.springfox',              name: 'springfox-swagger2'
+  implementation     group: 'io.springfox',              name: 'springfox-swagger-ui'
+  implementation     group: 'io.swagger',                name: 'swagger-jersey2-jaxrs'
+  implementation     group: 'javax.xml.bind',            name: 'jaxb-api'
+  implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server'
+  implementation     group: 'org.mybatis',               name: 'mybatis-migrations'
+  implementation     group: 'org.postgresql',            name: 'postgresql'
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter'
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web'
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator'
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey'
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa'
+  testImplementation ('org.springframework.boot:spring-boot-starter-test') {
+    exclude group: 'junit'
+  }
+  testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-api'
+  testRuntime        group: 'org.junit.jupiter',         name: 'junit-jupiter-engine'
+
+  constraints {
+    implementation     group: 'com.google.code.gson',      name: 'gson',                           version: '2.6.2'
+    implementation     group: 'dnsjava',                   name: 'dnsjava',                        version: '2.1.7'
+    implementation     group: 'io.micrometer',             name: 'micrometer-core',                version: micrometerVersion
+    implementation     group: 'io.micrometer',             name: 'micrometer-jersey2',             version: micrometerVersion
+    implementation     group: 'io.micrometer',             name: 'micrometer-registry-prometheus', version: micrometerVersion
+    implementation     group: 'io.springfox',              name: 'springfox-swagger2',             version: swagger2Version
+    implementation     group: 'io.springfox',              name: 'springfox-swagger-ui',           version: swagger2Version
+    implementation     group: 'io.swagger',                name: 'swagger-jersey2-jaxrs',          version: '1.5.21'
+    implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                       version: '2.3.1'
+    implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                  version: '2.28'
+    implementation     group: 'org.mybatis',               name: 'mybatis-migrations',             version: '3.2.0'
+    implementation     group: 'org.postgresql',            name: 'postgresql',                     version: postgreSQLVersion
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web',        version: springBootVersion
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator',   version: springBootVersion
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey',     version: springBootVersion
+    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',   version: springBootVersion
+    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+    testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-api',              version: junitJupiterVersion
+    testRuntime        group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',           version: junitJupiterVersion
+  }
+
+}
+
+bootRun {
+  systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
+  systemProperty 'spring.config.location', System.properties['spring.config.location']
+  if (project.hasProperty('jvmArgs')) {
+    jvmArgs += project.jvmArgs.split("\\s+").toList()
+  }
+}
+
+springBoot {
+  mainClassName = 'com.sequenceiq.redbeams.RedbeamsApplication'
+}
+
+jar {
+  baseName = 'redbeams'
+  archiveName = 'redbeams.jar'
+}
+
+bootJar {
+  baseName = 'redbeams'
+  archiveName = 'redbeams.jar'
+  manifest {
+    def grgit = Grgit.open(currentDir: project.projectDir)
+    attributes "Implementation-Version": grgit.describe()
+  }
+}
+
+test{
+  useJUnitPlatform()
+}
+
+task execute(type: JavaExec) {
+  if (project.hasProperty('mainClass')) {
+    main = mainClass
+    classpath = sourceSets.main.runtimeClasspath
+  }
+}
+
+task buildInfo(type: BuildInfoTask, dependsOn: processResources) {
+  destination = file("$buildDir")
+  applicationPropertiesPath = "$buildDir"
+  basename = jar.baseName
+  buildVersion = version
+}
+
+compileJava.dependsOn buildInfo
+
+class BuildInfoTask extends DefaultTask {
+  File destination = new File("build.info")
+  String applicationPropertiesPath
+  String basename
+  String buildVersion
+
+  @TaskAction
+  def writeBuildInfo() {
+    List<File> applicationDestinations = []
+
+    applicationDestinations += project.file("out/production/resources")
+    applicationDestinations += new File(applicationPropertiesPath + "/resources/main")
+
+    destination.mkdirs()
+
+    // if using dev environment this condition is true
+    if (buildVersion.contains("+") || buildVersion == "unspecified") {
+      def grgit = Grgit.open(currentDir: project.projectDir)
+      buildVersion = grgit.describe()
+      println "buildVersion from git: " + buildVersion
+    }
+    String activeProfile = determineActiveProfile()
+    new File(destination, "build.info").withWriter { out ->
+      [
+              "ARTIFACT_BASENAME=" + basename,
+              "ARTIFACT_VERSION=" + buildVersion,
+      ].each { out.println it }
+    }
+    applicationDestinations.each {
+      it.mkdirs()
+      new File(it, "application.properties").withWriter { out ->
+        [
+                "info.app.name=" + basename,
+                "info.app.version=" + buildVersion,
+                "spring.profiles.active=" + activeProfile
+        ].each { out.println it }
+      }
+    }
+  }
+
+  private String determineActiveProfile() {
+    String activeProfile = "dev"
+    if (buildVersion.contains("dev") || buildVersion.equals("unspecified")) {
+      activeProfile = "dev"
+    } else if (buildVersion.contains("rc")) {
+      activeProfile = "rc"
+    } else {
+      activeProfile = "prod"
+    }
+    return activeProfile
+  }
+}
