@@ -3,26 +3,36 @@
 <head>
     <script src="jquery-3.3.1.min.js"></script>
     <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="pics/favicon.ico">
     <link rel="stylesheet" type="text/css" href="css/reset.css" />
     <link rel="stylesheet" type="text/css" href="css/style.css" />
     <link rel="stylesheet" type="text/css" href="css/login.css" />
+    <link rel="stylesheet" type="text/css" href="css/color.css" />
 </head>
-<body>
+<body id="" style="background-color: #f4f5f6;">
     <div class="container-fluid">
+        <div style="position: absolute">
+            <img src="pics/line-pattern.png" srcset="pics/line-pattern.png" class="line-pattern">
+            <img src="pics/airplane.png" srcset="pics/airplane.png" class="airplane">
+        </div>
         <div class="login-wrapper">
             <form class="right-col" id="loginform" action="../auth/in">
-                <div class="group-title">Mocked Sign In<span>*</span></div>
+                <div class="cdp-logo">
+                    <img class="group-title cdp-logo" src="pics/cdp-sign-in.png" srcset="pics/cdp-sign-in.png">
+                </div>
+
+                <div class="group-title Sign-In-Enjoy-the-R">Sign In. Enjoy the Ride</div>
                 <div class="field-group">
-                    <label for="tenant" aria-label="Tenant">Tenant</label>
+                    <label for="tenant" aria-label="Tenant" class="Username">Tenant</label>
                     <input type="text" class="form-control" name="tenant" id="tenant" required/>
                 </div>
                 <div class="field-group">
-                    <label for="username" aria-label="Username">Username</label>
+                    <label for="username" aria-label="Username" class="Username">Username</label>
                     <input type="text" class="form-control" name="username" id="username" required/>
                 </div>
                 <div class="action-group">
-                    <button type="submit" id="loginBtn" class="btn btn-primary">Sign In</button>
+                    <button type="submit" id="loginBtn" class="btn btn-primary default-button-background-copy-2">Sign In</button>
                 </div>
                 <div class="description">
                     <span>*</span> This is a mocked sign in form. It will accept every combination without any security.

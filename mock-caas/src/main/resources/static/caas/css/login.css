@@ -1,14 +1,82 @@
-html, 
+html,
 body,
 body > div {
     height: 100%;
-    font-family: Calibre,Calibri,Helvetica Neue,Helvetica,Arial,sans-serif;
-    -webkit-font-smoothing: antialiased;
+    font-family: 'Roboto', sans-serif;
+}
+.background {
+  width: 1370.9px;
+  height: 900px;
+  background-color: var(--white);
+}
+.cdp-logo {
+  width: 507px;
+  height: 32px;
+  margin-bottom: 60px;
+}
+.Sign-In-Enjoy-the-R {
+  width: 282px;
+  height: 20px;
+  font-family: Roboto;
+  font-size: 28px;
+  font-weight: normal;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: 0.71;
+  letter-spacing: normal;
+  color: var(--gray-900);
+}
+.Username {
+  width: 73px;
+  height: 20px;
+  font-family: Roboto;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: 1.25;
+  letter-spacing: normal;
+  color: var(--gray-700);
+}
+.Password {
+  width: 71px;
+  height: 20px;
+  font-family: Roboto;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: 1.25;
+  letter-spacing: normal;
+  color: var(--gray-700);
+}
+.airplane {
+  width: 59%;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  height: 100%;
+}
+.line-pattern {
+  width: 100%;
+  border: solid 1px var(--gray-50);
+}
+.default-button-background {
+  width: 284px;
+  height: 40px;
+  border-radius: 3px;
+  border: solid 1px var(--gray-400);
+  background-color: var(--white);
+}
+.default-button-background-copy-2 {
+  width: 89px;
+  height: 40px;
+  border-radius: 3px;
+  background-color: var(--blue-500);
 }
 .login-wrapper{
 	display: block;
 	display: flex;
-	align-items: center;
 	height: 100%;
 	min-width: 1260px;
 }
@@ -33,16 +101,16 @@ body > div {
     padding-left: 100px;
     position: relative;
     margin-left: 15%;
+    margin-top: 225px;
 }
 
 .group-title {
 	margin-bottom: 20px;
-	font-size: 30px;
 }
 
 .right-col .field-group {
 	width: 300px;
-	margin: 15px 0;
+	margin: 24px 0;
 }
 
 .right-col .field-group label {
@@ -96,4 +164,6 @@ body > div {
 .description {
     color: gray;
     font-style: italic;
+    max-width: 400px;
+    margin-top: 16px;
 }
