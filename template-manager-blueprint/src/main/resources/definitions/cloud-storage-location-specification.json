@@ -91,16 +91,6 @@
       "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
     },
     {
-      "propertyName": "hive.metastore.warehouse.external.dir",
-      "propertyFile": "hive-site",
-      "description": "Location of default database for the warehouse of external tables",
-      "defaultPath": "{{{ defaultPath }}}/warehouse/tablespace/external/hive",
-      "propertyDisplayName": "Hive Metastore Warehouse External Directory",
-      "relatedService": "HIVE_METASTORE",
-      "requiredForAttachedCluster": false,
-      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
-    },
-    {
       "propertyName": "xasecure.audit.destination.hdfs.dir",
       "propertyFile": "ranger-env",
       "description": "This is the directory where audit logs will be stored",
