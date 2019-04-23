@@ -327,6 +327,7 @@ public class Environment implements WorkspaceAwareResource, ArchivableResource {
         return deletionTimestamp;
     }
 
+    @Override
     public void setDeletionTimestamp(Long deletionTimestamp) {
         this.deletionTimestamp = deletionTimestamp;
     }

@@ -56,7 +56,7 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     Set<Cluster> findAllWithNoWorkspace();
 
     @CheckPermissionsByReturnValue
-    Set<Cluster> findByBlueprint(Blueprint blueprint);
+    Set<Cluster> findByBlueprintAndStatusNotIn(Blueprint blueprint, Set<Status> statuses);
 
     @CheckPermissionsByReturnValue
     Set<Cluster> findByLdapConfigAndStatusNot(LdapConfig ldapConfig, Status status);

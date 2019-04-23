@@ -3,26 +3,21 @@ package com.sequenceiq.cloudbreak.service.blueprint;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.PRE_DELETE_IN_PROGRESS;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Before;
@@ -42,11 +37,19 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
+import com.sequenceiq.cloudbreak.repository.BlueprintArchivedRepository;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
+import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BlueprintServiceTest {
+
+    private static final String NAME_ONE = "One";
+
+    private static final String NAME_TWO = "Two";
+
+    private static final String NAME_THREE = "Three";
 
     @Rule
     public final ExpectedException exceptionRule = ExpectedException.none();
@@ -56,6 +59,12 @@ public class BlueprintServiceTest {
 
     @Mock
     private BlueprintRepository blueprintRepository;
+
+    @Mock
+    private BlueprintArchivedRepository blueprintArchivedRepository;
+
+    @Mock
+    private Clock clock;
 
     @Mock
     private BlueprintLoaderService blueprintLoaderService;
@@ -72,7 +81,7 @@ public class BlueprintServiceTest {
 
     @Test
     public void testDeletionWithZeroClusters() {
-        when(clusterService.findByBlueprint(any())).thenReturn(Collections.emptySet());
+        when(clusterService.findNotDeletedByBlueprint(any())).thenReturn(Collections.emptySet());
 
         Blueprint deleted = underTest.delete(blueprint);
 
@@ -84,88 +93,96 @@ public class BlueprintServiceTest {
         Cluster cluster = getCluster("c1", 1L, blueprint, AVAILABLE);
         exceptionRule.expect(BadRequestException.class);
         exceptionRule.expectMessage("c1");
-        when(clusterService.findByBlueprint(any())).thenReturn(Set.of(cluster));
+        when(clusterService.findNotDeletedByBlueprint(any())).thenReturn(Set.of(cluster));
 
         underTest.delete(blueprint);
     }
 
     @Test
-    public void testDeletionWithTerminatedClusters() {
-        Set<Cluster> clusters = getClusterWithStatus(PRE_DELETE_IN_PROGRESS, DELETE_IN_PROGRESS, DELETE_COMPLETED, DELETE_FAILED);
+    public void testDeleteByIdArchives() {
+        blueprint.setArchived(false);
+        blueprint.setStatus(USER_MANAGED);
+        when(blueprintRepository.findById(2L)).thenReturn(Optional.of(blueprint));
 
-        when(clusterService.findByBlueprint(any())).thenReturn(clusters);
+        underTest.delete(2L);
+
+        assertTrue(blueprint.isArchived());
+        verify(blueprintRepository).save(blueprint);
+        verify(blueprintRepository, never()).delete(blueprint);
+    }
+
+    @Test
+    public void testDeletionWithTerminatedClusters() {
+        when(clusterService.findNotDeletedByBlueprint(any())).thenReturn(Set.of());
 
         Blueprint deleted = underTest.delete(blueprint);
 
         assertNotNull(deleted);
-        verify(clusterService, times(1)).saveAll(anyCollection());
     }
 
     @Test
     public void testDeletionWithTerminatedAndNonTerminatedClusters() {
         Set<Cluster> clusters = getClusterWithStatus(AVAILABLE, DELETE_IN_PROGRESS);
 
-        when(clusterService.findByBlueprint(any())).thenReturn(clusters);
+        when(clusterService.findNotDeletedByBlueprint(any())).thenReturn(clusters);
 
         try {
             underTest.delete(blueprint);
         } catch (BadRequestException e) {
             assertTrue(e.getMessage().contains("c1"));
-            assertFalse(e.getMessage().contains("c2"));
         }
-        verify(clusterService, times(1)).saveAll(anyCollection());
     }
 
     @Test
     public void testGetByNameForWorkspaceAndLoadDefaultsIfNecessaryWhenFound() {
-        Blueprint blueprint1 = getBlueprint("One", DEFAULT);
-        when(blueprintRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(Set.of(blueprint1));
+        Blueprint blueprint = getBlueprint(NAME_ONE, DEFAULT);
+        when(blueprintRepository.findByWorkspaceIdAndName(1L, "One")).thenReturn(Optional.of(blueprint));
 
-        Blueprint foundBlueprint = underTest.getByNameForWorkspaceAndLoadDefaultsIfNecessary("One", getWorkspace());
+        Blueprint foundBlueprint = underTest.getByNameForWorkspaceAndLoadDefaultsIfNecessary(NAME_ONE, getWorkspace());
 
         assertEquals("One", foundBlueprint.getName());
-        verify(blueprintRepository).findAllByNotDeletedInWorkspace(1L);
-        verify(blueprintRepository, never()).findAllByWorkspaceIdAndStatusIn(anyLong(), any());
-        verify(blueprintLoaderService, never()).isAddingDefaultBlueprintsNecessaryForTheUser(any());
+        verify(blueprintRepository).findByWorkspaceIdAndName(1L, NAME_ONE);
+        verify(blueprintRepository, never()).findAllByWorkspaceIdAndStatus(anyLong(), any());
+        verify(blueprintLoaderService, never()).isAddingDefaultBlueprintsNecessaryForTheUser(any(), any());
     }
 
     @Test
     public void testGetByNameForWorkspaceAndLoadDefaultsIfNecessaryWhenLoaded() {
-        Blueprint blueprint1 = getBlueprint("One", DEFAULT);
-        Blueprint blueprint2 = getBlueprint("Two", DEFAULT);
-        when(blueprintRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(Set.of(blueprint1));
-        when(blueprintRepository.findAllByWorkspaceIdAndStatusIn(anyLong(), any())).thenReturn(Set.of(blueprint1));
-        when(blueprintLoaderService.isAddingDefaultBlueprintsNecessaryForTheUser(any())).thenReturn(true);
-        when(blueprintLoaderService.loadBlueprintsForTheWorkspace(any(), any(), any())).thenReturn(Set.of(blueprint1, blueprint2));
+        Blueprint blueprint1 = getBlueprint(NAME_ONE, DEFAULT);
+        Blueprint blueprint2 = getBlueprint(NAME_TWO, DEFAULT);
+        when(blueprintRepository.findByWorkspaceIdAndName(1L, NAME_TWO)).thenReturn(Optional.empty());
+        when(blueprintRepository.findAllByWorkspaceIdAndStatus(anyLong(), any())).thenReturn(Set.of(blueprint1));
+        when(blueprintLoaderService.isAddingDefaultBlueprintsNecessaryForTheUser(any(), any())).thenReturn(true);
+        when(blueprintLoaderService.loadBlueprintsForTheWorkspace(any(), any(), any(), any())).thenReturn(Set.of(blueprint1, blueprint2));
 
-        Blueprint foundBlueprint = underTest.getByNameForWorkspaceAndLoadDefaultsIfNecessary("Two", getWorkspace());
+        Blueprint foundBlueprint = underTest.getByNameForWorkspaceAndLoadDefaultsIfNecessary(NAME_TWO, getWorkspace());
 
-        assertEquals("Two", foundBlueprint.getName());
-        verify(blueprintRepository).findAllByNotDeletedInWorkspace(1L);
-        verify(blueprintRepository).findAllByWorkspaceIdAndStatusIn(anyLong(), any());
-        verify(blueprintLoaderService).isAddingDefaultBlueprintsNecessaryForTheUser(any());
-        verify(blueprintLoaderService).loadBlueprintsForTheWorkspace(any(), any(), any());
+        assertEquals(NAME_TWO, foundBlueprint.getName());
+        verify(blueprintRepository).findByWorkspaceIdAndName(1L, NAME_TWO);
+        verify(blueprintRepository).findAllByWorkspaceIdAndStatus(anyLong(), any());
+        verify(blueprintLoaderService).isAddingDefaultBlueprintsNecessaryForTheUser(any(), any());
+        verify(blueprintLoaderService).loadBlueprintsForTheWorkspace(any(), any(), any(), any());
     }
 
     @Test
     public void testGetByNameForWorkspaceAndLoadDefaultsIfNecessaryWhenNotFound() {
-        Blueprint blueprint1 = getBlueprint("One", DEFAULT);
-        Blueprint blueprint2 = getBlueprint("Two", DEFAULT);
-        when(blueprintRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(Set.of(blueprint1));
-        when(blueprintRepository.findAllByWorkspaceIdAndStatusIn(anyLong(), any())).thenReturn(Set.of(blueprint1));
-        when(blueprintLoaderService.isAddingDefaultBlueprintsNecessaryForTheUser(any())).thenReturn(true);
-        when(blueprintLoaderService.loadBlueprintsForTheWorkspace(any(), any(), any())).thenReturn(Set.of(blueprint1, blueprint2));
+        Blueprint blueprint1 = getBlueprint(NAME_ONE, DEFAULT);
+        Blueprint blueprint2 = getBlueprint(NAME_TWO, DEFAULT);
+        when(blueprintRepository.findByWorkspaceIdAndName(1L, NAME_THREE)).thenReturn(Optional.empty());
+        when(blueprintRepository.findAllByWorkspaceIdAndStatus(anyLong(), any())).thenReturn(Set.of(blueprint1));
+        when(blueprintLoaderService.isAddingDefaultBlueprintsNecessaryForTheUser(any(), any())).thenReturn(true);
+        when(blueprintLoaderService.loadBlueprintsForTheWorkspace(any(), any(), any(), any())).thenReturn(Set.of(blueprint1, blueprint2));
 
         try {
-            underTest.getByNameForWorkspaceAndLoadDefaultsIfNecessary("Three", getWorkspace());
+            underTest.getByNameForWorkspaceAndLoadDefaultsIfNecessary(NAME_THREE, getWorkspace());
         } catch (NotFoundException e) {
-            assertThat(e.getMessage(), containsString("Three"));
+            assertThat(e.getMessage(), containsString(NAME_THREE));
         }
 
-        verify(blueprintRepository).findAllByNotDeletedInWorkspace(1L);
-        verify(blueprintRepository).findAllByWorkspaceIdAndStatusIn(anyLong(), any());
-        verify(blueprintLoaderService).isAddingDefaultBlueprintsNecessaryForTheUser(any());
-        verify(blueprintLoaderService).loadBlueprintsForTheWorkspace(any(), any(), any());
+        verify(blueprintRepository).findByWorkspaceIdAndName(1L, NAME_THREE);
+        verify(blueprintRepository).findAllByWorkspaceIdAndStatus(anyLong(), any());
+        verify(blueprintLoaderService).isAddingDefaultBlueprintsNecessaryForTheUser(any(), any());
+        verify(blueprintLoaderService).loadBlueprintsForTheWorkspace(any(), any(), any(), any());
     }
 
     private Set<Cluster> getClusterWithStatus(Status... statuses) {

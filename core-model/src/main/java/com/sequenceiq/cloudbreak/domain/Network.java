@@ -143,6 +143,7 @@ public class Network implements ProvisionEntity, WorkspaceAwareResource, Archiva
         return deletionTimestamp;
     }
 
+    @Override
     public void setArchived(boolean archived) {
         this.archived = archived;
     }
@@ -152,6 +153,7 @@ public class Network implements ProvisionEntity, WorkspaceAwareResource, Archiva
 
     }
 
+    @Override
     public void setDeletionTimestamp(Long deletionTimestamp) {
         this.deletionTimestamp = deletionTimestamp;
     }

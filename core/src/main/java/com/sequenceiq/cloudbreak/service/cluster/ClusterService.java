@@ -1,6 +1,10 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.PRE_DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
@@ -131,6 +135,8 @@ public class ClusterService {
     private static final String MASTER_CATEGORY = "MASTER";
 
     private static final List<String> REATTACH_NOT_SUPPORTED_VOLUME_TYPES = List.of("ephemeral");
+
+    private static final Set<Status> DELETED_CLUSTER_STATUSES = Set.of(PRE_DELETE_IN_PROGRESS, DELETE_IN_PROGRESS, DELETE_FAILED, DELETE_COMPLETED);
 
     @Inject
     private StackService stackService;
@@ -366,7 +372,7 @@ public class ClusterService {
 
     public void delete(Long stackId, Boolean withStackDelete, Boolean deleteDependencies) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        if (stack.getCluster() == null || stack.getCluster() != null && Status.DELETE_COMPLETED.equals(stack.getCluster().getStatus())) {
+        if (stack.getCluster() == null || stack.getCluster() != null && DELETE_COMPLETED.equals(stack.getCluster().getStatus())) {
             throw new BadRequestException("Clusters is already deleted.");
         }
         LOGGER.debug("Cluster delete requested.");
@@ -1119,8 +1125,8 @@ public class ClusterService {
         return clusterApiConnectors.getConnector(stack).clusterStatusService().getHostStatusesRaw();
     }
 
-    public Set<Cluster> findByBlueprint(Blueprint blueprint) {
-        return repository.findByBlueprint(blueprint);
+    public Set<Cluster> findNotDeletedByBlueprint(Blueprint blueprint) {
+        return repository.findByBlueprintAndStatusNotIn(blueprint, DELETED_CLUSTER_STATUSES);
     }
 
     public List<Cluster> findByStatuses(Collection<Status> statuses) {

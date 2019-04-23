@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT_DELETED;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
@@ -20,6 +19,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.BlueprintArchived;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.init.blueprint.DefaultBlueprintCache;
@@ -46,6 +46,8 @@ public class BlueprintLoaderServiceTest {
             + "{\"name\":\"ZOOKEEPER_SERVER\"}],\"cardinality\":\"1\"},{\"name\":\"worker\",\"configurations\":[],\"components\":["
             + "{\"name\":\"DATANODE\"},{\"name\":\"METRICS_MONITOR\"},{\"name\":\"NODEMANAGER\"}],\"cardinality\":\"1+\"}]},\"inputs\": []}";
 
+    private static final String MULTI_NODE_HDFS_YARN = "multi-node-hdfs-yarn";
+
     @InjectMocks
     private BlueprintLoaderService underTest;
 
@@ -64,7 +66,7 @@ public class BlueprintLoaderServiceTest {
         Map<String, Blueprint> defaultBlueprints = generateCacheData(3);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
-        boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.isAddingDefaultBlueprintsNecessaryForTheUser(blueprints);
+        boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.isAddingDefaultBlueprintsNecessaryForTheUser(blueprints, Set.of());
 
         Assert.assertFalse(addingDefaultBlueprintsAreNecessaryForTheUser);
     }
@@ -75,19 +77,19 @@ public class BlueprintLoaderServiceTest {
         Map<String, Blueprint> defaultBlueprints = generateCacheData(2);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
-        boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.isAddingDefaultBlueprintsNecessaryForTheUser(blueprints);
+        boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.isAddingDefaultBlueprintsNecessaryForTheUser(blueprints, Set.of());
 
         Assert.assertTrue(addingDefaultBlueprintsAreNecessaryForTheUser);
     }
 
     @Test
     public void testWhenUserDeletedDefault() {
-        Set<Blueprint> blueprints = generateDatabaseData(0);
-        blueprints.add(createBlueprint(DEFAULT_DELETED, 0));
-        Map<String, Blueprint> defaultBlueprints = generateCacheData(1);
+        Set<Blueprint> blueprints = generateDatabaseData(1);
+        Set<BlueprintArchived> blueprintsArchived = generateArchivedDatabaseData(1, 1, DEFAULT);
+        Map<String, Blueprint> defaultBlueprints = generateCacheData(2);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
-        boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.isAddingDefaultBlueprintsNecessaryForTheUser(blueprints);
+        boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.isAddingDefaultBlueprintsNecessaryForTheUser(blueprints, blueprintsArchived);
 
         Assert.assertFalse(addingDefaultBlueprintsAreNecessaryForTheUser);
     }
@@ -98,7 +100,7 @@ public class BlueprintLoaderServiceTest {
         Map<String, Blueprint> defaultBlueprints = generateCacheData(2);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
-        boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.isAddingDefaultBlueprintsNecessaryForTheUser(blueprints);
+        boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.isAddingDefaultBlueprintsNecessaryForTheUser(blueprints, Set.of());
 
         Assert.assertTrue(addingDefaultBlueprintsAreNecessaryForTheUser);
     }
@@ -109,7 +111,7 @@ public class BlueprintLoaderServiceTest {
         Map<String, Blueprint> defaultBlueprints = generateCacheData(3, 1);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
-        boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.isAddingDefaultBlueprintsNecessaryForTheUser(blueprints);
+        boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.isAddingDefaultBlueprintsNecessaryForTheUser(blueprints, Set.of());
 
         Assert.assertTrue(addingDefaultBlueprintsAreNecessaryForTheUser);
     }
@@ -120,7 +122,7 @@ public class BlueprintLoaderServiceTest {
         Map<String, Blueprint> defaultBlueprints = generateCacheData(3, 1);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
-        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave);
+        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheWorkspace(blueprints, Set.of(), workspace, this::mockSave);
 
         Assert.assertEquals(4L, resultSet.size());
     }
@@ -131,7 +133,7 @@ public class BlueprintLoaderServiceTest {
         Map<String, Blueprint> defaultBlueprints = generateCacheData(3);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
-        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave);
+        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheWorkspace(blueprints, Set.of(), workspace, this::mockSave);
 
         Assert.assertEquals(3L, resultSet.size());
     }
@@ -142,7 +144,7 @@ public class BlueprintLoaderServiceTest {
         Map<String, Blueprint> defaultBlueprints = generateCacheData(3);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
-        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave);
+        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheWorkspace(blueprints, Set.of(), workspace, this::mockSave);
 
         Assert.assertEquals(3L, resultSet.size());
     }
@@ -173,6 +175,19 @@ public class BlueprintLoaderServiceTest {
         return databaseData;
     }
 
+    private Set<BlueprintArchived> generateArchivedDatabaseData(int databaseSize, int startIndex, ResourceStatus status) {
+        Set<BlueprintArchived> databaseData = new HashSet<>();
+        for (int i = startIndex; i < startIndex + databaseSize; i++) {
+            BlueprintArchived blueprintArchived = new BlueprintArchived();
+            blueprintArchived.setId((long) i);
+            blueprintArchived.setName(MULTI_NODE_HDFS_YARN + i);
+            blueprintArchived.setStatus(status);
+            blueprintArchived.setArchived(true);
+            databaseData.add(blueprintArchived);
+        }
+        return databaseData;
+    }
+
     public static Blueprint createBlueprint(ResourceStatus resourceStatus, int index) {
         Blueprint blueprint = new Blueprint();
         blueprint.setId((long) index);
@@ -181,7 +196,7 @@ public class BlueprintLoaderServiceTest {
         blueprint.setHostGroupCount(3);
         blueprint.setStatus(resourceStatus);
         blueprint.setDescription("test validation" + index);
-        blueprint.setName("multi-node-hdfs-yarn" + index);
+        blueprint.setName(MULTI_NODE_HDFS_YARN + index);
         return blueprint;
     }
 

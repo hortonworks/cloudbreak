@@ -9,7 +9,6 @@ import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -34,13 +33,15 @@ import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.BlueprintArchived;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
+import com.sequenceiq.cloudbreak.repository.BlueprintArchivedRepository;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
+import com.sequenceiq.cloudbreak.service.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject.Builder;
@@ -48,7 +49,7 @@ import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
 
 @Service
-public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blueprint> {
+public class BlueprintService extends AbstractArchivistService<Blueprint> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintService.class);
 
@@ -59,6 +60,9 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     @Inject
     private BlueprintRepository blueprintRepository;
+
+    @Inject
+    private BlueprintArchivedRepository blueprintArchivedRepository;
 
     @Inject
     private BlueprintUtils blueprintUtils;
@@ -134,14 +138,13 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     public Blueprint getByNameForWorkspaceAndLoadDefaultsIfNecessary(String name, Workspace workspace) {
-        Set<Blueprint> blueprints = blueprintRepository.findAllByNotDeletedInWorkspace(workspace.getId());
-        Optional<Blueprint> blueprint = filterBlueprintsByName(name, blueprints);
+        Optional<Blueprint> blueprint = blueprintRepository.findByWorkspaceIdAndName(workspace.getId(), name);
         if (blueprint.isPresent()) {
             return blueprint.get();
         } else {
-            Set<Blueprint> updatedBlueprints = getUpdatedDefaultBlueprintCollection(workspace);
-            if (!updatedBlueprints.isEmpty()) {
-                blueprint = filterBlueprintsByName(name, updatedBlueprints);
+            Set<Blueprint> updatedDefaultBlueprints = getUpdatedDefaultBlueprintCollection(workspace);
+            if (!updatedDefaultBlueprints.isEmpty()) {
+                blueprint = filterBlueprintsByName(name, updatedDefaultBlueprints);
                 if (blueprint.isPresent()) {
                     return blueprint.get();
                 }
@@ -157,14 +160,20 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     private Set<Blueprint> getUpdatedDefaultBlueprintCollection(Workspace workspace) {
-        Set<Blueprint> blueprintsInDatabase =
-                blueprintRepository.findAllByWorkspaceIdAndStatusIn(workspace.getId(), Set.of(ResourceStatus.DEFAULT, ResourceStatus.DEFAULT_DELETED));
-        if (!blueprintLoaderService.isAddingDefaultBlueprintsNecessaryForTheUser(blueprintsInDatabase)) {
-            return blueprintsInDatabase.stream().filter(bp -> ResourceStatus.DEFAULT.equals(bp.getStatus())).collect(Collectors.toSet());
+        Set<Blueprint> blueprintsActiveInDatabase =
+                blueprintRepository.findAllByWorkspaceIdAndStatus(workspace.getId(), ResourceStatus.DEFAULT);
+        Set<BlueprintArchived> blueprintsArchivedInDatabase =
+                blueprintArchivedRepository.findAllByWorkspaceIdAndStatus(workspace.getId(), ResourceStatus.DEFAULT);
+        if (!blueprintLoaderService.isAddingDefaultBlueprintsNecessaryForTheUser(blueprintsActiveInDatabase, blueprintsArchivedInDatabase)) {
+            return blueprintsActiveInDatabase;
         }
         LOGGER.debug("Modifying blueprints based on the defaults for the '{}' workspace.", workspace.getId());
-        Set<Blueprint> updatedBlueprints =
-                blueprintLoaderService.loadBlueprintsForTheWorkspace(blueprintsInDatabase, workspace, this::saveDefaultsWithReadRight);
+        Set<Blueprint> updatedBlueprints = blueprintLoaderService.loadBlueprintsForTheWorkspace(
+                blueprintsActiveInDatabase,
+                blueprintsArchivedInDatabase,
+                workspace,
+                this::saveDefaultsWithReadRight
+        );
         LOGGER.debug("Cluster definition modifications finished based on the defaults for '{}' workspace.", workspace.getId());
         return updatedBlueprints;
     }
@@ -199,19 +208,6 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     @Override
-    public Blueprint delete(Blueprint blueprint) {
-        LOGGER.debug("Deleting blueprint with name: {}", blueprint.getName());
-        prepareDeletion(blueprint);
-        if (ResourceStatus.USER_MANAGED.equals(blueprint.getStatus())) {
-            blueprintRepository.delete(blueprint);
-        } else {
-            blueprint.setStatus(ResourceStatus.DEFAULT_DELETED);
-            blueprint = blueprintRepository.save(blueprint);
-        }
-        return blueprint;
-    }
-
-    @Override
     public WorkspaceResourceRepository<Blueprint, Long> repository() {
         return blueprintRepository;
     }
@@ -223,10 +219,10 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     @Override
     protected void prepareDeletion(Blueprint blueprint) {
-        Set<Cluster> notDeletedClustersWithThisCd = getNotDeletedClustersWithBlueprint(blueprint);
-        if (!notDeletedClustersWithThisCd.isEmpty()) {
-            if (notDeletedClustersWithThisCd.size() > 1) {
-                String clusters = notDeletedClustersWithThisCd
+        Set<Cluster> notDeletedClustersWithThisBp = clusterService.findNotDeletedByBlueprint(blueprint);
+        if (!notDeletedClustersWithThisBp.isEmpty()) {
+            if (notDeletedClustersWithThisBp.size() > 1) {
+                String clusters = notDeletedClustersWithThisBp
                         .stream()
                         .map(Cluster::getName)
                         .collect(Collectors.joining(", "));
@@ -235,20 +231,8 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                                 + "The following clusters are using this blueprint: [%s]", blueprint.getName(), clusters));
             }
             throw new BadRequestException(String.format("There is a cluster ['%s'] which uses blueprint '%s'. Please remove this "
-                    + "cluster before deleting the blueprint", notDeletedClustersWithThisCd.iterator().next().getName(), blueprint.getName()));
+                    + "cluster before deleting the blueprint", notDeletedClustersWithThisBp.iterator().next().getName(), blueprint.getName()));
         }
-    }
-
-    private Set<Cluster> getNotDeletedClustersWithBlueprint(Blueprint blueprint) {
-        Set<Cluster> clustersWithThisBlueprint = clusterService.findByBlueprint(blueprint);
-        Set<Cluster> deletedClustersWithThisBp = clustersWithThisBlueprint.stream()
-                .filter(cluster -> DELETED_CLUSTER_STATUSES.contains(cluster.getStatus()))
-                .collect(Collectors.toSet());
-        deletedClustersWithThisBp.forEach(cluster -> cluster.setBlueprint(null));
-        clusterService.saveAll(deletedClustersWithThisBp);
-        Set<Cluster> notDeletedClustersWithThisBp = new HashSet<>(clustersWithThisBlueprint);
-        notDeletedClustersWithThisBp.removeAll(deletedClustersWithThisBp);
-        return notDeletedClustersWithThisBp;
     }
 
     @Override

@@ -7,12 +7,15 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Where;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
+@Where(clause = "archived = false")
 @Table(name = "Blueprint")
 public class BlueprintView extends CompactView {
     private String stackType;
@@ -28,6 +31,8 @@ public class BlueprintView extends CompactView {
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json tags;
+
+    private boolean archived;
 
     public String getStackType() {
         return stackType;
@@ -72,5 +77,9 @@ public class BlueprintView extends CompactView {
     @Override
     public WorkspaceResource getResource() {
         return WorkspaceResource.BLUEPRINT;
+    }
+
+    public boolean isArchived() {
+        return archived;
     }
 }

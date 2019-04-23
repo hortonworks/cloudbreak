@@ -2,12 +2,12 @@ package com.sequenceiq.cloudbreak.repository;
 
 import static com.sequenceiq.cloudbreak.authorization.ResourceAction.READ;
 
+import java.util.Optional;
 import java.util.Set;
 
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
@@ -26,12 +26,11 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @WorkspaceResourceType(resource = WorkspaceResource.BLUEPRINT)
 public interface BlueprintRepository extends WorkspaceResourceRepository<Blueprint, Long> {
 
-    @Query("SELECT b FROM Blueprint b WHERE b.workspace.id= :workspaceId AND b.status <> 'DEFAULT_DELETED'")
     @CheckPermissionsByReturnValue
-    Set<Blueprint> findAllByNotDeletedInWorkspace(@Param("workspaceId") Long workspaceId);
+    Optional<Blueprint> findByWorkspaceIdAndName(@Param("workspaceId") Long workspaceId, @Param("name") String name);
 
     @CheckPermissionsByReturnValue
-    Set<Blueprint> findAllByWorkspaceIdAndStatusIn(Long workspaceId, Set<ResourceStatus> statuses);
+    Set<Blueprint> findAllByWorkspaceIdAndStatus(Long workspaceId, ResourceStatus status);
 
     @Override
     @DisableHasPermission
