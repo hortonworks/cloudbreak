@@ -11,11 +11,10 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/dataplane/common"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
-	ws "github.com/hortonworks/cb-cli/dataplane/workspace"
 	"github.com/hortonworks/dp-cli-common/utils"
-	homedir "github.com/mitchellh/go-homedir"
+	"github.com/mitchellh/go-homedir"
 	"github.com/urfave/cli"
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
 
 type Config struct {
@@ -50,7 +49,6 @@ func CheckConfigAndCommandFlags(c *cli.Context) error {
 		resp := configRead(c)
 		validateContext(c, []fl.StringFlag{fl.FlServerOptional, fl.FlApiKeyIDOptional, fl.FlPrivateKeyOptional})
 		setWorkspaceInContext(c)
-		validateContext(c, []fl.StringFlag{fl.FlWorkspaceOptional})
 		return resp
 	}
 	return err
@@ -87,30 +85,12 @@ func validateContext(c *cli.Context, flagsTocheck []fl.StringFlag) {
 }
 
 func setWorkspaceInContext(c *cli.Context) {
-	profile := c.String(fl.FlProfileOptional.Name)
-	workspace := c.String(fl.FlWorkspaceOptional.Name)
-	if len(profile) == 0 {
-		profile = "default"
-	}
-	config, err := ReadConfig(GetHomeDirectory(), profile)
-	if err != nil {
-		utils.LogErrorAndExit(err)
-	}
-
 	set := func(name, value string) {
-		if err = c.Set(name, value); err != nil {
+		if err := c.Set(name, value); err != nil {
 			log.Debug(err)
 		}
 	}
-	if len(workspace) == 0 {
-		if len(config.Workspace) != 0 {
-			workspaceID := ws.GetWorkspaceIdByName(c, config.Workspace)
-			set(fl.FlWorkspaceOptional.Name, strconv.FormatInt(workspaceID, 10))
-		}
-	} else {
-		workspaceID := ws.GetWorkspaceIdByName(c, workspace)
-		set(fl.FlWorkspaceOptional.Name, strconv.FormatInt(workspaceID, 10))
-	}
+	set(fl.FlWorkspaceOptional.Name, strconv.FormatInt(0, 10))
 }
 
 func configRead(c *cli.Context) error {
