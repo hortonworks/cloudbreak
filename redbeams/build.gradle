@@ -27,6 +27,8 @@ dependencies {
   implementation     group: 'io.springfox',              name: 'springfox-swagger-ui'
   implementation     group: 'io.swagger',                name: 'swagger-jersey2-jaxrs'
   implementation     group: 'javax.xml.bind',            name: 'jaxb-api'
+  runtime            group: 'com.sun.xml.bind',          name: 'jaxb-impl'
+  runtime            group: 'org.glassfish.jaxb',        name: 'jaxb-runtime'
   implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server'
   implementation     group: 'org.mybatis',               name: 'mybatis-migrations'
   implementation     group: 'org.postgresql',            name: 'postgresql'
@@ -51,6 +53,8 @@ dependencies {
     implementation     group: 'io.springfox',              name: 'springfox-swagger-ui',           version: swagger2Version
     implementation     group: 'io.swagger',                name: 'swagger-jersey2-jaxrs',          version: '1.5.21'
     implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                       version: '2.3.1'
+    runtime            group: 'com.sun.xml.bind',          name: 'jaxb-impl',                      version: '2.3.0'
+    runtime            group: 'org.glassfish.jaxb',        name: 'jaxb-runtime',                   version: '2.3.0'
     implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                  version: '2.28'
     implementation     group: 'org.mybatis',               name: 'mybatis-migrations',             version: '3.2.0'
     implementation     group: 'org.postgresql',            name: 'postgresql',                     version: postgreSQLVersion
@@ -64,6 +68,11 @@ dependencies {
     testRuntime        group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',           version: junitJupiterVersion
   }
 
+  compile project(':cloud-common')
+  compile project(':auth-connector')
+  compile project(':core-api')
+  compile project(':core-model')
+  compile project(':redbeams-api')
 }
 
 bootRun {
