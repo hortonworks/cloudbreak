@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor;
 
+import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.SUCCESS;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isSuccess;
 
@@ -23,12 +24,14 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterDecomissionService;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionRequest;
@@ -41,6 +44,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -74,6 +78,9 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
     @Inject
     private ClusterApiConnectors clusterApiConnectors;
 
+    @Inject
+    private StackUtil stackUtil;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(DecommissionRequest.class);
@@ -88,7 +95,8 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
             Stack stack = stackService.getByIdWithListsInTransaction(request.getStackId());
             ClusterDecomissionService clusterDecomissionService = clusterApiConnectors.getConnector(stack).clusterDecomissionService();
             Set<String> hostNames = getHostNamesForPrivateIds(request, stack);
-            HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(), hostGroupName)
+            Cluster cluster = stack.getCluster();
+            HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(cluster.getId(), hostGroupName)
                     .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
             Map<String, HostMetadata> hostsToRemove = clusterDecomissionService.collectHostsToRemove(hostGroup, hostNames);
             Set<String> decomissionedHostNames;
@@ -101,6 +109,13 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
                 decomissionedHostNames = decomissionedHostMetadatas.stream().map(HostMetadata::getHostName).collect(Collectors.toSet());
             }
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
+
+            Set<Node> decommissionedNodes = stackUtil.collectNodesFromHostnames(stack, decomissionedHostNames);
+            GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+            hostOrchestrator.stopClusterManagerAgent(gatewayConfig, decommissionedNodes, clusterDeletionBasedModel(stack.getId(), cluster.getId()),
+                    cluster.isAdJoinable(), cluster.isIpaJoinable());
+            decomissionedHostNames.stream().parallel().map(hostsToRemove::get).forEach(clusterDecomissionService::deleteHostFromCluster);
+
             List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             PollingResult orchestratorRemovalPollingResult =
                     removeHostsFromOrchestrator(stack, new ArrayList<>(decomissionedHostNames), hostOrchestrator, allGatewayConfigs);
@@ -108,6 +123,8 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
                 LOGGER.debug("Can not remove hosts from orchestrator: {}", decomissionedHostNames);
             }
             result = new DecommissionResult(request, decomissionedHostNames);
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
             LOGGER.info("Exception occurred during decommissioning.", e);
             result = new DecommissionResult(e.getMessage(), e, request);

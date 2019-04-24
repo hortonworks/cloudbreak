@@ -35,6 +35,7 @@ public class ClouderaManagerHostStatusChecker extends ClusterBasedStatusCheckerT
             LOGGER.debug("Hosts in the list from manager: " + hostNamesFromManager);
 
             List<InstanceMetaData> notKnownInstancesByManager = clouderaManagerPollerObject.getStack().getInstanceMetaDataAsList().stream()
+                    .filter(metaData -> !metaData.isTerminated() && !metaData.isDeletedOnProvider())
                     .filter(instanceMetaData -> !hostNamesFromManager.contains(instanceMetaData.getDiscoveryFQDN()))
                     .collect(Collectors.toList());
 

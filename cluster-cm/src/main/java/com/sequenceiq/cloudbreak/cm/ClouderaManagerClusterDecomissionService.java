@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,6 +28,9 @@ public class ClouderaManagerClusterDecomissionService implements ClusterDecomiss
     @Inject
     private ClouderaManagerClientFactory clouderaManagerClientFactory;
 
+    @Inject
+    private ClouderaManagerDecomissioner clouderaManagerDecomissioner;
+
     private final Stack stack;
 
     private final HttpClientConfig clientConfig;
@@ -48,27 +50,28 @@ public class ClouderaManagerClusterDecomissionService implements ClusterDecomiss
     @Override
     public void verifyNodesAreRemovable(Multimap<Long, HostMetadata> hostGroupWithInstances, Set<HostGroup> hostGroups, int defaultRootVolumeSize,
             List<InstanceMetaData> notDeletedNodes) {
-
+        clouderaManagerDecomissioner.verifyNodesAreRemovable(stack, hostGroupWithInstances, hostGroups, defaultRootVolumeSize, client, notDeletedNodes);
     }
 
     @Override
     public Set<String> collectDownscaleCandidates(@Nonnull HostGroup hostGroup, Integer scalingAdjustment, int defaultRootVolumeSize,
             Set<InstanceMetaData> instanceMetaDatasInStack) {
-        return Collections.emptySet();
+        return clouderaManagerDecomissioner.collectDownscaleCandidates(client, stack, hostGroup, scalingAdjustment, defaultRootVolumeSize,
+                instanceMetaDatasInStack);
     }
 
     @Override
     public Map<String, HostMetadata> collectHostsToRemove(@Nonnull HostGroup hostGroup, Set<String> hostNames) {
-        return Collections.emptyMap();
+        return clouderaManagerDecomissioner.collectHostsToRemove(stack, hostGroup, hostNames, client);
     }
 
     @Override
     public Set<HostMetadata> decommissionClusterNodes(Map<String, HostMetadata> hostsToRemove) {
-        return Collections.emptySet();
+        return clouderaManagerDecomissioner.decommissionNodes(stack, hostsToRemove, client);
     }
 
     @Override
     public boolean deleteHostFromCluster(HostMetadata data) {
-        return false;
+        return clouderaManagerDecomissioner.deleteHost(stack, data, client);
     }
 }

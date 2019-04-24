@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.client.ApiClient;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerApplyHostTemplateListenerTask;
+import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerDecommissionHostListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerDeployClientConfigListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerHostStatusChecker;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerKerberosConfigureListenerTask;
@@ -65,6 +66,9 @@ public class ClouderaManagerPollingServiceProvider {
 
     @Inject
     private ClouderaManagerApplyHostTemplateListenerTask applyHostTemplateListenerTask;
+
+    @Inject
+    private ClouderaManagerDecommissionHostListenerTask decommissionHostListenerTask;
 
     public PollingResult clouderaManagerStartupPollerObjectPollingService(Stack stack, ApiClient apiClient) {
         LOGGER.debug("Waiting for Cloudera Manager startup. [Server address: {}]", stack.getAmbariIp());
@@ -153,6 +157,16 @@ public class ClouderaManagerPollingServiceProvider {
         ClouderaManagerCommandPollerObject clouderaManagerPollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, commandId);
         return clouderaManagerCommandPollerObjectPollingService.pollWithTimeoutSingleFailure(
                 applyHostTemplateListenerTask,
+                clouderaManagerPollerObject,
+                POLL_INTERVAL,
+                MAX_ATTEMPT);
+    }
+
+    public PollingResult decommissionHostPollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
+        LOGGER.debug("Waiting for Cloudera Manager to decommission host. [Server address: {}]", stack.getAmbariIp());
+        ClouderaManagerCommandPollerObject clouderaManagerPollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, commandId);
+        return clouderaManagerCommandPollerObjectPollingService.pollWithTimeoutSingleFailure(
+                decommissionHostListenerTask,
                 clouderaManagerPollerObject,
                 POLL_INTERVAL,
                 MAX_ATTEMPT);

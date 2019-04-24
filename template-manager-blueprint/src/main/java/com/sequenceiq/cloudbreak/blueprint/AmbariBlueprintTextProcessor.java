@@ -619,6 +619,7 @@ public class AmbariBlueprintTextProcessor implements BlueprintTextProcessor {
         }
     }
 
+    @Override
     public boolean isComponentExistsInHostGroup(String component, String hostGroup) {
         Set<String> componentsInHostGroup = getComponentsInHostGroup(hostGroup);
         return componentsInHostGroup.stream().anyMatch(component::equals);

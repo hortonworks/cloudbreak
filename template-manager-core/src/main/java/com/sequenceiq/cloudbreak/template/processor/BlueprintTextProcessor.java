@@ -19,6 +19,8 @@ public interface BlueprintTextProcessor {
 
     BlueprintTextProcessor addComponentToHostgroups(String component, Collection<String> addToHostGroups);
 
+    boolean isComponentExistsInHostGroup(String component, String hostGroup);
+
     BlueprintTextProcessor setSecurityType(String kerberos);
 
     BlueprintTextProcessor extendBlueprintGlobalConfiguration(SiteConfigurations configs, boolean forced);
