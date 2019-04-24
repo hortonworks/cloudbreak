@@ -9,14 +9,15 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintTextProcessorFactory;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 
 @Component
 public class StackScaleV4RequestToUpdateClusterV4RequestConverter extends AbstractConversionServiceAwareConverter<StackScaleV4Request, UpdateClusterV4Request> {
@@ -27,6 +28,9 @@ public class StackScaleV4RequestToUpdateClusterV4RequestConverter extends Abstra
     @Inject
     private ClusterService clusterService;
 
+    @Inject
+    private BlueprintTextProcessorFactory clusterDefinitionTextProcessorFactory;
+
     @Override
     public UpdateClusterV4Request convert(StackScaleV4Request source) {
         UpdateClusterV4Request updateStackJson = new UpdateClusterV4Request();
@@ -35,7 +39,9 @@ public class StackScaleV4RequestToUpdateClusterV4RequestConverter extends Abstra
         Optional<HostGroup> hostGroup = hostGroupService.findHostGroupInClusterByName(oneByStackId.getId(), source.getGroup());
         if (hostGroup.isPresent()) {
             String blueprintText = oneByStackId.getBlueprint().getBlueprintText();
-            boolean dataNodeComponentInHostGroup = new AmbariBlueprintTextProcessor(blueprintText).isComponentExistsInHostGroup("DATANODE",
+            BlueprintTextProcessor blueprintTextProcessor =
+                    clusterDefinitionTextProcessorFactory.createBlueprintTextProcessor(blueprintText);
+            boolean dataNodeComponentInHostGroup = blueprintTextProcessor.isComponentExistsInHostGroup("DATANODE",
                     hostGroup.get().getName());
             HostGroupAdjustmentV4Request hostGroupAdjustmentJson = new HostGroupAdjustmentV4Request();
             hostGroupAdjustmentJson.setWithStackUpdate(true);

@@ -122,3 +122,7 @@ base:
     - match: grain
     - ambari.server-stop
     - ambari.agent-stop
+
+  'roles:cloudera_manager_agent_stop':
+    - match: grain
+    - cloudera.agent.agent-stop

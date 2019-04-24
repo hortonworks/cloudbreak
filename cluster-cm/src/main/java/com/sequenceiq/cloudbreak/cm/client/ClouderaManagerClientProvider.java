@@ -16,16 +16,16 @@ import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 @Service
 public class ClouderaManagerClientProvider {
 
-    public static final String API_V_30 = "/api/v30";
+    public static final String API_V_31 = "/api/v31";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerClientProvider.class);
 
     public ApiClient getClouderaManagerClient(HttpClientConfig clientConfig, Integer port, String userName, String password) {
         ApiClient cmClient = new ApiClient();
         if (port != null) {
-            cmClient.setBasePath("https://" + clientConfig.getApiAddress() + ':' + port + API_V_30);
+            cmClient.setBasePath("https://" + clientConfig.getApiAddress() + ':' + port + API_V_31);
         } else {
-            cmClient.setBasePath("https://" + clientConfig.getApiAddress() + API_V_30);
+            cmClient.setBasePath("https://" + clientConfig.getApiAddress() + API_V_31);
         }
         cmClient.setUsername(userName);
         cmClient.setPassword(password);

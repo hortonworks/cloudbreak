@@ -70,4 +70,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     Map<String, Map<String, String>> formatAndMountDisksOnNodes(List<GatewayConfig> allGateway, Set<Node> targets, ExitCriteriaModel exitModel,
             String platformVariant) throws CloudbreakOrchestratorFailedException;
+
+    void stopClusterManagerAgent(GatewayConfig gatewayConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel, boolean adJoinable, boolean ipaJoinable)
+            throws CloudbreakOrchestratorFailedException;
 }
