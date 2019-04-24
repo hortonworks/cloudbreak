@@ -19,20 +19,20 @@ import org.reflections.scanners.TypeAnnotationsScanner;
 public class InjectTest {
 
     @Test
-    public void testIfThereAreUnsedInjections() {
+    public void testIfThereAreUnusedInjections() {
         Reflections reflections = new Reflections("com.sequenceiq",
                 new FieldAnnotationsScanner(),
                 new TypeAnnotationsScanner(),
                 new SubTypesScanner(),
                 new MemberUsageScanner());
 
-        Map<String, Set<String>> unusedfields = new HashMap<>();
+        Map<String, Set<String>> unusedFields = new HashMap<>();
         reflections.getFieldsAnnotatedWith(Inject.class).forEach(field -> {
             try {
                 Set<Member> usages = reflections.getFieldUsage(field);
                 if (usages.isEmpty()) {
                     String className = field.getDeclaringClass().getSimpleName();
-                    unusedfields.computeIfAbsent(className, key -> new HashSet<>()).add(field.getName());
+                    unusedFields.computeIfAbsent(className, key -> new HashSet<>()).add(field.getName());
                 }
             } catch (RuntimeException e) {
                 // ignore if cannot check fields
@@ -40,7 +40,7 @@ public class InjectTest {
         });
 
         Assert.assertTrue(
-                String.format("Classes with unused injected fields: %s", String.join(", ", unusedfields.keySet())), unusedfields.isEmpty());
+                String.format("Classes with unused injected fields: %s", String.join(", ", unusedFields.keySet())), unusedFields.isEmpty());
     }
 
 }
