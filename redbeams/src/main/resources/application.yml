@@ -38,3 +38,10 @@ redbeams:
       schema: public
       cert.file: database.crt
       ssl: false
+
+rest:
+  debug: false
+
+cert:
+  validation: true
+  ignorePreValidation: false

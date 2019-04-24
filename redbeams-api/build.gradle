@@ -1,0 +1,52 @@
+apply plugin: 'java'
+
+repositories {
+  mavenLocal()
+  maven { url = "$repoUrl" }
+  mavenCentral()
+}
+
+jar {
+  baseName = 'redbeams-api'
+  archiveName = 'redbeams-api.jar'
+}
+
+dependencies {
+  compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
+  compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: jerseyCoreVersion
+  compile group: 'io.swagger',                    name: 'swagger-annotations',            version: swaggerVersion
+  compile group: 'commons-codec',                 name: 'commons-codec',                  version: '1.10'
+
+  compile group: 'net.jodah',                     name: 'expiringmap',                    version: '0.5.1'
+  compile group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
+  compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
+  compile group: 'org.glassfish.jersey.ext',      name: 'jersey-proxy-client',            version: jerseyCoreVersion
+
+  compile group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: jacksonVersion
+  compile group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonVersion
+  compile group: 'org.hibernate',                 name: 'hibernate-validator',            version: hibernateValidatorVersion
+  compile group: 'org.apache.httpcomponents',     name: 'httpclient',                     version: httpClientVersion
+  compile group: 'org.glassfish.jersey.connectors',  name: 'jersey-apache-connector',     version: jerseyCoreVersion
+
+  testCompile group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
+  testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
+  testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+  testCompile group: 'junit',                     name: 'junit',                          version: junitVersion
+
+  compile project(':cloud-common')
+}
+
+
+task testJar(type: Jar, dependsOn: testClasses) {
+  baseName = "test-${project.archivesBaseName}"
+  from sourceSets.test.output
+  from sourceSets.main.output
+}
+
+configurations {
+  tests
+}
+
+artifacts {
+  tests testJar
+}

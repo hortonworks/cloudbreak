@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration scan="true" scanPeriod="30 seconds">
+
+    <logger name="org.springframework.boot.autoconfigure.security.AuthenticationManagerConfiguration" level="ERROR"/>
+    <!-- <logger name="org.springframework.statemachine.support" level="ERROR"/> -->
+    <!-- <logger name="com.sequenceiq.ambari.client.AmbariClientUtils" level="ERROR"/> -->
+    <!-- <logger name="org.apache.kafka.clients.producer" level="ERROR"/> -->
+    <!-- <logger name="com.amazonaws.request" level="DEBUG"/> -->
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="com.sequenceiq.cloudbreak.logger.MaskingPatternLayout">
+                <loggerNameFilter>com.sequenceiq</loggerNameFilter>
+                <!-- <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [type:%X{resourceType:-springLog}] [id:%X{resourceId:-}] [name:%X{resourceName:-}] [flow:%X{flowId:-}] [requestid:%X{requestId:-}] [tenant:%X{tenant:-}] [workspaceId:%X{workspaceId:-}] [userId:%X{userId:-}] [userName:%X{userName:-}] %msg%n</pattern> -->
+                <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [owner:%X{owner:-spring}] [id:%X{resourceId:-}] [cb-stack-id:%X{cbStack:-}] %msg%n</pattern>
+            </layout>
+        </encoder>
+    </appender>
+
+    <appender name="REDBEAMS_NODEID_BASED" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <discriminator class="com.sequenceiq.redbeams.logger.UniqueIdDiscriminator" >
+        </discriminator>
+        <sift>
+            <appender name="FILE-${nodeid}" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <file>redbeams-log/redbeams-${nodeid}.log</file>
+                <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+                    <layout class="com.sequenceiq.cloudbreak.logger.MaskingPatternLayout">
+                        <loggerNameFilter>com.sequenceiq</loggerNameFilter>
+                        <!-- <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [instance:${nodeid}] [type:%X{resourceType:-springLog}] [id:%X{resourceId:-}] [name:%X{resourceName:-}] [requestid:%X{requestId:-}] [tenant:%X{tenant:-}] [workspaceId:%X{workspaceId:-}] [userId:%X{userId:-}] [userName:%X{userName:-}] %msg%n</pattern> -->
+                        <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [instance:${nodeid}] [owner:%X{owner:-spring}] [id:%X{resourceId:-}] [cb-stack-id:%X{cbStack:-}] %msg%n</pattern>
+                    </layout>
+                </encoder>
+                <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                    <FileNamePattern>redbeams-log/redbeams-${nodeid}-%d{yyyy-MM-dd}.log</FileNamePattern>
+                </rollingPolicy>
+                <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+                    <MaxFileSize>30MB</MaxFileSize>
+                </triggeringPolicy>
+            </appender>
+        </sift>
+    </appender>
+
+    <root level="${REDBEAMS_ROOT_LOG_LEVEL:-INFO}">
+        <appender-ref ref="REDBEAMS_NODEID_BASED"/>
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+    <logger name="com.sequenceiq" level="${REDBEAMS_LOG_LEVEL:-DEBUG}" additivity="false">
+        <appender-ref ref="REDBEAMS_NODEID_BASED"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <logger name="com.zaxxer" level="${REDBEAMS_LOG_LEVEL:-INFO}" additivity="false">
+        <appender-ref ref="REDBEAMS_NODEID_BASED"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+</configuration>

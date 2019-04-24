@@ -24,6 +24,12 @@ public class ServiceEndpointConfig {
     @Value("${redbeams.db.serviceid:}")
     private String databaseId;
 
+    @Value("${redbeams.identity.server.url:}")
+    private String identityServiceUrl;
+
+    @Value("${redbeams.identity.serviceid:}")
+    private String identityServiceId;
+
     @Value("${redbeams.cloudbreak.url:}")
     private String cloudbreakUrl;
 
@@ -39,6 +45,12 @@ public class ServiceEndpointConfig {
     @DependsOn("serviceAddressResolver")
     public String databaseAddress(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
         return serviceAddressResolver.resolveHostPort(dbHost, dbPort, databaseId);
+    }
+
+    @Bean
+    @DependsOn("serviceAddressResolver")
+    public String identityServerUrl(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
+        return serviceAddressResolver.resolveUrl(identityServiceUrl, "http", identityServiceId);
     }
 
     @Bean
