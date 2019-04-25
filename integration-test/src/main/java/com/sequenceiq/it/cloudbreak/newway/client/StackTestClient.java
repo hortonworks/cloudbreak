@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.it.cloudbreak.newway.action.Action;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.stack.ChangeImageAction;
-import com.sequenceiq.it.cloudbreak.newway.action.v4.stack.StackClusterDefinitionRequestAction;
+import com.sequenceiq.it.cloudbreak.newway.action.v4.stack.StackBlueprintRequestAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.stack.StackCreateAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.stack.StackDeleteAction;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.stack.StackDeleteInstanceAction;
@@ -38,8 +38,8 @@ public class StackTestClient {
         return new StackDeleteAction();
     }
 
-    public Action<StackTestDto> clusterDefinitionRequestV4() {
-        return new StackClusterDefinitionRequestAction();
+    public Action<StackTestDto> blueprintRequestV4() {
+        return new StackBlueprintRequestAction();
     }
 
     public Action<StackTestDto> getV4() {

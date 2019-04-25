@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.authorization;
 public enum WorkspaceResource {
     ALL("All resources", "All"),
     WORKSPACE("Workspace", "Workspace"),
-    CLUSTER_DEFINITION("Cluster definition", "ClusterDefinition"),
+    BLUEPRINT("Blueprint", "Blueprint"),
     IMAGECATALOG("Image catalog", "ImageCatalog"),
     CREDENTIAL("Credential", "Credential"),
     RECIPE("Recipe", "Recipe"),

@@ -34,13 +34,13 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.it.cloudbreak.newway.action.v4.stack.StackScalePostAction;
-import com.sequenceiq.it.cloudbreak.newway.client.ClusterDefinitionTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.ClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
-import com.sequenceiq.it.cloudbreak.newway.dto.clusterdefinition.ClusterDefinitionTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.spark.DynamicRouteStack;
 import com.sequenceiq.it.util.HostNameUtil;
@@ -72,7 +72,7 @@ public class ClouderaManagerUpscaleTest extends AbstractClouderaManagerTest {
     private static final String READ_COMMAND = API_ROOT + "/commands/:commandId";
 
     @Inject
-    private ClusterDefinitionTestClient clusterDefinitionTestClient;
+    private BlueprintTestClient blueprintTestClient;
 
     @Inject
     private StackTestClient stackTestClient;
@@ -106,7 +106,7 @@ public class ClouderaManagerUpscaleTest extends AbstractClouderaManagerTest {
             when = "upscale to 15",
             then = "stack is running")
     public void testUpscale(MockedTestContext testContext) {
-        String clusterDefinitionName = testContext.get(ClusterDefinitionTestDto.class).getRequest().getName();
+        String blueprintName = testContext.get(BlueprintTestDto.class).getRequest().getName();
         String clusterName = resourcePropertyProvider().getName();
 
         Integer addedNodes = desiredWorkerCount - originalWorkerCount;
@@ -115,8 +115,8 @@ public class ClouderaManagerUpscaleTest extends AbstractClouderaManagerTest {
         testContext
                 .given(CLOUDERA_MANAGER_KEY, ClouderaManagerTestDto.class)
                 .given(CLUSTER_KEY, ClusterTestDto.class)
-                .withClusterDefinitionName(clusterDefinitionName)
-                .withValidateClusterDefinition(Boolean.FALSE)
+                .withBlueprintName(blueprintName)
+                .withValidateBlueprint(Boolean.FALSE)
                 .withClouderaManager(CLOUDERA_MANAGER_KEY)
                 .given(StackTestDto.class).withCluster(CLUSTER_KEY)
                 .withName(clusterName)
@@ -207,8 +207,8 @@ public class ClouderaManagerUpscaleTest extends AbstractClouderaManagerTest {
     }
 
     @Override
-    protected ClusterDefinitionTestClient clusterDefinitionTestClient() {
-        return clusterDefinitionTestClient;
+    protected BlueprintTestClient blueprintTestClient() {
+        return blueprintTestClient;
     }
 
     private static class ClouderaManagerPathResolver {

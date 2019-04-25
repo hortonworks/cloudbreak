@@ -4,7 +4,7 @@ public enum APIResourceType {
     TEMPLATE("t"),
     CONSTRAINT_TEMPLATE("ct"),
     STACK("st"),
-    CLUSTER_DEFINITION("cd"),
+    BLUEPRINT("cd"),
     CLUSTER("cl"),
     CREDENTIAL("c"),
     RECIPE("hrec"),

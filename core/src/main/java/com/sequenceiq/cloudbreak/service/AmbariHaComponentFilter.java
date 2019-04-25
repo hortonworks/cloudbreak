@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
-import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
 
 @Service
 public class AmbariHaComponentFilter {

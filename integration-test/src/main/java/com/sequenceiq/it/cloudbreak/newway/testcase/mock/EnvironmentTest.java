@@ -59,7 +59,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
-        initializeDefaultClusterDefinitions(testContext);
+        initializeDefaultBlueprints(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)

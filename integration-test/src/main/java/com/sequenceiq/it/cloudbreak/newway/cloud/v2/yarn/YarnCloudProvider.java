@@ -74,8 +74,8 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     @Override
     protected ClusterTestDto withCluster(ClusterTestDto cluster) {
         return cluster
-                .withValidateClusterDefinition(Boolean.FALSE)
-                .withClusterDefinitionName(getClusterDefinitionName());
+                .withValidateBlueprint(Boolean.FALSE)
+                .withBlueprintName(getBlueprintName());
     }
 
     @Override
@@ -120,8 +120,8 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getClusterDefinitionName() {
-        return yarnProperties.getDefaultClusterDefinitionName();
+    public String getBlueprintName() {
+        return yarnProperties.getDefaultBlueprintName();
     }
 
     public String getQueue() {

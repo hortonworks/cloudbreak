@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplateProcessor;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
-import com.sequenceiq.cloudbreak.template.views.ClusterDefinitionView;
+import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -52,7 +52,7 @@ public class CentralCmTemplateUpdaterTest {
     private TemplatePreparationObject templatePreparationObject;
 
     @Mock
-    private ClusterDefinitionView clusterDefinitionView;
+    private BlueprintView blueprintView;
 
     @Mock
     private GeneralClusterConfigs generalClusterConfigs;
@@ -66,7 +66,7 @@ public class CentralCmTemplateUpdaterTest {
     public void setUp() {
         List<CmTemplateComponentConfigProvider> cmTemplateComponentConfigProviders = List.of(new HiveMetastoreConfigProvider());
         when(cmTemplateProcessorFactory.get(anyString())).thenAnswer(i -> new CmTemplateProcessor(i.getArgument(0)));
-        when(templatePreparationObject.getClusterDefinitionView()).thenReturn(clusterDefinitionView);
+        when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
         when(templatePreparationObject.getGeneralClusterConfigs()).thenReturn(generalClusterConfigs);
         when(templatePreparationObject.getRdsConfigs()).thenReturn(getRdsConfigs());
         when(generalClusterConfigs.getClusterName()).thenReturn("testcluster");
@@ -77,34 +77,34 @@ public class CentralCmTemplateUpdaterTest {
 
     @Test
     public void getCmTemplate() {
-        when(clusterDefinitionView.getClusterDefinitionText()).thenReturn(getClusterDefinitionText("input/clouderamanager.bp"));
+        when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager.bp"));
         ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null);
-        Assert.assertEquals(new CmTemplateProcessor(getClusterDefinitionText("output/clouderamanager.bp")).getTemplate(), generated);
+        Assert.assertEquals(new CmTemplateProcessor(getBlueprintText("output/clouderamanager.bp")).getTemplate(), generated);
     }
 
     @Test
     public void getCmTemplateNoMetastore() {
-        when(clusterDefinitionView.getClusterDefinitionText()).thenReturn(getClusterDefinitionText("input/clouderamanager-nometastore.bp"));
+        when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-nometastore.bp"));
         ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null);
-        Assert.assertEquals(new CmTemplateProcessor(getClusterDefinitionText("output/clouderamanager-nometastore.bp")).getTemplate(), generated);
+        Assert.assertEquals(new CmTemplateProcessor(getBlueprintText("output/clouderamanager-nometastore.bp")).getTemplate(), generated);
     }
 
     @Test
     public void getCmTemplateNoMetastoreWithTemplateParams() {
-        when(clusterDefinitionView.getClusterDefinitionText()).thenReturn(getClusterDefinitionText("input/clouderamanager-fixparam.bp"));
+        when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-fixparam.bp"));
         ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null);
-        Assert.assertEquals(new CmTemplateProcessor(getClusterDefinitionText("output/clouderamanager-fixparam.bp")).getTemplate(), generated);
+        Assert.assertEquals(new CmTemplateProcessor(getBlueprintText("output/clouderamanager-fixparam.bp")).getTemplate(), generated);
     }
 
     @Test
     public void getCmTemplateWithoutHosts() {
-        when(clusterDefinitionView.getClusterDefinitionText()).thenReturn(getClusterDefinitionText("input/clouderamanager-without-hosts.bp"));
-        String generated = generator.getClusterDefinitionText(templatePreparationObject);
-        Assert.assertEquals(new CmTemplateProcessor(getClusterDefinitionText("output/clouderamanager-without-hosts.bp")).getTemplate(),
+        when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-without-hosts.bp"));
+        String generated = generator.getBlueprintText(templatePreparationObject);
+        Assert.assertEquals(new CmTemplateProcessor(getBlueprintText("output/clouderamanager-without-hosts.bp")).getTemplate(),
                 new CmTemplateProcessor(generated).getTemplate());
     }
 
-    private String getClusterDefinitionText(String path) {
+    private String getBlueprintText(String path) {
         return FileReaderUtils.readFileFromClasspathQuietly(path);
     }
 

@@ -7,8 +7,8 @@
   "stackTemplate": {
     "type": "TEMPLATE",
     "cluster": {
-      "clusterDefinitionName": "HDP 3.0 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin",
-      "validateClusterDefinition": false,
+      "blueprintName": "HDP 3.0 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin",
+      "validateBlueprint": false,
       "ambari": {
         "gateway": {
           "enableGateway": true,

@@ -110,8 +110,8 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             ApiClusterTemplate apiClusterTemplate = cmTemplateUpdater.getCmTemplate(templatePreparationObject, hostGroupMappings, clouderaManagerRepoDetails,
                     clouderaManagerProductDetails);
 
-            cluster.setExtendedClusterDefinitionText(getExtendedClusterDefinitionText(apiClusterTemplate));
-            LOGGER.info("Generated Cloudera cluster template: {}", cluster.getExtendedClusterDefinitionText());
+            cluster.setExtendedBlueprintText(getExtendedBlueprintText(apiClusterTemplate));
+            LOGGER.info("Generated Cloudera cluster template: {}", cluster.getExtendedBlueprintText());
             ClouderaManagerResourceApi clouderaManagerResourceApi = new ClouderaManagerResourceApi(client);
 
             boolean prewarmed = isPrewarmed(clusterId);
@@ -125,7 +125,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             LOGGER.debug("Cloudera cluster template has been submitted, cluster install is in progress");
 
             clouderaManagerPollingServiceProvider.templateInstallCheckerService(stack, client, apiCommand.getId());
-            if (!CMRepositoryVersionUtil.isEnableKerberosSupportedViaClusterDefinition(clouderaManagerRepoDetails)) {
+            if (!CMRepositoryVersionUtil.isEnableKerberosSupportedViaBlueprint(clouderaManagerRepoDetails)) {
                 kerberosService.configureKerberosViaApi(client, clientConfig, stack, clouderaManagerRepoDetails);
             }
         } catch (CancellationException cancellationException) {
@@ -167,7 +167,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         }
     }
 
-    private String getExtendedClusterDefinitionText(ApiClusterTemplate apiClusterTemplate) {
+    private String getExtendedBlueprintText(ApiClusterTemplate apiClusterTemplate) {
         return JsonUtil.writeValueAsStringSilent(apiClusterTemplate);
     }
 

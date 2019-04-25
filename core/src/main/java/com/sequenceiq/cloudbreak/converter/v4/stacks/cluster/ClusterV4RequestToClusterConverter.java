@@ -39,7 +39,7 @@ import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.ClouderaManagerProductV4RequestToClouderaManagerProductConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.ClouderaManagerRepositoryV4RequestToClouderaManagerRepoConverter;
 import com.sequenceiq.cloudbreak.domain.ClusterAttributes;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -50,7 +50,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
@@ -76,7 +76,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
     private KerberosConfigService kerberosConfigService;
 
     @Inject
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     @Inject
     private WorkspaceService workspaceService;
@@ -109,7 +109,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         cluster.setCloudbreakAmbariPassword(PasswordUtil.generatePassword());
         cluster.setDpAmbariUser(dpUsername);
         cluster.setDpAmbariPassword(PasswordUtil.generatePassword());
-        cluster.setClusterDefinition(getClusterDefinition(source.getClusterDefinitionName(), workspace));
+        cluster.setBlueprint(getBlueprint(source.getBlueprintName(), workspace));
         convertGateway(source, cluster);
         if (cloudStorageValidationUtil.isCloudStorageConfigured(source.getCloudStorage())) {
             cluster.setFileSystem(getConversionService().convert(source.getCloudStorage(), FileSystem.class));
@@ -137,7 +137,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
     }
 
     private void convertGateway(ClusterV4Request source, Cluster cluster) {
-        if (source.getGateway() != null && clusterDefinitionService.isAmbariBlueprint(cluster.getClusterDefinition())) {
+        if (source.getGateway() != null && blueprintService.isAmbariBlueprint(cluster.getBlueprint())) {
             if (StringUtils.isEmpty(source.getGateway().getPath())) {
                 source.getGateway().setPath(source.getName());
             }
@@ -177,10 +177,10 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         if (Objects.nonNull(ambariRequest) && Objects.nonNull(clouderaManagerRequest)) {
             throw new BadRequestException("Cannot determine cluster manager. More than one provided");
         }
-        if (Objects.nonNull(ambariRequest) && StackType.CDH.name().equals(cluster.getClusterDefinition().getStackType())) {
-            throw new BadRequestException("Cannot process the provided cluster definition template with Ambari");
+        if (Objects.nonNull(ambariRequest) && StackType.CDH.name().equals(cluster.getBlueprint().getStackType())) {
+            throw new BadRequestException("Cannot process the provided blueprint template with Ambari");
         }
-        if (Objects.nonNull(clouderaManagerRequest) && !StackType.CDH.name().equals(cluster.getClusterDefinition().getStackType())) {
+        if (Objects.nonNull(clouderaManagerRequest) && !StackType.CDH.name().equals(cluster.getBlueprint().getStackType())) {
             throw new BadRequestException("Cannot process the provided Ambari blueprint with Cloudera Manager");
         }
 
@@ -227,15 +227,15 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         };
     }
 
-    private ClusterDefinition getClusterDefinition(String clusterDefinitionName, Workspace workspace) {
-        ClusterDefinition clusterDefinition = null;
-        if (!StringUtils.isEmpty(clusterDefinitionName)) {
-            clusterDefinition = clusterDefinitionService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(clusterDefinitionName, workspace);
-            if (clusterDefinition == null) {
-                throw new NotFoundException("Cluster definition does not exists by name: " + clusterDefinitionName);
+    private Blueprint getBlueprint(String blueprintName, Workspace workspace) {
+        Blueprint blueprint = null;
+        if (!StringUtils.isEmpty(blueprintName)) {
+            blueprint = blueprintService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(blueprintName, workspace);
+            if (blueprint == null) {
+                throw new NotFoundException("Cluster definition does not exists by name: " + blueprintName);
             }
         }
-        return clusterDefinition;
+        return blueprint;
     }
 
     private void updateDatabases(ClusterV4Request source, Cluster cluster, Workspace workspace) {

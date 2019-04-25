@@ -38,11 +38,11 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
-import com.sequenceiq.cloudbreak.clusterdefinition.utils.ClusterDefinitionUtils;
+import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -75,7 +75,7 @@ public class ImageService {
     private ConversionService conversionService;
 
     @Inject
-    private ClusterDefinitionUtils clusterDefinitionUtils;
+    private BlueprintUtils blueprintUtils;
 
     @Inject
     private StackMatrixService stackMatrixService;
@@ -118,18 +118,18 @@ public class ImageService {
     //CHECKSTYLE:OFF
     @Measure(ImageService.class)
     public StatedImage determineImageFromCatalog(Long workspaceId, ImageSettingsV4Request image, String platformString,
-            ClusterDefinition clusterDefinition, boolean useBaseImage, User user) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+            Blueprint blueprint, boolean useBaseImage, User user) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         String clusterType = ImageCatalogService.UNDEFINED;
         String clusterVersion = ImageCatalogService.UNDEFINED;
-        if (clusterDefinition != null) {
+        if (blueprint != null) {
             try {
-                JsonNode root = JsonUtil.readTree(clusterDefinition.getClusterDefinitionText());
-                if (clusterDefinitionUtils.isAmbariBlueprint(clusterDefinition.getClusterDefinitionText())) {
-                    clusterType = clusterDefinitionUtils.getBlueprintStackName(root);
-                    clusterVersion = clusterDefinitionUtils.getBlueprintStackVersion(root);
+                JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
+                if (blueprintUtils.isAmbariBlueprint(blueprint.getBlueprintText())) {
+                    clusterType = blueprintUtils.getBlueprintStackName(root);
+                    clusterVersion = blueprintUtils.getBlueprintStackVersion(root);
                 } else {
                     clusterType = "CDH";
-                    clusterVersion = clusterDefinitionUtils.getCDHStackVersion(root);
+                    clusterVersion = blueprintUtils.getCDHStackVersion(root);
                 }
             } catch (IOException ex) {
                 LOGGER.warn("Can not initiate default hdp info: ", ex);

@@ -41,7 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
-import com.sequenceiq.cloudbreak.clusterdefinition.validation.AmbariBlueprintValidator;
+import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
@@ -52,7 +52,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -795,7 +795,7 @@ public class StackService {
     }
 
     private void validateHostGroupAdjustment(InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, Stack stack, Integer adjustment) {
-        ClusterDefinition clusterDefinition = stack.getCluster().getClusterDefinition();
+        Blueprint blueprint = stack.getCluster().getBlueprint();
         Optional<HostGroup> hostGroup = stack.getCluster().getHostGroups().stream()
                 .filter(input -> input.getConstraint().getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup())).findFirst();
         if (!hostGroup.isPresent()) {
@@ -803,7 +803,7 @@ public class StackService {
                     instanceGroupAdjustmentJson.getInstanceGroup(), stack.getName()));
         }
         if (ClusterApi.AMBARI.equalsIgnoreCase(stack.getCluster().getVariant())) {
-            ambariBlueprintValidator.validateHostGroupScalingRequest(clusterDefinition, hostGroup.get(), adjustment);
+            ambariBlueprintValidator.validateHostGroupScalingRequest(blueprint, hostGroup.get(), adjustment);
         }
     }
 

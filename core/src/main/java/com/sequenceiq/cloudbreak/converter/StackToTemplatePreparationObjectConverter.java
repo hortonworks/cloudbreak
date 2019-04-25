@@ -13,10 +13,10 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintViewProvider;
-import com.sequenceiq.cloudbreak.clusterdefinition.GeneralClusterConfigsProvider;
-import com.sequenceiq.cloudbreak.clusterdefinition.nifi.HdfConfigProvider;
-import com.sequenceiq.cloudbreak.clusterdefinition.sharedservice.SharedServiceConfigsViewProvider;
+import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintViewProvider;
+import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
+import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigProvider;
+import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsViewProvider;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceGroupMetadataCollector;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.template.ClusterDefinitionProcessingException;
+import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
@@ -82,8 +82,8 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             StackRepoDetails hdpRepo = clusterComponentConfigProvider.getHDPRepo(cluster.getId());
             String stackRepoDetailsHdpVersion = hdpRepo != null ? hdpRepo.getHdpVersion() : null;
             Map<String, List<InstanceMetaData>> groupInstances = instanceGroupMetadataCollector.collectMetadata(source);
-            String clusterDefinitionText = cluster.getClusterDefinition().getClusterDefinitionText();
-            HdfConfigs hdfConfigs = hdfConfigProvider.createHdfConfig(cluster.getHostGroups(), groupInstances, clusterDefinitionText);
+            String blueprintText = cluster.getBlueprint().getBlueprintText();
+            HdfConfigs hdfConfigs = hdfConfigProvider.createHdfConfig(cluster.getHostGroups(), groupInstances, blueprintText);
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, fileSystem);
             Optional<DatalakeResources> dataLakeResource = getDataLakeResource(source);
             StackInputs stackInputs = getStackInputs(source);
@@ -106,7 +106,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withGateway(gateway, gatewaySignKey)
                     .withCustomInputs(stackInputs.getCustomInputs() == null ? new HashMap<>() : stackInputs.getCustomInputs())
                     .withFixInputs(fixInputs)
-                    .withClusterDefinitionView(ambariBlueprintViewProvider.getBlueprintView(cluster.getClusterDefinition()))
+                    .withBlueprintView(ambariBlueprintViewProvider.getBlueprintView(cluster.getBlueprint()))
                     .withStackRepoDetailsHdpVersion(stackRepoDetailsHdpVersion)
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
                     .withGeneralClusterConfigs(generalClusterConfigsProvider.generalClusterConfigs(source, cluster))
@@ -115,7 +115,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withKerberosConfig(cluster.getKerberosConfig())
                     .withSharedServiceConfigs(sharedServiceConfigProvider.createSharedServiceConfigs(source, dataLakeResource))
                     .build();
-        } catch (ClusterDefinitionProcessingException | IOException e) {
+        } catch (BlueprintProcessingException | IOException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }

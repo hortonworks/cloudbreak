@@ -31,22 +31,22 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
 import com.cloudera.api.swagger.model.ApiConfigureForKerberosArguments;
 import com.cloudera.api.swagger.model.ApiProductVersion;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
-import com.sequenceiq.cloudbreak.template.ClusterDefinitionProcessingException;
+import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.processor.ClusterDefinitionTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.ClusterManagerType;
 import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfigurations;
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
-public class CmTemplateProcessor implements ClusterDefinitionTextProcessor {
+public class CmTemplateProcessor implements BlueprintTextProcessor {
     private final ApiClusterTemplate cmTemplate;
 
     public CmTemplateProcessor(@Nonnull String cmTemplateText) {
         try {
             cmTemplate = JsonUtil.readValue(cmTemplateText, ApiClusterTemplate.class);
         } catch (IOException e) {
-            throw new ClusterDefinitionProcessingException("Failed to parse cluster definition text.", e);
+            throw new BlueprintProcessingException("Failed to parse blueprint text.", e);
         }
     }
 
@@ -56,17 +56,17 @@ public class CmTemplateProcessor implements ClusterDefinitionTextProcessor {
     }
 
     @Override
-    public ClusterDefinitionTextProcessor replaceConfiguration(String s, String descriptor) {
+    public BlueprintTextProcessor replaceConfiguration(String s, String descriptor) {
         throw new NotImplementedException("");
     }
 
     @Override
-    public ClusterDefinitionTextProcessor addComponentToHostgroups(String component, Predicate<String> addToHostgroup) {
+    public BlueprintTextProcessor addComponentToHostgroups(String component, Predicate<String> addToHostgroup) {
         throw new NotImplementedException("");
     }
 
     @Override
-    public ClusterDefinitionTextProcessor addComponentToHostgroups(String component, Collection<String> addToHostGroups) {
+    public BlueprintTextProcessor addComponentToHostgroups(String component, Collection<String> addToHostGroups) {
         throw new NotImplementedException("");
     }
 
@@ -81,12 +81,12 @@ public class CmTemplateProcessor implements ClusterDefinitionTextProcessor {
     }
 
     @Override
-    public ClusterDefinitionTextProcessor setSecurityType(String kerberos) {
+    public BlueprintTextProcessor setSecurityType(String kerberos) {
         throw new NotImplementedException("");
     }
 
     @Override
-    public ClusterDefinitionTextProcessor extendBlueprintGlobalConfiguration(SiteConfigurations configs, boolean forced) {
+    public BlueprintTextProcessor extendBlueprintGlobalConfiguration(SiteConfigurations configs, boolean forced) {
         throw new NotImplementedException("");
     }
 
@@ -96,7 +96,7 @@ public class CmTemplateProcessor implements ClusterDefinitionTextProcessor {
     }
 
     @Override
-    public ClusterDefinitionTextProcessor extendBlueprintHostGroupConfiguration(HostgroupConfigurations hostgroupConfigurations, boolean b) {
+    public BlueprintTextProcessor extendBlueprintHostGroupConfiguration(HostgroupConfigurations hostgroupConfigurations, boolean b) {
         throw new NotImplementedException("");
     }
 
@@ -117,10 +117,10 @@ public class CmTemplateProcessor implements ClusterDefinitionTextProcessor {
             instantiator.setClusterName(templatePreparationObject.getGeneralClusterConfigs().getClusterName());
         }
         if (Objects.nonNull(clouderaManagerRepoDetails)
-                && CMRepositoryVersionUtil.isKeepHostTemplateSupportedViaClusterDefinition(clouderaManagerRepoDetails)) {
+                && CMRepositoryVersionUtil.isKeepHostTemplateSupportedViaBlueprint(clouderaManagerRepoDetails)) {
             instantiator.keepHostTemplates(Boolean.TRUE);
         }
-        if (Objects.nonNull(clouderaManagerRepoDetails) && CMRepositoryVersionUtil.isEnableKerberosSupportedViaClusterDefinition(clouderaManagerRepoDetails)
+        if (Objects.nonNull(clouderaManagerRepoDetails) && CMRepositoryVersionUtil.isEnableKerberosSupportedViaBlueprint(clouderaManagerRepoDetails)
                 && templatePreparationObject.getKerberosConfig().isPresent()) {
             instantiator.setEnableKerberos(new ApiConfigureForKerberosArguments());
         }

@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedClusterDefinitionV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
@@ -123,15 +123,15 @@ public class StackTestAction {
         return entity;
     }
 
-    public static StackTestDto getClusterDefinitionByRequest(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
+    public static StackTestDto getBlueprintByRequest(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
         log(LOGGER, format(" Name: %s", entity.getRequest().getName()));
-        logJSON(LOGGER, " Stack get cluster definition:\n", entity.getRequest());
-        GeneratedClusterDefinitionV4Response bp = client.getCloudbreakClient().stackV4Endpoint().postStackForClusterDefinition(
+        logJSON(LOGGER, " Stack get blueprint:\n", entity.getRequest());
+        GeneratedBlueprintV4Response bp = client.getCloudbreakClient().stackV4Endpoint().postStackForBlueprint(
                 client.getWorkspaceId(),
                 entity.getName(),
                 entity.getRequest());
-        entity.withGeneratedClusterDefinition(bp);
-        logJSON(LOGGER, " get cluster definition was successfully:\n", entity.getGeneratedClusterDefinition());
+        entity.withGeneratedBlueprint(bp);
+        logJSON(LOGGER, " get blueprint was successfully:\n", entity.getGeneratedBlueprint());
         return entity;
     }
 

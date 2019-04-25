@@ -25,7 +25,7 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultEnvironment(testContext);
-        initializeDefaultClusterDefinitions(testContext);
+        initializeDefaultBlueprints(testContext);
     }
 
     /**

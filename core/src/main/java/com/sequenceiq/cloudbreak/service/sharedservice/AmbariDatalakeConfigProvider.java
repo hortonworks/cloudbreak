@@ -19,8 +19,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
-import com.sequenceiq.cloudbreak.clusterdefinition.CentralClusterDefinitionParameterQueryService;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -49,7 +49,7 @@ public class AmbariDatalakeConfigProvider {
     private ServiceDescriptorDefinitionProvider serviceDescriptorDefinitionProvider;
 
     @Inject
-    private CentralClusterDefinitionParameterQueryService centralClusterDefinitionParameterQueryService;
+    private CentralBlueprintParameterQueryService centralBlueprintParameterQueryService;
 
     @Inject
     private DatalakeResourcesService datalakeResourcesService;
@@ -133,9 +133,9 @@ public class AmbariDatalakeConfigProvider {
             Map<String, String> serviceParams = datalakeParameters.entrySet().stream()
                     .filter(dp -> sddEntry.getValue().getBlueprintParamKeys().contains(dp.getKey()))
                     .collect(Collectors.toMap(dp -> getDatalakeParameterKey(dp.getKey()), Entry::getValue));
-            serviceDescriptor.setClusterDefinitionParam(new Json(serviceParams));
+            serviceDescriptor.setBlueprintParam(new Json(serviceParams));
             Map<String, String> serviceSecretParams = serviceSecretParamMap.getOrDefault(sddEntry.getKey(), new HashMap<>());
-            serviceDescriptor.setClusterDefinitionSecretParams(new Json(serviceSecretParams));
+            serviceDescriptor.setBlueprintSecretParams(new Json(serviceSecretParams));
             Map<String, String> componentHosts = new HashMap<>();
             for (String component : sddEntry.getValue().getComponentHosts()) {
                 componentHosts.put(component, String.join(",", connector.getHostNamesByComponent(component)));
@@ -174,7 +174,7 @@ public class AmbariDatalakeConfigProvider {
     public SharedServiceConfigsView createSharedServiceConfigView(DatalakeResources datalakeResources) {
         SharedServiceConfigsView sharedServiceConfigsView = new SharedServiceConfigsView();
         sharedServiceConfigsView.setRangerAdminPassword((String) datalakeResources.getServiceDescriptorMap()
-                .get(ServiceDescriptorDefinitionProvider.RANGER_SERVICE).getClusterDefinitionSecretParams().getMap()
+                .get(ServiceDescriptorDefinitionProvider.RANGER_SERVICE).getBlueprintSecretParams().getMap()
                 .get(ServiceDescriptorDefinitionProvider.RANGER_ADMIN_PWD_KEY));
         sharedServiceConfigsView.setAttachedCluster(true);
         sharedServiceConfigsView.setDatalakeCluster(false);
@@ -182,22 +182,22 @@ public class AmbariDatalakeConfigProvider {
         sharedServiceConfigsView.setDatalakeAmbariFqdn(datalakeResources.getDatalakeAmbariFqdn());
         sharedServiceConfigsView.setDatalakeComponents(datalakeResources.getDatalakeComponentSet());
         sharedServiceConfigsView.setRangerAdminPort((String) datalakeResources.getServiceDescriptorMap().get(ServiceDescriptorDefinitionProvider.RANGER_SERVICE)
-                .getClusterDefinitionParams().getMap().getOrDefault(ServiceDescriptorDefinitionProvider.RANGER_HTTPPORT_KEY, DEFAULT_RANGER_PORT));
+                .getBlueprintParams().getMap().getOrDefault(ServiceDescriptorDefinitionProvider.RANGER_HTTPPORT_KEY, DEFAULT_RANGER_PORT));
         sharedServiceConfigsView.setRangerAdminHost((String) datalakeResources.getServiceDescriptorMap().get(ServiceDescriptorDefinitionProvider.RANGER_SERVICE)
                 .getComponentsHosts().getMap().get(ServiceDescriptorDefinitionProvider.RANGER_ADMIN_COMPONENT));
         return sharedServiceConfigsView;
     }
 
     public Map<String, String> getBlueprintConfigParameters(DatalakeResources datalakeResources, Stack workloadCluster, DatalakeConfigApi connector) {
-        return getBlueprintConfigParameters(datalakeResources, workloadCluster.getCluster().getClusterDefinition(), connector);
+        return getBlueprintConfigParameters(datalakeResources, workloadCluster.getCluster().getBlueprint(), connector);
     }
 
-    public Map<String, String> getBlueprintConfigParameters(DatalakeResources datalakeResources, ClusterDefinition workloadClusterDefinition,
+    public Map<String, String> getBlueprintConfigParameters(DatalakeResources datalakeResources, Blueprint workloadBlueprint,
             DatalakeConfigApi connector) {
-        Map<String, String> blueprintConfigParameters = new HashMap<>(getWorkloadClusterParametersFromDatalake(workloadClusterDefinition, connector));
+        Map<String, String> blueprintConfigParameters = new HashMap<>(getWorkloadClusterParametersFromDatalake(workloadBlueprint, connector));
         for (ServiceDescriptor serviceDescriptor : datalakeResources.getServiceDescriptorMap().values()) {
-            blueprintConfigParameters.putAll((Map) serviceDescriptor.getClusterDefinitionParams().getMap());
-            blueprintConfigParameters.putAll((Map) serviceDescriptor.getClusterDefinitionSecretParams().getMap());
+            blueprintConfigParameters.putAll((Map) serviceDescriptor.getBlueprintParams().getMap());
+            blueprintConfigParameters.putAll((Map) serviceDescriptor.getBlueprintSecretParams().getMap());
         }
         return blueprintConfigParameters;
     }
@@ -230,9 +230,9 @@ public class AmbariDatalakeConfigProvider {
         return result;
     }
 
-    private Map<String, String> getWorkloadClusterParametersFromDatalake(ClusterDefinition workloadClusterDefinition, DatalakeConfigApi connector) {
+    private Map<String, String> getWorkloadClusterParametersFromDatalake(Blueprint workloadBlueprint, DatalakeConfigApi connector) {
         Set<String> workloadBlueprintParamKeys =
-                centralClusterDefinitionParameterQueryService.queryDatalakeParameters(workloadClusterDefinition.getClusterDefinitionText());
+                centralBlueprintParameterQueryService.queryDatalakeParameters(workloadBlueprint.getBlueprintText());
         return CollectionUtils.isEmpty(workloadBlueprintParamKeys)
                 ? Map.of()
                 : connector.getConfigValuesByConfigIds(Lists.newArrayList(workloadBlueprintParamKeys));

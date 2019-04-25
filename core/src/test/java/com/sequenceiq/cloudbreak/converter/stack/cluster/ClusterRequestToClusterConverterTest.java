@@ -23,13 +23,13 @@ import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ClusterV4RequestToClusterConverter;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -56,7 +56,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     private RdsConfigService rdsConfigService;
 
     @Mock
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     @Mock
     private Workspace workspace;
@@ -65,7 +65,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     public void setUp() {
         Whitebox.setInternalState(underTest, "ambariUserName", "cloudbreak");
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
-        when(clusterDefinitionService.isAmbariBlueprint(any())).thenReturn(Boolean.TRUE);
+        when(blueprintService.isAmbariBlueprint(any())).thenReturn(Boolean.TRUE);
     }
 
     @Test
@@ -73,16 +73,16 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         // GIVEN
         ClusterV4Request request = getRequest("cluster.json");
 
-        ClusterDefinition clusterDefinition = new ClusterDefinition();
-        clusterDefinition.setStackType(StackType.HDP.name());
-        given(clusterDefinitionService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(eq("my-cluster-definition"), any())).willReturn(clusterDefinition);
+        Blueprint blueprint = new Blueprint();
+        blueprint.setStackType(StackType.HDP.name());
+        given(blueprintService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(eq("my-blueprint"), any())).willReturn(blueprint);
         given(conversionService.convert(request.getGateway(), Gateway.class)).willReturn(new Gateway());
         // WHEN
         Cluster result = underTest.convert(request);
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("stack", "clusterDefinition", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
+        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
                 "fileSystem", "rdsConfigs", "ldapConfig", "attributes", "uptime", "kerberosConfig", "ambariSecurityMasterKey", "proxyConfig",
-                "extendedClusterDefinitionText", "environment", "variant", "description"));
+                "extendedBlueprintText", "environment", "variant", "description"));
     }
 
     @Test
@@ -94,30 +94,30 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         given(kerberosConfigService.getByNameForWorkspaceId(eq("somename"), anyLong())).willReturn(new KerberosConfig());
         given(conversionService.convert(request.getCloudStorage(), FileSystem.class)).willReturn(new FileSystem());
         given(cloudStorageValidationUtil.isCloudStorageConfigured(request.getCloudStorage())).willReturn(true);
-        ClusterDefinition clusterDefinition = new ClusterDefinition();
-        clusterDefinition.setStackType(StackType.HDP.name());
-        given(clusterDefinitionService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(eq("my-cluster-definition"), any())).willReturn(clusterDefinition);
+        Blueprint blueprint = new Blueprint();
+        blueprint.setStackType(StackType.HDP.name());
+        given(blueprintService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(eq("my-blueprint"), any())).willReturn(blueprint);
         // WHEN
         Cluster result = underTest.convert(request);
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("stack", "clusterDefinition", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
-                "rdsConfigs", "ldapConfig", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfig", "extendedClusterDefinitionText",
+        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
+                "rdsConfigs", "ldapConfig", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfig", "extendedBlueprintText",
                 "environment", "variant", "description"));
     }
 
     @Test
     public void testNoGateway() {
         // GIVEN
-        ClusterDefinition clusterDefinition = new ClusterDefinition();
-        clusterDefinition.setStackType(StackType.HDP.name());
-        given(clusterDefinitionService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(eq("my-cluster-definition"), any())).willReturn(clusterDefinition);
+        Blueprint blueprint = new Blueprint();
+        blueprint.setStackType(StackType.HDP.name());
+        given(blueprintService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(eq("my-blueprint"), any())).willReturn(blueprint);
         // WHEN
         ClusterV4Request clusterRequest = getRequest("cluster-no-gateway.json");
         Cluster result = underTest.convert(clusterRequest);
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("stack", "clusterDefinition", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
+        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
                 "fileSystem", "rdsConfigs", "ldapConfig", "attributes", "uptime", "kerberosConfig", "ambariSecurityMasterKey", "proxyConfig",
-                "extendedClusterDefinitionText", "gateway", "environment", "variant", "description"));
+                "extendedBlueprintText", "gateway", "environment", "variant", "description"));
         assertNull(result.getGateway());
     }
 

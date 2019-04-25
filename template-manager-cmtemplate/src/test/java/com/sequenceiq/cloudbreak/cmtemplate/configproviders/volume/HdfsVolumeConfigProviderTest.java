@@ -38,7 +38,7 @@ public class HdfsVolumeConfigProviderTest {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
         TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker)).build();
-        String inputJson = getClusterDefinitionText("input/clouderamanager.bp");
+        String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
@@ -61,7 +61,7 @@ public class HdfsVolumeConfigProviderTest {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
         TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker)).build();
-        String inputJson = getClusterDefinitionText("input/clouderamanager-custom-ref.bp");
+        String inputJson = getBlueprintText("input/clouderamanager-custom-ref.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
@@ -84,7 +84,7 @@ public class HdfsVolumeConfigProviderTest {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, 2);
         TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker)).build();
-        String inputJson = getClusterDefinitionText("input/clouderamanager.bp");
+        String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
@@ -112,7 +112,7 @@ public class HdfsVolumeConfigProviderTest {
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, 2);
         TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker)).build();
-        String inputJson = getClusterDefinitionText("input/clouderamanager.bp");
+        String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
@@ -140,7 +140,7 @@ public class HdfsVolumeConfigProviderTest {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
         TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker)).build();
-        String inputJson = getClusterDefinitionText("input/clouderamanager-no-nn-dn.bp");
+        String inputJson = getBlueprintText("input/clouderamanager-no-nn-dn.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
@@ -154,7 +154,7 @@ public class HdfsVolumeConfigProviderTest {
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
         HostgroupView compute = new HostgroupView("compute", 3, InstanceGroupType.CORE, 2);
         TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker, compute)).build();
-        String inputJson = getClusterDefinitionText("input/clouderamanager-3hg-same-DN-role.bp");
+        String inputJson = getBlueprintText("input/clouderamanager-3hg-same-DN-role.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
@@ -173,7 +173,7 @@ public class HdfsVolumeConfigProviderTest {
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
         HostgroupView compute = new HostgroupView("compute", 3, InstanceGroupType.CORE, 2);
         TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker, compute)).build();
-        String inputJson = getClusterDefinitionText("input/clouderamanager-3hg-different-DN-role.bp");
+        String inputJson = getBlueprintText("input/clouderamanager-3hg-different-DN-role.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
@@ -204,7 +204,7 @@ public class HdfsVolumeConfigProviderTest {
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
         HostgroupView compute = new HostgroupView("compute", 0, InstanceGroupType.CORE, 2);
         TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker, compute)).build();
-        String inputJson = getClusterDefinitionText("input/clouderamanager-3hg-different-DN-role.bp");
+        String inputJson = getBlueprintText("input/clouderamanager-3hg-different-DN-role.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
@@ -236,7 +236,7 @@ public class HdfsVolumeConfigProviderTest {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
         TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker)).build();
-        String inputJson = getClusterDefinitionText("input/clouderamanager.bp");
+        String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
         List<ApiClusterTemplateVariable> roleVariables = underTest.getRoleConfigVariables(cmTemplateProcessor, preparationObject);
@@ -263,7 +263,7 @@ public class HdfsVolumeConfigProviderTest {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, 2);
         TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker)).build();
-        String inputJson = getClusterDefinitionText("input/clouderamanager.bp");
+        String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
         List<ApiClusterTemplateVariable> roleVariables = underTest.getRoleConfigVariables(cmTemplateProcessor, preparationObject);
@@ -290,7 +290,7 @@ public class HdfsVolumeConfigProviderTest {
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, 2);
         TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker)).build();
-        String inputJson = getClusterDefinitionText("input/clouderamanager.bp");
+        String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
         List<ApiClusterTemplateVariable> roleVariables = underTest.getRoleConfigVariables(cmTemplateProcessor, preparationObject);
@@ -317,7 +317,7 @@ public class HdfsVolumeConfigProviderTest {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
         TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker)).build();
-        String inputJson = getClusterDefinitionText("input/clouderamanager-custom-ref.bp");
+        String inputJson = getBlueprintText("input/clouderamanager-custom-ref.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
         List<ApiClusterTemplateVariable> roleVariables = underTest.getRoleConfigVariables(cmTemplateProcessor, preparationObject);
@@ -344,7 +344,7 @@ public class HdfsVolumeConfigProviderTest {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
         TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker)).build();
-        String inputJson = getClusterDefinitionText("input/clouderamanager-no-nn-dn.bp");
+        String inputJson = getBlueprintText("input/clouderamanager-no-nn-dn.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
         List<ApiClusterTemplateVariable> roleVariables = underTest.getRoleConfigVariables(cmTemplateProcessor, preparationObject);
@@ -358,7 +358,7 @@ public class HdfsVolumeConfigProviderTest {
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
         HostgroupView compute = new HostgroupView("compute", 3, InstanceGroupType.CORE, 2);
         TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker, compute)).build();
-        String inputJson = getClusterDefinitionText("input/clouderamanager-3hg-different-DN-role.bp");
+        String inputJson = getBlueprintText("input/clouderamanager-3hg-different-DN-role.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
         List<ApiClusterTemplateVariable> roleVariables = underTest.getRoleConfigVariables(cmTemplateProcessor, preparationObject);
@@ -388,7 +388,7 @@ public class HdfsVolumeConfigProviderTest {
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
         HostgroupView compute = new HostgroupView("compute", 0, InstanceGroupType.CORE, 2);
         TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker, compute)).build();
-        String inputJson = getClusterDefinitionText("input/clouderamanager-3hg-different-DN-role.bp");
+        String inputJson = getBlueprintText("input/clouderamanager-3hg-different-DN-role.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
         List<ApiClusterTemplateVariable> roleVariables = underTest.getRoleConfigVariables(cmTemplateProcessor, preparationObject);
@@ -412,7 +412,7 @@ public class HdfsVolumeConfigProviderTest {
         assertEquals("0", computeFailedVolumes.getValue());
     }
 
-    private String getClusterDefinitionText(String path) {
+    private String getBlueprintText(String path) {
         return FileReaderUtils.readFileFromClasspathQuietly(path);
     }
 

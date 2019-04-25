@@ -27,13 +27,13 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackValidationV4RequestToStackValidationConverter;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
@@ -47,7 +47,7 @@ public class StackValidationRequestToStackValidationConverterTest {
     public ExpectedException expectedEx = ExpectedException.none();
 
     @Mock
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     @Mock
     private NetworkService networkService;
@@ -96,11 +96,11 @@ public class StackValidationRequestToStackValidationConverterTest {
     public void init() {
         validationRequest = new StackValidationV4Request();
         mockUserRelated();
-        mockClusterDefinitionsInWorkspace();
+        mockBlueprintsInWorkspace();
     }
 
     @Test
-    public void invalidClusterDefinitionValidationRequest() {
+    public void invalidBlueprintValidationRequest() {
         validationRequest = new StackValidationV4Request();
         Workspace workspace = TestUtil.workspace(1L, "myWorkspace");
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(TestUtil.cbAdminUser());
@@ -111,9 +111,9 @@ public class StackValidationRequestToStackValidationConverterTest {
     }
 
     @Test
-    public void validClusterDefinitionByName() {
+    public void validBlueprintByName() {
         validationRequest.setNetworkId(442L);
-        validationRequest.setClusterDefinitionName(bpName);
+        validationRequest.setBlueprintName(bpName);
         validationRequest.setCredentialName("credName");
 
         when(credentialService.getByNameForWorkspace(validationRequest.getCredentialName(), workspace)).thenReturn(credential);
@@ -125,14 +125,14 @@ public class StackValidationRequestToStackValidationConverterTest {
 
         StackValidation result = underTest.convert(validationRequest);
 
-        assertEquals(bpName, result.getClusterDefinition().getName());
+        assertEquals(bpName, result.getBlueprint().getName());
     }
 
     @Test
     public void convertShouldUseEnvironmentCredentialWhenItisGiven() {
         // GIVEN
         validationRequest.setNetworkId(442L);
-        validationRequest.setClusterDefinitionName(bpName);
+        validationRequest.setBlueprintName(bpName);
         EnvironmentView environmentView = new EnvironmentView();
         environmentView.setName("env");
         environmentView.setCredential(credential);
@@ -153,7 +153,7 @@ public class StackValidationRequestToStackValidationConverterTest {
     public void convertShouldThrowAccessDeniedExceptinWhenNoEnvironmentAndCredentialAreGiven() {
         // GIVEN
         validationRequest.setNetworkId(442L);
-        validationRequest.setClusterDefinitionName(bpName);
+        validationRequest.setBlueprintName(bpName);
         expectedEx.expect(BadRequestException.class);
         expectedEx.expectMessage("Credential is not configured for the validation request!");
         // WHEN
@@ -161,11 +161,11 @@ public class StackValidationRequestToStackValidationConverterTest {
         // THEN expected exception should be thrown
     }
 
-    private void mockClusterDefinitionsInWorkspace() {
-        Set<ClusterDefinition> clusterDefinitions = new HashSet<>();
-        clusterDefinitions.add(TestUtil.clusterDefinition(1L, bpName, "{}"));
-        clusterDefinitions.add(TestUtil.clusterDefinition(2L, bpName2, "{}"));
-        when(clusterDefinitionService.getAllAvailableInWorkspace(any())).thenReturn(clusterDefinitions);
+    private void mockBlueprintsInWorkspace() {
+        Set<Blueprint> blueprints = new HashSet<>();
+        blueprints.add(TestUtil.blueprint(1L, bpName, "{}"));
+        blueprints.add(TestUtil.blueprint(2L, bpName2, "{}"));
+        when(blueprintService.getAllAvailableInWorkspace(any())).thenReturn(blueprints);
     }
 
     private void mockUserRelated() {

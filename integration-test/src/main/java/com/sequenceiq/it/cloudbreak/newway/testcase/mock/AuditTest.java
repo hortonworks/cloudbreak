@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.ActiveDirecto
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
 import com.sequenceiq.it.cloudbreak.newway.assertion.audit.AuditTestAssertion;
 import com.sequenceiq.it.cloudbreak.newway.client.AuditTestClient;
-import com.sequenceiq.it.cloudbreak.newway.client.ClusterDefinitionTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.ClusterTemplateTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.DatabaseTestClient;
@@ -26,7 +26,7 @@ import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.audit.AuditTestDto;
-import com.sequenceiq.it.cloudbreak.newway.dto.clusterdefinition.ClusterDefinitionTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.clustertemplate.ClusterTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.database.DatabaseTestDto;
@@ -58,7 +58,7 @@ public class AuditTest extends AbstractIntegrationTest {
     private KerberosTestClient kerberosTestClient;
 
     @Inject
-    private ClusterDefinitionTestClient clusterDefinitionTestClient;
+    private BlueprintTestClient blueprintTestClient;
 
     @Inject
     private ClusterTemplateTestClient clusterTemplateTestClient;
@@ -98,7 +98,7 @@ public class AuditTest extends AbstractIntegrationTest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
-        initializeDefaultClusterDefinitions(testContext);
+        initializeDefaultBlueprints(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -144,19 +144,19 @@ public class AuditTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running cloudbreak",
-            when = "a Cluster Definition is created",
+            when = "a Blueprint is created",
             then = "an audit record must be available in the database")
-    public void createValidClusterDefinitionThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
+    public void createValidBlueprintThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
         String blueprintName = resourcePropertyProvider().getName();
         testContext
-                .given(ClusterDefinitionTestDto.class)
+                .given(BlueprintTestDto.class)
                 .withName(blueprintName)
-                .withClusterDefinition(VALID_BP)
-                .when(clusterDefinitionTestClient.createV4(), key(blueprintName))
+                .withBlueprint(VALID_BP)
+                .when(blueprintTestClient.createV4(), key(blueprintName))
                 .select(bp -> bp.getResponse().getId(), key(blueprintName))
                 .given(AuditTestDto.class)
                 .withResourceIdByKey(blueprintName)
-                .withResourceType("cluster_definitions")
+                .withResourceType("blueprints")
                 .when(auditTestClient.listV4(), key(blueprintName))
                 .then(AuditTestAssertion.listContainsAtLeast(1), key(blueprintName))
                 .validate();

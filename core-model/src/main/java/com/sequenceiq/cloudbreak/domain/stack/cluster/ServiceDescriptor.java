@@ -36,11 +36,11 @@ public class ServiceDescriptor implements ProvisionEntity, WorkspaceAwareResourc
 
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
-    private Json clusterDefinitionParams;
+    private Json blueprintParams;
 
     @Convert(converter = SecretToString.class)
     @SecretValue
-    private Secret clusterDefinitionSecretParams = Secret.EMPTY;
+    private Secret blueprintSecretParams = Secret.EMPTY;
 
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
@@ -91,20 +91,20 @@ public class ServiceDescriptor implements ProvisionEntity, WorkspaceAwareResourc
         this.serviceName = serviceName;
     }
 
-    public Json getClusterDefinitionParams() {
-        return clusterDefinitionParams;
+    public Json getBlueprintParams() {
+        return blueprintParams;
     }
 
-    public void setClusterDefinitionParam(Json clusterDefinitionParam) {
-        clusterDefinitionParams = clusterDefinitionParam;
+    public void setBlueprintParam(Json blueprintParam) {
+        blueprintParams = blueprintParam;
     }
 
-    public Json getClusterDefinitionSecretParams() {
-        return new Json(clusterDefinitionSecretParams.getRaw());
+    public Json getBlueprintSecretParams() {
+        return new Json(blueprintSecretParams.getRaw());
     }
 
-    public void setClusterDefinitionSecretParams(Json clusterDefinitionSecretParams) {
-        this.clusterDefinitionSecretParams = new Secret(clusterDefinitionSecretParams.getValue());
+    public void setBlueprintSecretParams(Json blueprintSecretParams) {
+        this.blueprintSecretParams = new Secret(blueprintSecretParams.getValue());
     }
 
     public Json getComponentsHosts() {

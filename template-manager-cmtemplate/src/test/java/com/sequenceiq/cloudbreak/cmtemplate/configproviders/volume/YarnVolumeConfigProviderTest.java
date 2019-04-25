@@ -30,7 +30,7 @@ public class YarnVolumeConfigProviderTest {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
         TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker)).build();
-        String inputJson = getClusterDefinitionText("input/clouderamanager.bp");
+        String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
@@ -49,7 +49,7 @@ public class YarnVolumeConfigProviderTest {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
         TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker)).build();
-        String inputJson = getClusterDefinitionText("input/clouderamanager.bp");
+        String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
         List<ApiClusterTemplateVariable> roleVariables = underTest.getRoleConfigVariables(cmTemplateProcessor, preparationObject);
@@ -70,7 +70,7 @@ public class YarnVolumeConfigProviderTest {
         HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, 2);
         TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker)).build();
-        String inputJson = getClusterDefinitionText("input/clouderamanager.bp");
+        String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
         List<ApiClusterTemplateVariable> roleVariables = underTest.getRoleConfigVariables(cmTemplateProcessor, preparationObject);
@@ -86,7 +86,7 @@ public class YarnVolumeConfigProviderTest {
         assertEquals("/hadoopfs/root1/nodemanager/log", workerLog.getValue());
     }
 
-    private String getClusterDefinitionText(String path) {
+    private String getBlueprintText(String path) {
         return FileReaderUtils.readFileFromClasspathQuietly(path);
     }
 }

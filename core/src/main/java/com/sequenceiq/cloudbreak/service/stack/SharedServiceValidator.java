@@ -13,11 +13,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 
 @Component
@@ -30,7 +30,7 @@ public class SharedServiceValidator {
     private StackViewService stackViewService;
 
     @Inject
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     public ValidationResult checkSharedServiceStackRequirements(StackV4Request request, Workspace workspace) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
@@ -38,9 +38,9 @@ public class SharedServiceValidator {
             Long workspaceId = workspace.getId();
             checkCloudPlatform(request, workspaceId, resultBuilder);
             ClusterV4Request clusterReq = request.getCluster();
-            ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspaceId(
-                    clusterReq.getClusterDefinitionName(), workspaceId);
-            if (clusterDefinitionService.isAmbariBlueprint(clusterDefinition)) {
+            Blueprint blueprint = blueprintService.getByNameForWorkspaceId(
+                    clusterReq.getBlueprintName(), workspaceId);
+            if (blueprintService.isAmbariBlueprint(blueprint)) {
                 checkSharedServiceRequirements(request, workspace, resultBuilder);
             }
         }

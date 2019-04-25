@@ -96,13 +96,13 @@ public class Cluster extends Entity {
         return this;
     }
 
-    public Cluster withClusterDefinitionName(String clusterDefinitionName) {
-        request.setClusterDefinitionName(clusterDefinitionName);
+    public Cluster withBlueprintName(String blueprintName) {
+        request.setBlueprintName(blueprintName);
         return this;
     }
 
-    public Cluster withValidateClusterDefinition(Boolean validateClusterDefinition) {
-        request.setValidateClusterDefinition(validateClusterDefinition);
+    public Cluster withValidateBlueprint(Boolean validateBlueprint) {
+        request.setValidateBlueprint(validateBlueprint);
         return this;
     }
 

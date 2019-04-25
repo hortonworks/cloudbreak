@@ -82,8 +82,8 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     protected ClusterTestDto withCluster(ClusterTestDto cluster) {
         return cluster
-                .withValidateClusterDefinition(Boolean.TRUE)
-                .withClusterDefinitionName(getClusterDefinitionName());
+                .withValidateBlueprint(Boolean.TRUE)
+                .withBlueprintName(getBlueprintName());
     }
 
     @Override
@@ -208,7 +208,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getClusterDefinitionName() {
+    public String getBlueprintName() {
         return DEFAULT_CLUSTER_DEFINTION_NAME;
     }
 }

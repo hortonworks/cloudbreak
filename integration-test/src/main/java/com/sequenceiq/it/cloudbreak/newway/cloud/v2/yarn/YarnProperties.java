@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "integrationtest.yarn")
 public class YarnProperties {
 
-    private String defaultClusterDefinitionName;
+    private String defaultBlueprintName;
 
     private String availabilityZone;
 
@@ -25,12 +25,12 @@ public class YarnProperties {
 
     private final Instance instance = new Instance();
 
-    public String getDefaultClusterDefinitionName() {
-        return defaultClusterDefinitionName;
+    public String getDefaultBlueprintName() {
+        return defaultBlueprintName;
     }
 
-    public void setDefaultClusterDefinitionName(String defaultClusterDefinitionName) {
-        this.defaultClusterDefinitionName = defaultClusterDefinitionName;
+    public void setDefaultBlueprintName(String defaultBlueprintName) {
+        this.defaultBlueprintName = defaultBlueprintName;
     }
 
     public String getAvailabilityZone() {

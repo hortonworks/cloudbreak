@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "integrationtest.openstack")
 public class OpenStackProperties {
 
-    private String defaultClusterDefinitionName;
+    private String defaultBlueprintName;
 
     private String availabilityZone;
 
@@ -35,12 +35,12 @@ public class OpenStackProperties {
         this.availabilityZone = availabilityZone;
     }
 
-    public String getDefaultClusterDefinitionName() {
-        return defaultClusterDefinitionName;
+    public String getDefaultBlueprintName() {
+        return defaultBlueprintName;
     }
 
-    public void setDefaultClusterDefinitionName(String defaultClusterDefinitionName) {
-        this.defaultClusterDefinitionName = defaultClusterDefinitionName;
+    public void setDefaultBlueprintName(String defaultBlueprintName) {
+        this.defaultBlueprintName = defaultBlueprintName;
     }
 
     public String getRegion() {
@@ -227,7 +227,7 @@ public class OpenStackProperties {
         }
 
         public static class Hdf {
-            private List<String> clusterDefinitionNames;
+            private List<String> blueprintNames;
 
             private Boolean enabled;
 
@@ -235,12 +235,12 @@ public class OpenStackProperties {
 
             private String scaleGroup;
 
-            public List<String> getClusterDefinitionNames() {
-                return clusterDefinitionNames;
+            public List<String> getBlueprintNames() {
+                return blueprintNames;
             }
 
-            public void setClusterDefinitionNames(List<String> clusterDefinitionNames) {
-                this.clusterDefinitionNames = clusterDefinitionNames;
+            public void setBlueprintNames(List<String> blueprintNames) {
+                this.blueprintNames = blueprintNames;
             }
 
             public Boolean getEnabled() {

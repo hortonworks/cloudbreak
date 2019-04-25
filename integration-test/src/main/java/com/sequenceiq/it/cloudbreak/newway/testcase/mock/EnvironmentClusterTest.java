@@ -73,7 +73,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
-        initializeDefaultClusterDefinitions(testContext);
+        initializeDefaultBlueprints(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -90,7 +90,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .withDatabase(testContext.get(DatabaseTestDto.class).getName())
                 .withLdapConfigName(testContext.get(LdapTestDto.class).getName())
                 .withProxyConfigName(testContext.get(ProxyTestDto.class).getName())
-                .withClusterDefinitionName(CD_NAME)
+                .withBlueprintName(CD_NAME)
                 .withAmbari(testContext.given(AmbariTestDto.class))
                 .given(StackTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)
@@ -176,7 +176,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         testContext.getModel().getAmbariMock().putConfigureLdap();
         testContext
                 .given(ClusterTestDto.class)
-                .withClusterDefinitionName(CD_NAME)
+                .withBlueprintName(CD_NAME)
                 .withAmbari(testContext.given(AmbariTestDto.class))
                 .given(StackTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)
@@ -236,13 +236,13 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
 
                 .given(ClusterTestDto.class)
                 .withDatabase(testContext.get(DatabaseTestDto.class).getName())
-                .withClusterDefinitionName(CD_NAME)
+                .withBlueprintName(CD_NAME)
                 .withAmbari(testContext.given(AmbariTestDto.class))
                 .given(StackTestDto.class)
                 .given(EnvironmentSettingsV4TestDto.class)
                 .given(ClusterTestDto.class)
                 .withDatabase(testContext.get(DatabaseTestDto.class).getName())
-                .withClusterDefinitionName(CD_NAME)
+                .withBlueprintName(CD_NAME)
                 .withAmbari(testContext.given(AmbariTestDto.class))
                 .given(StackTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)
@@ -273,7 +273,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .then(EnvironmentTestUtils::checkRdsAttachedToEnv)
                 .given(ClusterTestDto.class)
                 .withDatabase(testContext.get(DatabaseTestDto.class).getName())
-                .withClusterDefinitionName(CD_NAME)
+                .withBlueprintName(CD_NAME)
                 .withAmbari(testContext.given(AmbariTestDto.class))
                 .given(StackTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)
@@ -408,7 +408,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         ClusterTestDto cluster = testContext.given(ClusterTestDto.class)
                 .valid()
                 .withRdsConfigNames(rdsSet)
-                .withClusterDefinitionName(CD_NAME);
+                .withBlueprintName(CD_NAME);
         if (rdsName != null) {
             cluster.withRdsConfigNames(rdsSet);
         }

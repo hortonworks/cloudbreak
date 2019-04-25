@@ -125,7 +125,7 @@ cb:
     defaultQueue: "default"
     defaultLifeTime: -1
 
-  clusterdefinition:
+  blueprint:
     cm:
       defaults: >
                 CDH 6.2 - Data Science: Apache Spark, Apache Hive, Impala=cdh6-data-science;

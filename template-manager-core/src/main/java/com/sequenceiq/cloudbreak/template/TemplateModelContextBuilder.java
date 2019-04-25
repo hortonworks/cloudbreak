@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfiguration
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
 import com.sequenceiq.cloudbreak.template.utils.ModelConverterUtils;
-import com.sequenceiq.cloudbreak.template.views.ClusterDefinitionView;
+import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.template.views.GeneralClusterConfigsView;
 import com.sequenceiq.cloudbreak.template.views.HdfConfigView;
@@ -42,7 +42,7 @@ public class TemplateModelContextBuilder {
 
     private GeneralClusterConfigsView generalClusterConfigsView;
 
-    private ClusterDefinitionView clusterDefinitionView;
+    private BlueprintView blueprintView;
 
     private Set<String> components = new HashSet<>();
 
@@ -89,8 +89,8 @@ public class TemplateModelContextBuilder {
         return this;
     }
 
-    public TemplateModelContextBuilder withClusterDefinitionView(ClusterDefinitionView clusterDefinitionView) {
-        this.clusterDefinitionView = clusterDefinitionView;
+    public TemplateModelContextBuilder withBlueprintView(BlueprintView blueprintView) {
+        this.blueprintView = blueprintView;
         return this;
     }
 
@@ -154,7 +154,7 @@ public class TemplateModelContextBuilder {
         templateModelContext.put(HandleBarModelKey.RDS.modelKey(), rds);
         templateModelContext.put(HandleBarModelKey.FILESYSTEMCONFIGS.modelKey(), ModelConverterUtils.convert(createAdjustedFileSystemConfig()));
         templateModelContext.put(HandleBarModelKey.SHAREDSERVICE.modelKey(), sharedServiceConfigs.orElse(null));
-        templateModelContext.put(HandleBarModelKey.CLUSTER_DEFINITION.modelKey(), clusterDefinitionView);
+        templateModelContext.put(HandleBarModelKey.BLUEPRINT.modelKey(), blueprintView);
         templateModelContext.put(HandleBarModelKey.HDF.modelKey(), hdfConfigs.orElse(null));
         templateModelContext.put(HandleBarModelKey.GENERAL.modelKey(), generalClusterConfigsView);
         ModelConverterUtils.deepMerge(templateModelContext, ModelConverterUtils.convert(customInputs));

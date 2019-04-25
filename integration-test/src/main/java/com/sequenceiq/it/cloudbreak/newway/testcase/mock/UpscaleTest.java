@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
 
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
-import static com.sequenceiq.it.cloudbreak.newway.mock.model.AmbariMock.CLUSTER_DEFINITIONS;
+import static com.sequenceiq.it.cloudbreak.newway.mock.model.AmbariMock.BLUEPRINTS;
 import static com.sequenceiq.it.spark.ITResponse.AMBARI_API_ROOT;
 import static com.sequenceiq.it.spark.ITResponse.MOCK_ROOT;
 import static com.sequenceiq.it.spark.ITResponse.SALT_API_ROOT;
@@ -96,7 +96,7 @@ public class UpscaleTest extends AbstractIntegrationTest {
             then = "stack state is failed")
     public void testAmbariFailure(MockedTestContext testContext) {
         String stackName = resourcePropertyProvider().getName();
-        mockAmbariClusterDefinitionFail(testContext);
+        mockAmbariBlueprintFail(testContext);
         testContext
                 .given(stackName, StackTestDto.class)
                 .when(stackTestClient.createV4(), key(stackName))
@@ -105,15 +105,15 @@ public class UpscaleTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    private void mockAmbariClusterDefinitionFail(MockedTestContext testContext) {
+    private void mockAmbariBlueprintFail(MockedTestContext testContext) {
         Route customResponse = (request, response) -> {
             response.type("text/plain");
             response.status(400);
-            response.body("Bad cluster definition format");
+            response.body("Bad blueprint format");
             return "";
         };
-        testContext.getModel().getAmbariMock().getDynamicRouteStack().clearPost(CLUSTER_DEFINITIONS);
-        testContext.getModel().getAmbariMock().getDynamicRouteStack().post(CLUSTER_DEFINITIONS, customResponse);
+        testContext.getModel().getAmbariMock().getDynamicRouteStack().clearPost(BLUEPRINTS);
+        testContext.getModel().getAmbariMock().getDynamicRouteStack().post(BLUEPRINTS, customResponse);
     }
 
 }

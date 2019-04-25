@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterConnectorPollingResultChecker;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
-import com.sequenceiq.cloudbreak.clusterdefinition.CentralClusterDefinitionUpdater;
+import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintUpdater;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -92,7 +92,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
     private AmbariPollingServiceProvider ambariPollingServiceProvider;
 
     @Inject
-    private CentralClusterDefinitionUpdater centralClusterDefinitionUpdater;
+    private CentralBlueprintUpdater centralBlueprintUpdater;
 
     @Inject
     private AmbariAdapter ambariAdapter;
@@ -129,7 +129,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
         Cluster cluster = stack.getCluster();
         try {
             ambariRepositoryVersionService.setBaseRepoURL(stack.getName(), cluster.getId(), ambariClient);
-            String blueprintText = centralClusterDefinitionUpdater.getClusterDefinitionText(templatePreparationObject);
+            String blueprintText = centralBlueprintUpdater.getBlueprintText(templatePreparationObject);
             addBlueprint(stack.getId(), ambariClient, blueprintText, cluster.getTopologyValidation());
             PollingResult waitForHostsResult = ambariPollingServiceProvider.hostsPollingService(stack, ambariClient, hostsInCluster);
             clusterConnectorPollingResultChecker

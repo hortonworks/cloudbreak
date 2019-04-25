@@ -50,7 +50,7 @@ public interface CloudProvider {
 
     Integer gatewayPort(StackTestDtoBase stackEntity);
 
-    String getClusterDefinitionName();
+    String getBlueprintName();
 
     StackV4ParameterBase stackParameters();
 }

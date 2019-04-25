@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
-import com.sequenceiq.cloudbreak.clusterdefinition.utils.ClusterDefinitionUtils;
+import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -54,7 +54,7 @@ public class ClouderaManagerClusterCreationSetupService {
     private StackMatrixService stackMatrixService;
 
     @Inject
-    private ClusterDefinitionUtils clusterDefinitionUtils;
+    private BlueprintUtils blueprintUtils;
 
     public List<ClusterComponent> prepareClouderaManagerCluster(ClusterV4Request request, Cluster cluster,
             Optional<Component> stackClouderaManagerRepoConfig,
@@ -108,8 +108,8 @@ public class ClouderaManagerClusterCreationSetupService {
             Optional<Component> stackImageComponent, Cluster cluster) throws IOException {
         Json json;
         if (Objects.isNull(stackClouderaManagerRepoConfig) || !stackClouderaManagerRepoConfig.isPresent()) {
-            JsonNode root = JsonUtil.readTree(cluster.getClusterDefinition().getClusterDefinitionText());
-            String cdhStackVersion = clusterDefinitionUtils.getCDHStackVersion(root);
+            JsonNode root = JsonUtil.readTree(cluster.getBlueprint().getBlueprintText());
+            String cdhStackVersion = blueprintUtils.getCDHStackVersion(root);
             String cdh = StackType.CDH.name();
             ClouderaManagerRepo clouderaManagerRepo = defaultClouderaManagerRepoService.getDefault(
                     getOsType(stackImageComponent), cdh, cdhStackVersion);

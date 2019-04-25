@@ -33,9 +33,9 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
-import com.sequenceiq.cloudbreak.clusterdefinition.utils.ClusterDefinitionUtils;
+import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
@@ -66,7 +66,7 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
     private DefaultClouderaManagerRepoService defaultClouderaManagerRepoService;
 
     @Mock
-    private ClusterDefinitionUtils clusterDefinitionUtils;
+    private BlueprintUtils blueprintUtils;
 
     @InjectMocks
     private ClouderaManagerClusterCreationSetupService underTest;
@@ -75,7 +75,7 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
 
     private Stack stack;
 
-    private ClusterDefinition clusterDefinition;
+    private Blueprint blueprint;
 
     private Workspace workspace;
 
@@ -95,8 +95,8 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
         stack = new Stack();
         stack.setId(1L);
         stack.setWorkspace(workspace);
-        clusterDefinition = new ClusterDefinition();
-        clusterDefinition.setClusterDefinitionText("{}");
+        blueprint = new Blueprint();
+        blueprint.setBlueprintText("{}");
         Map<InstanceGroupType, String> userData = new HashMap<>();
         userData.put(InstanceGroupType.CORE, "userdata");
         Image image = new Image("imagename", userData, "centos7", REDHAT_7, "url", "imgcatname",
@@ -114,7 +114,7 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
         KerberosConfig kerberosConfig = new KerberosConfig();
         kerberosConfig.setDomain("domain");
         cluster.setKerberosConfig(kerberosConfig);
-        cluster.setClusterDefinition(clusterDefinition);
+        cluster.setBlueprint(blueprint);
         DefaultCDHInfo defaultCDHInfo = getDefaultCDHInfo(DEFAULT_CM_VERSION, DEFAULT_CDH_VERSION);
         setupDefaultClouderaManagerEntries();
 
@@ -122,7 +122,7 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
         StackMatrixV4Response stackMatrixV4Response = new StackMatrixV4Response();
         stackMatrixV4Response.setCdh(Collections.singletonMap(DEFAULT_CDH_VERSION, null));
         when(stackMatrixService.getStackMatrix()).thenReturn(stackMatrixV4Response);
-        when(clusterDefinitionUtils.getCDHStackVersion(any())).thenReturn(CDH_VERSION);
+        when(blueprintUtils.getCDHStackVersion(any())).thenReturn(CDH_VERSION);
     }
 
     @Test

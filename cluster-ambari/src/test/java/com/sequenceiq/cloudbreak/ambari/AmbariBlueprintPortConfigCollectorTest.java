@@ -12,7 +12,7 @@ import org.junit.Test;
 import com.sequenceiq.cloudbreak.FileReaderUtil;
 import com.sequenceiq.cloudbreak.ambari.AmbariBlueprintPortConfigCollector.PortConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 
 public class AmbariBlueprintPortConfigCollectorTest {
 
@@ -36,9 +36,9 @@ public class AmbariBlueprintPortConfigCollectorTest {
     @Test
     public void testGetServicePorts() {
         String blueprintText = FileReaderUtil.readResourceFile(this, "test-blueprint.json");
-        ClusterDefinition clusterDefinition = new ClusterDefinition();
-        clusterDefinition.setClusterDefinitionText(blueprintText);
-        Map<String, Integer> result = underTest.getServicePorts(clusterDefinition);
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(blueprintText);
+        Map<String, Integer> result = underTest.getServicePorts(blueprint);
         assertEquals(HIVE_PORT, result.get(ExposedService.HIVE_SERVER.getKnoxService()).intValue());
         assertEquals(ZEPPELIN_PORT, result.get(ExposedService.ZEPPELIN.getKnoxService()).intValue());
         assertEquals(YARN_PORT, result.get(ExposedService.RESOURCEMANAGER_WEB.getKnoxService()).intValue());
@@ -52,9 +52,9 @@ public class AmbariBlueprintPortConfigCollectorTest {
     @Test
     public void testWithissingConfigArray() {
         String blueprintText = FileReaderUtil.readResourceFile(this, "test-blueprint-no-config.json");
-        ClusterDefinition clusterDefinition = new ClusterDefinition();
-        clusterDefinition.setClusterDefinitionText(blueprintText);
-        Map<String, Integer> result = underTest.getServicePorts(clusterDefinition);
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(blueprintText);
+        Map<String, Integer> result = underTest.getServicePorts(blueprint);
         assertEquals(ExposedService.HIVE_SERVER.getDefaultPort(), result.get(ExposedService.HIVE_SERVER.getKnoxService()));
         assertEquals(ExposedService.ZEPPELIN.getDefaultPort(), result.get(ExposedService.ZEPPELIN.getKnoxService()));
         assertEquals(ExposedService.RESOURCEMANAGER_WEB.getDefaultPort(), result.get(ExposedService.RESOURCEMANAGER_WEB.getKnoxService()));

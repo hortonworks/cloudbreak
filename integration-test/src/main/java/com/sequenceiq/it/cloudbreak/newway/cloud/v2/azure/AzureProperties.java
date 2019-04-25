@@ -9,7 +9,7 @@ public class AzureProperties {
 
     private String availabilityZone;
 
-    private String defaultClusterDefinitionName;
+    private String defaultBlueprintName;
 
     private String region;
 
@@ -29,12 +29,12 @@ public class AzureProperties {
         this.availabilityZone = availabilityZone;
     }
 
-    public String getDefaultClusterDefinitionName() {
-        return defaultClusterDefinitionName;
+    public String getDefaultBlueprintName() {
+        return defaultBlueprintName;
     }
 
-    public void setDefaultClusterDefinitionName(String defaultClusterDefinitionName) {
-        this.defaultClusterDefinitionName = defaultClusterDefinitionName;
+    public void setDefaultBlueprintName(String defaultBlueprintName) {
+        this.defaultBlueprintName = defaultBlueprintName;
     }
 
     public String getRegion() {

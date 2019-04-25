@@ -446,7 +446,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             then = "getting back a stack which using a prewarmed image")
     public void testGetImageCatalogByNameAndStackWhenPreWarmedImageHasBeenUsed(TestContext testContext) {
         createDefaultCredential(testContext);
-        initializeDefaultClusterDefinitions(testContext);
+        initializeDefaultBlueprints(testContext);
 
         String imgCatalogName = resourcePropertyProvider().getName();
         String environmentName = resourcePropertyProvider().getName();

@@ -22,10 +22,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePassword
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
-import com.sequenceiq.cloudbreak.clusterdefinition.validation.AmbariBlueprintValidator;
+import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -78,7 +78,7 @@ public class ClusterCommonService {
         } else if (updateJson.getStatus() != null) {
             LOGGER.debug("Cluster status update request received. Stack id:  {}, status: {} ", stackId, updateJson.getStatus());
             clusterService.updateStatus(stackId, updateJson.getStatus());
-        } else if (updateJson.getClusterDefinitionName() != null && updateJson.getHostgroups() != null && stack.getCluster().isCreateFailed()) {
+        } else if (updateJson.getBlueprintName() != null && updateJson.getHostgroups() != null && stack.getCluster().isCreateFailed()) {
             LOGGER.debug("Cluster rebuild request received. Stack id:  {}", stackId);
             try {
                 recreateCluster(stack, updateJson, user, workspace);
@@ -120,14 +120,14 @@ public class ClusterCommonService {
                     stack.getStatus()));
         }
         LOGGER.debug("Cluster host adjustment request received. Stack id: {} ", stackId);
-        ClusterDefinition clusterDefinition = stack.getCluster().getClusterDefinition();
+        Blueprint blueprint = stack.getCluster().getBlueprint();
         Optional<HostGroup> hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(),
                 updateJson.getHostGroupAdjustment().getHostGroup());
         if (hostGroup.isEmpty()) {
             throw new BadRequestException(String.format("Host group '%s' not found or not member of the cluster '%s'",
                     updateJson.getHostGroupAdjustment().getHostGroup(), stack.getName()));
         }
-        ambariBlueprintValidator.validateHostGroupScalingRequest(clusterDefinition, hostGroup.get(),
+        ambariBlueprintValidator.validateHostGroupScalingRequest(blueprint, hostGroup.get(),
                 updateJson.getHostGroupAdjustment().getScalingAdjustment());
         clusterService.updateHosts(stackId, updateJson.getHostGroupAdjustment());
     }
@@ -144,7 +144,7 @@ public class ClusterCommonService {
         if (stackDetails != null) {
             stackRepoDetails = converterUtil.convert(stackDetails, StackRepoDetails.class);
         }
-        clusterService.recreate(stack, updateCluster.getClusterDefinitionName(), hostGroups, updateCluster.getValidateClusterDefinition(), stackRepoDetails,
+        clusterService.recreate(stack, updateCluster.getBlueprintName(), hostGroups, updateCluster.getValidateBlueprint(), stackRepoDetails,
                 updateCluster.getKerberosPassword(), updateCluster.getKerberosPrincipal());
     }
 

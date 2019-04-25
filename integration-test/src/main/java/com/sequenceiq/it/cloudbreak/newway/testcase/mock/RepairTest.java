@@ -71,7 +71,7 @@ public class RepairTest extends AbstractIntegrationTest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
-        initializeDefaultClusterDefinitions(testContext);
+        initializeDefaultBlueprints(testContext);
     }
 
     @AfterMethod(alwaysRun = true)
