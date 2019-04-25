@@ -25,10 +25,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentAttachV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentChangeCredentialV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentDetachV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentEditV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.LocationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.RegisterDatalakeV4Request;
@@ -46,6 +48,7 @@ import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentAt
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentCreationValidator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentDetachValidator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentRegionValidator;
+import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.KubernetesConfig;
@@ -53,6 +56,7 @@ import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.environment.BaseNetwork;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.environment.Region;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -154,6 +158,12 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
     @Inject
     private AmbariDatalakeConfigProvider ambariDatalakeConfigProvider;
 
+    @Inject
+    private EnvironmentNetworkService environmentNetworkService;
+
+    @Inject
+    private Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap;
+
     public Set<SimpleEnvironmentV4Response> listByWorkspaceId(Long workspaceId) {
         Set<SimpleEnvironmentV4Response> environmentResponses = environmentViewService.findAllByWorkspaceId(workspaceId).stream()
                 .map(env -> conversionService.convert(env, SimpleEnvironmentV4Response.class))
@@ -206,6 +216,7 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
         environment = createForLoggedInUser(environment, workspaceId);
+        createAndSetNetwork(environment, request.getNetwork());
         return conversionService.convert(environment, DetailedEnvironmentV4Response.class);
     }
 
@@ -527,5 +538,25 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
     @Override
     public WorkspaceResource resource() {
         return ENVIRONMENT;
+    }
+
+    private void createAndSetNetwork(Environment environment, EnvironmentNetworkV4Request networkRequest) {
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
+        BaseNetwork network = createNetworkIfPossible(environment, networkRequest, cloudPlatform);
+        if (network != null) {
+            environment.setNetwork(network);
+        }
+    }
+
+    private BaseNetwork createNetworkIfPossible(Environment environment, EnvironmentNetworkV4Request networkRequest, CloudPlatform cloudPlatform) {
+        BaseNetwork network = null;
+        if (networkRequest != null) {
+            EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(cloudPlatform);
+            if (environmentNetworkConverter != null) {
+                BaseNetwork baseNetwork = environmentNetworkConverter.convert(networkRequest, environment);
+                network = environmentNetworkService.save(baseNetwork);
+            }
+        }
+        return network;
     }
 }

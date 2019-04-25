@@ -40,6 +40,9 @@ public class EnvironmentV4Request extends EnvironmentV4BaseRequest implements Cr
     @NotNull
     private LocationV4Request location;
 
+    @ApiModelProperty(EnvironmentRequestModelDescription.NETWORK)
+    private EnvironmentNetworkV4Request network;
+
     public String getName() {
         return name;
     }
@@ -90,5 +93,13 @@ public class EnvironmentV4Request extends EnvironmentV4BaseRequest implements Cr
 
     public void setLocation(LocationV4Request location) {
         this.location = location;
+    }
+
+    public EnvironmentNetworkV4Request getNetwork() {
+        return network;
+    }
+
+    public void setNetwork(EnvironmentNetworkV4Request network) {
+        this.network = network;
     }
 }

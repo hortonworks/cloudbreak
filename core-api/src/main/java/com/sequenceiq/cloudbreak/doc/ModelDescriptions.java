@@ -673,6 +673,7 @@ public class ModelDescriptions {
         public static final String LATITUDE = "Location latitude of the environment.";
         public static final String KERBEROS_CONFIGS = "Name of Kerberos configs to be attached to the environment.";
         public static final String LOCATION_DISPLAY_NAME = "Display name of the location of the environment.";
+        public static final String NETWORK = "Network related specifics of the environment.";
     }
 
     public static class EnvironmentResponseModelDescription {
@@ -692,6 +693,7 @@ public class ModelDescriptions {
         public static final String DATALAKE_RESOURCES_NAMES = "Datalake cluster resources registered to the environment.";
         public static final String DATALAKE_RESOURCES = "Datalake cluster resources registered to the environment.";
         public static final String KERBEROS_CONFIGS = "Kerberos configs in the environment.";
+        public static final String NETWORK = "Network related specifics of the environment.";
     }
 
     public static class SecretResponseModelDescription {
@@ -704,5 +706,16 @@ public class ModelDescriptions {
         public static final String SERVICE_NAME = "Name of the datalake service";
         public static final String BLUEPRINT_PARAMS = "Bluepirnt parameters from the datalake services";
         public static final String COMPONENT_HOSTS = "Component hosts of the datalake services";
+    }
+
+    public static class EnvironmentNetworkDescription {
+        public static final String SUBNET_IDS = "Subnet ids of the specified networks";
+        public static final String AWS_SPECIFIC_PARAMETERS = "Subnet ids of the specified networks";
+        public static final String AZURE_SPECIFIC_PARAMETERS = "Subnet ids of the specified networks";
+        public static final String AWS_VPC_ID = "Subnet ids of the specified networks";
+        public static final String AZURE_RESOURCE_GROUP_NAME = "Subnet ids of the specified networks";
+        public static final String AZURE_NETWORK_ID = "Subnet ids of the specified networks";
+        public static final String AZURE_NO_PUBLIC_IP = "Subnet ids of the specified networks";
+        public static final String AZURE_NO_FIREWALL_RULES = "Subnet ids of the specified networks";
     }
 }
