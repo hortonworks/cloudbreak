@@ -1,0 +1,40 @@
+server.servlet.context-path: "/env"
+
+management:
+  endpoints:
+    web:
+      base-path: "/"
+      exposure:
+        include: info,health,prometheus
+      path-mapping:
+        prometheus: metrics
+  endpoint:
+    metrics:
+      enabled: true
+      export:
+        prometheus:
+          enabled: true
+    prometheus:
+      enabled: true
+  metrics:
+    distribution:
+      sla:
+        "[http.server.requests]": "125ms, 250ms, 500ms, 1s, 2s"
+      percentiles:
+        "[http.server.requests]": "0.5, 0.95"
+
+environment:
+  cert.dir: /certs/
+  client.id: environment
+  structuredevent:
+    rest:
+      enabled: false
+  db:
+    port.5432.tcp.port: 5432
+    env:
+      user: postgres
+      pass:
+      db: environmentdb
+      schema: public
+      cert.file: database.crt
+      ssl: false

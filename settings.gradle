@@ -35,4 +35,5 @@ include 'flow'
 
 rootProject.name = 'cloudbreak'
 include 'mock-caas'
+include 'environment'
 
