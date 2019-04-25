@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesRequest;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesResult;
 import com.amazonaws.services.ec2.model.DescribeInternetGatewaysRequest;
@@ -387,13 +388,19 @@ public class AwsPlatformResources implements PlatformResources {
 
                 describeAvailabilityZonesRequest.withFilters(filter);
 
-                DescribeAvailabilityZonesResult describeAvailabilityZonesResult = ec2Client.describeAvailabilityZones(describeAvailabilityZonesRequest);
+                try {
+                    DescribeAvailabilityZonesResult describeAvailabilityZonesResult = ec2Client.describeAvailabilityZones(describeAvailabilityZonesRequest);
 
-                List<AvailabilityZone> tmpAz = new ArrayList<>();
-                for (com.amazonaws.services.ec2.model.AvailabilityZone availabilityZone : describeAvailabilityZonesResult.getAvailabilityZones()) {
-                    tmpAz.add(availabilityZone(availabilityZone.getZoneName()));
+                    List<AvailabilityZone> tmpAz = new ArrayList<>();
+                    for (com.amazonaws.services.ec2.model.AvailabilityZone availabilityZone : describeAvailabilityZonesResult.getAvailabilityZones()) {
+                        tmpAz.add(availabilityZone(availabilityZone.getZoneName()));
+                    }
+                    regionListMap.put(region(awsRegion.getRegionName()), tmpAz);
+
+                } catch (AmazonEC2Exception e) {
+                    LOGGER.info("Failed to retrieve AZ from Region: {}!", awsRegion.getRegionName(), e);
                 }
-                regionListMap.put(region(awsRegion.getRegionName()), tmpAz);
+
                 addDisplayName(displayNames, awsRegion);
                 addCoordinate(coordinates, awsRegion);
             }
