@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecution
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
-import com.sequenceiq.cloudbreak.service.template.ClusterTemplateViewService;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
 @Controller
@@ -35,9 +34,6 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
 
     @Inject
     private ClusterTemplateService clusterTemplateService;
-
-    @Inject
-    private ClusterTemplateViewService clusterTemplateViewService;
 
     @Inject
     private BlueprintService blueprintService;
@@ -57,7 +53,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
             blueprintService.updateDefaultBlueprints(workspaceId);
             clusterTemplateService.updateDefaultClusterTemplates(workspaceId);
             Set<ClusterTemplateViewV4Response> responses = transactionService.required(() ->
-                    converterUtil.convertAllAsSet(clusterTemplateViewService.findAllByWorkspaceId(workspaceId), ClusterTemplateViewV4Response.class));
+                    converterUtil.convertAllAsSet(clusterTemplateService.getAllAvailableViewInWorkspace(workspaceId), ClusterTemplateViewV4Response.class));
             return new ClusterTemplateViewV4Responses(responses);
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
