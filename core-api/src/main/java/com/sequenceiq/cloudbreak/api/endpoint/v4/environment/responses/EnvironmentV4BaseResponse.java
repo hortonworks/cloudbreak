@@ -43,6 +43,9 @@ public abstract class EnvironmentV4BaseResponse {
     @ApiModelProperty(EnvironmentResponseModelDescription.WORKLOAD_CLUSTER_NAMES)
     private Set<String> workloadClusterNames;
 
+    @ApiModelProperty(EnvironmentResponseModelDescription.NETWORK)
+    private EnvironmentNetworkV4Response network;
+
     public Set<String> getDatalakeResourcesNames() {
         return datalakeResourcesNames;
     }
@@ -129,5 +132,13 @@ public abstract class EnvironmentV4BaseResponse {
 
     public void setLocation(LocationV4Response location) {
         this.location = location;
+    }
+
+    public EnvironmentNetworkV4Response getNetwork() {
+        return network;
+    }
+
+    public void setNetwork(EnvironmentNetworkV4Response network) {
+        this.network = network;
     }
 }

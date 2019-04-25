@@ -16,6 +16,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -121,6 +122,9 @@ public class Environment implements WorkspaceAwareResource, ArchivableResource {
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "environment_id")
     private Set<DatalakeResources> datalakeResources = new HashSet<>();
+
+    @OneToOne(mappedBy = "environment", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private BaseNetwork network;
 
     public Environment() {
         try {
@@ -325,5 +329,13 @@ public class Environment implements WorkspaceAwareResource, ArchivableResource {
 
     public void setDeletionTimestamp(Long deletionTimestamp) {
         this.deletionTimestamp = deletionTimestamp;
+    }
+
+    public BaseNetwork getNetwork() {
+        return network;
+    }
+
+    public void setNetwork(BaseNetwork network) {
+        this.network = network;
     }
 }
