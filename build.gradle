@@ -166,6 +166,12 @@ subprojects {
     maven { url "https://cloudbreak-maven.s3.amazonaws.com/releases" }
     maven { url "https://repo.spring.io/release" }
     maven { url "https://plugins.gradle.org/m2/" }
-    maven { url "https://repository.cloudera.com/artifactory/cloudera-repos" }
+    maven {
+      credentials {
+        username "$System.env.CM_PRIVATE_REPO_USER"
+        password "$System.env.CM_PRIVATE_REPO_PASSWORD"
+      }
+      url "https://repository.cloudera.com/cloudera/list/cm-private/" 
+    }
   }
 }
