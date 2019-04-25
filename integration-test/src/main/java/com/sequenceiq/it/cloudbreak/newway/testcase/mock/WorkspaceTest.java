@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakTest;
-import com.sequenceiq.it.cloudbreak.newway.client.ClusterDefinitionTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.KerberosTestClient;
@@ -21,7 +21,7 @@ import com.sequenceiq.it.cloudbreak.newway.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.dto.clusterdefinition.ClusterDefinitionTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.kerberos.KerberosTestDto;
@@ -37,7 +37,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
 
     private static final String FORBIDDEN_KEY = "forbiddenGetByName";
 
-    private static final String CLUSTER_DEFINITION_TEXT = "{\"Blueprints\":{\"blueprint_name\":\"ownbp\",\"stack_name\":\"HDF\",\"stack_version\":\"3.2\"},"
+    private static final String BLUEPRINT_TEXT = "{\"Blueprints\":{\"blueprint_name\":\"ownbp\",\"stack_name\":\"HDF\",\"stack_version\":\"3.2\"},"
             + "\"settings\":[{\"recovery_settings\":[]},{\"service_settings\":[]},{\"component_settings\":[]}],\"configurations\":[],\"host_groups\":[{\"name\""
             + ":\"master\",\"configurations\":[],\"components\":[{\"name\":\"METRICS_MONITOR\"},{\"name\":\"METRICS_COLLECTOR\"},{\"name\":\"ZOOKEEPER_CLIENT\""
             + "}],\"cardinality\":\"1\"}]}";
@@ -49,7 +49,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     private KerberosTestClient kerberosTestClient;
 
     @Inject
-    private ClusterDefinitionTestClient clusterDefinitionTestClient;
+    private BlueprintTestClient blueprintTestClient;
 
     @Inject
     private CredentialTestClient credentialTestClient;
@@ -87,12 +87,12 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    public void testCreateAClusterDefinitionAndGetOtherUser(TestContext testContext) {
+    public void testCreateABlueprintAndGetOtherUser(TestContext testContext) {
         testContext
-                .given(ClusterDefinitionTestDto.class)
-                .withClusterDefinition(CLUSTER_DEFINITION_TEXT)
-                .when(clusterDefinitionTestClient.createV4())
-                .when(clusterDefinitionTestClient.getV4(), key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
+                .given(BlueprintTestDto.class)
+                .withBlueprint(BLUEPRINT_TEXT)
+                .when(blueprintTestClient.createV4())
+                .when(blueprintTestClient.getV4(), key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .expect(ForbiddenException.class, key(FORBIDDEN_KEY))
                 .validate();
     }

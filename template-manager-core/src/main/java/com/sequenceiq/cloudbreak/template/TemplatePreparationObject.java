@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
-import com.sequenceiq.cloudbreak.template.views.ClusterDefinitionView;
+import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.LdapView;
@@ -27,7 +27,7 @@ public class TemplatePreparationObject {
 
     private final GeneralClusterConfigs generalClusterConfigs;
 
-    private final ClusterDefinitionView clusterDefinitionView;
+    private final BlueprintView blueprintView;
 
     private final Set<RDSConfig> rdsConfigs;
 
@@ -58,7 +58,7 @@ public class TemplatePreparationObject {
         gatewayView = builder.gatewayView;
         fileSystemView = builder.fileSystemView;
         kerberosConfig = builder.kerberosConfig;
-        clusterDefinitionView = builder.clusterDefinitionView;
+        blueprintView = builder.blueprintView;
         generalClusterConfigs = builder.generalClusterConfigs;
         sharedServiceConfigs = builder.sharedServiceConfigs;
         customInputs = builder.customInputs;
@@ -101,8 +101,8 @@ public class TemplatePreparationObject {
         return generalClusterConfigs;
     }
 
-    public ClusterDefinitionView getClusterDefinitionView() {
-        return clusterDefinitionView;
+    public BlueprintView getBlueprintView() {
+        return blueprintView;
     }
 
     public Optional<SharedServiceConfigsView> getSharedServiceConfigs() {
@@ -139,7 +139,7 @@ public class TemplatePreparationObject {
 
         private GeneralClusterConfigs generalClusterConfigs;
 
-        private ClusterDefinitionView clusterDefinitionView;
+        private BlueprintView blueprintView;
 
         private Map<String, Object> customInputs = new HashMap<>();
 
@@ -205,8 +205,8 @@ public class TemplatePreparationObject {
             return this;
         }
 
-        public Builder withClusterDefinitionView(ClusterDefinitionView clusterDefinitionView) {
-            this.clusterDefinitionView = clusterDefinitionView;
+        public Builder withBlueprintView(BlueprintView blueprintView) {
+            this.blueprintView = blueprintView;
             return this;
         }
 

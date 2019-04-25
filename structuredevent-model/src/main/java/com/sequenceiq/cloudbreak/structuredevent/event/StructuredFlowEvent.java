@@ -14,7 +14,7 @@ public class StructuredFlowEvent extends StructuredEvent {
 
     private ClusterDetails cluster;
 
-    private ClusterDefinitionDetails clusterDefinitionDetails;
+    private BlueprintDetails blueprintDetails;
 
     @JsonSerialize(using = Base64Serializer.class)
     @JsonDeserialize(using = Base64Deserializer.class)
@@ -25,22 +25,22 @@ public class StructuredFlowEvent extends StructuredEvent {
     }
 
     public StructuredFlowEvent(String type, OperationDetails operation, FlowDetails flow, StackDetails stack,
-            ClusterDetails cluster, ClusterDefinitionDetails clusterDefinitionDetails) {
+            ClusterDetails cluster, BlueprintDetails blueprintDetails) {
         super(type, operation);
         this.flow = flow;
         this.stack = stack;
         this.cluster = cluster;
-        this.clusterDefinitionDetails = clusterDefinitionDetails;
+        this.blueprintDetails = blueprintDetails;
     }
 
     public StructuredFlowEvent(OperationDetails operation, FlowDetails flow, StackDetails stack, ClusterDetails cluster,
-            ClusterDefinitionDetails clusterDefinitionDetails) {
-        this(StructuredFlowEvent.class.getSimpleName(), operation, flow, stack, cluster, clusterDefinitionDetails);
+            BlueprintDetails blueprintDetails) {
+        this(StructuredFlowEvent.class.getSimpleName(), operation, flow, stack, cluster, blueprintDetails);
     }
 
     public StructuredFlowEvent(OperationDetails operation, FlowDetails flow, StackDetails stack,
-            ClusterDetails cluster, ClusterDefinitionDetails clusterDefinitionDetails, String exception) {
-        this(StructuredFlowEvent.class.getSimpleName(), operation, flow, stack, cluster, clusterDefinitionDetails);
+            ClusterDetails cluster, BlueprintDetails blueprintDetails, String exception) {
+        this(StructuredFlowEvent.class.getSimpleName(), operation, flow, stack, cluster, blueprintDetails);
         this.exception = exception;
     }
 
@@ -87,12 +87,12 @@ public class StructuredFlowEvent extends StructuredEvent {
         this.cluster = cluster;
     }
 
-    public ClusterDefinitionDetails getClusterDefinitionDetails() {
-        return clusterDefinitionDetails;
+    public BlueprintDetails getBlueprintDetails() {
+        return blueprintDetails;
     }
 
-    public void setClusterDefinitionDetails(ClusterDefinitionDetails clusterDefinitionDetails) {
-        this.clusterDefinitionDetails = clusterDefinitionDetails;
+    public void setBlueprintDetails(BlueprintDetails blueprintDetails) {
+        this.blueprintDetails = blueprintDetails;
     }
 
     public String getException() {

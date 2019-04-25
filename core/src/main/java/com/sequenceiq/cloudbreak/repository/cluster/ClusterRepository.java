@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspaceId;
 import com.sequenceiq.cloudbreak.aspect.workspace.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -56,7 +56,7 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     Set<Cluster> findAllWithNoWorkspace();
 
     @CheckPermissionsByReturnValue
-    Set<Cluster> findByClusterDefinition(ClusterDefinition clusterDefinition);
+    Set<Cluster> findByBlueprint(Blueprint blueprint);
 
     @CheckPermissionsByReturnValue
     Set<Cluster> findByLdapConfigAndStatusNot(LdapConfig ldapConfig, Status status);

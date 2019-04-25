@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackValidationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedClusterDefinitionV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
@@ -48,7 +48,7 @@ import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.template.ClusterDefinitionUpdaterConnectors;
+import com.sequenceiq.cloudbreak.template.BlueprintUpdaterConnectors;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @Service
@@ -105,7 +105,7 @@ public class StackCommonService {
     private UserService userService;
 
     @Inject
-    private ClusterDefinitionUpdaterConnectors clusterDefinitionUpdaterConnectors;
+    private BlueprintUpdaterConnectors blueprintUpdaterConnectors;
 
     public StackV4Response createInWorkspace(StackV4Request stackRequest, CloudbreakUser cloudbreakUser, User user, Workspace workspace) {
         return stackCreatorService.createStack(cloudbreakUser, user, workspace, stackRequest);
@@ -222,12 +222,12 @@ public class StackCommonService {
         operationRetryService.retry(stack);
     }
 
-    public GeneratedClusterDefinitionV4Response postStackForClusterDefinition(StackV4Request stackRequest) {
+    public GeneratedBlueprintV4Response postStackForBlueprint(StackV4Request stackRequest) {
         TemplatePreparationObject templatePreparationObject = converterUtil.convert(stackRequest, TemplatePreparationObject.class);
 
-        String clusterDefinitionText = clusterDefinitionUpdaterConnectors.getClusterDefinitionText(templatePreparationObject);
-        GeneratedClusterDefinitionV4Response response = new GeneratedClusterDefinitionV4Response();
-        response.setClusterDefinitionText(anonymize(clusterDefinitionText));
+        String blueprintText = blueprintUpdaterConnectors.getBlueprintText(templatePreparationObject);
+        GeneratedBlueprintV4Response response = new GeneratedBlueprintV4Response();
+        response.setBlueprintText(anonymize(blueprintText));
         return response;
     }
 

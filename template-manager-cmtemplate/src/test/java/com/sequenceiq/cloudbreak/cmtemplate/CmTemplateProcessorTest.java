@@ -32,8 +32,8 @@ public class CmTemplateProcessorTest {
 
     @Test
     public void testAddServiceConfigs() {
-        getClusterDefinitionText("input/clouderamanager.bp");
-        underTest = new CmTemplateProcessor(getClusterDefinitionText("input/clouderamanager.bp"));
+        getBlueprintText("input/clouderamanager.bp");
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
         configs.add(new ApiClusterTemplateConfig().name("hive_metastore_database_type").variable("hive-hive_metastore_database_type"));
 
@@ -48,8 +48,8 @@ public class CmTemplateProcessorTest {
 
     @Test
     public void testAddRoleConfigs() {
-        getClusterDefinitionText("input/clouderamanager.bp");
-        underTest = new CmTemplateProcessor(getClusterDefinitionText("input/clouderamanager.bp"));
+        getBlueprintText("input/clouderamanager.bp");
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
         Map<String, List<ApiClusterTemplateConfig>> configs = new HashMap<>();
         configs.put("hdfs-NAMENODE-BASE", List.of(new ApiClusterTemplateConfig().name("dfs_name_dir_list").variable("master_NAMENODE")));
         configs.put("hdfs-DATANODE-BASE", List.of(new ApiClusterTemplateConfig().name("dfs_data_dir_list").variable("worker_DATANODE")));
@@ -70,8 +70,8 @@ public class CmTemplateProcessorTest {
 
     @Test
     public void testAddRoleConfigsWithNoMatchinRefName() {
-        getClusterDefinitionText("input/clouderamanager.bp");
-        underTest = new CmTemplateProcessor(getClusterDefinitionText("input/clouderamanager.bp"));
+        getBlueprintText("input/clouderamanager.bp");
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
         Map<String, List<ApiClusterTemplateConfig>> configs = new HashMap<>();
         configs.put("hdfs-NAMENODE-nomatch", List.of(new ApiClusterTemplateConfig().name("dfs_name_dir_list").variable("master_NAMENODE")));
         configs.put("hdfs-DATANODE-nomatch", List.of(new ApiClusterTemplateConfig().name("dfs_data_dir_list").variable("worker_DATANODE")));
@@ -90,8 +90,8 @@ public class CmTemplateProcessorTest {
 
     @Test
     public void testAddRoleConfigsWithExistingConfig() {
-        getClusterDefinitionText("input/clouderamanager.bp");
-        underTest = new CmTemplateProcessor(getClusterDefinitionText("input/clouderamanager-existing-conf.bp"));
+        getBlueprintText("input/clouderamanager.bp");
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-existing-conf.bp"));
         Map<String, List<ApiClusterTemplateConfig>> configs = new HashMap<>();
         configs.put("hdfs-NAMENODE-BASE", List.of(new ApiClusterTemplateConfig().name("dfs_name_dir_list").variable("master_NAMENODE")));
         configs.put("hdfs-DATANODE-BASE", List.of(
@@ -119,8 +119,8 @@ public class CmTemplateProcessorTest {
 
     @Test
     public void testIsRoleTypePresentInServiceWithSingleRole() {
-        getClusterDefinitionText("input/clouderamanager.bp");
-        underTest = new CmTemplateProcessor(getClusterDefinitionText("input/clouderamanager.bp"));
+        getBlueprintText("input/clouderamanager.bp");
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
 
         boolean present = underTest.isRoleTypePresentInService("HDFS", List.of("NAMENODE"));
 
@@ -129,8 +129,8 @@ public class CmTemplateProcessorTest {
 
     @Test
     public void testIsRoleTypePresentInServiceWithMultipleRole() {
-        getClusterDefinitionText("input/clouderamanager.bp");
-        underTest = new CmTemplateProcessor(getClusterDefinitionText("input/clouderamanager.bp"));
+        getBlueprintText("input/clouderamanager.bp");
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
 
         boolean present = underTest.isRoleTypePresentInService("HDFS", List.of("DATANODE", "NAMENODE"));
 
@@ -139,8 +139,8 @@ public class CmTemplateProcessorTest {
 
     @Test
     public void testIsRoleTypePresentInServiceWithFakeRole() {
-        getClusterDefinitionText("input/clouderamanager.bp");
-        underTest = new CmTemplateProcessor(getClusterDefinitionText("input/clouderamanager.bp"));
+        getBlueprintText("input/clouderamanager.bp");
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
 
         boolean present = underTest.isRoleTypePresentInService("HDFS", List.of("MYROLE"));
 
@@ -149,8 +149,8 @@ public class CmTemplateProcessorTest {
 
     @Test
     public void testAddInstantiatorWithBaseRoles() {
-        getClusterDefinitionText("input/clouderamanager.bp");
-        underTest = new CmTemplateProcessor(getClusterDefinitionText("input/clouderamanager.bp"));
+        getBlueprintText("input/clouderamanager.bp");
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
         ClouderaManagerRepo clouderaManagerRepoDetails = new ClouderaManagerRepo();
         clouderaManagerRepoDetails.setVersion(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_6_3_0.getVersion());
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
@@ -170,8 +170,8 @@ public class CmTemplateProcessorTest {
 
     @Test
     public void testAddInstantiatorWithoutBaseRoles() {
-        getClusterDefinitionText("input/clouderamanager.bp");
-        underTest = new CmTemplateProcessor(getClusterDefinitionText("input/clouderamanager-custom-ref.bp"));
+        getBlueprintText("input/clouderamanager.bp");
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-custom-ref.bp"));
         ClouderaManagerRepo clouderaManagerRepoDetails = new ClouderaManagerRepo();
         clouderaManagerRepoDetails.setVersion(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_6_3_0.getVersion());
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
@@ -187,7 +187,7 @@ public class CmTemplateProcessorTest {
         assertNull(roleConfigGroups);
     }
 
-    private String getClusterDefinitionText(String path) {
+    private String getBlueprintText(String path) {
         return FileReaderUtils.readFileFromClasspathQuietly(path);
     }
 }

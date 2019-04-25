@@ -35,10 +35,10 @@ import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
-import com.sequenceiq.cloudbreak.clusterdefinition.utils.ClusterDefinitionUtils;
+import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
@@ -48,7 +48,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 
 public class AmbariClusterCreationSetupServiceTest {
@@ -70,10 +70,10 @@ public class AmbariClusterCreationSetupServiceTest {
     private ComponentConfigProviderService componentConfigProviderService;
 
     @Mock
-    private ClusterDefinitionUtils clusterDefinitionUtils;
+    private BlueprintUtils blueprintUtils;
 
     @Mock
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     @Mock
     private DefaultHDPEntries defaultHDPEntries;
@@ -100,7 +100,7 @@ public class AmbariClusterCreationSetupServiceTest {
 
     private Stack stack;
 
-    private ClusterDefinition clusterDefinition;
+    private Blueprint blueprint;
 
     private Workspace workspace;
 
@@ -120,8 +120,8 @@ public class AmbariClusterCreationSetupServiceTest {
         stack = new Stack();
         stack.setId(1L);
         stack.setWorkspace(workspace);
-        clusterDefinition = new ClusterDefinition();
-        clusterDefinition.setClusterDefinitionText("{}");
+        blueprint = new Blueprint();
+        blueprint.setBlueprintText("{}");
         Map<InstanceGroupType, String> userData = new HashMap<>();
         userData.put(InstanceGroupType.CORE, "userdata");
         Image image = new Image("imagename", userData, "centos7", REDHAT_7, "url", "imgcatname",
@@ -137,11 +137,11 @@ public class AmbariClusterCreationSetupServiceTest {
         KerberosConfig kerberosConfig = new KerberosConfig();
         kerberosConfig.setDomain("domain");
         cluster.setKerberosConfig(kerberosConfig);
-        cluster.setClusterDefinition(clusterDefinition);
+        cluster.setBlueprint(blueprint);
         when(clusterDecorator.decorate(any(), any(), any(), any(), any(), any())).thenReturn(cluster);
         when(componentConfigProviderService.getAllComponentsByStackIdAndType(any(), any())).thenReturn(Sets.newHashSet(ambariComponent, imageComponent));
-        when(clusterDefinitionUtils.getBlueprintStackVersion(any())).thenReturn(DEFAULT_HDP_VERSION);
-        when(clusterDefinitionUtils.getBlueprintStackName(any())).thenReturn("HDP");
+        when(blueprintUtils.getBlueprintStackVersion(any())).thenReturn(DEFAULT_HDP_VERSION);
+        when(blueprintUtils.getBlueprintStackName(any())).thenReturn("HDP");
 
         DefaultHDPInfo defaultHDPInfo = getDefaultHDPInfo("2.7.0", DEFAULT_HDP_VERSION);
         setupDefaultAmbariEntries();
@@ -156,10 +156,10 @@ public class AmbariClusterCreationSetupServiceTest {
 
     @Test
     public void testBaseAmbariClusterComponents() throws CloudbreakImageNotFoundException, IOException {
-        when(clusterDefinitionService.isAmbariBlueprint(clusterDefinition)).thenReturn(true);
+        when(blueprintService.isAmbariBlueprint(blueprint)).thenReturn(true);
         when(clusterApiConnectors.getConnector(any(Cluster.class))).thenReturn(clusterPreCreationApi);
         when(clusterPreCreationApi.isVdfReady(any(AmbariRepo.class))).thenReturn(false);
-        List<ClusterComponent> clusterComponents = underTest.prepareAmbariCluster(clusterRequest, stack, clusterDefinition, cluster, null, null,
+        List<ClusterComponent> clusterComponents = underTest.prepareAmbariCluster(clusterRequest, stack, blueprint, cluster, null, null,
                 Optional.of(imageComponent));
 
         assertEquals(2, clusterComponents.size());
@@ -171,10 +171,10 @@ public class AmbariClusterCreationSetupServiceTest {
 
     @Test
     public void testPrewarmedAmbariClusterComponents() throws CloudbreakImageNotFoundException, IOException {
-        when(clusterDefinitionService.isAmbariBlueprint(clusterDefinition)).thenReturn(true);
+        when(blueprintService.isAmbariBlueprint(blueprint)).thenReturn(true);
         when(clusterApiConnectors.getConnector(any(Cluster.class))).thenReturn(clusterPreCreationApi);
         when(clusterPreCreationApi.isVdfReady(any(AmbariRepo.class))).thenReturn(false);
-        List<ClusterComponent> clusterComponents = underTest.prepareAmbariCluster(clusterRequest, stack, clusterDefinition,
+        List<ClusterComponent> clusterComponents = underTest.prepareAmbariCluster(clusterRequest, stack, blueprint,
                 cluster, Optional.of(ambariComponent), Optional.of(stackComponent), Optional.of(imageComponent));
 
         assertEquals(2, clusterComponents.size());

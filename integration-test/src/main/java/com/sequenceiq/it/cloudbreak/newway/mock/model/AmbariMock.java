@@ -69,9 +69,9 @@ public class AmbariMock extends AbstractModelMock {
 
     public static final String USERS_ADMIN = AMBARI_API_ROOT + "/users/admin";
 
-    public static final String CLUSTER_DEFINITIONS = AMBARI_API_ROOT + "/blueprints/*";
+    public static final String BLUEPRINTS = AMBARI_API_ROOT + "/blueprints/*";
 
-    public static final String CLUSTERDEFINITIONS_CLUSTERDEFINITION_NAME = AMBARI_API_ROOT + "/blueprints/:blueprintname";
+    public static final String BLUEPRINTS_BLUEPRINT_NAME = AMBARI_API_ROOT + "/blueprints/:blueprintname";
 
     public static final String SERVICES_AMBARI_COMPONENTS_AMBARI_SERVER = AMBARI_API_ROOT + "/services/AMBARI/components/AMBARI_SERVER";
 
@@ -104,13 +104,13 @@ public class AmbariMock extends AbstractModelMock {
         postAmbariClusterRequest();
         getAmbariCheck();
         postAmbariUsers();
-        getAmbariClusterDefinitions();
+        getAmbariBlueprints();
         getAmbariClusterHosts("STARTED");
         getAmbariHosts();
         postAmbariInstances();
         postAmbariClusters();
         getAmbariComponents();
-        postAmbariClusterDefinitions();
+        postAmbariBlueprints();
         putAmbariUsersAdmin();
         getAmbariClusterHosts();
         putAmbariHdpVersion();
@@ -263,14 +263,14 @@ public class AmbariMock extends AbstractModelMock {
         dynamicRouteStack.put(USERS_ADMIN, new EmptyAmbariResponse());
     }
 
-    private void postAmbariClusterDefinitions() {
-        dynamicRouteStack.post(CLUSTER_DEFINITIONS, new EmptyAmbariResponse());
+    private void postAmbariBlueprints() {
+        dynamicRouteStack.post(BLUEPRINTS, new EmptyAmbariResponse());
     }
 
-    private void getAmbariClusterDefinitions() {
-        dynamicRouteStack.get(CLUSTERDEFINITIONS_CLUSTERDEFINITION_NAME, (request, response) -> {
+    private void getAmbariBlueprints() {
+        dynamicRouteStack.get(BLUEPRINTS_BLUEPRINT_NAME, (request, response) -> {
             response.type("text/plain");
-            return responseFromJsonFile("clusterdefinition/" + request.params("blueprintname") + ".bp");
+            return responseFromJsonFile("blueprint/" + request.params("blueprintname") + ".bp");
         });
     }
 

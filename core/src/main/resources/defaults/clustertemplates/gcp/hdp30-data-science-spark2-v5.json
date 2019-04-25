@@ -7,8 +7,8 @@
   "stackTemplate": {
     "type": "TEMPLATE",
     "cluster": {
-      "clusterDefinitionName": "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin",
-      "validateClusterDefinition": false,
+      "blueprintName": "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin",
+      "validateBlueprint": false,
       "ambari": {
         "stackRepository": {
           "stack": "HDP",

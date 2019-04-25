@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.ClusterDefinitionV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
@@ -41,7 +41,7 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
@@ -60,7 +60,7 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
     private ServiceEndpointCollector serviceEndpointCollector;
 
     @Inject
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     @Inject
     private ConverterUtil converterUtil;
@@ -77,7 +77,7 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
         clusterResponse.setStatusReason(source.getStatusReason());
         setUptime(source, clusterResponse);
         clusterResponse.setDescription(source.getDescription() == null ? "" : source.getDescription());
-        if (clusterDefinitionService.isAmbariBlueprint(source.getClusterDefinition())) {
+        if (blueprintService.isAmbariBlueprint(source.getBlueprint())) {
             String ambariIp = stackUtil.extractClusterManagerIp(source.getStack());
             Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesForTopologies =
                     serviceEndpointCollector.prepareClusterExposedServices(source, ambariIp);
@@ -96,8 +96,8 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
         clusterResponse.setDatabases(converterUtil.convertAll(source.getRdsConfigs().stream().filter(
                 rds -> ResourceStatus.USER_MANAGED.equals(rds.getStatus())).collect(Collectors.toList()), DatabaseV4Response.class));
         clusterResponse.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceV4Response.class));
-        clusterResponse.setClusterDefinition(getConversionService().convert(source.getClusterDefinition(), ClusterDefinitionV4Response.class));
-        clusterResponse.setExtendedClusterDefinitionText(getExtendedClusterDefinitionText(source));
+        clusterResponse.setBlueprint(getConversionService().convert(source.getBlueprint(), BlueprintV4Response.class));
+        clusterResponse.setExtendedBlueprintText(getExtendedBlueprintText(source));
         convertDpSecrets(source, clusterResponse);
         String ambariIp = stackUtil.extractClusterManagerIp(source.getStack());
         clusterResponse.setServerIp(ambariIp);
@@ -127,9 +127,9 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
         }
     }
 
-    private String getExtendedClusterDefinitionText(Cluster source) {
-        if (StringUtils.isNoneEmpty(source.getExtendedClusterDefinitionText()) && !disableShowBlueprint) {
-            String fromVault = source.getExtendedClusterDefinitionText();
+    private String getExtendedBlueprintText(Cluster source) {
+        if (StringUtils.isNoneEmpty(source.getExtendedBlueprintText()) && !disableShowBlueprint) {
+            String fromVault = source.getExtendedBlueprintText();
             return anonymize(fromVault);
         }
         return null;

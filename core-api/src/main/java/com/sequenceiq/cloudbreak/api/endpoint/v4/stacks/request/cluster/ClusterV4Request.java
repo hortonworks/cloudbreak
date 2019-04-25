@@ -79,11 +79,11 @@ public class ClusterV4Request implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.EXECUTOR_TYPE)
     private ExecutorType executorType = ExecutorType.DEFAULT;
 
-    @ApiModelProperty(ClusterModelDescription.CLUSTER_DEFINITION_NAME)
-    private String clusterDefinitionName;
+    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_NAME)
+    private String blueprintName;
 
-    @ApiModelProperty(ClusterModelDescription.VALIDATE_CLUSTER_DEFINITION)
-    private Boolean validateClusterDefinition = Boolean.TRUE;
+    @ApiModelProperty(ClusterModelDescription.VALIDATE_BLUEPRINT)
+    private Boolean validateBlueprint = Boolean.TRUE;
 
     public String getUserName() {
         return userName;
@@ -197,20 +197,20 @@ public class ClusterV4Request implements JsonEntity {
         this.customContainer = customContainer;
     }
 
-    public String getClusterDefinitionName() {
-        return clusterDefinitionName;
+    public String getBlueprintName() {
+        return blueprintName;
     }
 
-    public void setClusterDefinitionName(String clusterDefinitionName) {
-        this.clusterDefinitionName = clusterDefinitionName;
+    public void setBlueprintName(String blueprintName) {
+        this.blueprintName = blueprintName;
     }
 
-    public Boolean getValidateClusterDefinition() {
-        return validateClusterDefinition;
+    public Boolean getValidateBlueprint() {
+        return validateBlueprint;
     }
 
-    public void setValidateClusterDefinition(Boolean validateClusterDefinition) {
-        this.validateClusterDefinition = validateClusterDefinition;
+    public void setValidateBlueprint(Boolean validateBlueprint) {
+        this.validateBlueprint = validateBlueprint;
     }
 
 }

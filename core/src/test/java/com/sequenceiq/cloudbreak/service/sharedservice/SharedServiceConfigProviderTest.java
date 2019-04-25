@@ -31,7 +31,7 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -67,7 +67,7 @@ public class SharedServiceConfigProviderTest {
     private LdapConfig ldapConfig;
 
     @Mock
-    private ClusterDefinition clusterDefinition;
+    private Blueprint blueprint;
 
     @Mock
     private Stack publicStack;
@@ -233,7 +233,7 @@ public class SharedServiceConfigProviderTest {
     private Cluster createBarelyConfiguredRequestedCluster() {
         Cluster requestedCluster = new Cluster();
         requestedCluster.setRdsConfigs(new LinkedHashSet<>());
-        requestedCluster.setClusterDefinition(clusterDefinition);
+        requestedCluster.setBlueprint(blueprint);
         requestedCluster.setStack(publicStack);
         return requestedCluster;
     }

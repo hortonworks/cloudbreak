@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cluster.api;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
 public interface ClusterPreCreationApi {
@@ -29,5 +29,5 @@ public interface ClusterPreCreationApi {
 
     String getMasterKey(Cluster cluster);
 
-    Map<String, Integer> getServicePorts(ClusterDefinition clusterDefinition);
+    Map<String, Integer> getServicePorts(Blueprint blueprint);
 }

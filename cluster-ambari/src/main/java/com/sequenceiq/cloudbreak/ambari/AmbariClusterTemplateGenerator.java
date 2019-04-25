@@ -31,7 +31,7 @@ public class AmbariClusterTemplateGenerator {
 
     String generateClusterTemplate(Cluster cluster, Map<String, List<Map<String, String>>> hostGroupMappings,
             ClusterService ambariClient) {
-        String blueprintName = cluster.getClusterDefinition().getStackName();
+        String blueprintName = cluster.getBlueprint().getStackName();
         String configStrategy = ofNullable(cluster.getConfigStrategy()).orElse(ConfigStrategy.ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES).name();
         String clusterTemplate;
 

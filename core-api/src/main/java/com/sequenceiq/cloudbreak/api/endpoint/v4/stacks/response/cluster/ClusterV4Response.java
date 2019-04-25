@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.ClusterDefinitionV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage.CloudStorageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterDefinitionModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
@@ -105,13 +105,13 @@ public class ClusterV4Response implements JsonEntity {
     @ApiModelProperty(StackModelDescription.DP_AMBARI_PASSWORD)
     private SecretV4Response dpPassword;
 
-    @ApiModelProperty(ClusterModelDescription.CLUSTER_DEFINITION)
-    private ClusterDefinitionV4Response clusterDefinition;
+    @ApiModelProperty(ClusterModelDescription.BLUEPRINT)
+    private BlueprintV4Response blueprint;
 
-    @ApiModelProperty(ClusterDefinitionModelDescription.CLUSTER_DEFINITION)
+    @ApiModelProperty(BlueprintModelDescription.BLUEPRINT)
     @JsonSerialize(using = Base64Serializer.class)
     @JsonDeserialize(using = Base64Deserializer.class)
-    private String extendedClusterDefinitionText;
+    private String extendedBlueprintText;
 
     @ApiModelProperty(StackModelDescription.SERVER_IP)
     private String serverIp;
@@ -311,20 +311,20 @@ public class ClusterV4Response implements JsonEntity {
         this.exposedServices = exposedServices;
     }
 
-    public ClusterDefinitionV4Response getClusterDefinition() {
-        return clusterDefinition;
+    public BlueprintV4Response getBlueprint() {
+        return blueprint;
     }
 
-    public void setClusterDefinition(ClusterDefinitionV4Response clusterDefinition) {
-        this.clusterDefinition = clusterDefinition;
+    public void setBlueprint(BlueprintV4Response blueprint) {
+        this.blueprint = blueprint;
     }
 
-    public String getExtendedClusterDefinitionText() {
-        return extendedClusterDefinitionText;
+    public String getExtendedBlueprintText() {
+        return extendedBlueprintText;
     }
 
-    public void setExtendedClusterDefinitionText(String extendedClusterDefinitionText) {
-        this.extendedClusterDefinitionText = extendedClusterDefinitionText;
+    public void setExtendedBlueprintText(String extendedBlueprintText) {
+        this.extendedBlueprintText = extendedBlueprintText;
     }
 
     public String getServerIp() {

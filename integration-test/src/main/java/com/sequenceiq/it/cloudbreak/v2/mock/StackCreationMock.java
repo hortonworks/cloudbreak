@@ -104,7 +104,7 @@ public class StackCreationMock extends MockServer {
         sparkService.get(AMBARI_API_ROOT + "/hosts", new AmbariHostsResponse(instanceMap), gson()::toJson);
         sparkService.get(AMBARI_API_ROOT + "/blueprints/:blueprintname", (request, response) -> {
             response.type("text/plain");
-            return responseFromJsonFile("clusterdefinition/" + request.params("blueprintname") + ".bp");
+            return responseFromJsonFile("blueprint/" + request.params("blueprintname") + ".bp");
         });
         sparkService.post(AMBARI_API_ROOT + "/blueprints/*", new EmptyAmbariResponse());
         sparkService.put(AMBARI_API_ROOT + "/users/admin", new EmptyAmbariResponse());
@@ -188,7 +188,7 @@ public class StackCreationMock extends MockServer {
         verify(AMBARI_API_ROOT + "/blueprints/bp", "POST").exactTimes(1)
                 .bodyContains("blueprint_name").bodyContains("stack_name").bodyContains("stack_version").bodyContains("host_groups")
                 .exactTimes(1).verify();
-        verify(AMBARI_API_ROOT + "/clusters/" + clusterName, "POST").exactTimes(1).bodyContains("clusterdefinition").bodyContains("default_password")
+        verify(AMBARI_API_ROOT + "/clusters/" + clusterName, "POST").exactTimes(1).bodyContains("blueprint").bodyContains("default_password")
                 .bodyContains("host_groups").verify();
         verify(AMBARI_API_ROOT + "/clusters/" + clusterName + "/requests/1", "GET").atLeast(1).verify();
 

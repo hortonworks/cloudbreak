@@ -44,13 +44,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4Response;
-import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.clusterdefinition.validation.AmbariBlueprintValidator;
-import com.sequenceiq.cloudbreak.clusterdefinition.validation.StackServiceComponentDescriptors;
+import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
+import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.ExposedServiceListValidator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology.GatewayTopologyV4RequestToExposedServicesConverter;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -59,9 +59,9 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ComponentLocatorService;
-import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
+import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -72,7 +72,7 @@ public class ServiceEndpointCollectorTest {
     private static final String GATEWAY_PATH = "gateway-path";
 
     @Mock
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     @Mock
     private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
@@ -294,9 +294,9 @@ public class ServiceEndpointCollectorTest {
     }
 
     private void mockBlueprintTextProcessor(Set<String> components, String stackName, String stackVersion) {
-        ClusterDefinition clusterDefinition = new ClusterDefinition();
-        clusterDefinition.setClusterDefinitionText("{\"Blueprints\":{}}");
-        when(clusterDefinitionService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(clusterDefinition);
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText("{\"Blueprints\":{}}");
+        when(blueprintService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(blueprint);
         AmbariBlueprintTextProcessor blueprintTextProcessor = mock(AmbariBlueprintTextProcessor.class);
         when(ambariBlueprintProcessorFactory.get(any())).thenReturn(blueprintTextProcessor);
         when(blueprintTextProcessor.getAllComponents()).thenReturn(components);
@@ -335,14 +335,14 @@ public class ServiceEndpointCollectorTest {
         stack.setOrchestrator(orchestrator);
         cluster.setStack(stack);
         cluster.setGateway(gateway);
-        ClusterDefinition clusterDefinition = new ClusterDefinition();
+        Blueprint blueprint = new Blueprint();
         try {
             String testBlueprint = FileReaderUtils.readFileFromClasspath("defaults/blueprints/hdp26-data-science-spark2-text.bp");
-            clusterDefinition.setClusterDefinitionText(testBlueprint);
+            blueprint.setBlueprintText(testBlueprint);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        cluster.setClusterDefinition(clusterDefinition);
+        cluster.setBlueprint(blueprint);
         return cluster;
     }
 

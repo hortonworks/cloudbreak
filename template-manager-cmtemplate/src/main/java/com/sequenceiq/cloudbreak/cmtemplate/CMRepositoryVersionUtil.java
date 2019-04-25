@@ -12,11 +12,11 @@ public class CMRepositoryVersionUtil {
     private CMRepositoryVersionUtil() {
     }
 
-    public static boolean isEnableKerberosSupportedViaClusterDefinition(ClouderaManagerRepo clouderaManagerRepoDetails) {
+    public static boolean isEnableKerberosSupportedViaBlueprint(ClouderaManagerRepo clouderaManagerRepoDetails) {
         return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_6_3_0);
     }
 
-    public static boolean isKeepHostTemplateSupportedViaClusterDefinition(ClouderaManagerRepo clouderaManagerRepoDetails) {
+    public static boolean isKeepHostTemplateSupportedViaBlueprint(ClouderaManagerRepo clouderaManagerRepoDetails) {
         return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_6_3_0);
     }
 

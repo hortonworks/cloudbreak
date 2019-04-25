@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.newway.dto;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.RecommendationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.RecommendationV4Response;
 
 public class RecommendationTestDto extends AbstractCloudbreakTestDto<Object, RecommendationV4Response, RecommendationTestDto> {
 
@@ -12,7 +12,7 @@ public class RecommendationTestDto extends AbstractCloudbreakTestDto<Object, Rec
 
     private String availabilityZone;
 
-    private String clusterDefinitionName;
+    private String blueprintName;
 
     private RecommendationTestDto(String newId) {
         super(newId);
@@ -22,8 +22,8 @@ public class RecommendationTestDto extends AbstractCloudbreakTestDto<Object, Rec
         this(RECOMMENDATION);
     }
 
-    public RecommendationTestDto withClusterDefinitionName(String name) {
-        this.clusterDefinitionName = name;
+    public RecommendationTestDto withBlueprintName(String name) {
+        this.blueprintName = name;
         return this;
     }
 
@@ -54,7 +54,7 @@ public class RecommendationTestDto extends AbstractCloudbreakTestDto<Object, Rec
         return availabilityZone;
     }
 
-    public String getClusterDefinitionName() {
-        return clusterDefinitionName;
+    public String getBlueprintName() {
+        return blueprintName;
     }
 }

@@ -91,8 +91,8 @@ public class ClusterBuilderService {
         Set<HostMetadata> hostsInCluster = hostMetadataService.findHostsInCluster(cluster.getId());
         Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup = loadInstanceMetadataForHostGroups(hostGroups);
         recipeEngine.executePostAmbariStartRecipes(stack, instanceMetaDataByHostGroup.keySet());
-        String clusterDefinitionText = cluster.getClusterDefinition().getClusterDefinitionText();
-        cluster.setExtendedClusterDefinitionText(clusterDefinitionText);
+        String blueprintText = cluster.getBlueprint().getBlueprintText();
+        cluster.setExtendedBlueprintText(blueprintText);
         clusterService.updateCluster(cluster);
         clusterService.save(connector.buildCluster(instanceMetaDataByHostGroup, templatePreparationObject, hostsInCluster));
         recipeEngine.executePostInstallRecipes(stack, instanceMetaDataByHostGroup.keySet());

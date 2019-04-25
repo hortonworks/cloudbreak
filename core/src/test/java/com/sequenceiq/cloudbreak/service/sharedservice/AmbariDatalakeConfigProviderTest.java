@@ -17,7 +17,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
-import com.sequenceiq.cloudbreak.clusterdefinition.CentralClusterDefinitionParameterQueryService;
+import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ServiceDescriptor;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ServiceDescriptorDefinition;
@@ -31,7 +31,7 @@ public class AmbariDatalakeConfigProviderTest {
     private ServiceDescriptorDefinitionProvider serviceDescriptorDefinitionProvider;
 
     @Mock
-    private CentralClusterDefinitionParameterQueryService centralClusterDefinitionParameterQueryService;
+    private CentralBlueprintParameterQueryService centralBlueprintParameterQueryService;
 
     @Mock
     private DatalakeResourcesService datalakeResourcesService;
@@ -89,26 +89,26 @@ public class AmbariDatalakeConfigProviderTest {
         // THEN
         Assert.assertNotNull(datalakeResources);
         ServiceDescriptor serviceDescriptor1 = datalakeResources.getServiceDescriptorMap().get("service1");
-        Assert.assertEquals(serviceDescriptor1.getClusterDefinitionParams().getMap().size(), serviceDescriptorDefinition1.getBlueprintParamKeys().size());
-        for (Map.Entry blueprintParam : serviceDescriptor1.getClusterDefinitionParams().getMap().entrySet()) {
+        Assert.assertEquals(serviceDescriptor1.getBlueprintParams().getMap().size(), serviceDescriptorDefinition1.getBlueprintParamKeys().size());
+        for (Map.Entry blueprintParam : serviceDescriptor1.getBlueprintParams().getMap().entrySet()) {
             Assert.assertTrue(serviceDescriptorDefinition1.getBlueprintParamKeys().contains(blueprintParam.getKey()));
             Assert.assertEquals(blueprintParam.getValue(), ambariParameters.get(blueprintParam.getKey()));
         }
-        Assert.assertEquals(serviceDescriptor1.getClusterDefinitionSecretParams().getMap().size(),
+        Assert.assertEquals(serviceDescriptor1.getBlueprintSecretParams().getMap().size(),
                 serviceDescriptorDefinition1.getBlueprintSecretParamKeys().size());
-        for (Map.Entry blueprintSecretParam : serviceDescriptor1.getClusterDefinitionSecretParams().getMap().entrySet()) {
+        for (Map.Entry blueprintSecretParam : serviceDescriptor1.getBlueprintSecretParams().getMap().entrySet()) {
             Assert.assertTrue(serviceDescriptorDefinition1.getBlueprintSecretParamKeys().contains(blueprintSecretParam.getKey()));
             Assert.assertEquals(blueprintSecretParam.getValue(), ambariParameters.get(blueprintSecretParam.getKey()));
         }
         ServiceDescriptor serviceDescriptor2 = datalakeResources.getServiceDescriptorMap().get("service2");
-        Assert.assertEquals(serviceDescriptor2.getClusterDefinitionParams().getMap().size(), serviceDescriptorDefinition2.getBlueprintParamKeys().size());
-        for (Map.Entry blueprintParam : serviceDescriptor2.getClusterDefinitionParams().getMap().entrySet()) {
+        Assert.assertEquals(serviceDescriptor2.getBlueprintParams().getMap().size(), serviceDescriptorDefinition2.getBlueprintParamKeys().size());
+        for (Map.Entry blueprintParam : serviceDescriptor2.getBlueprintParams().getMap().entrySet()) {
             Assert.assertTrue(serviceDescriptorDefinition2.getBlueprintParamKeys().contains(blueprintParam.getKey()));
             Assert.assertEquals(blueprintParam.getValue(), ambariParameters.get(blueprintParam.getKey()));
         }
-        Assert.assertEquals(serviceDescriptor2.getClusterDefinitionSecretParams().getMap().size(),
+        Assert.assertEquals(serviceDescriptor2.getBlueprintSecretParams().getMap().size(),
                 serviceDescriptorDefinition2.getBlueprintSecretParamKeys().size());
-        for (Map.Entry blueprintSecretParam : serviceDescriptor2.getClusterDefinitionSecretParams().getMap().entrySet()) {
+        for (Map.Entry blueprintSecretParam : serviceDescriptor2.getBlueprintSecretParams().getMap().entrySet()) {
             Assert.assertTrue(serviceDescriptorDefinition2.getBlueprintSecretParamKeys().contains(blueprintSecretParam.getKey()));
             Assert.assertEquals(blueprintSecretParam.getValue(), ambariParameters.get(blueprintSecretParam.getKey()));
         }

@@ -7,6 +7,6 @@
   "stackName": "mystack",
   "instanceType": "m3.large",
   "instanceGroup": "slave_1",
-  "clusterDefinitionId": 1,
-  "clusterDefinitionName": "clusterDefinitionName"
+  "blueprintId": 1,
+  "blueprintName": "blueprintName"
 }

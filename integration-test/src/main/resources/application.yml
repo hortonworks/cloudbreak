@@ -10,24 +10,11 @@ logging:
 integrationtest:
   cloudProvider: MOCK
   sshPublicKey: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kcUEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpjT7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh"
-  sshPrivateKeyPath:
-  sshTimeout: 10000
-  defaultSshUser: cloudbreak
   subnetCidr: 10.0.0.0/16
   imageCatalogName: cloudbreak-default
   gatewayPort: null
   defaultCredentialDescription: "autotesting credential default description."
   testsuite.pollingInterval: 1000
-
-  recipe:
-    content: |
-      #!/usr/bin/python
-
-      f = open("/tmp/python-recipe-test.txt", "a")
-      f.write("Recipe is working.")
-      f.close()
-    outputFilePath: /tmp/python-recipe-test.txt
-    output: Recipe is working.
 
   ambari:
     defaultUser: admin
@@ -36,7 +23,7 @@ integrationtest:
 
   # aws parameters
   aws:
-    defaultClusterDefinitionName: "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
+    defaultBlueprintName: "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
     region: eu-west-1
     location: eu-west-1
     availabilityZone: eu-west-1a
@@ -56,20 +43,20 @@ integrationtest:
     baseimage:
       redhat7:
         imageId: 963f81ae-efd1-4bfb-7f91-4aa357950c02
-        clusterDefinitions:
+        blueprints:
           - "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
       amazonlinux2:
         imageId: 97b9e57d-8135-4d71-4f52-37a09d913e5e
-        clusterDefinitions:
+        blueprints:
           - "HDP 3.1 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin"
       sles12:
         imageId: 1580eb06-e175-4d06-675a-c484b2c634f3
-        clusterDefinitions:
+        blueprints:
           - "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
 
   # azure parameters
   azure:
-    defaultClusterDefinitionName: "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
+    defaultBlueprintName: "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
     availabilityZone:
     region: West Europe
     location: West Europe
@@ -90,7 +77,7 @@ integrationtest:
 
   # gcp parameters
   gcp:
-    defaultClusterDefinitionName: "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
+    defaultBlueprintName: "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
     availabilityZone: europe-west2-a
     region: europe-west2
     location: europe-west2
@@ -110,7 +97,7 @@ integrationtest:
 
   # openstack parameters
   openstack:
-    defaultClusterDefinitionName: "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
+    defaultBlueprintName: "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
     availabilityZone: nova
     region: RegionOne
     location: Texas
@@ -136,7 +123,7 @@ integrationtest:
           - compute
         scaleGroup: compute
       hdf:
-        clusterDefinitionNames:
+        blueprintNames:
          - "HDF-3.3 Messaging Management: Apache Kafka"
         enabled: true
         hostGroups:
@@ -147,7 +134,7 @@ integrationtest:
 
   # yarn parameters
   yarn:
-    defaultClusterDefinitionName: "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
+    defaultBlueprintName: "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
     availabilityZone:
     region: default
     location: Frankfurt
@@ -281,7 +268,7 @@ integrationtest:
       retryCount: 3
       cleanupBeforeStart: false
 
-  defaultClusterDefinitionName:
+  defaultBlueprintName:
 
   ambariContainer: hortonworks/ambari-agent
 

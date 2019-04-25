@@ -2,9 +2,9 @@ package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
 import java.io.IOException;
 
-import com.sequenceiq.it.cloudbreak.newway.client.ClusterDefinitionTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.dto.clusterdefinition.ClusterDefinitionTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.util.ResourceUtil;
 
@@ -14,14 +14,14 @@ public abstract class AbstractClouderaManagerTest extends AbstractIntegrationTes
     protected void setupTest(TestContext testContext)  {
         try {
             super.setupTest(testContext);
-            testContext.given(ClusterDefinitionTestDto.class)
+            testContext.given(BlueprintTestDto.class)
                     .withName(resourcePropertyProvider().getName())
-                    .withClusterDefinition(ResourceUtil.readResourceAsString(applicationContext, "classpath:/clusterdefinition/clouderamanager.bp"))
-                    .when(clusterDefinitionTestClient().createV4());
+                    .withBlueprint(ResourceUtil.readResourceAsString(applicationContext, "classpath:/blueprint/clouderamanager.bp"))
+                    .when(blueprintTestClient().createV4());
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    protected abstract ClusterDefinitionTestClient clusterDefinitionTestClient();
+    protected abstract BlueprintTestClient blueprintTestClient();
 }

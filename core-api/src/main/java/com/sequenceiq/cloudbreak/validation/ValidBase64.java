@@ -15,7 +15,7 @@ import javax.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidBase64 {
 
-    String message() default "The value should be a valid Base64 encoded string.";
+    String message() default "The field should contains a valid Base64 string";
 
     Class<?>[] groups() default { };
 

@@ -12,13 +12,13 @@ import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.newway.client.ClusterDefinitionTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.ClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
-import com.sequenceiq.it.cloudbreak.newway.dto.clusterdefinition.ClusterDefinitionTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.mock.model.SPIMock;
 import com.sequenceiq.it.spark.StatefulRoute;
@@ -29,7 +29,7 @@ public class ClouderaManagerStartStopTest extends AbstractClouderaManagerTest {
     private static final String CLOUD_INSTANCE_STATUSES = MOCK_ROOT + SPIMock.CLOUD_INSTANCE_STATUSES;
 
     @Inject
-    private ClusterDefinitionTestClient clusterDefinitionTestClient;
+    private BlueprintTestClient blueprintTestClient;
 
     @Inject
     private StackTestClient stackTestClient;
@@ -42,7 +42,7 @@ public class ClouderaManagerStartStopTest extends AbstractClouderaManagerTest {
     public void createRegularClouderaManagerClusterThenWaitForAvailableThenStopThenStartThenWaitForAvailableThenNoExceptionOccurs(
             MockedTestContext testContext) {
         mockSpi(testContext);
-        String name = testContext.get(ClusterDefinitionTestDto.class).getRequest().getName();
+        String name = testContext.get(BlueprintTestDto.class).getRequest().getName();
         String cm = resourcePropertyProvider().getName();
         String cmcluster = resourcePropertyProvider().getName();
         String stack = resourcePropertyProvider().getName();
@@ -51,8 +51,8 @@ public class ClouderaManagerStartStopTest extends AbstractClouderaManagerTest {
         testContext
                 .given(cm, ClouderaManagerTestDto.class)
                 .given(cmcluster, ClusterTestDto.class)
-                .withValidateClusterDefinition(Boolean.FALSE)
-                .withClusterDefinitionName(name)
+                .withValidateBlueprint(Boolean.FALSE)
+                .withBlueprintName(name)
                 .withClouderaManager(cm)
                 .given(stack, StackTestDto.class)
                 .withCluster(cmcluster)
@@ -97,7 +97,7 @@ public class ClouderaManagerStartStopTest extends AbstractClouderaManagerTest {
     }
 
     @Override
-    protected ClusterDefinitionTestClient clusterDefinitionTestClient() {
-        return clusterDefinitionTestClient;
+    protected BlueprintTestClient blueprintTestClient() {
+        return blueprintTestClient;
     }
 }

@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.controller.validation.mpack.ManagementPackValid
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConfigValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
@@ -43,7 +43,7 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.util.Benchmark.MultiCheckedSupplier;
@@ -81,7 +81,7 @@ public class ClusterCreationSetupService {
     private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     @Inject
     private ManagementPackValidator mpackValidator;
@@ -121,7 +121,7 @@ public class ClusterCreationSetupService {
         return prepare(request, stack, null, user);
     }
 
-    public Cluster prepare(ClusterV4Request request, Stack stack, ClusterDefinition clusterDefinition, User user) throws IOException,
+    public Cluster prepare(ClusterV4Request request, Stack stack, Blueprint blueprint, User user) throws IOException,
             CloudbreakImageNotFoundException, TransactionExecutionException {
         String stackName = stack.getName();
         Cluster clusterStub = stack.getCluster();
@@ -138,12 +138,12 @@ public class ClusterCreationSetupService {
         clusterStub.setStack(stack);
         clusterStub.setWorkspace(stack.getWorkspace());
 
-        Cluster cluster = clusterDecorator.decorate(clusterStub, request, clusterDefinition, user, stack.getWorkspace(), stack);
+        Cluster cluster = clusterDecorator.decorate(clusterStub, request, blueprint, user, stack.getWorkspace(), stack);
 
         decorateStackWithCustomDomainIfAdOrIpaJoinable(stack, cluster);
 
         List<ClusterComponent> components = checkedMeasure((MultiCheckedSupplier<List<ClusterComponent>, IOException, CloudbreakImageNotFoundException>) () -> {
-            if (clusterDefinition != null) {
+            if (blueprint != null) {
                 Set<Component> allComponent = componentConfigProviderService.getAllComponentsByStackIdAndType(stack.getId(),
                         Sets.newHashSet(ComponentType.AMBARI_REPO_DETAILS,
                                 ComponentType.HDP_REPO_DETAILS,
@@ -160,10 +160,10 @@ public class ClusterCreationSetupService {
                 Optional<Component> stackImageComponent = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.IMAGE)
                         && c.getName().equalsIgnoreCase(ComponentType.IMAGE.name())).findAny();
 
-                if (clusterDefinitionService.isAmbariBlueprint(clusterDefinition)) {
+                if (blueprintService.isAmbariBlueprint(blueprint)) {
                     return ambariClusterCreationSetupService.prepareAmbariCluster(
-                            request, stack, clusterDefinition, cluster, stackAmbariRepoConfig, stackHdpRepoConfig, stackImageComponent);
-                } else if (clusterDefinitionService.isClouderaManagerTemplate(clusterDefinition)) {
+                            request, stack, blueprint, cluster, stackAmbariRepoConfig, stackHdpRepoConfig, stackImageComponent);
+                } else if (blueprintService.isClouderaManagerTemplate(blueprint)) {
                     return clouderaManagerClusterCreationSetupService.prepareClouderaManagerCluster(
                             request, cluster, stackCmRepoConfig, stackCdhRepoConfig, stackImageComponent);
                 }

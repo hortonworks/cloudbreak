@@ -22,20 +22,20 @@ public class TemplateProcessor {
 
     public String process(String sourceTemplate, TemplatePreparationObject source, Map<String, Object> customProperties) throws IOException {
         long started = System.currentTimeMillis();
-        String generateClusterDefinition = generateTemplateWithParameters(sourceTemplate, source, customProperties);
+        String generateBlueprint = generateTemplateWithParameters(sourceTemplate, source, customProperties);
         long generationTime = System.currentTimeMillis() - started;
         LOGGER.debug("The template text processed successfully by the EL based template processor under {} ms, the text after processing is: {}",
-                generationTime, JsonUtil.minify(generateClusterDefinition));
-        return generateClusterDefinition;
+                generationTime, JsonUtil.minify(generateBlueprint));
+        return generateBlueprint;
     }
 
     public List<String> queryParameters(String sourceTemplate) throws IOException {
         long started = System.currentTimeMillis();
-        List<String> clusterDefinitionParameters = queryTemplateParameters(sourceTemplate);
+        List<String> blueprintParameters = queryTemplateParameters(sourceTemplate);
         long generationTime = System.currentTimeMillis() - started;
         LOGGER.debug("The template text processed successfully by the EL based template processor under {} ms, the parameters are: {}",
-                generationTime, clusterDefinitionParameters);
-        return clusterDefinitionParameters;
+                generationTime, blueprintParameters);
+        return blueprintParameters;
     }
 
     private String generateTemplateWithParameters(String sourceTemplate, TemplatePreparationObject source, Map<String, Object> customProperties)
@@ -56,9 +56,9 @@ public class TemplateProcessor {
                 .withLdap(source.getLdapConfig().orElse(null))
                 .withKerberos(source.getKerberosConfig().orElse(null))
                 .withSharedServiceConfigs(source.getSharedServiceConfigs().orElse(null))
-                .withComponents(source.getClusterDefinitionView().getComponents())
+                .withComponents(source.getBlueprintView().getComponents())
                 .withGateway(source.getGatewayView())
-                .withClusterDefinitionView(source.getClusterDefinitionView())
+                .withBlueprintView(source.getBlueprintView())
                 .withRdsConfigs(source.getRdsConfigs())
                 .withFileSystemConfigs(source.getFileSystemConfigurationView().orElse(null))
                 .withCustomInputs(source.getCustomInputs())

@@ -74,8 +74,8 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     @Override
     protected ClusterTestDto withCluster(ClusterTestDto cluster) {
         return cluster
-                .withValidateClusterDefinition(Boolean.TRUE)
-                .withClusterDefinitionName(getClusterDefinitionName());
+                .withValidateBlueprint(Boolean.TRUE)
+                .withBlueprintName(getBlueprintName());
     }
 
     @Override
@@ -115,7 +115,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getClusterDefinitionName() {
-        return gcpProperties.getDefaultClusterDefinitionName();
+    public String getBlueprintName() {
+        return gcpProperties.getDefaultBlueprintName();
     }
 }

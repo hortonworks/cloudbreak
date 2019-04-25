@@ -49,7 +49,7 @@ public class TemplateService {
         try {
             return templateRepository.save(template);
         } catch (DataIntegrityViolationException ex) {
-            String msg = String.format("Error with resource [%s], %s", APIResourceType.CLUSTER_DEFINITION, getProperSqlErrorMessage(ex));
+            String msg = String.format("Error with resource [%s], %s", APIResourceType.BLUEPRINT, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg, ex);
         }
     }

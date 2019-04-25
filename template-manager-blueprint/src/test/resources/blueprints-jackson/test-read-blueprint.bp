@@ -1,5 +1,5 @@
 {
-    "clusterDefinitionName": "name",
+    "blueprintName": "name",
     "components": {
         "services": {
            "name1": "service-name1",

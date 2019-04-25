@@ -35,11 +35,11 @@ import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
-import com.sequenceiq.cloudbreak.clusterdefinition.utils.ClusterDefinitionUtils;
+import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
@@ -48,7 +48,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 
 public class ClusterCreationSetupServiceTest {
@@ -72,10 +72,10 @@ public class ClusterCreationSetupServiceTest {
     private ComponentConfigProviderService componentConfigProviderService;
 
     @Mock
-    private ClusterDefinitionUtils clusterDefinitionUtils;
+    private BlueprintUtils blueprintUtils;
 
     @Mock
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     @Mock
     private DefaultHDPEntries defaultHDPEntries;
@@ -102,7 +102,7 @@ public class ClusterCreationSetupServiceTest {
 
     private Stack stack;
 
-    private ClusterDefinition clusterDefinition;
+    private Blueprint blueprint;
 
     private User user;
 
@@ -118,8 +118,8 @@ public class ClusterCreationSetupServiceTest {
         stack = new Stack();
         stack.setId(1L);
         stack.setWorkspace(workspace);
-        clusterDefinition = new ClusterDefinition();
-        clusterDefinition.setClusterDefinitionText("{}");
+        blueprint = new Blueprint();
+        blueprint.setBlueprintText("{}");
         user = new User();
         Map<InstanceGroupType, String> userData = new HashMap<>();
         userData.put(InstanceGroupType.CORE, "userdata");
@@ -136,8 +136,8 @@ public class ClusterCreationSetupServiceTest {
         cluster.setKerberosConfig(kerberosConfig);
         when(clusterDecorator.decorate(any(), any(), any(), any(), any(), any())).thenReturn(cluster);
         when(componentConfigProviderService.getAllComponentsByStackIdAndType(any(), any())).thenReturn(Sets.newHashSet(ambariRepoComponent, imageComponent));
-        when(clusterDefinitionUtils.getBlueprintStackVersion(any())).thenReturn(HDP_VERSION);
-        when(clusterDefinitionUtils.getBlueprintStackName(any())).thenReturn("HDP");
+        when(blueprintUtils.getBlueprintStackVersion(any())).thenReturn(HDP_VERSION);
+        when(blueprintUtils.getBlueprintStackName(any())).thenReturn("HDP");
 
         DefaultHDPInfo defaultHDPInfo = getDefaultHDPInfo("2.7.0", HDP_VERSION);
         DefaultCDHInfo defaultCDHInfo = getDefaultCDHInfo("6.1.0", CDH_VERSION);
@@ -152,7 +152,7 @@ public class ClusterCreationSetupServiceTest {
         stackMatrixV4Response.setCdh(Collections.singletonMap(CDH_VERSION, null));
         when(stackMatrixService.getStackMatrix()).thenReturn(stackMatrixV4Response);
         when(clusterService.save(any(Cluster.class))).thenReturn(cluster);
-        when(clusterDefinitionService.isAmbariBlueprint(clusterDefinition)).thenReturn(true);
+        when(blueprintService.isAmbariBlueprint(blueprint)).thenReturn(true);
         when(ambariClusterCreationSetupService.prepareAmbariCluster(any(), any(), any(), any(), any(), any(), any())).
                 thenReturn(new ArrayList<>());
         when(clouderaManagerClusterCreationSetupService.prepareClouderaManagerCluster(any(), any(), any(), any(), any())).
@@ -161,21 +161,21 @@ public class ClusterCreationSetupServiceTest {
 
     @Test
     public void testDomainIsSet() throws CloudbreakImageNotFoundException, IOException, TransactionService.TransactionExecutionException {
-        underTest.prepare(clusterRequest, stack, clusterDefinition, user);
+        underTest.prepare(clusterRequest, stack, blueprint, user);
         assertEquals(cluster.getKerberosConfig().getDomain(), stack.getCustomDomain());
     }
 
     @Test
     public void testMissingKerberosConfig() throws CloudbreakImageNotFoundException, IOException, TransactionService.TransactionExecutionException {
         cluster.setKerberosConfig(null);
-        underTest.prepare(clusterRequest, stack, clusterDefinition, user);
+        underTest.prepare(clusterRequest, stack, blueprint, user);
         assertNull(stack.getCustomDomain());
     }
 
     @Test
     public void testMissingDomain() throws CloudbreakImageNotFoundException, IOException, TransactionService.TransactionExecutionException {
         cluster.getKerberosConfig().setDomain(null);
-        underTest.prepare(clusterRequest, stack, clusterDefinition, user);
+        underTest.prepare(clusterRequest, stack, blueprint, user);
         assertNull(stack.getCustomDomain());
     }
 

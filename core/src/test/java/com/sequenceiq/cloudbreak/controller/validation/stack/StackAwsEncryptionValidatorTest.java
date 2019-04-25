@@ -39,12 +39,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.template.InstanceTemplateV4RequestValidator;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
@@ -80,13 +80,13 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     private AmbariV4Request ambariRequest;
 
     @Mock
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     @Mock
-    private ClusterDefinition clusterDefinition;
+    private Blueprint blueprint;
 
     @Mock
-    private Json clusterDefinitionTags;
+    private Json blueprintTags;
 
     @Mock
     private PlatformResourceRequest platformResourceRequest;
@@ -120,13 +120,13 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     public void setup() {
         when(templateRequestValidator.validate(any())).thenReturn(ValidationResult.builder().build());
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(1L);
-        when(clusterDefinitionService.getByNameForWorkspaceId(anyString(), anyLong())).thenReturn(clusterDefinition);
+        when(blueprintService.getByNameForWorkspaceId(anyString(), anyLong())).thenReturn(blueprint);
         when(subject.getEnvironment()).thenReturn(environmentSettingsRequest);
         when(subject.getPlacement()).thenReturn(placementSettingsRequest);
         when(subject.getCluster()).thenReturn(clusterRequest);
         when(clusterRequest.getAmbari()).thenReturn(ambariRequest);
         String credentialName = "someCred";
-        when(clusterRequest.getClusterDefinitionName()).thenReturn("dummy");
+        when(clusterRequest.getBlueprintName()).thenReturn("dummy");
         when(credential.cloudPlatform()).thenReturn("AWS");
         when(credentialService.getByNameForWorkspaceId(any(), any())).thenReturn(credential);
         when(platformParameterService.getPlatformResourceRequest(anyLong(), anyString(), eq(null), eq(null), eq(null)))

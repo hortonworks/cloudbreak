@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
 @Service(AMBARI + BEAN_POST_TAG)
@@ -84,7 +84,7 @@ public class AmbariPreCreationService implements ClusterPreCreationApi {
     }
 
     @Override
-    public Map<String, Integer> getServicePorts(ClusterDefinition clusterDefinition) {
-        return ambariBlueprintPortConfigCollector.getServicePorts(clusterDefinition);
+    public Map<String, Integer> getServicePorts(Blueprint blueprint) {
+        return ambariBlueprintPortConfigCollector.getServicePorts(blueprint);
     }
 }

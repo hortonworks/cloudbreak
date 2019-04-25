@@ -8,7 +8,7 @@ mock:
 integrationtest:
     testsuite:
       threadPoolSize: 5
-    defaultClusterDefinitionName: hdp-small-default
+    defaultBlueprintName: hdp-small-default
     outputdir: /it
     command: suites
     cleanup:

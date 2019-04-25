@@ -9,12 +9,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
-import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
 
 @Component
 public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
@@ -39,7 +39,7 @@ public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
     private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
 
     @Inject
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     /**
      *  For 2.4 compatibility we also need some extra field to be in the pillar so it will look like this:
@@ -63,10 +63,10 @@ public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
         return servicePillarConfigMap;
     }
 
-    private boolean isRdsConfigNeedForHiveMetastore(ClusterDefinition clusterDefinition) {
-        String clusterDefinitionText = clusterDefinition.getClusterDefinitionText();
-        AmbariBlueprintTextProcessor blueprintProcessor = ambariBlueprintProcessorFactory.get(clusterDefinitionText);
-        if (clusterDefinitionService.isAmbariBlueprint(clusterDefinition)) {
+    private boolean isRdsConfigNeedForHiveMetastore(Blueprint blueprint) {
+        String blueprintText = blueprint.getBlueprintText();
+        AmbariBlueprintTextProcessor blueprintProcessor = ambariBlueprintProcessorFactory.get(blueprintText);
+        if (blueprintService.isAmbariBlueprint(blueprint)) {
             return blueprintProcessor.isComponentExistsInBlueprint("HIVE_METASTORE")
                     && !blueprintProcessor.isComponentExistsInBlueprint("MYSQL_SERVER")
                     && !blueprintProcessor.isAllConfigurationExistsInPathUnderConfigurationNode(createPathListFromConfigurations(PATH, CONFIGURATIONS));
@@ -100,7 +100,7 @@ public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected boolean isRdsConfigNeeded(ClusterDefinition clusterDefinition) {
-        return isRdsConfigNeedForHiveMetastore(clusterDefinition);
+    protected boolean isRdsConfigNeeded(Blueprint blueprint) {
+        return isRdsConfigNeedForHiveMetastore(blueprint);
     }
 }

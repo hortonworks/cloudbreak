@@ -65,7 +65,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
-        initializeDefaultClusterDefinitions(testContext);
+        initializeDefaultBlueprints(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)

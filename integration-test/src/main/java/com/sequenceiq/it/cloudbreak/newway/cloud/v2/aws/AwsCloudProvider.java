@@ -40,8 +40,8 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     protected ClusterTestDto withCluster(ClusterTestDto cluster) {
         return cluster
-                .withValidateClusterDefinition(Boolean.TRUE)
-                .withClusterDefinitionName(getClusterDefinitionName());
+                .withValidateBlueprint(Boolean.TRUE)
+                .withBlueprintName(getBlueprintName());
     }
 
     @Override
@@ -123,8 +123,8 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getClusterDefinitionName() {
-        return awsProperties.getDefaultClusterDefinitionName();
+    public String getBlueprintName() {
+        return awsProperties.getDefaultBlueprintName();
     }
 
     public AwsCredentialV4Parameters awsCredentialDetailsArn() {

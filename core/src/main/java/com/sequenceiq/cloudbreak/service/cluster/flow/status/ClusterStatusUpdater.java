@@ -49,7 +49,7 @@ public class ClusterStatusUpdater {
         } else if (cluster != null && cluster.getAmbariIp() != null) {
             Long stackId = stack.getId();
             clusterService.updateClusterMetadata(stackId);
-            String blueprintName = cluster.getClusterDefinition().getStackName();
+            String blueprintName = cluster.getBlueprint().getStackName();
             ClusterStatusResult clusterStatusResult =
                     clusterApiConnectors.getConnector(stack).clusterStatusService().getStatus(StringUtils.isNotBlank(blueprintName));
             LOGGER.debug("Ambari cluster status: [{}] Status reason: [{}]", clusterStatusResult.getClusterStatus(), clusterStatusResult.getStatusReason());

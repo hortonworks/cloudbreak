@@ -17,14 +17,14 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
-import com.sequenceiq.cloudbreak.template.ClusterDefinitionProcessingException;
-import com.sequenceiq.cloudbreak.template.ClusterDefinitionUpdater;
+import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
+import com.sequenceiq.cloudbreak.template.BlueprintUpdater;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplateProcessor;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
-public class CentralCmTemplateUpdater implements ClusterDefinitionUpdater {
+public class CentralCmTemplateUpdater implements BlueprintUpdater {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CentralCmTemplateUpdater.class);
 
@@ -46,20 +46,20 @@ public class CentralCmTemplateUpdater implements ClusterDefinitionUpdater {
             return processor.getTemplate();
         } catch (IOException e) {
             String message = String.format("Unable to update cmTemplate with default properties which was: %s",
-                    source.getClusterDefinitionView().getClusterDefinitionText());
+                    source.getBlueprintView().getBlueprintText());
             LOGGER.warn(message);
-            throw new ClusterDefinitionProcessingException(message, e);
+            throw new BlueprintProcessingException(message, e);
         }
     }
 
     public CmTemplateProcessor getCmTemplateProcessor(TemplatePreparationObject source) throws IOException {
-        String cmTemplate = source.getClusterDefinitionView().getClusterDefinitionText();
+        String cmTemplate = source.getBlueprintView().getBlueprintText();
         cmTemplate = templateProcessor.process(cmTemplate, source, Maps.newHashMap());
         return cmTemplateProcessorFactory.get(cmTemplate);
     }
 
     @Override
-    public String getClusterDefinitionText(TemplatePreparationObject source) {
+    public String getBlueprintText(TemplatePreparationObject source) {
         ApiClusterTemplate template = getCmTemplate(source, Map.of(), null, null);
         return JsonUtil.writeValueAsStringSilent(template);
     }

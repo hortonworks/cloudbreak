@@ -137,13 +137,13 @@ public class ClusterTestDto extends AbstractCloudbreakTestDto<ClusterV4Request, 
         return this;
     }
 
-    public ClusterTestDto withClusterDefinitionName(String clusterDefinitionName) {
-        getRequest().setClusterDefinitionName(clusterDefinitionName);
+    public ClusterTestDto withBlueprintName(String blueprintName) {
+        getRequest().setBlueprintName(blueprintName);
         return this;
     }
 
-    public ClusterTestDto withValidateClusterDefinition(Boolean validateClusterDefinition) {
-        getRequest().setValidateClusterDefinition(validateClusterDefinition);
+    public ClusterTestDto withValidateBlueprint(Boolean validateBlueprint) {
+        getRequest().setValidateBlueprint(validateBlueprint);
         return this;
     }
 }

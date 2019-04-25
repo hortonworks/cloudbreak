@@ -46,8 +46,8 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     protected ClusterTestDto withCluster(ClusterTestDto cluster) {
         return cluster
-                .withValidateClusterDefinition(Boolean.TRUE)
-                .withClusterDefinitionName(getClusterDefinitionName());
+                .withValidateBlueprint(Boolean.TRUE)
+                .withBlueprintName(getBlueprintName());
     }
 
     @Override
@@ -106,7 +106,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getClusterDefinitionName() {
-        return azureProperties.getDefaultClusterDefinitionName();
+    public String getBlueprintName() {
+        return azureProperties.getDefaultBlueprintName();
     }
 }

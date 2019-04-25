@@ -12,8 +12,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
-import com.sequenceiq.cloudbreak.clusterdefinition.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
 
 @Component
 @ConfigurationProperties
@@ -22,16 +22,16 @@ public class AmbariBlueprintPortConfigCollector {
     // injected by Spring using the setter, but setting a default value here in case config were missing
     private List<PortConfig> blueprintServicePorts = new ArrayList<>();
 
-    public Map<String, Integer> getServicePorts(ClusterDefinition clusterDefinition) {
+    public Map<String, Integer> getServicePorts(Blueprint blueprint) {
         Map<String, Integer> collectedPorts = new HashMap<>();
-        collectConfiguredPorts(clusterDefinition, collectedPorts);
+        collectConfiguredPorts(blueprint, collectedPorts);
         addDefaultPorts(collectedPorts);
         return collectedPorts;
     }
 
-    private void collectConfiguredPorts(ClusterDefinition clusterDefinition, Map<String, Integer> collectedPorts) {
-        String clusterDefinitionText = clusterDefinition.getClusterDefinitionText();
-        Map<String, Map<String, String>> configurations = new AmbariBlueprintTextProcessor(clusterDefinitionText).getConfigurationEntries();
+    private void collectConfiguredPorts(Blueprint blueprint, Map<String, Integer> collectedPorts) {
+        String blueprintText = blueprint.getBlueprintText();
+        Map<String, Map<String, String>> configurations = new AmbariBlueprintTextProcessor(blueprintText).getConfigurationEntries();
         blueprintServicePorts.forEach(portConfig -> {
             Optional<Integer> configuredPort = getConfiguredPortForService(portConfig, configurations);
             ExposedService exposedService = ExposedService.valueOf(portConfig.getService());

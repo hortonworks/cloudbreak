@@ -2,7 +2,7 @@
   "name" : "mycluster",
   "knoxTopologyName" : "cb",
   "emailNeeded" : true,
-  "clusterDefinitionName": "my-cluster-definition",
+  "blueprintName": "my-blueprint",
   "description" : "my cluster description",
   "kerberosName" : "somename",
   "gateway" : {
@@ -12,7 +12,7 @@
     "userName" : "user",
     "password" : "pass"
   },
-  "validateClusterDefinition" : true,
+  "validateBlueprint" : true,
   "emailTo": "admin@example.com",
   "cloudStorage" : {
     "name": "teszt",

@@ -82,7 +82,7 @@ public class ClusterContainerRunnerTest {
     @Test
     public void runNewNodesClusterContainersWhenContainerRunnerFailed() throws CloudbreakException {
         Stack stack = TestUtil.stack();
-        Cluster cluster = TestUtil.cluster(TestUtil.clusterDefinition(), stack, 1L);
+        Cluster cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
         stack.setCluster(cluster);
         HostGroupAdjustmentV4Request hostGroupAdjustment = new HostGroupAdjustmentV4Request();
         hostGroupAdjustment.setHostGroup("agent");
@@ -118,7 +118,7 @@ public class ClusterContainerRunnerTest {
     public void runNewNodesClusterContainersWhenContainerRunnerCancelled()
             throws CloudbreakException {
         Stack stack = TestUtil.stack();
-        Cluster cluster = TestUtil.cluster(TestUtil.clusterDefinition(), stack, 1L);
+        Cluster cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
         stack.setCluster(cluster);
         HostGroupAdjustmentV4Request hostGroupAdjustment = new HostGroupAdjustmentV4Request();
         hostGroupAdjustment.setHostGroup("agent");

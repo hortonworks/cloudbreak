@@ -89,7 +89,7 @@ public class StackApiViewService {
         if (dataLakeOnly) {
             stackViewResponses = stackViewResponses.stream()
                     .filter(stackViewResponse ->
-                            Boolean.TRUE.equals(stackViewResponse.getCluster().getClusterDefinition().getTags().getMap().get("shared_services_ready")))
+                            Boolean.TRUE.equals(stackViewResponse.getCluster().getBlueprint().getTags().getMap().get("shared_services_ready")))
                     .collect(Collectors.toSet());
         }
         return new HashSet<>(stackViewResponses);

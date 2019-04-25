@@ -25,16 +25,16 @@ public class HostgroupConfigurations implements Iterable<HostgroupConfiguration>
         return result;
     }
 
-    public static HostgroupConfigurations fromConfigEntryMap(Map<HostgroupEntry, List<ClusterDefinitionConfigurationEntry>> configuration) {
+    public static HostgroupConfigurations fromConfigEntryMap(Map<HostgroupEntry, List<BlueprintConfigurationEntry>> configuration) {
         HostgroupConfigurations result = new HostgroupConfigurations();
-        for (Entry<HostgroupEntry, List<ClusterDefinitionConfigurationEntry>> conf : configuration.entrySet()) {
+        for (Entry<HostgroupEntry, List<BlueprintConfigurationEntry>> conf : configuration.entrySet()) {
             Map<String, Map<String, String>> config = new HashMap<>();
-            for (ClusterDefinitionConfigurationEntry clusterDefinitionConfigurationEntry : conf.getValue()) {
-                if (!config.keySet().contains(clusterDefinitionConfigurationEntry.getConfigFile())) {
-                    config.put(clusterDefinitionConfigurationEntry.getConfigFile(), new HashMap<>());
+            for (BlueprintConfigurationEntry blueprintConfigurationEntry : conf.getValue()) {
+                if (!config.keySet().contains(blueprintConfigurationEntry.getConfigFile())) {
+                    config.put(blueprintConfigurationEntry.getConfigFile(), new HashMap<>());
                 }
-                config.get(clusterDefinitionConfigurationEntry.getConfigFile()).put(clusterDefinitionConfigurationEntry.getKey(),
-                        clusterDefinitionConfigurationEntry.getValue());
+                config.get(blueprintConfigurationEntry.getConfigFile()).put(blueprintConfigurationEntry.getKey(),
+                        blueprintConfigurationEntry.getValue());
             }
             result.addHostgroupConfiguration(new HostgroupConfiguration(conf.getKey().getHostGroup(), config));
         }

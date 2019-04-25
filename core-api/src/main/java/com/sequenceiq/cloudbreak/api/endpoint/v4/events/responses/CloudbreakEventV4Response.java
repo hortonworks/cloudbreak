@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterDefinitionModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
@@ -27,11 +27,11 @@ public class CloudbreakEventV4Response extends CloudbreakEventBaseV4 {
     @ApiModelProperty(StackModelDescription.AVAILABILITY_ZONE)
     private String availabilityZone;
 
-    @ApiModelProperty(ClusterModelDescription.CLUSTER_DEFINITION_ID)
-    private Long clusterDefinitionId;
+    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_ID)
+    private Long blueprintId;
 
-    @ApiModelProperty(ClusterDefinitionModelDescription.CLUSTER_DEFINITION_NAME)
-    private String clusterDefinitionName;
+    @ApiModelProperty(BlueprintModelDescription.BLUEPRINT_NAME)
+    private String blueprintName;
 
     @ApiModelProperty(ClusterModelDescription.CLUSTER_ID)
     private Long clusterId;
@@ -91,20 +91,20 @@ public class CloudbreakEventV4Response extends CloudbreakEventBaseV4 {
         this.region = region;
     }
 
-    public String getClusterDefinitionName() {
-        return clusterDefinitionName;
+    public String getBlueprintName() {
+        return blueprintName;
     }
 
-    public void setClusterDefinitionName(String clusterDefinitionName) {
-        this.clusterDefinitionName = clusterDefinitionName;
+    public void setBlueprintName(String blueprintName) {
+        this.blueprintName = blueprintName;
     }
 
-    public Long getClusterDefinitionId() {
-        return clusterDefinitionId;
+    public Long getBlueprintId() {
+        return blueprintId;
     }
 
-    public void setClusterDefinitionId(Long clusterDefinitionId) {
-        this.clusterDefinitionId = clusterDefinitionId;
+    public void setBlueprintId(Long blueprintId) {
+        this.blueprintId = blueprintId;
     }
 
     public Status getStackStatus() {

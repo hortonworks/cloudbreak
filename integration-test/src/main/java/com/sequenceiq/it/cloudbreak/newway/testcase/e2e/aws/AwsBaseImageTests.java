@@ -29,7 +29,7 @@ public class AwsBaseImageTests extends AbstractE2ETest {
 
     private static final String SLES12 = "sles12";
 
-    private static final String EDW_CLUSTER_DEFINITION = "HDP 3.1 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin";
+    private static final String EDW_BLUEPRINT = "HDP 3.1 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin";
 
     private static final String BASE_IMAGE_DATA_PROVIDER = "BASE_IMAGE_DATA_PROVIDER";
 
@@ -40,21 +40,21 @@ public class AwsBaseImageTests extends AbstractE2ETest {
     private AwsProperties awsProperties;
 
     @Test(dataProvider = BASE_IMAGE_DATA_PROVIDER)
-    public void testBaseImagesOnAwsWithClusterDefs(
+    public void testBaseImagesOnAwsWithBlueprints(
             TestContext testContext,
             String osName,
             String imageId,
-            String clusterDefinition,
+            String blueprint,
             @Description TestCaseDescription testCaseDescription) {
 
-        if (EDW_CLUSTER_DEFINITION.equalsIgnoreCase(clusterDefinition)) {
+        if (EDW_BLUEPRINT.equalsIgnoreCase(blueprint)) {
             getTestParameter().put(InstanceCountParameter.WORKER_INSTANCE_COUNT.getName(), "3");
         } else {
             getTestParameter().put(InstanceCountParameter.WORKER_INSTANCE_COUNT.getName(), "1");
         }
 
         testContext.given(ClusterTestDto.class)
-                .withClusterDefinitionName(clusterDefinition)
+                .withBlueprintName(blueprint)
                 .given(ImageSettingsTestDto.class)
                 .withOs(osName)
                 .withImageId(imageId)
@@ -66,52 +66,52 @@ public class AwsBaseImageTests extends AbstractE2ETest {
 
     @DataProvider(name = BASE_IMAGE_DATA_PROVIDER)
     public Object[][] dataProvider() {
-        List<OsImageIdClusterDef> osImagesWithClusterDefinitions = getOsImagesWithClusterDefinitions();
-        int dataRows = osImagesWithClusterDefinitions.size();
+        List<OsImageIdBlueprint> osImagesWithBlueprints = getOsImagesWithBlueprints();
+        int dataRows = osImagesWithBlueprints.size();
         var data = new Object[dataRows][5];
         for (int row = 0; row < dataRows; row++) {
-            OsImageIdClusterDef osImageWithClusterDef = osImagesWithClusterDefinitions.get(row);
+            OsImageIdBlueprint osImageWithBlueprint = osImagesWithBlueprints.get(row);
             data[row][0] = getBean(TestContext.class);
-            data[row][1] = osImageWithClusterDef.os;
-            data[row][2] = osImageWithClusterDef.imageId;
-            data[row][3] = osImageWithClusterDef.clusterDef;
+            data[row][1] = osImageWithBlueprint.os;
+            data[row][2] = osImageWithBlueprint.imageId;
+            data[row][3] = osImageWithBlueprint.blueprint;
             data[row][4] = new TestCaseDescriptionBuilder()
                     .given("there is a running cloudbreak")
-                    .when(String.format("a stack create request is sent with '%s' OS image [image id: '%s'] and '%s' cluster definition",
-                            osImageWithClusterDef.os, osImageWithClusterDef.imageId, osImageWithClusterDef.clusterDef))
+                    .when(String.format("a stack create request is sent with '%s' OS image [image id: '%s'] and '%s' blueprint",
+                            osImageWithBlueprint.os, osImageWithBlueprint.imageId, osImageWithBlueprint.blueprint))
                     .then("the stack creation should succeed");
         }
         return data;
     }
 
-    private List<OsImageIdClusterDef> getOsImagesWithClusterDefinitions() {
+    private List<OsImageIdBlueprint> getOsImagesWithBlueprints() {
         Baseimage baseimage = awsProperties.getBaseimage();
-        List<String> amazonLinux2ClusterDefinitions = baseimage.getAmazonlinux2().getClusterDefinitions();
-        List<String> redhat7ClusterDefinitions = baseimage.getRedhat7().getClusterDefinitions();
-        List<String> sles12ClusterDefinitions = baseimage.getSles12().getClusterDefinitions();
+        List<String> amazonLinux2Blueprints = baseimage.getAmazonlinux2().getBlueprints();
+        List<String> redhat7Blueprints = baseimage.getRedhat7().getBlueprints();
+        List<String> sles12Blueprints = baseimage.getSles12().getBlueprints();
 
-        List<OsImageIdClusterDef> osImagesWithClusterDefinitions = new ArrayList<>();
-        amazonLinux2ClusterDefinitions.forEach(clusterDef -> osImagesWithClusterDefinitions.add(
-                new OsImageIdClusterDef(AMAZONLINUX2, baseimage.getAmazonlinux2().getImageId(), clusterDef)));
-        redhat7ClusterDefinitions.forEach(clusterDef -> osImagesWithClusterDefinitions.add(
-                new OsImageIdClusterDef(REDHAT7, baseimage.getRedhat7().getImageId(), clusterDef)));
-        sles12ClusterDefinitions.forEach(clusterDef -> osImagesWithClusterDefinitions.add(
-                new OsImageIdClusterDef(SLES12, baseimage.getSles12().getImageId(), clusterDef)
+        List<OsImageIdBlueprint> osImagesWithBlueprints = new ArrayList<>();
+        amazonLinux2Blueprints.forEach(blueprint -> osImagesWithBlueprints.add(
+                new OsImageIdBlueprint(AMAZONLINUX2, baseimage.getAmazonlinux2().getImageId(), blueprint)));
+        redhat7Blueprints.forEach(blueprint -> osImagesWithBlueprints.add(
+                new OsImageIdBlueprint(REDHAT7, baseimage.getRedhat7().getImageId(), blueprint)));
+        sles12Blueprints.forEach(blueprint -> osImagesWithBlueprints.add(
+                new OsImageIdBlueprint(SLES12, baseimage.getSles12().getImageId(), blueprint)
         ));
-        return osImagesWithClusterDefinitions;
+        return osImagesWithBlueprints;
     }
 
-    private static class OsImageIdClusterDef {
+    private static class OsImageIdBlueprint {
         private final String os;
 
         private final String imageId;
 
-        private final String clusterDef;
+        private final String blueprint;
 
-        OsImageIdClusterDef(String os, String imageId, String clusterDef) {
+        OsImageIdBlueprint(String os, String imageId, String blueprint) {
             this.os = os;
             this.imageId = imageId;
-            this.clusterDef = clusterDef;
+            this.blueprint = blueprint;
         }
     }
 

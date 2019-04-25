@@ -144,7 +144,7 @@ public class MockSparkServer {
         get(AMBARI_API_ROOT + "/hosts", new AmbariHostsResponse(instanceMap), GSON::toJson);
         get(AMBARI_API_ROOT + "/blueprints/:blueprintname", (request, response) -> {
             response.type("text/plain");
-            return responseFromJsonFile("clusterdefinition/" + request.params("clusterdefinitionname") + ".bp");
+            return responseFromJsonFile("blueprint/" + request.params("blueprintname") + ".bp");
         });
         post(AMBARI_API_ROOT + "/blueprints/*", new EmptyAmbariResponse());
         put(AMBARI_API_ROOT + "/users/admin", new EmptyAmbariResponse());

@@ -17,15 +17,7 @@ public class CommonCloudProperties {
 
     private Integer gatewayPort;
 
-    private String sshPrivateKeyPath;
-
-    private Integer sshTimeout;
-
-    private String defaultSshUser;
-
     private String defaultCredentialDescription;
-
-    private final Recipe recipe = new Recipe();
 
     private final Ambari ambari = new Ambari();
 
@@ -77,68 +69,8 @@ public class CommonCloudProperties {
         this.defaultCredentialDescription = defaultCredentialDescription;
     }
 
-    public String getSshPrivateKeyPath() {
-        return sshPrivateKeyPath;
-    }
-
-    public void setSshPrivateKeyPath(String sshPrivateKeyPath) {
-        this.sshPrivateKeyPath = sshPrivateKeyPath;
-    }
-
-    public Integer getSshTimeout() {
-        return sshTimeout;
-    }
-
-    public void setSshTimeout(Integer sshTimeout) {
-        this.sshTimeout = sshTimeout;
-    }
-
-    public String getDefaultSshUser() {
-        return defaultSshUser;
-    }
-
-    public void setDefaultSshUser(String defaultSshUser) {
-        this.defaultSshUser = defaultSshUser;
-    }
-
-    public Recipe getRecipe() {
-        return recipe;
-    }
-
     public Ambari getAmbari() {
         return ambari;
-    }
-
-    public static class Recipe {
-        private String content;
-
-        private String outputFilePath;
-
-        private String output;
-
-        public String getContent() {
-            return content;
-        }
-
-        public void setContent(String content) {
-            this.content = content;
-        }
-
-        public String getOutputFilePath() {
-            return outputFilePath;
-        }
-
-        public void setOutputFilePath(String outputFilePath) {
-            this.outputFilePath = outputFilePath;
-        }
-
-        public String getOutput() {
-            return output;
-        }
-
-        public void setOutput(String output) {
-            this.output = output;
-        }
     }
 
     public static class Ambari {

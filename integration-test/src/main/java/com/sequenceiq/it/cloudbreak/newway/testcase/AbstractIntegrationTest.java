@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.exception.TestCaseDescriptionMissingException;
 import com.sequenceiq.it.cloudbreak.newway.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.newway.actor.Actor;
-import com.sequenceiq.it.cloudbreak.newway.client.ClusterDefinitionTestClient;
+import com.sequenceiq.it.cloudbreak.newway.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.DatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.EnvironmentTestClient;
@@ -49,7 +49,7 @@ import com.sequenceiq.it.cloudbreak.newway.context.SparklessTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription.TestCaseDescriptionBuilder;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.dto.clusterdefinition.ClusterDefinitionTestDto;
+import com.sequenceiq.it.cloudbreak.newway.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.database.DatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
@@ -97,7 +97,7 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     private ProxyTestClient proxyTestClient;
 
     @Inject
-    private ClusterDefinitionTestClient clusterDefinitionTestClient;
+    private BlueprintTestClient blueprintTestClient;
 
     @Inject
     private LdapTestClient ldapTestClient;
@@ -141,7 +141,7 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
         createDefaultCredential(testContext);
         createDefaultEnvironment(testContext);
         createDefaultImageCatalog(testContext);
-        initializeDefaultClusterDefinitions(testContext);
+        initializeDefaultBlueprints(testContext);
     }
 
     private TestCaseDescription collectTestCaseDescription(Method method, Object[] params) {
@@ -282,10 +282,10 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
         testContext.as(Actor::secondUser);
     }
 
-    protected void initializeDefaultClusterDefinitions(TestContext testContext) {
+    protected void initializeDefaultBlueprints(TestContext testContext) {
         testContext
-                .init(ClusterDefinitionTestDto.class)
-                .when(clusterDefinitionTestClient.listV4());
+                .init(BlueprintTestDto.class)
+                .when(blueprintTestClient.listV4());
     }
 
     /**

@@ -32,9 +32,9 @@ public class NotificationDetails implements Serializable {
 
     private String clusterStatus;
 
-    private String clusterDefinitionName;
+    private String blueprintName;
 
-    private Long clusterDefinitionId;
+    private Long blueprintId;
 
     public String getNotificationType() {
         return notificationType;
@@ -76,20 +76,20 @@ public class NotificationDetails implements Serializable {
         this.availabiltyZone = availabiltyZone;
     }
 
-    public String getClusterDefinitionName() {
-        return clusterDefinitionName;
+    public String getBlueprintName() {
+        return blueprintName;
     }
 
-    public void setClusterDefinitionName(String clusterDefinitionName) {
-        this.clusterDefinitionName = clusterDefinitionName;
+    public void setBlueprintName(String blueprintName) {
+        this.blueprintName = blueprintName;
     }
 
-    public Long getClusterDefinitionId() {
-        return clusterDefinitionId;
+    public Long getBlueprintId() {
+        return blueprintId;
     }
 
-    public void setClusterDefinitionId(Long clusterDefinitionId) {
-        this.clusterDefinitionId = clusterDefinitionId;
+    public void setBlueprintId(Long blueprintId) {
+        this.blueprintId = blueprintId;
     }
 
     public Long getStackId() {

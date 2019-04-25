@@ -66,8 +66,8 @@ import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
-import com.sequenceiq.cloudbreak.clusterdefinition.utils.ClusterDefinitionUtils;
-import com.sequenceiq.cloudbreak.clusterdefinition.validation.AmbariBlueprintValidator;
+import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
+import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
@@ -79,7 +79,7 @@ import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
@@ -109,7 +109,7 @@ import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.constraint.ConstraintService;
 import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
@@ -136,7 +136,7 @@ public class ClusterService {
     private StackService stackService;
 
     @Inject
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     @Inject
     private ClusterRepository repository;
@@ -199,7 +199,7 @@ public class ClusterService {
     private TransactionService transactionService;
 
     @Inject
-    private ClusterDefinitionUtils clusterDefinitionUtils;
+    private BlueprintUtils blueprintUtils;
 
     @Inject
     private ResourceService resourceService;
@@ -212,7 +212,7 @@ public class ClusterService {
 
     @Measure(ClusterService.class)
     public Cluster create(Stack stack, Cluster cluster, List<ClusterComponent> components, User user) throws TransactionExecutionException {
-        LOGGER.debug("Cluster requested [ClusterDefinitionId: {}]", cluster.getClusterDefinition().getId());
+        LOGGER.debug("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         String stackName = stack.getName();
         if (stack.getCluster() != null) {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [cluster: '%s']", stack.getCluster().getName()));
@@ -852,22 +852,22 @@ public class ClusterService {
         }
     }
 
-    public Cluster recreate(Stack stack, String clusterDefinitionName, Set<HostGroup> hostGroups, boolean validateClusterDefinition,
+    public Cluster recreate(Stack stack, String blueprintName, Set<HostGroup> hostGroups, boolean validateBlueprint,
             StackRepoDetails stackRepoDetails, String kerberosPassword, String kerberosPrincipal) throws TransactionExecutionException {
         return transactionService.required(() -> {
-            checkClusterDefinitionIdAndHostGroups(clusterDefinitionName, hostGroups);
+            checkBlueprintIdAndHostGroups(blueprintName, hostGroups);
             Stack stackWithLists = stackService.getByIdWithListsInTransaction(stack.getId());
             Cluster cluster = getCluster(stackWithLists);
             if (cluster != null && stackWithLists.getCluster().getKerberosConfig() != null) {
                 initKerberos(kerberosPassword, kerberosPrincipal, cluster);
             }
-            ClusterDefinition clusterDefinition = clusterDefinitionService.getByNameForWorkspace(clusterDefinitionName, stack.getWorkspace());
+            Blueprint blueprint = blueprintService.getByNameForWorkspace(blueprintName, stack.getWorkspace());
             if (!withEmbeddedAmbariDB(cluster)) {
                 throw new BadRequestException("Ambari doesn't support resetting external DB automatically. To reset Ambari Server schema you must first drop "
                         + "and then create it using DDL scripts from /var/lib/ambari-server/resources");
             }
-            if (validateClusterDefinition) {
-                ambariBlueprintValidator.validateBlueprintForStack(cluster, clusterDefinition, hostGroups, stackWithLists.getInstanceGroups());
+            if (validateBlueprint) {
+                ambariBlueprintValidator.validateBlueprintForStack(cluster, blueprint, hostGroups, stackWithLists.getInstanceGroups());
             }
             boolean containerOrchestrator;
             try {
@@ -881,7 +881,7 @@ public class ClusterService {
             }
 
             try {
-                cluster = prepareCluster(hostGroups, stackRepoDetails, clusterDefinition, stackWithLists, cluster);
+                cluster = prepareCluster(hostGroups, stackRepoDetails, blueprint, stackWithLists, cluster);
                 triggerClusterInstall(stackWithLists, cluster);
             } catch (CloudbreakException e) {
                 throw new CloudbreakServiceException(e);
@@ -904,19 +904,19 @@ public class ClusterService {
         kerberosConfigService.save(kerberosConfig);
     }
 
-    private void checkClusterDefinitionIdAndHostGroups(String clusterDefinition, Set<HostGroup> hostGroups) {
-        if (clusterDefinition == null || hostGroups == null) {
+    private void checkBlueprintIdAndHostGroups(String blueprint, Set<HostGroup> hostGroups) {
+        if (blueprint == null || hostGroups == null) {
             throw new BadRequestException("Cluster definition id and hostGroup assignments can not be null.");
         }
     }
 
-    private Cluster prepareCluster(Collection<HostGroup> hostGroups, StackRepoDetails stackRepoDetails, ClusterDefinition clusterDefinition, Stack stack,
+    private Cluster prepareCluster(Collection<HostGroup> hostGroups, StackRepoDetails stackRepoDetails, Blueprint blueprint, Stack stack,
             Cluster cluster) {
-        cluster.setClusterDefinition(clusterDefinition);
+        cluster.setBlueprint(blueprint);
         cluster.getHostGroups().clear();
         cluster.getHostGroups().addAll(hostGroups);
         createHDPRepoComponent(stackRepoDetails, stack);
-        LOGGER.debug("Cluster requested [ClusterDefinitionId: {}]", cluster.getClusterDefinition().getId());
+        LOGGER.debug("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         cluster.setStatus(REQUESTED);
         cluster.setStack(stack);
         cluster = repository.save(cluster);
@@ -1025,7 +1025,7 @@ public class ClusterService {
         if (scalingAdjustment == 0) {
             throw new BadRequestException("No scaling adjustments specified. Nothing to do.");
         }
-        ambariBlueprintValidator.validateHostGroupScalingRequest(stack.getCluster().getClusterDefinition(), hostGroup, scalingAdjustment);
+        ambariBlueprintValidator.validateHostGroupScalingRequest(stack.getCluster().getBlueprint(), hostGroup, scalingAdjustment);
         if (!downScale && hostGroup.getConstraint().getInstanceGroup() != null) {
             validateUnusedHosts(hostGroup.getConstraint().getInstanceGroup(), scalingAdjustment);
         } else {
@@ -1038,15 +1038,15 @@ public class ClusterService {
     }
 
     private void validateComponentsCategory(Stack stack, String hostGroup) {
-        ClusterDefinition clusterDefinition = stack.getCluster().getClusterDefinition();
-        String clusterDefinitionText = clusterDefinition.getClusterDefinitionText();
+        Blueprint blueprint = stack.getCluster().getBlueprint();
+        String blueprintText = blueprint.getBlueprintText();
         try {
-            JsonNode root = JsonUtil.readTree(clusterDefinitionText);
+            JsonNode root = JsonUtil.readTree(blueprintText);
             String blueprintName = root.path("Blueprints").path("blueprint_name").asText();
             Map<String, String> categories =
                     clusterApiConnectors.getConnector(stack).clusterModificationService().getComponentsByCategory(blueprintName, hostGroup);
             for (Entry<String, String> entry : categories.entrySet()) {
-                if (entry.getValue().equalsIgnoreCase(MASTER_CATEGORY) && !clusterDefinitionUtils.isSharedServiceReadyBlueprint(clusterDefinition)) {
+                if (entry.getValue().equalsIgnoreCase(MASTER_CATEGORY) && !blueprintUtils.isSharedServiceReadyBlueprint(blueprint)) {
                     throw new BadRequestException(
                             String.format("Cannot downscale the '%s' hostGroupAdjustment group, because it contains a '%s' component", hostGroup,
                                     entry.getKey()));
@@ -1116,8 +1116,8 @@ public class ClusterService {
         return clusterApiConnectors.getConnector(stack).clusterStatusService().getHostStatusesRaw();
     }
 
-    public Set<Cluster> findByClusterDefinition(ClusterDefinition clusterDefinition) {
-        return repository.findByClusterDefinition(clusterDefinition);
+    public Set<Cluster> findByBlueprint(Blueprint blueprint) {
+        return repository.findByBlueprint(blueprint);
     }
 
     public List<Cluster> findByStatuses(Collection<Status> statuses) {

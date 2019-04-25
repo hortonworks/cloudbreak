@@ -5,7 +5,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.clusterdefinition.responses.ClusterDefinitionV4ViewResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4ViewResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;
@@ -31,8 +31,8 @@ public class ClusterViewV4Response extends CompactViewV4Response {
     @ApiModelProperty(ClusterModelDescription.KERBEROSCONFIG_NAME)
     private String kerberosName;
 
-    @ApiModelProperty(ClusterModelDescription.CLUSTER_DEFINITION)
-    private ClusterDefinitionV4ViewResponse clusterDefinition;
+    @ApiModelProperty(ClusterModelDescription.BLUEPRINT)
+    private BlueprintV4ViewResponse blueprint;
 
     @ApiModelProperty(ModelDescriptions.StackModelDescription.SERVER_IP)
     private String serverIp;
@@ -77,12 +77,12 @@ public class ClusterViewV4Response extends CompactViewV4Response {
         this.kerberosName = kerberosName;
     }
 
-    public ClusterDefinitionV4ViewResponse getClusterDefinition() {
-        return clusterDefinition;
+    public BlueprintV4ViewResponse getBlueprint() {
+        return blueprint;
     }
 
-    public void setClusterDefinition(ClusterDefinitionV4ViewResponse clusterDefinition) {
-        this.clusterDefinition = clusterDefinition;
+    public void setBlueprint(BlueprintV4ViewResponse blueprint) {
+        this.blueprint = blueprint;
     }
 
     public String getServerIp() {

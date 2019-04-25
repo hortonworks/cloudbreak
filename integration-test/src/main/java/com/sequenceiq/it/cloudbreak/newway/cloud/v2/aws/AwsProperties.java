@@ -21,7 +21,7 @@ public class AwsProperties {
 
     private String publicKeyId;
 
-    private String defaultClusterDefinitionName;
+    private String defaultBlueprintName;
 
     private final Instance instance = new Instance();
 
@@ -77,12 +77,12 @@ public class AwsProperties {
         this.publicKeyId = publicKeyId;
     }
 
-    public String getDefaultClusterDefinitionName() {
-        return defaultClusterDefinitionName;
+    public String getDefaultBlueprintName() {
+        return defaultBlueprintName;
     }
 
-    public void setDefaultClusterDefinitionName(String defaultClusterDefinitionName) {
-        this.defaultClusterDefinitionName = defaultClusterDefinitionName;
+    public void setDefaultBlueprintName(String defaultBlueprintName) {
+        this.defaultBlueprintName = defaultBlueprintName;
     }
 
     public Instance getInstance() {
@@ -204,7 +204,7 @@ public class AwsProperties {
         public static class Redhat7 {
             private String imageId;
 
-            private List<String> clusterDefinitions;
+            private List<String> blueprints;
 
             public String getImageId() {
                 return imageId;
@@ -214,19 +214,19 @@ public class AwsProperties {
                 this.imageId = imageId;
             }
 
-            public List<String> getClusterDefinitions() {
-                return clusterDefinitions;
+            public List<String> getBlueprints() {
+                return blueprints;
             }
 
-            public void setClusterDefinitions(List<String> clusterDefinitions) {
-                this.clusterDefinitions = clusterDefinitions;
+            public void setBlueprints(List<String> blueprints) {
+                this.blueprints = blueprints;
             }
         }
 
         public static class Amazonlinux2 {
             private String imageId;
 
-            private List<String> clusterDefinitions;
+            private List<String> blueprints;
 
             public String getImageId() {
                 return imageId;
@@ -236,19 +236,19 @@ public class AwsProperties {
                 this.imageId = imageId;
             }
 
-            public List<String> getClusterDefinitions() {
-                return clusterDefinitions;
+            public List<String> getBlueprints() {
+                return blueprints;
             }
 
-            public void setClusterDefinitions(List<String> clusterDefinitions) {
-                this.clusterDefinitions = clusterDefinitions;
+            public void setBlueprints(List<String> blueprints) {
+                this.blueprints = blueprints;
             }
         }
 
         public static class Sles12 {
             private String imageId;
 
-            private List<String> clusterDefinitions;
+            private List<String> blueprints;
 
             public String getImageId() {
                 return imageId;
@@ -258,12 +258,12 @@ public class AwsProperties {
                 this.imageId = imageId;
             }
 
-            public List<String> getClusterDefinitions() {
-                return clusterDefinitions;
+            public List<String> getBlueprints() {
+                return blueprints;
             }
 
-            public void setClusterDefinitions(List<String> clusterDefinitions) {
-                this.clusterDefinitions = clusterDefinitions;
+            public void setBlueprints(List<String> blueprints) {
+                this.blueprints = blueprints;
             }
         }
     }

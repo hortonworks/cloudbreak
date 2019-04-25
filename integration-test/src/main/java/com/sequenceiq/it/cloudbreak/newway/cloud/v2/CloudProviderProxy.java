@@ -131,8 +131,8 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
-    public String getClusterDefinitionName() {
-        return delegate.getClusterDefinitionName();
+    public String getBlueprintName() {
+        return delegate.getBlueprintName();
     }
 
     @Override

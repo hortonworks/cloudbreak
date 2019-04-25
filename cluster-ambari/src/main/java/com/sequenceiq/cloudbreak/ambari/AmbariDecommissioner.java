@@ -275,7 +275,7 @@ public class AmbariDecommissioner {
         List<HostMetadata> filteredHostList =
                 hostFilterService.filterHostsForDecommission(cluster, hostsInHostGroup, hostGroup.getName(), ambariClient, instanceMetaDatasInStack);
         int reservedInstances = hostsInHostGroup.size() - filteredHostList.size();
-        String blueprintName = cluster.getClusterDefinition().getStackName();
+        String blueprintName = cluster.getBlueprint().getStackName();
         Map<String, List<String>> blueprintMap = ambariClient.getBlueprintMap(blueprintName);
         if (hostGroupNodesAreDataNodes(blueprintMap, hostGroup.getName())) {
             int replication = getReplicationFactor(ambariClient, hostGroup.getName());
@@ -295,7 +295,7 @@ public class AmbariDecommissioner {
     public void verifyNodesAreRemovable(Stack stack, Multimap<Long, HostMetadata> hostGroupWithInstances, Set<HostGroup> hostGroups, int defaultRootVolumeSize,
             AmbariClient ambariClient, List<InstanceMetaData> notDeletedNodes) {
         Cluster cluster = stack.getCluster();
-        String blueprintName = cluster.getClusterDefinition().getStackName();
+        String blueprintName = cluster.getBlueprint().getStackName();
         Map<String, List<String>> blueprintMap = ambariClient.getBlueprintMap(blueprintName);
 
         for (HostGroup hostGroup : hostGroups) {

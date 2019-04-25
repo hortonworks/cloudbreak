@@ -42,7 +42,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cluster.service.NotEnoughNodeException;
 import com.sequenceiq.cloudbreak.cluster.service.NotRecommendedNodeRemovalException;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -202,13 +202,13 @@ public class AmbariDecommissionerTest {
         int gatewayPort = 1234;
         String ambariName = "ambari-name";
 
-        ClusterDefinition clusterDefinition = new ClusterDefinition();
-        clusterDefinition.setName(ambariName);
-        clusterDefinition.setStackName(ambariName);
+        Blueprint blueprint = new Blueprint();
+        blueprint.setName(ambariName);
+        blueprint.setStackName(ambariName);
 
         Cluster cluster = new Cluster();
         cluster.setAmbariIp(ipAddress);
-        cluster.setClusterDefinition(clusterDefinition);
+        cluster.setBlueprint(blueprint);
 
         Stack stack = new Stack();
         stack.setCluster(cluster);
@@ -263,13 +263,13 @@ public class AmbariDecommissionerTest {
         int gatewayPort = 1234;
         String ambariName = "ambari-name";
 
-        ClusterDefinition clusterDefinition = new ClusterDefinition();
-        clusterDefinition.setName(ambariName);
-        clusterDefinition.setStackName(ambariName);
+        Blueprint blueprint = new Blueprint();
+        blueprint.setName(ambariName);
+        blueprint.setStackName(ambariName);
 
         Cluster cluster = new Cluster();
         cluster.setAmbariIp(ipAddress);
-        cluster.setClusterDefinition(clusterDefinition);
+        cluster.setBlueprint(blueprint);
 
         Stack stack = new Stack();
         stack.setCluster(cluster);
@@ -325,13 +325,13 @@ public class AmbariDecommissionerTest {
         String ambariName = "ambari-name";
         String replication = "3";
 
-        ClusterDefinition clusterDefinition = new ClusterDefinition();
-        clusterDefinition.setName(ambariName);
-        clusterDefinition.setStackName(ambariName);
+        Blueprint blueprint = new Blueprint();
+        blueprint.setName(ambariName);
+        blueprint.setStackName(ambariName);
 
         Cluster cluster = new Cluster();
         cluster.setAmbariIp(ipAddress);
-        cluster.setClusterDefinition(clusterDefinition);
+        cluster.setBlueprint(blueprint);
 
         Stack stack = new Stack();
         stack.setCluster(cluster);
@@ -388,13 +388,13 @@ public class AmbariDecommissionerTest {
         String ambariName = "ambari-name";
         String replication = "0";
 
-        ClusterDefinition clusterDefinition = new ClusterDefinition();
-        clusterDefinition.setName(ambariName);
-        clusterDefinition.setStackName(ambariName);
+        Blueprint blueprint = new Blueprint();
+        blueprint.setName(ambariName);
+        blueprint.setStackName(ambariName);
 
         Cluster cluster = new Cluster();
         cluster.setAmbariIp(ipAddress);
-        cluster.setClusterDefinition(clusterDefinition);
+        cluster.setBlueprint(blueprint);
 
         Stack stack = new Stack();
         stack.setCluster(cluster);

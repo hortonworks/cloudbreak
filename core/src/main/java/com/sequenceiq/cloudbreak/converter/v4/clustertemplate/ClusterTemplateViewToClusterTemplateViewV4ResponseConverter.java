@@ -28,8 +28,8 @@ public class ClusterTemplateViewToClusterTemplateViewV4ResponseConverter
             StackApiView stackTemplate = source.getStackTemplate();
             if (stackTemplate.getCluster() != null) {
                 ClusterApiView cluster = stackTemplate.getCluster();
-                clusterTemplateViewV4Response.setStackType(cluster.getClusterDefinition() != null ? cluster.getClusterDefinition().getStackType() : "");
-                clusterTemplateViewV4Response.setStackVersion(cluster.getClusterDefinition() != null ? cluster.getClusterDefinition().getStackVersion() : "");
+                clusterTemplateViewV4Response.setStackType(cluster.getBlueprint() != null ? cluster.getBlueprint().getStackType() : "");
+                clusterTemplateViewV4Response.setStackVersion(cluster.getBlueprint() != null ? cluster.getBlueprint().getStackVersion() : "");
             }
             if (stackTemplate.getEnvironment() != null) {
                 clusterTemplateViewV4Response.setEnvironmentName(stackTemplate.getEnvironment().getName());

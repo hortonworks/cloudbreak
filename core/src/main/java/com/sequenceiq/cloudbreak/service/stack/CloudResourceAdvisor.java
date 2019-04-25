@@ -28,13 +28,13 @@ import com.sequenceiq.cloudbreak.cloud.model.VmRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
-import com.sequenceiq.cloudbreak.clusterdefinition.validation.StackServiceComponentDescriptors;
-import com.sequenceiq.cloudbreak.domain.ClusterDefinition;
+import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionService;
-import com.sequenceiq.cloudbreak.service.clusterdefinition.ClusterDefinitionTextProcessorFactory;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintTextProcessorFactory;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.template.processor.ClusterDefinitionTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.ClusterManagerType;
 
 @Service
@@ -45,10 +45,10 @@ public class CloudResourceAdvisor {
     private CloudParameterService cloudParameterService;
 
     @Inject
-    private ClusterDefinitionService clusterDefinitionService;
+    private BlueprintService blueprintService;
 
     @Inject
-    private ClusterDefinitionTextProcessorFactory clusterDefinitionTextProcessorFactory;
+    private BlueprintTextProcessorFactory blueprintTextProcessorFactory;
 
     @Inject
     private StackServiceComponentDescriptors stackServiceComponentDescs;
@@ -59,22 +59,22 @@ public class CloudResourceAdvisor {
     @Inject
     private CredentialService credentialService;
 
-    public PlatformRecommendation createForClusterDefintion(Long workspaceId, String clusterDefinitionName, String credentialName,
+    public PlatformRecommendation createForBlueprint(Long workspaceId, String blueprintName, String credentialName,
             String region, String platformVariant, String availabilityZone) {
         Credential credential = credentialService.getByNameForWorkspaceId(credentialName, workspaceId);
         String cloudPlatform = credential.cloudPlatform();
         Map<String, VmType> vmTypesByHostGroup = new HashMap<>();
         Map<String, Boolean> hostGroupContainsMasterComp = new HashMap<>();
-        LOGGER.debug("Advising resources for clusterDefinitionName: {}, provider: {} and region: {}.",
-                clusterDefinitionName, cloudPlatform, region);
+        LOGGER.debug("Advising resources for blueprintName: {}, provider: {} and region: {}.",
+                blueprintName, cloudPlatform, region);
 
-        ClusterDefinition clusterDefinition = getClusterDefinition(clusterDefinitionName, workspaceId);
-        String clusterDefinitionText = clusterDefinition.getClusterDefinitionText();
-        ClusterDefinitionTextProcessor clusterDefinitionTextProcessor =
-                clusterDefinitionTextProcessorFactory.createClusterDefinitionTextProcessor(clusterDefinitionText);
-        Map<String, Set<String>> componentsByHostGroup = clusterDefinitionTextProcessor.getComponentsByHostGroup();
+        Blueprint blueprint = getBlueprint(blueprintName, workspaceId);
+        String blueprintText = blueprint.getBlueprintText();
+        BlueprintTextProcessor blueprintTextProcessor =
+                blueprintTextProcessorFactory.createBlueprintTextProcessor(blueprintText);
+        Map<String, Set<String>> componentsByHostGroup = blueprintTextProcessor.getComponentsByHostGroup();
         componentsByHostGroup.forEach((hGName, components) -> hostGroupContainsMasterComp.put(hGName,
-                isThereMasterComponents(clusterDefinitionTextProcessor.getClusterManagerType(), hGName, components)));
+                isThereMasterComponents(blueprintTextProcessor.getClusterManagerType(), hGName, components)));
 
         PlatformDisks platformDisks = cloudParameterService.getDiskTypes();
         Platform platform = platform(cloudPlatform);
@@ -108,13 +108,13 @@ public class CloudResourceAdvisor {
         return new PlatformRecommendation(vmTypesByHostGroup, availableVmTypes, diskTypes);
     }
 
-    private ClusterDefinition getClusterDefinition(String clusterDefinitionName, Long workspaceId) {
-        ClusterDefinition clusterDefinition = null;
-        if (!Strings.isNullOrEmpty(clusterDefinitionName)) {
-            LOGGER.debug("Try to get validation by name: {}.", clusterDefinitionName);
-            clusterDefinition = clusterDefinitionService.getByNameForWorkspaceId(clusterDefinitionName, workspaceId);
+    private Blueprint getBlueprint(String blueprintName, Long workspaceId) {
+        Blueprint blueprint = null;
+        if (!Strings.isNullOrEmpty(blueprintName)) {
+            LOGGER.debug("Try to get validation by name: {}.", blueprintName);
+            blueprint = blueprintService.getByNameForWorkspaceId(blueprintName, workspaceId);
         }
-        return clusterDefinition;
+        return blueprint;
     }
 
     private boolean isThereMasterComponents(ClusterManagerType clusterManagerType, String hostGroupName, Collection<String> components) {
