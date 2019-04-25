@@ -5,6 +5,9 @@
 
 [libdefaults]
  dns_lookup_realm = false
+{%- if "ipa_member" in grains.get('roles', []) %}
+ dns_lookup_kdc = true
+{%- endif %}
  ticket_lifetime = 24h
  renew_lifetime = 7d
  forwardable = true

@@ -130,7 +130,7 @@ public class ClouderaManagerKerberosServiceTest {
         when(kerberosConfig.getPassword()).thenReturn(password);
         cluster.setKerberosConfig(kerberosConfig);
         ClouderaManagerRepo clouderaManagerRepoDetails = new ClouderaManagerRepo();
-        clouderaManagerRepoDetails.setVersion(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_6_2_0.getVersion());
+        clouderaManagerRepoDetails.setVersion(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_6_3_0.getVersion());
 
         when(clustersResourceApi.configureForKerberos(eq(cluster.getName()), any(ApiConfigureForKerberosArguments.class)))
                 .thenReturn(new ApiCommand().id(BigDecimal.TEN));
