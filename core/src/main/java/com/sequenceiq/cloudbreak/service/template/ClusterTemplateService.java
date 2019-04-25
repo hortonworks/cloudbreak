@@ -22,10 +22,12 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplateView;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.init.clustertemplate.ClusterTemplateLoaderService;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterTemplateRepository;
+import com.sequenceiq.cloudbreak.repository.cluster.ClusterTemplateViewRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -43,6 +45,9 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     @Inject
     private ClusterTemplateRepository clusterTemplateRepository;
+
+    @Inject
+    private ClusterTemplateViewRepository clusterTemplateViewRepository;
 
     @Inject
     private UserService userService;
@@ -146,6 +151,10 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     public Set<ClusterTemplate> findAllByWorkspaceId(Long workspaceId) {
         updateDefaultClusterTemplates(workspaceId);
         return clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspaceId);
+    }
+
+    public Set<ClusterTemplateView> getAllAvailableViewInWorkspace(Long workspaceId) {
+        return clusterTemplateViewRepository.findAllByNotDeletedInWorkspace(workspaceId);
     }
 
     public void updateDefaultClusterTemplates(long workspaceId) {
