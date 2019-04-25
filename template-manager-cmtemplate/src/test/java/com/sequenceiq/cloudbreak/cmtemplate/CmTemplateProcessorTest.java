@@ -152,7 +152,7 @@ public class CmTemplateProcessorTest {
         getClusterDefinitionText("input/clouderamanager.bp");
         underTest = new CmTemplateProcessor(getClusterDefinitionText("input/clouderamanager.bp"));
         ClouderaManagerRepo clouderaManagerRepoDetails = new ClouderaManagerRepo();
-        clouderaManagerRepoDetails.setVersion(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_6_2_0.getVersion());
+        clouderaManagerRepoDetails.setVersion(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_6_3_0.getVersion());
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setClusterName("cluster");
         TemplatePreparationObject.Builder tpoBuilder = new TemplatePreparationObject.Builder().withGeneralClusterConfigs(generalClusterConfigs);
@@ -173,7 +173,7 @@ public class CmTemplateProcessorTest {
         getClusterDefinitionText("input/clouderamanager.bp");
         underTest = new CmTemplateProcessor(getClusterDefinitionText("input/clouderamanager-custom-ref.bp"));
         ClouderaManagerRepo clouderaManagerRepoDetails = new ClouderaManagerRepo();
-        clouderaManagerRepoDetails.setVersion(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_6_2_0.getVersion());
+        clouderaManagerRepoDetails.setVersion(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_6_3_0.getVersion());
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setClusterName("cluster");
         TemplatePreparationObject.Builder tpoBuilder = new TemplatePreparationObject.Builder().withGeneralClusterConfigs(generalClusterConfigs);

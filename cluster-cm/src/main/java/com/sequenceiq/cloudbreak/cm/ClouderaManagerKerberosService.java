@@ -33,7 +33,9 @@ public class ClouderaManagerKerberosService {
 
     private static final String ACTIVE_DIRECTORY = "Active Directory";
 
-    private static final String FREEIPA = "MIT KDC";
+    private static final String FREEIPA = "Red Hat IPA";
+
+    private static final String FREEIPA_FEATURE_FLAG = "FEATURE_FLAG_redhat_ipa";
 
     @Inject
     private ClouderaManagerClientFactory clouderaManagerClientFactory;
@@ -46,7 +48,9 @@ public class ClouderaManagerKerberosService {
 
     public void setupKerberos(ApiClient client, Stack stack) throws ApiException {
         Cluster cluster = stack.getCluster();
+        String clusterName = cluster.getName();
         if (cluster.isAdJoinable() || cluster.isIpaJoinable()) {
+            LOGGER.debug("Configure cluster {} with Kerberos", clusterName);
             ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerClientFactory.getClouderaManagerResourceApi(client);
             KerberosConfig kerberosConfig = cluster.getKerberosConfig();
             ApiConfigList apiConfigList = new ApiConfigList()
@@ -57,12 +61,19 @@ public class ClouderaManagerKerberosService {
                 apiConfigList.addItemsItem(new ApiConfig().name("kdc_type").value(ACTIVE_DIRECTORY));
                 apiConfigList.addItemsItem(new ApiConfig().name("ad_kdc_domain").value(kerberosConfig.getContainerDn()));
             } else if (cluster.isIpaJoinable()) {
+                LOGGER.debug("Enable FreeIPA on cluster: {}", clusterName);
                 apiConfigList.addItemsItem(new ApiConfig().name("kdc_type").value(FREEIPA));
+                ApiConfigList enableIpa = new ApiConfigList()
+                        .addItemsItem(new ApiConfig().name(FREEIPA_FEATURE_FLAG).value(Boolean.TRUE.toString()));
+                clouderaManagerResourceApi.updateConfig("Enable FreeIPA", enableIpa);
             }
             clouderaManagerResourceApi.updateConfig("Add kerberos configuration", apiConfigList);
-            ApiCommand importAdminCredentials =
-                    clouderaManagerResourceApi.importAdminCredentials(kerberosConfig.getPassword(), kerberosConfig.getPrincipal());
-            clouderaManagerPollingServiceProvider.kerberosConfigurePollingService(stack, client, importAdminCredentials.getId());
+            if (cluster.isAdJoinable()) {
+                LOGGER.debug("Import kerberos credentials for AD on cluster: {}", clusterName);
+                ApiCommand importAdminCredentials =
+                        clouderaManagerResourceApi.importAdminCredentials(kerberosConfig.getPassword(), kerberosConfig.getPrincipal());
+                clouderaManagerPollingServiceProvider.kerberosConfigurePollingService(stack, client, importAdminCredentials.getId());
+            }
         }
     }
 

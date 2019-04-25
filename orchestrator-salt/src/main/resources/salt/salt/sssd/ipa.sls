@@ -1,3 +1,5 @@
+{%- from 'sssd/settings.sls' import ipa with context %}
+
 packages_install:
   pkg.installed:
     - refresh: False
@@ -38,3 +40,24 @@ restart-sssd-if-reconfigured:
 
 include:
     - sssd.ssh
+
+{%- if "manager_server" in grains.get('roles', []) %}
+
+create_cm_keytab_generation_script:
+  file.managed:
+    - name: /opt/salt/scripts/generate_cm_keytab.sh
+    - source: salt://sssd/template/generate_cm_keytab.j2
+    - makedirs: True
+    - template: jinja
+    - context:
+        ipa: {{ ipa }}
+    - mode: 755
+
+generate_cm_freeipa_keytab:
+  cmd.run:
+    - name: sh -x /opt/salt/scripts/generate_cm_keytab.sh 2>&1 | tee -a /var/log/generate_cm_keytab.log && exit ${PIPESTATUS[0]}
+    - unless: ls /etc/cloudera-scm-server/cmf.keytab
+    - require:
+      - file: create_cm_keytab_generation_script
+
+{%- endif %}
