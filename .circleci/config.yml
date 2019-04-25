@@ -29,8 +29,6 @@ jobs:
       - image: circleci/openjdk:11-jdk
     environment:
       _JAVA_OPTIONS: "-Xmx1536m"
-      CM_PRIVATE_REPO_USER: CM_PRIVATE_REPO_USER
-      CM_PRIVATE_REPO_PASSWORD: CM_PRIVATE_REPO_PASSWORD
     steps:
       - checkout
       - attach_workspace:
@@ -55,8 +53,6 @@ jobs:
       - image: circleci/openjdk:11-jdk
     environment:
       _JAVA_OPTIONS: "-Xmx1536m"
-      CM_PRIVATE_REPO_USER: CM_PRIVATE_REPO_USER
-      CM_PRIVATE_REPO_PASSWORD: CM_PRIVATE_REPO_PASSWORD
     steps:
       - checkout
       - attach_workspace:
@@ -81,8 +77,6 @@ jobs:
       - image: circleci/openjdk:11-jdk
     environment:
       _JAVA_OPTIONS: "-Xmx1536m"
-      CM_PRIVATE_REPO_USER: CM_PRIVATE_REPO_USER
-      CM_PRIVATE_REPO_PASSWORD: CM_PRIVATE_REPO_PASSWORD
     steps:
       - checkout
       - attach_workspace:
@@ -107,8 +101,6 @@ jobs:
       - image: circleci/openjdk:11-jdk
     environment:
       _JAVA_OPTIONS: "-Xmx1536m"
-      CM_PRIVATE_REPO_USER: CM_PRIVATE_REPO_USER
-      CM_PRIVATE_REPO_PASSWORD: CM_PRIVATE_REPO_PASSWORD
     steps:
       - checkout
       - attach_workspace:
@@ -129,13 +121,9 @@ jobs:
           path: ~/spotbugs-test
 
   unit-test:
-    environment:
-      CC_TEST_REPORTER_ID: CC_TEST_REPORTER_ID
     docker:
       - image: circleci/openjdk:11-jdk
     environment:
-      CM_PRIVATE_REPO_USER: CM_PRIVATE_REPO_USER
-      CM_PRIVATE_REPO_PASSWORD: CM_PRIVATE_REPO_PASSWORD
       _JAVA_OPTIONS: "-XX:+UseContainerSupport"
     steps:
       - checkout
@@ -175,8 +163,6 @@ jobs:
     machine: true
     environment:
       _JAVA_OPTIONS: "-Xmx1536m"
-      CM_PRIVATE_REPO_USER: CM_PRIVATE_REPO_USER
-      CM_PRIVATE_REPO_PASSWORD: CM_PRIVATE_REPO_PASSWORD
     steps:
       - checkout
       - attach_workspace:
