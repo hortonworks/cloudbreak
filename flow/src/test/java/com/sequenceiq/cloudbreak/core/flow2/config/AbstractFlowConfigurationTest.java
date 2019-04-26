@@ -24,7 +24,6 @@ import org.springframework.statemachine.listener.StateMachineListenerAdapter;
 
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.Flow;
-import com.sequenceiq.cloudbreak.core.flow2.FlowConstants;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEventListener;
 import com.sequenceiq.cloudbreak.core.flow2.FlowFinalizeAction;
@@ -61,7 +60,7 @@ public class AbstractFlowConfigurationTest {
         underTest = new TestFlowConfiguration();
         MockitoAnnotations.initMocks(this);
         BDDMockito.given(applicationContext.getBean(ArgumentMatchers.anyString(), ArgumentMatchers.any(Class.class))).willReturn(action);
-        BDDMockito.given(applicationContext.getBean(ArgumentMatchers.eq(FlowConstants.FLOW_EVENT_LISTENER), ArgumentMatchers.eq(State.INIT),
+        BDDMockito.given(applicationContext.getBean(ArgumentMatchers.eq(FlowEventListener.class), ArgumentMatchers.eq(State.INIT),
                 ArgumentMatchers.eq(State.FINAL), ArgumentMatchers.anyString(), ArgumentMatchers.eq("flowId"),
                 ArgumentMatchers.anyLong())).willReturn(flowEventListener);
         transitions = new Builder<State, Event>()

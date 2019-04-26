@@ -36,7 +36,7 @@ public interface FlowLogService {
 
     void updateLastFlowLogPayload(FlowLog lastFlowLog, Payload payload, Map<Object, Object> variables);
 
-    FlowLog getLastFlowLog(String flowId);
+    Optional<FlowLog> getLastFlowLog(String flowId);
 
     Set<String> findAllRunningNonTerminationFlowIdsByStackId(Long stackId);
 

@@ -111,26 +111,34 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                         flow.sendEvent(key, payload);
                     }
                 } else {
-                    LOGGER.debug("flow control event arrived: key: {}, flowid: {}, payload: {}", key, flowId, payload);
-                    Flow flow = runningFlows.get(flowId);
-                    if (flow != null) {
-                        transactionService.required(() -> {
-                            FlowLog lastFlowLog = flowLogService.getLastFlowLog(flow.getFlowId());
-                            if (flowLogService.repeatedFlowState(lastFlowLog, key)) {
-                                flowLogService.updateLastFlowLogPayload(lastFlowLog, payload, flow.getVariables());
-                            } else {
-                                flowLogService.updateLastFlowLogStatus(lastFlowLog, failHandledEvents.contains(key));
-                                flowLogService.save(flow.getFlowId(), flowChainId, key, payload, flow.getVariables(),
-                                        flow.getFlowConfigClass(), flow.getCurrentState());
-                            }
-                            return null;
-                        });
-                        flow.sendEvent(key, payload);
-                    } else {
-                        LOGGER.debug("Cancelled flow finished running. Stack ID {}, flow ID {}, event {}", payload.getStackId(), flowId, key);
-                    }
+                    handleFlowControlEvent(key, payload, flowId, flowChainId);
                 }
                 break;
+        }
+    }
+
+    private void handleFlowControlEvent(String key, Payload payload, String flowId, String flowChainId) throws TransactionExecutionException {
+        LOGGER.debug("flow control event arrived: key: {}, flowid: {}, payload: {}", key, flowId, payload);
+        Flow flow = runningFlows.get(flowId);
+        if (flow != null) {
+            transactionService.required(() -> {
+                Optional<FlowLog> lastFlowLog = flowLogService.getLastFlowLog(flow.getFlowId());
+                lastFlowLog.ifPresent(flowLog -> updateFlowLogStatus(key, payload, flowChainId, flow, flowLog));
+                return null;
+            });
+            flow.sendEvent(key, payload);
+        } else {
+            LOGGER.debug("Cancelled flow finished running. Stack ID {}, flow ID {}, event {}", payload.getStackId(), flowId, key);
+        }
+    }
+
+    private void updateFlowLogStatus(String key, Payload payload, String flowChainId, Flow flow, FlowLog lastFlowLog) {
+        if (flowLogService.repeatedFlowState(lastFlowLog, key)) {
+            flowLogService.updateLastFlowLogPayload(lastFlowLog, payload, flow.getVariables());
+        } else {
+            flowLogService.updateLastFlowLogStatus(lastFlowLog, failHandledEvents.contains(key));
+            flowLogService.save(flow.getFlowId(), flowChainId, key, payload, flow.getVariables(),
+                    flow.getFlowConfigClass(), flow.getCurrentState());
         }
     }
 

@@ -21,6 +21,7 @@ dependencies {
   compile group: 'io.projectreactor',                  name: 'reactor-bus',                    version: eventBusVersion
   compile group: 'org.springframework.statemachine',   name: 'spring-statemachine-core',       version: '1.0.1.RELEASE'
   compile group: 'com.cedarsoftware',                  name: 'json-io',                        version: '4.9.12'
+  compile group: 'org.mybatis',                        name: 'mybatis-migrations',             version: '3.2.0'
 
   compile project(':cloud-common')
   compile project(':cloud-reactor-api')
