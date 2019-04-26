@@ -3,7 +3,7 @@
 set -e
 
 # auth to generate the keytab
-echo {{ ipa.password }} | kinit {{ ipa.principal }}
+echo "$password" | kinit {{ ipa.principal }}
 
 # generate keytab for user krbbind
 ipa-getkeytab -s {{ ipa.server }} -p krbbind -k /etc/cloudera-scm-server/cmf.keytab
