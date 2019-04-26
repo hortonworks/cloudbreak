@@ -55,7 +55,7 @@ create_cm_keytab_generation_script:
 
 generate_cm_freeipa_keytab:
   cmd.run:
-    - name: sh -x /opt/salt/scripts/generate_cm_keytab.sh 2>&1 | tee -a /var/log/generate_cm_keytab.log && exit ${PIPESTATUS[0]}
+    - name: sh /opt/salt/scripts/generate_cm_keytab.sh 2>&1 | tee -a /var/log/generate_cm_keytab.log && exit ${PIPESTATUS[0]}
     - env:
         - password: {{salt['pillar.get']('sssd-ipa:password')}}
     - unless: ls /etc/cloudera-scm-server/cmf.keytab
