@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.flowlog;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.Map;
 import java.util.Optional;
@@ -13,6 +12,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cedarsoftware.util.io.JsonWriter;
@@ -58,11 +58,12 @@ public class FlowLogDBServiceTest {
     public void getLastFlowLog() {
         FlowLog flowLog = new FlowLog();
         flowLog.setId(ID);
+        Optional<FlowLog> flowLogOptional = Optional.of(flowLog);
 
-        when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
+        Mockito.when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLogOptional);
 
-        FlowLog lastFlowLog = underTest.getLastFlowLog(FLOW_ID);
-        assertEquals(flowLog, lastFlowLog);
+        Optional<FlowLog> lastFlowLog = underTest.getLastFlowLog(FLOW_ID);
+        assertEquals(flowLogOptional, lastFlowLog);
     }
 
     @Test

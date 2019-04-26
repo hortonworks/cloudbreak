@@ -122,7 +122,6 @@ dependencyManagement {
     dependency group: 'com.google.code.findbugs',           name: 'annotations',                 version: '3.0.1'
     dependency group: 'com.google.http-client',             name: 'google-http-client-jackson2', version: '1.22.0'
     dependency group: 'com.icegreen',                       name: 'greenmail',                   version: '1.4.1'
-    dependency group: 'com.cedarsoftware',                  name: 'json-io',                     version: '4.9.12'
     dependency group: 'com.thoughtworks.xstream',           name: 'xstream',                     version: '1.4.7'
     dependency group: 'com.github.fommil',                  name: 'openssh',                     version: '1.0'
 
@@ -185,7 +184,6 @@ dependencies {
   compile group: 'com.google.oauth-client',            name: 'google-oauth-client-jetty'
   compile group: 'com.google.code.findbugs',           name: 'annotations'
   compile group: 'com.google.http-client',             name: 'google-http-client-jackson2'
-  compile group: 'com.cedarsoftware',                  name: 'json-io'
   compile group: 'com.thoughtworks.xstream',           name: 'xstream'
   compile group: 'com.github.fommil',                  name: 'openssh'
   compile group: 'com.icegreen',                       name: 'greenmail'

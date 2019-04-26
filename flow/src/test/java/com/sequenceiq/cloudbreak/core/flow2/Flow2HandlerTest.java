@@ -191,10 +191,15 @@ public class Flow2HandlerTest {
 
     @Test
     public void testExistingFlow() {
+        FlowLog lastFlowLog = new FlowLog();
+        lastFlowLog.setNextEvent("KEY");
+        Optional<FlowLog> flowLogOptional = Optional.of(lastFlowLog);
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
         given(runningFlows.get(anyString())).willReturn(flow);
         given(flow.getCurrentState()).willReturn(flowState);
         given(flow.getFlowId()).willReturn(FLOW_ID);
+        given(flowLogService.getLastFlowLog(FLOW_ID)).willReturn(flowLogOptional);
+
         dummyEvent.setKey("KEY");
         underTest.accept(dummyEvent);
         verify(flowLogService, times(1))
@@ -214,7 +219,8 @@ public class Flow2HandlerTest {
 
         FlowLog lastFlowLog = new FlowLog();
         lastFlowLog.setNextEvent("KEY");
-        given(flowLogService.getLastFlowLog(FLOW_ID)).willReturn(lastFlowLog);
+        Optional<FlowLog> flowLogOptional = Optional.of(lastFlowLog);
+        given(flowLogService.getLastFlowLog(FLOW_ID)).willReturn(flowLogOptional);
         given(flowLogService.repeatedFlowState(lastFlowLog, "KEY")).willReturn(true);
         dummyEvent.setKey("KEY");
         underTest.accept(dummyEvent);

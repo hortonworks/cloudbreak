@@ -13,17 +13,14 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
-import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.CommonContext;
 
 @Configuration
 public class HelloWorldActions {
-
     @Bean(name = "HELLO_WORLD_START_STATE")
     public Action<?, ?> startAction() {
         return new AbstractHelloWorldAction<>(Payload.class) {
-
             @Override
             protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) {
                 sendEvent(context.getFlowId(), HELLO_WORLD_FINISHED_EVENT.event(), payload);
@@ -36,23 +33,8 @@ public class HelloWorldActions {
         return new AbstractHelloWorldAction<>(Payload.class) {
             @Override
             protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) {
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(CommonContext context) {
-                return new Selectable() {
-
-                    @Override
-                    public String selector() {
-                        return FINALIZE_HELLO_WORLD_EVENT.event();
-                    }
-
-                    @Override
-                    public Long getStackId() {
-                        return null;
-                    }
-                };
+                sendEvent(context.getFlowId(), FINALIZE_HELLO_WORLD_EVENT.event(),
+                        new HelloWorldFinishPayload(FINALIZE_HELLO_WORLD_EVENT.event(), payload.getStackId()));
             }
         };
     }

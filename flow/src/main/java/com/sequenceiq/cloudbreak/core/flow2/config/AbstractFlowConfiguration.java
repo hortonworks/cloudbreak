@@ -38,7 +38,6 @@ import com.sequenceiq.cloudbreak.core.flow2.DefaultFlowTriggerCondition;
 import com.sequenceiq.cloudbreak.core.flow2.EventConverterAdapter;
 import com.sequenceiq.cloudbreak.core.flow2.Flow;
 import com.sequenceiq.cloudbreak.core.flow2.FlowAdapter;
-import com.sequenceiq.cloudbreak.core.flow2.FlowConstants;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEventListener;
 import com.sequenceiq.cloudbreak.core.flow2.FlowFinalizeAction;
@@ -82,7 +81,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
     @Override
     public Flow createFlow(String flowId, Long stackId) {
         StateMachine<S, E> sm = stateMachineFactory.getStateMachine();
-        FlowEventListener<S, E> fl = (FlowEventListener<S, E>) applicationContext.getBean(FlowConstants.FLOW_EVENT_LISTENER, getEdgeConfig().initState,
+        FlowEventListener<S, E> fl = (FlowEventListener<S, E>) applicationContext.getBean(FlowEventListener.class, getEdgeConfig().initState,
                 getEdgeConfig().finalState, getClass().getSimpleName(), flowId, stackId);
         Flow flow = new FlowAdapter<>(flowId, sm, new MessageFactory<>(), new StateConverterAdapter<>(stateType),
                 new EventConverterAdapter<>(eventType), (Class<? extends FlowConfiguration<E>>) getClass(), fl);

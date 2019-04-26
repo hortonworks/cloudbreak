@@ -57,6 +57,11 @@ vault:
       mount.path: "dps-dev"
       login.role: "cloudbreak.default"
 
+flow:
+  schema:
+    migration:
+      auto: false
+
 cb:
   uaa.startup.timeout.sec: 300
   enabledplatforms: AZURE,AWS,GCP,OPENSTACK

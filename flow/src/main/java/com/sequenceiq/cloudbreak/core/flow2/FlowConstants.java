@@ -9,8 +9,6 @@ public class FlowConstants {
 
     public static final String FLOW_CANCEL = "FLOWCANCEL";
 
-    public static final String FLOW_EVENT_LISTENER = "flowEventListener";
-
     private FlowConstants() {
     }
 }

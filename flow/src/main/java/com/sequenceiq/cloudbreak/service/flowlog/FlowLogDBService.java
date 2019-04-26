@@ -11,13 +11,13 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import com.cedarsoftware.util.io.JsonWriter;
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.FlowLogService;
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 import com.sequenceiq.cloudbreak.domain.FlowChainLog;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 
+@Primary
 @Service
 public class FlowLogDBService implements FlowLogService {
 
@@ -90,7 +91,7 @@ public class FlowLogDBService implements FlowLogService {
     private FlowLog finalize(Long stackId, String flowId, String state) throws TransactionExecutionException {
         return transactionService.required(() -> {
             flowLogRepository.finalizeByFlowId(flowId);
-            updateLastFlowLogStatus(getLastFlowLog(flowId), false);
+            getLastFlowLog(flowId).ifPresent(flowLog -> updateLastFlowLogStatus(flowLog, false));
             FlowLog flowLog = new FlowLog(stackId, flowId, state, Boolean.TRUE, StateStatus.SUCCESSFUL);
             flowLog.setCloudbreakNodeId(cloudbreakNodeConfig.getId());
             return flowLogRepository.save(flowLog);
@@ -128,8 +129,8 @@ public class FlowLogDBService implements FlowLogService {
                 });
     }
 
-    public FlowLog getLastFlowLog(String flowId) {
-        return flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(flowId).orElseThrow(NotFoundException.notFound("FlowLog", flowId));
+    public Optional<FlowLog> getLastFlowLog(String flowId) {
+        return flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(flowId);
     }
 
     @Override
