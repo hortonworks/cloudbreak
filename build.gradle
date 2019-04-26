@@ -29,6 +29,9 @@ if (project.hasProperty("reckon.scope")) {
   }
 }
 
+def cmPrivateRepoUser = System.getenv("CM_PRIVATE_REPO_USER") ?: "$defaultCmPrivateRepoUser"
+def cmPrivateRepoPassword = System.getenv("CM_PRIVATE_REPO_PASSWORD") ?: "$defaultCmPrivateRepoPassword"
+
 def env = project.hasProperty('env') ? project.getProperty('env') : 'local'
 ext.config = new ConfigSlurper(env).parse(file("$rootDir/gradle/config/buildConfig.groovy").toURL())
 
@@ -168,8 +171,8 @@ subprojects {
     maven { url "https://plugins.gradle.org/m2/" }
     maven {
       credentials {
-        username "$System.env.CM_PRIVATE_REPO_USER"
-        password "$System.env.CM_PRIVATE_REPO_PASSWORD"
+        username "$cmPrivateRepoUser"
+        password "$cmPrivateRepoPassword"
       }
       url "https://repository.cloudera.com/cloudera/list/cm-private/" 
     }
