@@ -371,8 +371,7 @@ public class AwsPlatformResources implements PlatformResources {
         Map<Region, String> displayNames = new HashMap<>();
         Map<Region, Coordinate> coordinates = new HashMap<>();
 
-        DescribeRegionsRequest describeRegionsRequest = new DescribeRegionsRequest();
-        DescribeRegionsResult describeRegionsResult = ec2Client.describeRegions(describeRegionsRequest);
+        DescribeRegionsResult describeRegionsResult = describeRegionsResult(ec2Client);
         String defaultRegion = awsDefaultZoneProvider.getDefaultZone(cloudCredential);
 
         for (com.amazonaws.services.ec2.model.Region awsRegion : describeRegionsResult.getRegions()) {
@@ -428,6 +427,36 @@ public class AwsPlatformResources implements PlatformResources {
         } else {
             coordinates.put(region(awsRegion.getRegionName()), coordinate);
         }
+    }
+
+    private DescribeAvailabilityZonesResult describeAvailabilityZonesResult(AmazonEC2Client ec2Client, com.amazonaws.services.ec2.model.Region awsRegion) {
+        try {
+            DescribeAvailabilityZonesRequest describeAvailabilityZonesRequest = new DescribeAvailabilityZonesRequest();
+
+            ec2Client.setRegion(RegionUtils.getRegion(awsRegion.getRegionName()));
+            Filter filter = new Filter();
+            filter.setName("region-name");
+            Collection<String> list = new ArrayList<>();
+            list.add(awsRegion.getRegionName());
+            filter.setValues(list);
+
+            describeAvailabilityZonesRequest.withFilters(filter);
+
+            return ec2Client.describeAvailabilityZones(describeAvailabilityZonesRequest);
+        } catch (AmazonEC2Exception e) {
+            LOGGER.info("Failed to retrieve AZ from Region: {}!", awsRegion.getRegionName(), e);
+        }
+        return new DescribeAvailabilityZonesResult();
+    }
+
+    private DescribeRegionsResult describeRegionsResult(AmazonEC2Client ec2Client) {
+        try {
+            DescribeRegionsRequest describeRegionsRequest = new DescribeRegionsRequest();
+            return ec2Client.describeRegions(describeRegionsRequest);
+        } catch (AmazonEC2Exception e) {
+            LOGGER.info("Failed to retrieve regions!", e);
+        }
+        return new DescribeRegionsResult();
     }
 
     @Override
