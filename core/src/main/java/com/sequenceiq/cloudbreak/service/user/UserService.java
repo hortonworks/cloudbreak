@@ -75,7 +75,7 @@ public class UserService {
         try {
             return cachedUserService.getUser(
                     cloudbreakUser,
-                    (tenantName, userId) -> userRepository.findByTenantNameAndUserId(tenantName, userId).orElse(null),
+                    this::findUserAndSetCrnIfExists,
                     this::createUser);
         } finally {
             semaphore.release();
@@ -105,6 +105,25 @@ public class UserService {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         cachedUserService.evictByIdentityUser(cloudbreakUser);
         return cloudbreakUser.getUsername();
+    }
+
+    private User findUserAndSetCrnIfExists(CloudbreakUser cloudbreakUser) {
+        try {
+            return transactionService.requiresNew(() -> {
+                Optional<User> userByIdAndTenantName = userRepository.findByTenantNameAndUserId(cloudbreakUser.getTenant(), cloudbreakUser.getUserId());
+                if (userByIdAndTenantName.isPresent()) {
+                    User user = userByIdAndTenantName.get();
+                    if (user.getUserCrn() == null && !StringUtils.isEmpty(cloudbreakUser.getUserCrn())) {
+                        user.setUserCrn(cloudbreakUser.getUserCrn());
+                        user = userRepository.save(user);
+                    }
+                    return user;
+                }
+                return null;
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
     }
 
     private User createUser(CloudbreakUser cloudbreakUser) {
