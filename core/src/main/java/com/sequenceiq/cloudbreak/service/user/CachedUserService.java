@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.user;
 
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
@@ -19,8 +18,8 @@ public class CachedUserService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CachedUserService.class);
 
     @Cacheable(cacheNames = "userCache", key = "#cloudbreakUser")
-    public User getUser(CloudbreakUser cloudbreakUser, BiFunction<String, String, User> findByTenantAndUsername, Function<CloudbreakUser, User> createUser) {
-        return Optional.ofNullable(findByTenantAndUsername.apply(cloudbreakUser.getTenant(), cloudbreakUser.getUserId()))
+    public User getUser(CloudbreakUser cloudbreakUser, Function<CloudbreakUser, User> findByTenantAndUsername, Function<CloudbreakUser, User> createUser) {
+        return Optional.ofNullable(findByTenantAndUsername.apply(cloudbreakUser))
                 .orElseGet(() -> createUser.apply(cloudbreakUser));
     }
 
