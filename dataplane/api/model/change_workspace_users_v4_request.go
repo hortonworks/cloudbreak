@@ -6,6 +6,9 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -17,19 +20,24 @@ import (
 // swagger:model ChangeWorkspaceUsersV4Request
 type ChangeWorkspaceUsersV4Request struct {
 
-	// permissions
+	// roles
 	// Unique: true
-	Permissions []string `json:"permissions"`
+	Roles []string `json:"roles"`
 
 	// user Id
-	UserID string `json:"userId,omitempty"`
+	// Required: true
+	UserID *string `json:"userId"`
 }
 
 // Validate validates this change workspace users v4 request
 func (m *ChangeWorkspaceUsersV4Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validatePermissions(formats); err != nil {
+	if err := m.validateRoles(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateUserID(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -39,13 +47,50 @@ func (m *ChangeWorkspaceUsersV4Request) Validate(formats strfmt.Registry) error 
 	return nil
 }
 
-func (m *ChangeWorkspaceUsersV4Request) validatePermissions(formats strfmt.Registry) error {
+var changeWorkspaceUsersV4RequestRolesItemsEnum []interface{}
 
-	if swag.IsZero(m.Permissions) { // not required
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["WORKSPACEREADER","WORKSPACEWRITER","WORKSPACEMANAGER"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		changeWorkspaceUsersV4RequestRolesItemsEnum = append(changeWorkspaceUsersV4RequestRolesItemsEnum, v)
+	}
+}
+
+func (m *ChangeWorkspaceUsersV4Request) validateRolesItemsEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, changeWorkspaceUsersV4RequestRolesItemsEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ChangeWorkspaceUsersV4Request) validateRoles(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Roles) { // not required
 		return nil
 	}
 
-	if err := validate.UniqueItems("permissions", "body", m.Permissions); err != nil {
+	if err := validate.UniqueItems("roles", "body", m.Roles); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.Roles); i++ {
+
+		// value enum
+		if err := m.validateRolesItemsEnum("roles"+"."+strconv.Itoa(i), "body", m.Roles[i]); err != nil {
+			return err
+		}
+
+	}
+
+	return nil
+}
+
+func (m *ChangeWorkspaceUsersV4Request) validateUserID(formats strfmt.Registry) error {
+
+	if err := validate.Required("userId", "body", m.UserID); err != nil {
 		return err
 	}
 

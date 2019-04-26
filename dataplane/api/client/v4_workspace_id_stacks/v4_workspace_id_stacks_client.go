@@ -117,7 +117,7 @@ func (a *Client) DeleteStackInWorkspaceV4(params *DeleteStackInWorkspaceV4Params
 /*
 DeleteWithKerberos deletes the stack with kerberos cluster by name in workspace
 
-Clusters are materialised Hadoop services on a given infrastructure. They are built based on a cluster definition (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
+Clusters are materialised Hadoop services on a given infrastructure. They are built based on a blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
 */
 func (a *Client) DeleteWithKerberos(params *DeleteWithKerberosParams) error {
 	// TODO: Validate the params before sending
@@ -235,32 +235,32 @@ func (a *Client) ListStackInWorkspaceV4(params *ListStackInWorkspaceV4Params) (*
 }
 
 /*
-PostStackForClusterDefinitionV4 posts stack for cluster definition in workspace
+PostStackForBlueprintV4 posts stack for blueprint in workspace
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */
-func (a *Client) PostStackForClusterDefinitionV4(params *PostStackForClusterDefinitionV4Params) (*PostStackForClusterDefinitionV4OK, error) {
+func (a *Client) PostStackForBlueprintV4(params *PostStackForBlueprintV4Params) (*PostStackForBlueprintV4OK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostStackForClusterDefinitionV4Params()
+		params = NewPostStackForBlueprintV4Params()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "postStackForClusterDefinitionV4",
+		ID:                 "postStackForBlueprintV4",
 		Method:             "POST",
-		PathPattern:        "/v4/{workspaceId}/stacks/{name}/cluster_definition",
+		PathPattern:        "/v4/{workspaceId}/stacks/{name}/blueprint",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PostStackForClusterDefinitionV4Reader{formats: a.formats},
+		Reader:             &PostStackForBlueprintV4Reader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostStackForClusterDefinitionV4OK), nil
+	return result.(*PostStackForBlueprintV4OK), nil
 
 }
 
@@ -297,7 +297,7 @@ func (a *Client) PostStackInWorkspaceV4(params *PostStackInWorkspaceV4Params) (*
 /*
 PutClusterV4 updates cluster by stack id
 
-Clusters are materialised Hadoop services on a given infrastructure. They are built based on a cluster definition (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
+Clusters are materialised Hadoop services on a given infrastructure. They are built based on a blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
 */
 func (a *Client) PutClusterV4(params *PutClusterV4Params) error {
 	// TODO: Validate the params before sending
@@ -314,36 +314,6 @@ func (a *Client) PutClusterV4(params *PutClusterV4Params) error {
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PutClusterV4Reader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-
-}
-
-/*
-PutReinstallStackV4 updates stack by name
-
-Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
-*/
-func (a *Client) PutReinstallStackV4(params *PutReinstallStackV4Params) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewPutReinstallStackV4Params()
-	}
-
-	_, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "putReinstallStackV4",
-		Method:             "PUT",
-		PathPattern:        "/v4/{workspaceId}/stacks/{name}/reinstall",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &PutReinstallStackV4Reader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})

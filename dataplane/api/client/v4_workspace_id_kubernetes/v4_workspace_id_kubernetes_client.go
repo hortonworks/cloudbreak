@@ -115,6 +115,36 @@ func (a *Client) DeleteKubernetesConfigInWorkspace(params *DeleteKubernetesConfi
 }
 
 /*
+DeleteKubernetesConfigsInWorkspace deletes multiple kubernetes configs by name in workspace
+
+An Kubernetes Configuration describe a configuration to communicate with a Kubernetes cluster.
+*/
+func (a *Client) DeleteKubernetesConfigsInWorkspace(params *DeleteKubernetesConfigsInWorkspaceParams) (*DeleteKubernetesConfigsInWorkspaceOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteKubernetesConfigsInWorkspaceParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteKubernetesConfigsInWorkspace",
+		Method:             "DELETE",
+		PathPattern:        "/v4/{workspaceId}/kubernetes",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteKubernetesConfigsInWorkspaceReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DeleteKubernetesConfigsInWorkspaceOK), nil
+
+}
+
+/*
 DetachKubernetesResourceFromEnvironments detaches kubernetes resource from environemnts
 
 An Kubernetes Configuration describe a configuration to communicate with a Kubernetes cluster.

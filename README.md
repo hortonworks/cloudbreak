@@ -29,7 +29,7 @@ AUTHOR(S):
 
 COMMANDS:
      audit                 audit related operations
-     clusterdefinition     cluster definition related operations
+     blueprint     blueprint related operations
      cloud                 information about cloud provider resources
      cluster               cluster related operations
      completion            prints the bash completion function
@@ -100,7 +100,7 @@ The full reference of this descriptor file can be found in the API docs.
 The CLI can help with creating the skeleton of the cluster descriptor JSON.
 The following command outputs a descriptor file with empty values:
 ```
-dp cluster generate-template aws existing-subnet --cluster-definition-name "my-custom-cluster-definition"
+dp cluster generate-template aws existing-subnet --blueprint-name "my-custom-blueprint"
 ```
 The `aws` and `existing-subnet` keywords are subcommands to the `cluster generate-template` command and help with creating a skeleton with proper entries for the selected cloud provider and network configuration.
 Use the `-h` option to see the available subcommands, e.g.:

@@ -57,7 +57,7 @@ func (a *Client) EvictCurrentUserDetails(params *EvictCurrentUserDetailsParams) 
 /*
 GetAllUsers retrieves all users in the tenant
 
-Users can be invited under an account by the administrator, and all resources (e.g. resources, networks, cluster definition, credentials, clusters) can be shared across account users
+Users can be invited under an account by the administrator, and all resources (e.g. resources, networks, blueprint, credentials, clusters) can be shared across account users
 */
 func (a *Client) GetAllUsers(params *GetAllUsersParams) (*GetAllUsersOK, error) {
 	// TODO: Validate the params before sending

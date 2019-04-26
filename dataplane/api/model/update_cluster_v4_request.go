@@ -20,8 +20,8 @@ import (
 // swagger:model UpdateClusterV4Request
 type UpdateClusterV4Request struct {
 
-	// cluster definition id for the cluster
-	ClusterDefinitionName string `json:"clusterDefinitionName,omitempty"`
+	// blueprint id for the cluster
+	BlueprintName string `json:"blueprintName,omitempty"`
 
 	// host group adjustment
 	HostGroupAdjustment *HostGroupAdjustmentV4Request `json:"hostGroupAdjustment,omitempty"`
@@ -48,8 +48,8 @@ type UpdateClusterV4Request struct {
 	// user details
 	UserNamePassword *UserNamePasswordV4Request `json:"userNamePassword,omitempty"`
 
-	// cluster definition validation
-	ValidateClusterDefinition *bool `json:"validateClusterDefinition,omitempty"`
+	// blueprint validation
+	ValidateBlueprint *bool `json:"validateBlueprint,omitempty"`
 }
 
 // Validate validates this update cluster v4 request

@@ -115,6 +115,36 @@ func (a *Client) DeleteDatabaseInWorkspace(params *DeleteDatabaseInWorkspacePara
 }
 
 /*
+DeleteDatabasesInWorkspace deletes multiple r d s configs by name in workspace
+
+A Database Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
+*/
+func (a *Client) DeleteDatabasesInWorkspace(params *DeleteDatabasesInWorkspaceParams) (*DeleteDatabasesInWorkspaceOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteDatabasesInWorkspaceParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteDatabasesInWorkspace",
+		Method:             "DELETE",
+		PathPattern:        "/v4/{workspaceId}/databases",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteDatabasesInWorkspaceReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DeleteDatabasesInWorkspaceOK), nil
+
+}
+
+/*
 DetachDatabaseFromEnvironments detaches r d s resource from environemnts
 
 A Database Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.

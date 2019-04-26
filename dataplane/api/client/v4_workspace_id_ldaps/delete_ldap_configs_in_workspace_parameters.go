@@ -63,8 +63,8 @@ for the delete ldap configs in workspace operation typically these are written t
 */
 type DeleteLdapConfigsInWorkspaceParams struct {
 
-	/*Name*/
-	Name string
+	/*Body*/
+	Body []string
 	/*WorkspaceID*/
 	WorkspaceID int64
 
@@ -106,15 +106,15 @@ func (o *DeleteLdapConfigsInWorkspaceParams) SetHTTPClient(client *http.Client) 
 	o.HTTPClient = client
 }
 
-// WithName adds the name to the delete ldap configs in workspace params
-func (o *DeleteLdapConfigsInWorkspaceParams) WithName(name string) *DeleteLdapConfigsInWorkspaceParams {
-	o.SetName(name)
+// WithBody adds the body to the delete ldap configs in workspace params
+func (o *DeleteLdapConfigsInWorkspaceParams) WithBody(body []string) *DeleteLdapConfigsInWorkspaceParams {
+	o.SetBody(body)
 	return o
 }
 
-// SetName adds the name to the delete ldap configs in workspace params
-func (o *DeleteLdapConfigsInWorkspaceParams) SetName(name string) {
-	o.Name = name
+// SetBody adds the body to the delete ldap configs in workspace params
+func (o *DeleteLdapConfigsInWorkspaceParams) SetBody(body []string) {
+	o.Body = body
 }
 
 // WithWorkspaceID adds the workspaceID to the delete ldap configs in workspace params
@@ -136,9 +136,10 @@ func (o *DeleteLdapConfigsInWorkspaceParams) WriteToRequest(r runtime.ClientRequ
 	}
 	var res []error
 
-	// path param name
-	if err := r.SetPathParam("name", o.Name); err != nil {
-		return err
+	if o.Body != nil {
+		if err := r.SetBodyParam(o.Body); err != nil {
+			return err
+		}
 	}
 
 	// path param workspaceId

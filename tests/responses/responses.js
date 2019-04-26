@@ -2,8 +2,8 @@ var responses={};
 
 var accountpreferences = require('./accountpreferences/accountpreferences.json');
 var platforms = require('./accountpreferences/platforms.json');
-var defaultclusterdefinition = require('./clusterdefinitions/default-clusterdefinition.json');
-var qaclusterdefinition = require('./clusterdefinitions/qa-clusterdefinition.json');
+var defaultblueprint = require('./blueprints/default-blueprint.json');
+var qablueprint = require('./blueprints/qa-blueprint.json');
 var disktypes = require('./connectors/disktypes.json');
 var gateways = require('./connectors/gateways.json');
 var ippools = require('./connectors/ippools.json');
@@ -76,9 +76,9 @@ responses.getAuditEventsInWorkspace = responseObject([], OK);
 
 responses.isPlatformSelectionDisabled= responseObject(platforms, OK);
 responses.platformEnablement= responseObject(platforms, OK);
-responses.listClusterDefinitionsByWorkspace = responseObject(qaclusterdefinition, OK);
-responses.getClusterDefinitionInWorkspace = responseObject(defaultclusterdefinition, OK);
-responses.createClusterDefinitionInWorkspace= responseObject(defaultclusterdefinition, OK);
+responses.listBlueprintsByWorkspace = responseObject(qablueprint, OK);
+responses.getBlueprintInWorkspace = responseObject(defaultblueprint, OK);
+responses.createBlueprintInWorkspace= responseObject(defaultblueprint, OK);
 responses.getDisktypes= responseObject(disktypes, OK);
 responses.getGatewaysCredentialId= responseObject(gateways, OK);
 responses.getIpPoolsCredentialId= responseObject(ippools, OK);

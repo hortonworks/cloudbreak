@@ -47,16 +47,16 @@ func NewDeleteLdapConfigsInWorkspaceOK() *DeleteLdapConfigsInWorkspaceOK {
 successful operation
 */
 type DeleteLdapConfigsInWorkspaceOK struct {
-	Payload *model.LdapV4Response
+	Payload *model.LdapV4Responses
 }
 
 func (o *DeleteLdapConfigsInWorkspaceOK) Error() string {
-	return fmt.Sprintf("[DELETE /v4/{workspaceId}/ldaps/{name}][%d] deleteLdapConfigsInWorkspaceOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[DELETE /v4/{workspaceId}/ldaps][%d] deleteLdapConfigsInWorkspaceOK  %+v", 200, o.Payload)
 }
 
 func (o *DeleteLdapConfigsInWorkspaceOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(model.LdapV4Response)
+	o.Payload = new(model.LdapV4Responses)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

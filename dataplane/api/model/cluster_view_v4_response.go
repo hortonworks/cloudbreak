@@ -20,8 +20,8 @@ import (
 // swagger:model ClusterViewV4Response
 type ClusterViewV4Response struct {
 
-	// cluster definition for the cluster
-	ClusterDefinition *ClusterDefinitionV4ViewResponse `json:"clusterDefinition,omitempty"`
+	// blueprint for the cluster
+	Blueprint *BlueprintV4ViewResponse `json:"blueprint,omitempty"`
 
 	// description of the resource
 	// Max Length: 1000
@@ -63,7 +63,7 @@ type ClusterViewV4Response struct {
 func (m *ClusterViewV4Response) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateClusterDefinition(formats); err != nil {
+	if err := m.validateBlueprint(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -93,16 +93,16 @@ func (m *ClusterViewV4Response) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *ClusterViewV4Response) validateClusterDefinition(formats strfmt.Registry) error {
+func (m *ClusterViewV4Response) validateBlueprint(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.ClusterDefinition) { // not required
+	if swag.IsZero(m.Blueprint) { // not required
 		return nil
 	}
 
-	if m.ClusterDefinition != nil {
-		if err := m.ClusterDefinition.Validate(formats); err != nil {
+	if m.Blueprint != nil {
+		if err := m.Blueprint.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("clusterDefinition")
+				return ve.ValidateName("blueprint")
 			}
 			return err
 		}

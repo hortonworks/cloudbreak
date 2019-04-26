@@ -15,8 +15,8 @@ import (
 )
 
 type proxyClient interface {
-	CreateProxyconfigInWorkspace(params *v4Proxy.CreateProxyconfigInWorkspaceParams) (*v4Proxy.CreateProxyconfigInWorkspaceOK, error)
-	ListProxyconfigsByWorkspace(params *v4Proxy.ListProxyconfigsByWorkspaceParams) (*v4Proxy.ListProxyconfigsByWorkspaceOK, error)
+	CreateProxyConfigInWorkspace(params *v4Proxy.CreateProxyConfigInWorkspaceParams) (*v4Proxy.CreateProxyConfigInWorkspaceOK, error)
+	ListProxyConfigsByWorkspace(params *v4Proxy.ListProxyConfigsByWorkspaceParams) (*v4Proxy.ListProxyConfigsByWorkspaceOK, error)
 }
 
 var Header = []string{"Name", "Host", "Port", "Protocol", "Environments"}
@@ -68,7 +68,7 @@ func createProxy(proxyClient proxyClient, workspaceID int64, name, host string, 
 
 	log.Infof("[createProxy] create proxy with name: %s", name)
 	var proxy *model.ProxyV4Response
-	resp, err := proxyClient.CreateProxyconfigInWorkspace(v4Proxy.NewCreateProxyconfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(proxyRequest))
+	resp, err := proxyClient.CreateProxyConfigInWorkspace(v4Proxy.NewCreateProxyConfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(proxyRequest))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -125,7 +125,7 @@ func ListProxies(c *cli.Context) error {
 }
 
 func listProxiesImpl(proxyClient proxyClient, writer func([]string, []utils.Row), workspaceID int64) error {
-	resp, err := proxyClient.ListProxyconfigsByWorkspace(v4Proxy.NewListProxyconfigsByWorkspaceParams().WithWorkspaceID(workspaceID))
+	resp, err := proxyClient.ListProxyConfigsByWorkspace(v4Proxy.NewListProxyConfigsByWorkspaceParams().WithWorkspaceID(workspaceID))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -155,7 +155,7 @@ func DeleteProxy(c *cli.Context) error {
 
 	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
 
-	if _, err := cbClient.Cloudbreak.V4WorkspaceIDProxies.DeleteProxyconfigInWorkspace(v4Proxy.NewDeleteProxyconfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(proxyName)); err != nil {
+	if _, err := cbClient.Cloudbreak.V4WorkspaceIDProxies.DeleteProxyConfigInWorkspace(v4Proxy.NewDeleteProxyConfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(proxyName)); err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	log.Infof("[DeleteProxy] proxy config deleted: %s", proxyName)

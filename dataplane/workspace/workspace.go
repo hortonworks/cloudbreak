@@ -169,7 +169,7 @@ func AddReadWriteManageUser(c *cli.Context) {
 	addUser(c, []string{"ALL:READ", "ALL:WRITE", "WORKSPACE:MANAGE"})
 }
 
-func addUser(c *cli.Context, permissions []string) {
+func addUser(c *cli.Context, roles []string) {
 	defer utils.TimeTrack(time.Now(), "add user to workspace")
 	log.Infof("[AddUser] add user to workspace")
 
@@ -180,8 +180,8 @@ func addUser(c *cli.Context, permissions []string) {
 
 	changeUsersJSON := []*model.ChangeWorkspaceUsersV4Request{
 		{
-			UserID:      userID,
-			Permissions: permissions,
+			UserID: &userID,
+			Roles:  roles,
 		},
 	}
 

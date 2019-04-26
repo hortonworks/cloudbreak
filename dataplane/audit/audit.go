@@ -42,8 +42,8 @@ type auditClient interface {
 }
 
 func (a *auditOut) DataAsStringArray() []string {
-	if a.Audit.RawFlowEvent != nil && a.Audit.RawFlowEvent.ClusterDefinitionDetails != nil {
-		a.Audit.RawFlowEvent.ClusterDefinitionDetails.ClusterDefinitionJSON = "---TRUNCATED---"
+	if a.Audit.RawFlowEvent != nil && a.Audit.RawFlowEvent.BlueprintDetails != nil {
+		a.Audit.RawFlowEvent.BlueprintDetails.BlueprintJSON = "---TRUNCATED---"
 	}
 	auditYAML, err := yaml.Marshal(a.Audit)
 	if err != nil {
@@ -52,8 +52,8 @@ func (a *auditOut) DataAsStringArray() []string {
 	return []string{string(auditYAML)}
 }
 
-func ListClusterDefinitionAudits(c *cli.Context) {
-	listAudits("clusterdefinitions", c)
+func ListBlueprintAudits(c *cli.Context) {
+	listAudits("blueprints", c)
 }
 
 func ListClusterAudits(c *cli.Context) {

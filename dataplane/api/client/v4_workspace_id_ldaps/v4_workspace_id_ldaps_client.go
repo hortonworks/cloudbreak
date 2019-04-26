@@ -85,7 +85,37 @@ func (a *Client) CreateLdapConfigsInWorkspace(params *CreateLdapConfigsInWorkspa
 }
 
 /*
-DeleteLdapConfigsInWorkspace deletes l d a p config by name in workspace
+DeleteLdapConfigInWorkspace deletes l d a p config by name in workspace
+
+LDAP server integration enables the user to provide a central place to store usernames and passwords for the users of his/her clusters.
+*/
+func (a *Client) DeleteLdapConfigInWorkspace(params *DeleteLdapConfigInWorkspaceParams) (*DeleteLdapConfigInWorkspaceOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteLdapConfigInWorkspaceParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteLdapConfigInWorkspace",
+		Method:             "DELETE",
+		PathPattern:        "/v4/{workspaceId}/ldaps/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteLdapConfigInWorkspaceReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DeleteLdapConfigInWorkspaceOK), nil
+
+}
+
+/*
+DeleteLdapConfigsInWorkspace deletes multiple l d a p configs by name in workspace
 
 LDAP server integration enables the user to provide a central place to store usernames and passwords for the users of his/her clusters.
 */
@@ -98,7 +128,7 @@ func (a *Client) DeleteLdapConfigsInWorkspace(params *DeleteLdapConfigsInWorkspa
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "deleteLdapConfigsInWorkspace",
 		Method:             "DELETE",
-		PathPattern:        "/v4/{workspaceId}/ldaps/{name}",
+		PathPattern:        "/v4/{workspaceId}/ldaps",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},

@@ -115,6 +115,36 @@ func (a *Client) DeleteKerberosConfigInWorkspace(params *DeleteKerberosConfigInW
 }
 
 /*
+DeleteKerberosConfigsInWorkspace deletes multiple kerberos configs by name in workspace
+
+Kerberos config operations
+*/
+func (a *Client) DeleteKerberosConfigsInWorkspace(params *DeleteKerberosConfigsInWorkspaceParams) (*DeleteKerberosConfigsInWorkspaceOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteKerberosConfigsInWorkspaceParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteKerberosConfigsInWorkspace",
+		Method:             "DELETE",
+		PathPattern:        "/v4/{workspaceId}/kerberos",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteKerberosConfigsInWorkspaceReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DeleteKerberosConfigsInWorkspaceOK), nil
+
+}
+
+/*
 DetachKerberosConfigFromEnvironments detaches kerberos config from environemnts
 
 Kerberos config operations

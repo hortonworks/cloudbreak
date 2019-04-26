@@ -22,11 +22,11 @@ type ClusterV4Request struct {
 	// ambari specific requests
 	Ambari *AmbariV4Request `json:"ambari,omitempty"`
 
+	// blueprint name for the cluster
+	BlueprintName string `json:"blueprintName,omitempty"`
+
 	// external cloud storage configuration
 	CloudStorage *CloudStorageV4Request `json:"cloudStorage,omitempty"`
-
-	// cluster definition name for the cluster
-	ClusterDefinitionName string `json:"clusterDefinitionName,omitempty"`
 
 	// cloudera manager specific requests
 	Cm *ClouderaManagerV4Request `json:"cm,omitempty"`
@@ -70,8 +70,8 @@ type ClusterV4Request struct {
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	UserName *string `json:"userName"`
 
-	// cluster definition validation
-	ValidateClusterDefinition *bool `json:"validateClusterDefinition,omitempty"`
+	// blueprint validation
+	ValidateBlueprint *bool `json:"validateBlueprint,omitempty"`
 }
 
 // Validate validates this cluster v4 request

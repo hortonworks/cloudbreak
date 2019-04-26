@@ -7,8 +7,8 @@ class TraceResponseBuilder
 
     @@cloudbreak_base = "cb"
     @@api_base = "#{@@cloudbreak_base}/api"
-    @@clusterdefinition_base = "#{@@api_base}/v4/#{@@default_workspace}/clusterdefinitions"
-    @@create_clusterdefinition_endpoint = "#{@@clusterdefinition_base}"
+    @@blueprint_base = "#{@@api_base}/v4/#{@@default_workspace}/blueprints"
+    @@create_blueprint_endpoint = "#{@@blueprint_base}"
     @@cluster_base = "#{@@api_base}/v4/#{@@default_workspace}/stack"
     @@create_cluster_endpoint = "#{@@cluster_base}"
     @@create_workspace_endpoint = "#{@@api_base}/v4/workspaces"

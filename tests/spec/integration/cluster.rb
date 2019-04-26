@@ -275,7 +275,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
 
     it "Cluster - Generate attached cluster template - Not datalake cluster" do
     with_environment 'DEBUG' => '1' do
-      result = cb.cluster.generate_attached_cluster_template.source_cluster("test").cluster_definition_name("test").build(false)
+      result = cb.cluster.generate_attached_cluster_template.source_cluster("test").blueprint_name("test").build(false)
       expect(result.exit_status).to eql 1
       expect(result.stderr).to include("error")
     end
@@ -286,7 +286,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
       requestBody = MockResponse.requestBodyCreate('getStackInWorkspaceV4', JSON.parse(load_json(@dl_stack_json)), '200')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)
-      result = cb.cluster.generate_attached_cluster_template.source_cluster("dl-ok").cluster_definition_name("test").build(false)
+      result = cb.cluster.generate_attached_cluster_template.source_cluster("dl-ok").blueprint_name("test").build(false)
       expect(result.exit_status).to eql 0
       expect(result.stdout.empty?).to be_falsy
     end
@@ -300,7 +300,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
       requestBody = MockResponse.requestBodyCreate('getStackInWorkspaceV4', temp_json, '200')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)
-      result = cb.cluster.generate_attached_cluster_template.source_cluster("dl-ok").cluster_definition_name("test").build(false)
+      result = cb.cluster.generate_attached_cluster_template.source_cluster("dl-ok").blueprint_name("test").build(false)
       expect(result.exit_status).to eql 1
       expect(result.stderr).to include("error")
     end
@@ -314,7 +314,7 @@ RSpec.describe 'Cluster test cases', :type => :aruba do
       requestBody = MockResponse.requestBodyCreate('getStackInWorkspaceV4', temp_json, '200')
       url = ENV['BASE_URL'] + @mock_endpoint_setup
       MockResponse.post(requestBody, url)
-      result = cb.cluster.generate_attached_cluster_template.source_cluster("dl-ok").cluster_definition_name("test").build(false)
+      result = cb.cluster.generate_attached_cluster_template.source_cluster("dl-ok").blueprint_name("test").build(false)
       expect(result.exit_status).to eql 1
       expect(result.stderr).to include("error")
     end

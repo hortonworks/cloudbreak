@@ -15,7 +15,7 @@ var stackTemplateDescription = `Template parameters to fill in the generated tem
 		name:	Name of the cluster
 		region:	Region of the cluster
 		availabilityZone:	Availability zone of the cluster, on AZURE it is the same as the region
-		clusterDefinitionName:	Name of the selected cluster definition
+		blueprintName:	Name of the selected blueprint
 		credentialName:	Name of the selected credential
 		instanceGroups.group:	Name of the instance group
 		instanceGroups.nodeCount:	Number of nodes in the group
@@ -100,10 +100,10 @@ func init() {
 						Name:   "yarn",
 						Usage:  "creates an yarn cluster JSON template",
 						Before: cf.CheckConfigAndCommandFlags,
-						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
+						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 						Action: stack.GenerateYarnStackTemplate,
 						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},
@@ -116,10 +116,10 @@ func init() {
 								Name:   "new-network",
 								Usage:  "creates an aws cluster JSON template with new network",
 								Before: cf.CheckConfigAndCommandFlags,
-								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional, fl.FlCloudStorageTypeOptional, fl.FlDefaultEncryptionOptional, fl.FlCustomEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
+								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional, fl.FlCloudStorageTypeOptional, fl.FlDefaultEncryptionOptional, fl.FlCustomEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 								Action: stack.GenerateAwsStackTemplate,
 								BashComplete: func(c *cli.Context) {
-									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional, fl.FlCloudStorageTypeOptional, fl.FlDefaultEncryptionOptional, fl.FlCustomEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
+									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional, fl.FlCloudStorageTypeOptional, fl.FlDefaultEncryptionOptional, fl.FlCustomEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 										fl.PrintFlagCompletion(f)
 									}
 								},
@@ -128,10 +128,10 @@ func init() {
 								Name:   "existing-network",
 								Usage:  "creates an aws cluster JSON template with existing network",
 								Before: cf.CheckConfigAndCommandFlags,
-								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional, fl.FlCloudStorageTypeOptional, fl.FlDefaultEncryptionOptional, fl.FlCustomEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
+								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional, fl.FlCloudStorageTypeOptional, fl.FlDefaultEncryptionOptional, fl.FlCustomEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 								Action: stack.GenerateAwsStackTemplate,
 								BashComplete: func(c *cli.Context) {
-									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional, fl.FlCloudStorageTypeOptional, fl.FlDefaultEncryptionOptional, fl.FlCustomEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
+									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional, fl.FlCloudStorageTypeOptional, fl.FlDefaultEncryptionOptional, fl.FlCustomEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 										fl.PrintFlagCompletion(f)
 									}
 								},
@@ -140,10 +140,10 @@ func init() {
 								Name:   "existing-subnet",
 								Usage:  "creates an aws cluster JSON template with existing subnet",
 								Before: cf.CheckConfigAndCommandFlags,
-								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional, fl.FlCloudStorageTypeOptional, fl.FlDefaultEncryptionOptional, fl.FlCustomEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
+								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional, fl.FlCloudStorageTypeOptional, fl.FlDefaultEncryptionOptional, fl.FlCustomEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 								Action: stack.GenerateAwsStackTemplate,
 								BashComplete: func(c *cli.Context) {
-									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional, fl.FlCloudStorageTypeOptional, fl.FlDefaultEncryptionOptional, fl.FlCustomEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
+									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional, fl.FlCloudStorageTypeOptional, fl.FlDefaultEncryptionOptional, fl.FlCustomEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 										fl.PrintFlagCompletion(f)
 									}
 								},
@@ -158,10 +158,10 @@ func init() {
 								Name:   "new-network",
 								Usage:  "creates an azure cluster JSON template with new network",
 								Before: cf.CheckConfigAndCommandFlags,
-								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional, fl.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
+								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional, fl.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 								Action: stack.GenerateAzureStackTemplate,
 								BashComplete: func(c *cli.Context) {
-									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional, fl.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
+									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional, fl.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 										fl.PrintFlagCompletion(f)
 									}
 								},
@@ -170,10 +170,10 @@ func init() {
 								Name:   "existing-subnet",
 								Usage:  "creates an azure cluster JSON template with existing subnet",
 								Before: cf.CheckConfigAndCommandFlags,
-								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional, fl.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
+								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional, fl.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 								Action: stack.GenerateAzureStackTemplate,
 								BashComplete: func(c *cli.Context) {
-									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional, fl.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
+									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional, fl.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 										fl.PrintFlagCompletion(f)
 									}
 								},
@@ -188,10 +188,10 @@ func init() {
 								Name:   "new-network",
 								Usage:  "creates a gcp cluster JSON template with new network",
 								Before: cf.CheckConfigAndCommandFlags,
-								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional, fl.FlCloudStorageTypeOptional, fl.FlRawEncryptionOptional, fl.FlRsaEncryptionOptional, fl.FlKmsEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
+								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional, fl.FlCloudStorageTypeOptional, fl.FlRawEncryptionOptional, fl.FlRsaEncryptionOptional, fl.FlKmsEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 								Action: stack.GenerateGcpStackTemplate,
 								BashComplete: func(c *cli.Context) {
-									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional, fl.FlCloudStorageTypeOptional, fl.FlRawEncryptionOptional, fl.FlRsaEncryptionOptional, fl.FlKmsEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
+									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional, fl.FlCloudStorageTypeOptional, fl.FlRawEncryptionOptional, fl.FlRsaEncryptionOptional, fl.FlKmsEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 										fl.PrintFlagCompletion(f)
 									}
 								},
@@ -200,10 +200,10 @@ func init() {
 								Name:   "existing-network",
 								Usage:  "creates a gcp cluster JSON template with existing network",
 								Before: cf.CheckConfigAndCommandFlags,
-								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional, fl.FlCloudStorageTypeOptional, fl.FlRawEncryptionOptional, fl.FlRsaEncryptionOptional, fl.FlKmsEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
+								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional, fl.FlCloudStorageTypeOptional, fl.FlRawEncryptionOptional, fl.FlRsaEncryptionOptional, fl.FlKmsEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 								Action: stack.GenerateGcpStackTemplate,
 								BashComplete: func(c *cli.Context) {
-									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional, fl.FlCloudStorageTypeOptional, fl.FlRawEncryptionOptional, fl.FlRsaEncryptionOptional, fl.FlKmsEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
+									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional, fl.FlCloudStorageTypeOptional, fl.FlRawEncryptionOptional, fl.FlRsaEncryptionOptional, fl.FlKmsEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 										fl.PrintFlagCompletion(f)
 									}
 								},
@@ -212,10 +212,10 @@ func init() {
 								Name:   "existing-subnet",
 								Usage:  "creates a gcp cluster JSON template with existing subnet",
 								Before: cf.CheckConfigAndCommandFlags,
-								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional, fl.FlCloudStorageTypeOptional, fl.FlRawEncryptionOptional, fl.FlRsaEncryptionOptional, fl.FlKmsEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
+								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional, fl.FlCloudStorageTypeOptional, fl.FlRawEncryptionOptional, fl.FlRsaEncryptionOptional, fl.FlKmsEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 								Action: stack.GenerateGcpStackTemplate,
 								BashComplete: func(c *cli.Context) {
-									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional, fl.FlCloudStorageTypeOptional, fl.FlRawEncryptionOptional, fl.FlRsaEncryptionOptional, fl.FlKmsEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
+									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional, fl.FlCloudStorageTypeOptional, fl.FlRawEncryptionOptional, fl.FlRsaEncryptionOptional, fl.FlKmsEncryptionOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 										fl.PrintFlagCompletion(f)
 									}
 								},
@@ -224,10 +224,10 @@ func init() {
 								Name:   "legacy-network",
 								Usage:  "creates a gcp cluster JSON template with legacy network",
 								Before: cf.CheckConfigAndCommandFlags,
-								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional, fl.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
+								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional, fl.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 								Action: stack.GenerateGcpStackTemplate,
 								BashComplete: func(c *cli.Context) {
-									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional, fl.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
+									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional, fl.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 										fl.PrintFlagCompletion(f)
 									}
 								},
@@ -236,10 +236,10 @@ func init() {
 								Name:   "shared-network",
 								Usage:  "creates a gcp cluster JSON template with shared network",
 								Before: cf.CheckConfigAndCommandFlags,
-								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional, fl.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
+								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional, fl.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 								Action: stack.GenerateGcpStackTemplate,
 								BashComplete: func(c *cli.Context) {
-									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional, fl.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
+									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional, fl.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 										fl.PrintFlagCompletion(f)
 									}
 								},
@@ -254,10 +254,10 @@ func init() {
 								Name:   "new-network",
 								Usage:  "creates a openstack cluster JSON template with new network",
 								Before: cf.CheckConfigAndCommandFlags,
-								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
+								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 								Action: stack.GenerateOpenstackStackTemplate,
 								BashComplete: func(c *cli.Context) {
-									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
+									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 										fl.PrintFlagCompletion(f)
 									}
 								},
@@ -266,10 +266,10 @@ func init() {
 								Name:   "existing-network",
 								Usage:  "creates a openstack cluster JSON template with existing network",
 								Before: cf.CheckConfigAndCommandFlags,
-								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
+								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 								Action: stack.GenerateOpenstackStackTemplate,
 								BashComplete: func(c *cli.Context) {
-									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
+									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 										fl.PrintFlagCompletion(f)
 									}
 								},
@@ -278,10 +278,10 @@ func init() {
 								Name:   "existing-subnet",
 								Usage:  "creates a openstack cluster JSON template with existing subnet",
 								Before: cf.CheckConfigAndCommandFlags,
-								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
+								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build(),
 								Action: stack.GenerateOpenstackStackTemplate,
 								BashComplete: func(c *cli.Context) {
-									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlClusterDefinitionNameOptional, fl.FlClusterDefinitionFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
+									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlBlueprintNameOptional, fl.FlBlueprintFileOptional).AddAuthenticationFlags().AddTemplateFlags().Build() {
 										fl.PrintFlagCompletion(f)
 									}
 								},
@@ -294,10 +294,10 @@ func init() {
 				Name:   "generate-attached-cluster-template",
 				Usage:  "generates attached cluster template",
 				Before: cf.CheckConfigAndCommandFlags,
-				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlWithSourceCluster, fl.FlClusterDefinitionName, fl.FlClusterDefinitionFileOptional, fl.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
+				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlWithSourceCluster, fl.FlBlueprintName, fl.FlBlueprintFileOptional, fl.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddOutputFlag().Build(),
 				Action: stack.GenerateAtachedStackTemplate,
 				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlWithSourceCluster, fl.FlClusterDefinitionName, fl.FlClusterDefinitionFileOptional, fl.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlWithSourceCluster, fl.FlBlueprintName, fl.FlBlueprintFileOptional, fl.FlCloudStorageTypeOptional).AddAuthenticationFlags().AddOutputFlag().Build() {
 						fl.PrintFlagCompletion(f)
 					}
 				},

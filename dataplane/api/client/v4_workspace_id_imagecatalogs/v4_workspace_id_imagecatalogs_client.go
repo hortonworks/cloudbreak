@@ -85,6 +85,36 @@ func (a *Client) DeleteImageCatalogInWorkspace(params *DeleteImageCatalogInWorks
 }
 
 /*
+DeleteImageCatalogsInWorkspace deletes multiple image catalogs by name in workspace
+
+Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.
+*/
+func (a *Client) DeleteImageCatalogsInWorkspace(params *DeleteImageCatalogsInWorkspaceParams) (*DeleteImageCatalogsInWorkspaceOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteImageCatalogsInWorkspaceParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteImageCatalogsInWorkspace",
+		Method:             "DELETE",
+		PathPattern:        "/v4/{workspaceId}/image_catalogs",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteImageCatalogsInWorkspaceReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DeleteImageCatalogsInWorkspaceOK), nil
+
+}
+
+/*
 GetImageCatalogInWorkspace gets image catalog by name in workspace
 
 Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.

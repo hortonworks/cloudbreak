@@ -47,8 +47,8 @@ func (*mockAuditClient) GetAuditEventByWorkspace(params *v4audit.GetAuditEventBy
 			UserName:          "admin@example.com",
 		},
 		RawFlowEvent: &model.StructuredFlowEvent{
-			ClusterDefinitionDetails: &model.ClusterDefinitionDetails{
-				ClusterDefinitionJSON: "long cluster definition text",
+			BlueprintDetails: &model.BlueprintDetails{
+				BlueprintJSON: "long blueprint text",
 			},
 		},
 		Status: "OK - 200",
@@ -90,7 +90,7 @@ func TestDescribeAuditImpl(t *testing.T) {
 	if len(rows) != 1 {
 		t.Fatalf("row number doesn't match 1 == %d", len(rows))
 	}
-	expected := regexp.MustCompile("clusterdefinitionjson: '---TRUNCATED---'")
+	expected := regexp.MustCompile("blueprintjson: '---TRUNCATED---'")
 	for _, r := range rows {
 		if expected.FindString(strings.Join(r.DataAsStringArray(), "")) == "" {
 			t.Errorf("TRUNCATED text not found in %s", r.DataAsStringArray())

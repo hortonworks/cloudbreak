@@ -2,7 +2,7 @@ GIT_FIRST_PARENT ?= $(shell git describe --tags --first-parent | sed -nre 's/^[^
 GIT_LATEST_TAG ?= $(shell git describe --tags | grep -Eo "^[0-9]+\.[0-9]+\.[0-9]+\-[a-z]+\.[0-9]*")
 GIT_ACTIVE_BRANCH ?= $(shell git rev-parse HEAD)
 DOCKER_IP ?= $(shell echo $(DOCKER_HOST) | awk -F/ '{print $$3}' | sed 's/:.*//')
-CLUSTER_DEFINITION_URL ?= https://raw.githubusercontent.com/hortonworks/cb-cli/$(GIT_ACTIVE_BRANCH)/tests/clusterdefinitions/test.bp
+CLUSTER_DEFINITION_URL ?= https://raw.githubusercontent.com/hortonworks/cb-cli/$(GIT_ACTIVE_BRANCH)/tests/blueprints/test.bp
 
 ifeq ($(DOCKER_IP),)
     DOCKER_IP=127.0.0.1

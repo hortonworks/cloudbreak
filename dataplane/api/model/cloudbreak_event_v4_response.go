@@ -22,14 +22,14 @@ type CloudbreakEventV4Response struct {
 	// availability zone of the stack
 	AvailabilityZone string `json:"availabilityZone,omitempty"`
 
+	// blueprint id for the cluster
+	BlueprintID int64 `json:"blueprintId,omitempty"`
+
+	// gathered from blueprintName field from the blueprint
+	BlueprintName string `json:"blueprintName,omitempty"`
+
 	// type of cloud provider
 	Cloud string `json:"cloud,omitempty"`
-
-	// cluster definition id for the cluster
-	ClusterDefinitionID int64 `json:"clusterDefinitionId,omitempty"`
-
-	// gathered from clusterDefinitionName field from the cluster definition
-	ClusterDefinitionName string `json:"clusterDefinitionName,omitempty"`
 
 	// id of the cluster
 	ClusterID int64 `json:"clusterId,omitempty"`
@@ -77,6 +77,9 @@ type CloudbreakEventV4Response struct {
 	// status of the stack
 	// Enum: [REQUESTED CREATE_IN_PROGRESS AVAILABLE UPDATE_IN_PROGRESS UPDATE_REQUESTED UPDATE_FAILED CREATE_FAILED ENABLE_SECURITY_FAILED PRE_DELETE_IN_PROGRESS DELETE_IN_PROGRESS DELETE_FAILED DELETE_COMPLETED STOPPED STOP_REQUESTED START_REQUESTED STOP_IN_PROGRESS START_IN_PROGRESS START_FAILED STOP_FAILED WAIT_FOR_SYNC MAINTENANCE_MODE_ENABLED]
 	StackStatus string `json:"stackStatus,omitempty"`
+
+	// name of the current tenant
+	TenantName string `json:"tenantName,omitempty"`
 
 	// User ID in the new authorization model
 	UserID string `json:"userId,omitempty"`

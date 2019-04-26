@@ -26,11 +26,11 @@ type ClusterV4Response struct {
 	// Additional information for ambari cluster
 	Attributes map[string]interface{} `json:"attributes,omitempty"`
 
+	// blueprint for the cluster
+	Blueprint *BlueprintV4Response `json:"blueprint,omitempty"`
+
 	// filesystem for a specific stack
 	CloudStorage *CloudStorageV4Response `json:"cloudStorage,omitempty"`
-
-	// cluster definition for the cluster
-	ClusterDefinition *ClusterDefinitionV4Response `json:"clusterDefinition,omitempty"`
 
 	// cm
 	Cm *ClouderaManagerV4Response `json:"cm,omitempty"`
@@ -59,8 +59,8 @@ type ClusterV4Response struct {
 	// cluster exposed services for topologies
 	ExposedServices map[string][]ClusterExposedServiceV4Response `json:"exposedServices,omitempty"`
 
-	// cluster definition, set this or the url field
-	ExtendedClusterDefinitionText string `json:"extendedClusterDefinitionText,omitempty"`
+	// blueprint, set this or the url field
+	ExtendedBlueprintText string `json:"extendedBlueprintText,omitempty"`
 
 	// gateway
 	Gateway *GatewayV4Response `json:"gateway,omitempty"`
@@ -114,11 +114,11 @@ func (m *ClusterV4Response) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateCloudStorage(formats); err != nil {
+	if err := m.validateBlueprint(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateClusterDefinition(formats); err != nil {
+	if err := m.validateCloudStorage(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -194,6 +194,24 @@ func (m *ClusterV4Response) validateAmbari(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *ClusterV4Response) validateBlueprint(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Blueprint) { // not required
+		return nil
+	}
+
+	if m.Blueprint != nil {
+		if err := m.Blueprint.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("blueprint")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (m *ClusterV4Response) validateCloudStorage(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.CloudStorage) { // not required
@@ -204,24 +222,6 @@ func (m *ClusterV4Response) validateCloudStorage(formats strfmt.Registry) error 
 		if err := m.CloudStorage.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("cloudStorage")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *ClusterV4Response) validateClusterDefinition(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.ClusterDefinition) { // not required
-		return nil
-	}
-
-	if m.ClusterDefinition != nil {
-		if err := m.ClusterDefinition.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("clusterDefinition")
 			}
 			return err
 		}

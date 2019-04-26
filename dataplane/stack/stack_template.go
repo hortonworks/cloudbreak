@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hortonworks/cb-cli/dataplane/clusterdefinition"
+	"github.com/hortonworks/cb-cli/dataplane/blueprint"
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
 
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
@@ -34,9 +34,9 @@ var maxCardinality = map[string]int{
 	"ALL": 3,
 }
 
-var getClusterDefinitionClient = func(server, apiKeyID, privateKey string) clusterdefinition.GetClusterDefinitionInWorkspace {
+var getBlueprintClient = func(server, apiKeyID, privateKey string) blueprint.GetBlueprintInWorkspace {
 	cbClient := oauth.NewCloudbreakHTTPClient(server, apiKeyID, privateKey)
-	return cbClient.Cloudbreak.V4WorkspaceIDClusterDefinitions
+	return cbClient.Cloudbreak.V4WorkspaceIDBlueprints
 }
 
 var stackClient = func(server, apiKeyID, privateKey string) getStackInWorkspace {
@@ -46,27 +46,27 @@ var stackClient = func(server, apiKeyID, privateKey string) getStackInWorkspace 
 
 func GenerateAwsStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.AWS)
-	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, c.Int64, getClusterDefinitionClient, getCloudStorageType(c.String)))
+	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, c.Int64, getBlueprintClient, getCloudStorageType(c.String)))
 }
 
 func GenerateAzureStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.AZURE)
-	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, c.Int64, getClusterDefinitionClient, getCloudStorageType(c.String)))
+	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, c.Int64, getBlueprintClient, getCloudStorageType(c.String)))
 }
 
 func GenerateGcpStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.GCP)
-	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, c.Int64, getClusterDefinitionClient, getCloudStorageType(c.String)))
+	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, c.Int64, getBlueprintClient, getCloudStorageType(c.String)))
 }
 
 func GenerateOpenstackStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.OPENSTACK)
-	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, c.Int64, getClusterDefinitionClient, getCloudStorageType(c.String)))
+	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, c.Int64, getBlueprintClient, getCloudStorageType(c.String)))
 }
 
 func GenerateYarnStackTemplate(c *cli.Context) error {
 	cloud.SetProviderType(cloud.YARN)
-	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, c.Int64, getClusterDefinitionClient, getCloudStorageType(c.String)))
+	return printTemplate(*generateStackTemplateImpl(getNetworkMode(c), c.String, c.Bool, c.Int64, getBlueprintClient, getCloudStorageType(c.String)))
 }
 
 func GenerateAtachedStackTemplate(c *cli.Context) error {
@@ -122,16 +122,16 @@ func getStringPointer(skippedFields map[string]bool, fieldName string, defaultVa
 	return &defaultValue
 }
 
-func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string) string, boolFinder func(string) bool, int64Finder func(string) int64, getClusterDefinitionClient func(string, string, string) clusterdefinition.GetClusterDefinitionInWorkspace, storageType cloud.CloudStorageType) *model.StackV4Request {
+func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string) string, boolFinder func(string) bool, int64Finder func(string) int64, getBlueprintClient func(string, string, string) blueprint.GetBlueprintInWorkspace, storageType cloud.CloudStorageType) *model.StackV4Request {
 	provider := cloud.GetProvider()
 	skippedFields := provider.SkippedFields()
 
 	template := model.StackV4Request{
 		Cluster: &model.ClusterV4Request{
-			UserName:                  &(&types.S{S: "____"}).S,
-			Password:                  &(&types.S{S: ""}).S,
-			ClusterDefinitionName:     "____",
-			ValidateClusterDefinition: &(&types.B{B: false}).B,
+			UserName:          &(&types.S{S: "____"}).S,
+			Password:          &(&types.S{S: ""}).S,
+			BlueprintName:     "____",
+			ValidateBlueprint: &(&types.B{B: false}).B,
 		},
 		Name: &(&types.S{S: ""}).S,
 		Environment: &model.EnvironmentSettingsV4Request{
@@ -149,18 +149,18 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 	}
 	preExtendTemplateWithOptionalBlocks(&template, boolFinder, storageType)
 	nodes := defaultNodes
-	if bpName := stringFinder(fl.FlClusterDefinitionNameOptional.Name); len(bpName) != 0 {
+	if bpName := stringFinder(fl.FlBlueprintNameOptional.Name); len(bpName) != 0 {
 		workspace := int64Finder(fl.FlWorkspaceOptional.Name)
-		bpResp := clusterdefinition.FetchClusterDefinition(workspace, bpName, getClusterDefinitionClient(stringFinder(fl.FlServerOptional.Name), stringFinder(fl.FlApiKeyIDOptional.Name), stringFinder(fl.FlPrivateKeyOptional.Name)))
-		bp, err := base64.StdEncoding.DecodeString(bpResp.ClusterDefinition)
+		bpResp := blueprint.FetchBlueprint(workspace, bpName, getBlueprintClient(stringFinder(fl.FlServerOptional.Name), stringFinder(fl.FlApiKeyIDOptional.Name), stringFinder(fl.FlPrivateKeyOptional.Name)))
+		bp, err := base64.StdEncoding.DecodeString(bpResp.Blueprint)
 		if err != nil {
 			commonUtils.LogErrorAndExit(err)
 		}
-		nodes = getNodesByClusterDefinition(bp)
-		template.Cluster.ClusterDefinitionName = bpName
-	} else if bpFile := stringFinder(fl.FlClusterDefinitionFileOptional.Name); len(bpFile) != 0 {
+		nodes = getNodesByBlueprint(bp)
+		template.Cluster.BlueprintName = bpName
+	} else if bpFile := stringFinder(fl.FlBlueprintFileOptional.Name); len(bpFile) != 0 {
 		bp := commonUtils.ReadFile(bpFile)
-		nodes = getNodesByClusterDefinition(bp)
+		nodes = getNodesByBlueprint(bp)
 	}
 	for _, node := range nodes {
 		template.InstanceGroups = append(template.InstanceGroups, convertNodeToInstanceGroup(provider, node))
@@ -172,7 +172,7 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 
 func generateAttachedTemplateImpl(stringFinder func(string) string, boolFinder func(string) bool, int64Finder func(string) int64, storageType cloud.CloudStorageType) error {
 	datalake := fetchStack(int64Finder(fl.FlWorkspaceOptional.Name), stringFinder(fl.FlWithSourceCluster.Name), stackClient(stringFinder(fl.FlServerOptional.Name), stringFinder(fl.FlApiKeyIDOptional.Name), stringFinder(fl.FlPrivateKeyOptional.Name)))
-	isSharedServiceReady, _ := datalake.Cluster.ClusterDefinition.Tags["shared_services_ready"].(bool)
+	isSharedServiceReady, _ := datalake.Cluster.Blueprint.Tags["shared_services_ready"].(bool)
 	if !isSharedServiceReady {
 		commonUtils.LogErrorMessageAndExit("The source cluster must be a datalake")
 	} else if datalake.Status != "AVAILABLE" || datalake.Cluster.Status != "AVAILABLE" {
@@ -186,7 +186,7 @@ func generateAttachedTemplateImpl(stringFinder func(string) string, boolFinder f
 			commonUtils.LogErrorAndExit(errors.New("the cloud platform is not specified for the source cluster"))
 		}
 		cloud.SetProviderType(cloud.CloudType(env.CloudPlatform))
-		attachedClusterTemplate := generateStackTemplateImpl(cloud.EXISTING_NETWORK_EXISTING_SUBNET, stringFinder, boolFinder, int64Finder, getClusterDefinitionClient, storageType)
+		attachedClusterTemplate := generateStackTemplateImpl(cloud.EXISTING_NETWORK_EXISTING_SUBNET, stringFinder, boolFinder, int64Finder, getBlueprintClient, storageType)
 		attachedClusterTemplate.Placement.Region = datalake.Placement.Region
 		attachedClusterTemplate.Placement.AvailabilityZone = datalake.Placement.AvailabilityZone
 		attachedClusterTemplate.Environment.CredentialName = *env.Credential.Name
@@ -243,14 +243,14 @@ func printTemplate(template model.StackV4Request) error {
 	return nil
 }
 
-func getNodesByClusterDefinition(bp []byte) []cloud.Node {
+func getNodesByBlueprint(bp []byte) []cloud.Node {
 	var bpJson map[string]interface{}
 	if err := json.Unmarshal(bp, &bpJson); err != nil {
 		commonUtils.LogErrorAndExit(err)
 	}
 	var nodes []*cloud.Node
 	if bpJson["host_groups"] == nil {
-		commonUtils.LogErrorMessageAndExit("host_groups not found in cluster definition")
+		commonUtils.LogErrorMessageAndExit("host_groups not found in blueprint")
 	}
 	var gateway *cloud.Node
 	for _, e := range bpJson["host_groups"].([]interface{}) {
@@ -268,7 +268,7 @@ func getNodesByClusterDefinition(bp []byte) []cloud.Node {
 			}
 		}
 		if hg["name"] == nil {
-			commonUtils.LogErrorMessageAndExit("host group name not found in cluster definition")
+			commonUtils.LogErrorMessageAndExit("host group name not found in blueprint")
 		}
 		node := cloud.Node{Name: hg["name"].(string), GroupType: model.InstanceGroupV4ResponseTypeCORE, Count: int32(count)}
 		nodes = append(nodes, &node)
@@ -306,8 +306,8 @@ func preExtendTemplateWithOptionalBlocks(template *model.StackV4Request, boolFin
 			ID:      "____",
 		}
 	}
-	if withClusterDefinitionValidation := boolFinder(fl.FlWithClusterDefinitionValidation.Name); withClusterDefinitionValidation {
-		template.Cluster.ValidateClusterDefinition = &(&types.B{B: true}).B
+	if withBlueprintValidation := boolFinder(fl.FlWithBlueprintValidation.Name); withBlueprintValidation {
+		template.Cluster.ValidateBlueprint = &(&types.B{B: true}).B
 	}
 	extendTemplateWithStorageType(template, storageType)
 }

@@ -41,7 +41,7 @@ type WorkspaceV4Response struct {
 
 	// users
 	// Unique: true
-	Users []*UserWorkspacePermissionsV4Response `json:"users"`
+	Users []*UserV4Response `json:"users"`
 }
 
 // Validate validates this workspace v4 response

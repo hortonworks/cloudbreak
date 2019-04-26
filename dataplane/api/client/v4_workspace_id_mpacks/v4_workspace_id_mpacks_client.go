@@ -85,6 +85,36 @@ func (a *Client) DeleteManagementPackInWorkspace(params *DeleteManagementPackInW
 }
 
 /*
+DeleteManagementPacksInWorkspace deletes multiple management packs by name in workspace
+
+An Apache Ambari Management Pack (Mpack) can bundle multiple service definitions, stack definitions, stack add-on service definitions, view definitions services so that releasing these artifacts don’t enforce an Apache Ambari release.
+*/
+func (a *Client) DeleteManagementPacksInWorkspace(params *DeleteManagementPacksInWorkspaceParams) (*DeleteManagementPacksInWorkspaceOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteManagementPacksInWorkspaceParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteManagementPacksInWorkspace",
+		Method:             "DELETE",
+		PathPattern:        "/v4/{workspaceId}/mpacks",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteManagementPacksInWorkspaceReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DeleteManagementPacksInWorkspaceOK), nil
+
+}
+
+/*
 GetManagementPackInWorkspace gets management pack by name in workspace
 
 An Apache Ambari Management Pack (Mpack) can bundle multiple service definitions, stack definitions, stack add-on service definitions, view definitions services so that releasing these artifacts don’t enforce an Apache Ambari release.

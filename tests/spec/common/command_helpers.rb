@@ -15,19 +15,19 @@ RSpec.shared_context "shared command helpers", :a => :b do
     expect(after_node_count).to eq(before_node_count + scale_range) 
   end
 
-  def bp_create_describe_delete(cb, cluster_definition_name, &block)
+  def bp_create_describe_delete(cb, blueprint_name, &block)
     result = block.call
     expect(result.exit_status).to eql 0
 
-    result = cb.clusterdefinition.describe.name(cluster_definition_name).build
+    result = cb.blueprint.describe.name(blueprint_name).build
     expect(result.exit_status).to eql 0 
 
-    result = list_with_name_exists(cluster_definition_name) do
-      cb.clusterdefinition.list.build
+    result = list_with_name_exists(blueprint_name) do
+      cb.blueprint.list.build
     end
     expect(result[0]).to be_truthy       
 
-    result = cb.clusterdefinition.delete.name(cluster_definition_name).build
+    result = cb.blueprint.delete.name(blueprint_name).build
     expect(result.exit_status).to eql 0        
   end 
 

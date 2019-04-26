@@ -79,8 +79,8 @@ type GetFileSystemParametersParams struct {
 	AccountName *string
 	/*AttachedCluster*/
 	AttachedCluster *bool
-	/*ClusterDefinitionName*/
-	ClusterDefinitionName string
+	/*BlueprintName*/
+	BlueprintName string
 	/*ClusterName*/
 	ClusterName string
 	/*FileSystemType*/
@@ -150,15 +150,15 @@ func (o *GetFileSystemParametersParams) SetAttachedCluster(attachedCluster *bool
 	o.AttachedCluster = attachedCluster
 }
 
-// WithClusterDefinitionName adds the clusterDefinitionName to the get file system parameters params
-func (o *GetFileSystemParametersParams) WithClusterDefinitionName(clusterDefinitionName string) *GetFileSystemParametersParams {
-	o.SetClusterDefinitionName(clusterDefinitionName)
+// WithBlueprintName adds the blueprintName to the get file system parameters params
+func (o *GetFileSystemParametersParams) WithBlueprintName(blueprintName string) *GetFileSystemParametersParams {
+	o.SetBlueprintName(blueprintName)
 	return o
 }
 
-// SetClusterDefinitionName adds the clusterDefinitionName to the get file system parameters params
-func (o *GetFileSystemParametersParams) SetClusterDefinitionName(clusterDefinitionName string) {
-	o.ClusterDefinitionName = clusterDefinitionName
+// SetBlueprintName adds the blueprintName to the get file system parameters params
+func (o *GetFileSystemParametersParams) SetBlueprintName(blueprintName string) {
+	o.BlueprintName = blueprintName
 }
 
 // WithClusterName adds the clusterName to the get file system parameters params
@@ -245,11 +245,11 @@ func (o *GetFileSystemParametersParams) WriteToRequest(r runtime.ClientRequest, 
 
 	}
 
-	// query param clusterDefinitionName
-	qrClusterDefinitionName := o.ClusterDefinitionName
-	qClusterDefinitionName := qrClusterDefinitionName
-	if qClusterDefinitionName != "" {
-		if err := r.SetQueryParam("clusterDefinitionName", qClusterDefinitionName); err != nil {
+	// query param blueprintName
+	qrBlueprintName := o.BlueprintName
+	qBlueprintName := qrBlueprintName
+	if qBlueprintName != "" {
+		if err := r.SetQueryParam("blueprintName", qBlueprintName); err != nil {
 			return err
 		}
 	}

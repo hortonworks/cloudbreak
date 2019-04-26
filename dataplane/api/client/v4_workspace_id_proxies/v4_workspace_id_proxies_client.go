@@ -55,62 +55,92 @@ func (a *Client) AttachProxyResourceToEnvironments(params *AttachProxyResourceTo
 }
 
 /*
-CreateProxyconfigInWorkspace creates proxy configuration in workspace
+CreateProxyConfigInWorkspace creates proxy configuration in workspace
 
 An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
 */
-func (a *Client) CreateProxyconfigInWorkspace(params *CreateProxyconfigInWorkspaceParams) (*CreateProxyconfigInWorkspaceOK, error) {
+func (a *Client) CreateProxyConfigInWorkspace(params *CreateProxyConfigInWorkspaceParams) (*CreateProxyConfigInWorkspaceOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewCreateProxyconfigInWorkspaceParams()
+		params = NewCreateProxyConfigInWorkspaceParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "createProxyconfigInWorkspace",
+		ID:                 "createProxyConfigInWorkspace",
 		Method:             "POST",
 		PathPattern:        "/v4/{workspaceId}/proxies",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &CreateProxyconfigInWorkspaceReader{formats: a.formats},
+		Reader:             &CreateProxyConfigInWorkspaceReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*CreateProxyconfigInWorkspaceOK), nil
+	return result.(*CreateProxyConfigInWorkspaceOK), nil
 
 }
 
 /*
-DeleteProxyconfigInWorkspace deletes proxy configuration by name in workspace
+DeleteProxyConfigInWorkspace deletes proxy configuration by name in workspace
 
 An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
 */
-func (a *Client) DeleteProxyconfigInWorkspace(params *DeleteProxyconfigInWorkspaceParams) (*DeleteProxyconfigInWorkspaceOK, error) {
+func (a *Client) DeleteProxyConfigInWorkspace(params *DeleteProxyConfigInWorkspaceParams) (*DeleteProxyConfigInWorkspaceOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteProxyconfigInWorkspaceParams()
+		params = NewDeleteProxyConfigInWorkspaceParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "deleteProxyconfigInWorkspace",
+		ID:                 "deleteProxyConfigInWorkspace",
 		Method:             "DELETE",
 		PathPattern:        "/v4/{workspaceId}/proxies/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteProxyconfigInWorkspaceReader{formats: a.formats},
+		Reader:             &DeleteProxyConfigInWorkspaceReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*DeleteProxyconfigInWorkspaceOK), nil
+	return result.(*DeleteProxyConfigInWorkspaceOK), nil
+
+}
+
+/*
+DeleteProxyConfigsInWorkspace deletes multiple proxy configurations by name in workspace
+
+An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
+*/
+func (a *Client) DeleteProxyConfigsInWorkspace(params *DeleteProxyConfigsInWorkspaceParams) (*DeleteProxyConfigsInWorkspaceOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteProxyConfigsInWorkspaceParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteProxyConfigsInWorkspace",
+		Method:             "DELETE",
+		PathPattern:        "/v4/{workspaceId}/proxies",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteProxyConfigsInWorkspaceReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DeleteProxyConfigsInWorkspaceOK), nil
 
 }
 
@@ -145,6 +175,36 @@ func (a *Client) DetachProxyResourceFromEnvironments(params *DetachProxyResource
 }
 
 /*
+GetProxyConfigInWorkspace gets proxy configuration by name in workspace
+
+An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
+*/
+func (a *Client) GetProxyConfigInWorkspace(params *GetProxyConfigInWorkspaceParams) (*GetProxyConfigInWorkspaceOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetProxyConfigInWorkspaceParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getProxyConfigInWorkspace",
+		Method:             "GET",
+		PathPattern:        "/v4/{workspaceId}/proxies/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetProxyConfigInWorkspaceReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetProxyConfigInWorkspaceOK), nil
+
+}
+
+/*
 GetProxyRequestFromNameInWorkspace gets request by name
 
 An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
@@ -175,62 +235,32 @@ func (a *Client) GetProxyRequestFromNameInWorkspace(params *GetProxyRequestFromN
 }
 
 /*
-GetProxyconfigInWorkspace gets proxy configuration by name in workspace
+ListProxyConfigsByWorkspace lists proxy configurations for the given workspace
 
 An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
 */
-func (a *Client) GetProxyconfigInWorkspace(params *GetProxyconfigInWorkspaceParams) (*GetProxyconfigInWorkspaceOK, error) {
+func (a *Client) ListProxyConfigsByWorkspace(params *ListProxyConfigsByWorkspaceParams) (*ListProxyConfigsByWorkspaceOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetProxyconfigInWorkspaceParams()
+		params = NewListProxyConfigsByWorkspaceParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getProxyconfigInWorkspace",
-		Method:             "GET",
-		PathPattern:        "/v4/{workspaceId}/proxies/{name}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetProxyconfigInWorkspaceReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetProxyconfigInWorkspaceOK), nil
-
-}
-
-/*
-ListProxyconfigsByWorkspace lists proxy configurations for the given workspace
-
-An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
-*/
-func (a *Client) ListProxyconfigsByWorkspace(params *ListProxyconfigsByWorkspaceParams) (*ListProxyconfigsByWorkspaceOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewListProxyconfigsByWorkspaceParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "listProxyconfigsByWorkspace",
+		ID:                 "listProxyConfigsByWorkspace",
 		Method:             "GET",
 		PathPattern:        "/v4/{workspaceId}/proxies",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &ListProxyconfigsByWorkspaceReader{formats: a.formats},
+		Reader:             &ListProxyConfigsByWorkspaceReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*ListProxyconfigsByWorkspaceOK), nil
+	return result.(*ListProxyConfigsByWorkspaceOK), nil
 
 }
 
