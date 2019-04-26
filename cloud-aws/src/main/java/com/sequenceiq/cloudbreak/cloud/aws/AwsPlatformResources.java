@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesRequest;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesResult;
 import com.amazonaws.services.ec2.model.DescribeInternetGatewaysRequest;
@@ -331,24 +332,12 @@ public class AwsPlatformResources implements PlatformResources {
         Map<Region, List<AvailabilityZone>> regionListMap = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
 
-        DescribeRegionsRequest describeRegionsRequest = new DescribeRegionsRequest();
-        DescribeRegionsResult describeRegionsResult = ec2Client.describeRegions(describeRegionsRequest);
+        DescribeRegionsResult describeRegionsResult = describeRegionsResult(ec2Client);
         String defaultRegion = awsDefaultZoneProvider.getDefaultZone(cloudCredential);
 
         for (com.amazonaws.services.ec2.model.Region awsRegion : describeRegionsResult.getRegions()) {
             if (region == null || Strings.isNullOrEmpty(region.value()) || awsRegion.getRegionName().equals(region.value())) {
-                DescribeAvailabilityZonesRequest describeAvailabilityZonesRequest = new DescribeAvailabilityZonesRequest();
-
-                ec2Client.setRegion(RegionUtils.getRegion(awsRegion.getRegionName()));
-                Filter filter = new Filter();
-                filter.setName("region-name");
-                Collection<String> list = new ArrayList<>();
-                list.add(awsRegion.getRegionName());
-                filter.setValues(list);
-
-                describeAvailabilityZonesRequest.withFilters(filter);
-
-                DescribeAvailabilityZonesResult describeAvailabilityZonesResult = ec2Client.describeAvailabilityZones(describeAvailabilityZonesRequest);
+                DescribeAvailabilityZonesResult describeAvailabilityZonesResult = describeAvailabilityZonesResult(ec2Client, awsRegion);
 
                 List<AvailabilityZone> tmpAz = new ArrayList<>();
                 for (com.amazonaws.services.ec2.model.AvailabilityZone availabilityZone : describeAvailabilityZonesResult.getAvailabilityZones()) {
@@ -367,6 +356,36 @@ public class AwsPlatformResources implements PlatformResources {
             defaultRegion = region.value();
         }
         return new CloudRegions(regionListMap, displayNames, defaultRegion);
+    }
+
+    private DescribeAvailabilityZonesResult describeAvailabilityZonesResult(AmazonEC2Client ec2Client, com.amazonaws.services.ec2.model.Region awsRegion) {
+        try {
+            DescribeAvailabilityZonesRequest describeAvailabilityZonesRequest = new DescribeAvailabilityZonesRequest();
+
+            ec2Client.setRegion(RegionUtils.getRegion(awsRegion.getRegionName()));
+            Filter filter = new Filter();
+            filter.setName("region-name");
+            Collection<String> list = new ArrayList<>();
+            list.add(awsRegion.getRegionName());
+            filter.setValues(list);
+
+            describeAvailabilityZonesRequest.withFilters(filter);
+
+            return ec2Client.describeAvailabilityZones(describeAvailabilityZonesRequest);
+        } catch (AmazonEC2Exception e) {
+            LOGGER.info("Failed to retrieve AZ from Region: {}!", awsRegion.getRegionName(), e);
+        }
+        return new DescribeAvailabilityZonesResult();
+    }
+
+    private DescribeRegionsResult describeRegionsResult(AmazonEC2Client ec2Client) {
+        try {
+            DescribeRegionsRequest describeRegionsRequest = new DescribeRegionsRequest();
+            return ec2Client.describeRegions(describeRegionsRequest);
+        } catch (AmazonEC2Exception e) {
+            LOGGER.info("Failed to retrieve regions!", e);
+        }
+        return new DescribeRegionsResult();
     }
 
     @Override
