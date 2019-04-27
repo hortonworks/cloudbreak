@@ -186,7 +186,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         }
     }
 
-    public boolean isDatalakeAmbariBlueprint(Blueprint blueprint) {
+    public boolean isDatalakeBlueprint(Blueprint blueprint) {
         return Optional.ofNullable((Boolean) blueprint.getTags().getMap().get(SHARED_SERVICES_READY)).orElse(false);
     }
 

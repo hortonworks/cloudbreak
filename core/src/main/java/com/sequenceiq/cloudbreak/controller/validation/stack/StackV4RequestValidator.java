@@ -5,6 +5,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,8 +37,8 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
@@ -192,16 +193,15 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
 
     private void checkResourceRequirementsIfBlueprintIsDatalakeReady(StackV4Request stackRequest, Blueprint blueprint,
             ValidationResultBuilder validationBuilder, Long wsId) {
-        boolean sharedServiceReadyBlueprint = blueprintService.isDatalakeAmbariBlueprint(blueprint);
-        if (sharedServiceReadyBlueprint) {
+        if (blueprintService.isDatalakeBlueprint(blueprint)) {
             ClusterV4Request clusterRequest = stackRequest.getCluster();
             Set<String> databaseTypes = getGivenRdsTypes(clusterRequest, wsId);
-            String rdsErrorMessageFormat = "For a Datalake cluster (since you have selected a datalake ready blueprint) you should provide at least "
-                    + "one %s rds/database configuration to the Cluster request";
-            if (!databaseTypes.contains(DatabaseType.HIVE.name())) {
-                validationBuilder.error(String.format(rdsErrorMessageFormat, "Hive"));
-            }
             if (blueprintService.isAmbariBlueprint(blueprint)) {
+                String rdsErrorMessageFormat = "For a Datalake cluster (since you have selected a datalake ready blueprint) you should provide at least "
+                        + "one %s rds/database configuration to the Cluster request";
+                if (!databaseTypes.contains(DatabaseType.HIVE.name())) {
+                    validationBuilder.error(String.format(rdsErrorMessageFormat, "Hive"));
+                }
                 if (!databaseTypes.contains(DatabaseType.RANGER.name())) {
                     validationBuilder.error(String.format(rdsErrorMessageFormat, "Ranger"));
                 }
@@ -218,7 +218,7 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
     }
 
     private Set<String> getGivenRdsTypes(ClusterV4Request clusterRequest, Long workspaceId) {
-        return clusterRequest.getDatabases().stream().map(s ->
+        return Optional.ofNullable(clusterRequest.getDatabases()).orElse(new HashSet<>()).stream().map(s ->
                 rdsConfigService.getByNameForWorkspaceId(s, workspaceId).getType()).collect(Collectors.toSet());
     }
 
