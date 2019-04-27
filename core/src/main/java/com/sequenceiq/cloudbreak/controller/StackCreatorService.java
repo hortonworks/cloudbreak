@@ -236,7 +236,7 @@ public class StackCreatorService {
     }
 
     private void setStackTypeAndValidateDatalake(Stack stack, Blueprint blueprint) {
-        if (blueprintService.isDatalakeAmbariBlueprint(blueprint)) {
+        if (blueprintService.isDatalakeBlueprint(blueprint)) {
             stack.setType(StackType.DATALAKE);
             if (stack.getEnvironment() != null) {
                 Long datalakesInEnv = datalakeResourcesService.countDatalakeResourcesInEnvironment(stack.getEnvironment());
