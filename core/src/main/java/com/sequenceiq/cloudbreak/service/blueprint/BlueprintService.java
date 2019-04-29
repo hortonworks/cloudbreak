@@ -271,7 +271,8 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     public Set<ConfigQueryEntry> queryFileSystemParameters(String blueprintName, String clusterName,
-            String storageName, String fileSystemType, String accountName, boolean attachedCluster, Long workspaceId) {
+            String storageName, String fileSystemType, String accountName, boolean attachedCluster,
+            boolean secure, Long workspaceId) {
         User user = getLoggedInUser();
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
         Blueprint blueprint = getByNameForWorkspace(blueprintName, workspace);
@@ -287,6 +288,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                 .withAccountName(accountName)
                 .withAttachedCluster(attachedCluster)
                 .withDatalakeCluster(datalake)
+                .withSecure(secure)
                 .build();
 
         return centralBlueprintParameterQueryService.queryFileSystemParameters(fileSystemConfigQueryObject);

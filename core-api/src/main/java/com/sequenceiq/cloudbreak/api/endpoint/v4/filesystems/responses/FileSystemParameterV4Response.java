@@ -26,6 +26,8 @@ public class FileSystemParameterV4Response implements JsonEntity {
 
     private String propertyDisplayName;
 
+    private boolean secure;
+
     public String getPropertyName() {
         return propertyName;
     }
@@ -82,6 +84,14 @@ public class FileSystemParameterV4Response implements JsonEntity {
         this.propertyDisplayName = propertyDisplayName;
     }
 
+    public boolean isSecure() {
+        return secure;
+    }
+
+    public void setSecure(boolean secure) {
+        this.secure = secure;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -91,7 +101,8 @@ public class FileSystemParameterV4Response implements JsonEntity {
             return false;
         }
         FileSystemParameterV4Response that = (FileSystemParameterV4Response) o;
-        return Objects.equals(propertyName, that.propertyName)
+        return secure == that.secure &&
+                Objects.equals(propertyName, that.propertyName)
                 && Objects.equals(description, that.description)
                 && Objects.equals(defaultPath, that.defaultPath)
                 && Objects.equals(relatedServices, that.relatedServices)
@@ -103,7 +114,6 @@ public class FileSystemParameterV4Response implements JsonEntity {
     @Override
     public int hashCode() {
         return Objects.hash(propertyName, description, defaultPath, relatedServices, propertyFile, protocol,
-                propertyDisplayName);
+                propertyDisplayName, secure);
     }
-
 }
