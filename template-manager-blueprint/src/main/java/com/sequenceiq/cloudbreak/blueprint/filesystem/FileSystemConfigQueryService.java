@@ -81,10 +81,13 @@ public class FileSystemConfigQueryService {
         filtered.addAll(collectedEntries);
         String fileSystemTypeRequest = request.getFileSystemType();
         FileSystemType fileSystemType = FileSystemType.valueOf(fileSystemTypeRequest);
-        Map<String, Object> templateObject = getTemplateObject(request, fileSystemType.getProtocol());
+        String protocol = fileSystemType.getProtocol();
+        Map<String, Object> templateObject = getTemplateObject(request, protocol);
         for (ConfigQueryEntry configQueryEntry : filtered) {
             try {
-                configQueryEntry.setProtocol(fileSystemType.getProtocol());
+                boolean secure = request.isSecure();
+                configQueryEntry.setProtocol(secure ? protocol + "s" : protocol);
+                configQueryEntry.setSecure(secure);
                 configQueryEntry.setDefaultPath(generateConfigWithParameters(configQueryEntry.getDefaultPath(), fileSystemType, templateObject));
             } catch (IOException e) {
             }
@@ -109,7 +112,7 @@ public class FileSystemConfigQueryService {
         templateObject.put("storageName", fileSystemConfigQueryObject.getStorageName());
         templateObject.put("blueprintText", fileSystemConfigQueryObject.getBlueprintText());
         templateObject.put("accountName", fileSystemConfigQueryObject.getAccountName().orElse("default-account-name"));
-        templateObject.put("protocol", protocol);
+        templateObject.put("protocol", fileSystemConfigQueryObject.isSecure() ? protocol + "s" : protocol);
         return templateObject;
     }
 
