@@ -22,6 +22,9 @@ public class AdlsGen2CloudStorageParameters implements CloudStorageParameters {
     @NotNull
     private String accountName;
 
+    @ApiModelProperty
+    private boolean secure;
+
     public String getAccountKey() {
         return accountKey;
     }
@@ -44,22 +47,26 @@ public class AdlsGen2CloudStorageParameters implements CloudStorageParameters {
         return FileSystemType.ADLS_GEN_2;
     }
 
+    public boolean isSecure() {
+        return secure;
+    }
+
+    public void setSecure(boolean secure) {
+        this.secure = secure;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof AdlsGen2CloudStorageParameters)) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         AdlsGen2CloudStorageParameters that = (AdlsGen2CloudStorageParameters) o;
-        return Objects.equals(accountKey, that.accountKey)
-                && Objects.equals(accountName, that.accountName);
+        return secure == that.secure &&
+                Objects.equals(accountKey, that.accountKey) &&
+                Objects.equals(accountName, that.accountName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(accountKey, accountName);
+        return Objects.hash(accountKey, accountName, secure);
     }
-
 }

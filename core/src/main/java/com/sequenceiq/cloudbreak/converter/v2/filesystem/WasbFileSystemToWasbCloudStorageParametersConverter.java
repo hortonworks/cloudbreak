@@ -15,6 +15,7 @@ public class WasbFileSystemToWasbCloudStorageParametersConverter
         WasbCloudStorageParameters fileSystemConfigurations = new WasbCloudStorageParameters();
         fileSystemConfigurations.setAccountName(source.getAccountName());
         fileSystemConfigurations.setAccountKey(source.getAccountKey());
+        fileSystemConfigurations.setSecure(source.isSecure());
         return fileSystemConfigurations;
     }
 }

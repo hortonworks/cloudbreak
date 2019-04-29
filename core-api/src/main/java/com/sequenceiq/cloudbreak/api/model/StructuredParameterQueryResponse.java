@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
@@ -23,6 +23,8 @@ public class StructuredParameterQueryResponse implements JsonEntity {
     private String protocol;
 
     private String propertyDisplayName;
+
+    private boolean secure;
 
     public String getPropertyName() {
         return propertyName;
@@ -80,28 +82,31 @@ public class StructuredParameterQueryResponse implements JsonEntity {
         this.propertyDisplayName = propertyDisplayName;
     }
 
+    public boolean isSecure() {
+        return secure;
+    }
+
+    public void setSecure(boolean secure) {
+        this.secure = secure;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof StructuredParameterQueryResponse)) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         StructuredParameterQueryResponse that = (StructuredParameterQueryResponse) o;
-        return Objects.equals(propertyName, that.propertyName)
-                && Objects.equals(description, that.description)
-                && Objects.equals(defaultPath, that.defaultPath)
-                && Objects.equals(relatedService, that.relatedService)
-                && Objects.equals(propertyFile, that.propertyFile)
-                && Objects.equals(protocol, that.protocol)
-                && Objects.equals(propertyDisplayName, that.propertyDisplayName);
+        return secure == that.secure &&
+                Objects.equals(propertyName, that.propertyName) &&
+                Objects.equals(description, that.description) &&
+                Objects.equals(defaultPath, that.defaultPath) &&
+                Objects.equals(relatedService, that.relatedService) &&
+                Objects.equals(propertyFile, that.propertyFile) &&
+                Objects.equals(protocol, that.protocol) &&
+                Objects.equals(propertyDisplayName, that.propertyDisplayName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(propertyName, description, defaultPath, relatedService, propertyFile, protocol,
-                propertyDisplayName);
+        return Objects.hash(propertyName, description, defaultPath, relatedService, propertyFile, protocol, propertyDisplayName, secure);
     }
-
 }
