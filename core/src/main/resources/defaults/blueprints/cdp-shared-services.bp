@@ -1,0 +1,109 @@
+{
+  "tags": {
+    "shared_services_ready": true
+  },
+  "description": "CDP 1.0 Shared Data Experience template",
+  "blueprint": {
+    "cdhVersion": "6.0.99",
+    "displayName": "datalake",
+    "services": [
+      {
+        "refName": "zookeeper",
+        "serviceType": "ZOOKEEPER",
+        "roleConfigGroups": [
+          {
+            "refName": "zookeeper-SERVER-BASE",
+            "roleType": "SERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hdfs",
+        "serviceType": "HDFS",
+        "roleConfigGroups": [
+          {
+            "refName": "hdfs-NAMENODE-BASE",
+            "roleType": "NAMENODE",
+            "base": true
+          },
+          {
+            "refName": "hdfs-SECONDARYNAMENODE-BASE",
+            "roleType": "SECONDARYNAMENODE",
+            "base": true
+          },
+          {
+            "refName": "hdfs-DATANODE-BASE",
+            "roleType": "DATANODE",
+            "base": true
+          },
+          {
+            "refName": "hdfs-BALANCER-BASE",
+            "roleType": "BALANCER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "yarn",
+        "serviceType": "YARN",
+        "roleConfigGroups": [
+          {
+            "refName": "yarn-RESOURCEMANAGER-BASE",
+            "roleType": "RESOURCEMANAGER",
+            "base": true
+          },
+          {
+            "refName": "yarn-NODEMANAGER-BASE",
+            "roleType": "NODEMANAGER",
+            "base": true
+          },
+          {
+            "refName": "yarn-JOBHISTORY-BASE",
+            "roleType": "JOBHISTORY",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hive",
+        "serviceType": "HIVE",
+        "roleConfigGroups": [
+          {
+            "refName": "hive-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "hive-HIVESERVER2-BASE",
+            "roleType": "HIVESERVER2",
+            "base": true
+          },
+          {
+            "refName": "hive-HIVEMETASTORE-BASE",
+            "roleType": "HIVEMETASTORE",
+            "base": true
+          }
+        ]
+      }
+    ],
+    "hostTemplates": [
+      {
+        "refName": "master",
+        "roleConfigGroupsRefNames": [
+          "hdfs-BALANCER-BASE",
+          "hdfs-NAMENODE-BASE",
+          "hdfs-SECONDARYNAMENODE-BASE",
+          "hdfs-DATANODE-BASE",
+          "hive-GATEWAY-BASE",
+          "hive-HIVEMETASTORE-BASE",
+          "hive-HIVESERVER2-BASE",
+          "yarn-JOBHISTORY-BASE",
+          "yarn-RESOURCEMANAGER-BASE",
+          "yarn-NODEMANAGER-BASE",
+          "zookeeper-SERVER-BASE"
+        ]
+      }
+    ]
+  }
+}
