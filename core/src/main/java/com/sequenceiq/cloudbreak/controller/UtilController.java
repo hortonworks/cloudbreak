@@ -154,6 +154,7 @@ public class UtilController implements UtilEndpoint {
                 structuredParametersQueryRequest.getFileSystemType(),
                 structuredParametersQueryRequest.getAccountName(),
                 structuredParametersQueryRequest.isAttachedCluster(),
+                structuredParametersQueryRequest.isSecure(),
                 workspace);
         List<StructuredParameterQueryResponse> result = new ArrayList<>();
         for (ConfigQueryEntry configQueryEntry : entries) {

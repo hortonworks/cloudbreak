@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.template.filesystem.query;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -26,6 +26,8 @@ public class ConfigQueryEntry {
     private String propertyDisplayName;
 
     private boolean requiredForAttachedCluster;
+
+    private boolean secure;
 
     private Set<String> supportedStorages = new HashSet<>();
 
@@ -101,6 +103,14 @@ public class ConfigQueryEntry {
         this.requiredForAttachedCluster = requiredForAttachedCluster;
     }
 
+    public boolean isSecure() {
+        return secure;
+    }
+
+    public void setSecure(boolean secure) {
+        this.secure = secure;
+    }
+
     public ConfigQueryEntry copy() {
         ConfigQueryEntry configQueryEntry = new ConfigQueryEntry();
         configQueryEntry.protocol = protocol;
@@ -111,6 +121,7 @@ public class ConfigQueryEntry {
         configQueryEntry.relatedService = relatedService;
         configQueryEntry.propertyName = propertyName;
         configQueryEntry.requiredForAttachedCluster = requiredForAttachedCluster;
+        configQueryEntry.secure = secure;
         configQueryEntry.supportedStorages = new HashSet<>(supportedStorages);
         return configQueryEntry;
     }
@@ -128,15 +139,6 @@ public class ConfigQueryEntry {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(propertyName)
-                .append(description)
-                .append(defaultPath)
-                .append(relatedService)
-                .append(propertyFile)
-                .append(protocol)
-                .append(propertyDisplayName)
-                .append(supportedStorages)
-                .toHashCode();
+        return Objects.hash(propertyName, description, defaultPath, relatedService, propertyFile, protocol, propertyDisplayName, requiredForAttachedCluster, secure, supportedStorages);
     }
 }

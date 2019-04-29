@@ -19,6 +19,7 @@ public class ConfigQueryEntryToStructuredParameterQueryResponseConverter
         structuredParameterQueryResponse.setPropertyFile(source.getPropertyFile());
         structuredParameterQueryResponse.setProtocol(source.getProtocol());
         structuredParameterQueryResponse.setPropertyDisplayName(source.getPropertyDisplayName());
+        structuredParameterQueryResponse.setSecure(source.isSecure());
         return structuredParameterQueryResponse;
     }
 }

@@ -15,6 +15,7 @@ public class AdlsGen2FileSystemToAdlsGen2CloudStorageParametersConverter
         AdlsGen2CloudStorageParameters adlsGen2CloudStorageParameters = new AdlsGen2CloudStorageParameters();
         adlsGen2CloudStorageParameters.setAccountName(source.getAccountName());
         adlsGen2CloudStorageParameters.setAccountKey(source.getAccountKey());
+        adlsGen2CloudStorageParameters.setSecure(source.isSecure());
         return adlsGen2CloudStorageParameters;
     }
 }

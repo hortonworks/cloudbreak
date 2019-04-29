@@ -55,6 +55,7 @@ public class FileSystemV3Controller implements FileSystemV3Endpoint {
                 structuredParametersQueryRequest.getFileSystemType(),
                 structuredParametersQueryRequest.getAccountName(),
                 structuredParametersQueryRequest.isAttachedCluster(),
+                structuredParametersQueryRequest.isSecure(),
                 workspace);
         List<StructuredParameterQueryResponse> result = new ArrayList<>();
         for (ConfigQueryEntry configQueryEntry : entries) {

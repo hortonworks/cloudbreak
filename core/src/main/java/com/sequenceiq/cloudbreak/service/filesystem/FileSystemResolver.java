@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.api.model.filesystem.BaseFileSystem;
 @Service
 public class FileSystemResolver {
 
-    private static final String NOT_SUPPORTED_FS_PROVIDED = "Unable to decide file system, none of the supported file system type has provided!";
+    private static final String NOT_SUPPORTED_FS_PROVIDED = "Unable to determine file system type, or unsupported file system type provided!";
 
     public CloudStorageParameters propagateConfiguration(CloudStorageRequest source) {
         CloudStorageParameters cloudStorageParameters;

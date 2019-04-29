@@ -32,6 +32,9 @@ public class StructuredParametersQueryRequest extends ParametersQueryRequest {
     @ApiModelProperty(value = UtilDescription.ATTACHED_CLUSTER, required = true)
     private boolean attachedCluster;
 
+    @ApiModelProperty(value = UtilDescription.SECURE)
+    private boolean secure;
+
     public String getAccountName() {
         return accountName;
     }
@@ -70,5 +73,13 @@ public class StructuredParametersQueryRequest extends ParametersQueryRequest {
 
     public void setAttachedCluster(boolean attachedCluster) {
         this.attachedCluster = attachedCluster;
+    }
+
+    public boolean isSecure() {
+        return secure;
+    }
+
+    public void setSecure(boolean secure) {
+        this.secure = secure;
     }
 }

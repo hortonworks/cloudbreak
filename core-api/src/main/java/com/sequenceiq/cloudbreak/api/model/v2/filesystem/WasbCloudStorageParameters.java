@@ -22,6 +22,7 @@ public class WasbCloudStorageParameters implements CloudStorageParameters {
     @NotNull
     private String accountName;
 
+    @ApiModelProperty
     private boolean secure;
 
     public String getAccountKey() {

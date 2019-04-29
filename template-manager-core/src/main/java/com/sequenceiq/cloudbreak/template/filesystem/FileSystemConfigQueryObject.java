@@ -16,6 +16,8 @@ public class FileSystemConfigQueryObject {
 
     private final boolean attachedCluster;
 
+    private final boolean secure;
+
     private FileSystemConfigQueryObject(Builder builder) {
         storageName = builder.storageName;
         clusterName = builder.clusterName;
@@ -23,6 +25,7 @@ public class FileSystemConfigQueryObject {
         fileSystemType = builder.fileSystemType;
         accountName = builder.accountName;
         attachedCluster = builder.attachedCluster;
+        secure = builder.secure;
     }
 
     public String getClusterName() {
@@ -49,6 +52,10 @@ public class FileSystemConfigQueryObject {
         return attachedCluster;
     }
 
+    public boolean isSecure() {
+        return secure;
+    }
+
     public static class Builder {
 
         private String clusterName;
@@ -62,6 +69,8 @@ public class FileSystemConfigQueryObject {
         private Optional<String> accountName = Optional.empty();
 
         private boolean attachedCluster;
+
+        private boolean secure;
 
         public static Builder builder() {
             return new Builder();
@@ -94,6 +103,11 @@ public class FileSystemConfigQueryObject {
 
         public Builder withAttachedCluster(boolean attachedCluster) {
             this.attachedCluster = attachedCluster;
+            return this;
+        }
+
+        public Builder withSecure(boolean secure) {
+            this.secure = secure;
             return this;
         }
 
