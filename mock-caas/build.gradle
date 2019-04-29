@@ -44,6 +44,7 @@ dependencies {
   compile group:  'com.fasterxml.jackson.core',   name: 'jackson-core',                   version: '2.9.7'
   compile group:  'io.jsonwebtoken',              name: 'jjwt',                           version: '0.9.1'
   testCompile group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
+  testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
 
   compile project(':auth-connector')
 }

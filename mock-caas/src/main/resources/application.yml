@@ -1,0 +1,5 @@
+auth:
+  license:
+    file: license.txt
+  config:
+    dir: /etc/auth

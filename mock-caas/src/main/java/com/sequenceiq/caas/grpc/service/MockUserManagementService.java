@@ -8,12 +8,18 @@ import static com.cloudera.thunderhead.service.usermanagement.UserManagementProt
 import static com.sequenceiq.caas.service.MockCaasService.SIGNATURE_VERIFIER;
 import static org.springframework.security.jwt.JwtHelper.decodeAndVerify;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +41,16 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     @Inject
     private JsonUtil jsonUtil;
 
+    @Value("#{'${auth.config.dir:}/${auth.license.file:}'}")
+    private String cbLicenseFilePath;
+
+    private String cbLicense;
+
+    @PostConstruct
+    public void setLicense() {
+        this.cbLicense = getLicense();
+    }
+
     @Override
     public void getUser(GetUserRequest request, StreamObserver<GetUserResponse> responseObserver) {
         String userIdOrCrn = request.getUserIdOrCrn();
@@ -54,7 +70,12 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     @Override
     public void getAccount(GetAccountRequest request, StreamObserver<GetAccountResponse> responseObserver) {
-        responseObserver.onNext(GetAccountResponse.newBuilder().build());
+        responseObserver.onNext(
+                GetAccountResponse.newBuilder()
+                        .setAccount(UserManagementProto.Account.newBuilder()
+                                .setClouderaManagerLicenseKey(cbLicense)
+                                .build())
+                        .build());
         responseObserver.onCompleted();
     }
 
@@ -125,6 +146,21 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
             StreamObserver<UserManagementProto.NotifyResourceDeletedResponse> responseObserver) {
         responseObserver.onNext(UserManagementProto.NotifyResourceDeletedResponse.newBuilder().build());
         responseObserver.onCompleted();
+    }
+
+    private String getLicense() {
+        String license = "";
+        try {
+            if (Files.exists(Paths.get(cbLicenseFilePath))) {
+                LOG.info("Cloudbreak license file successfully loaded.");
+                license = Files.readString(Path.of(cbLicenseFilePath));
+            } else {
+                LOG.warn("The license file is not exists in path: {}", cbLicenseFilePath);
+            }
+        } catch (IOException e) {
+            LOG.warn("Error during reading license.", e);
+        }
+        return license;
     }
 
     private UserManagementProto.ResourceAssignee createResourceAssignee(String resourceCrn) {
