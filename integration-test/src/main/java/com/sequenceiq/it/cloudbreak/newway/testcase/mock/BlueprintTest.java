@@ -151,7 +151,7 @@ public class BlueprintTest extends AbstractIntegrationTest {
             CloudbreakClient cloudbreakClient) {
         if (entity.getViewResponses().stream().anyMatch(bp -> bp.getName().equals(entity.getName()))) {
             throw new TestFailException(
-                    String.format("Cluster definition is still exist in the db %s", entity.getName()));
+                    String.format("Blueprint still exists in the db %s", entity.getName()));
         }
         return entity;
     }
@@ -183,7 +183,7 @@ public class BlueprintTest extends AbstractIntegrationTest {
                 .filter(bp -> bp.getStatus().equals(ResourceStatus.DEFAULT))
                 .collect(Collectors.toList());
         if (result.isEmpty()) {
-            throw new TestFailException("Cluster definition is not listed");
+            throw new TestFailException("Default blueprint is not listed");
         }
         return blueprint;
     }
