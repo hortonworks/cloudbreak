@@ -57,12 +57,16 @@ public class AdlsGen2CloudStorageParameters implements CloudStorageParameters {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         AdlsGen2CloudStorageParameters that = (AdlsGen2CloudStorageParameters) o;
-        return secure == that.secure &&
-                Objects.equals(accountKey, that.accountKey) &&
-                Objects.equals(accountName, that.accountName);
+        return secure == that.secure
+                && Objects.equals(accountKey, that.accountKey)
+                && Objects.equals(accountName, that.accountName);
     }
 
     @Override

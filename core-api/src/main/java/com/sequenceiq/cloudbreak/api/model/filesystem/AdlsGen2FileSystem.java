@@ -1,4 +1,5 @@
 package com.sequenceiq.cloudbreak.api.model.filesystem;
+
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 
@@ -53,13 +54,17 @@ public class AdlsGen2FileSystem extends BaseFileSystem {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         AdlsGen2FileSystem that = (AdlsGen2FileSystem) o;
-        return secure == that.secure &&
-                Objects.equals(accountKey, that.accountKey) &&
-                Objects.equals(accountName, that.accountName) &&
-                Objects.equals(storageContainerName, that.storageContainerName);
+        return secure == that.secure
+                && Objects.equals(accountKey, that.accountKey)
+                && Objects.equals(accountName, that.accountName)
+                && Objects.equals(storageContainerName, that.storageContainerName);
     }
 
     @Override

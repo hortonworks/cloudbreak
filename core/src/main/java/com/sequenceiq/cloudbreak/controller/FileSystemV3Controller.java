@@ -48,6 +48,7 @@ public class FileSystemV3Controller implements FileSystemV3Endpoint {
     @Override
     public StructuredParameterQueriesResponse getFileSystemParameters(Long workspaceId, StructuredParametersQueryRequest structuredParametersQueryRequest) {
         Workspace workspace = getWorkspace(workspaceId);
+
         Set<ConfigQueryEntry> entries = blueprintService.queryFileSystemParameters(
                 structuredParametersQueryRequest.getBlueprintName(),
                 structuredParametersQueryRequest.getClusterName(),

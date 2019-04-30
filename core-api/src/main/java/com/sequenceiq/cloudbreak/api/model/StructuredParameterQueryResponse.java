@@ -92,17 +92,21 @@ public class StructuredParameterQueryResponse implements JsonEntity {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         StructuredParameterQueryResponse that = (StructuredParameterQueryResponse) o;
-        return secure == that.secure &&
-                Objects.equals(propertyName, that.propertyName) &&
-                Objects.equals(description, that.description) &&
-                Objects.equals(defaultPath, that.defaultPath) &&
-                Objects.equals(relatedService, that.relatedService) &&
-                Objects.equals(propertyFile, that.propertyFile) &&
-                Objects.equals(protocol, that.protocol) &&
-                Objects.equals(propertyDisplayName, that.propertyDisplayName);
+        return secure == that.secure
+                && Objects.equals(propertyName, that.propertyName)
+                && Objects.equals(description, that.description)
+                && Objects.equals(defaultPath, that.defaultPath)
+                && Objects.equals(relatedService, that.relatedService)
+                && Objects.equals(propertyFile, that.propertyFile)
+                && Objects.equals(protocol, that.protocol)
+                && Objects.equals(propertyDisplayName, that.propertyDisplayName);
     }
 
     @Override

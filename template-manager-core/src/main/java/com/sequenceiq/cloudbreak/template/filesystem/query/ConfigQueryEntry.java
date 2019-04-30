@@ -139,6 +139,7 @@ public class ConfigQueryEntry {
 
     @Override
     public int hashCode() {
-        return Objects.hash(propertyName, description, defaultPath, relatedService, propertyFile, protocol, propertyDisplayName, requiredForAttachedCluster, secure, supportedStorages);
+        return Objects.hash(propertyName, description, defaultPath, relatedService, propertyFile,
+                protocol, propertyDisplayName, requiredForAttachedCluster, secure, supportedStorages);
     }
 }
