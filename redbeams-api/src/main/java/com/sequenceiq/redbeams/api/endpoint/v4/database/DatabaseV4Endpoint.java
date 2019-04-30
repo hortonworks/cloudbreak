@@ -21,10 +21,10 @@ import javax.ws.rs.core.MediaType;
 //import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 //import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Responses;
 import com.sequenceiq.cloudbreak.doc.ContentType;
-import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 //import com.sequenceiq.cloudbreak.doc.Notes;
 //import com.sequenceiq.cloudbreak.doc.OperationDescriptions.DatabaseOpDescription;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.EchoResponse;
+import com.sequenceiq.redbeams.doc.ControllerDescriptions;
 //
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -33,7 +33,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/v4/{workspaceId}/databases")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v4/{workspaceId}/databases", description = ControllerDescription.DATABASES_V4_DESCRIPTION, protocols = "http,https")
+@Api(value = "/v4/{workspaceId}/databases", description = ControllerDescriptions.DATABASE_V4_DESCRIPTION, protocols = "http,https")
 public interface DatabaseV4Endpoint {
 
     @GET

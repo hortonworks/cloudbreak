@@ -16,7 +16,8 @@ public enum WorkspaceResource {
     STRUCTURED_EVENT("Structured event resource", "StructuredEvent"),
     CLUSTER_TEMPLATE("Cluster template", "ClusterTemplate"),
     ENVIRONMENT("Environment", "Env"),
-    KERBEROS_CONFIG("Kerberos Config", "Krbconf");
+    KERBEROS_CONFIG("Kerberos Config", "Krbconf"),
+    DATABASE_SERVER("database server config", "DatabaseServer");
 
     private final String readableName;
 
