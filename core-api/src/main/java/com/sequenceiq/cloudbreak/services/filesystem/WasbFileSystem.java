@@ -54,13 +54,17 @@ public class WasbFileSystem extends BaseFileSystem {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         WasbFileSystem that = (WasbFileSystem) o;
-        return secure == that.secure &&
-                Objects.equals(accountKey, that.accountKey) &&
-                Objects.equals(accountName, that.accountName) &&
-                Objects.equals(storageContainerName, that.storageContainerName);
+        return secure == that.secure
+                && Objects.equals(accountKey, that.accountKey)
+                && Objects.equals(accountName, that.accountName)
+                && Objects.equals(storageContainerName, that.storageContainerName);
     }
 
     @Override

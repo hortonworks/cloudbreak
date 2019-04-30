@@ -101,8 +101,8 @@ public class FileSystemParameterV4Response implements JsonEntity {
             return false;
         }
         FileSystemParameterV4Response that = (FileSystemParameterV4Response) o;
-        return secure == that.secure &&
-                Objects.equals(propertyName, that.propertyName)
+        return secure == that.secure
+                && Objects.equals(propertyName, that.propertyName)
                 && Objects.equals(description, that.description)
                 && Objects.equals(defaultPath, that.defaultPath)
                 && Objects.equals(relatedServices, that.relatedServices)
