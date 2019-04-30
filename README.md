@@ -123,6 +123,17 @@ Also you need to import inspection settings called `inpsections.xml` located in 
 IntelliJ IDEA -> Preferences -> Editor -> Inspections -> Settings icon -> Import Profile
 ```
 
+Cloudbreak integrates with GRPC components. This results in generated files inside the project with big file size. By default IDEA ignores anything that is more than 8Mb resulting in unknown classes inside IDEA context. 
+To circumwent this you need to add this property to your IDEA properties. 
+
+Go to: Help/Edit Custom Properties...
+``` 
+#parse files up until 15Mb
+idea.max.intellisense.filesize=15000
+``` 
+Restart IDEA, and Rebuild.
+
+
 ### Running cloudbreak in IDEA
 
 
@@ -135,7 +146,7 @@ To launch the Cloudbreak application execute the `com.sequenceiq.cloudbreak.Clou
 -Dcb.identity.server.url=http://localhost:8089
 -Dspring.cloud.consul.host=YOUR_IP
 -Dserver.port=9091
--Dcaas.url=localhost:10080
+-Daltus.ums.host=localhost
 -Dvault.addr=localhost
 -Dvault.root.token=<TOKEN_FROM_PROFILE_FILE>
 ```
@@ -167,7 +178,7 @@ After having imported cloudbreak repo root you can launch Periscope application 
 -Dperiscope.db.port.5432.tcp.port=5432
 -Dperiscope.cloudbreak.url=http://localhost:8080
 -Dserver.port=8085
--Dcaas.url=localhost:10080
+-Daltus.ums.host=localhost
 -Dvault.addr=localhost
 -Dvault.root.token=<TOKEN_FROM_PROFILE_FILE>
 ````
@@ -197,7 +208,7 @@ To run Cloudbreak from command line, you have to list the JVM parameters from ab
 -Dcb.identity.server.url=http://localhost:8089 \
 -Dcb.schema.scripts.location=$(pwd)/core/src/main/resources/schema
 -Dserver.port=9091 \
--Dcaas.url=localhost:10080
+-Daltus.ums.host=localhost
 -Dvault.addr=localhost
 -Dvault.root.token=<TOKEN_FROM_PROFILE_FILE>
 -Dspring.config.location=$(pwd)/cloud-common/src/main/resources/application.yml,$(pwd)/core/build/resources/main/application.properties"
@@ -219,7 +230,7 @@ To run periscope from command line you have to run the below gradle command with
 -Dperiscope.cloudbreak.url=http://localhost:8080 \
 -Dperiscope.schema.scripts.location=$(pwd)/autoscale/src/main/resources/schema
 -Dserver.port=8085 \
--Dcaas.url=localhost:10080
+-Daltus.ums.host=localhost
 -Dvault.addr=localhost
 -Dvault.root.token=<TOKEN_FROM_PROFILE_FILE>
 -Dspring.config.location=$(pwd)/autoscale/src/main/resources/application.yml,$(pwd)/autoscale/build/resources/main/application.properties"
