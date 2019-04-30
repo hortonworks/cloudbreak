@@ -1,0 +1,65 @@
+package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests;
+
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.base.DatabaseServerV4Base;
+import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
+// import com.sequenceiq.cloudbreak.validation.externaldatabase.ValidRds;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+// @ValidRds
+@ApiModel
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class DatabaseServerV4Request extends DatabaseServerV4Base {
+
+    // FIXME maybe move to base
+    @NotNull
+    @ApiModelProperty(value = DatabaseServer.DATABASE_VENDOR, required = true)
+    private String databaseVendor;
+
+    @NotNull
+    @ApiModelProperty(value = DatabaseServer.CONNECTION_USER_NAME, required = true)
+    private String connectionUserName;
+
+    @NotNull
+    @ApiModelProperty(value = DatabaseServer.CONNECTION_PASSWORD, required = true)
+    private String connectionPassword;
+
+    // @ApiModelProperty(Database.ORACLE)
+    // private OracleParameters oracle;
+
+    public String getDatabaseVendor() {
+        return databaseVendor;
+    }
+
+    public void setDatabaseVendor(String databaseVendor) {
+        this.databaseVendor = databaseVendor;
+    }
+
+    public String getConnectionUserName() {
+        return connectionUserName;
+    }
+
+    public void setConnectionUserName(String connectionUserName) {
+        this.connectionUserName = connectionUserName;
+    }
+
+    public String getConnectionPassword() {
+        return connectionPassword;
+    }
+
+    public void setConnectionPassword(String connectionPassword) {
+        this.connectionPassword = connectionPassword;
+    }
+
+    // public OracleParameters getOracle() {
+    //     return oracle;
+    // }
+
+    // public void setOracle(OracleParameters oracle) {
+    //     this.oracle = oracle;
+    // }
+}

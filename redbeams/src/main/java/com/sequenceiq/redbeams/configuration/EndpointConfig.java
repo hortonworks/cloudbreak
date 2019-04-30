@@ -16,6 +16,7 @@ import com.sequenceiq.redbeams.api.RedbeamsApi;
 import com.sequenceiq.redbeams.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.redbeams.controller.mapper.WebApplicationExceptionMapper;
 import com.sequenceiq.redbeams.controller.v4.database.DatabaseV4Controller;
+import com.sequenceiq.redbeams.controller.v4.databaseserver.DatabaseServerV4Controller;
 
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.config.SwaggerConfigLocator;
@@ -26,7 +27,8 @@ import io.swagger.jaxrs.config.SwaggerContextService;
 public class EndpointConfig extends ResourceConfig {
 
     private static final List<Class<?>> CONTROLLERS = List.of(
-        DatabaseV4Controller.class
+        DatabaseV4Controller.class,
+        DatabaseServerV4Controller.class
     );
 
     private static final String VERSION_UNAVAILABLE = "unspecified";

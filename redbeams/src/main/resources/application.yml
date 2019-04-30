@@ -45,3 +45,15 @@ rest:
 cert:
   validation: true
   ignorePreValidation: false
+
+vault:
+  addr: vault.service.consul
+  port: 8200
+  ssl.enabled: false
+  kv.engine.v2.path: secret
+  auth:
+    type: "token"
+    kubernetes:
+      service.account.token.path: /var/run/secrets/kubernetes.io/serviceaccount/token
+      mount.path: "dps-dev"
+      login.role: "cloudbreak.default"
