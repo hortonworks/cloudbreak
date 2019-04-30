@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ParametersQueryV
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
@@ -40,7 +39,7 @@ public class BlueprintV4Controller extends NotificationController implements Blu
 
     @Override
     public BlueprintV4ViewResponses list(Long workspaceId) {
-        Set<BlueprintView> allAvailableViewInWorkspace = blueprintService.getAllAvailableViewInWorkspace(workspaceId);
+        Set<Blueprint> allAvailableViewInWorkspace = blueprintService.getAllAvailableViewInWorkspace(workspaceId);
         return new BlueprintV4ViewResponses(converterUtil.convertAllAsSet(allAvailableViewInWorkspace, BlueprintV4ViewResponse.class));
     }
 
