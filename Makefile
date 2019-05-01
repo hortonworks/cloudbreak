@@ -43,3 +43,6 @@ build-redbeams-dockerhub:
 
 build-environment-dockerhub:
 	 make -C docker-environment dockerhub
+
+build-usersync-dockerhub:
+	 make -C docker-usersync dockerhub
