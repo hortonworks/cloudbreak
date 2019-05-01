@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -e
+
+# auth to remove the Service Account
+echo "$password" | kinit {{ ipa.principal }}
+
+set -x
+
+SA_NAME=krbbind-{{ ipa.cluster_name }}
+ROLE_NAME=hadoopadminrole-{{ ipa.cluster_name }}
+
+# Remove per-cluster krbbind Service Account
+ipa user-del "$SA_NAME"
+ipa role-del "$ROLE_NAME"
+
+# Remove CM keytab
+rm -f /etc/cloudera-scm-server/cmf.keytab
