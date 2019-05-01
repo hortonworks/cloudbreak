@@ -170,11 +170,14 @@ subprojects {
     maven { url "https://repo.spring.io/release" }
     maven { url "https://plugins.gradle.org/m2/" }
     maven {
-      credentials {
+      authentication {
+        basic(BasicAuthentication)
+      }
+      credentials(PasswordCredentials) {
         username "$cmPrivateRepoUser"
         password "$cmPrivateRepoPassword"
       }
-      url "https://repository.cloudera.com/cloudera/list/cm-private/" 
+      url "https://repository.cloudera.com/cloudera/list/cm-private/"
     }
   }
 }
