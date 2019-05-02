@@ -29,11 +29,12 @@ public class WaitUtilForMultipleStatuses {
     @Value("${integrationtest.testsuite.pollingInterval:1000}")
     private long pollingInterval;
 
-    public Map<String, String> waitAndCheckStatuses(CloudbreakClient cloudbreakClient, String stackName, Map<String, Status> desiredStatuses) {
+    public Map<String, String> waitAndCheckStatuses(CloudbreakClient cloudbreakClient, String stackName, Map<String, Status> desiredStatuses,
+            long pollingInterval) {
         Map<String, String> errors = new HashMap<>();
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
-            waitResult = waitForStatuses(cloudbreakClient, stackName, desiredStatuses);
+            waitResult = waitForStatuses(cloudbreakClient, stackName, desiredStatuses, Math.max(this.pollingInterval, pollingInterval));
             if (waitResult == WaitResult.FAILED || waitResult == WaitResult.TIMEOUT) {
                 break;
             }
@@ -84,7 +85,7 @@ public class WaitUtilForMultipleStatuses {
         return result;
     }
 
-    private WaitResult waitForStatuses(CloudbreakClient cloudbreakClient, String stackName, Map<String, Status> desiredStatuses) {
+    private WaitResult waitForStatuses(CloudbreakClient cloudbreakClient, String stackName, Map<String, Status> desiredStatuses, long pollingInterval) {
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         Map<String, Status> currentStatuses = new HashMap<>();
 
@@ -92,7 +93,7 @@ public class WaitUtilForMultipleStatuses {
         while (!checkStatuses(currentStatuses, desiredStatuses) && !checkFailedStatuses(currentStatuses) && retryCount < maxRetry) {
             LOGGER.info("Waiting for status(es) {}, stack id: {}, current status(es) {} ...", desiredStatuses, stackName, currentStatuses);
 
-            sleep();
+            sleep(pollingInterval);
             try {
                 StackStatusV4Response status = cloudbreakClient.getCloudbreakClient().stackV4Endpoint()
                         .getStatusByName(cloudbreakClient.getWorkspaceId(), stackName);
@@ -130,7 +131,7 @@ public class WaitUtilForMultipleStatuses {
         return waitResult;
     }
 
-    private void sleep() {
+    private void sleep(long pollingInterval) {
         try {
             Thread.sleep(pollingInterval);
         } catch (InterruptedException e) {

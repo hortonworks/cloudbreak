@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
-
 import static com.sequenceiq.it.cloudbreak.newway.mock.model.ClouderaManagerMock.API_ROOT;
 
 import java.math.BigDecimal;
@@ -131,9 +130,9 @@ public class ClouderaManagerDownscaleTest extends AbstractClouderaManagerTest {
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(desiredWorkerCount))
-                .await(StackTestDto.class, STACK_AVAILABLE)
+                .await(StackTestDto.class, STACK_AVAILABLE, 3000)
                 .when(StackScalePostAction.valid().withDesiredCount(desiredBackscaledWorkerCount))
-                .await(StackTestDto.class, STACK_AVAILABLE)
+                .await(StackTestDto.class, STACK_AVAILABLE, 3000)
                 .validate();
     }
 
