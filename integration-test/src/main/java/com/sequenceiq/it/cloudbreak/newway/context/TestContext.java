@@ -387,11 +387,16 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public <T extends CloudbreakTestDto> T await(Class<T> entityClass, Map<String, Status> desiredStatuses) {
-        return await(entityClass, desiredStatuses, emptyRunningParameter());
+        return await(entityClass, desiredStatuses, emptyRunningParameter(), -1);
     }
 
     public <T extends CloudbreakTestDto> T await(Class<T> entityClass, Map<String, Status> desiredStatuses, RunningParameter runningParameter) {
-        return await(getEntityFromEntityClass(entityClass, runningParameter), desiredStatuses, runningParameter);
+        return await(getEntityFromEntityClass(entityClass, runningParameter), desiredStatuses, runningParameter, -1);
+    }
+
+    public <T extends CloudbreakTestDto> T await(Class<T> entityClass, Map<String, Status> desiredStatuses, RunningParameter runningParameter,
+            long pollingInterval) {
+        return await(getEntityFromEntityClass(entityClass, runningParameter), desiredStatuses, runningParameter, pollingInterval);
     }
 
     public <T extends CloudbreakTestDto> T await(T entity, Map<String, Status> desiredStatuses) {
@@ -399,6 +404,10 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public <T extends CloudbreakTestDto> T await(T entity, Map<String, Status> desiredStatuses, RunningParameter runningParameter) {
+        return await(entity, desiredStatuses, runningParameter, -1);
+    }
+
+    public <T extends CloudbreakTestDto> T await(T entity, Map<String, Status> desiredStatuses, RunningParameter runningParameter, long pollingInterval) {
         checkShutdown();
 
         if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
@@ -414,7 +423,7 @@ public abstract class TestContext implements ApplicationContextAware {
             }
 
             CloudbreakClient cloudbreakClient = getCloudbreakClient(getWho(runningParameter));
-            statuses.putAll(waitUtil.waitAndCheckStatuses(cloudbreakClient, awaitEntity.getName(), desiredStatuses));
+            statuses.putAll(waitUtil.waitAndCheckStatuses(cloudbreakClient, awaitEntity.getName(), desiredStatuses, pollingInterval));
             if (!desiredStatuses.values().contains(Status.DELETE_COMPLETED)) {
                 awaitEntity.refresh(this, cloudbreakClient);
             }
