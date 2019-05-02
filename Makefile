@@ -8,11 +8,19 @@ LDFLAGS_NOVER=-ldflags "-X github.com/hortonworks/cb-cli/dataplane/common.Versio
 GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*")
 CB_IP = $(shell echo \${IP})
 ifeq ($(CB_IP),)
-        CB_IP = 192.168.64.1
+        CB_IP = localhost
 endif
 CB_PORT = $(shell echo \${PORT})
 ifeq ($(CB_PORT),)
         CB_PORT = 9091
+endif
+
+ifeq ($(SDX_IP),)
+        SDX_IP = localhost
+endif
+CB_PORT = $(shell echo \${PORT})
+ifeq ($(SDX_PORT),)
+        SDX_PORT = 9092
 endif
 
 deps: deps-errcheck
@@ -76,6 +84,9 @@ build-linux-version:
 build-windows-version:
 	GOOS=windows GO111MODULE=on CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Windows/${BINARY}.exe main.go
 
+install: build ## Installs OS specific binary into: /usr/local/bin
+	install build/$(shell uname -s)/$(BINARY) /usr/local/bin
+
 _init-swagger-generation:
 	rm -rf dataplane/api/client dataplane/api/model
 	rm -f build/swagger.json
@@ -87,6 +98,10 @@ generate-swagger: _init-swagger-generation
 generate-swagger-dp: 
 	rm -rf dataplane/oauthapi/client dataplane/oauthapi/model
 	swagger generate client -f http://$(DP_IP):$(DP_PORT)/spec/api-docs/swagger.json -c client -m model -t dataplane/oauthapi
+
+generate-swagger-sdx:
+	rm -rf dataplane/api-sdx/client dataplane/api-sdx/model
+	swagger generate client -f http://$(SDX_IP):$(SDX_PORT)/dl/api/swagger.json -c client -m model -t dataplane/api-sdx
 
 generate-swagger-docker: _init-swagger-generation
 	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -v ${PWD}/build/swagger.json:${PWD}/build/swagger.json  -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:v0.17.2 \

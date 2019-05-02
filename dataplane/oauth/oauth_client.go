@@ -2,6 +2,7 @@ package oauth
 
 import (
 	"github.com/go-openapi/strfmt"
+	sdxclient "github.com/hortonworks/cb-cli/dataplane/api-sdx/client"
 	apiclient "github.com/hortonworks/cb-cli/dataplane/api/client"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	authapiclient "github.com/hortonworks/cb-cli/dataplane/oauthapi/client"
@@ -18,6 +19,9 @@ type Cloudbreak struct {
 }
 type Dataplane struct {
 	Dataplane *authapiclient.Dataplane
+}
+type Sdx struct {
+	Sdx *sdxclient.Datalake
 }
 
 func NewCloudbreakHTTPClientFromContext(c *cli.Context) *Cloudbreak {
@@ -44,4 +48,17 @@ func NewDataplaneHTTPClient(address string, apiKeyID, privateKey string) *Datapl
 	const baseAPIPath string = "/"
 	transport = apikeyauth.GetAPIKeyAuthTransport(address, baseAPIPath, apiKeyID, privateKey)
 	return &Dataplane{Dataplane: authapiclient.New(transport, strfmt.Default)}
+}
+
+// NewDataplaneHTTPClientFromContext : Initialize Dataplane client.
+func NewSDXClientFromContext(c *cli.Context) *Sdx {
+	return NewSDXClient(c.String(fl.FlServerOptional.Name), c.String(fl.FlApiKeyIDOptional.Name), c.String(fl.FlPrivateKeyOptional.Name))
+}
+
+func NewSDXClient(address string, apiKeyID, privateKey string) *Sdx {
+	u.CheckServerAddress(address)
+	var transport *utils.Transport
+	const baseAPIPath string = "/dl/api"
+	transport = apikeyauth.GetAPIKeyAuthTransport(address, baseAPIPath, apiKeyID, privateKey)
+	return &Sdx{Sdx: sdxclient.New(transport, strfmt.Default)}
 }
