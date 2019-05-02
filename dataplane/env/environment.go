@@ -1,6 +1,8 @@
 package env
 
 import (
+	"encoding/json"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -34,11 +36,17 @@ type environmentOutTableDescribe struct {
 
 type environmentOutJsonDescribe struct {
 	*environment
-	LdapConfigs     []string `json:"LdapConfigs" yaml:"LdapConfigs"`
-	ProxyConfigs    []string `json:"ProxyConfigs" yaml:"ProxyConfigs"`
-	KerberosConfigs []string `json:"KerberosConfigs" yaml:"KerberosConfigs"`
-	RdsConfigs      []string `json:"RdsConfigs" yaml:"RdsConfigs"`
-	ID              string   `json:"ID" yaml:"ID"`
+	LdapConfigs     []string                           `json:"LdapConfigs" yaml:"LdapConfigs"`
+	ProxyConfigs    []string                           `json:"ProxyConfigs" yaml:"ProxyConfigs"`
+	KerberosConfigs []string                           `json:"KerberosConfigs" yaml:"KerberosConfigs"`
+	RdsConfigs      []string                           `json:"RdsConfigs" yaml:"RdsConfigs"`
+	ID              string                             `json:"ID" yaml:"ID"`
+	Network         model.EnvironmentNetworkV4Response `json:"Network" yaml:"Network"`
+}
+
+type environmentListJsonDescribe struct {
+	*environment
+	Network model.EnvironmentNetworkV4Response `json:"Network" yaml:"Network"`
 }
 
 type environmentClient interface {
@@ -93,6 +101,28 @@ func CreateEnvironment(c *cli.Context) {
 	createEnvironmentImpl(c, workspaceID, EnvironmentV4Request)
 }
 
+func CreateEnvironmentFromTemplate(c *cli.Context) {
+	defer utils.TimeTrack(time.Now(), "create environment from template")
+	fileLocation := c.String(fl.FlEnvironmentTemplateFile.Name)
+	log.Infof("[assembleStackTemplate] read environment template JSON from file: %s", fileLocation)
+	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
+	content := utils.ReadFile(fileLocation)
+
+	var req model.EnvironmentV4Request
+	err := json.Unmarshal(content, &req)
+	if err != nil {
+		msg := fmt.Sprintf(`Invalid JSON format: %s. Please make sure that the json is valid (check for commas and double quotes).`, err.Error())
+		utils.LogErrorMessageAndExit(msg)
+	}
+
+	if name := c.String(fl.FlEnvironmentNameOptional.Name); len(name) != 0 {
+		req.Name = &name
+	} else if req.Name == nil {
+		utils.LogErrorMessageAndExit("Name of the environment must be set either in the template or with the --name command line option.")
+	}
+	createEnvironmentImpl(c, workspaceID, &req)
+}
+
 func createEnvironmentImpl(c *cli.Context, workspaceId int64, EnvironmentV4Request *model.EnvironmentV4Request) {
 	log.Infof("[createEnvironmentImpl] create environment with name: %s", *EnvironmentV4Request.Name)
 
@@ -105,6 +135,66 @@ func createEnvironmentImpl(c *cli.Context, workspaceId int64, EnvironmentV4Reque
 	environment := resp.Payload
 
 	log.Infof("[createEnvironmentImpl] environment created with name: %s, id: %d", *EnvironmentV4Request.Name, environment.ID)
+}
+
+func GenerateAwsEnvironmentTemplate(c *cli.Context) error {
+	template := createEnvironmentWithNetwork(c)
+	template.Network.Aws = &model.EnvironmentNetworkAwsV4Params{
+		VpcID: new(string),
+	}
+	return printTemplate(template)
+}
+
+func GenerateAzureEnvironmentTemplate(c *cli.Context) error {
+	template := createEnvironmentWithNetwork(c)
+	template.Network.Azure = &model.EnvironmentNetworkAzureV4Params{
+		ResourceGroupName: new(string),
+		NetworkID:         new(string),
+		NoFirewallRules:   new(bool),
+		NoPublicIP:        new(bool),
+	}
+	return printTemplate(template)
+}
+
+func createEnvironmentWithNetwork(c *cli.Context) model.EnvironmentV4Request {
+	template := model.EnvironmentV4Request{
+		Name:           new(string),
+		Description:    new(string),
+		CredentialName: "____",
+		Regions:        make([]string, 0),
+		Ldaps:          make([]string, 0),
+		Proxies:        make([]string, 0),
+		Kerberoses:     make([]string, 0),
+		Databases:      make([]string, 0),
+		Kubernetes:     make([]string, 0),
+		Location: &model.LocationV4Request{
+			Name:      new(string),
+			Longitude: 0,
+			Latitude:  0,
+		},
+		Network: &model.EnvironmentNetworkV4Request{
+			SubnetIds: make([]string, 0),
+		},
+	}
+	if credName := c.String(fl.FlEnvironmentCredentialOptional.Name); len(credName) != 0 {
+		template.CredentialName = credName
+	}
+	if locationName := c.String(fl.FlEnvironmentLocationNameOptional.Name); len(locationName) != 0 {
+		template.Location.Name = &locationName
+	}
+	if regions := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentRegions.Name), ","); len(regions) != 0 {
+		template.Regions = regions
+	}
+	return template
+}
+
+func printTemplate(template model.EnvironmentV4Request) error {
+	resp, err := json.MarshalIndent(template, "", "\t")
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	fmt.Printf("%s\n", string(resp))
+	return nil
 }
 
 func RegisterCumulusDatalake(c *cli.Context) {
@@ -151,10 +241,10 @@ func ListEnvironments(c *cli.Context) error {
 
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	return listEnvironmentsImpl(cbClient.Cloudbreak.V4WorkspaceIDEnvironments, output.WriteList, workspaceID)
+	return listEnvironmentsImpl(cbClient.Cloudbreak.V4WorkspaceIDEnvironments, output, workspaceID)
 }
 
-func listEnvironmentsImpl(envClient environmentClient, writer func([]string, []utils.Row), workspaceID int64) error {
+func listEnvironmentsImpl(envClient environmentClient, output utils.Output, workspaceID int64) error {
 	resp, err := envClient.ListEnvironment(v4env.NewListEnvironmentParams().WithWorkspaceID(workspaceID))
 	if err != nil {
 		utils.LogErrorAndExit(err)
@@ -172,10 +262,22 @@ func listEnvironmentsImpl(envClient environmentClient, writer func([]string, []u
 			Longitude:     e.Location.Longitude,
 			Latitude:      e.Location.Latitude,
 		}
-		tableRows = append(tableRows, row)
+
+		if output.Format != "table" && output.Format != "yaml" && e.Network != nil {
+			tableRows = append(tableRows, &environmentListJsonDescribe{
+				environment: row,
+				Network:     *e.Network,
+			})
+		} else {
+			tableRows = append(tableRows, row)
+		}
 	}
 
-	writer(EnvironmentHeader, tableRows)
+	if output.Format != "table" && output.Format != "yaml" {
+		output.WriteList(append(EnvironmentHeader, "Network"), tableRows)
+	} else {
+		output.WriteList(EnvironmentHeader, tableRows)
+	}
 	return nil
 }
 
@@ -193,8 +295,8 @@ func DescribeEnvironment(c *cli.Context) {
 		utils.LogErrorAndExit(err)
 	}
 	env := resp.Payload
-	if output.Format != "table" {
-		output.Write(append(EnvironmentHeader, "Ldaps", "Proxies", "Databases", "ID"), convertResponseToJsonOutput(env))
+	if output.Format != "table" && output.Format != "yaml" {
+		output.Write(append(EnvironmentHeader, "Ldaps", "Proxies", "Databases", "ID", "Network"), convertResponseToJsonOutput(env))
 	} else {
 		output.Write(append(EnvironmentHeader, "ID"), convertResponseToTableOutput(env))
 	}
@@ -348,7 +450,7 @@ func convertResponseToTableOutput(env *model.DetailedEnvironmentV4Response) *env
 }
 
 func convertResponseToJsonOutput(env *model.DetailedEnvironmentV4Response) *environmentOutJsonDescribe {
-	return &environmentOutJsonDescribe{
+	result := &environmentOutJsonDescribe{
 		environment: &environment{
 			Name:          env.Name,
 			Description:   env.Description,
@@ -365,6 +467,10 @@ func convertResponseToJsonOutput(env *model.DetailedEnvironmentV4Response) *envi
 		RdsConfigs:      getRdsConfigNames(env.Databases),
 		ID:              strconv.FormatInt(env.ID, 10),
 	}
+	if env.Network != nil {
+		result.Network = *env.Network
+	}
+	return result
 }
 
 func getRegionNames(region *model.CompactRegionV4Response) []string {

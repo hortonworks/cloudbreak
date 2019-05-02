@@ -55,6 +55,9 @@ type EnvironmentV4Request struct {
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
 
+	// Network related specifics of the environment.
+	Network *EnvironmentNetworkV4Request `json:"network,omitempty"`
+
 	// Name of the proxy configurations to be attached to the environment.
 	// Unique: true
 	Proxies []string `json:"proxies"`
@@ -97,6 +100,10 @@ func (m *EnvironmentV4Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateName(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateNetwork(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -235,6 +242,24 @@ func (m *EnvironmentV4Request) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("name", "body", string(*m.Name), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *EnvironmentV4Request) validateNetwork(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Network) { // not required
+		return nil
+	}
+
+	if m.Network != nil {
+		if err := m.Network.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("network")
+			}
+			return err
+		}
 	}
 
 	return nil

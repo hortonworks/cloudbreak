@@ -43,6 +43,9 @@ type SimpleEnvironmentV4Response struct {
 	// name of the resource
 	Name string `json:"name,omitempty"`
 
+	// Network related specifics of the environment.
+	Network *EnvironmentNetworkV4Response `json:"network,omitempty"`
+
 	// Regions of the environment.
 	Regions *CompactRegionV4Response `json:"regions,omitempty"`
 
@@ -67,6 +70,10 @@ func (m *SimpleEnvironmentV4Response) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateLocation(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateNetwork(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -124,6 +131,24 @@ func (m *SimpleEnvironmentV4Response) validateLocation(formats strfmt.Registry) 
 		if err := m.Location.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("location")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *SimpleEnvironmentV4Response) validateNetwork(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Network) { // not required
+		return nil
+	}
+
+	if m.Network != nil {
+		if err := m.Network.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("network")
 			}
 			return err
 		}

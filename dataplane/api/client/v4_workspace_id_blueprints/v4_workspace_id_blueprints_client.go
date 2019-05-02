@@ -27,7 +27,7 @@ type Client struct {
 /*
 CreateBlueprintInWorkspace creates blueprint in workspace
 
-Blueprints are a declarative definition of a Hadoop cluster. With a blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
+Cluster definitions are a declarative definition of a Hadoop cluster. With a blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
 */
 func (a *Client) CreateBlueprintInWorkspace(params *CreateBlueprintInWorkspaceParams) (*CreateBlueprintInWorkspaceOK, error) {
 	// TODO: Validate the params before sending
@@ -87,7 +87,7 @@ func (a *Client) CreateRecommendationForWorkspace(params *CreateRecommendationFo
 /*
 DeleteBlueprintInWorkspace deletes blueprint by name in workspace
 
-Blueprints are a declarative definition of a Hadoop cluster. With a blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
+Cluster definitions are a declarative definition of a Hadoop cluster. With a blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
 */
 func (a *Client) DeleteBlueprintInWorkspace(params *DeleteBlueprintInWorkspaceParams) (*DeleteBlueprintInWorkspaceOK, error) {
 	// TODO: Validate the params before sending
@@ -117,7 +117,7 @@ func (a *Client) DeleteBlueprintInWorkspace(params *DeleteBlueprintInWorkspacePa
 /*
 DeleteBlueprintsInWorkspace deletes multiple blueprints by name in workspace
 
-Blueprints are a declarative definition of a Hadoop cluster. With a blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
+Cluster definitions are a declarative definition of a Hadoop cluster. With a blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
 */
 func (a *Client) DeleteBlueprintsInWorkspace(params *DeleteBlueprintsInWorkspaceParams) (*DeleteBlueprintsInWorkspaceOK, error) {
 	// TODO: Validate the params before sending
@@ -175,7 +175,7 @@ func (a *Client) GetBlueprintCustomParameters(params *GetBlueprintCustomParamete
 /*
 GetBlueprintInWorkspace gets blueprint by name in workspace
 
-Blueprints are a declarative definition of a Hadoop cluster. With a blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
+Cluster definitions are a declarative definition of a Hadoop cluster. With a blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
 */
 func (a *Client) GetBlueprintInWorkspace(params *GetBlueprintInWorkspaceParams) (*GetBlueprintInWorkspaceOK, error) {
 	// TODO: Validate the params before sending
@@ -205,7 +205,7 @@ func (a *Client) GetBlueprintInWorkspace(params *GetBlueprintInWorkspaceParams) 
 /*
 GetBlueprintRequestFromName retrieves validation request by blueprint name
 
-Blueprints are a declarative definition of a Hadoop cluster. With a blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
+Cluster definitions are a declarative definition of a Hadoop cluster. With a blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
 */
 func (a *Client) GetBlueprintRequestFromName(params *GetBlueprintRequestFromNameParams) (*GetBlueprintRequestFromNameOK, error) {
 	// TODO: Validate the params before sending
@@ -235,7 +235,7 @@ func (a *Client) GetBlueprintRequestFromName(params *GetBlueprintRequestFromName
 /*
 ListBlueprintsByWorkspace lists blueprints for the given workspace
 
-Blueprints are a declarative definition of a Hadoop cluster. With a blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
+Cluster definitions are a declarative definition of a Hadoop cluster. With a blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
 */
 func (a *Client) ListBlueprintsByWorkspace(params *ListBlueprintsByWorkspaceParams) (*ListBlueprintsByWorkspaceOK, error) {
 	// TODO: Validate the params before sending

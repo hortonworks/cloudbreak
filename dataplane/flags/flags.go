@@ -570,20 +570,6 @@ var (
 			Usage: "base DN from where the user will be deleted (e.g: CN=Users,DC=ad,DC=cb,DC=com)",
 		},
 	}
-	FlKerberosPasswordOptional = StringFlag{
-		RequiredFlag: OPTIONAL,
-		StringFlag: cli.StringFlag{
-			Name:  "kerberos-password",
-			Usage: "kerberos password",
-		},
-	}
-	FlKerberosPrincipalOptional = StringFlag{
-		RequiredFlag: OPTIONAL,
-		StringFlag: cli.StringFlag{
-			Name:  "kerberos-principal",
-			Usage: "kerberos principal",
-		},
-	}
 	FlCredential = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
@@ -943,6 +929,13 @@ var (
 			Usage: "name of the credential",
 		},
 	}
+	FlEnvironmentCredentialOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "credential",
+			Usage: "name of the credential",
+		},
+	}
 	FlEnvironmentRegions = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
@@ -990,6 +983,20 @@ var (
 		StringFlag: cli.StringFlag{
 			Name:  "env-name",
 			Usage: "name of an environment",
+		},
+	}
+	FlEnvironmentNameOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "name",
+			Usage: "name of an environment",
+		},
+	}
+	FlEnvironmentTemplateFile = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "file",
+			Usage: "location of the environment JSON template file",
 		},
 	}
 	FlEnvironments = StringFlag{

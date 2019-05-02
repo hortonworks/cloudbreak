@@ -29,6 +29,52 @@ func init() {
 				},
 			},
 			{
+				Name:   "from-file",
+				Usage:  "creates a new Environment from JSON template",
+				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentTemplateFile, fl.FlEnvironmentNameOptional).AddAuthenticationFlags().Build(),
+				Before: cf.CheckConfigAndCommandFlags,
+				Action: env.CreateEnvironmentFromTemplate,
+				BashComplete: func(c *cli.Context) {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentTemplateFile, fl.FlEnvironmentNameOptional).AddAuthenticationFlags().Build() {
+						fl.PrintFlagCompletion(f)
+					}
+				},
+			},
+			{
+				Name:  "generate-template",
+				Usage: "creates an environment JSON template",
+				Subcommands: []cli.Command{
+					{
+						Name:  "aws",
+						Usage: "creates an aws specific environment JSON template",
+						Flags: fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCredentialOptional,
+							fl.FlEnvironmentLocationNameOptional, fl.FlEnvironmentRegions).AddAuthenticationFlags().Build(),
+						Before: cf.CheckConfigAndCommandFlags,
+						Action: env.GenerateAwsEnvironmentTemplate,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCredentialOptional,
+								fl.FlEnvironmentLocationNameOptional, fl.FlEnvironmentRegions).AddAuthenticationFlags().Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+					{
+						Name:  "azure",
+						Usage: "creates an azure specific environment JSON template",
+						Flags: fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCredentialOptional,
+							fl.FlEnvironmentLocationNameOptional, fl.FlEnvironmentRegions).AddAuthenticationFlags().Build(),
+						Before: cf.CheckConfigAndCommandFlags,
+						Action: env.GenerateAzureEnvironmentTemplate,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCredentialOptional,
+								fl.FlEnvironmentLocationNameOptional, fl.FlEnvironmentRegions).AddAuthenticationFlags().Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+				},
+			},
+			{
 				Name:  "cumulus",
 				Usage: "cumulus related operations",
 				Subcommands: []cli.Command{
