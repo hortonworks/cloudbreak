@@ -19,6 +19,7 @@ jar {
 dependencies {
   compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
     exclude group: 'org.slf4j'
+    exclude group: 'org.codehouse.groovy'
   }
   compile project(':cluster-api')
   compile project(':template-manager-blueprint')
