@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @WorkspaceResourceType(resource = WorkspaceResource.CLUSTER_TEMPLATE)
 public interface ClusterTemplateViewRepository extends WorkspaceResourceRepository<ClusterTemplateView, Long> {
 
-    @Query("SELECT b FROM ClusterTemplate b WHERE b.workspace.id= :workspaceId AND b.status <> 'DEFAULT_DELETED'")
+    @Query("SELECT b FROM ClusterTemplateView b WHERE b.workspace.id= :workspaceId AND b.status <> 'DEFAULT_DELETED'")
     @CheckPermissionsByReturnValue
     Set<ClusterTemplateView> findAllByNotDeletedInWorkspace(@Param("workspaceId") Long workspaceId);
 
