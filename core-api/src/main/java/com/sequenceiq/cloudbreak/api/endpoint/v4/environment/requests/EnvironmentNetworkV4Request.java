@@ -2,20 +2,26 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.base.EnvironmentNetworkAwsV4Params;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.base.EnvironmentNetworkAzureV4Params;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+@ApiModel
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class EnvironmentNetworkV4Request {
     @ApiModelProperty(value = ModelDescriptions.EnvironmentNetworkDescription.SUBNET_IDS, required = true)
     private Set<String> subnetIds;
 
-    @ApiModelProperty(value = ModelDescriptions.EnvironmentNetworkDescription.AWS_SPECIFIC_PARAMETERS, required = true)
+    @ApiModelProperty(value = ModelDescriptions.EnvironmentNetworkDescription.AWS_SPECIFIC_PARAMETERS)
     private EnvironmentNetworkAwsV4Params aws;
 
-    @ApiModelProperty(value = ModelDescriptions.EnvironmentNetworkDescription.AZURE_SPECIFIC_PARAMETERS, required = true)
+    @ApiModelProperty(value = ModelDescriptions.EnvironmentNetworkDescription.AZURE_SPECIFIC_PARAMETERS)
     private EnvironmentNetworkAzureV4Params azure;
 
     public Set<String> getSubnetIds() {
