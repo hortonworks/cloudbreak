@@ -189,8 +189,8 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
 
     private void convertDpSecrets(Cluster source, ClusterV4Response response) {
         if (isNotEmpty(source.getDpAmbariUserSecret()) && isNotEmpty(source.getDpAmbariPasswordSecret())) {
-            response.setDpUser(getConversionService().convert(source.getDpAmbariUserSecret(), SecretV4Response.class));
-            response.setDpPassword(getConversionService().convert(source.getDpAmbariPasswordSecret(), SecretV4Response.class));
+            response.setCmMgmtUser(getConversionService().convert(source.getDpAmbariUserSecret(), SecretV4Response.class));
+            response.setCmMgmtPassword(getConversionService().convert(source.getDpAmbariPasswordSecret(), SecretV4Response.class));
         }
     }
 }
