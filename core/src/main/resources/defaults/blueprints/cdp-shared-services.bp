@@ -21,6 +21,12 @@
       {
         "refName": "hdfs",
         "serviceType": "HDFS",
+        "serviceConfigs": [
+          {
+            "name": "hdfs_service_config_safety_valve",
+            "value": "<property><name>dfs.datanode.keytab.file</name><value>{{CMF_CONF_DIR}}/hdfs.keytab</value></property>"
+          }
+        ],
         "roleConfigGroups": [
           {
             "refName": "hdfs-NAMENODE-BASE",
