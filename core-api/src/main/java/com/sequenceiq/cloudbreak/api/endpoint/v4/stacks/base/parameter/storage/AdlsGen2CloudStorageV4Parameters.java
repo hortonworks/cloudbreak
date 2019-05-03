@@ -41,18 +41,18 @@ public class AdlsGen2CloudStorageV4Parameters implements CloudStorageV4Parameter
         this.accountName = accountName;
     }
 
-    @ApiModelProperty(hidden = true)
-    @Override
-    public FileSystemType getType() {
-        return FileSystemType.ADLS_GEN_2;
-    }
-
     public boolean isSecure() {
         return secure;
     }
 
     public void setSecure(boolean secure) {
         this.secure = secure;
+    }
+
+    @ApiModelProperty(hidden = true)
+    @Override
+    public FileSystemType getType() {
+        return FileSystemType.ADLS_GEN_2;
     }
 
     @Override
@@ -64,9 +64,9 @@ public class AdlsGen2CloudStorageV4Parameters implements CloudStorageV4Parameter
             return false;
         }
         AdlsGen2CloudStorageV4Parameters that = (AdlsGen2CloudStorageV4Parameters) o;
-        return secure == that.secure &&
-                Objects.equals(accountKey, that.accountKey) &&
-                Objects.equals(accountName, that.accountName);
+        return secure == that.secure
+                && Objects.equals(accountKey, that.accountKey)
+                && Objects.equals(accountName, that.accountName);
     }
 
     @Override
