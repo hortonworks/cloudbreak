@@ -117,6 +117,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
             if (oldAdminUser.isPresent()) {
                 Cluster cluster = stack.getCluster();
                 createNewUser(usersResourceApi, oldAdminUser.get().getAuthRoles(), cluster.getCloudbreakAmbariUser(), cluster.getCloudbreakAmbariPassword());
+                createNewUser(usersResourceApi, oldAdminUser.get().getAuthRoles(), cluster.getDpAmbariUser(), cluster.getDpAmbariPassword());
                 if ("admin".equals(cluster.getUserName())) {
                     ApiUser2 oldAdmin = oldAdminUser.get();
                     oldAdmin.setPassword(cluster.getPassword());
