@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.responses.KubernetesV4Response;
@@ -15,6 +17,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DetailedEnvironmentV4Response extends EnvironmentV4BaseResponse {
     @ApiModelProperty(EnvironmentResponseModelDescription.PROXY_CONFIGS)
     private Set<ProxyV4Response> proxies = new HashSet<>();
