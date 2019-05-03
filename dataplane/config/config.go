@@ -77,7 +77,7 @@ func CheckConfigAndCommandFlagsDP(c *cli.Context) error {
 func validateContext(c *cli.Context, flagsTocheck []fl.StringFlag) {
 	for _, f := range flagsTocheck {
 		if len(c.String(f.Name)) == 0 {
-			log.Error(fmt.Sprintf("configuration is not set, see: cb configure --help or provide the following flags: %v",
+			log.Error(fmt.Sprintf("configuration is not set, see: dp configure --help or provide the following flags: %v",
 				[]string{"--" + f.Name}))
 			os.Exit(1)
 		}

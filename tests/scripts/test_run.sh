@@ -24,7 +24,7 @@ echo "CLI Tests: "$CLI_TEST_FILES
 curl --verbose --show-error --location --insecure -C - https://s3.amazonaws.com/dp-cli/dp-cli_"${TARGET_CBD_VERSION}"_$(uname)_x86_64.tgz | tar -xvz --directory /usr/local/bin
 
 token=$(wget --continue --no-check-certificate $BASE_URL/oidc/authorize?username=$USERNAME_CLI\&tenant=$CBD_TENANT -O -)
-echo $token | cb configure --server $BASE_URL --workspace $USERNAME_CLI
+echo $token | dp configure --server $BASE_URL --workspace $USERNAME_CLI
 
 mkdir -p tmp/aruba
 rspec -f RspecJunitFormatter -o test-result.xml -f h $CLI_TEST_FILES | tee test-result.html | ruby -n spec/common/integration_formatter.rb

@@ -694,7 +694,7 @@ var (
 		RequiredFlag: OPTIONAL,
 		BoolFlag: cli.BoolFlag{
 			Name:  "not-validated",
-			Usage: "[DEPRECATED] has no effect, use 'cb database test ...' command instead",
+			Usage: "[DEPRECATED] has no effect, use 'dp database test ...' command instead",
 		},
 	}
 	FlKubernetesConfigFile = StringFlag{

@@ -57,7 +57,7 @@ func init() {
 			{
 				Name:        "create",
 				Usage:       "creates a new cluster",
-				Description: `use 'cb cluster generate-template' for cluster request JSON generation`,
+				Description: `use 'dp cluster generate-template' for cluster request JSON generation`,
 				Flags:       fl.NewFlagBuilder().AddResourceFlagsWithOptionalName().AddFlags(fl.FlInputJson, fl.FlAmbariUserOptional, fl.FlAmbariPasswordOptional, fl.FlWaitOptional).AddAuthenticationFlags().Build(),
 				Before:      cf.CheckConfigAndCommandFlags,
 				Action:      stack.CreateStack,
