@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service;
+package com.sequenceiq.cloudbreak.security.authentication;
 
 import java.io.IOException;
 import java.util.Map;
@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.service.token.CachedRemoteTokenService.MapTypeReference;
-import com.sequenceiq.cloudbreak.service.security.AuthUserService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
@@ -26,25 +25,21 @@ public class AuthenticatedUserService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticatedUserService.class);
 
     @Inject
-    private AuthUserService userService;
+    private AuthenticationService authenticationService;
 
     public CloudbreakUser getCbUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof OAuth2Authentication) {
             OAuth2Authentication oauth = (OAuth2Authentication) authentication;
             if (oauth.getUserAuthentication() != null) {
-                return userService.getUserWithCaasFallback(oauth);
+                return authenticationService.getCloudbreakUser(oauth);
             }
         }
         return null;
     }
 
-    public String getUserCrn() throws CloudbreakException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof OAuth2Authentication) {
-            return userService.getUserCrn((OAuth2Authentication) authentication);
-        }
-        throw new CloudbreakException("User is not authenticated via UMS, userCRN cannot be retrieved.");
+    public String getTokenValue(OAuth2Authentication auth) {
+        return ((OAuth2AuthenticationDetails) auth.getDetails()).getTokenValue();
     }
 
     public static String getTenant(OAuth2Authentication oauth) {

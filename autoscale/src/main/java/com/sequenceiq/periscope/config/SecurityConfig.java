@@ -22,7 +22,7 @@ import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecur
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
-import com.sequenceiq.cloudbreak.service.security.ScimAccountGroupReaderFilter;
+import com.sequenceiq.cloudbreak.security.ScimAccountGroupReaderFilter;
 import com.sequenceiq.periscope.service.security.TenantBasedPermissionEvaluator;
 
 @Configuration
