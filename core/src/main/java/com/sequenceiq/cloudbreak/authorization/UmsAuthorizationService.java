@@ -66,8 +66,9 @@ public class UmsAuthorizationService {
     }
 
     public void checkRightOfUserForResource(User user, Workspace workspace, WorkspaceResource resource, ResourceAction action) {
-        String unauthorizedMessage = format("You have no right to perform %s on %s in workspace %s.", action.name().toLowerCase(),
-                resource.getReadableName(), workspace.getName());
+        String unauthorizedMessage = format("You have no right to perform %s on %s. This requires PowerUser role. "
+                        + "You can request access through IAM service from an administrator.",
+                WorkspaceRightUtils.getRight(resource, action), resource.getReadableName());
         checkRightOfUserForResource(user, workspace, resource, action, unauthorizedMessage);
     }
 

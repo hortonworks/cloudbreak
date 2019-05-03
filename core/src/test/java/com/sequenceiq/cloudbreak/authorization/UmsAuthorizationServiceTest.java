@@ -72,7 +72,8 @@ public class UmsAuthorizationServiceTest {
         when(umsClient.checkRight(anyString(), anyString(), anyString(), anyString())).thenReturn(false);
 
         thrown.expect(AccessDeniedException.class);
-        thrown.expectMessage("You have no right to perform write on database config in workspace workspace@ws.com.");
+        thrown.expectMessage("You have no right to perform distrox/writeDatabase on database config. This requires PowerUser role. "
+                + "You can request access through IAM service from an administrator.");
 
         underTest.checkRightOfUserForResource(createUser(), createWorkspace(), WorkspaceResource.DATABASE, ResourceAction.WRITE);
     }
