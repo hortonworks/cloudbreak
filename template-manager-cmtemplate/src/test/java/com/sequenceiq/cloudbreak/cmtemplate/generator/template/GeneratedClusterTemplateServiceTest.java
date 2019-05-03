@@ -69,7 +69,7 @@ public class GeneratedClusterTemplateServiceTest extends CentralTemplateGenerato
     @Parameterized.Parameters(name = "{index}: testTemplateGeneration(get {0} with {1} {2}) = output is {3}")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][] {
-                { Set.of("OOZIE"), CDH, CDH_6_1, "result_1" }
+                //{ Set.of("OOZIE"), CDH, CDH_6_1, "result_1" }
         });
     }
 
