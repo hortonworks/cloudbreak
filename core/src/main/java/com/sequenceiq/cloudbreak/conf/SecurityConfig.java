@@ -23,7 +23,7 @@ import org.springframework.security.oauth2.provider.token.ResourceServerTokenSer
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
 import com.sequenceiq.cloudbreak.auth.altus.CrnTokenExtractor;
-import com.sequenceiq.cloudbreak.service.security.ScimAccountGroupReaderFilter;
+import com.sequenceiq.cloudbreak.security.ScimAccountGroupReaderFilter;
 import com.sequenceiq.cloudbreak.service.security.TenantBasedPermissionEvaluator;
 
 @Configuration

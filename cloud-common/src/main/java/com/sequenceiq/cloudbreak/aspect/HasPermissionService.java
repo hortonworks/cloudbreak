@@ -19,7 +19,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.security.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.CrudRepositoryLookupService;
 
 @Service

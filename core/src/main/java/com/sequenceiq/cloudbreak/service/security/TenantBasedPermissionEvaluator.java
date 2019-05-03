@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.authorization.SpecialScopes;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
 import com.sequenceiq.cloudbreak.domain.workspace.TenantAwareResource;
+import com.sequenceiq.cloudbreak.security.authentication.AuthenticationService;
 
 @Service
 @Lazy
@@ -28,7 +29,7 @@ public class TenantBasedPermissionEvaluator implements PermissionEvaluator {
     private static final Logger LOGGER = LoggerFactory.getLogger(TenantBasedPermissionEvaluator.class);
 
     @Inject
-    private AuthUserService userService;
+    private AuthenticationService authenticationService;
 
     @Override
     public boolean hasPermission(Authentication authentication, Object target, Object permission) {
@@ -44,7 +45,7 @@ public class TenantBasedPermissionEvaluator implements PermissionEvaluator {
             return oauth.getOAuth2Request().getScope().contains(SpecialScopes.AUTO_SCALE.getScope());
         }
 
-        CloudbreakUser user = userService.getUserWithCaasFallback(oauth);
+        CloudbreakUser user = authenticationService.getCloudbreakUser(oauth);
         Collection<?> targets = target instanceof Collection ? (Collection<?>) target : Collections.singleton(target);
         return targets.stream().allMatch(t -> hasPermission(user, p, t));
     }
