@@ -295,6 +295,36 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
+    @Override
+    public void initSaltConfig(List<GatewayConfig> allGateway, Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel)
+            throws CloudbreakOrchestratorFailedException {
+        GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGateway);
+        Set<String> gatewayTargets = getGatewayPrivateIps(allGateway);
+        try (SaltConnector sc = new SaltConnector(primaryGateway, restDebug)) {
+            OrchestratorBootstrap hostSave = new PillarSave(sc, gatewayTargets, allNodes);
+            Callable<Boolean> saltPillarRunner = runner(hostSave, exitCriteria, exitModel);
+            Future<Boolean> saltPillarRunnerFuture = parallelOrchestratorComponentRunner.submit(saltPillarRunner);
+            saltPillarRunnerFuture.get();
+
+            for (Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
+                OrchestratorBootstrap pillarSave = new PillarSave(sc, gatewayTargets, propertiesEntry.getValue());
+                saltPillarRunner = runner(pillarSave, exitCriteria, exitModel);
+                saltPillarRunnerFuture = parallelOrchestratorComponentRunner.submit(saltPillarRunner);
+                saltPillarRunnerFuture.get();
+            }
+        } catch (ExecutionException e) {
+            LOGGER.warn("Error occurred during ambari bootstrap", e);
+            if (e.getCause() instanceof CloudbreakOrchestratorFailedException) {
+                throw (CloudbreakOrchestratorFailedException) e.getCause();
+            }
+            throw new CloudbreakOrchestratorFailedException(e);
+
+        } catch (Exception e) {
+            LOGGER.warn("Error occurred during ambari bootstrap", e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
+    }
+
     private void addClusterManagerRoles(Set<Node> allNodes, ExitCriteriaModel exitModel, Set<String> gatewayTargets,
             SaltConnector sc, Set<String> server, Set<String> allNodeIP, boolean clouderaManager) throws ExecutionException, InterruptedException {
         if (clouderaManager) {

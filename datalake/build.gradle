@@ -25,7 +25,9 @@ dependencies {
   implementation     group: 'io.micrometer',             name: 'micrometer-registry-prometheus'
   implementation     group: 'io.springfox',              name: 'springfox-swagger2'
   implementation     group: 'io.springfox',              name: 'springfox-swagger-ui'
-  implementation     group: 'io.swagger',                name: 'swagger-jersey2-jaxrs'
+  implementation     ('io.swagger:swagger-jersey2-jaxrs') {
+    exclude group: 'org.yaml'
+  }
   implementation     group: 'javax.xml.bind',            name: 'jaxb-api'
   implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server'
   implementation     group: 'org.mybatis',               name: 'mybatis-migrations'

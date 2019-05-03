@@ -14,7 +14,6 @@ buildscript {
 }
 
 dependencies {
-
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-jersey', version: '2.0.3.RELEASE'
   compile group: 'org.springframework.security.oauth',  name: 'spring-security-oauth2',    version: springOauthVersion
 

@@ -230,9 +230,9 @@ To run periscope from command line you have to run the below gradle command with
 -Dperiscope.cloudbreak.url=http://localhost:8080 \
 -Dperiscope.schema.scripts.location=$(pwd)/autoscale/src/main/resources/schema
 -Dserver.port=8085 \
--Daltus.ums.host=localhost
--Dvault.addr=localhost
--Dvault.root.token=<TOKEN_FROM_PROFILE_FILE>
+-Daltus.ums.host=localhost \
+-Dvault.addr=localhost \
+-Dvault.root.token=<TOKEN_FROM_PROFILE_FILE> \
 -Dspring.config.location=$(pwd)/autoscale/src/main/resources/application.yml,$(pwd)/autoscale/build/resources/main/application.properties"
 ```` 
 
@@ -246,6 +246,17 @@ To run datalake from command line you have to run the below gradle command with 
 -Dserver.port=8086 \
 -Ddatalake.cloudbreak.url=http://localhost:8080 \
 -Dspring.config.location=$(pwd)/datalake/src/main/resources/application.yml,$(pwd)/datalake/build/resources/main/application.properties"
+````
+
+### FreeIPA
+To run freeipa management service from command line you have to run the below gradle command with the following list of JVM parameters:
+
+````
+./gradlew :freeipa:bootRun -PjvmArgs="-Dfreeipa.db.addr=localhost \
+-Dserver.port=8090 \
+-Dvault.addr=localhost \
+-Dvault.root.token=<TOKEN_FROM_PROFILE_FILE> \
+-Dspring.config.location=$(pwd)/freeipa/src/main/resources/application.yml,$(pwd)/freeipa/build/resources/main/application.properties"
 ````
 
 ## Database development
