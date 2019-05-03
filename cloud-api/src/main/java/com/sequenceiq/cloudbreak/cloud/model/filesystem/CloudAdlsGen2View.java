@@ -10,6 +10,8 @@ public class CloudAdlsGen2View extends CloudFileSystemView {
 
     private String resourceGroupName;
 
+    private boolean secure;
+
     public String getAccountKey() {
         return accountKey;
     }
@@ -32,6 +34,14 @@ public class CloudAdlsGen2View extends CloudFileSystemView {
 
     public void setResourceGroupName(String resourceGroupName) {
         this.resourceGroupName = resourceGroupName;
+    }
+
+    public boolean isSecure() {
+        return secure;
+    }
+
+    public void setSecure(boolean secure) {
+        this.secure = secure;
     }
 
     @Override

@@ -20,6 +20,7 @@ public class ConfigQueryEntryToFileSystemParameterV4ResponseConverter
         fileSystemParameterV4Response.setPropertyFile(source.getPropertyFile());
         fileSystemParameterV4Response.setProtocol(source.getProtocol());
         fileSystemParameterV4Response.setPropertyDisplayName(source.getPropertyDisplayName());
+        fileSystemParameterV4Response.setSecure(source.isSecure());
         return fileSystemParameterV4Response;
     }
 }
