@@ -11,7 +11,6 @@ import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.ExternalUserMappingsResourceApi;
 import com.cloudera.api.swagger.HostTemplatesResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
-import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.ParcelResourceApi;
 import com.cloudera.api.swagger.RolesResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
@@ -49,10 +48,6 @@ public class ClouderaManagerClientFactory {
 
     public ClouderaManagerResourceApi getClouderaManagerResourceApi(ApiClient apiClient) {
         return new ClouderaManagerResourceApi(apiClient);
-    }
-
-    public MgmtServiceResourceApi getMgmtServiceResourceApi(ApiClient apiClient) {
-        return new MgmtServiceResourceApi(apiClient);
     }
 
     public ExternalUserMappingsResourceApi getExternalUserMappingsResourceApi(Stack stack, Cluster cluster, HttpClientConfig clientConfig) {

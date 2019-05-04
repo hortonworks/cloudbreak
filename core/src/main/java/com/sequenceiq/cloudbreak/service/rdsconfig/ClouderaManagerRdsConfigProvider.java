@@ -11,13 +11,13 @@ public class ClouderaManagerRdsConfigProvider extends AbstractRdsConfigProvider 
 
     private static final String PILLAR_KEY = "clouderamanager";
 
-    @Value("${cb.clouderamanager.service.database.port:5432}")
+    @Value("${cb.clouderamanager.database.port:5432}")
     private String port;
 
-    @Value("${cb.clouderamanager.service.database.user:clouderamanager}")
+    @Value("${cb.clouderamanager.database.user:clouderamanager}")
     private String userName;
 
-    @Value("${cb.clouderamanager.service.database.db:clouderamanager}")
+    @Value("${cb.clouderamanager.database.db:clouderamanager}")
     private String db;
 
     @Override
