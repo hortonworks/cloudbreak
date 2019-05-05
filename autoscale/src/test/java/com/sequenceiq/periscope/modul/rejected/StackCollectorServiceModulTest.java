@@ -11,7 +11,6 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -57,9 +56,6 @@ public class StackCollectorServiceModulTest extends StackCollectorContext {
 
     @Inject
     private ApplicationContext applicationContext;
-
-    @Inject
-    private ThreadPoolExecutor executorService;
 
     @Inject
     private CloudbreakClientConfiguration cloudbreakClientConfiguration;

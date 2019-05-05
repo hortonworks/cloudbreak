@@ -4,7 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
-import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.util.Collection;
@@ -37,16 +37,17 @@ import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.authorization.ResourceAction;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
-import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.validation.network.NetworkConfigurationValidator;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -74,7 +75,9 @@ import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -84,9 +87,6 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.service.TransactionService;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.credential.OpenSshPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
@@ -253,7 +253,7 @@ public class StackService {
 
     @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
     public Tenant getTenant(Long stackId) {
-        Workspace workspace = stackRepository.findWorkspaceById(stackId).orElseThrow(NotFoundException.notFound("workspace", stackId));
+        Workspace workspace = stackRepository.findWorkspaceById(stackId).orElseThrow(notFound("workspace", stackId));
         return workspace.getTenant();
     }
 

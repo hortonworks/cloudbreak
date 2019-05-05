@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesFailed;

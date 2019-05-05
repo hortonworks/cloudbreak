@@ -2,7 +2,7 @@ package com.sequenceiq.freeipa.flow.stack;
 
 import javax.annotation.PostConstruct;
 
-import com.sequenceiq.cloudbreak.cloud.event.Payload;
+import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.CommonContext;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;

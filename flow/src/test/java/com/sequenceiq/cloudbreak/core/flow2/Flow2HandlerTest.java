@@ -42,7 +42,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cedarsoftware.util.io.JsonWriter;
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.cloud.event.Payload;
+import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainHandler;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChains;
 import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
@@ -50,8 +52,6 @@ import com.sequenceiq.cloudbreak.core.flow2.helloworld.HelloWorldFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.restart.DefaultRestartAction;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.domain.StateStatus;
-import com.sequenceiq.cloudbreak.service.TransactionService;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import reactor.bus.Event;

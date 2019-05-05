@@ -192,6 +192,7 @@ cb:
 
   eventbus.threadpool.core.size: 100
   cloud.api.executorservice.pool.size: 40
+  reactor.executorservice.pool.size: 40
 
   platform.default:
     variants: OPENSTACK:HEAT

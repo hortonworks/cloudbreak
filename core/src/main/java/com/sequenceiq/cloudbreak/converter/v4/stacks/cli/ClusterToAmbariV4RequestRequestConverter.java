@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.s
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;

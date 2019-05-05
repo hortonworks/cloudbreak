@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 import javax.inject.Inject;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.notification.Notification;

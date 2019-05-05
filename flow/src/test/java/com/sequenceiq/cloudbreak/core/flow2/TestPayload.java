@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
-import com.sequenceiq.cloudbreak.cloud.event.Payload;
+import com.sequenceiq.cloudbreak.common.event.Payload;
 
 public class TestPayload implements Payload {
     private Long stackId;

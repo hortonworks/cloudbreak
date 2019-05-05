@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.template.domain.GeneratedCmTemplate;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.util.URLUtils;
 import com.sequenceiq.cloudbreak.domain.Blueprint;

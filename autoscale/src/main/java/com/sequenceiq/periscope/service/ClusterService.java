@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.ScalingConfigurationRequest;
 import com.sequenceiq.periscope.domain.Ambari;

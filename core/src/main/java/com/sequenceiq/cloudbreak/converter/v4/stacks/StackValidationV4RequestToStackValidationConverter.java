@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;

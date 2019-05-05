@@ -39,7 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
-import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.cloudbreak.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;

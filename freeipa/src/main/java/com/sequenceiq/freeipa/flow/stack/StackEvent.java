@@ -2,8 +2,8 @@ package com.sequenceiq.freeipa.flow.stack;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.sequenceiq.cloudbreak.cloud.Acceptable;
-import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.freeipa.flow.event.EventSelectorUtil;
 
 import reactor.rx.Promise;

@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 import com.google.api.client.util.Joiner;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;

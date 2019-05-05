@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
+import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.CheckResult;

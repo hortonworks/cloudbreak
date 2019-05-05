@@ -23,9 +23,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.util.ReflectionUtils;
 
-import com.sequenceiq.cloudbreak.common.type.metric.Metric;
-import com.sequenceiq.cloudbreak.common.type.metric.MetricType;
-import com.sequenceiq.cloudbreak.service.metrics.MetricService;
+import com.sequenceiq.cloudbreak.common.metrics.MetricService;
+import com.sequenceiq.cloudbreak.common.metrics.type.Metric;
+import com.sequenceiq.cloudbreak.common.metrics.type.MetricType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SecretServiceTest {

@@ -16,9 +16,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.domain.Secret;
 import com.sequenceiq.cloudbreak.domain.SecretProxy;
-import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.secret.SecretService;
 

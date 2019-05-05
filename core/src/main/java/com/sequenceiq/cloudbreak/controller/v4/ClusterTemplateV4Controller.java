@@ -17,9 +17,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.Clust
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Responses;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
-import com.sequenceiq.cloudbreak.service.TransactionService;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;

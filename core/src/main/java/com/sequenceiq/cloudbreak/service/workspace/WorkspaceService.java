@@ -20,17 +20,17 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.authorization.UmsAuthorizationService;
 import com.sequenceiq.cloudbreak.authorization.ResourceAction;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceRole;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceRepository;
-import com.sequenceiq.cloudbreak.service.Clock;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.TransactionService;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Service

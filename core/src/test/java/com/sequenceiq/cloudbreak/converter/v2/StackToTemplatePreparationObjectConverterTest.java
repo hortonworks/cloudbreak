@@ -39,7 +39,7 @@ import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigProvider;
 import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsViewProvider;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;

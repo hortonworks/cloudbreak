@@ -15,6 +15,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.domain.ArchivableResource;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;

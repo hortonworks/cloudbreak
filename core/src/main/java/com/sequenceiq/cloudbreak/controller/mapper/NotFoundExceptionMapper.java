@@ -4,7 +4,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 
 @Component
 public class NotFoundExceptionMapper extends BaseExceptionMapper<NotFoundException> {

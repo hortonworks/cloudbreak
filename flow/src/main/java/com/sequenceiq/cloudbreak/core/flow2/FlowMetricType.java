@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
-import com.sequenceiq.cloudbreak.common.type.metric.Metric;
+import com.sequenceiq.cloudbreak.common.metrics.type.Metric;
 
 public enum FlowMetricType implements Metric {
     FLOW_STEP("flowstep"),

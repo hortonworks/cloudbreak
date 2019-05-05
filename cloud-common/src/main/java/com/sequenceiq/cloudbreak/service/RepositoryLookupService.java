@@ -27,12 +27,16 @@ public abstract class RepositoryLookupService<T extends CrudRepository<?, ?>> {
 
     private void fillRepositoryMap() {
         for (T repo : repositoryList) {
-            repositoryMap.put(getEntityClassForRepository(repo), repo);
+            Class<?> originalInterface = repo.getClass().getInterfaces()[0];
+            if (!originalInterface.getSimpleName().contains("FlowLogRepository")
+                    && !originalInterface.getSimpleName().contains("FlowChainLogRepository")) {
+                Class<?> entityClassForRepository = getEntityClassForRepository(originalInterface);
+                repositoryMap.put(entityClassForRepository, repo);
+            }
         }
     }
 
-    private Class<?> getEntityClassForRepository(T repo) {
-        Class<?> originalInterface = repo.getClass().getInterfaces()[0];
+    private Class<?> getEntityClassForRepository(Class<?> originalInterface) {
         EntityType annotation = originalInterface.getAnnotation(EntityType.class);
         if (annotation == null) {
             throw new IllegalStateException("Entity class is not specified for repository: " + originalInterface.getSimpleName());

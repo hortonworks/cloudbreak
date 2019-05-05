@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.aspect.PermissionType;
 import com.sequenceiq.cloudbreak.authorization.SpecialScopes;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
 import com.sequenceiq.cloudbreak.domain.workspace.TenantAwareResource;
 import com.sequenceiq.cloudbreak.security.authentication.AuthenticationService;

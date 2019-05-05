@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster;
 
+import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
 import static com.sequenceiq.cloudbreak.domain.ClusterAttributes.CUSTOM_QUEUE;
-import static com.sequenceiq.cloudbreak.structuredevent.json.AnonymizerUtil.anonymize;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage.CloudStorageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
+import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.ClusterToClouderaManagerV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;

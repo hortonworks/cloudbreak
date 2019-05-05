@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.domain;
 
-import com.sequenceiq.cloudbreak.common.type.metric.Metric;
+import com.sequenceiq.cloudbreak.common.metrics.type.Metric;
 
 public enum MetricType implements Metric {
 

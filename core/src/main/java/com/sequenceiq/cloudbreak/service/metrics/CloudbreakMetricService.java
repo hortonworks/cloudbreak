@@ -4,6 +4,7 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.metrics.AbstractMetricService;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;

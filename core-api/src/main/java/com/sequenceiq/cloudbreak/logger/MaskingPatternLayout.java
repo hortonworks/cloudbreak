@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.logger;
 
-import static com.sequenceiq.cloudbreak.structuredevent.json.AnonymizerUtil.anonymize;
+import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
 
 import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.spi.ILoggingEvent;

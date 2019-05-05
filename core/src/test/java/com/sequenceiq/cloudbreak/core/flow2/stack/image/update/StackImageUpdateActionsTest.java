@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.cloudbreak.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;

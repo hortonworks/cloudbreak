@@ -29,9 +29,9 @@ import org.springframework.statemachine.config.builders.StateMachineStateBuilder
 import org.springframework.statemachine.config.builders.StateMachineTransitionBuilder;
 import org.springframework.statemachine.config.common.annotation.ObjectPostProcessor;
 
-import com.sequenceiq.cloudbreak.cloud.event.Payload;
-import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import reactor.bus.EventBus;

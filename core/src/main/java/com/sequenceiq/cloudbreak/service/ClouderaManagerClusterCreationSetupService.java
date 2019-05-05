@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service;
 
-import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;

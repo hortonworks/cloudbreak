@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.eventbus;
 
-import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 
 import java.util.Optional;
 
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceNotification;
 import com.sequenceiq.cloudbreak.cloud.service.Persister;
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;

@@ -37,9 +37,9 @@ import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceRepository;
-import com.sequenceiq.cloudbreak.service.Clock;
-import com.sequenceiq.cloudbreak.service.TransactionService;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @RunWith(MockitoJUnitRunner.class)

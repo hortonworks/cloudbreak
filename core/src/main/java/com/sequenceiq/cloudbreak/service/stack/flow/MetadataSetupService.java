@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.service.Clock;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;

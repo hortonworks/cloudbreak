@@ -19,8 +19,8 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.event.Payload;
-import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.resource.GetInstancesStateRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.GetInstancesStateResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;

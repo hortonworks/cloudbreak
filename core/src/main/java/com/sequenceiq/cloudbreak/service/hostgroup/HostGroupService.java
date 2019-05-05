@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.hostgroup;
 
-import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 
 import java.util.Optional;
 import java.util.Set;

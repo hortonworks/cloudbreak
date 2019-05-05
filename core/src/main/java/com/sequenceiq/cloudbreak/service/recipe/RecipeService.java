@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.recipe;
 
-import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static java.util.Collections.emptySet;
 
 import java.util.ArrayList;
@@ -16,8 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
-import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.view.RecipeView;

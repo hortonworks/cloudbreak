@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.Defaul
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;

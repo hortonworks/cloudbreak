@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ServiceDescriptor;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ServiceDescriptorDefinition;
-import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.servicedescriptor.ServiceDescriptorService;
 

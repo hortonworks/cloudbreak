@@ -20,10 +20,10 @@ import org.mockito.Spy;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.repository.FileSystemRepository;
-import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FileSystemConfigServiceTest {

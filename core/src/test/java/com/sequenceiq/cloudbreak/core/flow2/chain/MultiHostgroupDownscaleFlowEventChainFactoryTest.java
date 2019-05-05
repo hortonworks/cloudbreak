@@ -12,7 +12,7 @@ import java.util.Set;
 import org.junit.Test;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackDownscaleTriggerEvent;
 

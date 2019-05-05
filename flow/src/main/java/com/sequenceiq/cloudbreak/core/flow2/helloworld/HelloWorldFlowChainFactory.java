@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowEventChainFactory;
 import com.sequenceiq.cloudbreak.reactor.api.event.BaseFlowEvent;
 

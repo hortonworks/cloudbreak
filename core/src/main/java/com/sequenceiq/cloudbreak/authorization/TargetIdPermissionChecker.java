@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.aspect.DisabledBaseRepository;
 import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByTargetId;
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;

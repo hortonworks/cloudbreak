@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.message.Msg;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 

@@ -12,9 +12,9 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;

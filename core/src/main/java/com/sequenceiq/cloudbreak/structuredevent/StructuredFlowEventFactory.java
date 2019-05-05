@@ -17,8 +17,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
-import com.sequenceiq.cloudbreak.service.Clock;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.BlueprintDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
@@ -46,7 +46,7 @@ public class StructuredFlowEventFactory {
     private ConversionService conversionService;
 
     @Inject
-    private CloudbreakNodeConfig cloudbreakNodeConfig;
+    private NodeConfig nodeConfig;
 
     @Inject
     private Clock clock;
@@ -61,7 +61,7 @@ public class StructuredFlowEventFactory {
     public StructuredFlowEvent createStucturedFlowEvent(Long stackId, FlowDetails flowDetails, Boolean detailed, Exception exception) {
         Stack stack = stackService.getByIdWithTransaction(stackId);
         OperationDetails operationDetails = new OperationDetails(clock.getCurrentTimeMillis(), FLOW, "stacks", stackId, stack.getName(),
-                cloudbreakNodeConfig.getId(), cbVersion, stack.getWorkspace().getId(), stack.getCreator().getUserId(), stack.getCreator().getUserName(),
+                nodeConfig.getId(), cbVersion, stack.getWorkspace().getId(), stack.getCreator().getUserId(), stack.getCreator().getUserName(),
                 stack.getTenant().getName());
         StackDetails stackDetails = null;
         ClusterDetails clusterDetails = null;
@@ -115,7 +115,7 @@ public class StructuredFlowEventFactory {
         }
 
         OperationDetails operationDetails = new OperationDetails(clock.getCurrentTimeMillis(), NOTIFICATION, "stacks", stackId, stackName,
-                cloudbreakNodeConfig.getInstanceUUID(), cbVersion, stack.getWorkspace().getId(), userId, userName, stack.getTenant().getName());
+                nodeConfig.getInstanceUUID(), cbVersion, stack.getWorkspace().getId(), userId, userName, stack.getTenant().getName());
         return new StructuredNotificationEvent(operationDetails, notificationDetails);
     }
 
@@ -132,7 +132,7 @@ public class StructuredFlowEventFactory {
                 "ldaps",
                 ldapDetails.getId(),
                 ldapDetails.getName(),
-                cloudbreakNodeConfig.getInstanceUUID(),
+                nodeConfig.getInstanceUUID(),
                 cbVersion,
                 null,
                 ldapDetails.getUserId(),
@@ -160,7 +160,7 @@ public class StructuredFlowEventFactory {
                 "rds",
                 rdsDetails.getId(),
                 rdsDetails.getName(),
-                cloudbreakNodeConfig.getInstanceUUID(),
+                nodeConfig.getInstanceUUID(),
                 cbVersion,
                 null,
                 rdsDetails.getUserId(),

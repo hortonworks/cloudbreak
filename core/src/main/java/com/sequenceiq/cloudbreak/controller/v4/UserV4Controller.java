@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.user.responses.UserV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.UserIdComparator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.UserV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 

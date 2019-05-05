@@ -39,7 +39,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.te
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;

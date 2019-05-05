@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
-import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;

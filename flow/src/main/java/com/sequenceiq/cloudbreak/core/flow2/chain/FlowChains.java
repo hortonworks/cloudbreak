@@ -11,10 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.FlowConstants;
 import com.sequenceiq.cloudbreak.core.flow2.FlowLogService;
+import com.sequenceiq.cloudbreak.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
 

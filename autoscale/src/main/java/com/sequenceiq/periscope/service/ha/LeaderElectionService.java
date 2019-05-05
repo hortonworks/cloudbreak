@@ -24,9 +24,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.service.Clock;
-import com.sequenceiq.cloudbreak.service.TransactionService;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.MetricType;
 import com.sequenceiq.periscope.domain.PeriscopeNode;

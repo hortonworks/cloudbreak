@@ -17,6 +17,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -30,9 +31,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.event.validation.ParametersValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ParametersValidator;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.State;
@@ -51,12 +53,10 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
-import com.sequenceiq.cloudbreak.service.TransactionService;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
@@ -124,12 +124,13 @@ public class StackCreatorService {
     private DatalakeResourcesService datalakeResourcesService;
 
     @Inject
+    @Qualifier("cloudbreakListeningScheduledExecutorService")
     private ExecutorService executorService;
 
     @Inject
     private CloudbreakMetricService metricService;
 
-    public StackV4Response createStack(CloudbreakUser cloudbreakUser, User user, Workspace workspace, StackV4Request stackRequest) {
+    public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest) {
         long start = System.currentTimeMillis();
 
         ValidationResult validationResult = stackRequestValidator.validate(stackRequest);

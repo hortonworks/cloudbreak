@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.stack.resource.definition.credential.CredentialDefinitionService;
 

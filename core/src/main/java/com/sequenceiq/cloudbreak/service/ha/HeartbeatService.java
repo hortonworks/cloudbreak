@@ -33,12 +33,13 @@ import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.domain.StateStatus;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
-import com.sequenceiq.cloudbreak.service.Clock;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
+import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.service.CloudbreakFlowLogService;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
-import com.sequenceiq.cloudbreak.service.TransactionService;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.node.CloudbreakNodeService;
@@ -55,13 +56,16 @@ public class HeartbeatService {
     private Integer heartbeatThresholdRate;
 
     @Inject
-    private CloudbreakNodeConfig cloudbreakNodeConfig;
+    private NodeConfig nodeConfig;
 
     @Inject
     private CloudbreakNodeService cloudbreakNodeService;
 
     @Inject
     private FlowLogService flowLogService;
+
+    @Inject
+    private CloudbreakFlowLogService cloudbreakFlowLogService;
 
     @Inject
     private Flow2Handler flow2Handler;
@@ -97,7 +101,7 @@ public class HeartbeatService {
     @Scheduled(cron = "${cb.ha.heartbeat.rate:0/30 * * * * *}")
     public void heartbeat() {
         if (shouldRun()) {
-            String nodeId = cloudbreakNodeConfig.getId();
+            String nodeId = nodeConfig.getId();
             try {
                 retryService.testWith2SecDelayMax5Times(() -> {
                     try {
@@ -135,7 +139,7 @@ public class HeartbeatService {
                 LOGGER.error("Failed to cleanup the nodes, somebody might have already done it. Message: {}", e.getMessage());
             }
 
-            String nodeId = cloudbreakNodeConfig.getId();
+            String nodeId = nodeConfig.getId();
             Set<String> allMyFlows = flowLogService.findAllByCloudbreakNodeId(nodeId).stream()
                     .map(FlowLog::getFlowId).collect(Collectors.toSet());
             Set<String> newFlows = allMyFlows.stream().filter(f -> runningFlows.get(f) == null).collect(Collectors.toSet());
@@ -150,7 +154,7 @@ public class HeartbeatService {
     }
 
     private boolean shouldRun() {
-        return cloudbreakNodeConfig.isNodeIdSpecified();
+        return nodeConfig.isNodeIdSpecified();
     }
 
     public List<CloudbreakNode> distributeFlows() throws TransactionExecutionException {
@@ -239,7 +243,7 @@ public class HeartbeatService {
     }
 
     private Set<Long> findTerminatingStacksForCurrentNode() {
-        return flowLogService.findTerminatingStacksByCloudbreakNodeId(cloudbreakNodeConfig.getId());
+        return cloudbreakFlowLogService.findTerminatingStacksByCloudbreakNodeId(nodeConfig.getId());
     }
 
     /**

@@ -20,8 +20,8 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.event.Payload;
-import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;

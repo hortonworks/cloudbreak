@@ -15,7 +15,6 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.AdjustmentType;
-import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetTlsInfoRequest;
@@ -30,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.event.setup.ValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.ValidationResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.Flow;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.converter.cloud.InstanceMetaDataToCloudInstanceConverter;
@@ -42,8 +42,8 @@ import com.sequenceiq.freeipa.flow.stack.StackFailureContext;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState;
-import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.image.ImageService;
+import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Configuration
 public class StackProvisionActions {

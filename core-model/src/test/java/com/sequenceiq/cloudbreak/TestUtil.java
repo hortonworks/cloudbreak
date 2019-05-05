@@ -45,7 +45,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.ChangeWorksp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceStatus;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceRole;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Constraint;

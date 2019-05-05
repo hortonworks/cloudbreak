@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
-import com.sequenceiq.cloudbreak.common.type.metric.MetricType;
-import com.sequenceiq.cloudbreak.service.metrics.MetricService;
+import com.sequenceiq.cloudbreak.common.metrics.MetricService;
+import com.sequenceiq.cloudbreak.common.metrics.type.MetricType;
 
 @Service
 public class SecretService {

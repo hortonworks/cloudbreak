@@ -6,7 +6,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
-import static com.sequenceiq.cloudbreak.controller.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
 
 import java.io.IOException;
@@ -27,8 +27,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEven
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
-import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveCredentialCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
-import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.mapper.DuplicatedKeyValueExceptionMapper;
 import com.sequenceiq.cloudbreak.converter.spi.ExtendedCloudCredentialToCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;

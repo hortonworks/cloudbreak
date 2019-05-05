@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.structuredevent.kafka;
 
-import static com.sequenceiq.cloudbreak.structuredevent.json.AnonymizerUtil.REPLACEMENT;
+import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.REPLACEMENT;
 
 import java.util.HashMap;
 import java.util.concurrent.ExecutionException;

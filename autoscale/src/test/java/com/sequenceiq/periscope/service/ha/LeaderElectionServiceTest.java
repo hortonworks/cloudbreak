@@ -28,9 +28,9 @@ import org.powermock.reflect.internal.WhiteboxImpl;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.cloudbreak.service.Clock;
-import com.sequenceiq.cloudbreak.service.TransactionService;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.PeriscopeNode;
 import com.sequenceiq.periscope.domain.TimeAlert;

@@ -46,6 +46,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
+import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.core.flow2.FlowLogService;
 import com.sequenceiq.cloudbreak.core.flow2.FlowRegister;
@@ -54,8 +57,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFl
 import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.domain.StateStatus;
-import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.service.ha.FlowDistributor;
 import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
 import com.sequenceiq.cloudbreak.service.node.CloudbreakNodeService;
@@ -76,13 +78,16 @@ public class HeartbeatServiceTest {
     private HeartbeatService heartbeatService;
 
     @Mock
-    private CloudbreakNodeConfig cloudbreakNodeConfig;
+    private NodeConfig nodeConfig;
 
     @Mock
     private CloudbreakNodeService cloudbreakNodeService;
 
     @Mock
     private FlowLogService flowLogService;
+
+    @Mock
+    private CloudbreakFlowLogService cloudbreakFlowLogService;
 
     @Mock
     private Flow2Handler flow2Handler;
@@ -110,8 +115,8 @@ public class HeartbeatServiceTest {
 
     @Before
     public void init() throws TransactionExecutionException {
-        when(cloudbreakNodeConfig.isNodeIdSpecified()).thenReturn(true);
-        when(cloudbreakNodeConfig.getId()).thenReturn(MY_ID);
+        when(nodeConfig.isNodeIdSpecified()).thenReturn(true);
+        when(nodeConfig.getId()).thenReturn(MY_ID);
         ReflectionTestUtils.setField(heartbeatService, "heartbeatThresholdRate", 70000);
         doAnswer(invocation -> {
             try {

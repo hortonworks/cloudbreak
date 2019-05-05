@@ -21,8 +21,8 @@ import org.mockito.Mock;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.workspace.User;

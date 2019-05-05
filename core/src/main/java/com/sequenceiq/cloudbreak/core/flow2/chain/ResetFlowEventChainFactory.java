@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterSuccess;
 
