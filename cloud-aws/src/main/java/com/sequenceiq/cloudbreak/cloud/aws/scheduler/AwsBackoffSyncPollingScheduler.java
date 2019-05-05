@@ -7,6 +7,7 @@ import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.google.common.util.concurrent.ListenableScheduledFuture;
@@ -28,6 +29,7 @@ public class AwsBackoffSyncPollingScheduler<T> {
     private static final String THROTTLING_ERROR_CODE = "Throttling";
 
     @Inject
+    @Qualifier("cloudApiListeningScheduledExecutorService")
     private ListeningScheduledExecutorService scheduler;
 
     public T schedule(PollTask<T> task) throws ExecutionException, InterruptedException, TimeoutException {

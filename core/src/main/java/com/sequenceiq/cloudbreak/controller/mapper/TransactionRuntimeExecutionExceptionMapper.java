@@ -7,7 +7,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 
 @Component
 public class TransactionRuntimeExecutionExceptionMapper extends SendNotificationExceptionMapper<TransactionRuntimeExecutionException> {

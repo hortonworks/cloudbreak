@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 
 public class ExtendedCloudCredential extends CloudCredential {
 

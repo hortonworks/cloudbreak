@@ -15,9 +15,8 @@ jar {
 }
 
 dependencies {
-
+    compile project(':common')
     compile project(':cloud-api')
-    compile project(':cloud-common')
 
     compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
     compile group: 'io.projectreactor',             name: 'reactor-core',                   version: eventBusVersion

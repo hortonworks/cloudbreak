@@ -29,16 +29,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.ComponentScan.Filter;
-import org.springframework.context.annotation.ComponentScans;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.ListeningScheduledExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsPlatformParameters;
@@ -66,12 +66,12 @@ import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
-import com.sequenceiq.cloudbreak.cloud.reactor.config.CloudReactorConfiguration;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.template.GroupResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.NetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
+import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerScheduledExecutor;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 
@@ -183,11 +183,7 @@ public abstract class AwsComponentTest {
     }
 
     @Configuration
-    @ComponentScans({
-            @ComponentScan(basePackages = {"com.sequenceiq.cloudbreak.cloud.aws", "com.sequenceiq.cloudbreak.cloud.template"}),
-            @ComponentScan(basePackages = "com.sequenceiq.cloudbreak.cloud.reactor.config", useDefaultFilters = false,
-                    includeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE, value = CloudReactorConfiguration.class)),
-    })
+    @ComponentScan(basePackages = {"com.sequenceiq.cloudbreak.cloud.aws", "com.sequenceiq.cloudbreak.cloud.template"})
     public static class AwsTestContext {
 
         @MockBean(name = "DefaultRetryService")
@@ -243,6 +239,20 @@ public abstract class AwsComponentTest {
             factoryBean.setTemplateLoaderPath("classpath:/");
             factoryBean.afterPropertiesSet();
             return factoryBean.getObject();
+        }
+
+        @Bean("reactorListeningScheduledExecutorService")
+        public ListeningScheduledExecutorService reactorListeningScheduledExecutorService() {
+            return MoreExecutors
+                    .listeningDecorator(new MDCCleanerScheduledExecutor(40,
+                            new ThreadFactoryBuilder().setNameFormat("cloud-api-%d").build()));
+        }
+
+        @Bean("cloudApiListeningScheduledExecutorService")
+        public ListeningScheduledExecutorService cloudApiListeningScheduledExecutorService() {
+            return MoreExecutors
+                    .listeningDecorator(new MDCCleanerScheduledExecutor(40,
+                            new ThreadFactoryBuilder().setNameFormat("cloud-api-%d").build()));
         }
 
         @Bean

@@ -7,6 +7,7 @@ import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.google.common.util.concurrent.ListenableScheduledFuture;
@@ -23,6 +24,7 @@ public class SyncPollingScheduler<T> {
     private static final int FAILURE_TOLERANT_ATTEMPT = 3;
 
     @Inject
+    @Qualifier("reactorListeningScheduledExecutorService")
     private ListeningScheduledExecutorService scheduler;
 
     public T schedule(PollTask<T> task) throws ExecutionException, InterruptedException, TimeoutException {

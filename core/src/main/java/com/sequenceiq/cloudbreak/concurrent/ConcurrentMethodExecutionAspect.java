@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.util.concurrent.Striped;
-import com.sequenceiq.cloudbreak.cloud.event.Payload;
+import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 
 @Component
@@ -35,7 +35,7 @@ public class ConcurrentMethodExecutionAspect {
     public void lockedMethod() {
     }
 
-    @Pointcut("args(com.sequenceiq.cloudbreak.cloud.event.Payload)")
+    @Pointcut("args(com.sequenceiq.cloudbreak.common.event.Payload)")
     public void methodWithPayloadArgument() {
     }
 

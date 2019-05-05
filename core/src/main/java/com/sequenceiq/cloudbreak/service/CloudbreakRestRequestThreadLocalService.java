@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.service;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 
 @Service("RestRequestThreadLocalService")
 public class CloudbreakRestRequestThreadLocalService implements RestRequestThreadLocalService {

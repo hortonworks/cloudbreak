@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.service.Clock;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.periscope.monitor.evaluator.EvaluatorExecutor;
 
 @Service

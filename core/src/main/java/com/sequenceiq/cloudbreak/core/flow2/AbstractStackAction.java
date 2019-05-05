@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2;
 
 import javax.annotation.PostConstruct;
 
-import com.sequenceiq.cloudbreak.cloud.event.Payload;
+import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 
 public abstract class AbstractStackAction<S extends FlowState, E extends FlowEvent, C extends CommonContext, P extends Payload>

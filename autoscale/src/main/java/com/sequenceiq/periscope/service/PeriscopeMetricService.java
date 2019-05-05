@@ -6,7 +6,7 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.service.metrics.AbstractMetricService;
+import com.sequenceiq.cloudbreak.common.metrics.AbstractMetricService;
 import com.sequenceiq.periscope.domain.MetricType;
 
 @Service("MetricService")

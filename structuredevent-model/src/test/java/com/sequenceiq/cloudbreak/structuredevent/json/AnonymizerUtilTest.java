@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.structuredevent.json;
 
-
-import static com.sequenceiq.cloudbreak.structuredevent.json.AnonymizerUtil.anonymize;
+import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 
 public class AnonymizerUtilTest {
 

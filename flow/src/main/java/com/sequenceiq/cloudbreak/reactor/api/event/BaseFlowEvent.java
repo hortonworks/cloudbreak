@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.api.event;
 
-import com.sequenceiq.cloudbreak.cloud.Acceptable;
-import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 
 import reactor.rx.Promise;
 

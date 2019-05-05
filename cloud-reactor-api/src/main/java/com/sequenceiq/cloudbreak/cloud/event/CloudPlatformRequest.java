@@ -6,6 +6,7 @@ import org.reactivestreams.Subscriber;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 
 import reactor.rx.Promise;
 import reactor.rx.Promises;

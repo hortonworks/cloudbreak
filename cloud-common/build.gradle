@@ -23,6 +23,7 @@ jar {
 
 dependencies {
     compile project(':core-api')
+    compile project(':common')
 
     compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jApiVersion
     compile group: 'org.springframework.boot',              name: 'spring-boot-starter',            version: springBootVersion
@@ -58,7 +59,6 @@ dependencies {
     compile group: 'org.glassfish.jersey.ext',              name: 'jersey-proxy-client',            version: jerseyCoreVersion
     compile group: 'org.glassfish.jersey.connectors',       name: 'jersey-apache-connector',        version: jerseyCoreVersion
     compile group: 'org.postgresql',                        name: 'postgresql',                     version: postgreSQLVersion
-    compile group: 'com.sequenceiq',                        name: 'consul-api',                     version: '1.10'
     compile group: 'org.apache.commons',                    name: 'commons-lang3',                  version: apacheCommonsLangVersion
     compile group: 'org.jasypt',                            name: 'jasypt-hibernate4',              version: jasyptVersion
     compile group: 'net.sf.json-lib',                       name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'

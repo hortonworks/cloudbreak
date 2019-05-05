@@ -15,17 +15,17 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import com.cedarsoftware.util.io.JsonWriter;
-import com.sequenceiq.cloudbreak.cloud.event.Payload;
-import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.core.flow2.FlowLogService;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 import com.sequenceiq.cloudbreak.domain.FlowChainLog;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.domain.StateStatus;
-import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
-import com.sequenceiq.cloudbreak.service.TransactionService;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 
 @Primary
 @Service
@@ -34,7 +34,7 @@ public class FlowLogDBService implements FlowLogService {
     private static final Logger LOGGER = LoggerFactory.getLogger(FlowLogDBService.class);
 
     @Inject
-    private CloudbreakNodeConfig cloudbreakNodeConfig;
+    private NodeConfig nodeConfig;
 
     @Inject
     private FlowLogRepository flowLogRepository;
@@ -55,7 +55,7 @@ public class FlowLogDBService implements FlowLogService {
         String variablesJson = JsonWriter.objectToJson(variables, writeOptions);
         FlowLog flowLog = new FlowLog(payload.getStackId(), flowId, flowChanId, key, payloadJson, payload.getClass(), variablesJson, flowType,
                 currentState.toString());
-        flowLog.setCloudbreakNodeId(cloudbreakNodeConfig.getId());
+        flowLog.setCloudbreakNodeId(nodeConfig.getId());
         return flowLogRepository.save(flowLog);
     }
 
@@ -76,24 +76,12 @@ public class FlowLogDBService implements FlowLogService {
         return finalize(stackId, flowId, "TERMINATED");
     }
 
-    public void purgeTerminatedStacksFlowLogs() throws TransactionExecutionException {
-        transactionService.required(() -> {
-            LOGGER.debug("Cleaning deleted stack's flowlog");
-            int purgedTerminatedStackLogs = flowLogRepository.purgeTerminatedStackLogs();
-            LOGGER.debug("Deleted flowlog count: {}", purgedTerminatedStackLogs);
-            LOGGER.debug("Cleaning orphan flowchainlogs");
-            int purgedOrphanFLowChainLogs = flowChainLogService.purgeOrphanFLowChainLogs();
-            LOGGER.debug("Deleted flowchainlog count: {}", purgedOrphanFLowChainLogs);
-            return null;
-        });
-    }
-
     private FlowLog finalize(Long stackId, String flowId, String state) throws TransactionExecutionException {
         return transactionService.required(() -> {
             flowLogRepository.finalizeByFlowId(flowId);
             getLastFlowLog(flowId).ifPresent(flowLog -> updateLastFlowLogStatus(flowLog, false));
             FlowLog flowLog = new FlowLog(stackId, flowId, state, Boolean.TRUE, StateStatus.SUCCESSFUL);
-            flowLog.setCloudbreakNodeId(cloudbreakNodeConfig.getId());
+            flowLog.setCloudbreakNodeId(nodeConfig.getId());
             return flowLogRepository.save(flowLog);
         });
     }
@@ -165,11 +153,6 @@ public class FlowLogDBService implements FlowLogService {
 
     public List<FlowLog> findAllByStackIdOrderByCreatedDesc(Long id) {
         return flowLogRepository.findAllByStackIdOrderByCreatedDesc(id);
-    }
-
-    @Override
-    public Set<Long> findTerminatingStacksByCloudbreakNodeId(String id) {
-        return flowLogRepository.findTerminatingStacksByCloudbreakNodeId(id);
     }
 
 }

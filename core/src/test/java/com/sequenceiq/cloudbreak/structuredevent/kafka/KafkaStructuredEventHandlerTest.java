@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.structuredevent.kafka;
 
-import static com.sequenceiq.cloudbreak.structuredevent.json.AnonymizerUtil.REPLACEMENT;
+import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.REPLACEMENT;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;

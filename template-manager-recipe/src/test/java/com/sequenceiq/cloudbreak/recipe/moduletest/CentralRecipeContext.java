@@ -13,11 +13,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.vault.core.VaultTemplate;
 
-import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.recipe.CentralRecipeUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
-import com.sequenceiq.cloudbreak.service.metrics.MetricService;
 import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
 import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
@@ -47,11 +46,6 @@ public class CentralRecipeContext {
                 map.put(fileSystemConfigurator.getFileSystemType(), fileSystemConfigurator);
             }
             return map;
-        }
-
-        @Bean
-        public CloudbreakNodeConfig cloudbreakNodeConfigProvider() {
-            return new CloudbreakNodeConfig();
         }
 
         @Bean

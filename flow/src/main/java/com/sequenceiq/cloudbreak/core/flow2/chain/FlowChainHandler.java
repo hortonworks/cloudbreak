@@ -13,8 +13,8 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.cedarsoftware.util.io.JsonReader;
-import com.sequenceiq.cloudbreak.cloud.event.Payload;
-import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.FlowLogService;
 import com.sequenceiq.cloudbreak.domain.FlowChainLog;
 

@@ -27,7 +27,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.controller.exception.FlowsAlreadyRunningException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.core.flow2.FlowLogService;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
@@ -35,10 +36,10 @@ import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
+import com.sequenceiq.cloudbreak.service.CloudbreakFlowLogService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.cloudbreak.service.TransactionService;
-import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
@@ -52,7 +53,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakCleanupService.class);
 
     @Inject
-    private CloudbreakNodeConfig cloudbreakNodeConfig;
+    private NodeConfig nodeConfig;
 
     @Inject
     private StackService stackService;
@@ -71,6 +72,9 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
 
     @Inject
     private FlowLogService flowLogService;
+
+    @Inject
+    private CloudbreakFlowLogService cloudbreakFlowLogService;
 
     @Inject
     private ReactorFlowManager flowManager;
@@ -99,7 +103,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
             List<Stack> stacksToSync = resetStackStatus(stackIdsUnderOperation);
             List<Cluster> clustersToSync = resetClusterStatus(stacksToSync, stackIdsUnderOperation);
             triggerSyncs(stacksToSync, clustersToSync);
-            flowLogService.purgeTerminatedStacksFlowLogs();
+            cloudbreakFlowLogService.purgeTerminatedStacksFlowLogs();
             govCloudFlagMigrator.run();
         } catch (Exception e) {
             LOGGER.error("Clean up or the migration operations failed. Shutting down the node. ", e);
@@ -164,9 +168,9 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
         List<Long> stackIds = new ArrayList<>();
         Set<FlowLog> unassignedFlowLogs = flowLogService.findAllUnassigned();
         if (!unassignedFlowLogs.isEmpty()) {
-            if (cloudbreakNodeConfig.isNodeIdSpecified()) {
+            if (nodeConfig.isNodeIdSpecified()) {
                 try {
-                    updateUnassignedFlows(unassignedFlowLogs, cloudbreakNodeConfig.getId());
+                    updateUnassignedFlows(unassignedFlowLogs, nodeConfig.getId());
                 } catch (TransactionExecutionException | OptimisticLockingFailureException e) {
                     LOGGER.error("Failed to update the flow logs with node id. Maybe another node is already running them?", e);
                 }
@@ -204,7 +208,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
      */
     private Collection<Long> restartMyAssignedDisruptedFlows() throws TransactionExecutionException {
         Collection<Long> stackIds = new ArrayList<>();
-        if (cloudbreakNodeConfig.isNodeIdSpecified()) {
+        if (nodeConfig.isNodeIdSpecified()) {
             Set<FlowLog> myFlowLogs;
             try {
                 myFlowLogs = getMyFlowLogs();
@@ -232,7 +236,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
      * Retrieves my assigned flow logs and updates the version lock to avoid concurrency issues.
      */
     private Set<FlowLog> getMyFlowLogs() throws TransactionExecutionException {
-        Set<FlowLog> myFlowLogs = flowLogService.findAllByCloudbreakNodeId(cloudbreakNodeConfig.getId());
+        Set<FlowLog> myFlowLogs = flowLogService.findAllByCloudbreakNodeId(nodeConfig.getId());
         myFlowLogs.forEach(fl -> fl.setCreated(fl.getCreated() + 1));
         transactionService.required(() -> flowLogService.saveAll(myFlowLogs));
         return myFlowLogs;

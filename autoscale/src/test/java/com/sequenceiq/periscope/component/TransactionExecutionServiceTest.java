@@ -2,7 +2,7 @@ package com.sequenceiq.periscope.component;
 
 import java.util.function.Supplier;
 
-import com.sequenceiq.cloudbreak.service.TransactionExecutorService;
+import com.sequenceiq.cloudbreak.common.service.TransactionExecutorService;
 
 public class TransactionExecutionServiceTest implements TransactionExecutorService {
     public synchronized <T> T required(Supplier<T> callback) {

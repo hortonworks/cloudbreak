@@ -4,7 +4,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.exception.CloudbreakApiException;
+import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 
 @Component
 public class CloudbreakApiExceptionMapper extends SendNotificationExceptionMapper<CloudbreakApiException> {

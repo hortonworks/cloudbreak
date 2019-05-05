@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.flowlog;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -16,8 +17,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cedarsoftware.util.io.JsonWriter;
-import com.sequenceiq.cloudbreak.cloud.event.Payload;
-import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageRequest;
+import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.domain.StateStatus;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
@@ -71,7 +72,7 @@ public class FlowLogDBServiceTest {
         FlowLog flowLog = new FlowLog();
         flowLog.setId(ID);
 
-        Payload payload = new CheckImageRequest<>(null, null, null, null);
+        Payload payload = mock(Selectable.class);
         Map<Object, Object> variables = Map.of("repeated", 2);
 
         underTest.updateLastFlowLogPayload(flowLog, payload, variables);

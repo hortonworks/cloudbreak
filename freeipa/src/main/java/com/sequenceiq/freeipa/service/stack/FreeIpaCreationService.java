@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -34,6 +35,7 @@ public class FreeIpaCreationService {
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
 
+    @Qualifier("freeipaListeningScheduledExecutorService")
     @Inject
     private ExecutorService executorService;
 

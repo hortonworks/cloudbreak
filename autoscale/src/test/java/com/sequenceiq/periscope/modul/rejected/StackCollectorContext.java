@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.modul.rejected;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 
@@ -17,7 +18,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 import org.springframework.test.context.TestPropertySource;
 
-import com.sequenceiq.cloudbreak.service.Clock;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.periscope.aspects.AmbariRequestLogging;
 import com.sequenceiq.periscope.monitor.evaluator.ClusterCreationEvaluator;
 import com.sequenceiq.periscope.monitor.executor.EvaluatorExecutorRegistry;
@@ -57,12 +58,17 @@ public class StackCollectorContext {
                     })
     )
     @MockBean({ClusterService.class, AmbariClientProvider.class, CloudbreakClientConfiguration.class, TlsSecurityService.class, HistoryService.class,
-            HttpNotificationSender.class, MetricUtils.class, LoggerUtils.class})
+            HttpNotificationSender.class, MetricUtils.class, LoggerUtils.class, Clock.class})
     @EnableAsync
     public static class StackCollectorSpringConfig implements AsyncConfigurer {
 
         @Inject
         private PersistRejectedThreadExecutionHandler persistRejectedThreadExecutionHandler;
+
+        @Bean("periscopeListeningScheduledExecutorService")
+        ExecutorService listeningScheduledExecutorService() {
+            return getThreadPoolExecutorFactoryBean().getObject();
+        }
 
         @Bean
         public ThreadPoolExecutorFactoryBean getThreadPoolExecutorFactoryBean() {

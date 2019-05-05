@@ -20,10 +20,9 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintUpdater;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
-import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
-import com.sequenceiq.cloudbreak.service.metrics.MetricService;
 import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
 import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
@@ -57,10 +56,10 @@ public class CentralBlueprintContext {
             return map;
         }
 
-        @Bean
-        public CloudbreakNodeConfig cloudbreakNodeConfigProvider() {
-            return new CloudbreakNodeConfig();
-        }
+//        @Bean
+//        public NodeConfig cloudbreakNodeConfigProvider() {
+//            return new NodeConfig();
+//        }
 
         @Bean
         public freemarker.template.Configuration configurationProvider() {

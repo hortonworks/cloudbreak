@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.metrics;
 
-import com.sequenceiq.cloudbreak.common.type.metric.Metric;
+import com.sequenceiq.cloudbreak.common.metrics.type.Metric;
 
 public enum MetricType implements Metric {
     STACK_CREATION_SUCCESSFUL("stack.creation.successful"),

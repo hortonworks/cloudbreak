@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -74,9 +73,6 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
 
     @Inject
     private CloudbreakClientConfiguration cloudbreakClientConfiguration;
-
-    @Inject
-    private ThreadPoolExecutor executorService;
 
     @Inject
     private RejectedThreadService rejectedThreadService;
@@ -162,7 +158,6 @@ public class AmbariAgentHealthMonitorModulTest extends RejectedThreadContext {
         List<RejectedThread> allRejectedCluster = rejectedThreadService.getAllRejectedCluster();
 
         Assert.assertFalse(allRejectedCluster.isEmpty());
-
     }
 
     @Ignore

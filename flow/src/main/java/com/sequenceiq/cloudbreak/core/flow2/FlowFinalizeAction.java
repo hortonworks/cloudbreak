@@ -6,8 +6,8 @@ import java.util.Optional;
 import org.springframework.statemachine.StateContext;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.event.Payload;
-import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 
 @Component("FlowFinalizeAction")
 public final class FlowFinalizeAction extends AbstractAction<FlowState, FlowEvent, CommonContext, Payload> {

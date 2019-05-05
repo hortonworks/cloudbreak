@@ -50,8 +50,8 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
@@ -92,7 +92,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     private final Pattern extendRestParamsFromResponsePattern = Pattern.compile("\"id\":([0-9]*)");
 
     @Inject
-    private CloudbreakNodeConfig cloudbreakNodeConfig;
+    private NodeConfig nodeConfig;
 
     @Value("${info.app.version:}")
     private String cbVersion;
@@ -286,7 +286,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
             resourceName = restParams.get(RESOURCE_NAME);
         }
         return new OperationDetails(requestTime, REST, resourceType, StringUtils.isNotEmpty(resourceId) ? Long.valueOf(resourceId) : null, resourceName,
-                cloudbreakNodeConfig.getId(), cbVersion, workspaceId,
+                nodeConfig.getId(), cbVersion, workspaceId,
                 cloudbreakUser != null ? cloudbreakUser.getUserId() : "", cloudbreakUser != null ? cloudbreakUser.getUsername() : "",
                 cloudbreakUser.getTenant());
     }

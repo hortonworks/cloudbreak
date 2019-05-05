@@ -6,6 +6,8 @@ import java.util.concurrent.ThreadFactory;
 
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
+import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerScheduledExecutor;
+
 public class MDCCleanerThreadPoolTaskScheduler extends ThreadPoolTaskScheduler {
 
     @Override

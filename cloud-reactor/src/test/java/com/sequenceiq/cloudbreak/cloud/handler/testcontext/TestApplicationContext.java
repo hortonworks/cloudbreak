@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ComponentScans;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -54,7 +55,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import reactor.Environment;
 
 @Configuration
-@ComponentScan("com.sequenceiq.cloudbreak.cloud")
+@ComponentScans({ @ComponentScan("com.sequenceiq.cloudbreak.cloud"), @ComponentScan("com.sequenceiq.cloudbreak.reactor")})
 @PropertySource("classpath:application.properties")
 public class TestApplicationContext {
 

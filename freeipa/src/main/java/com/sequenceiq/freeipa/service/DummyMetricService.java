@@ -4,8 +4,8 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.type.metric.Metric;
-import com.sequenceiq.cloudbreak.service.metrics.MetricService;
+import com.sequenceiq.cloudbreak.common.metrics.MetricService;
+import com.sequenceiq.cloudbreak.common.metrics.type.Metric;
 
 @Service
 public class DummyMetricService implements MetricService {

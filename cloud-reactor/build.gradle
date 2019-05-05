@@ -18,7 +18,7 @@ jar {
 dependencies {
 
     compile project(':cloud-reactor-api')
-    compile project(':core-api')
+    compile project(':flow')
 
     compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
     compile group: 'org.springframework',           name: 'spring-tx',                      version: springFrameworkVersion

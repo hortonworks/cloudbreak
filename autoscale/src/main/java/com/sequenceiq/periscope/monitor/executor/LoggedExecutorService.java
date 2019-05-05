@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.periscope.utils.LoggerUtils;
@@ -18,6 +19,7 @@ public class LoggedExecutorService {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggedExecutorService.class);
 
     @Inject
+    @Qualifier("periscopeListeningScheduledExecutorService")
     private ExecutorService executorService;
 
     @Inject
