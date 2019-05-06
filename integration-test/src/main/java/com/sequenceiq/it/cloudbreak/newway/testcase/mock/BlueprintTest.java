@@ -67,6 +67,29 @@ public class BlueprintTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
+            given = "a user managed blueprint is registered",
+            when = "listing all blueprints",
+            then = "the blueprint should be in the list")
+    public void testCreateAndListBlueprint(TestContext testContext) {
+        String blueprintName = resourcePropertyProvider().getName();
+        List<String> keys = Arrays.asList("key_1", "key_2", "key_3");
+        List<Object> values = Arrays.asList("value_1", "value_2", "value_3");
+        testContext.given(BlueprintTestDto.class)
+                .withName(blueprintName)
+                .withDescription(blueprintName)
+                .withTag(keys, values)
+                .withBlueprint(VALID_CD)
+                .when(blueprintTestClient.createV4(), key(blueprintName))
+                .when(blueprintTestClient.listV4())
+                .then((tc, entity, cc) -> {
+                    assertTrue(entity.getViewResponses().stream().anyMatch(bp -> blueprintName.equals(bp.getName())));
+                    return entity;
+                })
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @Description(
             given = "there is a running cloudbreak",
             when = "a blueprint create request with invalid name is sent",
             then = "a BadRequestException should be returned")
@@ -121,6 +144,23 @@ public class BlueprintTest extends AbstractIntegrationTest {
                 .when(blueprintTestClient.getV4(), key(blueprintName))
                 .then((tc, entity, cc) -> {
                     assertEquals(blueprintName, entity.getName());
+                    return entity;
+                })
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running cloudbreak",
+            when = "the get blueprint endpoint is called with default blueprint",
+            then = "the default blueprint should be returned")
+    public void testGetDefaultBlueprint(TestContext testContext) {
+        testContext.given(BlueprintTestDto.class)
+                .when(blueprintTestClient.listV4())
+                .then(BlueprintTest::useFirstDefaultBlueprintAsEntity)
+                .when(blueprintTestClient.getV4())
+                .then((tc, entity, cc) -> {
+                    assertEquals(entity.getResponse().getName(), entity.getName());
                     return entity;
                 })
                 .validate();
@@ -185,6 +225,17 @@ public class BlueprintTest extends AbstractIntegrationTest {
         if (result.isEmpty()) {
             throw new TestFailException("Default blueprint is not listed");
         }
+        return blueprint;
+    }
+
+    private static BlueprintTestDto useFirstDefaultBlueprintAsEntity(TestContext testContext, BlueprintTestDto blueprint,
+            CloudbreakClient cloudbreakClient) {
+        String bpName = blueprint.getViewResponses().stream()
+                .filter(bp -> ResourceStatus.DEFAULT.equals(bp.getStatus()))
+                .findFirst()
+                .orElseThrow(() -> new TestFailException("No default blueprint is available"))
+                .getName();
+        blueprint.withName(bpName);
         return blueprint;
     }
 

@@ -35,10 +35,12 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
+import com.sequenceiq.cloudbreak.repository.BlueprintViewRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -59,6 +61,9 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     @Inject
     private BlueprintRepository blueprintRepository;
+
+    @Inject
+    private BlueprintViewRepository blueprintViewRepository;
 
     @Inject
     private BlueprintUtils blueprintUtils;
@@ -123,14 +128,16 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         return getAllAvailableInWorkspace(workspace);
     }
 
-    public Set<Blueprint> getAllAvailableViewInWorkspace(Long workspaceId) {
+    public Set<BlueprintView> getAllAvailableViewInWorkspace(Long workspaceId) {
         User user = getLoggedInUser();
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
-        return getUpdatedDefaultBlueprintCollection(workspace);
+        updateDefaultBlueprintCollection(workspace);
+        return blueprintViewRepository.findAllByNotDeletedInWorkspace(workspaceId);
     }
 
     public Set<Blueprint> getAllAvailableInWorkspace(Workspace workspace) {
-        return getUpdatedDefaultBlueprintCollection(workspace);
+        updateDefaultBlueprintCollection(workspace);
+        return blueprintRepository.findAllByNotDeletedInWorkspace(workspace.getId());
     }
 
     public Blueprint getByNameForWorkspaceAndLoadDefaultsIfNecessary(String name, Workspace workspace) {
@@ -139,24 +146,22 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         if (blueprint.isPresent()) {
             return blueprint.get();
         } else {
-            Set<Blueprint> updatedBlueprints = getUpdatedDefaultBlueprintCollection(workspace);
-            if (!updatedBlueprints.isEmpty()) {
-                blueprint = filterBlueprintsByName(name, updatedBlueprints);
-                if (blueprint.isPresent()) {
-                    return blueprint.get();
-                }
+            Set<Blueprint> updatedDefaultBlueprints = updateDefaultBlueprintCollection(workspace);
+            blueprint = filterBlueprintsByName(name, updatedDefaultBlueprints);
+            if (blueprint.isPresent()) {
+                return blueprint.get();
             }
         }
         throw new NotFoundException(String.format("No %s found with name '%s'", resource().getShortName(), name));
     }
 
-    public void getUpdatedDefaultBlueprintCollection(Long workspaceId) {
+    public void updateDefaultBlueprintCollection(Long workspaceId) {
         User user = getLoggedInUser();
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
-        getUpdatedDefaultBlueprintCollection(workspace);
+        updateDefaultBlueprintCollection(workspace);
     }
 
-    private Set<Blueprint> getUpdatedDefaultBlueprintCollection(Workspace workspace) {
+    private Set<Blueprint> updateDefaultBlueprintCollection(Workspace workspace) {
         Set<Blueprint> blueprintsInDatabase =
                 blueprintRepository.findAllByWorkspaceIdAndStatusIn(workspace.getId(), Set.of(ResourceStatus.DEFAULT, ResourceStatus.DEFAULT_DELETED));
         if (!blueprintLoaderService.isAddingDefaultBlueprintsNecessaryForTheUser(blueprintsInDatabase)) {
