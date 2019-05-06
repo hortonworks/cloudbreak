@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
-import com.sequenceiq.freeipa.api.model.create.CreateFreeIpaRequest;
+import com.sequenceiq.freeipa.api.model.freeipa.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.converter.CreateFreeIpaRequestToStackConverter;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
@@ -63,8 +63,9 @@ public class FreeIpaCreationService {
     @Inject
     private FreeIpaService freeIpaService;
 
-    public void launchFreeIpa(CreateFreeIpaRequest request) {
+    public void launchFreeIpa(CreateFreeIpaRequest request, String environmentName) {
         Stack stack = stackConverter.convert(request);
+        stack.setEnvironment(environmentName);
         GetPlatformTemplateRequest getPlatformTemplateRequest = templateService.triggerGetTemplate(stack);
 
         SecurityConfig securityConfig = tlsSecurityService.generateSecurityKeys();

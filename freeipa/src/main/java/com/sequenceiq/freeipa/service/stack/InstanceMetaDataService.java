@@ -69,7 +69,7 @@ public class InstanceMetaDataService {
         return null;
     }
 
-    public Iterable<InstanceMetaData> saveAll(Set<InstanceMetaData> allInstanceMetaData) {
+    public Iterable<InstanceMetaData> saveAll(Iterable<InstanceMetaData> allInstanceMetaData) {
         return instanceMetaDataRepository.saveAll(allInstanceMetaData);
     }
 }

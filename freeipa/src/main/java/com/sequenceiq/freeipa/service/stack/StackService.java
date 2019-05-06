@@ -25,4 +25,9 @@ public class StackService {
     public Stack save(Stack stack) {
         return stackRepository.save(stack);
     }
+
+    public Stack getByNameAndEnvironment(String name, String environment) {
+        return stackRepository.findByNameAndEnvironment(name, environment)
+                .orElseThrow(() -> new NotFoundException(String.format("Stack [%s] in environment [%s] not found", name, environment)));
+    }
 }
