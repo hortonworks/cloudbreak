@@ -6,9 +6,13 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+
 	strfmt "github.com/go-openapi/strfmt"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // SdxClusterResponse sdx cluster response
@@ -17,10 +21,66 @@ type SdxClusterResponse struct {
 
 	// sdx name
 	SdxName string `json:"sdxName,omitempty"`
+
+	// status
+	// Enum: [REQUESTED REQUESTED_FROM_CLOUDBREAK]
+	Status string `json:"status,omitempty"`
 }
 
 // Validate validates this sdx cluster response
 func (m *SdxClusterResponse) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateStatus(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+var sdxClusterResponseTypeStatusPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["REQUESTED","REQUESTED_FROM_CLOUDBREAK"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		sdxClusterResponseTypeStatusPropEnum = append(sdxClusterResponseTypeStatusPropEnum, v)
+	}
+}
+
+const (
+
+	// SdxClusterResponseStatusREQUESTED captures enum value "REQUESTED"
+	SdxClusterResponseStatusREQUESTED string = "REQUESTED"
+
+	// SdxClusterResponseStatusREQUESTEDFROMCLOUDBREAK captures enum value "REQUESTED_FROM_CLOUDBREAK"
+	SdxClusterResponseStatusREQUESTEDFROMCLOUDBREAK string = "REQUESTED_FROM_CLOUDBREAK"
+)
+
+// prop value enum
+func (m *SdxClusterResponse) validateStatusEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, sdxClusterResponseTypeStatusPropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *SdxClusterResponse) validateStatus(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Status) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateStatusEnum("status", "body", m.Status); err != nil {
+		return err
+	}
+
 	return nil
 }
 

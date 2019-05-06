@@ -20,7 +20,7 @@ ifeq ($(SDX_IP),)
 endif
 SDX_PORT = $(shell echo \${PORT})
 ifeq ($(SDX_PORT),)
-        SDX_PORT = 9092
+        SDX_PORT = 8086
 endif
 
 ifeq ($(FREEIPA_IP),)
