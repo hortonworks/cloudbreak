@@ -6,7 +6,7 @@
 
 <suppressions>
     <!-- suppressing checks in real classes -->
-    <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="PublicKeyReaderUtil.java|AmbariClusterService.java|CachedUserDetailsService.java"/>
+    <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="PublicKeyReaderUtil.java|AmbariClusterService.java|CachedUserDetailsService.java|StructuredParameterQueryResponse.java|BlueprintService.java|FileSystemV4Endpoint.java|FileSystemV4Controller.java"/>
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="StatusToPollGroupConverter.java|StringTypesCompare.java"/>
     <!-- cases are increasing the the complexity since the switchBlockAsSingleDecisionPoint=true parameter does not work  -->
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="ContainerConfigService.java"/>
@@ -28,7 +28,7 @@
     <suppress checks="TrailingComment" files="HeartbeatServiceTest.java"/>
     <suppress checks="VisibilityModifier" files="AbstractAction.java"/>
     <suppress checks=".*" files="ModulTest.java"/>
-    <suppress id="IllegalTransaction" files="com.sequenceiq.cloudbreak.service.TransactionService.java|com.sequenceiq.cloudbreak.controller.*|com.sequenceiq.cloudbreak.structuredevent.StructuredFlowEventFactory|com.sequenceiq.cloudbreak.repository.*Repository.java|com.sequenceiq.cloudbreak.structuredevent.db.*Repository.java"/>
+    <suppress id="IllegalTransaction" files="com.sequenceiq.cloudbreak.service.TransactionService.java|com.sequenceiq.cloudbreak.controller.*|com.sequenceiq.freeipa.controller.*|com.sequenceiq.cloudbreak.structuredevent.StructuredFlowEventFactory|com.sequenceiq.cloudbreak.repository.*Repository.java|com.sequenceiq.freeipa.repository.*Repository.java|com.sequenceiq.cloudbreak.structuredevent.db.*Repository.java"/>
     <suppress checks="RegexpSingleline" files="FlexSubscription.java"/>
     <suppress id="hashtable-instantiation" files="LdapConfigValidator.java"/>
     <suppress checks="MethodName" files="EnvironmentResourceRepository.java"/>
@@ -54,5 +54,6 @@
     <suppress id="string-instantiation" files="RemoteUserDetailsService.java"/>
     <suppress checks="InnerAssignment" files="ScalingPolicyConverter.java" />
     <suppress id="sysout" files="VersionedApplication.java"/>
+    <suppress checks="VisibilityModifierCheck" files=".*Test.java"/>
 
 </suppressions>

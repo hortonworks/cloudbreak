@@ -12,9 +12,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DatalakeResourcesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.EnvironmentNetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.LocationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.ServiceDescriptorV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
@@ -24,7 +26,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Respon
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.environment.BaseNetwork;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ServiceDescriptor;
@@ -34,6 +38,9 @@ public class EnvironmentToDetailedEnvironmentV4ResponseConverter extends Abstrac
 
     @Inject
     private RegionConverter regionConverter;
+
+    @Inject
+    private Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap;
 
     @Override
     public DetailedEnvironmentV4Response convert(Environment source) {
@@ -121,6 +128,19 @@ public class EnvironmentToDetailedEnvironmentV4ResponseConverter extends Abstrac
         }
         response.setDatalakeResourcesNames(datalakeResourcesNames);
         response.setDatalakeResources(datalakeResourcesResponses);
+        setNetworkIfPossible(response, source);
         return response;
+    }
+
+    private void setNetworkIfPossible(DetailedEnvironmentV4Response response, Environment source) {
+        BaseNetwork network = source.getNetwork();
+        if (network != null) {
+            CloudPlatform cloudPlatform = CloudPlatform.valueOf(source.getCloudPlatform());
+            EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(cloudPlatform);
+            if (environmentNetworkConverter != null) {
+                EnvironmentNetworkV4Response networkV4Response = environmentNetworkConverter.convert(source.getNetwork());
+                response.setNetwork(networkV4Response);
+            }
+        }
     }
 }

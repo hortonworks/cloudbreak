@@ -28,6 +28,8 @@ public class ConfigQueryEntry {
 
     private boolean requiredForAttachedCluster;
 
+    private boolean secure;
+
     private Set<String> supportedStorages = new HashSet<>();
 
     public Set<String> getSupportedStorages() {
@@ -102,6 +104,14 @@ public class ConfigQueryEntry {
         this.requiredForAttachedCluster = requiredForAttachedCluster;
     }
 
+    public boolean isSecure() {
+        return secure;
+    }
+
+    public void setSecure(boolean secure) {
+        this.secure = secure;
+    }
+
     public ConfigQueryEntry copy() {
         ConfigQueryEntry configQueryEntry = new ConfigQueryEntry();
         configQueryEntry.protocol = protocol;
@@ -112,6 +122,7 @@ public class ConfigQueryEntry {
         configQueryEntry.relatedServices = relatedServices;
         configQueryEntry.propertyName = propertyName;
         configQueryEntry.requiredForAttachedCluster = requiredForAttachedCluster;
+        configQueryEntry.secure = secure;
         configQueryEntry.supportedStorages = new HashSet<>(supportedStorages);
         return configQueryEntry;
     }
@@ -138,6 +149,7 @@ public class ConfigQueryEntry {
                 .append(protocol)
                 .append(propertyDisplayName)
                 .append(supportedStorages)
+                .append(secure)
                 .toHashCode();
     }
 }

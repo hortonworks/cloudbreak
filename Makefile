@@ -40,3 +40,9 @@ build-datalake-dockerhub:
 
 build-redbeams-dockerhub:
 	 make -C docker-redbeams dockerhub
+
+build-environment-dockerhub:
+	 make -C docker-environment dockerhub
+
+build-freeipa-dockerhub:
+	 make -C docker-freeipa dockerhub

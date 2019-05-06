@@ -19,11 +19,11 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @DisableHasPermission
 public interface WorkspaceRepository extends DisabledBaseRepository<Workspace, Long> {
 
-    @Query("SELECT o FROM Workspace o WHERE o.name= :name AND o.tenant= :tenant AND o.status <> 'DELETED'")
+    @Query("SELECT o FROM Workspace o LEFT JOIN FETCH o.tenant WHERE o.name= :name AND o.tenant= :tenant AND o.status <> 'DELETED'")
     Workspace getByName(@Param("name") String name, @Param("tenant") Tenant tenant);
 
     @Override
-    @Query("SELECT o FROM Workspace o WHERE o.id= :id AND o.status <> 'DELETED'")
+    @Query("SELECT o FROM Workspace o LEFT JOIN FETCH o.tenant WHERE o.id= :id AND o.status <> 'DELETED'")
     Optional<Workspace> findById(@Param("id") Long id);
 
     @Override

@@ -15,6 +15,7 @@ public class AdlsGen2FileSystemToCloudAdlsGen2View
         cloudAdlsGen2View.setAccountName(source.getAccountName());
         cloudAdlsGen2View.setAccountKey(source.getAccountKey());
         cloudAdlsGen2View.setResourceGroupName(source.getStorageContainerName());
+        cloudAdlsGen2View.setSecure(source.isSecure());
         return cloudAdlsGen2View;
     }
 }

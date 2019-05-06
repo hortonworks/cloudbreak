@@ -38,8 +38,8 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.ClouderaManagerProductV4RequestToClouderaManagerProductConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.ClouderaManagerRepositoryV4RequestToClouderaManagerRepoConverter;
-import com.sequenceiq.cloudbreak.domain.ClusterAttributes;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.ClusterAttributes;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -66,8 +66,8 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
     @Value("${cb.ambari.username:cloudbreak}")
     private String ambariUserName;
 
-    @Value("${cb.ambari.dp.username:dpapps}")
-    private String dpUsername;
+    @Value("${cb.cm.mgmt.username:cmmgmt}")
+    private String cmMgmtUsername;
 
     @Inject
     private CloudStorageValidationUtil cloudStorageValidationUtil;
@@ -107,7 +107,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         }
         cluster.setCloudbreakAmbariUser(ambariUserName);
         cluster.setCloudbreakAmbariPassword(PasswordUtil.generatePassword());
-        cluster.setDpAmbariUser(dpUsername);
+        cluster.setDpAmbariUser(cmMgmtUsername);
         cluster.setDpAmbariPassword(PasswordUtil.generatePassword());
         cluster.setBlueprint(getBlueprint(source.getBlueprintName(), workspace));
         convertGateway(source, cluster);

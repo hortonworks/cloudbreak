@@ -22,6 +22,9 @@ public class AdlsGen2CloudStorageV4Parameters implements CloudStorageV4Parameter
     @NotNull
     private String accountName;
 
+    @ApiModelProperty
+    private boolean secure;
+
     public String getAccountKey() {
         return accountKey;
     }
@@ -36,6 +39,14 @@ public class AdlsGen2CloudStorageV4Parameters implements CloudStorageV4Parameter
 
     public void setAccountName(String accountName) {
         this.accountName = accountName;
+    }
+
+    public boolean isSecure() {
+        return secure;
+    }
+
+    public void setSecure(boolean secure) {
+        this.secure = secure;
     }
 
     @ApiModelProperty(hidden = true)
@@ -53,13 +64,13 @@ public class AdlsGen2CloudStorageV4Parameters implements CloudStorageV4Parameter
             return false;
         }
         AdlsGen2CloudStorageV4Parameters that = (AdlsGen2CloudStorageV4Parameters) o;
-        return Objects.equals(accountKey, that.accountKey)
+        return secure == that.secure
+                && Objects.equals(accountKey, that.accountKey)
                 && Objects.equals(accountName, that.accountName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(accountKey, accountName);
+        return Objects.hash(accountKey, accountName, secure);
     }
-
 }

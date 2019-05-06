@@ -171,8 +171,8 @@ public class ModelDescriptions {
         public static final String STATUS_REQUEST = "status of the scale request";
         public static final String SERVER_IP = "public ambari ip of the stack";
         public static final String SERVER_URL = "public ambari url";
-        public static final String DP_AMBARI_USERNAME = "ambari username for Dataplane";
-        public static final String DP_AMBARI_PASSWORD = "ambari password for Dataplane";
+        public static final String CM_MANAGEMENT_USERNAME = "CM username for shared usage";
+        public static final String CM_MANAGEMENT_PASSWORD = "CM password for shared usage";
         public static final String NETWORK_ID = "network resource id for the stack";
         public static final String CERTIFICATE = "server certificate used by the gateway";
         public static final String CLIENT_KEY = "client key used by the gateway";
@@ -641,6 +641,7 @@ public class ModelDescriptions {
         public static final String ACCOUNT_NAME = "Account name of the path";
         public static final String FILESYTEM_TYPE = "Type of filesystem";
         public static final String ATTACHED_CLUSTER = "Attached cluster";
+        public static final String SECURE = "Connect with SSL connection";
     }
 
     public static class ProxyConfigModelDescription {
@@ -673,6 +674,7 @@ public class ModelDescriptions {
         public static final String LATITUDE = "Location latitude of the environment.";
         public static final String KERBEROS_CONFIGS = "Name of Kerberos configs to be attached to the environment.";
         public static final String LOCATION_DISPLAY_NAME = "Display name of the location of the environment.";
+        public static final String NETWORK = "Network related specifics of the environment.";
     }
 
     public static class EnvironmentResponseModelDescription {
@@ -692,6 +694,7 @@ public class ModelDescriptions {
         public static final String DATALAKE_RESOURCES_NAMES = "Datalake cluster resources registered to the environment.";
         public static final String DATALAKE_RESOURCES = "Datalake cluster resources registered to the environment.";
         public static final String KERBEROS_CONFIGS = "Kerberos configs in the environment.";
+        public static final String NETWORK = "Network related specifics of the environment.";
     }
 
     public static class SecretResponseModelDescription {
@@ -704,5 +707,16 @@ public class ModelDescriptions {
         public static final String SERVICE_NAME = "Name of the datalake service";
         public static final String BLUEPRINT_PARAMS = "Bluepirnt parameters from the datalake services";
         public static final String COMPONENT_HOSTS = "Component hosts of the datalake services";
+    }
+
+    public static class EnvironmentNetworkDescription {
+        public static final String SUBNET_IDS = "Subnet ids of the specified networks";
+        public static final String AWS_SPECIFIC_PARAMETERS = "Subnet ids of the specified networks";
+        public static final String AZURE_SPECIFIC_PARAMETERS = "Subnet ids of the specified networks";
+        public static final String AWS_VPC_ID = "Subnet ids of the specified networks";
+        public static final String AZURE_RESOURCE_GROUP_NAME = "Subnet ids of the specified networks";
+        public static final String AZURE_NETWORK_ID = "Subnet ids of the specified networks";
+        public static final String AZURE_NO_PUBLIC_IP = "Subnet ids of the specified networks";
+        public static final String AZURE_NO_FIREWALL_RULES = "Subnet ids of the specified networks";
     }
 }

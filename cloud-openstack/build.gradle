@@ -24,7 +24,9 @@ dependencies {
     compile group: 'org.apache.commons',                 name: 'commons-lang3',                  version: apacheCommonsLangVersion
     compile group: 'org.springframework.boot',           name: 'spring-boot-starter',            version: springBootVersion
     compile group: 'org.glassfish.jersey.core',          name: 'jersey-client',                  version: jerseyCoreVersion
-    compile group: 'org.pacesys.openstack4j.connectors', name: 'openstack4j-jersey2',            version: '3.1.0-jersey26_v4fix'
+    compile (group: 'org.pacesys.openstack4j.connectors', name: 'openstack4j-jersey2',            version: '3.1.0-jersey26_v4fix') {
+      exclude group: 'org,yaml'
+    }
     compile group: 'org.freemarker',                     name: 'freemarker',                     version: freemarkerVersion
     compile group: 'commons-codec',                      name: 'commons-codec',                  version: '1.10'
 

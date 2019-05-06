@@ -71,7 +71,9 @@ dependencyManagement {
             }
         }
 
-        dependency group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',          version: swaggerVersion
+        dependency (group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',          version: swaggerVersion) {
+          exclude 'org.yaml:snakeyaml'
+        }
         dependency group: 'javax.mail',                    name: 'mail',                           version: '1.5.0-b01'
         dependency group: 'dnsjava',                       name: 'dnsjava',                        version: '2.1.7'
         dependency group: 'javax.xml.bind',                name: 'jaxb-api',                       version: '2.3.0'
@@ -82,7 +84,7 @@ dependencyManagement {
         dependency group: 'org.springframework.security.oauth', name: 'spring-security-oauth2',    version: springOauthVersion
 
         dependency group: 'com.google.code.gson',               name: 'gson',                      version: '2.6.2'
-        dependency group: 'org.codehaus.groovy',                name: 'groovy-all',                version: '2.5.0'
+        dependency group: 'org.codehaus.groovy',                name: 'groovy-all',                version: '2.5.6'
         dependency group: 'org.apache.hadoop',                  name: 'hadoop-yarn-api',           version: hadoopVersion
         dependency group: 'org.freemarker',                     name: 'freemarker',                version: freemarkerVersion
         dependency group: 'org.quartz-scheduler',               name: 'quartz',                    version: '2.3.0'
@@ -125,7 +127,9 @@ dependencies {
     compile group: 'io.springfox',                  name: 'springfox-core'
     compile group: 'io.springfox',                  name: 'springfox-swagger-ui'
 
-    compile group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs'
+    implementation     ('io.swagger:swagger-jersey2-jaxrs') {
+      exclude group: 'org.yaml'
+    }
 
     runtime group: 'javax.xml.bind',                name: 'jaxb-api'
     runtime group: 'com.sun.xml.bind',              name: 'jaxb-impl'

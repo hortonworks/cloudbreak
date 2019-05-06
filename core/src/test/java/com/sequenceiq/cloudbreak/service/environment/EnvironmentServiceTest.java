@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -37,12 +38,16 @@ import org.springframework.core.convert.ConversionService;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.base.EnvironmentNetworkAwsV4Params;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.base.EnvironmentNetworkAzureV4Params;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentChangeCredentialV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentDetachV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentEditV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.LocationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
@@ -66,6 +71,9 @@ import com.sequenceiq.cloudbreak.converter.v4.environment.EnvironmentToDetailedE
 import com.sequenceiq.cloudbreak.converter.v4.environment.EnvironmentToLocationV4RequestConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.EnvironmentToLocationV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.RegionConverter;
+import com.sequenceiq.cloudbreak.converter.v4.environment.network.AwsEnvironmentNetworkConverter;
+import com.sequenceiq.cloudbreak.converter.v4.environment.network.AzureEnvironmentNetworkConverter;
+import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
 import com.sequenceiq.cloudbreak.converter.v4.kerberos.KerberosConfigToKerberosV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.ldaps.LdapConfigToLdapV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.proxies.ProxyConfigToProxyV4ResponseConverter;
@@ -75,6 +83,9 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.environment.AwsNetwork;
+import com.sequenceiq.cloudbreak.domain.environment.AzureNetwork;
+import com.sequenceiq.cloudbreak.domain.environment.BaseNetwork;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
@@ -162,6 +173,18 @@ public class EnvironmentServiceTest {
     @Mock
     private TransactionService transactionService;
 
+    @Mock
+    private EnvironmentNetworkService environmentNetworkService;
+
+    @Mock
+    private Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap;
+
+    @Mock
+    private AwsEnvironmentNetworkConverter awsEnvironmentNetworkConverter;
+
+    @Mock
+    private AzureEnvironmentNetworkConverter azureEnvironmentNetworkConverter;
+
     @Spy
     private final EnvironmentDetachValidator environmentDetachValidator = new EnvironmentDetachValidator();
 
@@ -174,6 +197,11 @@ public class EnvironmentServiceTest {
     private EnvironmentService underTest;
 
     private final Workspace workspace = new Workspace();
+
+    private final Answer<Environment> answerWithFirstEnvironmentArgument = invocation -> {
+        Object[] args = invocation.getArguments();
+        return (Environment) args[0];
+    };
 
     @Spy
     private final RegionConverter regionConverter = new RegionConverter();
@@ -235,10 +263,12 @@ public class EnvironmentServiceTest {
         LocationV4Request locationV4Request = new LocationV4Request();
         locationV4Request.setName("region1");
         environmentV4Request.setLocation(locationV4Request);
+        Credential credential = new Credential();
+        credential.setCloudPlatform(CloudPlatform.MOCK.name());
 
         when(conversionService.convert(any(EnvironmentV4Request.class), eq(Environment.class))).thenReturn(new Environment());
-        when(environmentRepository.save(any(Environment.class))).thenReturn(new Environment());
-        when(environmentCredentialOperationService.getCredentialFromRequest(any(), anyLong())).thenReturn(new Credential());
+        when(environmentRepository.save(any(Environment.class))).thenAnswer(answerWithFirstEnvironmentArgument);
+        when(environmentCredentialOperationService.getCredentialFromRequest(any(), anyLong())).thenReturn(credential);
         CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions();
         when(platformParameterService.getRegionsByCredential(any())).thenReturn(cloudRegions);
         DetailedEnvironmentV4Response response = underTest.createForLoggedInUser(environmentV4Request, WORKSPACE_ID);
@@ -257,10 +287,12 @@ public class EnvironmentServiceTest {
         LocationV4Request locationV4Request = new LocationV4Request();
         locationV4Request.setName("region1");
         environmentV4Request.setLocation(locationV4Request);
+        Credential cred = new Credential();
+        cred.setCloudPlatform(CloudPlatform.MOCK.name());
 
         when(conversionService.convert(any(EnvironmentV4Request.class), eq(Environment.class))).thenReturn(new Environment());
-        when(environmentRepository.save(any(Environment.class))).thenReturn(new Environment());
-        when(environmentCredentialOperationService.getCredentialFromRequest(any(), anyLong())).thenReturn(new Credential());
+        when(environmentRepository.save(any(Environment.class))).thenAnswer(answerWithFirstEnvironmentArgument);
+        when(environmentCredentialOperationService.getCredentialFromRequest(any(), anyLong())).thenReturn(cred);
         CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions();
         when(platformParameterService.getRegionsByCredential(any())).thenReturn(cloudRegions);
         DetailedEnvironmentV4Response response = underTest.createForLoggedInUser(environmentV4Request, WORKSPACE_ID);
@@ -282,11 +314,13 @@ public class EnvironmentServiceTest {
         LocationV4Request locationV4Request = new LocationV4Request();
         locationV4Request.setName("region1");
         environmentV4Request.setLocation(locationV4Request);
+        Credential credential = new Credential();
+        credential.setCloudPlatform(CloudPlatform.MOCK.name());
 
         when(conversionService.convert(any(EnvironmentV4Request.class), eq(Environment.class))).thenReturn(new Environment());
         ArgumentCaptor<Environment> envCaptor = ArgumentCaptor.forClass(Environment.class);
-        when(environmentRepository.save(envCaptor.capture())).thenReturn(new Environment());
-        when(environmentCredentialOperationService.getCredentialFromRequest(any(), anyLong())).thenReturn(new Credential());
+        when(environmentCredentialOperationService.getCredentialFromRequest(any(), anyLong())).thenReturn(credential);
+        when(environmentRepository.save(envCaptor.capture())).thenAnswer(answerWithFirstEnvironmentArgument);
 
         CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions();
         when(platformParameterService.getRegionsByCredential(any())).thenReturn(cloudRegions);
@@ -759,6 +793,183 @@ public class EnvironmentServiceTest {
         assertEquals(region2, result.getLocation().getName());
         assertTrue(result.getRegions().getRegions().contains(region2));
         assertTrue(result.getRegions().getRegions().contains(region3));
+    }
+
+    @Test
+    public void testCreateWithAwsNetworkShouldCallSaveOnNetworkService() {
+        EnvironmentV4Request environmentV4Request = new EnvironmentV4Request();
+        environmentV4Request.setName(ENVIRONMENT_NAME);
+
+        CredentialV4Request credentialRequest = new CredentialV4Request();
+        credentialRequest.setName("CredRequestName");
+        environmentV4Request.setCredential(credentialRequest);
+        LocationV4Request locationV4Request = new LocationV4Request();
+        locationV4Request.setName("region1");
+        environmentV4Request.setLocation(locationV4Request);
+        Credential cred = new Credential();
+        cred.setCloudPlatform(CloudPlatform.AWS.name());
+
+        EnvironmentNetworkV4Request network = new EnvironmentNetworkV4Request();
+        network.setSubnetIds(Set.of("subnet-id"));
+        network.setAws(new EnvironmentNetworkAwsV4Params());
+        environmentV4Request.setNetwork(network);
+        when(environmentNetworkConverterMap.get(any(CloudPlatform.class))).thenReturn(awsEnvironmentNetworkConverter);
+        when(awsEnvironmentNetworkConverter.convert(any(EnvironmentNetworkV4Request.class), any(Environment.class))).thenReturn(new AwsNetwork());
+
+        when(conversionService.convert(any(EnvironmentV4Request.class), eq(Environment.class))).thenReturn(new Environment());
+        when(environmentRepository.save(any(Environment.class))).thenAnswer(answerWithFirstEnvironmentArgument);
+        when(environmentCredentialOperationService.getCredentialFromRequest(any(), anyLong())).thenReturn(cred);
+        CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions();
+        when(platformParameterService.getRegionsByCredential(any())).thenReturn(cloudRegions);
+
+        DetailedEnvironmentV4Response response = underTest.createForLoggedInUser(environmentV4Request, WORKSPACE_ID);
+
+        assertNotNull(response);
+        verify(environmentNetworkService, times(1)).save(any(BaseNetwork.class));
+    }
+
+    @Test
+    public void testCreateWithAwsCredentialWhenNoAwsNetworkSpecifiedShouldDoNothingWithNetworkService() {
+        EnvironmentV4Request environmentV4Request = new EnvironmentV4Request();
+        environmentV4Request.setName(ENVIRONMENT_NAME);
+
+        CredentialV4Request credentialRequest = new CredentialV4Request();
+        credentialRequest.setName("CredRequestName");
+        environmentV4Request.setCredential(credentialRequest);
+        LocationV4Request locationV4Request = new LocationV4Request();
+        locationV4Request.setName("region1");
+        environmentV4Request.setLocation(locationV4Request);
+        Credential cred = new Credential();
+        cred.setCloudPlatform(CloudPlatform.AWS.name());
+
+        EnvironmentNetworkV4Request network = new EnvironmentNetworkV4Request();
+        network.setSubnetIds(Set.of("subnet-id"));
+        environmentV4Request.setNetwork(network);
+
+        when(conversionService.convert(any(EnvironmentV4Request.class), eq(Environment.class))).thenReturn(new Environment());
+        when(environmentRepository.save(any(Environment.class))).thenAnswer(answerWithFirstEnvironmentArgument);
+        when(environmentCredentialOperationService.getCredentialFromRequest(any(), anyLong())).thenReturn(cred);
+        CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions();
+        when(platformParameterService.getRegionsByCredential(any())).thenReturn(cloudRegions);
+        DetailedEnvironmentV4Response response = underTest.createForLoggedInUser(environmentV4Request, WORKSPACE_ID);
+
+        assertNotNull(response);
+        verify(environmentNetworkService, times(0)).save(any(BaseNetwork.class));
+    }
+
+    @Test
+    public void testCreateWithAzureNetworkShouldCallSaveOnNetworkService() {
+        EnvironmentV4Request environmentV4Request = new EnvironmentV4Request();
+        environmentV4Request.setName(ENVIRONMENT_NAME);
+
+        CredentialV4Request credentialRequest = new CredentialV4Request();
+        credentialRequest.setName("CredRequestName");
+        environmentV4Request.setCredential(credentialRequest);
+        LocationV4Request locationV4Request = new LocationV4Request();
+        locationV4Request.setName("region1");
+        environmentV4Request.setLocation(locationV4Request);
+        Credential cred = new Credential();
+        cred.setCloudPlatform(CloudPlatform.AZURE.name());
+
+        EnvironmentNetworkV4Request network = new EnvironmentNetworkV4Request();
+        network.setSubnetIds(Set.of("subnet-id"));
+        network.setAzure(new EnvironmentNetworkAzureV4Params());
+        environmentV4Request.setNetwork(network);
+        when(environmentNetworkConverterMap.get(any(CloudPlatform.class))).thenReturn(azureEnvironmentNetworkConverter);
+        when(azureEnvironmentNetworkConverter.convert(any(EnvironmentNetworkV4Request.class), any(Environment.class))).thenReturn(new AwsNetwork());
+
+        when(conversionService.convert(any(EnvironmentV4Request.class), eq(Environment.class))).thenReturn(new Environment());
+        when(environmentRepository.save(any(Environment.class))).thenAnswer(answerWithFirstEnvironmentArgument);
+        when(environmentCredentialOperationService.getCredentialFromRequest(any(), anyLong())).thenReturn(cred);
+        CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions();
+        when(platformParameterService.getRegionsByCredential(any())).thenReturn(cloudRegions);
+        DetailedEnvironmentV4Response response = underTest.createForLoggedInUser(environmentV4Request, WORKSPACE_ID);
+
+        assertNotNull(response);
+        verify(environmentNetworkService, times(1)).save(any(BaseNetwork.class));
+    }
+
+    @Test
+    public void testCreateWithAzureCredentialWhenNoAzureNetworkSpecifiedShouldDoNothingWithNetworkService() {
+        EnvironmentV4Request environmentV4Request = new EnvironmentV4Request();
+        environmentV4Request.setName(ENVIRONMENT_NAME);
+
+        CredentialV4Request credentialRequest = new CredentialV4Request();
+        credentialRequest.setName("CredRequestName");
+        environmentV4Request.setCredential(credentialRequest);
+        LocationV4Request locationV4Request = new LocationV4Request();
+        locationV4Request.setName("region1");
+        environmentV4Request.setLocation(locationV4Request);
+        Credential cred = new Credential();
+        cred.setCloudPlatform(CloudPlatform.AZURE.name());
+
+        EnvironmentNetworkV4Request network = new EnvironmentNetworkV4Request();
+        network.setSubnetIds(Set.of("subnet-id"));
+        environmentV4Request.setNetwork(network);
+
+        when(conversionService.convert(any(EnvironmentV4Request.class), eq(Environment.class))).thenReturn(new Environment());
+        when(environmentRepository.save(any(Environment.class))).thenAnswer(answerWithFirstEnvironmentArgument);
+        when(environmentCredentialOperationService.getCredentialFromRequest(any(), anyLong())).thenReturn(cred);
+        CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions();
+        when(platformParameterService.getRegionsByCredential(any())).thenReturn(cloudRegions);
+        DetailedEnvironmentV4Response response = underTest.createForLoggedInUser(environmentV4Request, WORKSPACE_ID);
+
+        assertNotNull(response);
+        verify(environmentNetworkService, times(0)).save(any(AzureNetwork.class));
+    }
+
+    @Test
+    public void testCreateWithMockProviderShouldDoNothingWithNetworkService() {
+        EnvironmentV4Request environmentV4Request = new EnvironmentV4Request();
+        environmentV4Request.setName(ENVIRONMENT_NAME);
+
+        CredentialV4Request credentialRequest = new CredentialV4Request();
+        credentialRequest.setName("CredRequestName");
+        environmentV4Request.setCredential(credentialRequest);
+        environmentV4Request.setNetwork(new EnvironmentNetworkV4Request());
+        LocationV4Request locationV4Request = new LocationV4Request();
+        locationV4Request.setName("region1");
+        environmentV4Request.setLocation(locationV4Request);
+        Credential cred = new Credential();
+        cred.setCloudPlatform(CloudPlatform.MOCK.name());
+        when(environmentNetworkConverterMap.get(any(CloudPlatform.class))).thenReturn(null);
+
+        when(conversionService.convert(any(EnvironmentV4Request.class), eq(Environment.class))).thenReturn(new Environment());
+        when(environmentRepository.save(any(Environment.class))).thenAnswer(answerWithFirstEnvironmentArgument);
+        when(environmentCredentialOperationService.getCredentialFromRequest(any(), anyLong())).thenReturn(cred);
+        CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions();
+        when(platformParameterService.getRegionsByCredential(any())).thenReturn(cloudRegions);
+        DetailedEnvironmentV4Response response = underTest.createForLoggedInUser(environmentV4Request, WORKSPACE_ID);
+
+        assertNotNull(response);
+        verify(environmentNetworkService, times(0)).save(any(AwsNetwork.class));
+        verify(environmentNetworkService, times(0)).save(any(AzureNetwork.class));
+    }
+
+    @Test
+    public void testCreateWithoutNetworkInRequestShouldDoNothingWithNetworkService() {
+        EnvironmentV4Request environmentV4Request = new EnvironmentV4Request();
+        environmentV4Request.setName(ENVIRONMENT_NAME);
+
+        CredentialV4Request credentialRequest = new CredentialV4Request();
+        credentialRequest.setName("CredRequestName");
+        environmentV4Request.setCredential(credentialRequest);
+        LocationV4Request locationV4Request = new LocationV4Request();
+        locationV4Request.setName("region1");
+        environmentV4Request.setLocation(locationV4Request);
+        Credential cred = new Credential();
+        cred.setCloudPlatform(CloudPlatform.MOCK.name());
+
+        when(conversionService.convert(any(EnvironmentV4Request.class), eq(Environment.class))).thenReturn(new Environment());
+        when(environmentRepository.save(any(Environment.class))).thenAnswer(answerWithFirstEnvironmentArgument);
+        when(environmentCredentialOperationService.getCredentialFromRequest(any(), anyLong())).thenReturn(cred);
+        CloudRegions cloudRegions = EnvironmentUtils.getCloudRegions();
+        when(platformParameterService.getRegionsByCredential(any())).thenReturn(cloudRegions);
+        DetailedEnvironmentV4Response response = underTest.createForLoggedInUser(environmentV4Request, WORKSPACE_ID);
+
+        assertNotNull(response);
+        verify(environmentNetworkService, times(0)).save(any(AwsNetwork.class));
+        verify(environmentNetworkService, times(0)).save(any(AzureNetwork.class));
     }
 
     private void setCredential(Environment environment) {

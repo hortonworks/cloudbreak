@@ -57,7 +57,7 @@ public class WasbFileSystem extends BaseFileSystem {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof WasbFileSystem)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
         WasbFileSystem that = (WasbFileSystem) o;
@@ -71,5 +71,4 @@ public class WasbFileSystem extends BaseFileSystem {
     public int hashCode() {
         return Objects.hash(accountKey, accountName, secure, storageContainerName);
     }
-
 }

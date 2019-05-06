@@ -13,6 +13,7 @@ public class WasbCloudStorageParametersV4ToCloudWasbViewConverter extends Abstra
         CloudWasbView cloudWasbView = new CloudWasbView();
         cloudWasbView.setAccountKey(source.getAccountKey());
         cloudWasbView.setAccountName(source.getAccountName());
+        cloudWasbView.setSecure(source.isSecure());
         return cloudWasbView;
     }
 }

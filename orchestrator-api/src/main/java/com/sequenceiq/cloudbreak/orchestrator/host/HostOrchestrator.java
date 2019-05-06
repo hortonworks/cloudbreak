@@ -33,6 +33,9 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     void initServiceRun(List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
             SaltConfig pillarConfig, ExitCriteriaModel exitCriteriaModel, boolean clouderaManager) throws CloudbreakOrchestratorException;
 
+    void initSaltConfig(List<GatewayConfig> allGateway, Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel)
+            throws CloudbreakOrchestratorFailedException;
+
     void runService(List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
             SaltConfig pillarConfig, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
 
@@ -70,4 +73,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     Map<String, Map<String, String>> formatAndMountDisksOnNodes(List<GatewayConfig> allGateway, Set<Node> targets, ExitCriteriaModel exitModel,
             String platformVariant) throws CloudbreakOrchestratorFailedException;
+
+    void stopClusterManagerAgent(GatewayConfig gatewayConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel, boolean adJoinable, boolean ipaJoinable)
+            throws CloudbreakOrchestratorFailedException;
 }

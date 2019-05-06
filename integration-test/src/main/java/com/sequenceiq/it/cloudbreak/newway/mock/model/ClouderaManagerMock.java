@@ -21,7 +21,7 @@ import spark.Service;
 
 public class ClouderaManagerMock extends AbstractModelMock {
 
-    public static final String API_ROOT = "/api/v30";
+    public static final String API_ROOT = "/api/v31";
 
     public static final String ECHO = API_ROOT + "/tools/echo";
 

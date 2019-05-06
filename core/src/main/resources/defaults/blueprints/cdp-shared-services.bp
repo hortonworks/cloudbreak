@@ -21,6 +21,12 @@
       {
         "refName": "hdfs",
         "serviceType": "HDFS",
+        "serviceConfigs": [
+          {
+            "name": "hdfs_service_config_safety_valve",
+            "value": "<property><name>dfs.datanode.keytab.file</name><value>{{CMF_CONF_DIR}}/hdfs.keytab</value></property>"
+          }
+        ],
         "roleConfigGroups": [
           {
             "refName": "hdfs-NAMENODE-BASE",
@@ -66,6 +72,22 @@
         ]
       },
       {
+        "refName": "spark_on_yarn",
+        "serviceType": "SPARK_ON_YARN",
+        "roleConfigGroups": [
+          {
+            "refName": "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+            "roleType": "SPARK_YARN_HISTORY_SERVER",
+            "base": true
+          },
+          {
+            "refName": "spark_on_yarn-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          }
+        ]
+      },
+      {
         "refName": "hive",
         "serviceType": "HIVE",
         "roleConfigGroups": [
@@ -77,6 +99,12 @@
           {
             "refName": "hive-HIVESERVER2-BASE",
             "roleType": "HIVESERVER2",
+                "configs": [
+                  {
+                    "name": "hs2_execution_engine",
+                    "value": "spark"
+                  }
+                ],
             "base": true
           },
           {
@@ -101,9 +129,12 @@
           "yarn-JOBHISTORY-BASE",
           "yarn-RESOURCEMANAGER-BASE",
           "yarn-NODEMANAGER-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
+          "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
           "zookeeper-SERVER-BASE"
         ]
       }
     ]
   }
+
 }

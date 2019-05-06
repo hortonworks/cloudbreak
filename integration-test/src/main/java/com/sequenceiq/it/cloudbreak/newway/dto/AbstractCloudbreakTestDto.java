@@ -193,6 +193,10 @@ public abstract class AbstractCloudbreakTestDto<R, S, T extends CloudbreakTestDt
         return await(entityClass, statuses, emptyRunningParameter());
     }
 
+    public T await(Class<T> entityClass, Map<String, Status> statuses, long pollingInteval) {
+        return testContext.await(entityClass, statuses, emptyRunningParameter(), pollingInteval);
+    }
+
     public T await(Class<T> entityClass, Map<String, Status> statuses, RunningParameter runningParameter) {
         return testContext.await(entityClass, statuses, runningParameter);
     }

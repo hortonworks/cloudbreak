@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurat
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class CmTemplateProcessor implements BlueprintTextProcessor {
+
     private final ApiClusterTemplate cmTemplate;
 
     public CmTemplateProcessor(@Nonnull String cmTemplateText) {
@@ -63,6 +64,12 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     @Override
     public BlueprintTextProcessor addComponentToHostgroups(String component, Predicate<String> addToHostgroup) {
         throw new NotImplementedException("");
+    }
+
+    @Override
+    public boolean isComponentExistsInHostGroup(String component, String hostGroup) {
+        Set<String> componentsInHostGroup = getComponentsInHostGroup(hostGroup);
+        return componentsInHostGroup.stream().anyMatch(component::equals);
     }
 
     @Override
@@ -91,8 +98,20 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     }
 
     @Override
-    public Set<String> getComponentsInHostGroup(String name) {
-        throw new NotImplementedException("");
+    public Set<String> getComponentsInHostGroup(String hostGroup) {
+        Set<String> roleConfigRefNamesInHostTemplate = cmTemplate.getHostTemplates().stream()
+                .filter(hostTemplate -> hostTemplate.getRefName().equals(hostGroup))
+                .map(ApiClusterTemplateHostTemplate::getRoleConfigGroupsRefNames)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+
+        return cmTemplate.getServices().stream()
+                .map(ApiClusterTemplateService::getRoleConfigGroups)
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .filter(roleConfigGroup -> roleConfigRefNamesInHostTemplate.contains(roleConfigGroup.getRefName()))
+                .map(ApiClusterTemplateRoleConfigGroup::getRoleType)
+                .collect(Collectors.toSet());
     }
 
     @Override
@@ -225,4 +244,17 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     public void setCdhVersion(String cdhVersion) {
         cmTemplate.setCdhVersion(cdhVersion);
     }
+
+    public void setDisplayName(String displayName) {
+        cmTemplate.setDisplayName(displayName);
+    }
+
+    public void setHostTemplates(List<ApiClusterTemplateHostTemplate> hostTemplates) {
+        cmTemplate.setHostTemplates(hostTemplates);
+    }
+
+    public void setServices(List<ApiClusterTemplateService> services) {
+        cmTemplate.setServices(services);
+    }
+
 }

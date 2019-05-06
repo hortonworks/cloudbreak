@@ -1,0 +1,19 @@
+{
+  "services": [
+    "OOZIE",
+    "HDFS",
+    "HIVE",
+    "ZOOKEEPER",
+    "HBASE",
+    "YARN",
+    "SPARK_ON_YARN",
+    "IMPALA",
+    "KAFKA",
+    "FLUME",
+    "SOLR",
+    "KUDU",
+    "SQOOP"
+  ],
+  "version": "6.1.1",
+  "stackType": "CDH"
+}

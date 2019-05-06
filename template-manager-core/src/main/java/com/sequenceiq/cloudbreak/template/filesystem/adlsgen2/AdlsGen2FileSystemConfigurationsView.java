@@ -13,6 +13,8 @@ public class AdlsGen2FileSystemConfigurationsView extends BaseFileSystemConfigur
 
     private String accountKey;
 
+    private boolean secure;
+
     private String storageContainerName;
 
     private String storageContainer;
@@ -23,6 +25,7 @@ public class AdlsGen2FileSystemConfigurationsView extends BaseFileSystemConfigur
         accountKey = adlsGen2FileSystem.getAccountKey();
         storageContainerName = adlsGen2FileSystem.getStorageContainerName();
         storageContainer = adlsGen2FileSystem.getStorageContainer();
+        secure = adlsGen2FileSystem.isSecure();
     }
 
     public String getAccountName() {
@@ -62,5 +65,13 @@ public class AdlsGen2FileSystemConfigurationsView extends BaseFileSystemConfigur
     @Override
     public String getType() {
         return FileSystemType.ADLS_GEN_2.name();
+    }
+
+    public boolean isSecure() {
+        return secure;
+    }
+
+    public void setSecure(boolean secure) {
+        this.secure = secure;
     }
 }

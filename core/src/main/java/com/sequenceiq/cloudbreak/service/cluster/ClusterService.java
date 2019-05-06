@@ -1025,7 +1025,10 @@ public class ClusterService {
         if (scalingAdjustment == 0) {
             throw new BadRequestException("No scaling adjustments specified. Nothing to do.");
         }
-        ambariBlueprintValidator.validateHostGroupScalingRequest(stack.getCluster().getBlueprint(), hostGroup, scalingAdjustment);
+        Blueprint clusterDefinition = stack.getCluster().getBlueprint();
+        if (blueprintService.isAmbariBlueprint(clusterDefinition)) {
+            ambariBlueprintValidator.validateHostGroupScalingRequest(stack.getCluster().getBlueprint(), hostGroup, scalingAdjustment);
+        }
         if (!downScale && hostGroup.getConstraint().getInstanceGroup() != null) {
             validateUnusedHosts(hostGroup.getConstraint().getInstanceGroup(), scalingAdjustment);
         } else {

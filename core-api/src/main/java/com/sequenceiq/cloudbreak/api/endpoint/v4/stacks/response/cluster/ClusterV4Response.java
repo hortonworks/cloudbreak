@@ -99,11 +99,11 @@ public class ClusterV4Response implements JsonEntity {
     @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
     private WorkspaceResourceV4Response workspace;
 
-    @ApiModelProperty(StackModelDescription.DP_AMBARI_USERNAME)
-    private SecretV4Response dpUser;
+    @ApiModelProperty(StackModelDescription.CM_MANAGEMENT_USERNAME)
+    private SecretV4Response cmMgmtUser;
 
-    @ApiModelProperty(StackModelDescription.DP_AMBARI_PASSWORD)
-    private SecretV4Response dpPassword;
+    @ApiModelProperty(StackModelDescription.CM_MANAGEMENT_PASSWORD)
+    private SecretV4Response cmMgmtPassword;
 
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT)
     private BlueprintV4Response blueprint;
@@ -247,20 +247,20 @@ public class ClusterV4Response implements JsonEntity {
         this.uptime = uptime;
     }
 
-    public SecretV4Response getDpUser() {
-        return dpUser;
+    public SecretV4Response getCmMgmtUser() {
+        return cmMgmtUser;
     }
 
-    public void setDpUser(SecretV4Response dpUser) {
-        this.dpUser = dpUser;
+    public void setCmMgmtUser(SecretV4Response cmMgmtUser) {
+        this.cmMgmtUser = cmMgmtUser;
     }
 
-    public SecretV4Response getDpPassword() {
-        return dpPassword;
+    public SecretV4Response getCmMgmtPassword() {
+        return cmMgmtPassword;
     }
 
-    public void setDpPassword(SecretV4Response dpPassword) {
-        this.dpPassword = dpPassword;
+    public void setCmMgmtPassword(SecretV4Response cmMgmtPassword) {
+        this.cmMgmtPassword = cmMgmtPassword;
     }
 
     public WorkspaceResourceV4Response getWorkspace() {

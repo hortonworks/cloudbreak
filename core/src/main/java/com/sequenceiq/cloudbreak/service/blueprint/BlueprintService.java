@@ -26,21 +26,19 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
-import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
-import com.sequenceiq.cloudbreak.repository.BlueprintViewRepository;
 import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -48,7 +46,6 @@ import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
-import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
 public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blueprint> {
@@ -62,9 +59,6 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     @Inject
     private BlueprintRepository blueprintRepository;
-
-    @Inject
-    private BlueprintViewRepository blueprintViewRepository;
 
     @Inject
     private BlueprintUtils blueprintUtils;
@@ -129,27 +123,14 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         return getAllAvailableInWorkspace(workspace);
     }
 
-    public Set<BlueprintView> getAllAvailableViewInWorkspace(Long workspaceId) {
+    public Set<Blueprint> getAllAvailableViewInWorkspace(Long workspaceId) {
         User user = getLoggedInUser();
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
-        Set<Blueprint> blueprints = blueprintRepository.findAllByWorkspaceIdAndStatus(workspace.getId(), ResourceStatus.DEFAULT);
-        if (blueprintLoaderService.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints)) {
-            LOGGER.debug("Modifying blueprints based on the defaults for the '{}' workspace.", workspace.getId());
-            blueprintLoaderService.loadClusterDEfinitionsForTheWorkspace(blueprints, workspace, this::saveDefaultsWithReadRight);
-            LOGGER.debug("Cluster definition modifications finished based on the defaults for '{}' workspace.", workspace.getId());
-        }
-        return blueprintViewRepository.findAllByNotDeletedInWorkspace(workspace.getId());
+        return getUpdatedDefaultBlueprintCollection(workspace);
     }
 
     public Set<Blueprint> getAllAvailableInWorkspace(Workspace workspace) {
-        Set<Blueprint> blueprints = blueprintRepository.findAllByNotDeletedInWorkspace(workspace.getId());
-        if (blueprintLoaderService.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints)) {
-            LOGGER.debug("Modifying blueprints based on the defaults for the '{}' workspace.", workspace.getId());
-            blueprints = blueprintLoaderService.loadClusterDEfinitionsForTheWorkspace(blueprints, workspace,
-                    this::saveDefaultsWithReadRight);
-            LOGGER.debug("Cluster definition modifications finished based on the defaults for '{}' workspace.", workspace.getId());
-        }
-        return blueprints;
+        return getUpdatedDefaultBlueprintCollection(workspace);
     }
 
     public Blueprint getByNameForWorkspaceAndLoadDefaultsIfNecessary(String name, Workspace workspace) {
@@ -158,12 +139,9 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         if (blueprint.isPresent()) {
             return blueprint.get();
         } else {
-            if (blueprintLoaderService.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints)) {
-                LOGGER.debug("Modifying blueprints based on the defaults for the '{}' workspace.", workspace.getId());
-                blueprints = blueprintLoaderService.loadClusterDEfinitionsForTheWorkspace(blueprints, workspace,
-                        this::saveDefaultsWithReadRight);
-                LOGGER.debug("Cluster definition modifications finished based on the defaults for '{}' workspace.", workspace.getId());
-                blueprint = filterBlueprintsByName(name, blueprints);
+            Set<Blueprint> updatedBlueprints = getUpdatedDefaultBlueprintCollection(workspace);
+            if (!updatedBlueprints.isEmpty()) {
+                blueprint = filterBlueprintsByName(name, updatedBlueprints);
                 if (blueprint.isPresent()) {
                     return blueprint.get();
                 }
@@ -172,18 +150,27 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         throw new NotFoundException(String.format("No %s found with name '%s'", resource().getShortName(), name));
     }
 
-    private Optional<Blueprint> filterBlueprintsByName(String name, Collection<Blueprint> blueprints) {
-        return blueprints.stream().filter(blueprint -> name.equals(blueprint.getName())).findFirst();
+    public void getUpdatedDefaultBlueprintCollection(Long workspaceId) {
+        User user = getLoggedInUser();
+        Workspace workspace = getWorkspaceService().get(workspaceId, user);
+        getUpdatedDefaultBlueprintCollection(workspace);
     }
 
-    public void updateDefaultBlueprints(Long workspaceId) {
-        Set<Blueprint> blueprints = blueprintRepository.findAllByWorkspaceIdAndStatus(workspaceId, ResourceStatus.DEFAULT);
-        if (blueprintLoaderService.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints)) {
-            LOGGER.debug("Modifying blueprints based on the defaults for the '{}' workspace.", workspaceId);
-            blueprintLoaderService.loadClusterDEfinitionsForTheWorkspace(blueprints, getWorkspaceService().getByIdForCurrentUser(workspaceId),
-                    this::saveDefaultsWithReadRight);
-            LOGGER.debug("Cluster definition modifications finished based on the defaults for '{}' workspace.", workspaceId);
+    private Set<Blueprint> getUpdatedDefaultBlueprintCollection(Workspace workspace) {
+        Set<Blueprint> blueprintsInDatabase =
+                blueprintRepository.findAllByWorkspaceIdAndStatusIn(workspace.getId(), Set.of(ResourceStatus.DEFAULT, ResourceStatus.DEFAULT_DELETED));
+        if (!blueprintLoaderService.isAddingDefaultBlueprintsNecessaryForTheUser(blueprintsInDatabase)) {
+            return blueprintsInDatabase.stream().filter(bp -> ResourceStatus.DEFAULT.equals(bp.getStatus())).collect(Collectors.toSet());
         }
+        LOGGER.debug("Modifying blueprints based on the defaults for the '{}' workspace.", workspace.getId());
+        Set<Blueprint> updatedBlueprints =
+                blueprintLoaderService.loadBlueprintsForTheWorkspace(blueprintsInDatabase, workspace, this::saveDefaultsWithReadRight);
+        LOGGER.debug("Cluster definition modifications finished based on the defaults for '{}' workspace.", workspace.getId());
+        return updatedBlueprints;
+    }
+
+    private Optional<Blueprint> filterBlueprintsByName(String name, Collection<Blueprint> blueprints) {
+        return blueprints.stream().filter(blueprint -> name.equals(blueprint.getName())).findFirst();
     }
 
     public boolean isDatalakeBlueprint(Blueprint blueprint) {
@@ -218,7 +205,6 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         if (ResourceStatus.USER_MANAGED.equals(blueprint.getStatus())) {
             blueprintRepository.delete(blueprint);
         } else {
-            blueprint.setName(NameUtil.postfixWithTimestamp(blueprint.getName()));
             blueprint.setStatus(ResourceStatus.DEFAULT_DELETED);
             blueprint = blueprintRepository.save(blueprint);
         }
@@ -285,7 +271,8 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     public Set<ConfigQueryEntry> queryFileSystemParameters(String blueprintName, String clusterName,
-            String storageName, String fileSystemType, String accountName, boolean attachedCluster, Long workspaceId) {
+            String storageName, String fileSystemType, String accountName, boolean attachedCluster,
+            boolean secure, Long workspaceId) {
         User user = getLoggedInUser();
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
         Blueprint blueprint = getByNameForWorkspace(blueprintName, workspace);
@@ -301,6 +288,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                 .withAccountName(accountName)
                 .withAttachedCluster(attachedCluster)
                 .withDatalakeCluster(datalake)
+                .withSecure(secure)
                 .build();
 
         return centralBlueprintParameterQueryService.queryFileSystemParameters(fileSystemConfigQueryObject);

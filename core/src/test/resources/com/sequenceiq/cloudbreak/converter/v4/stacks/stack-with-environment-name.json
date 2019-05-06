@@ -1,0 +1,26 @@
+{
+  "name": "mystack",
+  "image": {
+    "catalog": "aws-catalog",
+    "id": "aws-image"
+  },
+  "placement": {
+    "availabilityZone": "avZone",
+    "region": "eu-west-1"
+  },
+  "environment": {
+    "credentialName": "cred",
+    "name": "environment"
+  },
+  "authentication": {
+    "publicKey": "ssh-key dsfsdfsdfsdf"
+  },
+  "instanceGroups": [],
+  "cluster": {
+
+  },
+  "tags": {
+
+  },
+  "cloudPlatform": "AWS"
+}

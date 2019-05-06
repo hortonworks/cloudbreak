@@ -17,8 +17,13 @@ import com.sequenceiq.cloudbreak.service.EntityType;
 @Transactional(TxType.REQUIRED)
 @HasPermission
 public interface UserProfileRepository extends BaseRepository<UserProfile, Long> {
-
-    @Query("SELECT b FROM UserProfile b LEFT JOIN FETCH b.user WHERE b.user.id= :userId")
+    @Query("SELECT b FROM UserProfile b "
+            + "LEFT JOIN FETCH b.user u "
+            + "LEFT JOIN FETCH u.tenant "
+            + "LEFT JOIN FETCH u.userPreferences "
+            + "LEFT JOIN FETCH b.defaultCredentials dc "
+            + "LEFT JOIN FETCH dc.workspace "
+            + "WHERE u.id= :userId")
     Optional<UserProfile> findOneByUser(@Param("userId") Long userId);
 
     @Query("SELECT b FROM UserProfile b JOIN b.defaultCredentials c WHERE c.id = :credentialId")
@@ -26,5 +31,4 @@ public interface UserProfileRepository extends BaseRepository<UserProfile, Long>
 
     @Query("SELECT b FROM UserProfile b WHERE b.imageCatalog.id = :catalogId")
     Set<UserProfile> findOneByImageCatalogName(@Param("catalogId") Long catalogId);
-
 }

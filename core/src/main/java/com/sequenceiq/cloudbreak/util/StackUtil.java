@@ -61,6 +61,20 @@ public class StackUtil {
         return agents;
     }
 
+    public Set<Node> collectNodesFromHostnames(Stack stack, Set<String> hostnames) {
+        Set<Node> agents = new HashSet<>();
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            if (instanceGroup.getNodeCount() != 0) {
+                for (InstanceMetaData im : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
+                    if (im.getDiscoveryFQDN() != null && hostnames.contains(im.getDiscoveryFQDN())) {
+                        agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), im.getDiscoveryFQDN(), im.getInstanceGroupName()));
+                    }
+                }
+            }
+        }
+        return agents;
+    }
+
     public Set<Node> collectNodesWithDiskData(Stack stack) {
         Set<Node> agents = new HashSet<>();
         List<Resource> volumeSets = stack.getDiskResources();

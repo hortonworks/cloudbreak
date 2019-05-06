@@ -14,6 +14,7 @@ public class AdlsGen2CloudStorageParametersV4ToCloudAdlsGen2ViewConverter
         CloudAdlsGen2View cloudAdlsGen2View = new CloudAdlsGen2View();
         cloudAdlsGen2View.setAccountKey(source.getAccountKey());
         cloudAdlsGen2View.setAccountName(source.getAccountName());
+        cloudAdlsGen2View.setSecure(source.isSecure());
         return cloudAdlsGen2View;
     }
 }

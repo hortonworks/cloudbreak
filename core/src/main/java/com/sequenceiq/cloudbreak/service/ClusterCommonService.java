@@ -21,8 +21,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4R
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.HostGroupDecorator;
 import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
@@ -68,6 +69,9 @@ public class ClusterCommonService {
 
     @Inject
     private CloudbreakMessagesService messagesService;
+
+    @Inject
+    private BlueprintService blueprintService;
 
     public void put(Long stackId, UpdateClusterV4Request updateJson, User user, Workspace workspace) {
         Stack stack = stackService.getById(stackId);
@@ -127,8 +131,10 @@ public class ClusterCommonService {
             throw new BadRequestException(String.format("Host group '%s' not found or not member of the cluster '%s'",
                     updateJson.getHostGroupAdjustment().getHostGroup(), stack.getName()));
         }
-        ambariBlueprintValidator.validateHostGroupScalingRequest(blueprint, hostGroup.get(),
-                updateJson.getHostGroupAdjustment().getScalingAdjustment());
+        if (blueprintService.isAmbariBlueprint(blueprint)) {
+            ambariBlueprintValidator.validateHostGroupScalingRequest(blueprint, hostGroup.get(),
+                    updateJson.getHostGroupAdjustment().getScalingAdjustment());
+        }
         clusterService.updateHosts(stackId, updateJson.getHostGroupAdjustment());
     }
 

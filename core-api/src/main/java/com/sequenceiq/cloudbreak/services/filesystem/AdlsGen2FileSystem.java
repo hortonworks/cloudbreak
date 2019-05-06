@@ -18,6 +18,8 @@ public class AdlsGen2FileSystem extends BaseFileSystem {
 
     private String storageContainerName;
 
+    private boolean secure;
+
     public String getAccountKey() {
         return accountKey;
     }
@@ -42,22 +44,31 @@ public class AdlsGen2FileSystem extends BaseFileSystem {
         this.storageContainerName = storageContainerName;
     }
 
+    public boolean isSecure() {
+        return secure;
+    }
+
+    public void setSecure(boolean secure) {
+        this.secure = secure;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof AdlsGen2FileSystem)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
         AdlsGen2FileSystem that = (AdlsGen2FileSystem) o;
-        return Objects.equals(accountKey, that.accountKey)
+        return secure == that.secure
+                && Objects.equals(accountKey, that.accountKey)
                 && Objects.equals(accountName, that.accountName)
                 && Objects.equals(storageContainerName, that.storageContainerName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(accountKey, accountName, storageContainerName);
+        return Objects.hash(accountKey, accountName, storageContainerName, secure);
     }
 }

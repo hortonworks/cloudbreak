@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.Network;
@@ -97,6 +98,9 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     @Inject
     private Clock clock;
 
+    @Inject
+    private Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap;
+
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
 
@@ -129,10 +133,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setCreated(clock.getCurrentTimeMillis());
         stack.setInstanceGroups(convertInstanceGroups(source, stack));
         updateCluster(source, stack, workspace);
-        if (source.getNetwork() != null) {
-            source.getNetwork().setCloudPlatform(source.getCloudPlatform());
-            stack.setNetwork(getConversionService().convert(source.getNetwork(), Network.class));
-        }
+        setNetworkIfApplicable(source, stack);
         if (source.getCustomDomain() != null) {
             stack.setCustomDomain(source.getCustomDomain().getDomainName());
             stack.setCustomHostname(source.getCustomDomain().getHostname());
@@ -329,5 +330,21 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         ImageSettingsV4Request imageSettings = source.getImage();
         Image image = new Image(null, null, imageSettings.getOs(), null, null, imageSettings.getCatalog(), imageSettings.getId(), null);
         return new com.sequenceiq.cloudbreak.domain.stack.Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), Json.silent(image), stack);
+    }
+
+    private void setNetworkIfApplicable(StackV4Request source, Stack stack) {
+        if (source.getNetwork() != null) {
+            source.getNetwork().setCloudPlatform(source.getCloudPlatform());
+            stack.setNetwork(getConversionService().convert(source.getNetwork(), Network.class));
+        } else {
+            EnvironmentView environment = stack.getEnvironment();
+            if (environment != null && environment.getNetwork() != null) {
+                EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(source.getCloudPlatform());
+                if (environmentNetworkConverter != null) {
+                    Network network = environmentNetworkConverter.convertToLegacyNetwork(environment.getNetwork());
+                    stack.setNetwork(network);
+                }
+            }
+        }
     }
 }

@@ -24,7 +24,7 @@ public class WasbCloudStorageParametersToCloudWasbViewConverterTest {
     @Test
     public void testConvertWhenPassingWasbCloudStorageParametersThenEveryNecessaryParametersShouldBePassed() {
         CloudWasbView expected = new CloudWasbView();
-        expected.setSecure(false);
+        expected.setSecure(true);
         expected.setAccountKey(ACCOUNT_KEY);
         expected.setAccountName(ACCOUNT_NAME);
         expected.setResourceGroupName(null);

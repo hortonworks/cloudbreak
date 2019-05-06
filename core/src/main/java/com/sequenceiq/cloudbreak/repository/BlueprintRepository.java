@@ -31,7 +31,7 @@ public interface BlueprintRepository extends WorkspaceResourceRepository<Bluepri
     Set<Blueprint> findAllByNotDeletedInWorkspace(@Param("workspaceId") Long workspaceId);
 
     @CheckPermissionsByReturnValue
-    Set<Blueprint> findAllByWorkspaceIdAndStatus(Long workspaceId, ResourceStatus status);
+    Set<Blueprint> findAllByWorkspaceIdAndStatusIn(Long workspaceId, Set<ResourceStatus> statuses);
 
     @Override
     @DisableHasPermission
