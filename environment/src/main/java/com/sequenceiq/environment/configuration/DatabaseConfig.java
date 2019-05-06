@@ -1,11 +1,13 @@
-package com.sequenceiq.environment.config;
+package com.sequenceiq.environment.configuration;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Properties;
 
 import javax.inject.Inject;
@@ -14,10 +16,12 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
+import org.postgresql.Driver;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -26,14 +30,15 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import com.sequenceiq.environment.config.ha.EnvironmentNodeConfig;
-import com.sequenceiq.environment.util.DatabaseUtil;
+import com.sequenceiq.environment.configuration.ha.EnvironmentNodeConfig;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
 @EnableTransactionManagement
 public class DatabaseConfig {
+
+    private static final String DEFAULT_SCHEMA_NAME = "public";
 
     @Value("${environment.db.env.user:}")
     private String dbUser;
@@ -56,7 +61,7 @@ public class DatabaseConfig {
     @Value("${environment.db.env.idletimeout:10}")
     private long idleTimeout;
 
-    @Value("${environment.db.env.schema:" + DatabaseUtil.DEFAULT_SCHEMA_NAME + '}')
+    @Value("${environment.db.env.schema:" + DEFAULT_SCHEMA_NAME + '}')
     private String dbSchemaName;
 
     @Value("${environment.db.env.ssl:}")
@@ -65,7 +70,7 @@ public class DatabaseConfig {
     @Value("#{'${environment.cert.dir:}/${environment.db.env.cert.file:}'}")
     private String certFile;
 
-    @Value("${environment.hbm2denvironment.strategy:validate}")
+    @Value("${environment.hbm2d.strategy:validate}")
     private String hbm2ddlStrategy;
 
     @Value("${environment.hibernate.debug:false}")
@@ -80,7 +85,7 @@ public class DatabaseConfig {
 
     @Bean
     public DataSource dataSource() throws SQLException {
-        DatabaseUtil.createSchemaIfNeeded("postgresql", databaseAddress, dbName, dbUser, dbPassword, dbSchemaName);
+        createSchemaIfNeeded("postgresql", databaseAddress, dbName, dbUser, dbPassword, dbSchemaName);
         HikariConfig config = new HikariConfig();
         if (ssl && Files.exists(Paths.get(certFile))) {
             config.addDataSourceProperty("ssl", "true");
@@ -118,7 +123,7 @@ public class DatabaseConfig {
     public EntityManagerFactory entityManagerFactory() throws SQLException {
         LocalContainerEntityManagerFactoryBean entityManagerFactory = new LocalContainerEntityManagerFactoryBean();
 
-        entityManagerFactory.setPackagesToScan("com.sequenceiq.environment.domain");
+        entityManagerFactory.setPackagesToScan("com.sequenceiq.environment", "com.sequenceiq.cloudbreak.repository");
         entityManagerFactory.setDataSource(dataSource());
 
         entityManagerFactory.setJpaVendorAdapter(jpaVendorAdapter());
@@ -133,6 +138,18 @@ public class DatabaseConfig {
         hibernateJpaVendorAdapter.setShowSql(true);
         hibernateJpaVendorAdapter.setDatabase(Database.POSTGRESQL);
         return hibernateJpaVendorAdapter;
+    }
+
+    private void createSchemaIfNeeded(String dbType, String dbAddress, String dbName, String dbUser, String dbPassword, String dbSchema)
+            throws SQLException {
+        if (!DEFAULT_SCHEMA_NAME.equals(dbSchema)) {
+            SimpleDriverDataSource ds = new SimpleDriverDataSource();
+            ds.setDriverClass(Driver.class);
+            ds.setUrl(String.format("jdbc:%s://%s/%s", dbType, dbAddress, dbName));
+            try (Connection conn = ds.getConnection(dbUser, dbPassword); Statement statement = conn.createStatement()) {
+                statement.execute("CREATE SCHEMA IF NOT EXISTS " + dbSchema);
+            }
+        }
     }
 
     private Properties jpaProperties() {

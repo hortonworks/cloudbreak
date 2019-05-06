@@ -23,14 +23,21 @@ management:
       percentiles:
         "[http.server.requests]": "0.5, 0.95"
 
+altus:
+  ums:
+    host: localhost
+
 environment:
   cert.dir: /certs/
   client.id: environment
   structuredevent:
     rest:
       enabled: false
+  cloudbreak:
+    url: "localhost:9091"
   db:
-    port.5432.tcp.port: 5432
+    host: localhost
+    port: 5432
     env:
       user: postgres
       pass:

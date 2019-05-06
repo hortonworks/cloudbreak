@@ -1,9 +1,7 @@
-package com.sequenceiq.environment.config;
+package com.sequenceiq.environment.configuration;
 
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.ext.ExceptionMapper;
 
@@ -12,8 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 
-import com.sequenceiq.environment.api.controller.EnvironmentController;
-import com.sequenceiq.environment.api.model.EnvironmentApi;
+import com.sequenceiq.environment.env.api.EnvironmentController;
+import com.sequenceiq.environment.env.api.model.EnvironmentApi;
 import com.sequenceiq.environment.exception.mapper.DefaultExceptionMapper;
 import com.sequenceiq.environment.exception.mapper.WebApplicaitonExceptionMapper;
 
@@ -29,27 +27,24 @@ public class EndpointConfig extends ResourceConfig {
 
     private static final String VERSION_UNAVAILABLE = "unspecified";
 
-    @Value("${info.app.version:}")
-    private String applicationVersion;
+    private final String applicationVersion;
 
-    @Value("${environment.structuredevent.rest.enabled:false}")
-    private Boolean auditEnabled;
+    private final Boolean auditEnabled;
 
-    @Inject
-    private List<ExceptionMapper<?>> exceptionMappers;
+    private final List<ExceptionMapper<?>> exceptionMappers;
 
-    @PostConstruct
-    private void init() {
-        /* TODO Add StructuredEventFilter, preferably as a library
-            if (auditEnabled) {
-                register(StructuredEventFilter.class);
-            }
-         */
+    public EndpointConfig(@Value("${info.app.version:}") String applicationVersion,
+            @Value("${environment.structuredevent.rest.enabled:false}") Boolean auditEnabled,
+            List<ExceptionMapper<?>> exceptionMappers) {
+
+        this.applicationVersion = applicationVersion;
+        this.auditEnabled = auditEnabled;
+        this.exceptionMappers = exceptionMappers;
         registerEndpoints();
         registerExceptionMappers();
+        registerSwagger();
     }
 
-    @PostConstruct
     private void registerSwagger() {
         BeanConfig swaggerConfig = new BeanConfig();
         swaggerConfig.setTitle("Environment API");

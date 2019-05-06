@@ -14,7 +14,7 @@ import javax.ws.rs.ext.ExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.environment.api.model.ExceptionResponse;
+import com.sequenceiq.environment.env.api.model.ExceptionResponse;
 
 import ch.qos.logback.classic.Level;
 
@@ -33,12 +33,10 @@ abstract class BaseExceptionMapper<T extends Throwable> implements ExceptionMapp
                 case WARN_INT:
                     LOGGER.warn(errorMessage, exception);
                     break;
-                case INFO_INT:
-                    LOGGER.info(errorMessage, exception);
-                    break;
                 case DEBUG_INT:
                     LOGGER.debug(errorMessage, exception);
                     break;
+                case INFO_INT:
                 default:
                     LOGGER.info(errorMessage, exception);
                     break;

@@ -1,10 +1,9 @@
 package com.sequenceiq.environment.exception.mapper;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
-
-import com.sequenceiq.environment.exception.request.BadRequestException;
 
 @Component
 public class SpringBadRequestExceptionMapper extends BaseExceptionMapper<BadRequestException> {

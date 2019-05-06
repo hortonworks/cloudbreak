@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.api.model;
+package com.sequenceiq.environment.env.api.model;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
