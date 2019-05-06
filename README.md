@@ -37,14 +37,14 @@ Please note that the full path needs to be configured and env variables like $US
 export ULU_SUBSCRIBE_TO_NOTIFICATIONS=true
 export CB_INSTANCE_UUID=$(uuidgen | tr '[:upper:]' '[:lower:]')
 export CB_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/core/src/main/resources/schema
+export ENVIRONMENT_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/environment/src/main/resources/schema
 export UAA_DEFAULT_USER_PW=YOUR_PASSWORD
 export VAULT_AUTO_UNSEAL=true
 ```
 
-In order to run Cloudbreak, Periscope and Datalake from IDEA, put this into your Profile:
-
+In order to run Cloudbreak, Periscope, Datalake, Environment from IDEA, put this into your Profile:
 ```
-export CB_LOCAL_DEV_LIST=cloudbreak,periscope,datalake
+export CB_LOCAL_DEV_LIST=cloudbreak,periscope,datalake,environment
 ```
 
 Cloudbreak, Periscope and Datalake containers won't be started and Uluwatu will connect to java processes running on your host.
@@ -63,13 +63,16 @@ cbd migrate cbdb pending
 ```
 
 
-For some reason if you encounter a similar problem with Periscope or Datalake, then run the following commands and you can restart the Cloudbreak Deployer:
+For some reason if you encounter a similar problem with Periscope, Datalake or Environment, then run the following commands and you can restart the Cloudbreak Deployer:
 ```
 cbd migrate periscopedb up
 cbd migrate periscopedb pending
 
 cbd migrate datalakedb up
 cbd migrate datalakedb pending
+
+cbd migrate environmentdb up
+cbd migrate environmentdb pending
 ```
 You can track the Periscope's logs to check the results by executing the following command:
 ```
@@ -195,6 +198,19 @@ After having imported cloudbreak repo root you can launch Datalake application b
 -Ddatalake.cloudbreak.url=http://localhost:8080
 ````
 
+### Running environment service in IDEA
+
+After having imported cloudbreak repo root you can launch Environment application by executing the com.sequenceiq.environment.EnvironmentApplication class with the following VM options:
+
+```
+-Denvironment.cloudbreak.url=http://localhost:9091
+-Denvironment.db.port.5432.tcp.addr=localhost
+-Denvironment.db.port.5432.tcp.port=5432
+-Dserver.port=8088
+-Dvault.addr=localhost
+-Dvault.root.token=<TOKEN_FROM_PROFILE_FILE>
+```
+
 ## Command line
 
 ### Cloudbreak
@@ -259,10 +275,21 @@ To run freeipa management service from command line you have to run the below gr
 -Dspring.config.location=$(pwd)/freeipa/src/main/resources/application.yml,$(pwd)/freeipa/build/resources/main/application.properties"
 ````
 
+### Environment
+To run environment service from command line you have to run the below gradle command with the following list of JVM parameters:
+
+ ````
+./gradlew :environment:bootRun -PjvmArgs="\
+-Denvironment.db.addr=localhost \
+-Dserver.port=8088 \
+-Dvault.addr=localhost \
+-Dvault.root.token=<TOKEN_FROM_PROFILE_FILE> \
+-Dspring.config.location=$(pwd)/environment/src/main/resources/application.yml,$(pwd)/environment/build/resources/main/application.properties"
+````
+
 ## Database development
 
-If any schema change is required in Cloudbreak database (cbdb), then the developer needs to write SQL scripts to migrate the database accordingly. The schema migration is managed by [MYBATIS Migrations](https://github.com/mybatis/migrations) in Cloudbreak and the cbd tool provides an easy-to-use wrapper for it. The syntax for using the migration commands is `cbd migrate <database name> <command> [parameters]` e.g. `cbd migrate migrate status`.
-
+If any schema change is required in Cloudbreak services databases (cbdb/environmentdb/datalakedb/redbeamsdb), then the developer needs to write SQL scripts to migrate the database accordingly. The schema migration is managed by [MYBATIS Migrations](https://github.com/mybatis/migrations) in Cloudbreak and the cbd tool provides an easy-to-use wrapper for it. The syntax for using the migration commands is `cbd migrate <database name> <command> [parameters]` e.g. `cbd migrate cbdb status`.
 Create a SQL template for schema changes:
 ```
 cbd migrate cbdb new "CLOUD-123 schema change for new feature"
@@ -279,19 +306,19 @@ As as result of the above command an SQL file template is generated under the pa
 ```
 Once you have implemented your SQLs then you can execute them with:
 ```
-cbd migrate cbdb up
+cbd migrate <database-name> up
 ```
 Make sure pending SQLs to run as well:
 ```
-cbd migrate cbdb pending
+cbd migrate <database-name> pending
 ```
 If you would like to rollback the last SQL file, then just use the down command:
 ```
-cbd migrate cbdb down
+cbd migrate <database-name> down
 ```
 On order to check the status of database
 ```
-cbd migrate cbdb status
+cbd migrate <database-name> status
 
 #Every script that has not been executed will be marked as ...pending... in the output of status command:
 
