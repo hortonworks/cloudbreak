@@ -49,34 +49,4 @@ RSpec.describe 'Workspace test cases', :type => :aruba, :feature => "Workspaces"
       expect(MockHelper.getResponseDiff(expectedEndpointResponse, resultHash)).to be_truthy
     end
   end
-
-  it "Workspace - Create", :story => "Create Workspaces", :severity => :critical, :testId => 3 do
-    with_environment 'DEBUG' => '1' do
-      requestHash = MockHelper.getResponseHash("../../../requests/workspaces/workspaces.json")
-
-      expectedEndpointCall = TraceResponseBuilder.createWorkspaceRequestFactory(requestHash)
-
-      result = cb.workspace.create.name("integration-testing").description("test").build(false)
-
-      expect(result.exit_status).to eql 0
-      expect(result.stderr.to_s.downcase).not_to include("error")
-      expect(MockHelper.getRequestDiff(expectedEndpointCall)).to be_truthy
-    end
-  end
-
-  it "Workspace - Delete", :story => "Delete Workspaces", :severity => :critical, :testId => 4 do
-    with_environment 'DEBUG' => '1' do
-      responseHash = MockHelper.getResponseHash("../../../responses/workspaces/deleted-workspace.json")
-
-      expectedEndpointResponse = TraceResponseBuilder.deleteWorkspaceByNameResponseFactory(responseHash)
-      MockHelper.setupResponse("deleteWorkspaceByName", responseHash)
-
-      result = cb.workspace.delete.name("mock@hortonworks.com").build(false)
-      resultHash = MockHelper.getResultHash(result.output)
-
-      expect(result.exit_status).to eql 0
-      expect(result.stderr.to_s.downcase).not_to include("error")
-      expect(MockHelper.getResponseDiff(expectedEndpointResponse, resultHash)).to be_truthy
-    end
-  end
 end
