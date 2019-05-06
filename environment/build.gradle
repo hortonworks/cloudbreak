@@ -19,8 +19,6 @@ repositories {
 }
 
 dependencies {
-  compile project(':cloud-common')
-  
   compile     group: 'com.google.code.gson',      name: 'gson'
   compile     group: 'dnsjava',                   name: 'dnsjava'
   compile     group: 'io.micrometer',             name: 'micrometer-core'
