@@ -15,7 +15,6 @@ repositories {
   maven { url "https://cloudbreak-maven.s3.amazonaws.com/releases" }
   maven { url "https://repo.spring.io/release" }
   maven { url "https://plugins.gradle.org/m2/" }
-  maven { url "https://repository.cloudera.com/artifactory/cloudera-repos" }
 }
 
 dependencies {
@@ -75,7 +74,6 @@ dependencies {
   implementation project(':orchestrator-api')
   implementation project(':flow')
   runtime project(':orchestrator-salt')
-  runtime project(':cloud-reactor')
   runtime project(':cloud-openstack')
   runtime project(':cloud-gcp')
   runtime project(':cloud-aws')
