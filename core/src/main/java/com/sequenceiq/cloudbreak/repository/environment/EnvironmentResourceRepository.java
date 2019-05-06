@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.repository.environment;
 
-import static com.sequenceiq.cloudbreak.authorization.ResourceAction.READ;
+import static com.sequenceiq.cloudbreak.workspace.resource.ResourceAction.READ;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -11,11 +11,11 @@ import javax.transaction.Transactional.TxType;
 
 import org.springframework.data.repository.NoRepositoryBean;
 
-import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
-import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspaceId;
+import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
+import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByWorkspaceId;
 import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
-import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 
 @NoRepositoryBean
 @Transactional(TxType.REQUIRED)

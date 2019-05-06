@@ -33,14 +33,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.ChangeWorksp
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.authorization.UmsAuthorizationService;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceRole;
-import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceRepository;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class WorkspaceServiceTest {

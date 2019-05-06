@@ -12,12 +12,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.aspect.DisabledBaseRepository;
-import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByTargetId;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
+import com.sequenceiq.cloudbreak.workspace.repository.DisabledBaseRepository;
+import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByTargetId;
+import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
-import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
 
 @Component
 public class TargetIdPermissionChecker implements PermissionChecker<CheckPermissionsByTargetId> {

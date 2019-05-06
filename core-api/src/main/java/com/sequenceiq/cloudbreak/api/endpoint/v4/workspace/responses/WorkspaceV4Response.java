@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.WorkspaceApiStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.WorkspaceV4Base;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
@@ -17,7 +18,7 @@ public class WorkspaceV4Response extends WorkspaceV4Base {
 
     private Set<UserV4Response> users;
 
-    private WorkspaceStatus status;
+    private WorkspaceApiStatus status;
 
     @JsonProperty("id")
     public Long getId() {
@@ -36,11 +37,11 @@ public class WorkspaceV4Response extends WorkspaceV4Base {
         this.users = users;
     }
 
-    public WorkspaceStatus getStatus() {
+    public WorkspaceApiStatus getStatus() {
         return status;
     }
 
-    public void setStatus(WorkspaceStatus status) {
+    public void setStatus(WorkspaceApiStatus status) {
         this.status = status;
     }
 

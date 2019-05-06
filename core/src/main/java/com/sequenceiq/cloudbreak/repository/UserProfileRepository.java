@@ -9,9 +9,10 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.aspect.HasPermission;
+import com.sequenceiq.cloudbreak.workspace.repository.BaseRepository;
+import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
+import com.sequenceiq.cloudbreak.workspace.repository.HasPermission;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
-import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = UserProfile.class)
 @Transactional(TxType.REQUIRED)

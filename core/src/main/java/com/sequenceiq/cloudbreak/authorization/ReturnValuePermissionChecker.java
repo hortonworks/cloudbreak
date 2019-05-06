@@ -9,8 +9,10 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByReturnValue;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByReturnValue;
+import com.sequenceiq.cloudbreak.workspace.resource.ResourceAction;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @Component
 public class ReturnValuePermissionChecker implements PermissionChecker<CheckPermissionsByReturnValue> {

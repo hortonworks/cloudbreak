@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.domain.ArchivableResource;
-import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
+import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 
 public abstract class AbstractArchivistService<T extends WorkspaceAwareResource & ArchivableResource> extends AbstractWorkspaceAwareResourceService<T> {
 

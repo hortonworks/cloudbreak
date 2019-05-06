@@ -8,7 +8,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Where;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
-import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @Entity
 @Where(clause = "archived = false")

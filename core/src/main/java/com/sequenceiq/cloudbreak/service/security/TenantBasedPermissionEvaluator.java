@@ -15,11 +15,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.aspect.PermissionType;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
+import com.sequenceiq.cloudbreak.workspace.model.TenantAwareResource;
+import com.sequenceiq.cloudbreak.workspace.repository.PermissionType;
 import com.sequenceiq.cloudbreak.authorization.SpecialScopes;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
-import com.sequenceiq.cloudbreak.domain.workspace.TenantAwareResource;
 import com.sequenceiq.cloudbreak.security.authentication.AuthenticationService;
 
 @Service

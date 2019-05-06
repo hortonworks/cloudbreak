@@ -68,7 +68,7 @@ import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.service.TransactionExecutorService;
 import com.sequenceiq.cloudbreak.conf.VaultConfig;
 import com.sequenceiq.cloudbreak.security.authentication.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.service.CrudRepositoryLookupService;
+import com.sequenceiq.cloudbreak.workspace.util.CrudRepositoryLookupService;
 import com.sequenceiq.periscope.PeriscopeApplication;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.ClusterState;

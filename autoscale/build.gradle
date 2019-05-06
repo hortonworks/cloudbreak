@@ -148,6 +148,7 @@ dependencies {
     compile project(':core-api')
     compile project(':autoscale-api')
     compile project(':common')
+    compile project(':workspace-authorization')
 }
 
 task buildInfo(type: BuildInfoTask, dependsOn: processResources) {

@@ -5,10 +5,11 @@ import java.util.Set;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
-import com.sequenceiq.cloudbreak.aspect.HasPermission;
+import com.sequenceiq.cloudbreak.workspace.repository.BaseRepository;
+import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
+import com.sequenceiq.cloudbreak.workspace.repository.HasPermission;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.Topology;
-import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = Template.class)
 @Transactional(TxType.REQUIRED)

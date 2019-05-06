@@ -1,19 +1,19 @@
 package com.sequenceiq.cloudbreak.repository.environment;
 
-import static com.sequenceiq.cloudbreak.authorization.ResourceAction.READ;
+import static com.sequenceiq.cloudbreak.workspace.resource.ResourceAction.READ;
 
 import java.util.Set;
 
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
-import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
-import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspaceId;
-import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
-import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
+import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByWorkspaceId;
+import com.sequenceiq.cloudbreak.workspace.repository.check.WorkspaceResourceType;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
-import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.cloudbreak.service.EntityType;
+import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 
 @DisableHasPermission
 @EntityType(entityClass = Environment.class)
