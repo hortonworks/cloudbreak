@@ -31,17 +31,6 @@
       ]
     },
     {
-      "refName": "sqoop",
-      "serviceType": "SQOOP",
-      "roleConfigGroups": [
-        {
-          "refName": "sqoop-SQOOP_SERVER-BASE",
-          "roleType": "SQOOP_SERVER",
-          "base": true
-        }
-      ]
-    },
-    {
       "refName": "ranger",
       "serviceType": "RANGER",
       "roleConfigGroups": [

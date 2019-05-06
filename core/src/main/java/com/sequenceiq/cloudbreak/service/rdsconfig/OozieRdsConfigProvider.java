@@ -7,27 +7,28 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
 
 @Component
-public class RangerRdsConfigProvider extends AbstractRdsConfigProvider {
+public class OozieRdsConfigProvider extends AbstractRdsConfigProvider {
 
-    private static final String PILLAR_KEY = "ranger";
+    private static final String PILLAR_KEY = "oozie";
 
-    private static final String[] PATH = {AmbariBlueprintTextProcessor.CONFIGURATIONS_NODE, "admin-properties", "properties"};
+    private static final String[] PATH = {AmbariBlueprintTextProcessor.CONFIGURATIONS_NODE, "oozie-site"};
 
-    private static final String[] CONFIGURATIONS = {"db_user", "db_password", "db_name", "db_host"};
+    private static final String[] CONFIGURATIONS = {"oozie.service.JPAService.jdbc.driver", "oozie.service.JPAService.jdbc.url",
+            "oozie.service.JPAService.jdbc.username", "oozie.service.JPAService.jdbc.password"};
 
-    @Value("${cb.ranger.database.user:ranger}")
-    private String rangerDbUser;
+    @Value("${cb.oozie.database.user:oozie}")
+    private String oozieDbUser;
 
-    @Value("${cb.ranger.database.db:ranger}")
-    private String rangerDb;
+    @Value("${cb.oozie.database.db:oozie}")
+    private String oozieDb;
 
-    @Value("${cb.ranger.database.port:5432}")
-    private String rangerDbPort;
+    @Value("${cb.oozie.database.port:5432}")
+    private String oozieDbPort;
 
     @Inject
     private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
@@ -35,30 +36,30 @@ public class RangerRdsConfigProvider extends AbstractRdsConfigProvider {
     @Inject
     private BlueprintService blueprintService;
 
-    private boolean isRdsConfigNeedForRangerAdmin(Blueprint blueprint) {
+    private boolean isRdsConfigNeedForOozieServer(Blueprint blueprint) {
         String blueprintText = blueprint.getBlueprintText();
         AmbariBlueprintTextProcessor blueprintProcessor = ambariBlueprintProcessorFactory.get(blueprintText);
         if (blueprintService.isAmbariBlueprint(blueprint)) {
-            return blueprintProcessor.isComponentExistsInBlueprint("RANGER_ADMIN")
+            return blueprintProcessor.isComponentExistsInBlueprint("OOZIE_SERVER")
                     && !blueprintProcessor.isComponentExistsInBlueprint("MYSQL_SERVER")
                     && !blueprintProcessor.isAllConfigurationExistsInPathUnderConfigurationNode(createPathListFromConfigurations(PATH, CONFIGURATIONS));
         }
-        return blueprintProcessor.isCMComponentExistsInBlueprint("RANGER_ADMIN");
+        return blueprintProcessor.isCMComponentExistsInBlueprint("OOZIE_SERVER");
     }
 
     @Override
     protected String getDbUser() {
-        return rangerDbUser;
+        return oozieDbUser;
     }
 
     @Override
     protected String getDb() {
-        return rangerDb;
+        return oozieDb;
     }
 
     @Override
     protected String getDbPort() {
-        return rangerDbPort;
+        return oozieDbPort;
     }
 
     @Override
@@ -68,11 +69,11 @@ public class RangerRdsConfigProvider extends AbstractRdsConfigProvider {
 
     @Override
     protected DatabaseType getRdsType() {
-        return DatabaseType.RANGER;
+        return DatabaseType.OOZIE;
     }
 
     @Override
     protected boolean isRdsConfigNeeded(Blueprint blueprint) {
-        return isRdsConfigNeedForRangerAdmin(blueprint);
+        return isRdsConfigNeedForOozieServer(blueprint);
     }
 }
