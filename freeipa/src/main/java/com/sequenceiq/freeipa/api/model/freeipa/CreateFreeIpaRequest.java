@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.api.model.create;
+package com.sequenceiq.freeipa.api.model.freeipa;
 
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.PLACEMENT_SETTINGS;
 
@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.freeipa.api.model.credential.CredentialRequest;
-import com.sequenceiq.freeipa.api.model.freeipa.FreeIpaRequest;
 import com.sequenceiq.freeipa.api.model.instance.InstanceGroupV4Request;
 
 import io.swagger.annotations.ApiModel;

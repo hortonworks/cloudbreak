@@ -17,11 +17,14 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.freeipa.entity.json.Json;
 import com.sequenceiq.freeipa.entity.json.JsonToString;
 
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"environment", "name"}))
 public class Stack {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "stack_generator")
@@ -29,6 +32,8 @@ public class Stack {
     private Long id;
 
     private String name;
+
+    private String environment;
 
     private String region;
 
@@ -224,5 +229,13 @@ public class Stack {
         return instanceGroups.stream()
                 .flatMap(instanceGroup -> instanceGroup.getNotDeletedInstanceMetaDataSet().stream())
                 .collect(Collectors.toSet());
+    }
+
+    public String getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(String environment) {
+        this.environment = environment;
     }
 }

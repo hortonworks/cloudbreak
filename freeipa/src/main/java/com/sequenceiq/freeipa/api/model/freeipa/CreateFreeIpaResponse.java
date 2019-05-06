@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.api.model.create;
+package com.sequenceiq.freeipa.api.model.freeipa;
 
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.PLACEMENT_SETTINGS;
 

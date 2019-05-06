@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Reque
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
-import com.sequenceiq.freeipa.api.model.create.CreateFreeIpaRequest;
+import com.sequenceiq.freeipa.api.model.freeipa.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.converter.authentication.StackAuthenticationV4RequestToStackAuthenticationConverter;
 import com.sequenceiq.freeipa.converter.credential.CredentialV4RequestToCredentialConverter;
