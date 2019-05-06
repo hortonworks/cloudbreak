@@ -50,7 +50,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     @Override
     public ClusterTemplateViewV4Responses list(Long workspaceId) {
         try {
-            blueprintService.getUpdatedDefaultBlueprintCollection(workspaceId);
+            blueprintService.updateDefaultBlueprintCollection(workspaceId);
             clusterTemplateService.updateDefaultClusterTemplates(workspaceId);
             Set<ClusterTemplateViewV4Response> responses = transactionService.required(() ->
                     converterUtil.convertAllAsSet(clusterTemplateService.getAllAvailableViewInWorkspace(workspaceId), ClusterTemplateViewV4Response.class));
