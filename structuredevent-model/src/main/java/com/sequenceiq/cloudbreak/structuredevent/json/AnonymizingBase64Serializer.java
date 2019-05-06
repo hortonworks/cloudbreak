@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 
 public class AnonymizingBase64Serializer extends Base64Serializer {
     @Override
