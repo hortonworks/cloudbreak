@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
 public class WorkspaceToWorkspaceResourceV4ResponseConverter extends AbstractConversionServiceAwareConverter<Workspace, WorkspaceResourceV4Response> {

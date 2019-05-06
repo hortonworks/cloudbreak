@@ -22,7 +22,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Service
 public class ClusterTemplateLoaderService {

@@ -18,7 +18,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.environment.BaseNetwork;
 import com.sequenceiq.cloudbreak.domain.environment.Region;

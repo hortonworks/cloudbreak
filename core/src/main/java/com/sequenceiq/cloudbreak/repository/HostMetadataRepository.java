@@ -9,10 +9,10 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
-import com.sequenceiq.cloudbreak.aspect.DisabledBaseRepository;
+import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
+import com.sequenceiq.cloudbreak.workspace.repository.DisabledBaseRepository;
+import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
-import com.sequenceiq.cloudbreak.service.EntityType;
 
 @EntityType(entityClass = HostMetadata.class)
 @Transactional(TxType.REQUIRED)

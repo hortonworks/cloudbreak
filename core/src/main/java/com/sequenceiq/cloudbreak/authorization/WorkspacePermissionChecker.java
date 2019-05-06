@@ -11,9 +11,11 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspace;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByWorkspace;
+import com.sequenceiq.cloudbreak.workspace.resource.ResourceAction;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @Component
 public class WorkspacePermissionChecker implements PermissionChecker<CheckPermissionsByWorkspace> {

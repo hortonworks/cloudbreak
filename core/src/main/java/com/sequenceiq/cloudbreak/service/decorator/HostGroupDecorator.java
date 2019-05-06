@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Reque
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 
 @Component

@@ -23,14 +23,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByReturnValue;
-import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByTarget;
-import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByTargetId;
-import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspace;
-import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspaceId;
-import com.sequenceiq.cloudbreak.aspect.workspace.DisableCheckPermissions;
-import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByReturnValue;
+import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByTarget;
+import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByTargetId;
+import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByWorkspace;
+import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByWorkspaceId;
+import com.sequenceiq.cloudbreak.workspace.repository.check.DisableCheckPermissions;
+import com.sequenceiq.cloudbreak.workspace.repository.check.WorkspaceResourceType;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 

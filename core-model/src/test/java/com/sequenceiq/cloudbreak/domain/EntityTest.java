@@ -11,7 +11,7 @@ import org.junit.Test;
 import org.reflections.Reflections;
 
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
-import com.sequenceiq.cloudbreak.domain.workspace.TenantAwareResource;
+import com.sequenceiq.cloudbreak.workspace.model.TenantAwareResource;
 
 public class EntityTest {
     @Test

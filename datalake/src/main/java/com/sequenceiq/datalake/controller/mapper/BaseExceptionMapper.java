@@ -32,12 +32,10 @@ abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapp
                 case WARN_INT:
                     LOGGER.warn(errorMessage, exception);
                     break;
-                case INFO_INT:
-                    LOGGER.info(errorMessage, exception);
-                    break;
                 case DEBUG_INT:
                     LOGGER.debug(errorMessage, exception);
                     break;
+                case INFO_INT:
                 default:
                     LOGGER.info(errorMessage, exception);
                     break;

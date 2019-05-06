@@ -11,9 +11,9 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
-import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 
 @Entity
 public class SaltSecurityConfig implements ProvisionEntity, WorkspaceAwareResource {

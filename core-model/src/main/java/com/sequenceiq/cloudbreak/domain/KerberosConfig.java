@@ -22,10 +22,10 @@ import javax.persistence.SequenceGenerator;
 import org.hibernate.annotations.Where;
 
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
-import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 
 @Entity

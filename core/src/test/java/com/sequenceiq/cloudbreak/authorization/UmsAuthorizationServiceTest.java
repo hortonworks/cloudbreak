@@ -29,10 +29,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceRepository;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceRepository;
+import com.sequenceiq.cloudbreak.workspace.resource.ResourceAction;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UmsAuthorizationServiceTest {

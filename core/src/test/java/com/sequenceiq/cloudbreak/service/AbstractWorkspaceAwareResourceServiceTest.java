@@ -16,11 +16,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
-import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
+import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AbstractWorkspaceAwareResourceServiceTest {

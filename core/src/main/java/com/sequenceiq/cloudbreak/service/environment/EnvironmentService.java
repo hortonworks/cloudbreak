@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.environment;
 
-import static com.sequenceiq.cloudbreak.authorization.WorkspaceResource.ENVIRONMENT;
+import static com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource.ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -36,7 +36,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.LocationV4
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.RegisterDatalakeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
-import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
@@ -65,7 +65,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentRepository;
-import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.KubernetesConfigService;

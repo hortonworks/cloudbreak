@@ -10,13 +10,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.domain.workspace.UserPreferences;
-import com.sequenceiq.cloudbreak.repository.workspace.UserPreferencesRepository;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.UserPreferences;
+import com.sequenceiq.cloudbreak.workspace.repository.workspace.UserPreferencesRepository;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 
 @Service
 public class UserPreferencesService {

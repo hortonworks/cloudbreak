@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.structuredevent;
 
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventContainer;
 

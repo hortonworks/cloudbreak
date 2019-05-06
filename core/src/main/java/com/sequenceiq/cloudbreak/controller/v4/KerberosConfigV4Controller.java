@@ -9,6 +9,7 @@ import javax.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.KerberosConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
@@ -19,7 +20,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosView
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
-import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
 @Controller
 @Transactional(TxType.NEVER)

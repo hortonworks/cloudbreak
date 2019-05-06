@@ -1,10 +1,14 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
+import java.util.Set;
+
 import javax.inject.Inject;
 import javax.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
+import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.ManagementPackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.request.ManagementPackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.response.ManagementPackV4Response;
@@ -12,13 +16,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.response.ManagementPackV
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.mpack.ManagementPackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
-import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
-
-import java.util.Set;
 
 @Controller
 @WorkspaceEntityType(ManagementPack.class)

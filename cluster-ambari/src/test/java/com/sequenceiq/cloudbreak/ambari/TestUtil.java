@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.ChangeWorkspaceUsersV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceStatus;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
@@ -77,15 +76,16 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.structuredevent.event.LdapDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.LdapNotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.NotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.RdsDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.RdsNotificationDetails;
 import com.sequenceiq.cloudbreak.type.KerberosType;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.workspace.model.WorkspaceStatus;
 
 public class TestUtil {
 

@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.user.responses.UserEvictV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.workspace.model.User;
 
 @Component
 public class UserToUserEvictV4ResponseConverter extends AbstractConversionServiceAwareConverter<User, UserEvictV4Response> {

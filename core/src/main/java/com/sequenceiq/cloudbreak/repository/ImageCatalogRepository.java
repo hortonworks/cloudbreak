@@ -5,13 +5,13 @@ import java.util.Set;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
-import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
-import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByReturnValue;
-import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
-import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
+import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByReturnValue;
+import com.sequenceiq.cloudbreak.workspace.repository.check.WorkspaceResourceType;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
-import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.cloudbreak.service.EntityType;
+import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 
 @EntityType(entityClass = ImageCatalog.class)
 @Transactional(TxType.REQUIRED)

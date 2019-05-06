@@ -7,12 +7,14 @@ import org.springframework.boot.actuate.autoconfigure.metrics.web.servlet.WebMvc
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableAutoConfiguration(exclude = WebMvcMetricsAutoConfiguration.class)
 @EnableSwagger2
 @ComponentScan(basePackages = "com.sequenceiq.cloudbreak")
+@EnableJpaRepositories(basePackages = "com.sequenceiq.cloudbreak")
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public class CloudbreakApplication {
     public static void main(String[] args) {

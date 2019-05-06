@@ -6,8 +6,8 @@ import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.responses.UserProfileV4Response;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
-import com.sequenceiq.cloudbreak.domain.workspace.Tenant;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
+import com.sequenceiq.cloudbreak.workspace.model.User;
 
 public class UserProfileToUserProfileV4ResponseConverterTest {
 

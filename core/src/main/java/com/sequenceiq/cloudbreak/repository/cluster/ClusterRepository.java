@@ -12,18 +12,18 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.aspect.DisableHasPermission;
-import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByReturnValue;
-import com.sequenceiq.cloudbreak.aspect.workspace.CheckPermissionsByWorkspaceId;
-import com.sequenceiq.cloudbreak.aspect.workspace.DisableCheckPermissions;
-import com.sequenceiq.cloudbreak.aspect.workspace.WorkspaceResourceType;
-import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
+import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
+import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByReturnValue;
+import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByWorkspaceId;
+import com.sequenceiq.cloudbreak.workspace.repository.check.DisableCheckPermissions;
+import com.sequenceiq.cloudbreak.workspace.repository.check.WorkspaceResourceType;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.cloudbreak.service.EntityType;
+import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 
 @DisableHasPermission
 @Transactional(TxType.REQUIRED)

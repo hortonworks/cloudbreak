@@ -8,8 +8,9 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.aspect.workspace.DisableCheckPermissions;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.repository.check.DisableCheckPermissions;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @Component
 public class DisabledPermissionChecker implements PermissionChecker<DisableCheckPermissions> {

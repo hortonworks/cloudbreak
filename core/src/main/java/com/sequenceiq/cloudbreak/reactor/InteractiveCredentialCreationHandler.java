@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.mapper.DuplicatedKeyValueExceptionMapper;
 import com.sequenceiq.cloudbreak.converter.spi.ExtendedCloudCredentialToCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.workspace.User;
+import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.notification.Notification;
 import com.sequenceiq.cloudbreak.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;

@@ -23,7 +23,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.WorkspaceApiStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceV4Response;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
@@ -200,7 +200,7 @@ public abstract class TestContext implements ApplicationContextAware {
             clients.put(acting.getToken(), cloudbreakClient);
             Optional<WorkspaceV4Response> workspace = cloudbreakClient.getCloudbreakClient()
                     .workspaceV4Endpoint().list().getResponses().stream()
-                    .filter(ws -> WorkspaceStatus.ACTIVE == ws.getStatus())
+                    .filter(ws -> WorkspaceApiStatus.ACTIVE == ws.getStatus())
                     .findFirst();
             workspace.ifPresent(workspaceResponse -> cloudbreakClient.setWorkspaceId(workspaceResponse.getId()));
         }
