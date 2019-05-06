@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.config.registry;
+package com.sequenceiq.environment.configuration.registry;
 
 import static com.sequenceiq.environment.util.Validation.notNull;
 
@@ -13,19 +13,20 @@ public class RetryingServiceAddressResolver implements ServiceAddressResolver {
 
     private final ServiceAddressResolver serviceAddressResolver;
 
-    private int maxRetryCount;
+    private final int maxRetryCount;
 
     public RetryingServiceAddressResolver(ServiceAddressResolver serviceAddressResolver, int timeoutInMillis) {
         notNull(serviceAddressResolver, "serviceAddressResolver");
         this.serviceAddressResolver = serviceAddressResolver;
-        maxRetryCount = timeoutInMillis / SLEEP_TIME;
-        if (maxRetryCount <= 0) {
+        if (timeoutInMillis / SLEEP_TIME <= 0) {
             maxRetryCount = 1;
+        } else {
+            maxRetryCount = timeoutInMillis / SLEEP_TIME;
         }
     }
 
     @Override
-    public String resolveUrl(String serverUrl, String protocol, String serviceId) throws ServiceAddressResolvingException {
+    public String resolveUrl(String serverUrl, String protocol, String serviceId) {
         int attemptCount = 0;
         String resolvedAddress = null;
         while (resolvedAddress == null && attemptCount < maxRetryCount) {
@@ -40,7 +41,7 @@ public class RetryingServiceAddressResolver implements ServiceAddressResolver {
     }
 
     @Override
-    public String resolveHostPort(String host, String port, String serviceId) throws ServiceAddressResolvingException {
+    public String resolveHostPort(String host, String port, String serviceId) {
         int attemptCount = 0;
         String resolvedAddress = null;
         while (resolvedAddress == null && attemptCount < maxRetryCount) {
@@ -54,7 +55,7 @@ public class RetryingServiceAddressResolver implements ServiceAddressResolver {
         return resolvedAddress;
     }
 
-    private void handleException(ServiceAddressResolvingException e, int attemptCount) throws ServiceAddressResolvingException {
+    private void handleException(ServiceAddressResolvingException e, int attemptCount) {
         if (attemptCount == maxRetryCount - 1) {
             throw e;
         } else {

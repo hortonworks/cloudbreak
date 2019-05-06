@@ -1,15 +1,13 @@
-package com.sequenceiq.environment.config;
+package com.sequenceiq.environment.configuration;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Resource;
-
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.environment.api.model.EnvironmentApi;
+import com.sequenceiq.environment.env.api.model.EnvironmentApi;
 
 import springfox.documentation.swagger.web.InMemorySwaggerResourcesProvider;
 import springfox.documentation.swagger.web.SwaggerResource;
@@ -19,8 +17,11 @@ import springfox.documentation.swagger.web.SwaggerResourcesProvider;
 @Component
 public class CombinedSwaggerResourcesProvider implements SwaggerResourcesProvider {
 
-    @Resource
-    private InMemorySwaggerResourcesProvider inMemorySwaggerResourcesProvider;
+    private final InMemorySwaggerResourcesProvider inMemorySwaggerResourcesProvider;
+
+    public CombinedSwaggerResourcesProvider(InMemorySwaggerResourcesProvider inMemorySwaggerResourcesProvider) {
+        this.inMemorySwaggerResourcesProvider = inMemorySwaggerResourcesProvider;
+    }
 
     @Override
     public List<SwaggerResource> get() {

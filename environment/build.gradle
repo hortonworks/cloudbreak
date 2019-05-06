@@ -19,49 +19,55 @@ repositories {
 }
 
 dependencies {
-  implementation     group: 'com.google.code.gson',      name: 'gson'
-  implementation     group: 'dnsjava',                   name: 'dnsjava'
-  implementation     group: 'io.micrometer',             name: 'micrometer-core'
-  implementation     group: 'io.micrometer',             name: 'micrometer-jersey2'
-  implementation     group: 'io.micrometer',             name: 'micrometer-registry-prometheus'
-  implementation     group: 'io.springfox',              name: 'springfox-swagger2'
-  implementation     group: 'io.springfox',              name: 'springfox-swagger-ui'
-  implementation     group: 'io.swagger',                name: 'swagger-jersey2-jaxrs'
-  implementation     group: 'javax.xml.bind',            name: 'jaxb-api'
-  implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server'
-  implementation     group: 'org.mybatis',               name: 'mybatis-migrations'
-  implementation     group: 'org.postgresql',            name: 'postgresql'
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter'
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web'
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator'
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey'
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa'
-  testImplementation ('org.springframework.boot:spring-boot-starter-test') {
+  compile project(':cloud-common')
+  
+  compile     group: 'com.google.code.gson',      name: 'gson'
+  compile     group: 'dnsjava',                   name: 'dnsjava'
+  compile     group: 'io.micrometer',             name: 'micrometer-core'
+  compile     group: 'io.micrometer',             name: 'micrometer-jersey2'
+  compile     group: 'io.micrometer',             name: 'micrometer-registry-prometheus'
+  compile     group: 'io.springfox',              name: 'springfox-swagger2'
+  compile     group: 'io.springfox',              name: 'springfox-swagger-ui'
+  compile     group: 'io.swagger',                name: 'swagger-jersey2-jaxrs'
+  compile     group: 'javax.xml.bind',            name: 'jaxb-api'
+  compile     group: 'org.glassfish.jersey.core', name: 'jersey-server'
+  compile     group: 'org.mybatis',               name: 'mybatis-migrations'
+  compile     group: 'org.postgresql',            name: 'postgresql'
+  compile     group: 'org.springframework.boot',  name: 'spring-boot-starter'
+  compile     group: 'org.springframework.boot',  name: 'spring-boot-starter-web'
+  compile     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator'
+  compile     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey'
+  compile     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa'
+  compile     group: 'io.projectreactor',         name: 'reactor-core',                   version: eventBusVersion
+  compile     group: 'io.projectreactor',         name: 'reactor-bus',                    version: eventBusVersion
+
+  testCompile group: 'org.junit.jupiter',         name: 'junit-jupiter-api'
+  testCompile ('org.springframework.boot:spring-boot-starter-test') {
     exclude group: 'junit'
   }
-  testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-api'
+
   testRuntime        group: 'org.junit.jupiter',         name: 'junit-jupiter-engine'
 
   constraints {
-    implementation     group: 'com.google.code.gson',      name: 'gson',                           version: '2.6.2'
-    implementation     group: 'dnsjava',                   name: 'dnsjava',                        version: '2.1.7'
-    implementation     group: 'io.micrometer',             name: 'micrometer-core',                version: micrometerVersion
-    implementation     group: 'io.micrometer',             name: 'micrometer-jersey2',             version: micrometerVersion
-    implementation     group: 'io.micrometer',             name: 'micrometer-registry-prometheus', version: micrometerVersion
-    implementation     group: 'io.springfox',              name: 'springfox-swagger2',             version: swagger2Version
-    implementation     group: 'io.springfox',              name: 'springfox-swagger-ui',           version: swagger2Version
-    implementation     group: 'io.swagger',                name: 'swagger-jersey2-jaxrs',          version: '1.5.21'
-    implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                       version: '2.3.1'
-    implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                  version: '2.28'
-    implementation     group: 'org.mybatis',               name: 'mybatis-migrations',             version: '3.2.0'
-    implementation     group: 'org.postgresql',            name: 'postgresql',                     version: postgreSQLVersion
-    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
-    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web',        version: springBootVersion
-    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator',   version: springBootVersion
-    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey',     version: springBootVersion
-    implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',   version: springBootVersion
-    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
-    testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-api',              version: junitJupiterVersion
+    compile     group: 'com.google.code.gson',      name: 'gson',                           version: '2.6.2'
+    compile     group: 'dnsjava',                   name: 'dnsjava',                        version: '2.1.7'
+    compile     group: 'io.micrometer',             name: 'micrometer-core',                version: micrometerVersion
+    compile     group: 'io.micrometer',             name: 'micrometer-jersey2',             version: micrometerVersion
+    compile     group: 'io.micrometer',             name: 'micrometer-registry-prometheus', version: micrometerVersion
+    compile     group: 'io.springfox',              name: 'springfox-swagger2',             version: swagger2Version
+    compile     group: 'io.springfox',              name: 'springfox-swagger-ui',           version: swagger2Version
+    compile     group: 'io.swagger',                name: 'swagger-jersey2-jaxrs',          version: '1.5.21'
+    compile     group: 'javax.xml.bind',            name: 'jaxb-api',                       version: '2.3.1'
+    compile     group: 'org.glassfish.jersey.core', name: 'jersey-server',                  version: '2.28'
+    compile     group: 'org.mybatis',               name: 'mybatis-migrations',             version: '3.2.0'
+    compile     group: 'org.postgresql',            name: 'postgresql',                     version: postgreSQLVersion
+    compile     group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
+    compile     group: 'org.springframework.boot',  name: 'spring-boot-starter-web',        version: springBootVersion
+    compile     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator',   version: springBootVersion
+    compile     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey',     version: springBootVersion
+    compile     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',   version: springBootVersion
+    testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+    testCompile group: 'org.junit.jupiter',         name: 'junit-jupiter-api',              version: junitJupiterVersion
     testRuntime        group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',           version: junitJupiterVersion
   }
 
@@ -89,7 +95,7 @@ bootJar {
   archiveName = 'environment.jar'
   manifest {
     def grgit = Grgit.open(currentDir: project.projectDir)
-    attributes "Implementation-Version": grgit.describe()
+    attributes "compile-Version": grgit.describe()
   }
 }
 

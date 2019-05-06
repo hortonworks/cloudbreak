@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.config;
+package com.sequenceiq.environment.configuration;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Properties;
 
-import javax.inject.Inject;
 import javax.sql.DataSource;
 
 import org.apache.ibatis.migration.ConnectionProvider;
@@ -41,14 +40,20 @@ public class DatabaseMigrationConfig {
 
     private static final String PENDING_OPERATION_SUBFOLDER = "/app";
 
-    @Value("${environment.schema.scripts.location:" + DEFAULT_SCHEMA_LOCATION_IN_SOURCE + '}')
-    private String schemaLocation;
+    private final String schemaLocation;
 
-    @Value("${environment.schema.migration.auto:true}")
-    private boolean schemaMigrationEnabled;
+    private final boolean schemaMigrationEnabled;
 
-    @Inject
-    private DataSource dataSource;
+    private final DataSource dataSource;
+
+    public DatabaseMigrationConfig(@Value("${environment.schema.scripts.location:" + DEFAULT_SCHEMA_LOCATION_IN_SOURCE + '}') String schemaLocation,
+            @Value("${environment.schema.migration.auto:true}") boolean schemaMigrationEnabled,
+            DataSource dataSource) {
+
+        this.schemaLocation = schemaLocation;
+        this.schemaMigrationEnabled = schemaMigrationEnabled;
+        this.dataSource = dataSource;
+    }
 
     @Bean
     @DependsOn("dataSource")
