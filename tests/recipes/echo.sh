@@ -1,3 +1,3 @@
-#!/usr/bin/env bash
-
-echo "CLI E2E test"
+#!/bin/bash
+touch /cli-test
+echo "CLI E2E test" >> /cli-test

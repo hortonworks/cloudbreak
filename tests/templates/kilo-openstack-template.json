@@ -1,76 +1,51 @@
 {
+  "parameters": {},
   "environment": {
     "name": "cli-environment"
   },
-  "customDomain": {
-    "clusterNameAsSubdomain": false,
-    "hostgroupNameAsHostname": false
+  "placement": {
+    "region": "RegionOne",
+    "availabilityZone": "nova"
   },
   "tags": {
-    "application": null,
     "userDefined": {
       "kisnyul": "pityuka",
       "+-=. _:/@": "+-=. _:/@"
-    },
-    "defaults": null
+    }
   },
-  "placement": {
-    "availabilityZone": "nova",
-    "region": "RegionOne"
+  "authentication": {
+    "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kcUEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpjT7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh"
+  },
+  "cluster": {
+    "blueprintName": "CDH 6.2 - Data Science: Apache Spark, Apache Hive, Impala",
+    "userName": "admin",
+    "password": "Admin123!@#\"",
+    "validateBlueprint": false,
+    "databases": []
+  },
+  "image": {
+    "os": "redhat7"
   },
   "instanceGroups": [
     {
-      "nodeCount": 1,
-      "name": "worker",
-      "type": "CORE",
-      "recoveryMode": "MANUAL",
+      "name": "master",
       "template": {
-        "instanceType": "m1.large",
-        "rootVolume": {
-          "size": 100
-        },
         "attachedVolumes": [
           {
-            "size": 100,
             "count": 0,
+            "size": 100,
             "type": "HDD"
           }
-        ]
+        ],
+        "instanceType": "m1.large",
+        "rootVolume": {
+          "size": 50
+        }
       },
-      "securityGroup": {
-        "securityGroupIds": [],
-        "securityRules": [
-          {
-            "subnet": "0.0.0.0/0",
-            "ports": [
-              "22"
-            ],
-            "protocol": "tcp"
-          }
-        ]
-      },
-      "recipeNames": []
-    },
-    {
       "nodeCount": 1,
-      "name": "master",
       "type": "GATEWAY",
       "recoveryMode": "MANUAL",
-      "template": {
-        "instanceType": "m1.large",
-        "rootVolume": {
-          "size": 100
-        },
-        "attachedVolumes": [
-          {
-            "size": 100,
-            "count": 0,
-            "type": "HDD"
-          }
-        ]
-      },
       "securityGroup": {
-        "securityGroupIds": [],
         "securityRules": [
           {
             "subnet": "0.0.0.0/0",
@@ -82,41 +57,39 @@
           {
             "subnet": "0.0.0.0/0",
             "ports": [
-              "22"
+              "443"
             ],
             "protocol": "tcp"
           },
           {
             "subnet": "0.0.0.0/0",
             "ports": [
-              "443"
+              "22"
             ],
             "protocol": "tcp"
           }
         ]
-      },
-      "recipeNames": []
+      }
     },
     {
-      "nodeCount": 0,
-      "name": "compute",
-      "type": "CORE",
-      "recoveryMode": "MANUAL",
+      "name": "worker",
       "template": {
-        "instanceType": "m1.large",
-        "rootVolume": {
-          "size": 100
-        },
         "attachedVolumes": [
           {
-            "size": 100,
             "count": 0,
+            "size": 100,
             "type": "HDD"
           }
-        ]
+        ],
+        "instanceType": "m1.large",
+        "rootVolume": {
+          "size": 50
+        }
       },
+      "nodeCount": 1,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
       "securityGroup": {
-        "securityGroupIds": [],
         "securityRules": [
           {
             "subnet": "0.0.0.0/0",
@@ -126,33 +99,44 @@
             "protocol": "tcp"
           }
         ]
+      }
+    },
+    {
+      "name": "compute",
+      "template": {
+        "attachedVolumes": [
+          {
+            "count": 0,
+            "size": 100,
+            "type": "HDD"
+          }
+        ],
+        "instanceType": "m1.large",
+        "rootVolume": {
+          "size": 50
+        }
       },
-      "recipeNames": []
+      "nodeCount": 0,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "securityGroup": {
+        "securityRules": [
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": [
+              "22"
+            ],
+            "protocol": "tcp"
+          }
+        ]
+      }
     }
   ],
-  "authentication": {
-    "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kcUEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpjT7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh"
-  },
   "network": {
-    "subnetCIDR": "10.0.0.0/16",
     "openstack": {
-      "publicNetId": "999e09bc-cf75-4a19-98fb-c0b4ddee6d93",
-      "networkingOption": "self-service"
-    }
-  },
-  "image": {
-    "catalog": "cloudbreak-default",
-    "id": "0907b59f-d38d-4325-6000-28d74e08158e"
-  },
-  "cluster": {
-    "name": "d8d2a30e-9bac-4106-b25d-1e95aee2d212",
-    "databases": [],
-    "blueprintName": "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin",
-    "userName": "admin",
-    "password": "Admin123!@#\"",
-    "ambari": {
+      "networkingOption": "self-service",
+      "publicNetId": "999e09bc-cf75-4a19-98fb-c0b4ddee6d93"
     },
-    "executorType": "DEFAULT"
-  },
-  "inputs": {}
+    "subnetCIDR": "10.0.0.0/16"
+  }
 }

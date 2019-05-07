@@ -8,7 +8,7 @@ define_method(:cb) do
   return cb
 end
 
-RSpec.describe 'Clusterdefinition test cases', :type => :aruba do
+RSpec.describe 'Blueprint test cases', :type => :aruba do
   include_context "shared command helpers"    
   include_context "e2e shared vars"
 
@@ -32,31 +32,31 @@ RSpec.describe 'Clusterdefinition test cases', :type => :aruba do
     end
   end  
 
-  it "Clusterdefinition - Create from url - Describe - List - Delete " do
+  it "Blueprint - Create from url - Describe - List - Delete " do
     bp_create_describe_delete(cb, @blueprint_name_url) do
       cb.blueprint.create.from_url.name(@blueprint_name_url).url(@blueprint_url).build
     end 
   end    
 
-  it "Clusterdefinition - Create - Url doesn't exist" do
+  it "Blueprint - Create - Url doesn't exist" do
     result = cb.blueprint.create.from_url.name("temp-bp").url("https://something123456789.com").build
     expect(result.exit_status).to eql 1
     expect(result.stderr).to include("error") 
   end
 
-  it "Clusterdefinition - Create - Invalid url with no protocol " do
+  it "Blueprint - Create - Invalid url with no protocol " do
     result = cb.blueprint.create.from_url.name("temp-bp").url("something123456789.com").build
     expect(result.exit_status).to eql 1
     expect(result.stderr).to include("error") 
   end
 
-  it "Clusterdefinition - Create from file - Describe List - Delete " do
+  it "Blueprint - Create from file - Describe List - Delete " do
     bp_create_describe_delete(cb, @blueprint_name_file) do
       cb.blueprint.create.from_file.name(@blueprint_name_file).file(@blueprint_file).build
     end 
   end 
 
-  it "Clusterdefinition - Describe a default blueprint" do
+  it "Blueprint - Describe a default blueprint" do
     result = cb.blueprint.describe.name(@default_blueprint_name).build
     expect(result.exit_status).to eql 0
     expect(result.stdout.empty?).to be_falsy 
@@ -73,7 +73,7 @@ RSpec.describe 'Clusterdefinition test cases', :type => :aruba do
     )       
   end
 
-  it "Clusterdefinition - List - All existing" do
+  it "Blueprint - List - All existing" do
     result = cb.blueprint.list.build
     expect(result.exit_status).to eql 0
     expect(result.stdout.empty?).to be_falsy
