@@ -1203,6 +1203,13 @@ var (
 			Usage: "API private key",
 		},
 	}
+	FlWriteToProfileOptional = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "write-to-profile",
+			Usage: "writes the values into the profile",
+		},
+	}
 )
 
 type RequiredFlag struct {

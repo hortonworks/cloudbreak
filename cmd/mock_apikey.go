@@ -6,7 +6,9 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	log "github.com/Sirupsen/logrus"
 	cf "github.com/hortonworks/cb-cli/dataplane/config"
+	"github.com/hortonworks/cb-cli/dataplane/configure"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/dp-cli-common/utils"
 	"github.com/urfave/cli"
@@ -18,9 +20,9 @@ func init() {
 		Usage:  "Generate mock ums apikey, based on tenant-name and tenant-user",
 		Before: cf.CheckConfigAndCommandFlagsDP,
 		Action: generateMockApikeys,
-		Flags:  fl.NewFlagBuilder().AddFlags(fl.FlServerOptional, fl.FlTenantName, fl.FlTenantUser).Build(),
+		Flags:  fl.NewFlagBuilder().AddFlags(fl.FlTenantName, fl.FlTenantUser, fl.FlWriteToProfileOptional).AddAuthenticationFlagsWithoutWorkspace().AddOutputFlag().Build(),
 		BashComplete: func(c *cli.Context) {
-			for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlServerOptional, fl.FlTenantName, fl.FlTenantUser).Build() {
+			for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlTenantName, fl.FlTenantUser, fl.FlWriteToProfileOptional).AddAuthenticationFlagsWithoutWorkspace().AddOutputFlag().Build() {
 				fl.PrintFlagCompletion(f)
 			}
 		},
@@ -52,6 +54,15 @@ func generateMockApikeys(c *cli.Context) {
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	fmt.Println("APIKeyID:", myKeys.APIKeyID)
-	fmt.Println("PrivateKey:", myKeys.PrivateKey)
+	fmt.Println("apikeyid:", myKeys.APIKeyID)
+	fmt.Println("privatekey:", myKeys.PrivateKey)
+	if c.Bool(fl.FlWriteToProfileOptional.Name) {
+		if err = c.Set(fl.FlApiKeyIDOptional.Name, myKeys.APIKeyID); err != nil {
+			log.Debug(err)
+		}
+		if err = c.Set(fl.FlPrivateKeyOptional.Name, myKeys.PrivateKey); err != nil {
+			log.Debug(err)
+		}
+		configure.Configure(c)
+	}
 }
