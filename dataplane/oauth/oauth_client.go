@@ -2,6 +2,7 @@ package oauth
 
 import (
 	"github.com/go-openapi/strfmt"
+	freeipaclient "github.com/hortonworks/cb-cli/dataplane/api-freeipa/client"
 	sdxclient "github.com/hortonworks/cb-cli/dataplane/api-sdx/client"
 	apiclient "github.com/hortonworks/cb-cli/dataplane/api/client"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
@@ -22,6 +23,9 @@ type Dataplane struct {
 }
 type Sdx struct {
 	Sdx *sdxclient.Datalake
+}
+type FreeIpa struct {
+	FreeIpa *freeipaclient.FreeIPA
 }
 
 func NewCloudbreakHTTPClientFromContext(c *cli.Context) *Cloudbreak {
@@ -50,7 +54,7 @@ func NewDataplaneHTTPClient(address string, apiKeyID, privateKey string) *Datapl
 	return &Dataplane{Dataplane: authapiclient.New(transport, strfmt.Default)}
 }
 
-// NewDataplaneHTTPClientFromContext : Initialize Dataplane client.
+// NewDataplaneHTTPClientFromContext : Initialize Sdx client.
 func NewSDXClientFromContext(c *cli.Context) *Sdx {
 	return NewSDXClient(c.String(fl.FlServerOptional.Name), c.String(fl.FlApiKeyIDOptional.Name), c.String(fl.FlPrivateKeyOptional.Name))
 }
@@ -61,4 +65,17 @@ func NewSDXClient(address string, apiKeyID, privateKey string) *Sdx {
 	const baseAPIPath string = "/dl/api"
 	transport = apikeyauth.GetAPIKeyAuthTransport(address, baseAPIPath, apiKeyID, privateKey)
 	return &Sdx{Sdx: sdxclient.New(transport, strfmt.Default)}
+}
+
+// NewDataplaneHTTPClientFromContext : Initialize FreeIpa client.
+func NewFreeIpaClientFromContext(c *cli.Context) *FreeIpa {
+	return NewFreeIpaClient(c.String(fl.FlServerOptional.Name), c.String(fl.FlApiKeyIDOptional.Name), c.String(fl.FlPrivateKeyOptional.Name))
+}
+
+func NewFreeIpaClient(address string, apiKeyID, privateKey string) *FreeIpa {
+	u.CheckServerAddress(address)
+	var transport *utils.Transport
+	const baseAPIPath string = "/freeipa/api"
+	transport = apikeyauth.GetAPIKeyAuthTransport(address, baseAPIPath, apiKeyID, privateKey)
+	return &FreeIpa{FreeIpa: freeipaclient.New(transport, strfmt.Default)}
 }

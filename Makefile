@@ -18,9 +18,17 @@ endif
 ifeq ($(SDX_IP),)
         SDX_IP = localhost
 endif
-CB_PORT = $(shell echo \${PORT})
+SDX_PORT = $(shell echo \${PORT})
 ifeq ($(SDX_PORT),)
         SDX_PORT = 9092
+endif
+
+ifeq ($(FREEIPA_IP),)
+        FREEIPA_IP = localhost
+endif
+FREEIPA_PORT = $(shell echo \${PORT})
+ifeq ($(FREEIPA_PORT),)
+        FREEIPA_PORT = 8090
 endif
 
 deps: deps-errcheck
@@ -92,6 +100,11 @@ _init-swagger-generation:
 	rm -f build/swagger.json
 	curl -sL http://$(CB_IP):$(CB_PORT)/cb/api/swagger.json -o build/swagger.json
 
+_init-swagger-generation-freeipa:
+	rm -rf dataplane/api-freeipa/client dataplane/api-freeipa/model
+	rm -f build/swagger.json
+	curl -sL http://$(FREEIPA_IP):$(FREEIPA_PORT)/freeipa/api/swagger.json -o build/swagger.json
+
 generate-swagger: _init-swagger-generation
 	swagger generate client -f build/swagger.json -c client -m model -t dataplane/api
 
@@ -103,9 +116,17 @@ generate-swagger-sdx:
 	rm -rf dataplane/api-sdx/client dataplane/api-sdx/model
 	swagger generate client -f http://$(SDX_IP):$(SDX_PORT)/dl/api/swagger.json -c client -m model -t dataplane/api-sdx
 
+generate-swagger-freeipa:
+	rm -rf dataplane/api-freeipa/client dataplane/api-freeipa/model
+	swagger generate client -f http://$(FREEIPA_IP):$(FREEIPA_PORT)/freeipa/api/swagger.json -c client -m model -t dataplane/api-freeipa
+
 generate-swagger-docker: _init-swagger-generation
 	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -v ${PWD}/build/swagger.json:${PWD}/build/swagger.json  -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:v0.17.2 \
 	generate client -f ${PWD}/build/swagger.json -c client -m model -t dataplane/api
+
+generate-swagger-freeipa-docker: _init-swagger-generation-freeipa
+	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -v ${PWD}/build/swagger.json:${PWD}/build/swagger.json  -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:v0.17.2 \
+	generate client -f ${PWD}/build/swagger.json -c client -m model -t dataplane/api-freeipa
 
 release: build
 	rm -rf release
