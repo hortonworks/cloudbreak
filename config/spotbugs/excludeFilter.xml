@@ -44,4 +44,7 @@
     <Match>
         <Package name="~com\.cloudera\.thunderhead\.service\.common.*"/>
     </Match>
+    <Match>
+        <Bug pattern="REC_CATCH_EXCEPTION" />
+    </Match>
 </FindBugsFilter>

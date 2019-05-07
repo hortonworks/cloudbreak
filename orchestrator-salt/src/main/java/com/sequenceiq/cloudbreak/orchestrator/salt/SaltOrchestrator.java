@@ -711,8 +711,6 @@ public class SaltOrchestrator implements HostOrchestrator {
                 String identityRole = adJoinable ? "ad_leave" : "ipa_leave";
                 runSaltCommand(sc, new GrainRemoveRunner(targets, nodes, "roles", identityRole, CompoundType.IP), exitCriteriaModel);
             }
-        } catch (RuntimeException e) {
-            throw e;
         } catch (Exception e) {
             LOGGER.info("Error occurred during executing highstate (for cluster manager agent stop).", e);
             throw new CloudbreakOrchestratorFailedException(e);
