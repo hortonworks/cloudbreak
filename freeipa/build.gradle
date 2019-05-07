@@ -84,6 +84,16 @@ dependencies {
 
 }
 
+sourceSets {
+  main {
+    resources {
+      srcDirs += [
+              project(':flow').sourceSets.main.resources
+      ]
+    }
+  }
+}
+
 bootRun {
   systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
   systemProperty 'spring.config.location', System.properties['spring.config.location']
