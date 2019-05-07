@@ -114,7 +114,7 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
             GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             hostOrchestrator.stopClusterManagerAgent(gatewayConfig, decommissionedNodes, clusterDeletionBasedModel(stack.getId(), cluster.getId()),
                     cluster.isAdJoinable(), cluster.isIpaJoinable());
-            decomissionedHostNames.stream().parallel().map(hostsToRemove::get).forEach(clusterDecomissionService::deleteHostFromCluster);
+            decomissionedHostNames.stream().map(hostsToRemove::get).forEach(clusterDecomissionService::deleteHostFromCluster);
 
             List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             PollingResult orchestratorRemovalPollingResult =
@@ -123,8 +123,6 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
                 LOGGER.debug("Can not remove hosts from orchestrator: {}", decomissionedHostNames);
             }
             result = new DecommissionResult(request, decomissionedHostNames);
-        } catch (RuntimeException e) {
-            throw e;
         } catch (Exception e) {
             LOGGER.info("Exception occurred during decommissioning.", e);
             result = new DecommissionResult(e.getMessage(), e, request);
