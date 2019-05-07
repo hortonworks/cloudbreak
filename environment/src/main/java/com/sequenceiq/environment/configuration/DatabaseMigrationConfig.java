@@ -36,7 +36,7 @@ public class DatabaseMigrationConfig {
 
     private static final String PENDING_OPERATION_WARNING_MSG = "WARNING: Running pending migrations out of order can create unexpected results.";
 
-    private static final String UP_OPERATION_SUBFOLDER = "/schema/mybatis";
+    private static final String UP_OPERATION_SUBFOLDER = "/mybatis";
 
     private static final String PENDING_OPERATION_SUBFOLDER = "/app";
 
