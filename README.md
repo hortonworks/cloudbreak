@@ -203,11 +203,6 @@ After having imported cloudbreak repo root you can launch Datalake application b
 After having imported cloudbreak repo root you can launch Environment application by executing the com.sequenceiq.environment.EnvironmentApplication class with the following VM options:
 
 ```
--Denvironment.cloudbreak.url=http://localhost:9091
--Denvironment.db.port.5432.tcp.addr=localhost
--Denvironment.db.port.5432.tcp.port=5432
--Dserver.port=8088
--Dvault.addr=localhost
 -Dvault.root.token=<TOKEN_FROM_PROFILE_FILE>
 ```
 
@@ -280,9 +275,6 @@ To run environment service from command line you have to run the below gradle co
 
  ````
 ./gradlew :environment:bootRun -PjvmArgs="\
--Denvironment.db.addr=localhost \
--Dserver.port=8088 \
--Dvault.addr=localhost \
 -Dvault.root.token=<TOKEN_FROM_PROFILE_FILE> \
 -Dspring.config.location=$(pwd)/environment/src/main/resources/application.yml,$(pwd)/environment/build/resources/main/application.properties"
 ````
