@@ -1,5 +1,7 @@
 server.servlet.context-path: "/env"
 
+server.port: 8088
+
 management:
   endpoints:
     web:
@@ -26,6 +28,9 @@ management:
 altus:
   ums:
     host: localhost
+
+vault:
+  addr: localhost
 
 environment:
   cert.dir: /certs/
