@@ -23,7 +23,6 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @Inject
     private DatabaseServerConfigService databaseServerConfigService;
 
-    // might not be found
     @Inject
     private ConverterUtil converterUtil;
 
