@@ -117,6 +117,10 @@
         <module name="MutableException" />
         <module name="AvoidStarImport" />
         <module name="PackageAnnotation" />
+        <module name="ExecutableStatementCount">
+            <property name="max" value="6"/>
+            <property name="tokens" value="CTOR_DEF"/>
+        </module>
         <!-- -->
 
         <!-- Redundancy -->
@@ -227,6 +231,7 @@
             <property name="offCommentFormat" value="CHECKSTYLE:OFF"/>
             <property name="onCommentFormat" value="CHECKSTYLE:ON"/>
         </module>
+
     </module>
 
     <!-- Deprecation -->
