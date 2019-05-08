@@ -15,8 +15,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.environment.api.EnvironmentNames;
 import com.sequenceiq.environment.api.proxy.doc.ProxyConfigDescription;
-import com.sequenceiq.environment.api.proxy.model.EnvironmentNames;
 import com.sequenceiq.environment.api.proxy.model.request.ProxyV1Request;
 import com.sequenceiq.environment.api.proxy.model.response.ProxyV1Response;
 import com.sequenceiq.environment.api.proxy.model.response.ProxyV1Responses;

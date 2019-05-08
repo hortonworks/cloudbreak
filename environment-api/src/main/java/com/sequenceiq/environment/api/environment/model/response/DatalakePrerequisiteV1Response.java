@@ -9,8 +9,8 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.environment.api.LdapV4Response;
 import com.sequenceiq.environment.api.environment.doc.EnvironmentModelDescription;
+import com.sequenceiq.environment.api.ldap.model.response.LdapV1Response;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -20,7 +20,7 @@ public class DatalakePrerequisiteV1Response implements Serializable {
 
     @NotNull
     @ApiModelProperty(EnvironmentModelDescription.LDAP_RESPONSE)
-    private LdapV4Response ldap;
+    private LdapV1Response ldap;
 
     @ApiModelProperty(EnvironmentModelDescription.RDS_RESPONSE)
     private Set<String> databases = new HashSet<>();
@@ -29,11 +29,11 @@ public class DatalakePrerequisiteV1Response implements Serializable {
     @ApiModelProperty(EnvironmentModelDescription.KERBEROS_RESPONSE)
     private String kerberos;
 
-    public LdapV4Response getLdap() {
+    public LdapV1Response getLdap() {
         return ldap;
     }
 
-    public void setLdap(LdapV4Response ldap) {
+    public void setLdap(LdapV1Response ldap) {
         this.ldap = ldap;
     }
 

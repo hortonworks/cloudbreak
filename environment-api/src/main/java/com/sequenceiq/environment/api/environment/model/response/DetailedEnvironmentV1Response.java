@@ -6,8 +6,8 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.environment.api.LdapV4Response;
 import com.sequenceiq.environment.api.environment.doc.EnvironmentModelDescription;
+import com.sequenceiq.environment.api.ldap.model.response.LdapV1Response;
 import com.sequenceiq.environment.api.proxy.model.response.ProxyV1Response;
 
 import io.swagger.annotations.ApiModel;
@@ -21,7 +21,7 @@ public class DetailedEnvironmentV1Response extends EnvironmentV1BaseResponse {
     private final Set<ProxyV1Response> proxies = new HashSet<>();
 
     @ApiModelProperty(EnvironmentModelDescription.LDAP_CONFIGS_RESPONSE)
-    private final Set<LdapV4Response> ldaps = new HashSet<>();
+    private final Set<LdapV1Response> ldaps = new HashSet<>();
 
     @ApiModelProperty(EnvironmentModelDescription.RDS_CONFIGS_RESPONSE)
     private final Set<String> databases = new HashSet<>();
@@ -45,7 +45,7 @@ public class DetailedEnvironmentV1Response extends EnvironmentV1BaseResponse {
         return proxies;
     }
 
-    public Set<LdapV4Response> getLdaps() {
+    public Set<LdapV1Response> getLdaps() {
         return ldaps;
     }
 

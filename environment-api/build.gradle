@@ -12,6 +12,7 @@ repositories {
 }
 
 dependencies {
+  compile project(':structuredevent-model')
   compile group: 'io.swagger', name: 'swagger-jersey2-jaxrs', version: "1.5.21"
   compile group: 'javax.validation', name: 'validation-api', version: '2.0.1.Final'
 }

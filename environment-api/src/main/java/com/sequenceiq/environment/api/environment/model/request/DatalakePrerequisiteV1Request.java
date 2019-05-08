@@ -5,8 +5,8 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.environment.api.LdapV4Request;
 import com.sequenceiq.environment.api.environment.doc.EnvironmentModelDescription;
+import com.sequenceiq.environment.api.ldap.model.request.LdapV1Request;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -16,13 +16,13 @@ public class DatalakePrerequisiteV1Request {
 
     @NotNull
     @ApiModelProperty(value = EnvironmentModelDescription.LDAP_REQUEST, required = true)
-    private LdapV4Request ldap;
+    private LdapV1Request ldap;
 
-    public LdapV4Request getLdap() {
+    public LdapV1Request getLdap() {
         return ldap;
     }
 
-    public void setLdap(LdapV4Request ldap) {
+    public void setLdap(LdapV1Request ldap) {
         this.ldap = ldap;
     }
 }

@@ -68,7 +68,7 @@ public interface EnvironmentV1Endpoint {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.LIST, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES, nickname = "listEnvironmentV1")
-    SimpleEnvironmentV1Responses list(@PathParam("workspaceId") Long workspaceId);
+    SimpleEnvironmentV1Responses list();
 
     @PUT
     @Path("/{name}/attach")

@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.api.proxy.model;
+package com.sequenceiq.environment.api;
 
 import java.util.Set;
 

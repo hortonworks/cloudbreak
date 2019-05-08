@@ -39,7 +39,7 @@ public interface CredentialV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CredentialOpDescription.LIST, produces = MediaType.APPLICATION_JSON, notes = CredentialDescriptor.CREDENTIAL_NOTES,
             nickname = "listCredentialsV1", httpMethod = "GET")
-    CredentialV1Responses list(@PathParam("workspaceId") Long workspaceId);
+    CredentialV1Responses list();
 
     @GET
     @Path("{name}")
