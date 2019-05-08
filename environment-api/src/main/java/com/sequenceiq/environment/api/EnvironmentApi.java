@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.env.api.model;
+package com.sequenceiq.environment.api;
 
 public class EnvironmentApi {
 

@@ -20,6 +20,7 @@ repositories {
 
 dependencies {
   compile project(':common')
+  compile project(':environment-api')
   compile project(':flow')
   
   compile     group: 'com.google.code.gson',      name: 'gson'

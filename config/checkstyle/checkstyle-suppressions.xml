@@ -33,6 +33,7 @@
     <suppress id="hashtable-instantiation" files="LdapConfigValidator.java"/>
     <suppress checks="MethodName" files="EnvironmentResourceRepository.java"/>
     <suppress checks="IllegalCatch|CyclomaticComplexity" files="SecretAspects.java|SecretAspectService.java"/>
+    <suppress files="com[\/]sequenceiq[\/](?!environment)[^\/]+[\/]" checks="ExecutableStatementCount"/>
     <!-- suppressing checks in application runner classes -->
     <suppress id="sysout" files="VersionedApplication.java"/>
     <suppress checks="HideUtilityClassConstructor" files=".*Application.java"/>
