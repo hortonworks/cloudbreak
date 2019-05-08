@@ -40,6 +40,7 @@ include 'mock-caas'
 include 'environment'
 include 'workspace-authorization'
 include 'common'
+include 'environment-api'
 
 rootProject.name = 'cloudbreak'
 include 'secret-engine'
