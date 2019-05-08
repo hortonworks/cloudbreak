@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.cloudera.api.swagger.AuthRolesResourceApi;
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.ClustersResourceApi;
+import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.ExternalUserMappingsResourceApi;
 import com.cloudera.api.swagger.HostTemplatesResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
@@ -89,5 +90,9 @@ public class ClouderaManagerClientFactory {
 
     public ParcelResourceApi getParcelResourceApi(ApiClient apiClient) {
         return new ParcelResourceApi(apiClient);
+    }
+
+    public CommandsResourceApi getCommandsResourceApi(ApiClient apiClient) {
+        return new CommandsResourceApi(apiClient);
     }
 }

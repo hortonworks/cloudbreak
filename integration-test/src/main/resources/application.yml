@@ -23,7 +23,7 @@ integrationtest:
 
   # aws parameters
   aws:
-    defaultBlueprintName: "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
+    defaultBlueprintName: "CDP 1.0 - Data Science: Apache Spark, Apache Hive, Impala"
     region: eu-west-1
     location: eu-west-1
     availabilityZone: eu-west-1a
@@ -44,15 +44,7 @@ integrationtest:
       redhat7:
         imageId: 963f81ae-efd1-4bfb-7f91-4aa357950c02
         blueprints:
-          - "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
-      amazonlinux2:
-        imageId: 97b9e57d-8135-4d71-4f52-37a09d913e5e
-        blueprints:
-          - "HDP 3.1 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin"
-      sles12:
-        imageId: 1580eb06-e175-4d06-675a-c484b2c634f3
-        blueprints:
-          - "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
+          - "CDP 1.0 - Data Science: Apache Spark, Apache Hive, Impala"
 
   # azure parameters
   azure:
