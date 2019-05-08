@@ -28,10 +28,6 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
     // @ApiModelProperty(RDSConfigModelDescription.CLUSTER_NAMES)
     // private Set<String> clusterNames;
 
-    // FIXME maybe move to base
-    @ApiModelProperty(value = DatabaseServer.DATABASE_VENDOR, required = true)
-    private String databaseVendor;
-
     @ApiModelProperty(value = DatabaseServer.DATABASE_VENDOR_DISPLAY_NAME, required = true)
     private String databaseVendorDisplayName;
 
@@ -53,14 +49,6 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getDatabaseVendor() {
-        return databaseVendor;
-    }
-
-    public void setDatabaseVendor(String databaseVendor) {
-        this.databaseVendor = databaseVendor;
     }
 
     public String getDatabaseVendorDisplayName() {

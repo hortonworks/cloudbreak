@@ -1,22 +1,13 @@
 package com.sequenceiq.redbeams.domain;
 
-//import java.util.HashSet;
-//import java.util.Set;
-
-//import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-//import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-//import javax.persistence.JoinColumn;
-//import javax.persistence.JoinTable;
-//import javax.persistence.ManyToMany;
-// import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -29,23 +20,17 @@ import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
 import com.sequenceiq.cloudbreak.domain.Secret;
 import com.sequenceiq.cloudbreak.domain.SecretToString;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
-//import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
-//import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
-// import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
-// import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
 @Entity
 @Where(clause = "archived = false")
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
-public class DatabaseServerConfig implements ProvisionEntity, /* EnvironmentAwareResource, WorkspaceAwareResource, */ ArchivableResource {
+public class DatabaseServerConfig implements ProvisionEntity, ArchivableResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "databaseserverconfig_generator")
     @SequenceGenerator(name = "databaseserverconfig_generator", sequenceName = "databaseserverconfig_id_seq", allocationSize = 1)
     private Long id;
 
-    // @ManyToOne
-    // private Workspace workspace;
     @Column(name = "workspace_id", nullable = false)
     private Long workspaceId;
 
@@ -87,16 +72,15 @@ public class DatabaseServerConfig implements ProvisionEntity, /* EnvironmentAwar
     @Column
     private String connectorJarUrl;
 
+    @Column
     private boolean archived;
 
+    @Column
     private Long deletionTimestamp = -1L;
 
-    // might go away / change, since environments are not stored in redbeams
-    // @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    // @JoinTable(name = "env_databaseserver", joinColumns = @JoinColumn(name = "databaseserverid"), inverseJoinColumns = @JoinColumn(name = "envid"))
-    // private Set<EnvironmentView> environments = new HashSet<>();
+    @Column(nullable = false)
+    private String environmentId;
 
-    //@Override
     public Long getId() {
         return id;
     }
@@ -113,12 +97,10 @@ public class DatabaseServerConfig implements ProvisionEntity, /* EnvironmentAwar
         this.workspaceId = workspaceId;
     }
 
-    //@Override
     public WorkspaceResource getResource() {
         return WorkspaceResource.DATABASE_SERVER;
     }
 
-    // @Override
     public String getName() {
         return name;
     }
@@ -230,21 +212,19 @@ public class DatabaseServerConfig implements ProvisionEntity, /* EnvironmentAwar
 
     @Override
     public void setArchived(boolean archived) {
-        this.archived = true;
+        this.archived = archived;
     }
 
     @Override
     public void unsetRelationsToEntitiesToBeDeleted() {
     }
 
-    // @Override
-    // public Set<EnvironmentView> getEnvironments() {
-    //     return environments;
-    // }
+    public String getEnvironmentId() {
+        return environmentId;
+    }
 
-    // @Override
-    // public void setEnvironments(Set<EnvironmentView> environments) {
-    //     this.environments = environments;
-    // }
+    public void setEnvironmentId(String environmentId) {
+        this.environmentId = environmentId;
+    }
 
 }

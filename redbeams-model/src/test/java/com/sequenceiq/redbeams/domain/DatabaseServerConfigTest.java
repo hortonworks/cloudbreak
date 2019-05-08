@@ -6,12 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-//import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
-// import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
-
-// import java.util.Collections;
-// import java.util.Set;
 
 import org.hibernate.annotations.Where;
 import org.junit.Before;
@@ -19,20 +14,10 @@ import org.junit.Test;
 
 public class DatabaseServerConfigTest {
 
-    // private Workspace workspace;
-
-    // private EnvironmentView environmentView;
-
     private DatabaseServerConfig config;
 
     @Before
     public void setUp() {
-        // workspace = new Workspace();
-        // workspace.setId(1L);
-
-        // environmentView = new EnvironmentView();
-        // environmentView.setId(1L);
-
         config = new DatabaseServerConfig();
     }
 
@@ -84,9 +69,8 @@ public class DatabaseServerConfigTest {
         config.setArchived(true);
         assertTrue(config.isArchived());
 
-        // Set<EnvironmentView> environments = Collections.singleton(environmentView);
-        // config.setEnvironments(environments);
-        // assertEquals(environments, config.getEnvironments());
+        config.setEnvironmentId("myenvironment");
+        assertEquals("myenvironment", config.getEnvironmentId());
     }
 
     @Test
