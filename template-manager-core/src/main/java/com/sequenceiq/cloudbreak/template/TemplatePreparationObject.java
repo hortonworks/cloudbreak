@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -12,6 +13,7 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
@@ -159,8 +161,11 @@ public class TemplatePreparationObject {
                 InstanceGroup instanceGroup = hostGroup.getConstraint().getInstanceGroup();
                 if (instanceGroup != null) {
                     int volumeCount = instanceGroup.getTemplate() == null ? 1 : instanceGroup.getTemplate().getVolumeCount();
+                    Set<String> fqdns = instanceGroup.getAllInstanceMetaData().stream()
+                            .map(InstanceMetaData::getDiscoveryFQDN)
+                            .collect(Collectors.toSet());
                     hostgroupViews.add(new HostgroupView(hostGroup.getName(), volumeCount,
-                            instanceGroup.getInstanceGroupType(), instanceGroup.getNodeCount()));
+                            instanceGroup.getInstanceGroupType(), fqdns));
                 } else {
                     hostgroupViews.add(new HostgroupView(hostGroup.getName()));
                 }

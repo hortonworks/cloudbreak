@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate;
 
+import static java.util.stream.Collectors.toSet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -22,6 +23,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.HiveMetastoreConfigProvider;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -29,6 +31,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplateProcessor;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -67,12 +70,23 @@ public class CentralCmTemplateUpdaterTest {
         List<CmTemplateComponentConfigProvider> cmTemplateComponentConfigProviders = List.of(new HiveMetastoreConfigProvider());
         when(cmTemplateProcessorFactory.get(anyString())).thenAnswer(i -> new CmTemplateProcessor(i.getArgument(0)));
         when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
+        when(templatePreparationObject.getHostgroupViews()).thenReturn(toHostgroupViews(getHostgroupMappings()));
         when(templatePreparationObject.getGeneralClusterConfigs()).thenReturn(generalClusterConfigs);
         when(templatePreparationObject.getRdsConfigs()).thenReturn(getRdsConfigs());
         when(generalClusterConfigs.getClusterName()).thenReturn("testcluster");
         clouderaManagerRepo = new ClouderaManagerRepo();
         clouderaManagerRepo.setVersion("6.1.0");
         ReflectionTestUtils.setField(cmTemplateComponentConfigProcessor, "cmTemplateComponentConfigProviderList", cmTemplateComponentConfigProviders);
+    }
+
+    private static Set<HostgroupView> toHostgroupViews(Map<String, List<Map<String, String>>> hostgroupMappings) {
+        return hostgroupMappings.entrySet().stream()
+                .map(entry -> new HostgroupView(entry.getKey(), 0, InstanceGroupType.CORE,
+                    entry.getValue().stream()
+                        .map(each -> each.get(FQDN))
+                        .collect(toSet())
+                ))
+                .collect(toSet());
     }
 
     @Test

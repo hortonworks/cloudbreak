@@ -20,6 +20,7 @@ public final class HandlebarUtils {
         handlebars.registerHelper(ComponentPresentedHelper.NAME, ComponentPresentedHelper.INSTANCE);
         handlebars.registerHelper(NoEscapeHelper.NAME, NoEscapeHelper.INSTANCE);
         handlebars.registerHelper(IfNullHelper.NAME, IfNullHelper.INSTANCE);
+        handlebars.registerHelper(FormatJoinHelper.NAME, FormatJoinHelper.INSTANCE);
         handlebars.registerHelperMissing((context, options) -> options.fn.text());
         return handlebars;
     }

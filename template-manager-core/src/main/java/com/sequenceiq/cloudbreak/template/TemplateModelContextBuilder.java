@@ -1,11 +1,15 @@
 package com.sequenceiq.cloudbreak.template;
 
+import static java.util.stream.Collectors.toMap;
+
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedSet;
 
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -18,6 +22,7 @@ import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.template.views.GeneralClusterConfigsView;
 import com.sequenceiq.cloudbreak.template.views.HdfConfigView;
+import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.LdapView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
@@ -49,6 +54,8 @@ public class TemplateModelContextBuilder {
     private Map<String, Object> customInputs = new HashMap<>();
 
     private Map<String, Object> fixInputs = new HashMap<>();
+
+    private Map<String, SortedSet<String>> hostGroups = Collections.emptyMap();
 
     public TemplateModelContextBuilder withGeneralClusterConfigs(GeneralClusterConfigs generalClusterConfigs) {
         generalClusterConfigsView = new GeneralClusterConfigsView(generalClusterConfigs);
@@ -126,6 +133,14 @@ public class TemplateModelContextBuilder {
         return this;
     }
 
+    public TemplateModelContextBuilder withHostgroupViews(Set<HostgroupView> hostgroupViews) {
+        if (hostgroupViews != null) {
+            hostGroups = hostgroupViews.stream()
+                .collect(toMap(HostgroupView::getName, HostgroupView::getHosts));
+        }
+        return this;
+    }
+
     public TemplateModelContextBuilder withComponents(Set<String> components) {
         this.components = components;
         return this;
@@ -157,6 +172,7 @@ public class TemplateModelContextBuilder {
         templateModelContext.put(HandleBarModelKey.BLUEPRINT.modelKey(), blueprintView);
         templateModelContext.put(HandleBarModelKey.HDF.modelKey(), hdfConfigs.orElse(null));
         templateModelContext.put(HandleBarModelKey.GENERAL.modelKey(), generalClusterConfigsView);
+        templateModelContext.put(HandleBarModelKey.HOST_GROUPS.modelKey(), hostGroups);
         ModelConverterUtils.deepMerge(templateModelContext, ModelConverterUtils.convert(customInputs));
         ModelConverterUtils.deepMerge(templateModelContext, ModelConverterUtils.convert(fixInputs));
         templateModelContext.put(HandleBarModelKey.STACK_VERSION.modelKey(), "{{stack_version}}");

@@ -305,7 +305,7 @@ public class TestUtil {
         instanceMetaData.setAmbariServer(ambariServer);
         instanceMetaData.setConsulServer(true);
         instanceMetaData.setSshPort(22);
-        instanceMetaData.setDiscoveryFQDN("test-" + instanceGroupId + '-' + serverNumber);
+        instanceMetaData.setDiscoveryFQDN("test-" + instanceGroup.getGroupName() + "-" + instanceGroupId + '-' + serverNumber);
         instanceMetaData.setInstanceId("test-" + instanceGroupId + '-' + serverNumber);
         instanceMetaData.setPrivateIp("1.1." + instanceGroupId + '.' + serverNumber);
         instanceMetaData.setPublicIp("2.2." + instanceGroupId + '.' + serverNumber);

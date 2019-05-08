@@ -29,10 +29,18 @@
     ],
     "configurations": [
       {
+        "host-group-test": {
+          "hive.metastore.uris": "{{{format-join host_groups.master format="thrift://%s:9083" sep=","}}}",
+          "worker_hosts": "{{{format-join host_groups.worker sep=";"}}}",
+          "single_gateway_host": "{{{ host_groups.gateway }}}",
+          "gateway_https_url": "{{{format-join host_groups.gateway format="https://%s" }}}"
+        }
+      },
+      {
         "nifi-ambari-ssl-config": {
           "content": "{{{ hdf.nodeEntities }}}",
           "nifi.initial.admin.identity": "{{{ general.userName }}}"
-        },
+        }
       },
       {
         "total-custom-rds-conf": {

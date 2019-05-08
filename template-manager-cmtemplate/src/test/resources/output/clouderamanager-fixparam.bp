@@ -27,6 +27,14 @@
         {
           "name": "default_fs_name",
           "value": "hdfs"
+        },
+        {
+          "name": "kdc_hosts",
+          "value": "host1,host2"
+        },
+        {
+          "name": "atlas.kafka.bootstrap.servers",
+          "value": "host1:2189,host2:2189"
         }
       ]
     },

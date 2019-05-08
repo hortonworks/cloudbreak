@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.TemplateProcessor;
@@ -66,6 +67,7 @@ public class TemplateProcessorTest {
                 .withBlueprintView(new BlueprintView(testBlueprint, blueprintStackInfo.getVersion(),
                         blueprintStackInfo.getType(), ambariBlueprintTextProcessor))
                 .withFixInputs(properties)
+                .withHostgroups(cluster.getHostGroups())
                 .build();
 
         String result = underTest.process(testBlueprint, templatePreparationObject, Maps.newHashMap());
@@ -76,6 +78,10 @@ public class TemplateProcessorTest {
         assertTrue(result.contains("jdbc:postgresql://10.1.1.1:5432/ranger"));
         assertTrue(result.contains("cn=users,dc=example,dc=org"));
         assertTrue(result.contains("ldap://localhost:389"));
+        assertTrue(result.contains("\"hive.metastore.uris\": \"thrift://test-master-1-1:9083,thrift://test-master-1-2:9083\""));
+        assertTrue(result.contains("\"worker_hosts\": \"test-worker-1-1;test-worker-1-2\""));
+        assertTrue(result.contains("\"single_gateway_host\": \"test-gateway-1-1\""));
+        assertTrue(result.contains("\"gateway_https_url\": \"https://test-gateway-1-1\""));
         assertFalse(result.contains("cloud-storage-present"));
     }
 
@@ -299,6 +305,13 @@ public class TemplateProcessorTest {
         rdsConfigSet.add(hiveRds);
         rdsConfigSet.add(rdsConfig(DatabaseType.RANGER.name().toLowerCase()));
         cluster.setRdsConfigs(rdsConfigSet);
+
+        Set<HostGroup> hostGroups = new HashSet<>();
+        hostGroups.add(TestUtil.hostGroup("master", 2));
+        hostGroups.add(TestUtil.hostGroup("worker", 2));
+        hostGroups.add(TestUtil.hostGroup("gateway", 1));
+        cluster.setHostGroups(hostGroups);
+
         return cluster;
     }
 
