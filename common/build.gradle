@@ -20,9 +20,12 @@ dependencies {
   compile group: 'org.slf4j',                             name: 'slf4j-api',                      version: slf4jApiVersion
   compile group: 'io.micrometer',                         name: 'micrometer-core',                version: micrometerVersion
   compile group: 'org.apache.commons',                    name: 'commons-lang3',                  version: apacheCommonsLangVersion
+  compile group: 'commons-io',                            name: 'commons-io',                     version: apacheCommonsIoVersion
   compile group: 'com.google.guava',                      name: 'guava',                          version: guavaVersion
   compile group: 'io.projectreactor',                     name: 'reactor-stream',                 version: eventBusVersion
+  compile group: 'org.mybatis',                           name: 'mybatis-migrations',             version: '3.2.0'
 
+  compile group: 'org.springframework.boot',              name: 'spring-boot-autoconfigure',      version: springBootVersion
   compile group: 'org.springframework.boot',              name: 'spring-boot-starter-logging',    version: springBootVersion
   compile group: 'org.springframework',                   name: 'spring-beans',                   version: springFrameworkVersion
   compile group: 'org.springframework',                   name: 'spring-context',                 version: springFrameworkVersion

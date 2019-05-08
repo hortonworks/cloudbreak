@@ -19,6 +19,7 @@ repositories {
 
 dependencies {
   compile project(':core-api')
+  compile project(':common')
 
   implementation     group: 'com.google.code.gson',      name: 'gson'
   implementation     group: 'dnsjava',                   name: 'dnsjava'

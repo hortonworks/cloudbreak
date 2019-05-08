@@ -20,6 +20,7 @@ repositories {
 
 dependencies {
   compile project(':common')
+  compile project(':flow')
   
   compile     group: 'com.google.code.gson',      name: 'gson'
   compile     group: 'dnsjava',                   name: 'dnsjava'
