@@ -2,7 +2,7 @@ package com.sequenceiq.environment.env.api;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.environment.env.api.model.WelcomeResponse;
+import com.sequenceiq.environment.api.WelcomeResponse;
 
 @Controller
 public class EnvironmentController implements EnvironmentEndpoint {

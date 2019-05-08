@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.environment.env.api.EnvironmentController;
-import com.sequenceiq.environment.env.api.model.EnvironmentApi;
+import com.sequenceiq.environment.api.environment.model.EnvironmentApi;
 import com.sequenceiq.environment.exception.mapper.DefaultExceptionMapper;
 import com.sequenceiq.environment.exception.mapper.WebApplicaitonExceptionMapper;
 

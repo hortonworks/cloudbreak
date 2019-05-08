@@ -14,7 +14,7 @@ import javax.ws.rs.ext.ExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.environment.env.api.model.ExceptionResponse;
+import com.sequenceiq.environment.api.ExceptionResponse;
 
 import ch.qos.logback.classic.Level;
 
