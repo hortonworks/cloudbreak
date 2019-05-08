@@ -123,7 +123,7 @@ public class DatabaseConfig {
     public EntityManagerFactory entityManagerFactory() throws SQLException {
         LocalContainerEntityManagerFactoryBean entityManagerFactory = new LocalContainerEntityManagerFactoryBean();
 
-        entityManagerFactory.setPackagesToScan("com.sequenceiq.environment", "com.sequenceiq.cloudbreak.repository");
+        entityManagerFactory.setPackagesToScan("com.sequenceiq.environment", "com.sequenceiq.cloudbreak");
         entityManagerFactory.setDataSource(dataSource());
 
         entityManagerFactory.setJpaVendorAdapter(jpaVendorAdapter());

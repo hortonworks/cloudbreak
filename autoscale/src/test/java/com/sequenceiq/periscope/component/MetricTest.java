@@ -64,6 +64,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.common.dbmigration.CommonDatabaseMigrationConfig;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.service.TransactionExecutorService;
 import com.sequenceiq.cloudbreak.conf.VaultConfig;
@@ -73,7 +74,6 @@ import com.sequenceiq.periscope.PeriscopeApplication;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.config.DatabaseConfig;
-import com.sequenceiq.periscope.config.DatabaseMigrationConfig;
 import com.sequenceiq.periscope.controller.AutoScaleClusterV1Controller;
 import com.sequenceiq.periscope.controller.AutoScaleClusterV2Controller;
 import com.sequenceiq.periscope.domain.Ambari;
@@ -449,7 +449,7 @@ public class MetricTest {
                     type = FilterType.ASSIGNABLE_TYPE,
                     value = {
                             DatabaseConfig.class,
-                            DatabaseMigrationConfig.class,
+                            CommonDatabaseMigrationConfig.class,
                             PeriscopeApplication.class,
                             MetricService.class,
                             VaultConfig.class
