@@ -1,5 +1,5 @@
 plugins {
-    id 'java'
+  id 'java'
 }
 
 group 'com.sequenceiq'
@@ -8,9 +8,10 @@ version 'unspecified'
 sourceCompatibility = 1.8
 
 repositories {
-    mavenCentral()
+  mavenCentral()
 }
 
 dependencies {
-    compile     group: 'io.swagger',                name: 'swagger-jersey2-jaxrs',  version: "1.5.21"
+  compile group: 'io.swagger', name: 'swagger-jersey2-jaxrs', version: "1.5.21"
+  compile group: 'javax.validation', name: 'validation-api', version: '2.0.1.Final'
 }

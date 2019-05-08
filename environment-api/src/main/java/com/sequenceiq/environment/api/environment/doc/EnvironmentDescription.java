@@ -11,6 +11,7 @@ public class EnvironmentDescription {
     public static final String REGISTER_EXTERNAL_DATALAKE = "Register external datalake";
     public static final String EDIT = "Edit and environment. Location, regions and description can be changed.";
     public static final String DATALAKE_PREREQUISITES = "returns datalake prerequisites";
+    public static final String ENVIRONMENTS = "Environments of the resource";
 
     public static final String ENVIRONMENT_NOTES = "Environment consists of a credential and various other resources and enables users to quickly "
             + "create clusters in given regions in a given cloud provider.";
