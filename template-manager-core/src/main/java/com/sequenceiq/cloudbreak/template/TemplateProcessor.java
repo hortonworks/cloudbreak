@@ -59,6 +59,7 @@ public class TemplateProcessor {
                 .withComponents(source.getBlueprintView().getComponents())
                 .withGateway(source.getGatewayView())
                 .withBlueprintView(source.getBlueprintView())
+                .withHostgroupViews(source.getHostgroupViews())
                 .withRdsConfigs(source.getRdsConfigs())
                 .withFileSystemConfigs(source.getFileSystemConfigurationView().orElse(null))
                 .withCustomInputs(source.getCustomInputs())

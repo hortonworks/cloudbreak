@@ -27,6 +27,14 @@
         {
           "name": "default_fs_name",
           "value": "hdfs"
+        },
+        {
+          "name": "kdc_hosts",
+          "value": "{{{ host_groups.master }}}"
+        },
+        {
+          "name": "atlas.kafka.bootstrap.servers",
+          "value": "{{{format-join host_groups.master format="%s:2189"}}}"
         }
       ]
     },

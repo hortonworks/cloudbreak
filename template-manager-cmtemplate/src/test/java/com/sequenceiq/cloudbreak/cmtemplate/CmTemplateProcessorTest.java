@@ -32,7 +32,6 @@ public class CmTemplateProcessorTest {
 
     @Test
     public void testAddServiceConfigs() {
-        getBlueprintText("input/clouderamanager.bp");
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
         configs.add(new ApiClusterTemplateConfig().name("hive_metastore_database_type").variable("hive-hive_metastore_database_type"));
@@ -48,7 +47,6 @@ public class CmTemplateProcessorTest {
 
     @Test
     public void testAddRoleConfigs() {
-        getBlueprintText("input/clouderamanager.bp");
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
         Map<String, List<ApiClusterTemplateConfig>> configs = new HashMap<>();
         configs.put("hdfs-NAMENODE-BASE", List.of(new ApiClusterTemplateConfig().name("dfs_name_dir_list").variable("master_NAMENODE")));
@@ -70,7 +68,6 @@ public class CmTemplateProcessorTest {
 
     @Test
     public void testAddRoleConfigsWithNoMatchinRefName() {
-        getBlueprintText("input/clouderamanager.bp");
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
         Map<String, List<ApiClusterTemplateConfig>> configs = new HashMap<>();
         configs.put("hdfs-NAMENODE-nomatch", List.of(new ApiClusterTemplateConfig().name("dfs_name_dir_list").variable("master_NAMENODE")));
@@ -90,7 +87,6 @@ public class CmTemplateProcessorTest {
 
     @Test
     public void testAddRoleConfigsWithExistingConfig() {
-        getBlueprintText("input/clouderamanager.bp");
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-existing-conf.bp"));
         Map<String, List<ApiClusterTemplateConfig>> configs = new HashMap<>();
         configs.put("hdfs-NAMENODE-BASE", List.of(new ApiClusterTemplateConfig().name("dfs_name_dir_list").variable("master_NAMENODE")));
@@ -119,7 +115,6 @@ public class CmTemplateProcessorTest {
 
     @Test
     public void testIsRoleTypePresentInServiceWithSingleRole() {
-        getBlueprintText("input/clouderamanager.bp");
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
 
         boolean present = underTest.isRoleTypePresentInService("HDFS", List.of("NAMENODE"));
@@ -129,7 +124,6 @@ public class CmTemplateProcessorTest {
 
     @Test
     public void testIsRoleTypePresentInServiceWithMultipleRole() {
-        getBlueprintText("input/clouderamanager.bp");
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
 
         boolean present = underTest.isRoleTypePresentInService("HDFS", List.of("DATANODE", "NAMENODE"));
@@ -139,7 +133,6 @@ public class CmTemplateProcessorTest {
 
     @Test
     public void testIsRoleTypePresentInServiceWithFakeRole() {
-        getBlueprintText("input/clouderamanager.bp");
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
 
         boolean present = underTest.isRoleTypePresentInService("HDFS", List.of("MYROLE"));
@@ -149,7 +142,6 @@ public class CmTemplateProcessorTest {
 
     @Test
     public void testAddInstantiatorWithBaseRoles() {
-        getBlueprintText("input/clouderamanager.bp");
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
         ClouderaManagerRepo clouderaManagerRepoDetails = new ClouderaManagerRepo();
         clouderaManagerRepoDetails.setVersion(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_6_3_0.getVersion());
@@ -170,7 +162,6 @@ public class CmTemplateProcessorTest {
 
     @Test
     public void testAddInstantiatorWithoutBaseRoles() {
-        getBlueprintText("input/clouderamanager.bp");
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-custom-ref.bp"));
         ClouderaManagerRepo clouderaManagerRepoDetails = new ClouderaManagerRepo();
         clouderaManagerRepoDetails.setVersion(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_6_3_0.getVersion());

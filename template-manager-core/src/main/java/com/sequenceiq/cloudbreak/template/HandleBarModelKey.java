@@ -16,6 +16,7 @@ public enum HandleBarModelKey {
     BLUEPRINT("blueprint"),
     HDF("hdf"),
     GENERAL("general"),
+    HOST_GROUPS("host_groups"),
     STACK_VERSION("stack_version");
 
     private final String modelKey;
