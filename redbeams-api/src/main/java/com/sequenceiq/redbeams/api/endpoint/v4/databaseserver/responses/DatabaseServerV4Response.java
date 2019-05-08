@@ -4,12 +4,11 @@ package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
+import com.sequenceiq.secret.model.SecretResponse;
 // import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.base.DatabaseServerV4Base;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
-// import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfigModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -21,13 +20,6 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
 
-    // FIXME
-    // @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
-    // private WorkspaceResourceV4Response workspace;
-
-    // @ApiModelProperty(RDSConfigModelDescription.CLUSTER_NAMES)
-    // private Set<String> clusterNames;
-
     @ApiModelProperty(value = DatabaseServer.DATABASE_VENDOR_DISPLAY_NAME, required = true)
     private String databaseVendorDisplayName;
 
@@ -35,10 +27,10 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
     private String connectionDriver;
 
     @ApiModelProperty(DatabaseServer.CONNECTION_USER_NAME)
-    private SecretV4Response connectionUserName;
+    private SecretResponse connectionUserName;
 
     @ApiModelProperty(DatabaseServer.CONNECTION_PASSWORD)
-    private SecretV4Response connectionPassword;
+    private SecretResponse connectionPassword;
 
     @ApiModelProperty(ModelDescriptions.CREATION_DATE)
     private Long creationDate;
@@ -67,19 +59,19 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
         this.connectionDriver = connectionDriver;
     }
 
-    public SecretV4Response getConnectionUserName() {
+    public SecretResponse getConnectionUserName() {
         return connectionUserName;
     }
 
-    public void setConnectionUserName(SecretV4Response connectionUserName) {
+    public void setConnectionUserName(SecretResponse connectionUserName) {
         this.connectionUserName = connectionUserName;
     }
 
-    public SecretV4Response getConnectionPassword() {
+    public SecretResponse getConnectionPassword() {
         return connectionPassword;
     }
 
-    public void setConnectionPassword(SecretV4Response connectionPassword) {
+    public void setConnectionPassword(SecretResponse connectionPassword) {
         this.connectionPassword = connectionPassword;
     }
 
@@ -90,20 +82,4 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
     public void setCreationDate(Long creationDate) {
         this.creationDate = creationDate;
     }
-
-    // public Set<String> getClusterNames() {
-    //     return clusterNames;
-    // }
-
-    // public void setClusterNames(Set<String> clusterNames) {
-    //     this.clusterNames = clusterNames;
-    // }
-
-    // public WorkspaceResourceV4Response getWorkspace() {
-    //     return workspace;
-    // }
-
-    // public void setWorkspace(WorkspaceResourceV4Response workspace) {
-    //     this.workspace = workspace;
-    // }
 }

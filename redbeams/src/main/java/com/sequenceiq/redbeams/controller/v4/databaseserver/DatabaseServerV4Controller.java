@@ -20,6 +20,8 @@ import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigServic
 @Transactional(TxType.NEVER)
 public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
+    static final Long DEFAULT_WORKSPACE = 0L;
+
     @Inject
     private DatabaseServerConfigService databaseServerConfigService;
 
@@ -27,33 +29,36 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     private ConverterUtil converterUtil;
 
     @Override
-    public DatabaseServerV4Responses list(Long workspaceId, String environmentId, Boolean attachGlobal) {
-        Set<DatabaseServerConfig> all = databaseServerConfigService.findAllInWorkspaceAndEnvironment(workspaceId, environmentId, attachGlobal);
+    public DatabaseServerV4Responses list(String environmentId, Boolean attachGlobal) {
+        Set<DatabaseServerConfig> all = databaseServerConfigService.findAllInWorkspaceAndEnvironment(DEFAULT_WORKSPACE, environmentId, attachGlobal);
         return new DatabaseServerV4Responses(converterUtil.convertAllAsSet(all, DatabaseServerV4Response.class));
     }
 
     @Override
-    public DatabaseServerV4Response get(Long workspaceId, String name) {
-        DatabaseServerV4Response response = new DatabaseServerV4Response();
-        response.setId(-1L);
-        response.setName(name);
-        return response;
+    public DatabaseServerV4Response get(String name) {
+        DatabaseServerConfig server = databaseServerConfigService.getByNameInWorkspace(DEFAULT_WORKSPACE, name);
+        return converterUtil.convert(server, DatabaseServerV4Response.class);
     }
 
     @Override
-    public DatabaseServerV4Response register(Long workspaceId, DatabaseServerV4Request request) {
-        DatabaseServerV4Response response = new DatabaseServerV4Response();
-        response.setId(-1L);
-        response.setName(request.getName());
-        return response;
+    public DatabaseServerV4Response register(DatabaseServerV4Request request) {
+        DatabaseServerConfig server = databaseServerConfigService.create(converterUtil.convert(request, DatabaseServerConfig.class), DEFAULT_WORKSPACE);
+        //notify(ResourceEvent.DATABASE_SERVER_CONFIG_CREATED);
+        return converterUtil.convert(server, DatabaseServerV4Response.class);
     }
 
     @Override
-    public DatabaseServerV4Response delete(Long workspaceId, String name) {
-        DatabaseServerV4Response response = new DatabaseServerV4Response();
-        response.setId(-1L);
-        response.setName(name);
-        return response;
+    public DatabaseServerV4Response delete(String name) {
+        DatabaseServerConfig deleted = databaseServerConfigService.deleteByNameInWorkspace(DEFAULT_WORKSPACE, name);
+        //notify(ResourceEvent.DATABASE_SERVER_CONFIG_DELETED);
+        return converterUtil.convert(deleted, DatabaseServerV4Response.class);
+    }
+
+    @Override
+    public DatabaseServerV4Responses deleteMultiple(Set<String> names) {
+        Set<DatabaseServerConfig> deleted = databaseServerConfigService.deleteMultipleByNameInWorkspace(DEFAULT_WORKSPACE, names);
+        //notify(ResourceEvent.DATABASE_SERVER_CONFIG_DELETED);
+        return new DatabaseServerV4Responses(converterUtil.convertAllAsSet(deleted, DatabaseServerV4Response.class));
     }
 
 }

@@ -3,8 +3,6 @@ package com.sequenceiq.redbeams.doc;
 public final class ModelDescriptions {
 
     public static final String ID = "ID of the resource";
-    // public static final String WORKSPACE_OF_THE_RESOURCE = "workspace of the resource";
-    // public static final String WORKSPACE_ID = "Workspace ID of the resource";
     public static final String DESCRIPTION = "Description of the resource";
     public static final String CREATION_DATE = "Creation date / time of the resource, in epoch milliseconds";
     public static final String ENVIRONMENT_ID = "ID of the environment of the resource";
