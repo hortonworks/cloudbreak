@@ -5,6 +5,7 @@ import java.util.Set;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
@@ -15,6 +16,9 @@ import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 @Transactional(TxType.REQUIRED)
 public interface DatabaseServerConfigRepository extends CrudRepository<DatabaseServerConfig, Long> {
 
-    Set<DatabaseServerConfig> findAllByWorkspaceId(Long workspaceId);
+    @Query("SELECT s FROM DatabaseServerConfig s WHERE"
+            + " s.workspaceId = :workspaceId AND s.environmentId = :environmentId"
+            + " AND s.resourceStatus = 'USER_MANAGED'")
+    Set<DatabaseServerConfig> findAllByWorkspaceIdAndEnvironmentId(Long workspaceId, String environmentId);
 
 }

@@ -28,8 +28,8 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     private ConverterUtil converterUtil;
 
     @Override
-    public DatabaseServerV4Responses list(Long workspaceId, String environment, Boolean attachGlobal) {
-        Set<DatabaseServerConfig> all = databaseServerConfigService.findAllInWorkspaceAndEnvironment(workspaceId, environment, attachGlobal);
+    public DatabaseServerV4Responses list(Long workspaceId, String environmentId, Boolean attachGlobal) {
+        Set<DatabaseServerConfig> all = databaseServerConfigService.findAllInWorkspaceAndEnvironment(workspaceId, environmentId, attachGlobal);
         return new DatabaseServerV4Responses(converterUtil.convertAllAsSet(all, DatabaseServerV4Response.class));
     }
 

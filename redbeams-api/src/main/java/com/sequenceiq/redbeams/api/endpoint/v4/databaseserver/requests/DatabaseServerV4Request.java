@@ -15,11 +15,6 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DatabaseServerV4Request extends DatabaseServerV4Base {
 
-    // FIXME maybe move to base
-    @NotNull
-    @ApiModelProperty(value = DatabaseServer.DATABASE_VENDOR, required = true)
-    private String databaseVendor;
-
     @NotNull
     @ApiModelProperty(value = DatabaseServer.CONNECTION_USER_NAME, required = true)
     private String connectionUserName;
@@ -30,14 +25,6 @@ public class DatabaseServerV4Request extends DatabaseServerV4Base {
 
     // @ApiModelProperty(Database.ORACLE)
     // private OracleParameters oracle;
-
-    public String getDatabaseVendor() {
-        return databaseVendor;
-    }
-
-    public void setDatabaseVendor(String databaseVendor) {
-        this.databaseVendor = databaseVendor;
-    }
 
     public String getConnectionUserName() {
         return connectionUserName;

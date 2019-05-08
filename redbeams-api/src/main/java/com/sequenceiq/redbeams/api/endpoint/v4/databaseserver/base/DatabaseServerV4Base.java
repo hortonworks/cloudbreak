@@ -1,8 +1,5 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.base;
 
-// import java.util.HashSet;
-// import java.util.Set;
-
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -38,11 +35,15 @@ public abstract class DatabaseServerV4Base implements JsonEntity {
     @ApiModelProperty(value = DatabaseServer.PORT, required = true)
     private Integer port;
 
+    @NotNull
+    @ApiModelProperty(value = DatabaseServer.DATABASE_VENDOR, required = true)
+    private String databaseVendor;
+
     @ApiModelProperty(DatabaseServer.CONNECTOR_JAR_URL)
     private String connectorJarUrl;
 
-    // @ApiModelProperty(ModelDescriptions.ENVIRONMENTS)
-    // private Set<String> environments = new HashSet<>();
+    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_ID, required = true)
+    private String environmentId;
 
     public String getName() {
         return name;
@@ -76,6 +77,14 @@ public abstract class DatabaseServerV4Base implements JsonEntity {
         this.port = port;
     }
 
+    public String getDatabaseVendor() {
+        return databaseVendor;
+    }
+
+    public void setDatabaseVendor(String databaseVendor) {
+        this.databaseVendor = databaseVendor;
+    }
+
     public String getConnectorJarUrl() {
         return connectorJarUrl;
     }
@@ -84,11 +93,11 @@ public abstract class DatabaseServerV4Base implements JsonEntity {
         this.connectorJarUrl = connectorJarUrl;
     }
 
-// public Set<String> getEnvironments() {
-//     return environments;
-// }
+    public String getEnvironmentId() {
+        return environmentId;
+    }
 
-// public void setEnvironments(Set<String> environments) {
-//     this.environments = environments == null ? new HashSet<>() : environments;
-// }
+    public void setEnvironmentId(String environmentId) {
+        this.environmentId = environmentId;
+    }
 }

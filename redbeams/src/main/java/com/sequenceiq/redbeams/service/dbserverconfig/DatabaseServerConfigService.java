@@ -19,8 +19,8 @@ public class DatabaseServerConfigService {
     @Inject
     private DatabaseServerConfigRepository repository;
 
-    public Set<DatabaseServerConfig> findAllInWorkspaceAndEnvironment(Long workspaceId, String environment, Boolean attachGlobal) {
-        return repository.findAllByWorkspaceId(workspaceId);
+    public Set<DatabaseServerConfig> findAllInWorkspaceAndEnvironment(Long workspaceId, String environmentId, Boolean attachGlobal) {
+        return repository.findAllByWorkspaceIdAndEnvironmentId(workspaceId, environmentId);
     }
 
 }

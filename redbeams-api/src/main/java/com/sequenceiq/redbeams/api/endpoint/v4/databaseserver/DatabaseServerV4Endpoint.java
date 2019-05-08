@@ -15,7 +15,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 //
 import com.sequenceiq.cloudbreak.doc.ContentType;
-//import com.sequenceiq.redbeams.api.endpoint.v4.common.EnvironmentNames;
+//import com.sequenceiq.redbeams.api.endpoint.v4.common.EnvironmentIds;
 //import com.sequenceiq.redbeams.api.endpoint.v4.database.requests.DatabaseTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
 //import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseTestV4Response;
@@ -40,7 +40,7 @@ public interface DatabaseServerV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.LIST_BY_WORKSPACE, produces = ContentType.JSON, notes = Notes.DATABASE_SERVER_NOTES,
         nickname = "listDatabasesServersByWorkspace")
-    DatabaseServerV4Responses list(@PathParam("workspaceId") Long workspaceId, @QueryParam("environment") String environment,
+    DatabaseServerV4Responses list(@PathParam("workspaceId") Long workspaceId, @QueryParam("environmentId") String environmentId,
         @QueryParam("attachGlobal") @DefaultValue("false") Boolean attachGlobal);
 
     @GET
