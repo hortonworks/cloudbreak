@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.newway.dto;
 
+import java.util.List;
+
 import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
@@ -23,11 +25,21 @@ public class ClouderaManagerTestDto extends AbstractCloudbreakTestDto<ClouderaMa
 
     public ClouderaManagerTestDto withClouderaManagerRepository(String key) {
         ClouderaManagerRepositoryTestDto repositoryEntity = getTestContext().get(key);
-        return withStackRepository(repositoryEntity);
+        return withClouderaManagerRepository(repositoryEntity);
     }
 
-    public ClouderaManagerTestDto withStackRepository(ClouderaManagerRepositoryTestDto clouderaManagerRepositoryEntity) {
+    public ClouderaManagerTestDto withClouderaManagerRepository(ClouderaManagerRepositoryTestDto clouderaManagerRepositoryEntity) {
         getRequest().setRepository(clouderaManagerRepositoryEntity.getRequest());
+        return this;
+    }
+
+    public ClouderaManagerTestDto withClouderaManagerProduct(String key) {
+        ClouderaManagerProductTestDto repositoryEntity = getTestContext().get(key);
+        return withClouderaManagerProduct(repositoryEntity);
+    }
+
+    public ClouderaManagerTestDto withClouderaManagerProduct(ClouderaManagerProductTestDto clouderaManagerProductEntity) {
+        getRequest().setProducts(List.of(clouderaManagerProductEntity.getRequest()));
         return this;
     }
 }

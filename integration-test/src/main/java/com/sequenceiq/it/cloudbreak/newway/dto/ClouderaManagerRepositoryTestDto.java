@@ -9,7 +9,7 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 public class ClouderaManagerRepositoryTestDto
         extends AbstractCloudbreakTestDto<ClouderaManagerRepositoryV4Request, ClouderaManagerRepositoryV4Response, ClouderaManagerRepositoryTestDto> {
 
-    protected ClouderaManagerRepositoryTestDto(TestContext testContext) {
+    public ClouderaManagerRepositoryTestDto(TestContext testContext) {
         super(new ClouderaManagerRepositoryV4Request(), testContext);
     }
 
@@ -20,6 +20,11 @@ public class ClouderaManagerRepositoryTestDto
 
     public ClouderaManagerRepositoryTestDto withVersion(String version) {
         getRequest().setVersion(version);
+        return this;
+    }
+
+    public ClouderaManagerRepositoryTestDto withBaseUrl(String baseUrl) {
+        getRequest().setBaseUrl(baseUrl);
         return this;
     }
 }
