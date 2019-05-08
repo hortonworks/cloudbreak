@@ -118,8 +118,7 @@ public class DatabaseConfig {
     public EntityManagerFactory entityManagerFactory() throws SQLException {
         LocalContainerEntityManagerFactoryBean entityManagerFactory = new LocalContainerEntityManagerFactoryBean();
 
-        // FIXME: redbeams - yep, need to move, or else tables missing for all the other domain objects!
-        entityManagerFactory.setPackagesToScan("com.sequenceiq");
+        entityManagerFactory.setPackagesToScan("com.sequenceiq.redbeams");
         entityManagerFactory.setDataSource(dataSource());
 
         entityManagerFactory.setJpaVendorAdapter(jpaVendorAdapter());

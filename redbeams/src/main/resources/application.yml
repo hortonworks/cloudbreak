@@ -46,6 +46,10 @@ cert:
   validation: true
   ignorePreValidation: false
 
+secret:
+  application: cb/shared
+  engine: "com.sequenceiq.secret.vault.VaultKvV2Engine"
+
 vault:
   addr: vault.service.consul
   port: 8200

@@ -13,7 +13,11 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
     "com.sequenceiq.cloudbreak.api.util",
     "com.sequenceiq.cloudbreak.conf",
     "com.sequenceiq.cloudbreak.config",
-    "com.sequenceiq.cloudbreak.cache.common" },
+    "com.sequenceiq.cloudbreak.cache.common",
+    "com.sequenceiq.secret.service",
+    "com.sequenceiq.secret.vault",
+    "com.sequenceiq.cloudbreak.common.service",
+    "com.sequenceiq.cloudbreak.common.dbmigration" },
     exclude = WebMvcMetricsAutoConfiguration.class)
 public class RedbeamsApplication {
 

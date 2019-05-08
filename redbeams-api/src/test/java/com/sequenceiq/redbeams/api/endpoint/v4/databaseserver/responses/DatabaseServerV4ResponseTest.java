@@ -2,7 +2,7 @@ package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses;
 
 import static org.junit.Assert.assertEquals;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
+import com.sequenceiq.secret.model.SecretResponse;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,13 +27,13 @@ public class DatabaseServerV4ResponseTest {
         response.setConnectionDriver("postgresql.jar");
         assertEquals("postgresql.jar", response.getConnectionDriver());
 
-        SecretV4Response username = new SecretV4Response("engine", "username");
+        SecretResponse username = new SecretResponse("engine", "username");
         response.setConnectionUserName(username);
-        verifyEqualSecretV4Responses(username, response.getConnectionUserName());
+        verifyEqualSecretResponses(username, response.getConnectionUserName());
 
-        SecretV4Response password = new SecretV4Response("engine", "password");
+        SecretResponse password = new SecretResponse("engine", "password");
         response.setConnectionPassword(password);
-        verifyEqualSecretV4Responses(password, response.getConnectionPassword());
+        verifyEqualSecretResponses(password, response.getConnectionPassword());
 
         long now = System.currentTimeMillis();
         response.setCreationDate(now);
@@ -41,7 +41,7 @@ public class DatabaseServerV4ResponseTest {
 
     }
 
-    private static void verifyEqualSecretV4Responses(SecretV4Response expected, SecretV4Response actual) {
+    private static void verifyEqualSecretResponses(SecretResponse expected, SecretResponse actual) {
         assertEquals(expected.getEnginePath(), actual.getEnginePath());
         assertEquals(expected.getSecretPath(), actual.getSecretPath());
     }

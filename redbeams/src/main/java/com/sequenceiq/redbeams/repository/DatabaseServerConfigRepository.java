@@ -1,5 +1,6 @@
 package com.sequenceiq.redbeams.repository;
 
+import java.util.Optional;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -20,5 +21,9 @@ public interface DatabaseServerConfigRepository extends CrudRepository<DatabaseS
             + " s.workspaceId = :workspaceId AND s.environmentId = :environmentId"
             + " AND s.resourceStatus = 'USER_MANAGED'")
     Set<DatabaseServerConfig> findAllByWorkspaceIdAndEnvironmentId(Long workspaceId, String environmentId);
+
+    Optional<DatabaseServerConfig> findByNameAndWorkspaceId(String name, Long workspaceId);
+
+    Set<DatabaseServerConfig> findByNameInAndWorkspaceId(Set<String> names, Long workspaceId);
 
 }
