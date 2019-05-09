@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.environment.api.environment.model.EnvironmentApi;
+import com.sequenceiq.environment.api.EnvironmentApi;
 
 import springfox.documentation.swagger.web.InMemorySwaggerResourcesProvider;
 import springfox.documentation.swagger.web.SwaggerResource;
