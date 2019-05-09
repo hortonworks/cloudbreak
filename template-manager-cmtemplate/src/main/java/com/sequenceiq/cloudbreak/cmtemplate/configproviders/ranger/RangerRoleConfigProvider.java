@@ -30,7 +30,7 @@ public class RangerRoleConfigProvider extends AbstractRoleConfigConfigProvider {
                 roleConfigs.add(new ApiClusterTemplateConfig().name("ranger_database_name").variable("ranger-ranger_database_name"));
                 roleConfigs.add(new ApiClusterTemplateConfig().name("ranger_database_type").variable("ranger-ranger_database_type"));
                 roleConfigs.add(new ApiClusterTemplateConfig().name("ranger_database_user").variable("ranger-ranger_database_user"));
-                roleConfigs.add(new ApiClusterTemplateConfig().name("ranger_database_user_password").variable("ranger-ranger_database_user_password"));
+                roleConfigs.add(new ApiClusterTemplateConfig().name("ranger_database_password").variable("ranger-ranger_database_password"));
                 break;
             default:
                 break;
@@ -50,7 +50,7 @@ public class RangerRoleConfigProvider extends AbstractRoleConfigConfigProvider {
                 variables.add(new ApiClusterTemplateVariable().name("ranger-ranger_database_name").value(rangerRdsView.getDatabaseName()));
                 variables.add(new ApiClusterTemplateVariable().name("ranger-ranger_database_type").value(rangerRdsView.getSubprotocol()));
                 variables.add(new ApiClusterTemplateVariable().name("ranger-ranger_database_user").value(rangerRdsView.getConnectionUserName()));
-                variables.add(new ApiClusterTemplateVariable().name("ranger-ranger_database_user_password").value(rangerRdsView.getConnectionPassword()));
+                variables.add(new ApiClusterTemplateVariable().name("ranger-ranger_database_password").value(rangerRdsView.getConnectionPassword()));
                 break;
             default:
                 break;
