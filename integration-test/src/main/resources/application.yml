@@ -27,8 +27,8 @@ integrationtest:
     region: eu-west-1
     location: eu-west-1
     availabilityZone: eu-west-1a
-    vpcId: vpc-5e68eb3a
-    subnetId: subnet-87b729f1
+    vpcId: vpc-071202b5656f08a83
+    subnetId: subnet-02d25e06bb8bcce9e
     publicKeyId: api-e2e-test
     credential:
       type: key
