@@ -160,14 +160,14 @@ public class OperationDescriptions {
 
     public static class DatabaseOpDescription {
         public static final String POST_CONNECTION_TEST = "test RDS connectivity";
-        public static final String LIST_BY_WORKSPACE = "list RDS configs for the given workspace";
-        public static final String GET_BY_NAME_IN_WORKSPACE = "get RDS config by name in workspace";
-        public static final String CREATE_IN_WORKSPACE = "create RDS config in workspace";
-        public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete RDS config by name in workspace";
-        public static final String DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE = "delete multiple RDS configs by name in workspace";
-        public static final String GET_REQUEST_IN_WORKSPACE = "get request in workspace";
-        public static final String ATTACH_TO_ENVIRONMENTS = "attach RDS resource to environemnts";
-        public static final String DETACH_FROM_ENVIRONMENTS = "detach RDS resource from environemnts";
+        public static final String LIST = "list RDS configs";
+        public static final String GET_BY_NAME = "get RDS config by name";
+        public static final String CREATE = "create RDS config";
+        public static final String DELETE_BY_NAME = "delete RDS config by name";
+        public static final String DELETE_MULTIPLE_BY_NAME = "delete multiple RDS configs by name";
+        public static final String GET_REQUEST = "get request";
+        public static final String ATTACH_TO_ENVIRONMENTS = "attach RDS resource to environments";
+        public static final String DETACH_FROM_ENVIRONMENTS = "detach RDS resource from environments";
     }
 
     public static class ProxyConfigOpDescription {
