@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerE
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StackRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
+import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 
 @Component
 public class StackRepairFlowEventChainFactory implements FlowEventChainFactory<StackRepairTriggerEvent> {

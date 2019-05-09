@@ -7,8 +7,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableSwagger2
-@EnableJpaRepositories(basePackages = { "com.sequenceiq.cloudbreak", "com.sequenceiq.freeipa.repository" })
-@SpringBootApplication(scanBasePackages = {"com.sequenceiq.freeipa", "com.sequenceiq.cloudbreak"})
+@EnableJpaRepositories(basePackages = { "com.sequenceiq" })
+@SpringBootApplication(scanBasePackages = { "com.sequenceiq" })
 public class FreeIpaApplication {
 
     public static void main(String[] args) {

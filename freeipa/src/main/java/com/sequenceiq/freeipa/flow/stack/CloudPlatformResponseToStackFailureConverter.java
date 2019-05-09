@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
-import com.sequenceiq.cloudbreak.core.flow2.PayloadConverter;
+import com.sequenceiq.flow.core.PayloadConverter;
 
 public class CloudPlatformResponseToStackFailureConverter implements PayloadConverter<StackFailureEvent> {
     @Override

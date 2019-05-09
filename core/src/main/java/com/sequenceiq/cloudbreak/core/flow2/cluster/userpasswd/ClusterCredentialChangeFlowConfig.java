@@ -16,8 +16,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
-import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class ClusterCredentialChangeFlowConfig extends AbstractFlowConfiguration<ClusterCredentialChangeState, ClusterCredentialChangeEvent> {

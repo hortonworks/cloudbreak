@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.termination;
 
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
-import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
+import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.freeipa.flow.event.EventSelectorUtil;
 
 public enum StackTerminationEvent implements FlowEvent {

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.userpasswd;
 
-import com.sequenceiq.cloudbreak.core.flow2.FlowState;
+import com.sequenceiq.flow.core.FlowState;
 
 public enum ClusterCredentialChangeState implements FlowState {
     INIT_STATE,

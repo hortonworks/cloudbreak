@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminati
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
+import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 
 @Component
 public class ProperTerminationFlowEventChainFactory implements FlowEventChainFactory<TerminationEvent> {

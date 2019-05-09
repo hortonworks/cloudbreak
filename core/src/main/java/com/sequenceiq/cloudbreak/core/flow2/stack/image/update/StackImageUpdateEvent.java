@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateImageResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
-import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
+import com.sequenceiq.flow.core.FlowEvent;
 
 public enum StackImageUpdateEvent implements FlowEvent {
     STACK_IMAGE_UPDATE_EVENT("STACK_IMAGE_UPDATE_EVENT"),

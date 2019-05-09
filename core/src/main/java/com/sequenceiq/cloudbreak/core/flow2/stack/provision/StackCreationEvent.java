@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.ValidationResult;
-import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
+import com.sequenceiq.flow.core.FlowEvent;
 
 public enum StackCreationEvent implements FlowEvent {
     START_CREATION_EVENT("STACK_PROVISION_TRIGGER_EVENT"),

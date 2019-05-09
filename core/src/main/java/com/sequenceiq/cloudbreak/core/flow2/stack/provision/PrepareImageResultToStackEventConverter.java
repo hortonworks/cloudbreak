@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.provision;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
-import com.sequenceiq.cloudbreak.core.flow2.PayloadConverter;
+import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 public class PrepareImageResultToStackEventConverter implements PayloadConverter<StackEvent> {

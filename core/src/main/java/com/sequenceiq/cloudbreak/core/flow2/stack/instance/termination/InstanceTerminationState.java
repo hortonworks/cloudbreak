@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.instance.termination;
 
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
-import com.sequenceiq.cloudbreak.core.flow2.FlowState;
+import com.sequenceiq.flow.core.FlowState;
 
 enum InstanceTerminationState implements FlowState {
 

@@ -55,7 +55,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import reactor.Environment;
 
 @Configuration
-@ComponentScans({ @ComponentScan("com.sequenceiq.cloudbreak.cloud"), @ComponentScan("com.sequenceiq.cloudbreak.reactor")})
+@ComponentScans({ @ComponentScan("com.sequenceiq.cloudbreak.cloud"), @ComponentScan("com.sequenceiq.flow.reactor")})
 @PropertySource("classpath:application.properties")
 public class TestApplicationContext {
 

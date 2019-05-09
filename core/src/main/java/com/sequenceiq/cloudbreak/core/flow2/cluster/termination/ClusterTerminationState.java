@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.termination;
 
-import com.sequenceiq.cloudbreak.core.flow2.FlowState;
+import com.sequenceiq.flow.core.FlowState;
 
 public enum ClusterTerminationState implements FlowState {
     INIT_STATE,

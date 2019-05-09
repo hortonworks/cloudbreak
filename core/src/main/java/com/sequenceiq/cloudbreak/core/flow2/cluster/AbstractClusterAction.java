@@ -8,8 +8,8 @@ import org.springframework.statemachine.StateContext;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
-import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
-import com.sequenceiq.cloudbreak.core.flow2.FlowState;
+import com.sequenceiq.flow.core.FlowEvent;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;

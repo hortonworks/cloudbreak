@@ -3,18 +3,14 @@ package com.sequenceiq.freeipa.repository;
 import javax.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
-import com.sequenceiq.cloudbreak.workspace.repository.DisabledBaseRepository;
-import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 
-@EntityType(entityClass = FreeIpaRepository.class)
 @Transactional(Transactional.TxType.REQUIRED)
-@DisableHasPermission
-public interface FreeIpaRepository extends DisabledBaseRepository<FreeIpa, Long> {
+public interface FreeIpaRepository extends CrudRepository<FreeIpa, Long> {
 
     FreeIpa getByStack(Stack stack);
 

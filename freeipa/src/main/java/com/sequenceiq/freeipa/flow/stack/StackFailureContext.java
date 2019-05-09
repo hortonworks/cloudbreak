@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack;
 
-import com.sequenceiq.cloudbreak.core.flow2.CommonContext;
+import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.freeipa.entity.Stack;
 
 public class StackFailureContext extends CommonContext {

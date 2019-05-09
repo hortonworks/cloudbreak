@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.maintenance;
 
-import com.sequenceiq.cloudbreak.core.flow2.FlowState;
+import com.sequenceiq.flow.core.FlowState;
 
 public enum MaintenanceModeValidationState implements FlowState {
 

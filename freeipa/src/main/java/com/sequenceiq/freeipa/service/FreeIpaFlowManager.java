@@ -8,8 +8,8 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
-import com.sequenceiq.cloudbreak.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.cloudbreak.reactor.api.event.BaseFlowEvent;
+import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;

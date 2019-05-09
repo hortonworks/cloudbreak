@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.repository.CloudbreakFlowLogRepository;
-import com.sequenceiq.cloudbreak.service.flowlog.FlowChainLogService;
+import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 
 @Component
 public class CloudbreakFlowLogService {

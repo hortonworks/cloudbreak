@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.sync;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.GetInstancesStateResult;
-import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
+import com.sequenceiq.flow.core.FlowEvent;
 
 public enum StackSyncEvent implements FlowEvent {
     STACK_SYNC_EVENT("STACK_SYNC_TRIGGER_EVENT"),

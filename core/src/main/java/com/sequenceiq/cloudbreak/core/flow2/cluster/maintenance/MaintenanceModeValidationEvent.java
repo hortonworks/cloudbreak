@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.maintenance;
 
-import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
+import com.sequenceiq.flow.core.FlowEvent;
 
 public enum MaintenanceModeValidationEvent implements FlowEvent {
     START_VALIDATION_FLOW_EVENT("START_VALIDATION_FLOW_EVENT"),

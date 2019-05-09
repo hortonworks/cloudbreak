@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.start;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesResult;
-import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
+import com.sequenceiq.flow.core.FlowEvent;
 
 public enum StackStartEvent implements FlowEvent {
     STACK_START_EVENT("STACK_START_TRIGGER_EVENT"),

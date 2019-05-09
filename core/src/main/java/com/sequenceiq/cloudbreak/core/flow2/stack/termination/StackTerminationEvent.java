@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
-import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
+import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationSuccess;

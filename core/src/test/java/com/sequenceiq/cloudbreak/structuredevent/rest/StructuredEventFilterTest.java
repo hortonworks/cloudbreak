@@ -33,7 +33,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.cloudbreak.ha.NodeConfig;
+import com.sequenceiq.flow.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;

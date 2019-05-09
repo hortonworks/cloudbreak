@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 
 @Component
 public class StopFlowEventChainFactory implements FlowEventChainFactory<StackEvent> {

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.start;
 
-import com.sequenceiq.cloudbreak.core.flow2.FlowState;
+import com.sequenceiq.flow.core.FlowState;
 
 public enum StackStartState implements FlowState {
     INIT_STATE,

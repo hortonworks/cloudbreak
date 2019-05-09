@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.ApplicationFlowInformation;
-import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
+import com.sequenceiq.flow.core.ApplicationFlowInformation;
+import com.sequenceiq.flow.core.config.FlowConfiguration;
 
 @Component
 public class EnvironmentFlowInformation implements ApplicationFlowInformation {

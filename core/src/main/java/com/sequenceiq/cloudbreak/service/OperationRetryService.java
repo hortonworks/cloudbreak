@@ -12,10 +12,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
-import com.sequenceiq.cloudbreak.core.flow2.FlowLogService;
-import com.sequenceiq.cloudbreak.domain.FlowLog;
-import com.sequenceiq.cloudbreak.domain.StateStatus;
+import com.sequenceiq.flow.core.Flow2Handler;
+import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.domain.StateStatus;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
