@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.workspace.util;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,12 +28,12 @@ public abstract class RepositoryLookupService<T extends CrudRepository<?, ?>> {
 
     private void fillRepositoryMap() {
         for (T repo : repositoryList) {
-            Class<?> originalInterface = repo.getClass().getInterfaces()[0];
-            if (!originalInterface.getSimpleName().contains("FlowLogRepository")
-                    && !originalInterface.getSimpleName().contains("FlowChainLogRepository")) {
-                Class<?> entityClassForRepository = getEntityClassForRepository(originalInterface);
+            Arrays.stream(repo.getClass().getInterfaces())
+                    .filter(clazz -> clazz.getName().contains("com.sequenceiq.cloudbreak"))
+                    .findFirst().ifPresent(clazz -> {
+                Class<?> entityClassForRepository = getEntityClassForRepository(clazz);
                 repositoryMap.put(entityClassForRepository, repo);
-            }
+            });
         }
     }
 

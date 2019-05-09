@@ -13,8 +13,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableAutoConfiguration(exclude = WebMvcMetricsAutoConfiguration.class)
 @EnableSwagger2
-@ComponentScan(basePackages = "com.sequenceiq.cloudbreak")
-@EnableJpaRepositories(basePackages = "com.sequenceiq.cloudbreak")
+@ComponentScan(basePackages = "com.sequenceiq")
+@EnableJpaRepositories(basePackages = "com.sequenceiq")
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public class CloudbreakApplication {
     public static void main(String[] args) {

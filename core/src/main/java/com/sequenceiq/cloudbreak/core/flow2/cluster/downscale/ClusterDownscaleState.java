@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.downscale;
 
-import com.sequenceiq.cloudbreak.core.flow2.FlowState;
-import com.sequenceiq.cloudbreak.core.flow2.RestartAction;
+import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.cloudbreak.core.flow2.restart.FillInMemoryStateStoreRestartAction;
 
 enum ClusterDownscaleState implements FlowState {

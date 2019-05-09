@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
+import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 
 @Component
 public class MultiHostgroupDownscaleFlowEventChainFactory implements FlowEventChainFactory<MultiHostgroupClusterAndStackDownscaleTriggerEvent> {

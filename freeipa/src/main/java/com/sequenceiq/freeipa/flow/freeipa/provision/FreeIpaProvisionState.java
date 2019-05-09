@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.provision;
 
-import com.sequenceiq.cloudbreak.core.flow2.FlowState;
+import com.sequenceiq.flow.core.FlowState;
 
 public enum FreeIpaProvisionState implements FlowState {
     INIT_STATE,

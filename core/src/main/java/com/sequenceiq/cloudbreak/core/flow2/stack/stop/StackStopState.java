@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.stop;
 
-import com.sequenceiq.cloudbreak.core.flow2.FlowState;
-import com.sequenceiq.cloudbreak.core.flow2.RestartAction;
-import com.sequenceiq.cloudbreak.core.flow2.restart.DefaultRestartAction;
+import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.RestartAction;
+import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 
 public enum StackStopState implements FlowState {
     INIT_STATE,

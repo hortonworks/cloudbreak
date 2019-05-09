@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.termination;
 
-import com.sequenceiq.cloudbreak.core.flow2.FlowState;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackAction;
 import com.sequenceiq.freeipa.flow.stack.termination.action.StackTerminationAction;
 import com.sequenceiq.freeipa.flow.stack.termination.action.StackTerminationFailureAction;

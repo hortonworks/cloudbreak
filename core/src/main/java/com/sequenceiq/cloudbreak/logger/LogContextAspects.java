@@ -29,11 +29,11 @@ public class LogContextAspects {
     public void interceptReactorHandlersAcceptMethod() {
     }
 
-    @Pointcut("execution(public * com.sequenceiq.cloudbreak.core.flow2.Flow2Handler.accept(..))")
+    @Pointcut("execution(public * com.sequenceiq.flow.core.Flow2Handler.accept(..))")
     public void interceptFlow2HandlerAcceptMethod() {
     }
 
-    @Pointcut("execution(public * com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainHandler.accept(..))")
+    @Pointcut("execution(public * com.sequenceiq.flow.core.chain.FlowChainHandler.accept(..))")
     public void interceptFlowChainHandlerAcceptMethod() {
     }
 

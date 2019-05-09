@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableSwagger2
-@EnableJpaRepositories(basePackages = { "com.sequenceiq.cloudbreak.repository", "com.sequenceiq.environment" })
-@SpringBootApplication(scanBasePackages = {"com.sequenceiq.environment", "com.sequenceiq.cloudbreak"},
+@EnableJpaRepositories(basePackages = { "com.sequenceiq" })
+@SpringBootApplication(scanBasePackages = {"com.sequenceiq" },
         exclude = WebMvcMetricsAutoConfiguration.class)
 public class EnvironmentApplication {
 

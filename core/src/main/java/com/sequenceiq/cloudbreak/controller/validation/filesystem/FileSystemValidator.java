@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.event.validation.FileSystemValidationRequ
 import com.sequenceiq.cloudbreak.cloud.event.validation.FileSystemValidationResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
-import com.sequenceiq.cloudbreak.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.OperationException;
 

@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.downscale;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackCollectResourcesResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackResult;
-import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
+import com.sequenceiq.flow.core.FlowEvent;
 
 public enum StackDownscaleEvent implements FlowEvent {
     STACK_DOWNSCALE_EVENT("STACK_DOWNSCALE_TRIGGER_EVENT"),

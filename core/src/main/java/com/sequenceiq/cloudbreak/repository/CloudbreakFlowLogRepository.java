@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.domain.FlowLog;
+import com.sequenceiq.flow.domain.FlowLog;
 
 @Transactional(Transactional.TxType.REQUIRED)
 public interface CloudbreakFlowLogRepository extends Repository<FlowLog, Long> {
@@ -21,7 +21,7 @@ public interface CloudbreakFlowLogRepository extends Repository<FlowLog, Long> {
     @Query("SELECT DISTINCT fl.stackId FROM FlowLog fl "
             + "WHERE fl.stateStatus = 'PENDING' "
             + "AND fl.cloudbreakNodeId = :cloudbreakNodeId "
-            + "AND fl.flowType = 'com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig'")
+            + "AND fl.flowType = 'com.sequenceiq.flow.core.stack.termination.StackTerminationFlowConfig'")
     Set<Long> findTerminatingStacksByCloudbreakNodeId(@Param("cloudbreakNodeId") String cloudbreakNodeId);
 
 }

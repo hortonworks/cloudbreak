@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
-import com.sequenceiq.cloudbreak.core.flow2.FlowState;
+import com.sequenceiq.flow.core.FlowState;
 
 public enum StackImageUpdateState implements FlowState {
     INIT_STATE,

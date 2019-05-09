@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
-import com.sequenceiq.cloudbreak.core.flow2.PayloadConverter;
+import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 
 public class CloudPlatformResponseToStackFailureConverter implements PayloadConverter<StackFailureEvent> {

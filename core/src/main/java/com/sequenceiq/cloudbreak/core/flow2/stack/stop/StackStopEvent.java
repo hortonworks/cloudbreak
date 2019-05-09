@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.stop;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
-import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
+import com.sequenceiq.flow.core.FlowEvent;
 
 public enum StackStopEvent implements FlowEvent {
     STACK_STOP_EVENT("STACK_STOP_TRIGGER_EVENT"),

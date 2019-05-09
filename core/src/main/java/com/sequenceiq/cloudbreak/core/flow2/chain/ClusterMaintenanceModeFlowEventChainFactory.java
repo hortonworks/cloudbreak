@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTrigg
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 
 @Component
 public class ClusterMaintenanceModeFlowEventChainFactory implements FlowEventChainFactory<MaintenanceModeValidationTriggerEvent> {

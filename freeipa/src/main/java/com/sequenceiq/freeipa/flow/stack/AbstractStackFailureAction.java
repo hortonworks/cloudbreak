@@ -7,10 +7,10 @@ import javax.inject.Inject;
 
 import org.springframework.statemachine.StateContext;
 
-import com.sequenceiq.cloudbreak.core.flow2.Flow;
-import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
-import com.sequenceiq.cloudbreak.core.flow2.FlowState;
-import com.sequenceiq.cloudbreak.core.flow2.PayloadConverter;
+import com.sequenceiq.flow.core.Flow;
+import com.sequenceiq.flow.core.FlowEvent;
+import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.StackService;

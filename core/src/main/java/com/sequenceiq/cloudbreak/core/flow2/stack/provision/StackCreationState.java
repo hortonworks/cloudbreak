@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.provision;
 
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
-import com.sequenceiq.cloudbreak.core.flow2.FlowState;
-import com.sequenceiq.cloudbreak.core.flow2.RestartAction;
+import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.cloudbreak.core.flow2.restart.DisableOnGCPRestartAction;
 import com.sequenceiq.cloudbreak.core.flow2.restart.FillInMemoryStateStoreRestartAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.CheckImageAction;

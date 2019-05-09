@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.EphemeralClustersUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 
 @Component
 public class EphemeralFlowEventChainFactory implements FlowEventChainFactory<EphemeralClustersUpgradeTriggerEvent> {
