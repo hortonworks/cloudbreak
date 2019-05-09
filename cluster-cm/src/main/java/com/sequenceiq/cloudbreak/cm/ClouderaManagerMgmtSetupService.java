@@ -2,30 +2,6 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static java.util.Objects.requireNonNull;
 
-import com.cloudera.api.swagger.ClouderaManagerResourceApi;
-import com.cloudera.api.swagger.MgmtRoleConfigGroupsResourceApi;
-import com.cloudera.api.swagger.MgmtRolesResourceApi;
-import com.cloudera.api.swagger.MgmtServiceResourceApi;
-import com.cloudera.api.swagger.client.ApiClient;
-import com.cloudera.api.swagger.client.ApiException;
-import com.cloudera.api.swagger.model.ApiConfig;
-import com.cloudera.api.swagger.model.ApiConfigList;
-import com.cloudera.api.swagger.model.ApiHostRef;
-import com.cloudera.api.swagger.model.ApiRole;
-import com.cloudera.api.swagger.model.ApiRoleList;
-import com.cloudera.api.swagger.model.ApiService;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableMap;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.cm.client.DataView;
-import com.sequenceiq.cloudbreak.cm.database.DatabaseProperties;
-import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.util.DatabaseCommon;
-import com.sequenceiq.cloudbreak.util.HostAndPortAndDatabaseName;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,6 +13,32 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import com.cloudera.api.swagger.ClouderaManagerResourceApi;
+import com.cloudera.api.swagger.MgmtRoleConfigGroupsResourceApi;
+import com.cloudera.api.swagger.MgmtRolesResourceApi;
+import com.cloudera.api.swagger.MgmtServiceResourceApi;
+import com.cloudera.api.swagger.client.ApiClient;
+import com.cloudera.api.swagger.client.ApiException;
+import com.cloudera.api.swagger.model.ApiCommand;
+import com.cloudera.api.swagger.model.ApiConfig;
+import com.cloudera.api.swagger.model.ApiConfigList;
+import com.cloudera.api.swagger.model.ApiHostRef;
+import com.cloudera.api.swagger.model.ApiRole;
+import com.cloudera.api.swagger.model.ApiRoleList;
+import com.cloudera.api.swagger.model.ApiService;
+import com.cloudera.api.swagger.model.ApiServiceState;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableMap;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.cm.client.DataView;
+import com.sequenceiq.cloudbreak.cm.database.DatabaseProperties;
+import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.util.DatabaseCommon;
+import com.sequenceiq.cloudbreak.util.HostAndPortAndDatabaseName;
 
 /**
  * Sets up management services for the given Cloudera Manager server.
@@ -95,7 +97,7 @@ public class ClouderaManagerMgmtSetupService {
         mgmtService.setName(MGMT_SERVICE);
         mgmtService.setType(MGMT_SERVICE);
 
-        mgmtServiceResourceApi.setupCMS(mgmtService);
+        setupCMS(mgmtServiceResourceApi, mgmtService);
 
         ApiRoleList mgmtRoles = new ApiRoleList();
         List<String> roleTypes = mgmtServiceResourceApi.listRoleTypes().getItems();
@@ -124,12 +126,41 @@ public class ClouderaManagerMgmtSetupService {
             telemetryPublisher.setHostRef(cmHostRef);
             mgmtRoles.addItemsItem(telemetryPublisher);
         }
-        mgmtRolesResourceApi.createRoles(mgmtRoles);
-
+        createMgmtRoles(mgmtRolesResourceApi, mgmtRoles);
         createMgmtDatabases(client, rdsConfigs);
+        startMgmtServices(stack, client, mgmtServiceResourceApi);
+    }
 
-        clouderaManagerPollingServiceProvider.startManagementServicePollingService(stack, client,
-                mgmtServiceResourceApi.startCommand().getId());
+    private void createMgmtRoles(MgmtRolesResourceApi mgmtRolesResourceApi, ApiRoleList mgmtRoles) throws ApiException {
+        try {
+            mgmtRolesResourceApi.createRoles(mgmtRoles);
+        } catch (ApiException ex) {
+            if (!ex.getResponseBody().contains("The maximum number of instances")) {
+                throw ex;
+            }
+        }
+    }
+
+    private void startMgmtServices(Stack stack, ApiClient client, MgmtServiceResourceApi mgmtServiceResourceApi) throws ApiException {
+        ApiService mgmtService = mgmtServiceResourceApi.readService("SUMMARY");
+        Optional<ApiCommand> startCommand = Optional.empty();
+        if (mgmtService.getServiceState() == ApiServiceState.STARTING) {
+            startCommand = mgmtServiceResourceApi.listActiveCommands("SUMMARY").getItems()
+                    .stream().filter(c -> c.getName().equals("Start")).findFirst();
+        } else if (mgmtService.getServiceState() != ApiServiceState.STARTED) {
+            startCommand = Optional.of(mgmtServiceResourceApi.startCommand());
+        }
+        startCommand.ifPresent(sc -> clouderaManagerPollingServiceProvider.startManagementServicePollingService(stack, client, sc.getId()));
+    }
+
+    private void setupCMS(MgmtServiceResourceApi mgmtServiceResourceApi, ApiService mgmtService) throws ApiException {
+        try {
+            mgmtServiceResourceApi.setupCMS(mgmtService);
+        } catch (ApiException ex) {
+            if (!ex.getResponseBody().contains("CMS instance already exists.")) {
+                throw ex;
+            }
+        }
     }
 
     private void createMgmtDatabases(ApiClient client, Set<RDSConfig> rdsConfigs) throws ApiException {

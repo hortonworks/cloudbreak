@@ -12,15 +12,18 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
+import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
+import com.cloudera.api.swagger.model.ApiCluster;
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiConfig;
@@ -113,8 +116,8 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         Long clusterId = cluster.getId();
         try {
             HostsResourceApi hostsResourceApi = new HostsResourceApi(client);
-            Optional<ApiHost> optionalCmHost = hostsResourceApi.readHosts(DataView.SUMMARY.name()).getItems().stream()
-                    .filter(host -> host.getIpAddress().equals(stack.getAmbariIp()))
+            Optional<ApiHost> optionalCmHost = hostsResourceApi.readHosts(DataView.SUMMARY.name()).getItems().stream().filter(
+                    host -> host.getHostname().equals(templatePreparationObject.getGeneralClusterConfigs().getPrimaryGatewayInstanceDiscoveryFQDN().get()))
                     .findFirst();
 
             if (optionalCmHost.isPresent()) {
@@ -143,12 +146,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                 refreshParcelRepos(clouderaManagerResourceApi);
             }
             kerberosService.setupKerberos(client, stack);
-            // addRepositories - if true the parcels repositories in the cluster template will be added.
-            ApiCommand apiCommand = clouderaManagerResourceApi.importClusterTemplate(!prewarmed, apiClusterTemplate);
-            LOGGER.debug("Cloudera cluster template has been submitted, cluster install is in progress");
-
-            clouderaManagerPollingServiceProvider.templateInstallCheckerService(stack, client, apiCommand.getId());
-
+            installCluster(cluster, apiClusterTemplate, clouderaManagerResourceApi, prewarmed);
             if (!CMRepositoryVersionUtil.isEnableKerberosSupportedViaBlueprint(clouderaManagerRepoDetails)) {
                 kerberosService.configureKerberosViaApi(client, clientConfig, stack, clouderaManagerRepoDetails);
             }
@@ -159,6 +157,27 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
         return cluster;
+    }
+
+    private void installCluster(Cluster cluster, ApiClusterTemplate apiClusterTemplate, ClouderaManagerResourceApi clouderaManagerResourceApi,
+            boolean prewarmed) throws ApiException {
+        ClustersResourceApi clustersResourceApi = new ClustersResourceApi(client);
+        ApiCluster cmCluster = null;
+        try {
+            cmCluster = clustersResourceApi.readCluster(cluster.getName());
+        } catch (ApiException apiException) {
+            if (apiException.getCode() != HttpStatus.SC_NOT_FOUND) {
+                throw apiException;
+            }
+        }
+        Optional<ApiCommand> clusterInstallCommand = clouderaManagerResourceApi.listActiveCommands("SUMMARY").getItems()
+                .stream().filter(c -> c.getName().equals("ClusterTemplateImport")).findFirst();
+        if (cmCluster == null) {
+            // addRepositories - if true the parcels repositories in the cluster template will be added.
+            clusterInstallCommand = Optional.of(clouderaManagerResourceApi.importClusterTemplate(!prewarmed, apiClusterTemplate));
+            LOGGER.debug("Cloudera cluster template has been submitted, cluster install is in progress");
+        }
+        clusterInstallCommand.ifPresent(cmd -> clouderaManagerPollingServiceProvider.templateInstallCheckerService(stack, client, cmd.getId()));
     }
 
     private void removeRemoteParcelRepos(ClouderaManagerResourceApi clouderaManagerResourceApi) {
