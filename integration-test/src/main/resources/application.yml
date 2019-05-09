@@ -10,16 +10,27 @@ logging:
 integrationtest:
   cloudProvider: MOCK
   sshPublicKey: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kcUEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpjT7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh"
+  defaultPrivateKeyFile:
   subnetCidr: 10.0.0.0/16
   imageCatalogName: cloudbreak-default
   gatewayPort: null
   defaultCredentialDescription: "autotesting credential default description."
-  testsuite.pollingInterval: 1000
+
+  testsuite:
+    pollingInterval: 1000
+    threadPoolSize: 3
+    skipRemainingTestsAfterOneFailed: true
+    cleanUpOnFailure: false
 
   ambari:
     defaultUser: admin
     defaultPassword: Admin123
     defaultPort: 8080
+
+  clouderamanager:
+    defaultUser: admin
+    defaultPassword: Admin123
+    defaultPort: 7180
 
   # aws parameters
   aws:
@@ -48,7 +59,7 @@ integrationtest:
 
   # azure parameters
   azure:
-    defaultBlueprintName: "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
+    defaultBlueprintName: "CDP 1.0 - Data Science: Apache Spark, Apache Hive, Impala"
     availabilityZone:
     region: West Europe
     location: West Europe
@@ -69,7 +80,7 @@ integrationtest:
 
   # gcp parameters
   gcp:
-    defaultBlueprintName: "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
+    defaultBlueprintName: "CDP 1.0 - Data Science: Apache Spark, Apache Hive, Impala"
     availabilityZone: europe-west2-a
     region: europe-west2
     location: europe-west2
@@ -89,7 +100,7 @@ integrationtest:
 
   # openstack parameters
   openstack:
-    defaultBlueprintName: "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
+    defaultBlueprintName: "CDP 1.0 - Data Science: Apache Spark, Apache Hive, Impala"
     availabilityZone: nova
     region: RegionOne
     location: Texas
@@ -105,28 +116,10 @@ integrationtest:
       tenant:
       userName:
       password:
-    prewarmed:
-      hdp:
-        version: "3.1"
-        enabled: true
-        hostGroups:
-          - master
-          - worker
-          - compute
-        scaleGroup: compute
-      hdf:
-        blueprintNames:
-         - "HDF-3.3 Messaging Management: Apache Kafka"
-        enabled: true
-        hostGroups:
-          - Services
-          - ZooKeeper
-          - Messaging
-        scaleGroup: Messaging
 
   # yarn parameters
   yarn:
-    defaultBlueprintName: "HDP 3.1 - Data Science: Apache Spark 2, Apache Zeppelin"
+    defaultBlueprintName: "CDP 1.0 - Data Science: Apache Spark, Apache Hive, Impala"
     availabilityZone:
     region: default
     location: Frankfurt
@@ -263,13 +256,6 @@ integrationtest:
   defaultBlueprintName:
 
   ambariContainer: hortonworks/ambari-agent
-
-  defaultPrivateKeyFile:
-
-  testsuite:
-      threadPoolSize: 3
-      skipRemainingTestsAfterOneFailed: true
-      cleanUpOnFailure: false
 
   logsearch:
     url:

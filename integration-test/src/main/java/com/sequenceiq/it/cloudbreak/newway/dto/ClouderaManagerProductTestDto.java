@@ -13,9 +13,8 @@ public class ClouderaManagerProductTestDto
         super(new ClouderaManagerProductV4Request(), testContext);
     }
 
-    @Override
     public CloudbreakTestDto valid() {
-        return withVersion("6.2.0-1.cdh6.2.0.p0.967373");
+        return this;
     }
 
     public ClouderaManagerProductTestDto withName(String name) {
