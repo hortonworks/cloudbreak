@@ -18,6 +18,9 @@ RUN apt-get update --no-install-recommends && apt-get install -y zip procps
 # install the Redbeams app
 ADD ${REPO_URL}/com/sequenceiq/redbeams/$VERSION/redbeams-$VERSION.jar /redbeams.jar
 
+# add jmx exporter
+ADD jmx_prometheus_javaagent-0.10.jar /jmx_prometheus_javaagent.jar
+
 # extract schema files
 RUN ( unzip redbeams.jar schema/* -d / ) || \
     ( unzip redbeams.jar BOOT-INF/classes/schema/* -d /tmp/ && mv /tmp/BOOT-INF/classes/schema/ /schema/ )

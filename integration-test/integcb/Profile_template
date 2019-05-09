@@ -1,9 +1,16 @@
 export CB_DB_ROOT_PATH=/var/lib/boot2docker/it-test
 export DOCKER_TAG_CLOUDBREAK=dev
+export DOCKER_TAG_FREEIPA=dev
+export DOCKER_TAG_REDBEAMS=dev
+export DOCKER_TAG_ENVIRONMENT=dev
+export DOCKER_TAG_DATALAKE=dev
+export DOCKER_TAG_AUTOSCALE=dev
 export CB_JAVA_OPTS="-Dcaas.url=caas-mock:8080 -Xmx4G -Drest.debug=true -Dmock.spi.endpoint=https://test:9443"
 export UAA_DEFAULT_SECRET=cbsecret2015
 export UAA_DEFAULT_USER_PW=cloudbreak
 export REMOVE_CONTAINER=
+export DPS_VERSION=2.0.0.0-142
+export UMS_ENABLED=false
 export CB_ENABLEDPLATFORMS=AZURE,AWS,GCP,OPENSTACK,YARN,MOCK
 
 export CB_CLUSTERDEFINITION_AMBARI_INTERNAL="HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin=hdp30-data-science-spark2;                HDP 3.0 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin=hdp30-edw-analytics;                HDP 3.0 - Data Lake: Apache Ranger, Apache Hive Metastore=hdp30-shared-services;                HDP 3.0 - Data Lake: Apache Ranger, Apache Atlas, Infrastructure Services=hdp30-shared-services-v2;                HDP 3.0 - Data Science Attached: Apache Spark 2, Apache Zeppelin=hdp30-data-science-spark2-attached-v2;                HDP 3.0 - Data Science Standalone: Apache Spark 2, Apache Zeppelin=hdp30-data-science-spark2-standalone-v2;                HDP 3.0 - EDW-Analytics Attached: Apache Hive 3 LLAP=hdp30-edw-analytics-attached-v2;                HDP 3.0 - EDW-Analytics Standalone: Apache Hive 3 LLAP=hdp30-edw-analytics-standalone-v2"

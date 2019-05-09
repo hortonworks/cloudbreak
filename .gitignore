@@ -28,6 +28,7 @@ curl_config_admin_user
 *.suml
 startit.sh
 integration-test/integcb/*.log
+integration-test/integcb/docker-containers
 integration-test/build/
 integration-test/test-output/
 owners_log/

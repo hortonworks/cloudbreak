@@ -20,6 +20,7 @@ test-output/
 integcb/.deps/
 integcb/cbd
 integcb/certs/
+integcb/docker-containers/
 integcb/docker-compose.yml
 integcb/uaa.yml
 test.out

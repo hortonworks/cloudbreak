@@ -23,6 +23,7 @@ public class ControllerDescription {
     public static final String USER_PROFILES_V4_DESCRIPTION = "Operations on user profiles in workspace";
     public static final String FILESYSTEMS_V4_DESCRIPTION = "Operations on filesystems";
     public static final String KERBEROS_CONFIG_V4_DESCRIPTION = "Operations on kerberos configs.";
+    public static final String INFO_DESCRIPTION = "Operations on info.";
     public static final String BLUEPRINT_V4_DESCRIPTION = "Operations on blueprints by workspace";
     public static final String RECIPES_V4_DESCRIPTION = "Operations on recipes by workspace";
     public static final String DATABASES_V4_DESCRIPTION = "Cloudbreak allows you to register an existing RDBMS instance as an external source "

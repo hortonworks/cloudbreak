@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.CoreApi;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.info.CloudbreakInfoV4Endpoint;
 import com.sequenceiq.cloudbreak.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.v4.AuditEventV4Controller;
@@ -75,7 +76,8 @@ public class EndpointConfig extends ResourceConfig {
             WorkspaceAwareUtilV4Controller.class,
             AutoscaleV4Controller.class,
             ManagementPackV4Controller.class,
-            StackV4Controller.class
+            StackV4Controller.class,
+            CloudbreakInfoV4Endpoint.class
     );
 
     private static final String VERSION_UNAVAILABLE = "unspecified";

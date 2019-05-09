@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.EventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.info.CloudbreakInfoV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.KerberosConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.KubernetesV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapConfigV4Endpoint;
@@ -72,7 +73,8 @@ public class CloudbreakIdentityClient {
             RecipeV4Endpoint.class,
             UserProfileV4Endpoint.class,
             UserV4Endpoint.class,
-            UtilV4Endpoint.class
+            UtilV4Endpoint.class,
+            CloudbreakInfoV4Endpoint.class
     );
 
     private static final Form EMPTY_FORM = new Form();
@@ -201,6 +203,10 @@ public class CloudbreakIdentityClient {
 
     public ClusterTemplateV4Endpoint clusterTemplateV3EndPoint() {
         return getEndpoint(ClusterTemplateV4Endpoint.class);
+    }
+
+    public CloudbreakInfoV4Endpoint cloudbreakInfoV4Endpoint() {
+        return getEndpoint(CloudbreakInfoV4Endpoint.class);
     }
 
     public KerberosConfigV4Endpoint kerberosConfigV4Endpoint() {
