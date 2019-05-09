@@ -34,7 +34,7 @@
         },
         {
           "name": "atlas.kafka.bootstrap.servers",
-          "value": "{{{format-join host_groups.master format="%s:2189"}}}"
+          "value": "{{{format-join host_groups.master format='%s:2189'}}}"
         }
       ]
     },

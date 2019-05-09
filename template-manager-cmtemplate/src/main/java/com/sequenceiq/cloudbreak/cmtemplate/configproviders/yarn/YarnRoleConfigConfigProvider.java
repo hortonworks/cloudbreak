@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cmtemplate.configproviders.volume;
+package com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,19 +7,20 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
-public class YarnVolumeConfigProvider extends AbstractVolumeConfigProvider {
+public class YarnRoleConfigConfigProvider extends AbstractRoleConfigConfigProvider {
 
     private static final String NODE_LOCAL_DIRS = "yarn_nodemanager_local_dirs";
 
     private static final String NODE_LOG_DIRS = "yarn_nodemanager_log_dirs";
 
     @Override
-    List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView) {
+    protected List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView) {
         List<ApiClusterTemplateConfig> roleConfigs = new ArrayList<>();
 
         switch (roleType) {
@@ -38,7 +39,7 @@ public class YarnVolumeConfigProvider extends AbstractVolumeConfigProvider {
     }
 
     @Override
-    List<ApiClusterTemplateVariable> getVariables(String roleType, HostgroupView hostGroupView, TemplatePreparationObject templatePreparationObject) {
+    protected List<ApiClusterTemplateVariable> getVariables(String roleType, HostgroupView hostGroupView, TemplatePreparationObject templatePreparationObject) {
         List<ApiClusterTemplateVariable> variables = new ArrayList<>();
 
         switch (roleType) {

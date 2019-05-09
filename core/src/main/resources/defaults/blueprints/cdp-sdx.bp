@@ -1,0 +1,954 @@
+{
+  "tags": {
+    "shared_services_ready": true
+  },
+  "description": "CDP 1.0 Shared Data Experience template with Atlas and Ranger",
+  "blueprint": {
+    "cdhVersion": "6.0.99",
+    "displayName": "datalake",
+    "services": [
+      {
+        "refName": "zookeeper",
+        "serviceType": "ZOOKEEPER",
+        "roleConfigGroups": [
+          {
+            "refName": "zookeeper-SERVER-BASE",
+            "roleType": "SERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "ranger",
+        "serviceType": "RANGER",
+        "serviceConfigs": [
+          {
+            "name": "hdfs_service",
+            "ref": "hdfs"
+          },
+          {
+            "name": "rangeradmin_user_password",
+            "value": "Admin123!"
+          },
+          {
+            "name": "rangertagsync_user_password",
+            "value": "Admin123!"
+          },
+          {
+            "name": "solr_service",
+            "ref": "solr"
+          },
+          {
+            "name": "rangerusersync_user_password",
+            "value": "Admin123!"
+          },
+          {
+            "name": "keyadmin_user_password",
+            "value": "Admin123!"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "ranger-RANGER_USERSYNC-BASE",
+            "roleType": "RANGER_USERSYNC",
+            "base": true
+          },
+          {
+            "refName": "ranger-RANGER_TAGSYNC-BASE",
+            "roleType": "RANGER_TAGSYNC",
+            "base": true
+          },
+          {
+            "refName": "ranger-RANGER_ADMIN-BASE",
+            "roleType": "RANGER_ADMIN",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "aws_s3",
+        "serviceType": "AWS_S3",
+        "serviceConfigs": [
+          {
+            "name": "key_distribution_policy",
+            "value": "UNSECURE"
+          },
+          {
+            "name": "cloud_account",
+            "value": "bdrAcnt"
+          }
+        ]
+      },
+      {
+        "refName": "atlas",
+        "serviceType": "ATLAS",
+        "serviceConfigs": [
+          {
+            "name": "solr_service",
+            "ref": "solr"
+          },
+          {
+            "name": "atlas.authentication.method.kerberos",
+            "value": "true"
+          },
+          {
+            "name": "kafka_service",
+            "ref": "kafka"
+          },
+          {
+            "name": "hbase_service",
+            "ref": "hbase"
+          },
+          {
+            "name": "hdfs_service",
+            "ref": "hdfs"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "atlas-ATLAS_SERVER-BASE",
+            "roleType": "ATLAS_SERVER",
+            "configs": [
+              {
+                "name": "atlas_kafka_bootstrap_servers",
+                "value": "{{{format-join host_groups.master format='%s:9092' }}}"
+              },
+              {
+                "name": "conf/atlas-application.properties_role_safety_valve",
+                "value": "atlas.solr.kerberos.enable=true\natlas.jaas.KafkaClient.loginModuleControlFlag=required\natlas.jaas.KafkaClient.loginModuleName=com.sun.security.auth.module.Krb5LoginModule\natlas.jaas.KafkaClient.option.keyTab=atlas.keytab\natlas.jaas.KafkaClient.option.principal=atlas/_HOST@VPC.CLOUDERA.COM\natlas.jaas.KafkaClient.option.serviceName=kafka\natlas.jaas.KafkaClient.option.storeKey=true\natlas.jaas.KafkaClient.option.useKeyTab=true"
+              }
+            ],
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "yarn",
+        "serviceType": "YARN",
+        "roleConfigGroups": [
+          {
+            "refName": "yarn-RESOURCEMANAGER-BASE",
+            "roleType": "RESOURCEMANAGER",
+            "configs": [
+              {
+                "name": "log_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "log_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "heap_dump_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "heap_dump_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "yarn_scheduler_maximum_allocation_mb",
+                "value": "8192"
+              }
+            ],
+            "base": true
+          },
+          {
+            "refName": "yarn-NODEMANAGER-BASE",
+            "roleType": "NODEMANAGER",
+            "configs": [
+              {
+                "name": "log_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "nodemanager_local_data_directories_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "nodemanager_log_directories_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "nodemanager_local_data_directories_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "nodemanager_log_directories_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "log_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "heap_dump_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "heap_dump_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "nodemanager_recovery_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "nodemanager_recovery_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              }
+            ],
+            "base": true
+          },
+          {
+            "refName": "yarn-NODEMANAGER",
+            "roleType": "NODEMANAGER",
+            "configs": [
+              {
+                "name": "log_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "nodemanager_local_data_directories_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "nodemanager_log_directories_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "nodemanager_local_data_directories_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "nodemanager_log_directories_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "log_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "heap_dump_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "heap_dump_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "nodemanager_recovery_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "nodemanager_recovery_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              }
+            ],
+            "base": false
+          },
+          {
+            "refName": "yarn-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "yarn-JOBHISTORY-BASE",
+            "roleType": "JOBHISTORY",
+            "configs": [
+              {
+                "name": "log_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "log_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "heap_dump_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "heap_dump_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              }
+            ],
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "solr",
+        "serviceType": "SOLR",
+        "serviceConfigs": [
+          {
+            "name": "solr_security_authentication",
+            "value": "kerberos"
+          },
+          {
+            "name": "hdfs_service",
+            "ref": "hdfs"
+          },
+          {
+            "name": "zookeeper_service",
+            "ref": "zookeeper"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "solr-SOLR_SERVER-BASE",
+            "roleType": "SOLR_SERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hbase",
+        "serviceType": "HBASE",
+        "serviceConfigs": [
+          {
+            "name": "hbase_security_authorization",
+            "value": "true"
+          },
+          {
+            "name": "hbase_security_authentication",
+            "value": "kerberos"
+          },
+          {
+            "name": "hbase_enable_replication",
+            "value": "true"
+          },
+          {
+            "name": "zookeeper_session_timeout",
+            "value": "30000"
+          },
+          {
+            "name": "hbase_thriftserver_security_authentication",
+            "value": "auth-conf"
+          },
+          {
+            "name": "hbase_enable_indexing",
+            "value": "true"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "hbase-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "hbase-REGIONSERVER-BASE",
+            "roleType": "REGIONSERVER",
+            "configs": [
+              {
+                "name": "log_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "hbase_regionserver_java_opts",
+                "value": "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancyFraction=70 -XX:+CMSParallelRemarkEnabled -XX:ReservedCodeCacheSize=256m -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps"
+              },
+              {
+                "name": "hbase_regionserver_info_port",
+                "value": "22102"
+              },
+              {
+                "name": "log_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "heap_dump_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "hbase_regionserver_port",
+                "value": "22101"
+              },
+              {
+                "name": "heap_dump_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              }
+            ],
+            "base": true
+          },
+          {
+            "refName": "hbase-REGIONSERVER",
+            "roleType": "REGIONSERVER",
+            "configs": [
+              {
+                "name": "log_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "hbase_regionserver_java_opts",
+                "value": "-XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancyFraction=70 -XX:+CMSParallelRemarkEnabled -XX:ReservedCodeCacheSize=256m -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps"
+              },
+              {
+                "name": "hbase_regionserver_info_port",
+                "value": "22102"
+              },
+              {
+                "name": "log_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "heap_dump_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "heap_dump_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "hbase_regionserver_port",
+                "value": "22101"
+              }
+            ],
+            "base": false
+          },
+          {
+            "refName": "hbase-MASTER-BASE",
+            "roleType": "MASTER",
+            "configs": [
+              {
+                "name": "log_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "hbase_master_info_port",
+                "value": "22002"
+              },
+              {
+                "name": "log_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "heap_dump_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "heap_dump_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "hbase_master_port",
+                "value": "22001"
+              }
+            ],
+            "base": true
+          },
+          {
+            "refName": "hbase-HBASETHRIFTSERVER-BASE",
+            "roleType": "HBASETHRIFTSERVER",
+            "configs": [
+              {
+                "name": "log_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "log_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "heap_dump_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "heap_dump_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              }
+            ],
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hdfs",
+        "serviceType": "HDFS",
+        "serviceConfigs": [
+          {
+            "name": "dfs_replication",
+            "value": "2"
+          },
+          {
+            "name": "hdfs_blocks_with_corrupt_replicas_thresholds",
+            "value": "{\"warning\":\"2.5\",\"critical\":\"3.0\"}"
+          },
+          {
+            "name": "hadoop_security_authentication",
+            "value": "kerberos"
+          },
+          {
+            "name": "core_site_safety_valve",
+            "value": ""
+          },
+          {
+            "name": "object_store_service",
+            "ref": "aws_s3"
+          },
+          {
+            "name": "dfs_encrypt_data_transfer_algorithm",
+            "value": "AES/CTR/NoPadding"
+          },
+          {
+            "name": "hadoop_security_authorization",
+            "value": "true"
+          },
+          {
+            "name": "redaction_policy_enabled",
+            "value": "false"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "hdfs-NAMENODE-BASE",
+            "roleType": "NAMENODE",
+            "configs": [
+              {
+                "name": "heap_dump_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "dfs_http_port",
+                "value": "20101"
+              },
+              {
+                "name": "log_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "namenode_config_safety_valve",
+                "value": "\n        <property>\n          <name>dfs.namenode.redundancy.considerLoad</name>\n          <value>false</value>\n        </property>"
+              },
+              {
+                "name": "dfs_https_port",
+                "value": "20102"
+              },
+              {
+                "name": "log_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "namenode_data_directories_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "heap_dump_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "namenode_data_directories_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              }
+            ],
+            "base": true
+          },
+          {
+            "refName": "hdfs-SECONDARYNAMENODE-BASE",
+            "roleType": "SECONDARYNAMENODE",
+            "configs": [
+              {
+                "name": "dfs_secondary_http_port",
+                "value": "20201"
+              },
+              {
+                "name": "secondarynamenode_checkpoint_directories_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "dfs_secondary_https_port",
+                "value": "20202"
+              },
+              {
+                "name": "heap_dump_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "log_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "log_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "heap_dump_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "secondarynamenode_checkpoint_directories_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              }
+            ],
+            "base": true
+          },
+          {
+            "refName": "hdfs-DATANODE-BASE",
+            "roleType": "DATANODE",
+            "configs": [
+              {
+                "name": "datanode_config_safety_valve",
+                "value": "\n        <property>\n          <name>dfs.thrift.datanode.address</name>\n          <value>0.0.0.0:20005</value>\n          <description>\n            The address where the Thrift datanode server will listen to.\n            If the port is 0 then the server will start on a free port.\n          </description>\n        </property>\n\n      <property>\n        <name>dfs.datanode.keytab.file</name>\n        <value>{{CMF_CONF_DIR}}/hdfs.keytab</value>\n      </property>"
+              },
+              {
+                "name": "dfs_datanode_ipc_port",
+                "value": "20001"
+              },
+              {
+                "name": "heap_dump_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "datanode_data_directories_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "dfs_datanode_https_port",
+                "value": "20004"
+              },
+              {
+                "name": "log_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "dfs_datanode_data_dir_perm",
+                "value": "700"
+              },
+              {
+                "name": "dfs_datanode_port",
+                "value": "1004"
+              },
+              {
+                "name": "log_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "dfs_datanode_http_port",
+                "value": "1006"
+              },
+              {
+                "name": "heap_dump_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "datanode_data_directories_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              }
+            ],
+            "base": true
+          },
+          {
+            "refName": "hdfs-BALANCER-BASE",
+            "roleType": "BALANCER",
+            "base": true
+          },
+          {
+            "refName": "hdfs-DATANODE",
+            "roleType": "DATANODE",
+            "configs": [
+              {
+                "name": "datanode_config_safety_valve",
+                "value": "\n        <property>\n          <name>dfs.thrift.datanode.address</name>\n          <value>0.0.0.0:20005</value>\n          <description>\n            The address where the Thrift datanode server will listen to.\n            If the port is 0 then the server will start on a free port.\n          </description>\n        </property>\n\n      <property>\n        <name>dfs.datanode.keytab.file</name>\n        <value>{{CMF_CONF_DIR}}/hdfs.keytab</value>\n      </property>"
+              },
+              {
+                "name": "dfs_datanode_ipc_port",
+                "value": "20001"
+              },
+              {
+                "name": "heap_dump_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "datanode_data_directories_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "dfs_datanode_https_port",
+                "value": "20004"
+              },
+              {
+                "name": "log_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "dfs_datanode_data_dir_perm",
+                "value": "700"
+              },
+              {
+                "name": "dfs_datanode_port",
+                "value": "1004"
+              },
+              {
+                "name": "log_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "dfs_datanode_http_port",
+                "value": "1006"
+              },
+              {
+                "name": "heap_dump_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "datanode_data_directories_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              }
+            ],
+            "base": false
+          },
+          {
+            "refName": "hdfs-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "hdfs-NFSGATEWAY-BASE",
+            "roleType": "NFSGATEWAY",
+            "configs": [
+              {
+                "name": "log_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "log_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "nfsgateway_dump_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "heap_dump_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "heap_dump_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "nfsgateway_dump_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              }
+            ],
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "spark_on_yarn",
+        "serviceType": "SPARK_ON_YARN",
+        "serviceConfigs": [
+          {
+            "name": "spark-conf/spark-env.sh_service_safety_valve",
+            "value": "export HDP_VERSION=Hadoop 3.1.1.6.0.99.0-118"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+            "roleType": "SPARK_YARN_HISTORY_SERVER",
+            "configs": [
+              {
+                "name": "log_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "log_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              }
+            ],
+            "base": true
+          },
+          {
+            "refName": "spark_on_yarn-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "kafka",
+        "serviceType": "KAFKA",
+        "serviceConfigs": [
+          {
+            "name": "kerberos.auth.enable",
+            "value": "true"
+          },
+          {
+            "name": "zookeeper_service",
+            "ref": "zookeeper"
+          },
+          {
+            "name": "offsets.topic.replication.factor",
+            "value": "1"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "kafka-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "kafka-KAFKA_BROKER-BASE",
+            "roleType": "KAFKA_BROKER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hive",
+        "serviceType": "HIVE",
+        "roleConfigGroups": [
+          {
+            "refName": "hive-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "configs": [
+              {
+                "name": "hive_client_config_safety_valve",
+                "value": "\n      <property>\n        <name>hbase.zookeeper.quorum</name>\n        <value>sdx-base-v2-3.vpc.cloudera.com</value>\n      </property>\n      <property>\n        <name>hbase.zookeeper.property.clientPort</name>\n        <value>2181</value>\n      </property>"
+              }
+            ],
+            "base": true
+          },
+          {
+            "refName": "hive-HIVESERVER2-BASE",
+            "roleType": "HIVESERVER2",
+            "configs": [
+              {
+                "name": "hiveserver2_exec_local_scratch_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "hs2_execution_engine",
+                "value": "spark"
+              },
+              {
+                "name": "hiveserver2_downloaded_resources_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "heap_dump_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "hiveserver2_downloaded_resources_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "log_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "hive_hs2_config_safety_valve",
+                "value": "<property><name>hive.exec.post.hooks</name><value>org.apache.atlas.hive.hook.HiveHook,com.cloudera.navigator.audit.hive.HiveExecHookContext,org.apache.hadoop.hive.ql.hooks.LineageLogger</value></property>"
+              },
+              {
+                "name": "log_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "hiveserver2_exec_local_scratch_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "heap_dump_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              }
+            ],
+            "base": true
+          },
+          {
+            "refName": "hive-HIVEMETASTORE-BASE",
+            "roleType": "HIVEMETASTORE",
+            "configs": [
+              {
+                "name": "role_health_suppression_hivemetastore_canary_health",
+                "value": "true"
+              },
+              {
+                "name": "log_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "log_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "heap_dump_directory_free_space_percentage_thresholds",
+                "value": "{\"critical\":\"10.0\",\"warning\":\"20.0\"}"
+              },
+              {
+                "name": "heap_dump_directory_free_space_absolute_thresholds",
+                "value": "{\"critical\":\"never\",\"warning\":\"never\"}"
+              },
+              {
+                "name": "hive_metastore_java_heapsize",
+                "value": "1073741824"
+              }
+            ],
+            "base": true
+          }
+        ]
+      }
+    ],
+    "hostTemplates": [
+      {
+        "refName": "master",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "atlas-ATLAS_SERVER-BASE",
+          "hbase-REGIONSERVER-BASE",
+          "hdfs-DATANODE-BASE",
+          "hive-GATEWAY-BASE",
+          "kafka-GATEWAY-BASE",
+          "kafka-KAFKA_BROKER-BASE",
+          "ranger-RANGER_ADMIN-BASE",
+          "solr-SOLR_SERVER-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
+          "yarn-NODEMANAGER"
+        ]
+      },
+      {
+        "refName": "worker",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "hbase-GATEWAY-BASE",
+          "hbase-HBASETHRIFTSERVER-BASE",
+          "hbase-MASTER-BASE",
+          "hdfs-BALANCER-BASE",
+          "hdfs-GATEWAY-BASE",
+          "hdfs-NAMENODE-BASE",
+          "hdfs-NFSGATEWAY-BASE",
+          "hdfs-SECONDARYNAMENODE-BASE",
+          "hive-GATEWAY-BASE",
+          "hive-HIVEMETASTORE-BASE",
+          "hive-HIVESERVER2-BASE",
+          "kafka-GATEWAY-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
+          "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+          "yarn-GATEWAY-BASE",
+          "yarn-JOBHISTORY-BASE",
+          "yarn-RESOURCEMANAGER-BASE",
+          "zookeeper-SERVER-BASE"
+        ]
+      },
+      {
+        "refName": "compute",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "hbase-REGIONSERVER",
+          "hdfs-DATANODE",
+          "hive-GATEWAY-BASE",
+          "kafka-GATEWAY-BASE",
+          "ranger-RANGER_TAGSYNC-BASE",
+          "ranger-RANGER_USERSYNC-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
+          "yarn-NODEMANAGER-BASE"
+        ]
+      }
+    ]
+  }
+}
