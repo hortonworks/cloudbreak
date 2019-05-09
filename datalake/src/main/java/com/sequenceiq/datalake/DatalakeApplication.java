@@ -7,9 +7,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-@EnableJpaRepositories(basePackages = { "com.sequenceiq.datalake" })
+@EnableJpaRepositories(basePackages = { "com.sequenceiq.cloudbreak.repository", "com.sequenceiq.datalake" })
 @EnableSwagger2
-@SpringBootApplication(scanBasePackages = { "com.sequenceiq.datalake" }, exclude = WebMvcMetricsAutoConfiguration.class)
+@SpringBootApplication(scanBasePackages = { "com.sequenceiq.datalake", "com.sequenceiq.cloudbreak" },
+        exclude = WebMvcMetricsAutoConfiguration.class)
 public class DatalakeApplication {
 
     public static void main(String[] args) {
