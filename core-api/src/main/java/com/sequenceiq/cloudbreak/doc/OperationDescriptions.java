@@ -270,6 +270,10 @@ public class OperationDescriptions {
         public static final String EDIT = "Edit and environment. Location, regions and description can be changed.";
     }
 
+    public static class InfoOpDescription {
+        public static final String INFO = "get info";
+    }
+
     public static class KerberosOpDescription {
         public static final String LIST_BY_WORKSPACE = "list kerberos configs for the given workspace";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get kerberos config by name in workspace";

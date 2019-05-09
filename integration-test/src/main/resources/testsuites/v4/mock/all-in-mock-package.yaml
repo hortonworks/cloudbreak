@@ -1,7 +1,5 @@
 name: "mock-tests"
 tests:
   - name: "newway mock testcases"
-    classes:
-      - com.sequenceiq.it.cloudbreak.newway.testcase.mock.ClouderaManagerDownscaleTest
-#    packages:
-#      - com.sequenceiq.it.cloudbreak.newway.testcase.mock.*
+    packages:
+      - com.sequenceiq.it.cloudbreak.newway.testcase.info.*

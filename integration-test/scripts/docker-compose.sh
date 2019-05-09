@@ -23,7 +23,7 @@ $INTEGCB_LOCATION/.deps/bin/docker-compose up -d caas-mock
 echo -e "\n\033[1;96m--- Start cloudbreak\033[0m\n"
 cd $INTEGCB_LOCATION
 ./cbd regenerate
-./cbd start-wait identity commondb vault cloudbreak
+./cbd start-wait identity commondb vault cloudbreak environment freeipa redbeams datalake
 cd ..
 
 echo -e "\n\033[1;96m--- Get token for testing from caas mock\033[0m\n"

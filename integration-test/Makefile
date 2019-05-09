@@ -4,7 +4,7 @@ ifeq ($(REPO_URL),"")
 REPO_URL = https://cloudbreak-maven.s3.amazonaws.com/releases
 endif
 
-all: download-cbd buildcb runtest
+all: download-cbd runtest
 
 runtest: create-image create-cloudbreak-context docker-compose stop-containers check-results
 

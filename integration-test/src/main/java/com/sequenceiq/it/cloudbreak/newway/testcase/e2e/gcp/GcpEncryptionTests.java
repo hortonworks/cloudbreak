@@ -49,7 +49,7 @@ public class GcpEncryptionTests extends AbstractE2ETest {
     @Description(
             given = "there is a running cloudbreak",
             when = "a valid stack create request is sent where a given disks are encrypted in given hostgroup",
-            then = "crreate is successful, the stack is stopable, startable, and scalable")
+            then = "create is successful, the stack is stopable, startable, and scalable")
     public void testGcpClusterWithEncryptedDisks(TestContext onTestContext, String hostgroupName, KeyEncryptionMethod keyEncryptionMethod,
             int desiredCountToScale) {
         test(givenStackWithEncryptedDiskInHostgroup(hostgroupName, keyEncryptionMethod)
