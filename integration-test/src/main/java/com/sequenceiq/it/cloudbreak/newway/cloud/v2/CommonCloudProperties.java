@@ -21,6 +21,8 @@ public class CommonCloudProperties {
 
     private final Ambari ambari = new Ambari();
 
+    private final ClouderaManager cm = new ClouderaManager();
+
     public String getCloudProvider() {
         return cloudProvider;
     }
@@ -73,7 +75,43 @@ public class CommonCloudProperties {
         return ambari;
     }
 
+    public ClouderaManager getClouderaManager() {
+        return cm;
+    }
+
     public static class Ambari {
+        private String defaultUser;
+
+        private String defaultPassword;
+
+        private String defaultPort;
+
+        public String getDefaultUser() {
+            return defaultUser;
+        }
+
+        public void setDefaultUser(String defaultUser) {
+            this.defaultUser = defaultUser;
+        }
+
+        public String getDefaultPassword() {
+            return defaultPassword;
+        }
+
+        public void setDefaultPassword(String defaultPassword) {
+            this.defaultPassword = defaultPassword;
+        }
+
+        public String getDefaultPort() {
+            return defaultPort;
+        }
+
+        public void setDefaultPort(String defaultPort) {
+            this.defaultPort = defaultPort;
+        }
+    }
+
+    public static class ClouderaManager {
         private String defaultUser;
 
         private String defaultPassword;

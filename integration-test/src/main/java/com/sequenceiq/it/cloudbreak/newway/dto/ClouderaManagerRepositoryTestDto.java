@@ -13,9 +13,8 @@ public class ClouderaManagerRepositoryTestDto
         super(new ClouderaManagerRepositoryV4Request(), testContext);
     }
 
-    @Override
     public CloudbreakTestDto valid() {
-        return withVersion("6.1.0");
+        return this;
     }
 
     public ClouderaManagerRepositoryTestDto withVersion(String version) {
@@ -25,6 +24,11 @@ public class ClouderaManagerRepositoryTestDto
 
     public ClouderaManagerRepositoryTestDto withBaseUrl(String baseUrl) {
         getRequest().setBaseUrl(baseUrl);
+        return this;
+    }
+
+    public ClouderaManagerRepositoryTestDto withGpgKeyUrl(String gpgKeyUrl) {
+        getRequest().setGpgKeyUrl(gpgKeyUrl);
         return this;
     }
 }
