@@ -1,6 +1,10 @@
 package com.sequenceiq.it.cloudbreak.newway.config;
 
+import static org.apache.commons.net.util.Base64.decodeBase64;
+
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,14 +37,8 @@ public class CloudbreakServer {
     @Value("${server.contextPath:/cb}")
     private String cbRootContextPath;
 
-    @Value("${integrationtest.caas.token:}")
-    private String refreshToken;
-
-    @Value("${integrationtest.caas.protocol:}")
-    private String caasProtocol;
-
-    @Value("${integrationtest.caas.address:}")
-    private String caasAddress;
+    @Value("${integrationtest.user.crn:}")
+    private String userCrn;
 
     @Value("${integrationtest.dp.profile:}")
     private String profile;
@@ -51,9 +49,23 @@ public class CloudbreakServer {
     @PostConstruct
     private void init() throws IOException {
 
+        configureFromCliProfile();
+
+        checkNonEmpty("integrationtest.cloudbreak.server", server);
+        checkNonEmpty("server.contextPath", cbRootContextPath);
+        checkNonEmpty("integrationtest.user.crn", userCrn);
+
+        testParameter.put(CloudbreakTest.CLOUDBREAK_SERVER_ROOT, server + cbRootContextPath);
+        testParameter.put(CloudbreakTest.USER_CRN, userCrn);
+    }
+
+    private void enforceHttpForCbAddress(String serverRaw) {
+        server = "http://" + getDomainFromUrl(serverRaw) + ":9091";
+    }
+
+    private void configureFromCliProfile() throws IOException {
         String userHome = System.getProperty("user.home");
         Path cbProfileLocation = Paths.get(userHome, ".dp", "config");
-
         if (Files.exists(cbProfileLocation)) {
             byte[] encoded = Files.readAllBytes(Paths.get(userHome, ".dp", "config"));
             String profileString = new String(encoded, Charset.defaultCharset());
@@ -74,40 +86,36 @@ public class CloudbreakServer {
                         + "integrationtest.dp.profile in application.yml or "
                         + "-Dintegrationtest.dp.profile should be added with exited profile");
             } else {
-                if (StringUtils.isEmpty(server)) {
-                    if (prof.get("server").contains("http")) {
-                        server = prof.get("server");
-                    } else {
-                        server = "https://" + prof.get("server");
-                    }
-                }
-                if (StringUtils.isEmpty(refreshToken)) {
-                    refreshToken = prof.get("refreshtoken");
-                }
+                calculateServerAddressFromProfile(prof);
+                calculateCrnsFromProfile(prof);
             }
         } else {
             LOGGER.info("Could not find cb profile file at location {}, falling back to application.yml", cbProfileLocation);
         }
+    }
 
-        checkNonEmpty("integrationtest.cloudbreak.server", server);
-
-        String[] cloudbreakServerSplit = server.split("://");
-        if (StringUtils.isEmpty(caasProtocol) && cloudbreakServerSplit.length > 0) {
-            caasProtocol = cloudbreakServerSplit[0];
+    private void calculateServerAddressFromProfile(Map<String, String> prof) {
+        if (StringUtils.isEmpty(server)) {
+            server = prof.get("server");
+            enforceHttpForCbAddress(server);
         }
-        if (StringUtils.isEmpty(caasAddress) && cloudbreakServerSplit.length > 1) {
-            caasAddress = cloudbreakServerSplit[1];
+    }
+
+    private String getDomainFromUrl(String url) {
+        if ("localhost".equals(url)) {
+            return url;
         }
+        try {
+            return new URL(url).getHost();
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Invalid configuration value in Profile for server " + url, e);
+        }
+    }
 
-        checkNonEmpty("server.contextPath", cbRootContextPath);
-        checkNonEmpty("integrationtest.caas.token", refreshToken);
-        checkNonEmpty("integrationtest.caas.protocol", caasProtocol);
-        checkNonEmpty("integrationtest.caas.address", caasAddress);
-
-        testParameter.put(CloudbreakTest.CLOUDBREAK_SERVER_ROOT, server + cbRootContextPath);
-        testParameter.put(CloudbreakTest.CAAS_PROTOCOL, caasProtocol);
-        testParameter.put(CloudbreakTest.CAAS_ADDRESS, caasAddress);
-        testParameter.put(CloudbreakTest.REFRESH_TOKEN, refreshToken);
+    private void calculateCrnsFromProfile(Map<String, String> prof) {
+        if (StringUtils.isEmpty(userCrn)) {
+            userCrn = new String(decodeBase64(prof.get("apikeyid")));
+        }
     }
 
     private void checkNonEmpty(String name, String value) {

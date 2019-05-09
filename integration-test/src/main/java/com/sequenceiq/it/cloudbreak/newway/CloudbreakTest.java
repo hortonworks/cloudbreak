@@ -42,11 +42,7 @@ public class CloudbreakTest extends GherkinTest {
 
     public static final String PASSWORD = "PASSWORD";
 
-    public static final String CAAS_PROTOCOL = "CAAS_PROTOCOL";
-
-    public static final String CAAS_ADDRESS = "CAAS_ADDRESS";
-
-    public static final String REFRESH_TOKEN = "REFRESH_TOKEN";
+    public static final String USER_CRN = "USER_CRN";
 
     public static final String SECONDARY_REFRESH_TOKEN = "SECONDARY_REFRESH_TOKEN";
 
@@ -64,17 +60,8 @@ public class CloudbreakTest extends GherkinTest {
     @Value("${server.contextPath:/cb}")
     private String cbRootContextPath;
 
-    @Value("${integrationtest.caas.token}")
-    private String refreshToken;
-
-    @Value("${integrationtest.caas.secondarytoken:}")
-    private String secondaryRefreshToken;
-
-    @Value("${integrationtest.caas.protocol:}")
-    private String caasProtocol;
-
-    @Value("${integrationtest.caas.address:}")
-    private String caasAddress;
+    @Value("${integrationtest.user.crn}")
+    private String userCrn;
 
     @Value("${integrationtest.uaa.server}")
     private String uaaServer;
@@ -110,21 +97,11 @@ public class CloudbreakTest extends GherkinTest {
 
         LOGGER.info("CloudbreakTest default values ::: ");
         IntegrationTestContext testContext = getItContext();
-        String[] cloudbreakServerSplit = server.split("://");
-        if (StringUtils.isEmpty(caasProtocol)) {
-            caasProtocol = cloudbreakServerSplit[0];
-        }
-        if (StringUtils.isEmpty(caasAddress)) {
-            caasAddress = cloudbreakServerSplit[1];
-        }
-        if (StringUtils.isEmpty(refreshToken)) {
-            throw new NullPointerException("INTEGRATIONTEST_CAAS_TOKEN should be set");
+        if (StringUtils.isEmpty(userCrn)) {
+            throw new NullPointerException("INTEGRATIONTEST_USER_CRN should be set");
         }
         testContext.putContextParam(CLOUDBREAK_SERVER_ROOT, server + cbRootContextPath);
-        testContext.putContextParam(CAAS_PROTOCOL, caasProtocol);
-        testContext.putContextParam(CAAS_ADDRESS, caasAddress);
-        testContext.putContextParam(REFRESH_TOKEN, refreshToken);
-        testContext.putContextParam(SECONDARY_REFRESH_TOKEN, secondaryRefreshToken);
+        testContext.putContextParam(USER_CRN, userCrn);
         testContext.putContextParam(LOG_SEARCH_QUERY_TYPES, logSearchProps.getQueryTypes());
         testContext.putContextParam(LOG_SEARCH_URL_PREFIX, logSearchProps.getUrl());
 

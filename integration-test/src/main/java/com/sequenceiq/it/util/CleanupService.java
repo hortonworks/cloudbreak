@@ -1,5 +1,7 @@
 package com.sequenceiq.it.util;
 
+import static com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient.CloudbreakEndpoint;
+
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -13,7 +15,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
-import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 import com.sequenceiq.it.cloudbreak.WaitResult;
 import com.sequenceiq.it.cloudbreak.config.ITProps;
@@ -33,7 +34,7 @@ public class CleanupService {
     @Inject
     private ITProps itProps;
 
-    public synchronized void deleteTestStacksAndResources(CloudbreakClient cloudbreakClient, Long workspaceId) {
+    public synchronized void deleteTestStacksAndResources(CloudbreakEndpoint cloudbreakClient, Long workspaceId) {
         if (cleanedUp) {
             return;
         }
@@ -75,7 +76,7 @@ public class CleanupService {
                 .forEach(rds -> deleteRdsConfigs(workspaceId, cloudbreakClient, rds.getId()));
     }
 
-    public void deleteCredential(Long workspaceId, CloudbreakClient cloudbreakClient, Long credentialId) {
+    public void deleteCredential(Long workspaceId, CloudbreakEndpoint cloudbreakClient, Long credentialId) {
         if (credentialId != null) {
             Optional<CredentialV4Response> response = cloudbreakClient.credentialV4Endpoint().list(workspaceId)
                     .getResponses()
@@ -88,7 +89,7 @@ public class CleanupService {
         }
     }
 
-    public void deleteBlueprint(Long workspaceId, CloudbreakClient cloudbreakClient, Long blueprintId) {
+    public void deleteBlueprint(Long workspaceId, CloudbreakEndpoint cloudbreakClient, Long blueprintId) {
         if (blueprintId != null) {
             Optional<BlueprintV4ViewResponse> response = cloudbreakClient.blueprintV4Endpoint().list(workspaceId)
                     .getResponses()
@@ -101,7 +102,7 @@ public class CleanupService {
         }
     }
 
-    public void deleteStackAndWait(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName) {
+    public void deleteStackAndWait(CloudbreakEndpoint cloudbreakClient, Long workspaceId, String stackName) {
         for (int i = 0; i < cleanUpRetryCount; i++) {
             if (deleteStack(cloudbreakClient, workspaceId, stackName)) {
                 WaitResult waitResult = CloudbreakUtil.waitForStackStatus(cloudbreakClient, workspaceId, stackName, "DELETE_COMPLETED");
@@ -117,7 +118,7 @@ public class CleanupService {
         }
     }
 
-    public boolean deleteStack(CloudbreakClient cloudbreakClient, Long workspaceId, String stackName) {
+    public boolean deleteStack(CloudbreakEndpoint cloudbreakClient, Long workspaceId, String stackName) {
         boolean result = false;
         if (stackName != null) {
             cloudbreakClient.stackV4Endpoint().delete(workspaceId, stackName, false, false);
@@ -126,7 +127,7 @@ public class CleanupService {
         return result;
     }
 
-    public void deleteRecipe(Long workspaceId, CloudbreakClient cloudbreakClient, Long recipeId) {
+    public void deleteRecipe(Long workspaceId, CloudbreakEndpoint cloudbreakClient, Long recipeId) {
         Optional<RecipeViewV4Response> response = cloudbreakClient.recipeV4Endpoint().list(workspaceId)
                 .getResponses()
                 .stream()
@@ -137,11 +138,11 @@ public class CleanupService {
         }
     }
 
-    public void deleteImageCatalog(CloudbreakClient cloudbreakClient, String name, Long workspaceId) {
+    public void deleteImageCatalog(CloudbreakEndpoint cloudbreakClient, String name, Long workspaceId) {
         cloudbreakClient.imageCatalogV4Endpoint().delete(workspaceId, name);
     }
 
-    public void deleteRdsConfigs(Long workspaceId, CloudbreakClient cloudbreakClient, Long databaseId) {
+    public void deleteRdsConfigs(Long workspaceId, CloudbreakEndpoint cloudbreakClient, Long databaseId) {
         if (databaseId != null) {
             Optional<DatabaseV4Response> response = cloudbreakClient.databaseV4Endpoint().list(workspaceId, null, Boolean.FALSE)
                     .getResponses()

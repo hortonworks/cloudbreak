@@ -11,7 +11,7 @@ public class IntegrationTestContext {
 
     public static final String AUTH_PASSWORD = "AUTH_PASSWORD";
 
-    public static final String REFRESH_TOKEN = "REFRESH_TOKEN";
+    public static final String USER_CRN = "USER_CRN";
 
     private Map<String, Object> contextParameters = new HashMap<>();
 

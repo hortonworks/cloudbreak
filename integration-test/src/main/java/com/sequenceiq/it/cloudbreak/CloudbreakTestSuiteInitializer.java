@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak;
 
+import static com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient.CloudbreakEndpoint;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -26,7 +28,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.CredentialV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
-import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder;
+import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.SuiteContext;
 import com.sequenceiq.it.cloudbreak.config.ITProps;
@@ -65,11 +68,8 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     @Value("${integrationtest.ambari.defaultAmbariPort}")
     private String defaultAmbariPort;
 
-    @Value("${integrationtest.caas.protocol:}")
-    private String caasProtocol;
-
-    @Value("${integrationtest.caas.address:}")
-    private String caasAddress;
+    @Value("${integrationtest.user.crn}")
+    private String userCrn;
 
     @Value("${server.contextPath:/cb}")
     private String cbRootContextPath;
@@ -106,34 +106,22 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             @Optional("") String stackName, @Optional("") String networkName, @Optional("") String securityGroupName) {
         cloudbreakServer = StringUtils.hasLength(cloudbreakServer) ? cloudbreakServer : defaultCloudbreakServer;
         String cbServerRoot = cloudbreakServer + cbRootContextPath;
-        String refreshToken = itContext.getContextParam(IntegrationTestContext.REFRESH_TOKEN);
+
         itContext.putContextParam(CloudbreakITContextConstants.SKIP_REMAINING_SUITETEST_AFTER_ONE_FAILED, skipRemainingSuiteTestsAfterOneFailed);
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_SERVER, cloudbreakServer);
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_SERVER_ROOT, cbServerRoot);
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDPROVIDER, cloudProvider);
 
-        String[] cloudbreakServerSplit = cloudbreakServer.split("://");
-        if (StringUtils.isEmpty(caasProtocol)) {
-            caasProtocol = cloudbreakServerSplit[0];
-        }
-        if (StringUtils.isEmpty(caasAddress)) {
-            caasAddress = cloudbreakServerSplit[1];
-        }
-
-        itContext.putContextParam(CloudbreakITContextConstants.CAAS_PROTOCOL, caasProtocol);
-        itContext.putContextParam(CloudbreakITContextConstants.CAAS_ADDRESS, caasAddress);
-
-        CloudbreakClient cloudbreakClient = new CloudbreakClientBuilder(cbServerRoot, caasProtocol, caasAddress)
+        CloudbreakUserCrnClient cloudbreakClient = new CloudbreakUserCrnClientBuilder(cbServerRoot)
                 .withCertificateValidation(false)
                 .withIgnorePreValidation(true)
                 .withDebug(true)
-                .withCredential(refreshToken)
                 .build();
 
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, cloudbreakClient);
         Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
         if (cleanUpBeforeStart) {
-            cleanUpService.deleteTestStacksAndResources(cloudbreakClient, workspaceId);
+            cleanUpService.deleteTestStacksAndResources(cloudbreakClient.withCrn(userCrn), workspaceId);
         }
         putBlueprintToContextIfExist(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class)
                 .blueprintV4Endpoint(), blueprintName, workspaceId);
@@ -217,7 +205,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
     @Parameters("cleanUp")
     public void cleanUp(@Optional("true") boolean cleanUp) {
         if (isCleanUpNeeded(cleanUp)) {
-            CloudbreakClient cloudbreakClient = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class);
+            CloudbreakEndpoint cloudbreakClient = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakEndpoint.class);
             Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
             String stackId = itContext.getCleanUpParameter(CloudbreakITContextConstants.STACK_ID);
             cleanUpService.deleteStackAndWait(cloudbreakClient, workspaceId, stackId);

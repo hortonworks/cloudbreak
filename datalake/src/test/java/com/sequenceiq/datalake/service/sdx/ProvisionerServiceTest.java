@@ -71,7 +71,7 @@ class ProvisionerServiceTest {
         sdxCluster.setAccountId("hortonworks");
         sdxCluster.setTags(Json.silent(new HashMap<>()));
 
-        CloudbreakUserCrnClient.UserCrnEndpoint cbEndpointMock = mock(CloudbreakUserCrnClient.UserCrnEndpoint.class);
+        CloudbreakUserCrnClient.CloudbreakEndpoint cbEndpointMock = mock(CloudbreakUserCrnClient.CloudbreakEndpoint.class);
         StackV4Endpoint stackEndpointMock = mock(StackV4Endpoint.class);
         StackV4Response stackV4Response = new StackV4Response();
         long stackIdFromCB = 100L;
@@ -109,7 +109,7 @@ class ProvisionerServiceTest {
         sdxCluster.setAccountId("hortonworks");
         sdxCluster.setTags(Json.silent(new HashMap<>()));
 
-        CloudbreakUserCrnClient.UserCrnEndpoint cbEndpointMock = mock(CloudbreakUserCrnClient.UserCrnEndpoint.class);
+        CloudbreakUserCrnClient.CloudbreakEndpoint cbEndpointMock = mock(CloudbreakUserCrnClient.CloudbreakEndpoint.class);
         StackV4Endpoint stackEndpointMock = mock(StackV4Endpoint.class);
         StackV4Response stackV4Response = new StackV4Response();
         long stackIdFromCB = 100L;
@@ -137,7 +137,7 @@ class ProvisionerServiceTest {
         sdxCluster.setAccountId("hortonworks");
         sdxCluster.setTags(Json.silent(new HashMap<>()));
 
-        CloudbreakUserCrnClient.UserCrnEndpoint cbEndpointMock = mock(CloudbreakUserCrnClient.UserCrnEndpoint.class);
+        CloudbreakUserCrnClient.CloudbreakEndpoint cbEndpointMock = mock(CloudbreakUserCrnClient.CloudbreakEndpoint.class);
         StackV4Endpoint stackEndpointMock = mock(StackV4Endpoint.class);
         StackV4Response stackV4Response = new StackV4Response();
         long stackIdFromCB = 100L;
@@ -165,7 +165,7 @@ class ProvisionerServiceTest {
         sdxCluster.setAccountId("hortonworks");
         sdxCluster.setTags(Json.silent(new HashMap<>()));
 
-        CloudbreakUserCrnClient.UserCrnEndpoint cbEndpointMock = mock(CloudbreakUserCrnClient.UserCrnEndpoint.class);
+        CloudbreakUserCrnClient.CloudbreakEndpoint cbEndpointMock = mock(CloudbreakUserCrnClient.CloudbreakEndpoint.class);
         StackV4Endpoint stackEndpointMock = mock(StackV4Endpoint.class);
 
         long stackIdFromCB = 100L;

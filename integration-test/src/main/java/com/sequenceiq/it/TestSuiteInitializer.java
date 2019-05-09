@@ -18,8 +18,8 @@ import com.sequenceiq.it.config.IntegrationTestConfiguration;
 @ContextConfiguration(classes = IntegrationTestConfiguration.class, initializers = ConfigFileApplicationContextInitializer.class)
 public class TestSuiteInitializer extends AbstractTestNGSpringContextTests {
 
-    @Value("${integrationtest.caas.token}")
-    private String defaultRefreshToken;
+    @Value("${integrationtest.user.crn}")
+    private String defaultUserCrn;
 
     @Inject
     private SuiteContext suiteContext;
@@ -41,10 +41,10 @@ public class TestSuiteInitializer extends AbstractTestNGSpringContextTests {
 
     @BeforeSuite(dependsOnMethods = "initSuiteMap", groups = "suiteInit")
     @Parameters({ "refreshToken" })
-    public void initTestSuite(@Optional("") String refreshToken) {
-        refreshToken = getString(refreshToken, defaultRefreshToken);
+    public void initTestSuite(@Optional("") String userCrn) {
+        userCrn = getString(userCrn, defaultUserCrn);
 
-        itContext.putContextParam(IntegrationTestContext.REFRESH_TOKEN, refreshToken);
+        itContext.putContextParam(IntegrationTestContext.USER_CRN, userCrn);
     }
 
     private String getString(String paramValue, String defaultValue) {

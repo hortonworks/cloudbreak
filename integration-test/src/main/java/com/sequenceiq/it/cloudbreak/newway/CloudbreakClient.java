@@ -2,19 +2,19 @@ package com.sequenceiq.it.cloudbreak.newway;
 
 import java.util.function.Function;
 
+import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient.CloudbreakEndpoint;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
-import com.sequenceiq.cloudbreak.client.IdentityClient;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.actor.CloudbreakUser;
 
 public class CloudbreakClient extends Entity {
     public static final String CLOUDBREAK_CLIENT = "CLOUDBREAK_CLIENT";
 
-    private static com.sequenceiq.cloudbreak.client.CloudbreakClient singletonCloudbreakClient;
+    private static CloudbreakEndpoint singletonCloudbreakClient;
 
-    private com.sequenceiq.cloudbreak.client.CloudbreakClient cloudbreakClient;
+    private static String crn;
 
-    private IdentityClient identityClient;
+    private CloudbreakEndpoint cloudbreakClient;
 
     private Long workspaceId;
 
@@ -26,15 +26,7 @@ public class CloudbreakClient extends Entity {
         this(CLOUDBREAK_CLIENT);
     }
 
-    public void setCloudbreakClient(com.sequenceiq.cloudbreak.client.CloudbreakClient cloudbreakClient) {
-        this.cloudbreakClient = cloudbreakClient;
-    }
-
-    public com.sequenceiq.cloudbreak.client.CloudbreakClient getCloudbreakClient() {
-        return cloudbreakClient;
-    }
-
-    public static com.sequenceiq.cloudbreak.client.CloudbreakClient getSingletonCloudbreakClient() {
+    public static synchronized CloudbreakEndpoint getSingletonCloudbreakClient() {
         return singletonCloudbreakClient;
     }
 
@@ -57,13 +49,7 @@ public class CloudbreakClient extends Entity {
         if (singletonCloudbreakClient == null) {
             singletonCloudbreakClient = new ProxyCloudbreakClient(
                     integrationTestContext.getContextParam(CloudbreakTest.CLOUDBREAK_SERVER_ROOT),
-                    integrationTestContext.getContextParam(CloudbreakTest.CAAS_PROTOCOL),
-                    integrationTestContext.getContextParam(CloudbreakTest.CAAS_ADDRESS),
-                    integrationTestContext.getContextParam(CloudbreakTest.REFRESH_TOKEN),
-                    new ConfigKey(false, true, true),
-                    integrationTestContext.getContextParam(CloudbreakTest.IDENTITY_URL),
-                    integrationTestContext.getContextParam(CloudbreakTest.AUTOSCALE_CLIENT_ID),
-                    integrationTestContext.getContextParam(CloudbreakTest.AUTOSCALE_SECRET));
+                    new ConfigKey(false, true, true)).withCrn(integrationTestContext.getContextParam(CloudbreakTest.USER_CRN));
         }
         clientEntity.cloudbreakClient = singletonCloudbreakClient;
     }
@@ -72,11 +58,16 @@ public class CloudbreakClient extends Entity {
         CloudbreakClient clientEntity = new CloudbreakClient();
         clientEntity.cloudbreakClient = new ProxyCloudbreakClient(
                 testParameter.get(CloudbreakTest.CLOUDBREAK_SERVER_ROOT),
-                testParameter.get(CloudbreakTest.CAAS_PROTOCOL),
-                testParameter.get(CloudbreakTest.CAAS_ADDRESS),
-                cloudbreakUser.getToken(),
-                new ConfigKey(false, true, true));
+                new ConfigKey(false, true, true)).withCrn(cloudbreakUser.getToken());
         return clientEntity;
+    }
+
+    public CloudbreakEndpoint getCloudbreakClient() {
+        return cloudbreakClient;
+    }
+
+    public void setCloudbreakClient(CloudbreakEndpoint cloudbreakClient) {
+        this.cloudbreakClient = cloudbreakClient;
     }
 
     public Long getWorkspaceId() {

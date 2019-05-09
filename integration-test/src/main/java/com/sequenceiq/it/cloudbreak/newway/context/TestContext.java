@@ -215,7 +215,7 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     protected String getDefaultUser() {
-        return testParameter.get(CloudbreakTest.REFRESH_TOKEN);
+        return testParameter.get(CloudbreakTest.USER_CRN);
     }
 
     public <O extends CloudbreakTestDto> O init(Class<O> clss) {

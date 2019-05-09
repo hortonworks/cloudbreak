@@ -22,7 +22,7 @@ import org.testng.annotations.Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Response;
-import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient.CloudbreakEndpoint;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 import com.sequenceiq.it.cloudbreak.v2.mock.SuiteInitializerMock;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
@@ -64,7 +64,7 @@ public class MockSuiteInitializer extends AbstractTestNGSpringContextTests {
     @BeforeSuite(dependsOnMethods = "initContext")
     @Parameters("mockPort")
     public void initSuiteMap(ITestContext testContext, @Optional("9443") int mockPort) {
-        CloudbreakClient cloudbreakClient = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class);
+        CloudbreakEndpoint cloudbreakClient = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakEndpoint.class);
         Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
 
         if (cleanUpBeforeStart && isImageCatalogExists(cloudbreakClient.imageCatalogV4Endpoint(), MOCK_IMAGE_CATALOG_NAME, workspaceId)) {
@@ -109,7 +109,7 @@ public class MockSuiteInitializer extends AbstractTestNGSpringContextTests {
     @Parameters("cleanUp")
     public void cleanUp(@Optional("true") boolean cleanUp) {
         if (isCleanUpNeeded(cleanUp)) {
-            CloudbreakClient cloudbreakClient = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class);
+            CloudbreakEndpoint cloudbreakClient = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakEndpoint.class);
             Long workspaceId = itContext.getContextParam(CloudbreakITContextConstants.WORKSPACE_ID, Long.class);
             cleanUpService.deleteImageCatalog(cloudbreakClient, MOCK_IMAGE_CATALOG_NAME, workspaceId);
         }
