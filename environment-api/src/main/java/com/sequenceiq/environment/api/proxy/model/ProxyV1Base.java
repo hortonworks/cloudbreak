@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.api.proxy.model;
 
+import static com.sequenceiq.environment.api.proxy.doc.ProxyConfigDescription.ENVIRONMENTS;
+
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -12,7 +14,6 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
-import com.sequenceiq.environment.api.environment.doc.EnvironmentDescription;
 import com.sequenceiq.environment.api.proxy.doc.ProxyConfigDescription;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -49,7 +50,7 @@ public abstract class ProxyV1Base implements Serializable {
     @ApiModelProperty(value = ProxyConfigDescription.PROTOCOL, required = true)
     private String protocol;
 
-    @ApiModelProperty(EnvironmentDescription.ENVIRONMENTS)
+    @ApiModelProperty(ENVIRONMENTS)
     private Set<String> environments = new HashSet<>();
 
     public String getName() {

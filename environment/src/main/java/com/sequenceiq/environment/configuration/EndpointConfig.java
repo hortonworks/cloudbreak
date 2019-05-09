@@ -10,8 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 
-import com.sequenceiq.environment.env.api.EnvironmentController;
-import com.sequenceiq.environment.api.environment.model.EnvironmentApi;
+import com.sequenceiq.environment.api.EnvironmentApi;
 import com.sequenceiq.environment.exception.mapper.DefaultExceptionMapper;
 import com.sequenceiq.environment.exception.mapper.WebApplicaitonExceptionMapper;
 
@@ -23,7 +22,7 @@ import io.swagger.jaxrs.config.SwaggerContextService;
 @Configuration
 public class EndpointConfig extends ResourceConfig {
 
-    private static final List<Class<?>> CONTROLLERS = List.of(EnvironmentController.class);
+    private static final List<Class<?>> CONTROLLERS = List.of();
 
     private static final String VERSION_UNAVAILABLE = "unspecified";
 
