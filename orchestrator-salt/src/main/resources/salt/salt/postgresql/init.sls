@@ -1,6 +1,6 @@
 init-db-with-utf8:
   cmd.run:
-    - name: rm -rf /var/lib/pgsql/data && su postgres sh -c 'initdb --locale=en_US.UTF-8 /var/lib/pgsql/data > /var/lib/pgsql/initdb.log' && rm /var/log/pgsql_listen_address_configured
+    - name: rm -rf /var/lib/pgsql/data && runuser -l postgres sh -c 'initdb --locale=en_US.UTF-8 /var/lib/pgsql/data > /var/lib/pgsql/initdb.log' && rm /var/log/pgsql_listen_address_configured
     - unless: grep -q UTF-8 /var/lib/pgsql/initdb.log
 
 start-postgresql:
@@ -39,6 +39,7 @@ init-services-db:
     - unless: test -f /var/log/init-services-db-executed
     - require:
       - file: /opt/salt/scripts/init_db.sh
+      - cmd: configure-listen-address
 
 {% if not salt['file.directory_exists']('/yarn-private') %}  # FIXME (BUG-92637): must be disabled for YCloud
 
@@ -52,9 +53,12 @@ restart-pgsql-if-reconfigured:
 
 {% else %}
 
-reload-postgresql:
+restart-postgresql:
   cmd.run:
-    - name: service postgresql reload
+    - name: service postgresql restart && while ! netstat -tlpn |grep -i "0 0.0.0.0:5432" &> /dev/null; do echo "waiting for postgres"; sleep 1; done
+    - watch:
+      - cmd: configure-listen-address
+      - cmd: init-services-db
 
 
 {% endif %}
