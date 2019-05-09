@@ -27,3 +27,27 @@ install-freeipa:
     - unless: test -f /var/log/freeipa_install-executed
     - require:
         - file: /opt/salt/scripts/freeipa_install.sh
+
+
+/opt/salt/scripts/ipa_user_management.sh:
+  file.managed:
+    - makedirs: True
+    - user: root
+    - group: root
+    - mode: 700
+    - source: salt://freeipa/scripts/ipa_user_management.sh
+
+add-user:
+  cmd.run:
+    - name: /opt/salt/scripts/ipa_user_management.sh && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/ipa_user_management-executed
+    - env:
+        - ADMINUSER: {{salt['pillar.get']('freeipa:password')}}
+        - PASSWORD: {{salt['pillar.get']('freeipa:domain')}}
+        - USERNAME: {{salt['pillar.get']('freeipa:username')}}
+        - FNAME: {{salt['pillar.get']('freeipa:fname')}}
+        - LNAME: {{salt['pillar.get']('freeipa:lname')}}
+    - unless: test -f /var/log/ipa_user_management-executed
+    - require:
+        - file: /opt/salt/scripts/ipa_user_management.sh
+
+
