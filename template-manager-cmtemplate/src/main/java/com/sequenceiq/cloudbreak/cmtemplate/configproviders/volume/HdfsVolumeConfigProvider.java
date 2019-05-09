@@ -26,7 +26,7 @@ public class HdfsVolumeConfigProvider extends AbstractVolumeConfigProvider {
     private static final String NUM_FAILED_VOLUMES_TOLERATED = "0";
 
     @Override
-    List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView) {
+    protected List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView) {
         List<ApiClusterTemplateConfig> roleConfigs = new ArrayList<>();
 
         switch (roleType) {
@@ -52,7 +52,7 @@ public class HdfsVolumeConfigProvider extends AbstractVolumeConfigProvider {
     }
 
     @Override
-    List<ApiClusterTemplateVariable> getVariables(String roleType, HostgroupView hostGroupView, TemplatePreparationObject templatePreparationObject) {
+    protected List<ApiClusterTemplateVariable> getVariables(String roleType, HostgroupView hostGroupView, TemplatePreparationObject templatePreparationObject) {
         List<ApiClusterTemplateVariable> variables = new ArrayList<>();
 
         switch (roleType) {

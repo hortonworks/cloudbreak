@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.HiveMetastoreConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.rds.HiveMetastoreConfigProvider;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplateProcessor;

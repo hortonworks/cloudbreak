@@ -14,8 +14,9 @@ import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
 public class HiveServer2ConfigProvider extends AbstractVolumeConfigProvider {
+
     @Override
-    List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView) {
+    protected List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView) {
         List<ApiClusterTemplateConfig> roleConfigs = new ArrayList<>();
 
         switch (roleType) {
@@ -30,7 +31,7 @@ public class HiveServer2ConfigProvider extends AbstractVolumeConfigProvider {
     }
 
     @Override
-    List<ApiClusterTemplateVariable> getVariables(String roleType, HostgroupView hostGroupView, TemplatePreparationObject templatePreparationObject) {
+    protected List<ApiClusterTemplateVariable> getVariables(String roleType, HostgroupView hostGroupView, TemplatePreparationObject templatePreparationObject) {
         List<ApiClusterTemplateVariable> variables = new ArrayList<>();
 
         switch (roleType) {
