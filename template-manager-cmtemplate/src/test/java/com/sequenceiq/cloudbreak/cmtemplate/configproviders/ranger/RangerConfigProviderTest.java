@@ -79,8 +79,8 @@ public class RangerConfigProviderTest {
         assertEquals("ranger_database_user", masterRangerAdmin.get(3).getName());
         assertEquals("ranger-ranger_database_user", masterRangerAdmin.get(3).getVariable());
 
-        assertEquals("ranger_database_user_password", masterRangerAdmin.get(4).getName());
-        assertEquals("ranger-ranger_database_user_password", masterRangerAdmin.get(4).getVariable());
+        assertEquals("ranger_database_password", masterRangerAdmin.get(4).getName());
+        assertEquals("ranger-ranger_database_password", masterRangerAdmin.get(4).getVariable());
 
     }
 
