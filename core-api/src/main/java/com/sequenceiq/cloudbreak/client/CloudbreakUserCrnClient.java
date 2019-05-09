@@ -54,24 +54,24 @@ public class CloudbreakUserCrnClient {
     protected CloudbreakUserCrnClient(String cloudbreakAddress, ConfigKey configKey) {
         client = RestClientUtil.get(configKey);
         webTarget = client.target(cloudbreakAddress).path(CoreApi.API_ROOT_CONTEXT);
-        logger.info("CloudbreakUserCrnClient has been created with token. cloudbreak: {}, configKey: {}", cloudbreakAddress, configKey);
+        logger.info("CloudbreakUserCrnClient has been created without crn. cloudbreak: {}, configKey: {}", cloudbreakAddress, configKey);
     }
 
     protected Client getClient() {
         return client;
     }
 
-    public UserCrnEndpoint withCrn(String crn) {
-        return new UserCrnEndpoint(webTarget, crn);
+    public CloudbreakEndpoint withCrn(String crn) {
+        return new CloudbreakEndpoint(webTarget, crn);
     }
 
-    public static class UserCrnEndpoint {
+    public static class CloudbreakEndpoint {
 
         private WebTarget webTarget;
 
         private String crn;
 
-        public UserCrnEndpoint(WebTarget webTarget, String crn) {
+        public CloudbreakEndpoint(WebTarget webTarget, String crn) {
             this.webTarget = webTarget;
             this.crn = crn;
         }
@@ -186,5 +186,4 @@ public class CloudbreakUserCrnClient {
             return WebResourceFactory.newResource(resourceInterface, webTarget, false, headers, Collections.emptyList(), EMPTY_FORM);
         }
     }
-
 }

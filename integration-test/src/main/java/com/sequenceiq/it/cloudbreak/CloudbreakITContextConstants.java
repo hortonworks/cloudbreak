@@ -3,10 +3,6 @@ package com.sequenceiq.it.cloudbreak;
 public class CloudbreakITContextConstants {
     public static final String CLOUDBREAK_SERVER = "CLOUDBREAK_SERVER";
 
-    public static final String CAAS_PROTOCOL = "CAAS_PROTOCOL";
-
-    public static final String CAAS_ADDRESS = "CAAS_ADDRESS";
-
     public static final String CLOUDBREAK_SERVER_ROOT = "CLOUDBREAK_SERVER_ROOT";
 
     public static final String BLUEPRINT_ID = "BLUEPRINT_ID";

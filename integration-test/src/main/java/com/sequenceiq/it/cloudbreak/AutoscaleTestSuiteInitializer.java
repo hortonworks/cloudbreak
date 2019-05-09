@@ -17,8 +17,8 @@ import org.testng.annotations.Parameters;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.SuiteContext;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
-import com.sequenceiq.periscope.client.AutoscaleClient;
-import com.sequenceiq.periscope.client.AutoscaleClient.AutoscaleClientBuilder;
+import com.sequenceiq.periscope.client.AutoscaleUserCrnClient;
+import com.sequenceiq.periscope.client.AutoscaleUserCrnClientBuilder;
 
 @ContextConfiguration(classes = IntegrationTestConfiguration.class, initializers = ConfigFileApplicationContextInitializer.class)
 public class AutoscaleTestSuiteInitializer extends AbstractTestNGSpringContextTests {
@@ -26,12 +26,6 @@ public class AutoscaleTestSuiteInitializer extends AbstractTestNGSpringContextTe
 
     @Value("${integrationtest.periscope.server}")
     private String defaultPeriscopeServer;
-
-    @Value("${integrationtest.caas.protocol}")
-    private String defaultCaasProtocol;
-
-    @Value("${integrationtest.caas.address}")
-    private String defaultCaasAddress;
 
     @Value("${server.contextPath:/as}")
     private String autoscaleRootContextPath;
@@ -53,18 +47,11 @@ public class AutoscaleTestSuiteInitializer extends AbstractTestNGSpringContextTe
     @Parameters("periscopeServer")
     public void initCloudbreakSuite(@Optional("") String periscopeServer, @Optional("") String caasProtocol, @Optional("") String caasAddress) {
         periscopeServer = StringUtils.hasLength(periscopeServer) ? periscopeServer : defaultPeriscopeServer;
-        caasProtocol = StringUtils.hasLength(caasProtocol) ? caasProtocol : defaultCaasProtocol;
-        caasAddress = StringUtils.hasLength(caasAddress) ? caasAddress : defaultCaasAddress;
-        String refreshToken = itContext.getContextParam(IntegrationTestContext.REFRESH_TOKEN);
+        String userCrn = itContext.getContextParam(IntegrationTestContext.USER_CRN);
 
-        AutoscaleClient autoscaleClient = new AutoscaleClientBuilder(periscopeServer + autoscaleRootContextPath, caasProtocol, caasAddress)
-                .withCertificateValidation(false)
-                .withDebug(true)
-                .withCredential(refreshToken)
-                .withIgnorePreValidation(false)
-                .build();
+        AutoscaleUserCrnClient autoscaleClient = new AutoscaleUserCrnClientBuilder(periscopeServer + autoscaleRootContextPath).build();
 
-        itContext.putContextParam(CloudbreakITContextConstants.AUTOSCALE_CLIENT, autoscaleClient);
+        itContext.putContextParam(CloudbreakITContextConstants.AUTOSCALE_CLIENT, autoscaleClient.withCrn(userCrn));
     }
 
 }

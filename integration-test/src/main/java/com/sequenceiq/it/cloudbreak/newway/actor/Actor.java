@@ -8,7 +8,7 @@ import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 public interface Actor {
 
     static CloudbreakUser defaultUser(TestParameter testParameter) {
-        return new CloudbreakUser(testParameter.get(CloudbreakTest.REFRESH_TOKEN));
+        return new CloudbreakUser(testParameter.get(CloudbreakTest.USER_CRN));
     }
 
     static CloudbreakUser secondUser(TestParameter testParameter) {
