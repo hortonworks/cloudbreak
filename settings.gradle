@@ -42,5 +42,5 @@ include 'workspace-authorization'
 include 'common'
 
 rootProject.name = 'cloudbreak'
-
+include 'secret-engine'
 
