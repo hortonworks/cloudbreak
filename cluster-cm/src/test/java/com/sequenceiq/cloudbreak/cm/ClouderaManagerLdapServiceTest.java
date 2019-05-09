@@ -17,6 +17,7 @@ import org.mockito.MockitoAnnotations;
 import com.cloudera.api.swagger.AuthRolesResourceApi;
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.ExternalUserMappingsResourceApi;
+import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiAuthRoleMetadata;
 import com.cloudera.api.swagger.model.ApiAuthRoleMetadataList;
@@ -48,6 +49,12 @@ public class ClouderaManagerLdapServiceTest {
     @Mock
     private GrpcUmsClient umsClient;
 
+    @Mock
+    private ClouderaManagerLicenseService licenseService;
+
+    @Mock
+    private ApiClient apiClient;
+
     @InjectMocks
     private ClouderaManagerLdapService underTest = new ClouderaManagerLdapService();
 
@@ -68,9 +75,10 @@ public class ClouderaManagerLdapServiceTest {
         httpClientConfig = new HttpClientConfig("apiAddress");
         MockitoAnnotations.initMocks(this);
         when(umsClient.isUmsUsable(anyString())).thenReturn(false);
-        when(clouderaManagerClientFactory.getClouderaManagerResourceApi(stack, cluster, httpClientConfig)).thenReturn(clouderaManagerResourceApi);
-        when(clouderaManagerClientFactory.getExternalUserMappingsResourceApi(stack, cluster, httpClientConfig)).thenReturn(externalUserMappingsResourceApi);
-        when(clouderaManagerClientFactory.getAuthRolesResourceApi(stack, cluster, httpClientConfig)).thenReturn(authRolesResourceApi);
+        when(clouderaManagerClientFactory.getClient(stack, cluster, httpClientConfig)).thenReturn(apiClient);
+        when(clouderaManagerClientFactory.getClouderaManagerResourceApi(apiClient)).thenReturn(clouderaManagerResourceApi);
+        when(clouderaManagerClientFactory.getExternalUserMappingsResourceApi(apiClient)).thenReturn(externalUserMappingsResourceApi);
+        when(clouderaManagerClientFactory.getAuthRolesResourceApi(apiClient)).thenReturn(authRolesResourceApi);
     }
 
     @Test
@@ -82,6 +90,7 @@ public class ClouderaManagerLdapServiceTest {
         // WHEN
         underTest.setupLdap(stack, cluster, httpClientConfig);
         // THEN
+        verify(licenseService).beginTrialIfNeeded(stack.getCreator(), apiClient);
         verify(externalUserMappingsResourceApi, never()).createExternalUserMappings(any(ApiExternalUserMappingList.class));
     }
 
@@ -95,6 +104,7 @@ public class ClouderaManagerLdapServiceTest {
         // WHEN
         underTest.setupLdap(stack, cluster, httpClientConfig);
         // THEN
+        verify(licenseService).beginTrialIfNeeded(stack.getCreator(), apiClient);
         ArgumentCaptor<ApiExternalUserMappingList> apiExternalUserMappingListArgumentCaptor = ArgumentCaptor.forClass(ApiExternalUserMappingList.class);
         verify(externalUserMappingsResourceApi).createExternalUserMappings(apiExternalUserMappingListArgumentCaptor.capture());
         ApiExternalUserMapping apiExternalUserMapping = apiExternalUserMappingListArgumentCaptor.getValue().getItems().get(0);
@@ -114,6 +124,7 @@ public class ClouderaManagerLdapServiceTest {
         // WHEN
         underTest.setupLdap(stack, cluster, httpClientConfig);
         // THEN
+        verify(licenseService).beginTrialIfNeeded(stack.getCreator(), apiClient);
         verify(externalUserMappingsResourceApi, never()).createExternalUserMappings(any(ApiExternalUserMappingList.class));
     }
 
@@ -123,7 +134,6 @@ public class ClouderaManagerLdapServiceTest {
         // WHEN
         underTest.setupLdap(stack, cluster, httpClientConfig);
         // THEN
-        verify(clouderaManagerResourceApi).beginTrial();
         verify(clouderaManagerResourceApi, never()).updateConfig(anyString(), any());
         verify(authRolesResourceApi, never()).readAuthRolesMetadata(anyString());
         verify(externalUserMappingsResourceApi, never()).createExternalUserMappings(any(ApiExternalUserMappingList.class));
