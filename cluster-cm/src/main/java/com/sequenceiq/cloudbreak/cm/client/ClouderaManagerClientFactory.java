@@ -44,10 +44,6 @@ public class ClouderaManagerClientFactory {
         return clouderaManagerClientProvider.getClouderaManagerClient(clientConfig, stack.getGatewayPort(), username, password);
     }
 
-    public ClouderaManagerResourceApi getClouderaManagerResourceApi(Stack stack, Cluster cluster, HttpClientConfig clientConfig) {
-        return getClouderaManagerResourceApi(getClient(stack, cluster, clientConfig));
-    }
-
     public ClouderaManagerResourceApi getClouderaManagerResourceApi(ApiClient apiClient) {
         return new ClouderaManagerResourceApi(apiClient);
     }
@@ -56,16 +52,12 @@ public class ClouderaManagerClientFactory {
         return new MgmtServiceResourceApi(apiClient);
     }
 
-    public ExternalUserMappingsResourceApi getExternalUserMappingsResourceApi(Stack stack, Cluster cluster, HttpClientConfig clientConfig) {
-        return new ExternalUserMappingsResourceApi(getClient(stack, cluster, clientConfig));
+    public ExternalUserMappingsResourceApi getExternalUserMappingsResourceApi(ApiClient client) {
+        return new ExternalUserMappingsResourceApi(client);
     }
 
-    public AuthRolesResourceApi getAuthRolesResourceApi(Stack stack, Cluster cluster, HttpClientConfig clientConfig) {
-        return new AuthRolesResourceApi(getClient(stack, cluster, clientConfig));
-    }
-
-    public ClustersResourceApi getClustersResourceApi(Stack stack, Cluster cluster, HttpClientConfig clientConfig) {
-        return getClustersResourceApi(getClient(stack, cluster, clientConfig));
+    public AuthRolesResourceApi getAuthRolesResourceApi(ApiClient client) {
+        return new AuthRolesResourceApi(client);
     }
 
     public ClustersResourceApi getClustersResourceApi(ApiClient apiClient) {

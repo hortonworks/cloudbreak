@@ -78,6 +78,9 @@ public class ClouderaManagerMgmtSetupService {
     @Inject
     private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
 
+    @Inject
+    private ClouderaManagerLicenseService licenseService;
+
     /**
      * Sets up the management services using the given Cloudera Manager client.
      *
@@ -89,6 +92,8 @@ public class ClouderaManagerMgmtSetupService {
      */
     public void setupMgmtServices(Stack stack, ApiClient client, ApiHostRef cmHostRef, Set<RDSConfig> rdsConfigs)
             throws ApiException {
+        licenseService.beginTrialIfNeeded(stack.getCreator(), client);
+
         ClouderaManagerResourceApi clouderaManagerResourceApi = new ClouderaManagerResourceApi(client);
         MgmtServiceResourceApi mgmtServiceResourceApi = new MgmtServiceResourceApi(client);
         MgmtRolesResourceApi mgmtRolesResourceApi = new MgmtRolesResourceApi(client);
