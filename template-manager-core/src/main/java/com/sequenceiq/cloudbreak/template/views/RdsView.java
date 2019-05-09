@@ -133,6 +133,10 @@ public class RdsView {
         return port;
     }
 
+    public DatabaseVendor getDatabaseVendor() {
+        return databaseVendor;
+    }
+
     public String getFancyName() {
         return databaseVendor.fancyName();
     }
