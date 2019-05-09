@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cmtemplate;
+package com.sequenceiq.cloudbreak.cmtemplate.oozie;
 
 import static org.junit.Assert.assertEquals;
 
@@ -11,6 +11,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @RunWith(MockitoJUnitRunner.class)

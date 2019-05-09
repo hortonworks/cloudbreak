@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cmtemplate.configproviders.volume;
+package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,12 +8,13 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
-public class HdfsVolumeConfigProvider extends AbstractVolumeConfigProvider {
+public class HdfsRoleConfigConfigProvider extends AbstractRoleConfigConfigProvider {
 
     private static final String DFS_DATA_DIRS = "dfs_data_dir_list";
 
@@ -26,7 +27,7 @@ public class HdfsVolumeConfigProvider extends AbstractVolumeConfigProvider {
     private static final String NUM_FAILED_VOLUMES_TOLERATED = "0";
 
     @Override
-    List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView) {
+    protected List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView) {
         List<ApiClusterTemplateConfig> roleConfigs = new ArrayList<>();
 
         switch (roleType) {
@@ -52,7 +53,7 @@ public class HdfsVolumeConfigProvider extends AbstractVolumeConfigProvider {
     }
 
     @Override
-    List<ApiClusterTemplateVariable> getVariables(String roleType, HostgroupView hostGroupView, TemplatePreparationObject templatePreparationObject) {
+    protected List<ApiClusterTemplateVariable> getVariables(String roleType, HostgroupView hostGroupView, TemplatePreparationObject templatePreparationObject) {
         List<ApiClusterTemplateVariable> variables = new ArrayList<>();
 
         switch (roleType) {

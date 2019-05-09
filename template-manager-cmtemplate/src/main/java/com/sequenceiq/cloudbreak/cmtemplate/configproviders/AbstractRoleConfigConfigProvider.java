@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cmtemplate.configproviders.volume;
+package com.sequenceiq.cloudbreak.cmtemplate.configproviders;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,9 +19,9 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
-public abstract class AbstractVolumeConfigProvider implements CmTemplateComponentConfigProvider {
+public abstract class AbstractRoleConfigConfigProvider implements CmTemplateComponentConfigProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractVolumeConfigProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRoleConfigConfigProvider.class);
 
     @Override
     public Map<String, List<ApiClusterTemplateConfig>> getRoleConfigs(CmTemplateProcessor cmTemplate, TemplatePreparationObject templatePreparationObject) {
@@ -100,15 +100,13 @@ public abstract class AbstractVolumeConfigProvider implements CmTemplateComponen
         return roleConfigGroup.getRefName().equals(roleConfigGroupsRefName) && roleConfigGroup.getRoleType().equals(roleType);
     }
 
-    abstract List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView);
+    protected abstract List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView);
 
-    abstract List<ApiClusterTemplateVariable> getVariables(String roleType, HostgroupView hostgroupView, TemplatePreparationObject templatePreparationObject);
+    protected abstract List<ApiClusterTemplateVariable> getVariables(String roleType, HostgroupView hostgroupView,
+            TemplatePreparationObject templatePreparationObject);
 
-    String getRoleTypeVariableName(String hostGroup, String roleType, String propertyKey) {
+    public String getRoleTypeVariableName(String hostGroup, String roleType, String propertyKey) {
         return String.format("%s_%s_%s", hostGroup, roleType.toLowerCase(), propertyKey);
     }
 
-    boolean hasAnyAttachedDisks(HostgroupView hostGroupView) {
-        return hostGroupView.getVolumeCount() > 0;
-    }
 }

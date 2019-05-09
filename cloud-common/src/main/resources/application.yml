@@ -137,7 +137,8 @@ cb:
                 CDH 6.2 - Data Lake: Hive Metastore=cdh6-shared-services;
                 CDP 1.0 - Data Science: Apache Spark, Apache Hive, Impala=cdp-data-science;
                 CDP 1.0 - Data Engineering: Apache Spark, Apache Livy, Apache Zeppelin=cdp-data-engineering;
-                CDP 1.0 - SDX: Hive Metastore=cdp-shared-services
+                CDP 1.0 - SDX: Hive Metastore=cdp-shared-services;
+                CDP 1.0 - SDX: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx
 
     ambari:
       defaults:
@@ -240,7 +241,7 @@ cb:
         version: 7.x.0
         repo:
           redhat7:
-            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1064720/cm7/7.x.0/redhat7/yum/
+            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1070025/cm7/7.x.0/redhat7/yum/
 
 
   cdh:
@@ -267,12 +268,12 @@ cb:
             repoid: CDH-6.2.0
             redhat7: https://archive.cloudera.com/cdh6/6.2.0/parcels/
       "[6.0.99]":
-        version: 6.0.99-1.cdh6.0.99.p0.158
+        version: 6.0.99-1.cdh6.0.99.p0.173
         minCM: 7.0
         repo:
           stack:
             repoid: CDH-6.0.99
-            redhat7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1061958/cdh/6.x/parcels/
+            redhat7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1067685/cdh/6.x/parcels/
 
 
   ambari:

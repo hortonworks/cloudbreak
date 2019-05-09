@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cmtemplate.configproviders;
+package com.sequenceiq.cloudbreak.cmtemplate.configproviders.oozie;
 
 import java.util.ArrayList;
 import java.util.Collections;

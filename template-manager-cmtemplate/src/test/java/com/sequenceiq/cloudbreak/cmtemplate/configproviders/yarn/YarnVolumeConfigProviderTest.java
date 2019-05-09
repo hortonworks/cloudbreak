@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cmtemplate.configproviders.volume;
+package com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn;
 
 import static org.junit.Assert.assertEquals;
 
@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 @RunWith(MockitoJUnitRunner.class)
 public class YarnVolumeConfigProviderTest {
 
-    private final YarnVolumeConfigProvider underTest = new YarnVolumeConfigProvider();
+    private final YarnRoleConfigConfigProvider underTest = new YarnRoleConfigConfigProvider();
 
     @Test
     public void testGetRoleConfigsWithSingleRolesPerHostGroup() {

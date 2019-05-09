@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cmtemplate.configproviders.volume;
+package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 @RunWith(MockitoJUnitRunner.class)
 public class HdfsVolumeConfigProviderTest {
 
-    private final HdfsVolumeConfigProvider underTest = new HdfsVolumeConfigProvider();
+    private final HdfsRoleConfigConfigProvider underTest = new HdfsRoleConfigConfigProvider();
 
     @Test
     public void testGetRoleTypeVariableName() {

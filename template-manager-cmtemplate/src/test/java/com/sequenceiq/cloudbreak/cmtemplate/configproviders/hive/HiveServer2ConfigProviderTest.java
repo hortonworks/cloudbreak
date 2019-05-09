@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cmtemplate.configproviders.volume;
+package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 @RunWith(MockitoJUnitRunner.class)
 public class HiveServer2ConfigProviderTest {
 
-    private final HiveServer2ConfigProvider underTest = new HiveServer2ConfigProvider();
+    private final HiveServer2RoleConfigConfigProvider underTest = new HiveServer2RoleConfigConfigProvider();
 
     @Test
     public void testGetRoleConfigsWithSingleRolesPerHostGroup() {
