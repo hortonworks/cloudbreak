@@ -25,5 +25,9 @@ remove_cm_service_account:
 
 leave-ipa:
   cmd.run:
+{% if not salt['file.directory_exists']('/yarn-private') %}
     - name: ipa host-del {{ salt['grains.get']('fqdn') }} --updatedns && ipa-client-install --uninstall -U
+{% else %}
+    - name: runuser -l root -c 'ipa host-del {{ salt['grains.get']('fqdn') }} --updatedns && ipa-client-install --uninstall -U'
+{% endif %}
     - onlyif: ipa env

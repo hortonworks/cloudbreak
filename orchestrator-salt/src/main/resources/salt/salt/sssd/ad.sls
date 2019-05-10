@@ -1,4 +1,4 @@
-packages_install:
+ad_packages_install:
   pkg.installed:
     - refresh: False
     - pkgs:
