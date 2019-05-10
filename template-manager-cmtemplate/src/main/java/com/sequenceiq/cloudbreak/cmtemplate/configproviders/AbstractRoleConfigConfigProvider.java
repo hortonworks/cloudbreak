@@ -6,9 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateHostTemplate;
@@ -20,8 +17,6 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 public abstract class AbstractRoleConfigConfigProvider implements CmTemplateComponentConfigProvider {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRoleConfigConfigProvider.class);
 
     @Override
     public Map<String, List<ApiClusterTemplateConfig>> getRoleConfigs(CmTemplateProcessor cmTemplate, TemplatePreparationObject templatePreparationObject) {

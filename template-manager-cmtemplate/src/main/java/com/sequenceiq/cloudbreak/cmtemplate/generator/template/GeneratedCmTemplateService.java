@@ -92,13 +92,14 @@ public class GeneratedCmTemplateService {
                 component.getGroups().forEach(group -> {
 
                     String componentName = component.getName();
-                    String hostServiceNameEnd = (component.getGroups().size() == 1 || component.isBase()) ? "BASE" : group.toUpperCase();
+                    boolean base = component.getGroups().size() == 1 || component.isBase();
+                    String hostServiceNameEnd = base ? "BASE" : group.toUpperCase();
                     String hostServiceName = String.format("%s-%s-%s", lowerCaseServiceName, component.getName().toUpperCase(), hostServiceNameEnd);
 
                     ApiClusterTemplateRoleConfigGroup apiClusterTemplateRoleConfigGroup = new ApiClusterTemplateRoleConfigGroup();
                     apiClusterTemplateRoleConfigGroup.setRoleType(componentName.toUpperCase());
                     apiClusterTemplateRoleConfigGroup.setRefName(hostServiceName);
-                    apiClusterTemplateRoleConfigGroup.setBase((component.getGroups().size() == 1 || component.isBase()) ? true : false);
+                    apiClusterTemplateRoleConfigGroup.setBase(base);
 
                     if (hostServiceMap.keySet().contains(group)) {
                         hostServiceMap.get(group).add(hostServiceName);

@@ -85,7 +85,7 @@ public class CentralCmTemplateUpdater implements BlueprintUpdater {
         if (Objects.nonNull(clouderaManagerProductDetails) && !clouderaManagerProductDetails.isEmpty()) {
             cmTemplateProcessor.resetProducts();
             cmTemplateProcessor.resetRepositories();
-            clouderaManagerProductDetails.stream().forEach(product -> {
+            clouderaManagerProductDetails.forEach(product -> {
                 String version = product.getVersion();
                 String name = product.getName();
                 String parcel = product.getParcel();

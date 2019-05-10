@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.configuration.domain.StackVersion;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.configuration.domain.dependencies.ServiceConfig;
-import com.sequenceiq.cloudbreak.cmtemplate.generator.configuration.domain.dependencies.ServiceDependecies;
+import com.sequenceiq.cloudbreak.cmtemplate.generator.configuration.domain.dependencies.ServiceDependencies;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.configuration.domain.versionmatrix.ServiceList;
 
 @Service
@@ -67,8 +67,8 @@ public class CmTemplateGeneratorConfigurationResolver implements ResourceLoaderA
         Set<ServiceConfig> serviceConfigs = new HashSet<>();
         String content = readFileFromClasspathQuietly(serviceDefinitionConfigurationPath);
         try {
-            ServiceDependecies serviceDependecies = MAPPER.readValue(content, ServiceDependecies.class);
-            serviceConfigs = serviceDependecies.getServices();
+            ServiceDependencies serviceDependencies = MAPPER.readValue(content, ServiceDependencies.class);
+            serviceConfigs = serviceDependencies.getServices();
         } catch (IOException ex) {
             String message = String.format("Could not read files from the definiated folder which was: %s", cdhConfigurationsPath);
             LOGGER.error(message, ex);

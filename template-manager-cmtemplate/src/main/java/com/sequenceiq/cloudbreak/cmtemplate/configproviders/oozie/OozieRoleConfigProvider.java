@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
+import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigConfigProvider;
@@ -65,7 +66,9 @@ public class OozieRoleConfigProvider extends AbstractRoleConfigConfigProvider {
 
         switch (roleType) {
             case "OOZIE_SERVER":
-                RdsView oozieRdsView = new RdsView(getFirstRDSConfigOptional(templatePreparationObject).get());
+                Optional<RDSConfig> rdsConfigOptional = getFirstRDSConfigOptional(templatePreparationObject);
+                Preconditions.checkArgument(rdsConfigOptional.isPresent());
+                RdsView oozieRdsView = new RdsView(rdsConfigOptional.get());
 
                 String databaseHostVar = getRoleTypeVariableName(hostGroupView.getName(), roleType, OOZIE_DATABASE_HOST);
                 variables.add(new ApiClusterTemplateVariable().name(databaseHostVar).value(oozieRdsView.getHost()));

@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cmtemplate.generator.configuration.domain.depe
 import java.util.HashSet;
 import java.util.Set;
 
-public class ServiceDependecies {
+public class ServiceDependencies {
 
     private Set<ServiceConfig> services = new HashSet<>();
 

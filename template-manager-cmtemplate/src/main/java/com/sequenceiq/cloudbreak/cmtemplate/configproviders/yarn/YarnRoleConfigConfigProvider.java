@@ -49,8 +49,8 @@ public class YarnRoleConfigConfigProvider extends AbstractRoleConfigConfigProvid
                 variables.add(new ApiClusterTemplateVariable().name(localDirVar).value(localDirs));
 
                 String logDirVar = getRoleTypeVariableName(hostGroupView.getName(), roleType, NODE_LOG_DIRS);
-                String loglDirs = VolumeUtils.buildVolumePathStringZeroVolumeHandled(hostGroupView.getVolumeCount(), "nodemanager/log");
-                variables.add(new ApiClusterTemplateVariable().name(logDirVar).value(loglDirs));
+                String logDirs = VolumeUtils.buildVolumePathStringZeroVolumeHandled(hostGroupView.getVolumeCount(), "nodemanager/log");
+                variables.add(new ApiClusterTemplateVariable().name(logDirVar).value(logDirs));
                 break;
             default:
                 break;
