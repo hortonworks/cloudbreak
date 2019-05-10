@@ -32,8 +32,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.i
 import com.sequenceiq.it.cloudbreak.newway.SecurityRulesEntity;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.AbstractCloudbreakTestDto;
-import com.sequenceiq.it.cloudbreak.newway.dto.AmbariRepositoryV4TestDto;
-import com.sequenceiq.it.cloudbreak.newway.dto.AmbariTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.EnvironmentSettingsV4TestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.GatewayTestDto;
@@ -45,7 +43,6 @@ import com.sequenceiq.it.cloudbreak.newway.dto.NetworkV2TestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.SecurityGroupTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.StackAuthenticationTestDto;
-import com.sequenceiq.it.cloudbreak.newway.dto.StackRepositoryTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.imagecatalog.ImageCatalogTestDto;
 
@@ -85,12 +82,9 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
                 .given("worker", InstanceGroupTestDto.class).withHostGroup(WORKER).withSecurityGroup("securityGroupWorker")
                 .given("compute", InstanceGroupTestDto.class).withHostGroup(COMPUTE)
                 .given("mpackDetails", ManagementPackDetailsTestDto.class).withName("mock-test-mpack")
-                .given("ambariStack", StackRepositoryTestDto.class).withMpacks("mpackDetails")
-                .given("ambariRepo", AmbariRepositoryV4TestDto.class)
                 .given("gatewayTopology", GatewayTopologyTestDto.class).withExposedServices("AMBARI").withTopologyName("proxy-name")
                 .given("gateway", GatewayTestDto.class).withTopologies("gatewayTopology")
-                .given("ambari", AmbariTestDto.class).withAmbariRepoDetails("ambariRepo").withStackRepository("ambariStack")
-                .given("cluster", ClusterTestDto.class).withRdsConfigNames("mock-test-rds").withLdapConfigName("mock-test-ldap").withAmbari("ambari")
+                .given("cluster", ClusterTestDto.class).withRdsConfigNames("mock-test-rds").withLdapConfigName("mock-test-ldap")
                 .withGateway("gateway")
                 .given("imageSettings", ImageSettingsTestDto.class).withImageId("f6e778fc-7f17-4535-9021-515351df3691").withImageCatalog(imgCat.getName());
 

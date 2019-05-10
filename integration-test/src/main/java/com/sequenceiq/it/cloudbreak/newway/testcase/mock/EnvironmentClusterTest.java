@@ -29,7 +29,6 @@ import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.dto.AmbariTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.EnvironmentSettingsV4TestDto;
@@ -83,15 +82,11 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
             then = "all of the three resources should be detached")
     public void testDetachFromEnvWithDeletedCluster(MockedTestContext testContext) {
         createEnvWithResources(testContext);
-        testContext.getModel().getAmbariMock().postSyncLdap();
-        testContext.getModel().getAmbariMock().putConfigureLdap();
         testContext
                 .given(ClusterTestDto.class)
                 .withDatabase(testContext.get(DatabaseTestDto.class).getName())
                 .withLdapConfigName(testContext.get(LdapTestDto.class).getName())
                 .withProxyConfigName(testContext.get(ProxyTestDto.class).getName())
-                .withBlueprintName(CD_NAME)
-                .withAmbari(testContext.given(AmbariTestDto.class))
                 .given(StackTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)
                 .when(stackTestClient.createV4())
@@ -142,8 +137,6 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
             then = "non of the operations should succeed")
     public void testCreateWlClusterDeleteFails(MockedTestContext testContext) {
         createEnvWithResources(testContext);
-        testContext.getModel().getAmbariMock().postSyncLdap();
-        testContext.getModel().getAmbariMock().putConfigureLdap();
         testContext.given(StackTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)
                 .withCluster(
@@ -172,12 +165,8 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
             then = "the resources should not be detached from the environment")
     public void testCreateWlClusterDetachFails(MockedTestContext testContext) {
         createEnvWithResources(testContext);
-        testContext.getModel().getAmbariMock().postSyncLdap();
-        testContext.getModel().getAmbariMock().putConfigureLdap();
         testContext
                 .given(ClusterTestDto.class)
-                .withBlueprintName(CD_NAME)
-                .withAmbari(testContext.given(AmbariTestDto.class))
                 .given(StackTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)
                 .withCluster(
@@ -236,14 +225,10 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
 
                 .given(ClusterTestDto.class)
                 .withDatabase(testContext.get(DatabaseTestDto.class).getName())
-                .withBlueprintName(CD_NAME)
-                .withAmbari(testContext.given(AmbariTestDto.class))
                 .given(StackTestDto.class)
                 .given(EnvironmentSettingsV4TestDto.class)
                 .given(ClusterTestDto.class)
                 .withDatabase(testContext.get(DatabaseTestDto.class).getName())
-                .withBlueprintName(CD_NAME)
-                .withAmbari(testContext.given(AmbariTestDto.class))
                 .given(StackTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)
                 .when(stackTestClient.createV4())
@@ -273,8 +258,6 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .then(EnvironmentTestUtils::checkRdsAttachedToEnv)
                 .given(ClusterTestDto.class)
                 .withDatabase(testContext.get(DatabaseTestDto.class).getName())
-                .withBlueprintName(CD_NAME)
-                .withAmbari(testContext.given(AmbariTestDto.class))
                 .given(StackTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)
                 .withCluster(
@@ -407,8 +390,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         rdsSet.add(rdsName);
         ClusterTestDto cluster = testContext.given(ClusterTestDto.class)
                 .valid()
-                .withRdsConfigNames(rdsSet)
-                .withBlueprintName(CD_NAME);
+                .withRdsConfigNames(rdsSet);
         if (rdsName != null) {
             cluster.withRdsConfigNames(rdsSet);
         }

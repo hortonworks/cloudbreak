@@ -16,7 +16,7 @@ public class RDSConfigJsonValidator implements ConstraintValidator<ValidRDSConfi
 
     private static final int MIN_TYPE_LENGTH = 3;
 
-    private static final int MAX_TYPE_LENGTH = 16;
+    private static final int MAX_TYPE_LENGTH = 56;
 
     private static final int MAX_CONNECTOR_JAR_URL_LENGTH = 150;
 
@@ -71,7 +71,7 @@ public class RDSConfigJsonValidator implements ConstraintValidator<ValidRDSConfi
                     + "The length of the name has to be in range of 3 to 12";
             return false;
         } else if (type.length() < MIN_TYPE_LENGTH || type.length() > MAX_TYPE_LENGTH) {
-            failMessage = "The length of the type has to be in range of 3 to 12";
+            failMessage = "The length of the type has to be in range of 3 to 56";
             return false;
         }
         return true;

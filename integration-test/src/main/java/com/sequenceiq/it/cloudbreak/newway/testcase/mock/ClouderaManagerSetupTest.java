@@ -1,8 +1,5 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
-import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
-import static com.sequenceiq.it.spark.ITResponse.AMBARI_API_ROOT;
-
 import javax.inject.Inject;
 
 import org.springframework.http.HttpMethod;
@@ -15,9 +12,10 @@ import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.newway.mock.model.ClouderaManagerMock;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
 
-public class AmbariSetupTest extends AbstractIntegrationTest {
+public class ClouderaManagerSetupTest extends AbstractIntegrationTest {
 
     @Inject
     private StackTestClient stackTestClient;
@@ -29,9 +27,8 @@ public class AmbariSetupTest extends AbstractIntegrationTest {
     @Description(
             given = "a working environment",
             when = "a stack is created",
-            then = "Ambari user endpoints should be invoked with the proper requests")
-    public void verifyCallsAgainstAmbariUserCreation(TestContext testContext) {
-        String generatedKey = resourcePropertyProvider().getName();
+            then = "ClouderaManager user endpoints should be invoked with the proper requests")
+    public void verifyCallsAgainstCmUserCreation(TestContext testContext) {
         String envName = resourcePropertyProvider().getName();
 
         testContext
@@ -41,16 +38,8 @@ public class AmbariSetupTest extends AbstractIntegrationTest {
                 .given(StackTestDto.class)
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
-                .then(MockVerification.verify(HttpMethod.POST, AMBARI_API_ROOT + "/users")
-                        .exactTimes(2).bodyContains("\"Users/active\": true"), key(generatedKey))
-                .then(MockVerification.verify(HttpMethod.POST, AMBARI_API_ROOT + "/users")
-                        .exactTimes(2).bodyContains("\"Users/admin\": true"), key(generatedKey))
-                .then(MockVerification.verify(HttpMethod.POST, AMBARI_API_ROOT + "/users")
-                        .exactTimes(1).bodyContains("\"Users/user_name\": \"cloudbreak\""), key(generatedKey))
-                .then(MockVerification.verify(HttpMethod.POST, AMBARI_API_ROOT + "/users")
-                        .exactTimes(1).bodyContains("\"Users/user_name\": \"dpapps\""), key(generatedKey))
-                .then(MockVerification.verify(HttpMethod.POST, AMBARI_API_ROOT + "/users")
-                        .atLeast(1).bodyContains("Users/password"), key(generatedKey))
+                .then(MockVerification.verify(HttpMethod.GET, ClouderaManagerMock.USERS).exactTimes(1))
+                .then(MockVerification.verify(HttpMethod.PUT, "/api/v31/users/admin").exactTimes(1))
                 .validate();
     }
 }

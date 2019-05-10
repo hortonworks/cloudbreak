@@ -2,10 +2,13 @@ package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.newway.context.RunningParameter.key;
+import static com.sequenceiq.it.cloudbreak.newway.mock.model.ClouderaManagerMock.API_ROOT;
+import static com.sequenceiq.it.cloudbreak.newway.mock.model.ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE;
 import static com.sequenceiq.it.cloudbreak.newway.mock.model.SaltMock.SALT_RUN;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.OK;
 
+import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,6 +20,8 @@ import org.springframework.http.HttpMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.cloudera.api.swagger.model.ApiCommand;
+import com.cloudera.api.swagger.model.ApiConfigList;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.ActiveDirectoryKerberosDescriptor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.AmbariKerberosDescriptor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.FreeIPAKerberosDescriptor;
@@ -33,10 +38,10 @@ import com.sequenceiq.it.cloudbreak.newway.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.newway.dto.AmbariTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.InstanceGroupTestDto;
-import com.sequenceiq.it.cloudbreak.newway.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
+import com.sequenceiq.it.spark.DynamicRouteStack;
 
 import spark.Route;
 
@@ -63,14 +68,13 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
     @Test(dataProvider = "dataProviderForTest")
     public void testClusterCreationWithValidKerberos(MockedTestContext testContext, String blueprintName, KerberosTestData testData,
             @Description TestCaseDescription testCaseDescription) {
-        mockAmbariBlueprintPassLdapSync(testContext);
+        DynamicRouteStack dynamicRouteStack = testContext.getModel().getClouderaManagerMock().getDynamicRouteStack();
+        dynamicRouteStack.put(API_ROOT + "/cm/config", (request, response) -> new ApiConfigList());
+        dynamicRouteStack.post(API_ROOT + "/cm/commands/importAdminCredentials", (request, response) -> new ApiCommand().id(new BigDecimal(1)));
+
         KerberosV4Request request = testData.getRequest();
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given(BlueprintTestDto.class)
-                .withName(blueprintName)
-                .withBlueprint(BLUEPRINT_TEXT)
-                .when(blueprintTestClient.createV4())
                 .given(KerberosTestDto.class)
                 .withRequest(request)
                 .withName(request.getName())
@@ -80,8 +84,6 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
                 .withNodeCount(1)
                 .given(ClusterTestDto.class)
                 .withKerberos(request.getName())
-                .withBlueprintName(blueprintName)
-                .withAmbari(testContext.given(AmbariTestDto.class))
                 .given(StackTestDto.class)
                 .withInstanceGroups("master")
                 .when(stackTestClient.createV4())
@@ -97,19 +99,12 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
             then = "the cluster should not been kerberized")
     public void testClusterCreationAttemptWithKerberosConfigWithoutName(MockedTestContext testContext) {
         mockAmbariBlueprintPassLdapSync(testContext);
-        String blueprintName = resourcePropertyProvider().getName();
         testContext
-                .given(BlueprintTestDto.class)
-                .withName(blueprintName)
-                .withBlueprint(BLUEPRINT_TEXT)
-                .when(blueprintTestClient.createV4())
                 .given("master", InstanceGroupTestDto.class)
                 .withHostGroup(MASTER)
                 .withNodeCount(1)
                 .given(ClusterTestDto.class)
                 .withKerberos(null)
-                .withBlueprintName(blueprintName)
-                .withAmbari(testContext.given(AmbariTestDto.class))
                 .given(StackTestDto.class)
                 .withInstanceGroups("master")
                 .when(stackTestClient.createV4())
@@ -124,14 +119,9 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
             then = "getting BadRequestException because kerberosname should not be empty")
     public void testClusterCreationAttemptWithKerberosConfigWithEmptyName(MockedTestContext testContext) {
         mockAmbariBlueprintPassLdapSync(testContext);
-        String blueprintName = resourcePropertyProvider().getName();
         KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given(BlueprintTestDto.class)
-                .withName(blueprintName)
-                .withBlueprint(BLUEPRINT_TEXT)
-                .when(blueprintTestClient.createV4())
                 .given(KerberosTestDto.class)
                 .withRequest(request)
                 .withName(request.getName())
@@ -141,7 +131,6 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
                 .withNodeCount(1)
                 .given(ClusterTestDto.class)
                 .withKerberos("")
-                .withBlueprintName(blueprintName)
                 .withAmbari(testContext.given(AmbariTestDto.class))
                 .given(StackTestDto.class)
                 .withInstanceGroups("master")
@@ -152,49 +141,17 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "an invalid kerberos descriptor JSON",
-            when = "calling kerberos creation",
-            then = "getting BadRequestException because descriptor should be a valid JSON")
-    public void testKerberosCreationAttemptWhenDescriptorIsAnInvalidJson(MockedTestContext testContext) {
-        mockAmbariBlueprintPassLdapSync(testContext);
-        String blueprintName = resourcePropertyProvider().getName();
-        String badRequest = resourcePropertyProvider().getName();
-        KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
-        String descriptor = "{\"kerberos-env\":{\"properties\":{\"kdc_type\":\"mit-kdc\",\"kdc_hosts\":\"kdc-host-value\",\"admin_server_host\""
-                + ":\"admin-server-host-value\",\"realm\":\"realm-value\"}}";
-        request.getAmbariDescriptor().setDescriptor(Base64.encodeBase64String(descriptor.getBytes()));
-        request.setName(extendNameWithGeneratedPart(request.getName()));
-        testContext
-                .given(BlueprintTestDto.class)
-                .withName(blueprintName)
-                .withBlueprint(BLUEPRINT_TEXT)
-                .when(blueprintTestClient.createV4())
-                .given(KerberosTestDto.class)
-                .withRequest(request)
-                .withName(request.getName())
-                .when(kerberosTestClient.createV4(), key(badRequest))
-                .expect(BadRequestException.class, key(badRequest))
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
             given = "a valid kerberos descriptor JSON which does not contain all the required fields",
             when = "calling kerberos creation",
             then = "getting BadRequestException because descriptor need all the required fields")
     public void testKerberosCreationAttemptWhenDescriptorDoesNotContainsAllTheRequiredFields(MockedTestContext testContext) {
         mockAmbariBlueprintPassLdapSync(testContext);
-        String blueprintName = resourcePropertyProvider().getName();
         String badRequest = resourcePropertyProvider().getName();
         KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
         request.getAmbariDescriptor().setDescriptor(
                 Base64.encodeBase64String("{\"kerberos-env\":{\"properties\":{\"kdc_type\":\"mit-kdc\",\"kdc_hosts\":\"kdc-host-value\"}}}".getBytes()));
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given(BlueprintTestDto.class)
-                .withName(blueprintName)
-                .withBlueprint(BLUEPRINT_TEXT)
-                .when(blueprintTestClient.createV4())
                 .given(KerberosTestDto.class)
                 .withRequest(request)
                 .withName(request.getName())
@@ -210,16 +167,11 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
             then = "getting BadRequestException because krb5conf should be a valid JSON")
     public void testKerberosCreationAttemptWhenKrb5ConfIsNotAValidJson(MockedTestContext testContext) {
         mockAmbariBlueprintPassLdapSync(testContext);
-        String blueprintName = resourcePropertyProvider().getName();
         String badRequest = resourcePropertyProvider().getName();
         KerberosV4Request request = KerberosTestData.AMBARI_DESCRIPTOR.getRequest();
         request.getAmbariDescriptor().setKrb5Conf(Base64.encodeBase64String("{".getBytes()));
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
-                .given(BlueprintTestDto.class)
-                .withName(blueprintName)
-                .withBlueprint(BLUEPRINT_TEXT)
-                .when(blueprintTestClient.createV4())
                 .given(KerberosTestDto.class)
                 .withRequest(request)
                 .withName(request.getName())
@@ -292,22 +244,7 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
             @Override
             public List<AssertionV2<StackTestDto>> getAssertions() {
                 List<AssertionV2<StackTestDto>> verifications = new LinkedList<>();
-                verifications.add(blueprintPostToAmbariContains(getRequest().getActiveDirectory().getPassword()).exactTimes(0));
-                verifications.add(blueprintPostToAmbariContains(getRequest().getActiveDirectory().getPrincipal()).exactTimes(0));
-                verifications.add(blueprintPostToAmbariContains(getRequest().getActiveDirectory().getUrl()).exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains(getRequest().getActiveDirectory().getAdminUrl()).exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains(getRequest().getActiveDirectory().getLdapUrl()).exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains(getRequest().getActiveDirectory().getContainerDn()).exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains("active-directory").exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains("KERBEROS_CLIENT").exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains("realm").exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains("kdc_type").exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains("kdc_hosts").exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains("admin_server_host").exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains("encryption_types").exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains("ldap_url").exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains("container_dn").exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains("KERBEROS_CLIENT").exactTimes(1));
+                verifications.add(clusterTemplatePostToCMContains("enableKerberos").exactTimes(1));
                 verifications.add(MockVerification.verify(HttpMethod.POST, SALT_RUN).bodyContains(SALT_HIGHSTATE).exactTimes(2));
                 return verifications;
             }
@@ -334,13 +271,7 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
             @Override
             public List<AssertionV2<StackTestDto>> getAssertions() {
                 List<AssertionV2<StackTestDto>> verifications = new LinkedList<>();
-                verifications.add(blueprintPostToAmbariContains(getRequest().getMit().getRealm().toUpperCase()).exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains(getRequest().getMit().getPassword()).exactTimes(0));
-                verifications.add(blueprintPostToAmbariContains(getRequest().getMit().getAdminUrl()).exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains(getRequest().getMit().getUrl()).exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains("mit-kdc").exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains("realm").exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains("KERBEROS_CLIENT").exactTimes(1));
+                verifications.add(clusterTemplatePostToCMContains("enableKerberos").exactTimes(1));
                 verifications.add(MockVerification.verify(HttpMethod.POST, SALT_RUN).bodyContains(SALT_HIGHSTATE).exactTimes(2));
                 return verifications;
             }
@@ -365,15 +296,7 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
             @Override
             public List<AssertionV2<StackTestDto>> getAssertions() {
                 List<AssertionV2<StackTestDto>> verifications = new LinkedList<>();
-                verifications.add(blueprintPostToAmbariContains("kdc_type").exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains("mit-kdc").exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains("kdc_hosts").exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains("kdc-host-value").exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains("admin_server_host").exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains("admin-server-host-value").exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains("realm").exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains("realm-value").exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains("KERBEROS_CLIENT").exactTimes(1));
+                verifications.add(clusterTemplatePostToCMContains("enableKerberos").exactTimes(1));
                 verifications.add(MockVerification.verify(HttpMethod.POST, SALT_RUN).bodyContains(SALT_HIGHSTATE).exactTimes(2));
                 return verifications;
             }
@@ -399,11 +322,7 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
             @Override
             public List<AssertionV2<StackTestDto>> getAssertions() {
                 List<AssertionV2<StackTestDto>> verifications = new LinkedList<>();
-                verifications.add(blueprintPostToAmbariContains("kdc_type").exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains("ipa").exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains(getRequest().getFreeIpa().getUrl()).exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains(getRequest().getFreeIpa().getAdminUrl()).exactTimes(1));
-                verifications.add(blueprintPostToAmbariContains("\"case_insensitive_username_rules\":\"true\"").exactTimes(1));
+                verifications.add(clusterTemplatePostToCMContains("enableKerberos").exactTimes(1));
                 return verifications;
             }
 
@@ -428,8 +347,8 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
 
         public abstract KerberosV4Request getRequest();
 
-        private static MockVerification blueprintPostToAmbariContains(String content) {
-            return MockVerification.verify(HttpMethod.POST, "/api/v1/blueprints/").bodyContains(content);
+        private static MockVerification clusterTemplatePostToCMContains(String content) {
+            return MockVerification.verify(HttpMethod.POST, IMPORT_CLUSTERTEMPLATE).bodyContains(content);
         }
 
     }

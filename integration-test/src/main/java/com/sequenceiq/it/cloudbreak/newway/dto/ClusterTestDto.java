@@ -30,7 +30,7 @@ public class ClusterTestDto extends AbstractCloudbreakTestDto<ClusterV4Request, 
     }
 
     public ClusterTestDto valid() {
-        return withAmbari(getTestContext().init(AmbariTestDto.class))
+        return withClouderaManager(getTestContext().init(ClouderaManagerTestDto.class))
                 .getCloudProvider().cluster(this);
     }
 

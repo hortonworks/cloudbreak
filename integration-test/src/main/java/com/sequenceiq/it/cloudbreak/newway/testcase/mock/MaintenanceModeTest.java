@@ -23,7 +23,7 @@ public class MaintenanceModeTest extends AbstractIntegrationTest {
     @Inject
     private StackTestClient stackTestClient;
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a valid cluster request",
             when = "calling create cluster and then modelling a maintenance mode on it",
