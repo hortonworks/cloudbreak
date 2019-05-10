@@ -159,6 +159,6 @@ public class ClouderaManagerPollingServiceProvider {
                 listenerTask,
                 clouderaManagerPollerObject,
                 POLL_INTERVAL,
-                INFINITE_ATTEMPT);
+                numAttempts);
     }
 }

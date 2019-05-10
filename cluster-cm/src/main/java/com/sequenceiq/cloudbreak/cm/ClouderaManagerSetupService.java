@@ -171,7 +171,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             }
         }
         Optional<ApiCommand> clusterInstallCommand = clouderaManagerResourceApi.listActiveCommands("SUMMARY").getItems()
-                .stream().filter(c -> c.getName().equals("ClusterTemplateImport")).findFirst();
+                .stream().filter(cmd -> "ClusterTemplateImport".equals(cmd.getName())).findFirst();
         if (cmCluster == null) {
             // addRepositories - if true the parcels repositories in the cluster template will be added.
             clusterInstallCommand = Optional.of(clouderaManagerResourceApi.importClusterTemplate(!prewarmed, apiClusterTemplate));
