@@ -58,7 +58,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     public static final String LONDON = "London";
 
-    public static final String DEFAULT_CLUSTER_DEFINTION_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
+    public static final String DEFAULT_CLUSTER_DEFINTION_NAME = "CDP 1.0 - Data Engineering: Apache Spark, Apache Livy, Apache Zeppelin";
 
     @Inject
     private ResourcePropertyProvider resourcePropertyProvider;

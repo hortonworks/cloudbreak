@@ -285,18 +285,18 @@ public class RDSConfigJsonValidatorTest {
         when(json.getConnectorJarUrl()).thenReturn(VALID_JAR_URL);
 
         assertFalse(underTest.isValid(json, constraintValidatorContext));
-        verify(constraintValidatorContext, times(ONCE)).buildConstraintViolationWithTemplate("The length of the type has to be in range of 3 to 12");
+        verify(constraintValidatorContext, times(ONCE)).buildConstraintViolationWithTemplate("The length of the type has to be in range of 3 to 56");
     }
 
     @Test
     public void testIsValidWhenTypeIsTooLongThenRelatedWarningMessageShouldBeStoredAsViolationAndFalseReturns() {
         when(json.getConnectionURL()).thenReturn(VALID_CONNECTION_URL);
         when(json.getName()).thenReturn(VALID_NAME);
-        when(json.getType()).thenReturn("SOMETYPEVALUEWHICHISTOOLONG");
+        when(json.getType()).thenReturn("CLOUDERA_MANAGER_MANAGEMENT_SERVICE_NAVIGATOR_METASERVER_AND_EVEN_MORE");
         when(json.getConnectorJarUrl()).thenReturn(VALID_JAR_URL);
 
         assertFalse(underTest.isValid(json, constraintValidatorContext));
-        verify(constraintValidatorContext, times(ONCE)).buildConstraintViolationWithTemplate("The length of the type has to be in range of 3 to 12");
+        verify(constraintValidatorContext, times(ONCE)).buildConstraintViolationWithTemplate("The length of the type has to be in range of 3 to 56");
     }
 
     @Test

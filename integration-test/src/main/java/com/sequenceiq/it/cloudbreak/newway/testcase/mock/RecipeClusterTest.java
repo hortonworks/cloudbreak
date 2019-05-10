@@ -189,7 +189,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(2))
                 .await(STACK_AVAILABLE)
-                .then(MockVerification.verify(HttpMethod.POST, SALT_RUN).bodyContains(HIGHSTATE).exactTimes(4))
+                .then(MockVerification.verify(HttpMethod.POST, SALT_RUN).bodyContains(HIGHSTATE).exactTimes(3))
                 .validate();
     }
 
@@ -217,7 +217,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(2))
                 .await(STACK_AVAILABLE)
-                .then(MockVerification.verify(HttpMethod.POST, SALT_RUN).bodyContains(HIGHSTATE).exactTimes(5))
+                .then(MockVerification.verify(HttpMethod.POST, SALT_RUN).bodyContains(HIGHSTATE).exactTimes(4))
                 .validate();
     }
 

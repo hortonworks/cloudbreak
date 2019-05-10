@@ -22,7 +22,6 @@ import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
 import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
-import com.sequenceiq.it.cloudbreak.newway.dto.AmbariTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.PlacementSettingsTestDto;
@@ -87,8 +86,6 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .when(environmentTestClient.createV4())
                 .given(ClusterTestDto.class).valid()
                 .withRdsConfigNames(rdsList)
-                .withBlueprintName(BP_NAME_DL)
-                .withAmbari(testContext.given(AmbariTestDto.class))
                 .withLdapConfigName(testContext.get(LdapTestDto.class).getName())
                 .withKerberos(testContext.get(KerberosTestDto.class).getName())
                 .given("placement", PlacementSettingsTestDto.class)
@@ -133,8 +130,6 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .when(environmentTestClient.createV4())
                 .given(ClusterTestDto.class).valid()
                 .withRdsConfigNames(rdsList)
-                .withBlueprintName(BP_NAME_DL)
-                .withAmbari(testContext.given(AmbariTestDto.class))
                 .withLdapConfigName(testContext.get(LdapTestDto.class).getName())
                 .given("placement", PlacementSettingsTestDto.class)
                 .given(StackTestDto.class).withPlacement("placement")
@@ -162,8 +157,8 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withLdapConfigs(getLdapAsList(testContext))
                 .when(environmentTestClient.createV4())
                 .validate();
-        createDatalake(testContext, rdsList, BP_NAME_DL);
-        createDatalake(testContext, rdsList, BP_NAME_DL);
+        createDatalake(testContext, rdsList);
+        createDatalake(testContext, rdsList);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -181,7 +176,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withLdapConfigs(getLdapAsList(testContext))
                 .when(environmentTestClient.createV4())
                 .validate();
-        createDatalake(testContext, rdsList, BP_NAME_DL);
+        createDatalake(testContext, rdsList);
         testContext
                 .given("newCred", CredentialTestDto.class).withDescription("Change credential")
                 .given(EnvironmentTestDto.class)
@@ -208,7 +203,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withLdapConfigs(getLdapAsList(testContext))
                 .when(environmentTestClient.createV4())
                 .validate();
-        createDatalake(testContext, rdsList, BP_NAME_DL);
+        createDatalake(testContext, rdsList);
         testContext.given(EnvironmentTestDto.class)
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
@@ -238,38 +233,13 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withEnvironment(EnvironmentTestDto.class)
                 .when(stackTestClient.createV4())
                 .validate();
-        createDatalake(testContext, rdsList, BP_NAME_DL);
+        createDatalake(testContext, rdsList);
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "Create datalake cluster with invalid configurations",
-            when = "call create cluster",
-            then = "will drop ForbiddenException")
-    public void testCreateDalalakeWithoutResourcesFails(TestContext testContext) {
-        testContext.given(EnvironmentTestDto.class)
-                .withRegions(VALID_REGION)
-                .withLocation(VALID_LOCATION)
-                .when(environmentTestClient.createV4())
-                .given(ClusterTestDto.class).valid()
-                .withBlueprintName(BP_NAME_DL)
-                .withAmbari(testContext.given(AmbariTestDto.class))
-                .given("placement", PlacementSettingsTestDto.class)
-                .given(StackTestDto.class)
-                .withPlacement("placement")
-                .withEnvironment(EnvironmentTestDto.class)
-                .withInstanceGroupsEntity(setInstanceGroup(testContext))
-                .when(stackTestClient.createV4(), key(FORBIDDEN_KEY))
-                .expect(BadRequestException.class, key(FORBIDDEN_KEY))
-                .validate();
-    }
-
-    private void createDatalake(TestContext testContext, Set<String> rdsList, String bpName) {
+    private void createDatalake(TestContext testContext, Set<String> rdsList) {
         testContext.given("placement", PlacementSettingsTestDto.class)
                 .given(ClusterTestDto.class).valid()
                 .withRdsConfigNames(rdsList)
-                .withBlueprintName(BP_NAME_DL)
-                .withAmbari(testContext.given(AmbariTestDto.class))
                 .withLdapConfigName(testContext.get(LdapTestDto.class).getName())
                 .given(StackTestDto.class)
                 .withName(resourcePropertyProvider().getName())

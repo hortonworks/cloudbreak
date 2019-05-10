@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.Datalake
 
 import java.security.InvalidParameterException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,7 +15,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplate
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.mpack.ManagementPackDetailsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
 import com.sequenceiq.it.cloudbreak.newway.assertion.AssertionV2;
@@ -188,57 +186,12 @@ public class ClusterTemplateTestAssertion {
                 throw new IllegalArgumentException("Image catalog name is mismatch!");
             }
 
-            if (!"2.7.2.2".equals(stackTemplate.getCluster().getAmbari().getRepository().getVersion())) {
-                throw new IllegalArgumentException("ambari repo version is mismatch!");
-            }
-
-            if (!"http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.7.2.2"
-                    .equals(stackTemplate.getCluster().getAmbari().getRepository().getBaseUrl())) {
-                throw new IllegalArgumentException("ambari repo base url is mismatch!");
-            }
-
-            if (!"http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins"
-                    .equals(stackTemplate.getCluster().getAmbari().getRepository().getGpgKeyUrl())) {
-                throw new IllegalArgumentException("ambari repo gpg key is mismatch!");
-            }
-
-            if (!"2.7".equals(stackTemplate.getCluster().getAmbari().getStackRepository().getVersion())) {
-                throw new IllegalArgumentException("stack repo version is mismatch!");
-            }
-
-            if (!"2.7.5.0-292".equals(stackTemplate.getCluster().getAmbari().getStackRepository().getRepository().getVersion())) {
-                throw new IllegalArgumentException("stack repo repoVersion is mismatch!");
-            }
-
-            if (!"HDP".equals(stackTemplate.getCluster().getAmbari().getStackRepository().getStack())) {
-                throw new IllegalArgumentException("stack repo stack is mismatch!");
-            }
-
-            if (!"http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.7.5.0/HDP-2.7.5.0-292.xml"
-                    .equals(stackTemplate.getCluster().getAmbari().getStackRepository().getVersionDefinitionFileUrl())) {
-                throw new IllegalArgumentException("stack repo vdf-url is mismatch!");
-            }
-
             if (!org.springframework.util.StringUtils.isEmpty(stackTemplate.getCluster().getPassword())) {
                 throw new IllegalArgumentException("Password should be empty!");
             }
 
             if (!org.springframework.util.StringUtils.isEmpty(stackTemplate.getCluster().getUserName())) {
                 throw new IllegalArgumentException("Username should be empty!");
-            }
-
-            List<ManagementPackDetailsV4Request> mpacks = stackTemplate.getCluster().getAmbari().getStackRepository().getMpacks();
-
-            if (mpacks.isEmpty() || !"mock-test-mpack".equals(mpacks.get(0).getName())) {
-                throw new IllegalArgumentException("mpack is mismatch!");
-            }
-
-            if (!"proxy-name".equals(stackTemplate.getCluster().getGateway().getTopologies().get(0).getTopologyName())) {
-                throw new IllegalArgumentException("topology name is mismatch!");
-            }
-
-            if (!Collections.singletonList("AMBARI").equals(stackTemplate.getCluster().getGateway().getTopologies().get(0).getExposedServices())) {
-                throw new IllegalArgumentException("expose service name is mismatch!");
             }
 
             return entity;

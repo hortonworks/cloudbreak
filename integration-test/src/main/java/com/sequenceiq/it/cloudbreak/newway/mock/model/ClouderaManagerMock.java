@@ -1,14 +1,22 @@
 package com.sequenceiq.it.cloudbreak.newway.mock.model;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.cloudera.api.swagger.model.ApiAuthRoleMetadataList;
 import com.cloudera.api.swagger.model.ApiAuthRoleRef;
 import com.cloudera.api.swagger.model.ApiCommand;
+import com.cloudera.api.swagger.model.ApiCommandList;
+import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiEcho;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
+import com.cloudera.api.swagger.model.ApiRoleTypeList;
+import com.cloudera.api.swagger.model.ApiService;
+import com.cloudera.api.swagger.model.ApiServiceState;
 import com.cloudera.api.swagger.model.ApiUser2;
 import com.cloudera.api.swagger.model.ApiUser2List;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
@@ -41,6 +49,22 @@ public class ClouderaManagerMock extends AbstractModelMock {
 
     public static final String BEGIN_FREE_TRIAL = API_ROOT + "/cm/trial/begin";
 
+    public static final String MANAGEMENT_SERVICE = API_ROOT + "/cm/service";
+
+    public static final String START_MANAGEMENT_SERVICE = API_ROOT + "/cm/service/commands/start";
+
+    public static final String ACTIVE_COMMANDS = API_ROOT + "/cm/service/commands";
+
+    public static final String ROLE_TYPES = API_ROOT + "/cm/service/roleTypes";
+
+    public static final String ROLES = API_ROOT + "/cm/service/roles";
+
+    public static final String CONFIG = API_ROOT + "/cm/config";
+
+    public static final String LIST_COMMANDS = API_ROOT + "/cm/commands";
+
+    public static final String READ_AUTH_ROLES = API_ROOT + "/authRoles/metadata";
+
     private DynamicRouteStack dynamicRouteStack;
 
     public ClouderaManagerMock(Service sparkService, DefaultModel defaultModel) {
@@ -63,6 +87,19 @@ public class ClouderaManagerMock extends AbstractModelMock {
         getHosts();
         postStartCommand();
         postBeginTrial();
+        addManagementService();
+        getManagementService();
+        createRoles();
+        listRoleTypes();
+        listRoles();
+        cmConfig();
+        startManagementService();
+        listCommands();
+        readAuthRoles();
+    }
+
+    private void readAuthRoles() {
+        dynamicRouteStack.get(READ_AUTH_ROLES, (request, response) -> new ApiAuthRoleMetadataList());
     }
 
     private void getEcho() {
@@ -115,6 +152,45 @@ public class ClouderaManagerMock extends AbstractModelMock {
 
     private void postBeginTrial() {
         dynamicRouteStack.post(BEGIN_FREE_TRIAL, (request, response) -> null);
+    }
+
+    private void addManagementService() {
+        dynamicRouteStack.put(MANAGEMENT_SERVICE, (request, response) -> new ApiService());
+    }
+
+    private void getManagementService() {
+        dynamicRouteStack.get(MANAGEMENT_SERVICE, (request, response) -> new ApiService().serviceState(ApiServiceState.STARTED));
+    }
+
+    private void startManagementService() {
+        dynamicRouteStack.post(START_MANAGEMENT_SERVICE, (request, response) -> new ApiService());
+    }
+
+    private void listRoleTypes() {
+        dynamicRouteStack.get(ROLE_TYPES, (request, response) -> new ApiRoleTypeList().items(new ArrayList<>()));
+    }
+
+    private void listRoles() {
+        dynamicRouteStack.get(ROLES, (request, response) -> new ApiRoleTypeList().items(new ArrayList<>()));
+    }
+
+    private void createRoles() {
+        dynamicRouteStack.post(ROLES, (request, response) -> new ApiRoleTypeList().items(new ArrayList<>()));
+    }
+
+    private void listActiveCommands() {
+        dynamicRouteStack.get(ACTIVE_COMMANDS,
+                (request, response) -> new ApiCommand().id(new BigDecimal(request.params("commandId"))).active(Boolean.FALSE).success(Boolean.TRUE));
+    }
+
+    private void listCommands() {
+        dynamicRouteStack.get(LIST_COMMANDS,
+                (request, response) -> new ApiCommandList().items(
+                        List.of(new ApiCommand().id(new BigDecimal(1)).active(Boolean.FALSE).success(Boolean.TRUE))));
+    }
+
+    private void cmConfig() {
+        dynamicRouteStack.get(CONFIG, (request, response) -> new ApiConfigList().items(new ArrayList<>()));
     }
 
     private void getHosts() {

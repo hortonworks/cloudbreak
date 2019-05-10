@@ -1,17 +1,22 @@
 package com.sequenceiq.it.cloudbreak.newway.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.newway.assertion.kerberos.KerberosTestAssertion.validateCustomDomain;
+import static com.sequenceiq.it.cloudbreak.newway.mock.model.ClouderaManagerMock.API_ROOT;
+
+import java.math.BigDecimal;
 
 import javax.inject.Inject;
 
 import org.springframework.http.HttpMethod;
 import org.testng.annotations.Test;
 
+import com.cloudera.api.swagger.model.ApiCommand;
+import com.cloudera.api.swagger.model.ApiConfigList;
 import com.sequenceiq.it.cloudbreak.newway.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.newway.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.newway.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.newway.context.Description;
-import com.sequenceiq.it.cloudbreak.newway.context.TestContext;
+import com.sequenceiq.it.cloudbreak.newway.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.newway.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.kerberos.ActiveDirectoryKerberosDescriptorTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.kerberos.FreeIPAKerberosDescriptorTestDto;
@@ -19,6 +24,7 @@ import com.sequenceiq.it.cloudbreak.newway.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.newway.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.newway.mock.model.SaltMock;
 import com.sequenceiq.it.cloudbreak.newway.testcase.AbstractIntegrationTest;
+import com.sequenceiq.it.spark.DynamicRouteStack;
 
 public class KerberizedStackCreationTest extends AbstractIntegrationTest {
 
@@ -33,7 +39,10 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
             given = "an ActiveDirectory based kerberos config without realm and domain",
             when = "calling a stack creation with that kerberos config",
             then = "custom should be used and salt action should be called")
-    public void testCreationWitKerberosAndStackWithoutCustomDomainAndADWithoutDomainAndWithRealm(TestContext testContext) {
+    public void testCreationWitKerberosAndStackWithoutCustomDomainAndADWithoutDomainAndWithRealm(MockedTestContext testContext) {
+        DynamicRouteStack dynamicRouteStack = testContext.getModel().getClouderaManagerMock().getDynamicRouteStack();
+        dynamicRouteStack.put(API_ROOT + "/cm/config", (request, response) -> new ApiConfigList());
+        dynamicRouteStack.post(API_ROOT + "/cm/commands/importAdminCredentials", (request, response) -> new ApiCommand().id(new BigDecimal(1)));
         testContext
                 .given(ActiveDirectoryKerberosDescriptorTestDto.class)
                 .withDomain(null)
@@ -57,7 +66,10 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
             given = "an ActiveDirectory based kerberos config without realm and with domain",
             when = "calling a stack creation with that kerberos config",
             then = "propagated domain should be used and salt action should be called")
-    public void testCreationWitKerberosAndStackWithoutCustomDomainAndADWithDomainAndWithRealm(TestContext testContext) {
+    public void testCreationWitKerberosAndStackWithoutCustomDomainAndADWithDomainAndWithRealm(MockedTestContext testContext) {
+        DynamicRouteStack dynamicRouteStack = testContext.getModel().getClouderaManagerMock().getDynamicRouteStack();
+        dynamicRouteStack.put(API_ROOT + "/cm/config", (request, response) -> new ApiConfigList());
+        dynamicRouteStack.post(API_ROOT + "/cm/commands/importAdminCredentials", (request, response) -> new ApiCommand().id(new BigDecimal(1)));
         testContext
                 .given(ActiveDirectoryKerberosDescriptorTestDto.class)
                 .withDomain("custom.addomain.com")
@@ -81,7 +93,9 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
             given = "a FreeIPA based kerberos config with realm and without domain",
             when = "calling a stack creation with that kerberos config",
             then = "propagated realm should be used and salt action should be called")
-    public void testCreationWitKerberosAndStackWithoutCustomDomainAndFreeIPAWithoutDomainAndWithRealm(TestContext testContext) {
+    public void testCreationWitKerberosAndStackWithoutCustomDomainAndFreeIPAWithoutDomainAndWithRealm(MockedTestContext testContext) {
+        DynamicRouteStack dynamicRouteStack = testContext.getModel().getClouderaManagerMock().getDynamicRouteStack();
+        dynamicRouteStack.put(API_ROOT + "/cm/config", (request, response) -> new ApiConfigList());
         testContext
                 .given(FreeIPAKerberosDescriptorTestDto.class)
                 .withDomain(null)
@@ -105,7 +119,10 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
             given = "a FreeIPA based kerberos config with realm and domain",
             when = "calling a stack creation with that kerberos config",
             then = "propagated domain should be used and salt action should be called")
-    public void testCreationWitKerberosAndStackWithoutCustomDomainAndFreeIPAWithDomainAndWithRealm(TestContext testContext) {
+    public void testCreationWitKerberosAndStackWithoutCustomDomainAndFreeIPAWithDomainAndWithRealm(MockedTestContext testContext) {
+        DynamicRouteStack dynamicRouteStack = testContext.getModel().getClouderaManagerMock().getDynamicRouteStack();
+        dynamicRouteStack.put(API_ROOT + "/cm/config", (request, response) -> new ApiConfigList());
+
         testContext
                 .given(FreeIPAKerberosDescriptorTestDto.class)
                 .withDomain("custom.freeipadomain.com")

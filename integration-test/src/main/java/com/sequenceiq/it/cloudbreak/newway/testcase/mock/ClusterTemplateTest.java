@@ -197,9 +197,6 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
             then = "the stack starts properly and can be deleted"
     )
     public void testLaunchClusterFromTemplateWithProperties(MockedTestContext testContext) {
-        testContext.getModel().getAmbariMock().putConfigureLdap();
-        testContext.getModel().getAmbariMock().postSyncLdap();
-        testContext.getModel().getAmbariMock().putConfigureSso();
         testContext
                 .given(LdapTestDto.class)
                 .withName("mock-test-ldap")

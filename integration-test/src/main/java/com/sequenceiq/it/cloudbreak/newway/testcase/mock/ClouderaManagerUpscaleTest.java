@@ -139,7 +139,7 @@ public class ClouderaManagerUpscaleTest extends AbstractClouderaManagerTest {
                                 .pathVariableMapping(":clusterName", clusterName)
                                 .resolve())
                         .exactTimes(1))
-                .then(verify(GET, READ_HOSTS).exactTimes(2))
+                .then(verify(GET, READ_HOSTS).exactTimes(3))
                 .then(verify(POST, new ClouderaManagerPathResolver(ADD_HOSTS)
                         .pathVariableMapping(":clusterName", clusterName)
                         .resolve())
