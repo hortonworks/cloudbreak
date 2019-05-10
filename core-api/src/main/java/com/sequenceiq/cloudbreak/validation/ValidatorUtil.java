@@ -13,4 +13,9 @@ public class ValidatorUtil {
                 .addConstraintViolation();
     }
 
+    public static ConstraintValidatorContext addConstraintViolation(ConstraintValidatorContext context, String message) {
+        return context.buildConstraintViolationWithTemplate(message)
+                .addConstraintViolation();
+    }
+
 }
