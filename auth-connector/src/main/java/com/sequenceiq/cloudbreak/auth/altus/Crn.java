@@ -110,6 +110,7 @@ public class Crn {
         NAVOPT("navopt", NON_ADMIN_SERVICE),
         DBUS("dbus", NON_ADMIN_SERVICE),
         SDX("sdx", "gridlink", NON_ADMIN_SERVICE),
+        REDBEAMS("redbeams", NON_ADMIN_SERVICE),
         SDXADMIN("sdxadmin", ADMIN_SERVICE),
         COREADMIN("coreadmin", ADMIN_SERVICE),
         DATAENGADMIN("dataengadmin", ADMIN_SERVICE),
@@ -226,7 +227,8 @@ public class Crn {
         NAMESPACE("namespace"),
         KCLUSTER("kcluster"),
         SAML_PROVIDER("samlProvider"),
-        WORKSPACE("workspace");
+        WORKSPACE("workspace"),
+        DATABASE("database");
 
         private static final ImmutableMap<String, ResourceType> FROM_STRING;
         static {

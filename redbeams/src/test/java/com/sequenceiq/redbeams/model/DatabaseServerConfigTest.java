@@ -1,16 +1,17 @@
-package com.sequenceiq.redbeams.domain;
+package com.sequenceiq.redbeams.model;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
-
 import org.hibernate.annotations.Where;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 
 public class DatabaseServerConfigTest {
 
