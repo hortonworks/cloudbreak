@@ -66,20 +66,6 @@
         ]
       },
       {
-        "refName": "aws_s3",
-        "serviceType": "AWS_S3",
-        "serviceConfigs": [
-          {
-            "name": "key_distribution_policy",
-            "value": "UNSECURE"
-          },
-          {
-            "name": "cloud_account",
-            "value": "bdrAcnt"
-          }
-        ]
-      },
-      {
         "refName": "atlas",
         "serviceType": "ATLAS",
         "serviceConfigs": [
