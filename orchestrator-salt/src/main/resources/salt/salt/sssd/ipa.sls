@@ -1,6 +1,6 @@
 {%- from 'sssd/settings.sls' import ipa with context %}
 
-packages_install:
+ipa_packages_install:
   pkg.installed:
     - refresh: False
     - pkgs:
@@ -10,11 +10,19 @@ packages_install:
 
 join_ipa:
   cmd.run:
+{% if not salt['file.directory_exists']('/yarn-private') %}
     - name: |
         ipa-client-install --server={{salt['pillar.get']('sssd-ipa:server')}} --realm={{salt['pillar.get']('sssd-ipa:realm')}} \
           --domain={{salt['pillar.get']('sssd-ipa:domain')}} --mkhomedir --principal={{salt['pillar.get']('sssd-ipa:principal')}} \
           --password $PW --unattended --force-join --ssh-trust-dns --force-ntpd
+{% else %}
+    - name: |
+        runuser -l root -c 'ipa-client-install --server={{salt['pillar.get']('sssd-ipa:server')}} --realm={{salt['pillar.get']('sssd-ipa:realm')}} \
+          --domain={{salt['pillar.get']('sssd-ipa:domain')}} --mkhomedir --principal={{salt['pillar.get']('sssd-ipa:principal')}} \
+          --password {{salt['pillar.get']('sssd-ipa:password')}} --unattended --force-join --ssh-trust-dns --force-ntpd --unattended'
+{% endif%}
     - unless: ipa env
+    - runas: root
     - env:
         - PW: {{salt['pillar.get']('sssd-ipa:password')}}
 
@@ -25,6 +33,8 @@ add_dns_record:
     - env:
         - PW: {{salt['pillar.get']('sssd-ipa:password')}}
 
+{% if not salt['file.directory_exists']('/yarn-private') %}
+
 restart-sssd-if-reconfigured:
   service.running:
     - enable: True
@@ -32,11 +42,15 @@ restart-sssd-if-reconfigured:
     - watch:
       - file: /etc/sssd/sssd.conf
 
+{% endif %}
+
 /etc/sssd/sssd.conf:
   file.managed:
     - source: salt://sssd/template/sssd-ipa.j2
     - template: jinja
     - mode: 700
+    - user: root
+    - group: root
 
 include:
     - sssd.ssh

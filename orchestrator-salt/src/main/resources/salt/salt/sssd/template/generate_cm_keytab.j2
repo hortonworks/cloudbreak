@@ -11,10 +11,10 @@ SA_NAME=krbbind-{{ ipa.cluster_name }}
 ROLE_NAME=hadoopadminrole-{{ ipa.cluster_name }}
 
 # Generate per-cluster krbbind Service Account
-ipa user-add "$SA_NAME" --first=service --last=account
-ipa role-add "$ROLE_NAME"
-ipa role-add-privilege "$ROLE_NAME" --privileges="Service Administrators"
-ipa role-add-member "$ROLE_NAME" --users="$SA_NAME"
+ipa user-show "$SA_NAME"  || ipa user-add "$SA_NAME" --first=service --last=account
+ipa role-show "$ROLE_NAME" || ipa role-add "$ROLE_NAME"
+ipa role-show "$ROLE_NAME" | grep -q "Service Administrators" || ipa role-add-privilege "$ROLE_NAME" --privileges="Service Administrators"
+ipa role-show "$ROLE_NAME" | grep -q "$SA_NAME" || ipa role-add-member "$ROLE_NAME" --users="$SA_NAME"
 
 # generate keytab for user krbbind
 ipa-getkeytab -s {{ ipa.server }} -p "$SA_NAME" -k /etc/cloudera-scm-server/cmf.keytab

@@ -55,7 +55,7 @@ restart-pgsql-if-reconfigured:
 
 restart-postgresql:
   cmd.run:
-    - name: service postgresql restart && while ! netstat -tlpn |grep -i "0 0.0.0.0:5432" &> /dev/null; do echo "waiting for postgres"; sleep 1; done
+    - name: netstat -tlpn |grep -q "0 0.0.0.0:5432" && service postgresql reload || service postgresql restart && while ! netstat -tlpn |grep -i "0 0.0.0.0:5432" &> /dev/null; do echo "waiting for postgres"; sleep 1; done
     - watch:
       - cmd: configure-listen-address
       - cmd: init-services-db
