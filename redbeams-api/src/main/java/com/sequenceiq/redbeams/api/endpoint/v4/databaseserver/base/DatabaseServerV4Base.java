@@ -6,18 +6,18 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
+import com.sequenceiq.cloudbreak.validation.ValidDatabaseVendor;
+import com.sequenceiq.cloudbreak.validation.ValidUrl;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
-// import com.sequenceiq.cloudbreak.validation.ValidRDSConfigJson;
 
 import io.swagger.annotations.ApiModelProperty;
 
-// @ValidRDSConfigJson
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class DatabaseServerV4Base implements JsonEntity {
 
     @NotNull
-    @Size(max = 100, min = 5, message = "The length of the database servers's name has to be in range of 5 to 100")
+    @Size(max = 100, min = 5, message = "The length of the database server's name must be between 5 and 100, inclusive")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The database server's name may only contain lowercase letters, digits, and hyphens, and must start with an alphanumeric character")
     @ApiModelProperty(value = DatabaseServer.NAME, required = true)
@@ -36,12 +36,16 @@ public abstract class DatabaseServerV4Base implements JsonEntity {
     private Integer port;
 
     @NotNull
+    @ValidDatabaseVendor
     @ApiModelProperty(value = DatabaseServer.DATABASE_VENDOR, required = true)
     private String databaseVendor;
 
+    @Size(max = 150)
+    @ValidUrl
     @ApiModelProperty(DatabaseServer.CONNECTOR_JAR_URL)
     private String connectorJarUrl;
 
+    @NotNull
     @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_ID, required = true)
     private String environmentId;
 
