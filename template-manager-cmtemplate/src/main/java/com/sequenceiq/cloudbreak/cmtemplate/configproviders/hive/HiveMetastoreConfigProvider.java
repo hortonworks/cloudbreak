@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
+import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -34,7 +35,9 @@ public class HiveMetastoreConfigProvider implements CmTemplateComponentConfigPro
     @Override
     public List<ApiClusterTemplateVariable> getServiceConfigVariables(TemplatePreparationObject source) {
         List<ApiClusterTemplateVariable> result = new ArrayList<>();
-        RdsView hiveView = new RdsView(getFirstRDSConfigOptional(source).get());
+        Optional<RDSConfig> rdsConfigOptional = getFirstRDSConfigOptional(source);
+        Preconditions.checkArgument(rdsConfigOptional.isPresent());
+        RdsView hiveView = new RdsView(rdsConfigOptional.get());
         result.add(new ApiClusterTemplateVariable().name("hive-hive_metastore_database_host").value(hiveView.getHost()));
         result.add(new ApiClusterTemplateVariable().name("hive-hive_metastore_database_port").value(hiveView.getPort()));
         result.add(new ApiClusterTemplateVariable().name("hive-hive_metastore_database_name").value(hiveView.getDatabaseName()));

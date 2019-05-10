@@ -23,12 +23,12 @@ public class SupportedVersionService {
     public SupportedVersions collectSupportedVersions() {
         SupportedVersions supportedVersions = new SupportedVersions();
         Set<SupportedVersion> supportedVersionsSet = new HashSet<>();
-        resolver.cdhConfigurations().entrySet().forEach(entry -> {
+        resolver.cdhConfigurations().forEach((key, value) -> {
             SupportedVersion supportedVersion = new SupportedVersion();
-            supportedVersion.setType(entry.getKey().getStackType());
-            supportedVersion.setVersion(entry.getKey().getVersion());
+            supportedVersion.setType(key.getStackType());
+            supportedVersion.setVersion(key.getVersion());
             SupportedServices supportedServices = new SupportedServices();
-            for (String serviceName : entry.getValue()) {
+            for (String serviceName : value) {
                 for (ServiceConfig serviceInformation : resolver.serviceInformations()) {
                     if (serviceInformation.getName().equals(serviceName)) {
                         SupportedService supportedService = new SupportedService();
