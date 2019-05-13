@@ -7,11 +7,6 @@ install-cloudera-manager-server:
       - cloudera-manager-agent
       - cloudera-manager-server
 
-init-cloudera-manager-db:
-  cmd.run:
-    - name: /opt/cloudera/cm/schema/scm_prepare_database.sh -h {{ cloudera_manager.cloudera_manager_database.host }} {{ cloudera_manager.cloudera_manager_database.subprotocol }} {{ cloudera_manager.cloudera_manager_database.databaseName }} {{ cloudera_manager.cloudera_manager_database.connectionUserName }} {{ cloudera_manager.cloudera_manager_database.connectionPassword }} && echo $(date +%Y-%m-%d:%H:%M:%S) >>  /var/import-certificate_success
-    - unless: test -f /var/log/init-cloudera-manager-db-executed
-
 {% if salt['pillar.get']('ldap', None) != None and salt['pillar.get']('ldap:local', None) == None %}
 
 /etc/cloudera-scm-server/ldap.settings:
@@ -31,11 +26,6 @@ cloudera_manager_setup_ldap:
     - unless: grep "CMF_SERVER_ARGS=\"-i /etc/cloudera-scm-server/ldap.settings\"" /etc/default/cloudera-scm-server
 
 {% endif %}
-
-start_server:
-  service.running:
-    - enable: True
-    - name: cloudera-scm-server
 
 {% if salt['pillar.get']('cloudera-manager:license', None) != None %}
 
