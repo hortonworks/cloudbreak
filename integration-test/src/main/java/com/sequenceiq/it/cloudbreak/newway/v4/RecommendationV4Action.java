@@ -59,7 +59,7 @@ public class RecommendationV4Action {
                 recommendationEntity.getAvailabilityZone(), "availability zone. "));
         recommendationEntity.setResponse(
                 client.getCloudbreakClient()
-                        .blueprintV4Endpoint()
+                        .blueprintUtilV4Endpoint()
                         .createRecommendation(workspaceId, recommendationEntity.getBlueprintName(), recommendationEntity.getCredentialName(),
                                 recommendationEntity.getRegion(), null, recommendationEntity.getAvailabilityZone()));
         Log.logJSON(" post Recommendations response: ", recommendationEntity.getResponse());
