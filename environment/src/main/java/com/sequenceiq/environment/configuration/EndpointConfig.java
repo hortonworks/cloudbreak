@@ -2,6 +2,7 @@ package com.sequenceiq.environment.configuration;
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.ext.ExceptionMapper;
 
@@ -41,9 +42,9 @@ public class EndpointConfig extends ResourceConfig {
         this.exceptionMappers = exceptionMappers;
         registerEndpoints();
         registerExceptionMappers();
-        registerSwagger();
     }
 
+    @PostConstruct
     private void registerSwagger() {
         BeanConfig swaggerConfig = new BeanConfig();
         swaggerConfig.setTitle("Environment API");
