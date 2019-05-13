@@ -48,11 +48,18 @@ public class CloudbreakFlowInformation implements ApplicationFlowInformation {
             ClusterUpgradeFlowConfig.class, ClusterResetFlowConfig.class, ChangePrimaryGatewayFlowConfig.class
     );
 
+    @Override
     public List<Class<? extends FlowConfiguration<?>>> getRestartableFlows() {
         return RESTARTABLE_FLOWS;
     }
 
+    @Override
     public List<String> getAllowedParallelFlows() {
         return ALLOWED_PARALLEL_FLOWS;
+    }
+
+    @Override
+    public Class<? extends FlowConfiguration<?>> getTerminationFlow() {
+        return StackTerminationFlowConfig.class;
     }
 }

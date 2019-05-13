@@ -131,7 +131,6 @@ public class ClusterBuilderService {
                 .map(clusterApiConnectors::getConnector)
                 .map(ClusterApi::getSdxContext).orElse(null);
 
-        // TODO kerberost nyald fel itt
         KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn()).orElse(null);
         clusterService.save(connector.clusterSetupService().buildCluster(
                 instanceMetaDataByHostGroup, templatePreparationObject, hostsInCluster, sdxContext, telemetry, kerberosConfig));

@@ -23,9 +23,7 @@ public enum MetricType implements Metric {
     CLUSTER_START_SUCCESSFUL("cluster.start.successful"),
     CLUSTER_START_FAILED("cluster.start.failed"),
 
-    STACK_PREPARATION("stack.preparation.duration"),
-
-    HEARTBEAT_UPDATE_FAILED("heartbeat.update.failed");
+    STACK_PREPARATION("stack.preparation.duration");
 
     private final String metricName;
 

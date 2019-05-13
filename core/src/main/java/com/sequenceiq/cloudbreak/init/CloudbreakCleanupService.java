@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.WAIT_FOR_SYNC;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -20,40 +19,30 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.startup.MissingVolumeTemplatesMigrator;
-import com.sequenceiq.flow.core.Flow2Handler;
-import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
-import com.sequenceiq.flow.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakFlowLogService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.flowlog.RestartFlowService;
 import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
 public class CloudbreakCleanupService implements ApplicationListener<ContextRefreshedEvent> {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakCleanupService.class);
-
-    @Inject
-    private NodeConfig nodeConfig;
 
     @Inject
     private StackService stackService;
@@ -71,22 +60,16 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     private CloudbreakEventService eventService;
 
     @Inject
-    private FlowLogService flowLogService;
+    private CloudbreakFlowLogService cloudbreakFlowLogService;
 
     @Inject
-    private CloudbreakFlowLogService cloudbreakFlowLogService;
+    private RestartFlowService restartFlowService;
 
     @Inject
     private ReactorFlowManager flowManager;
 
     @Inject
-    private Flow2Handler flow2Handler;
-
-    @Inject
     private HeartbeatService heartbeatService;
-
-    @Inject
-    private TransactionService transactionService;
 
     @Inject
     private MissingVolumeTemplatesMigrator missingVolumeTemplatesMigrator;
@@ -97,13 +80,11 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     public void onApplicationEvent(ContextRefreshedEvent event) {
         heartbeatService.heartbeat();
         try {
-            List<Long> stackIdsUnderOperation = restartOrUpdateUnassignedDisruptedFlows();
-            stackIdsUnderOperation.addAll(restartMyAssignedDisruptedFlows());
-            stackIdsUnderOperation.addAll(excludeStacksByFlowAssignment());
+            List<Long> stackIdsUnderOperation = restartFlowService.collectUnderOperationResources();
             List<Stack> stacksToSync = resetStackStatus(stackIdsUnderOperation);
             List<Cluster> clustersToSync = resetClusterStatus(stacksToSync, stackIdsUnderOperation);
             triggerSyncs(stacksToSync, clustersToSync);
-            cloudbreakFlowLogService.purgeTerminatedStacksFlowLogs();
+            restartFlowService.purgeTerminatedStacksFlowLogs();
             missingVolumeTemplatesMigrator.run();
         } catch (Exception e) {
             LOGGER.error("Clean up or the migration operations failed. Shutting down the node. ", e);
@@ -150,98 +131,6 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
         return stackIds.contains(cluster.getStack().getId());
     }
 
-    /**
-     * Exclude all stacks that have active flows and assigned to Cb nodes.
-     */
-    private Collection<Long> excludeStacksByFlowAssignment() {
-        List<Long> exclusion = new ArrayList<>();
-        List<Object[]> allPending = flowLogService.findAllPending();
-        allPending.stream().filter(o -> o[2] != null).forEach(o -> exclusion.add((Long) o[1]));
-        return exclusion;
-    }
-
-    /**
-     * If there are flow logs that do not have a Cloudbreak node id associated with it, we'll assigne a node to it (and let the node specific logic
-     * to restart the flow). Otherwise we're going to restart the flow without association.
-     */
-    private List<Long> restartOrUpdateUnassignedDisruptedFlows() throws TransactionExecutionException {
-        List<Long> stackIds = new ArrayList<>();
-        Set<FlowLog> unassignedFlowLogs = flowLogService.findAllUnassigned();
-        if (!unassignedFlowLogs.isEmpty()) {
-            if (nodeConfig.isNodeIdSpecified()) {
-                try {
-                    updateUnassignedFlows(unassignedFlowLogs, nodeConfig.getId());
-                } catch (TransactionExecutionException | OptimisticLockingFailureException e) {
-                    LOGGER.error("Failed to update the flow logs with node id. Maybe another node is already running them?", e);
-                }
-            } else {
-                List<String> flowIds = unassignedFlowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList());
-                for (String flowId : flowIds) {
-                    Long stackId = unassignedFlowLogs.stream().filter(f -> f.getFlowId().equalsIgnoreCase(flowId)).map(FlowLog::getResourceId).findAny().get();
-                    try {
-                        flow2Handler.restartFlow(flowId);
-                        stackIds.add(stackId);
-                    } catch (RuntimeException e) {
-                        LOGGER.error(String.format("Failed to restart flow %s on stack %s", flowId, stackId), e);
-                        flowLogService.terminate(stackId, flowId);
-                    }
-                }
-            }
-        }
-        return stackIds;
-    }
-
-    private void updateUnassignedFlows(Collection<FlowLog> flowLogs, String nodeId) throws TransactionExecutionException {
-        if (flowLogs != null && !flowLogs.isEmpty() && nodeId != null) {
-            for (FlowLog flowLog : flowLogs) {
-                flowLog.setCloudbreakNodeId(nodeId);
-            }
-            transactionService.required(() -> {
-                flowLogService.saveAll(flowLogs);
-                return null;
-            });
-        }
-    }
-
-    /**
-     * It restarts all the disrupted flows that are assigned to this node.
-     */
-    private Collection<Long> restartMyAssignedDisruptedFlows() throws TransactionExecutionException {
-        Collection<Long> stackIds = new ArrayList<>();
-        if (nodeConfig.isNodeIdSpecified()) {
-            Set<FlowLog> myFlowLogs;
-            try {
-                myFlowLogs = getMyFlowLogs();
-            } catch (TransactionExecutionException | ConcurrencyFailureException e) {
-                LOGGER.error("Cannot restart my flows, they have been re-distributed to other nodes", e);
-                return stackIds;
-            }
-            List<String> flowIds = myFlowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList());
-            for (String flowId : flowIds) {
-                Long stackId = myFlowLogs.stream().filter(f -> f.getFlowId().equalsIgnoreCase(flowId)).map(FlowLog::getResourceId).findAny().get();
-                LOGGER.debug("Restarting flow {}", flowId);
-                try {
-                    flow2Handler.restartFlow(flowId);
-                    stackIds.add(stackId);
-                } catch (RuntimeException e) {
-                    LOGGER.error(String.format("Failed to restart flow %s on stack %s", flowId, stackId), e);
-                    flowLogService.terminate(stackId, flowId);
-                }
-            }
-        }
-        return stackIds;
-    }
-
-    /**
-     * Retrieves my assigned flow logs and updates the version lock to avoid concurrency issues.
-     */
-    private Set<FlowLog> getMyFlowLogs() throws TransactionExecutionException {
-        Set<FlowLog> myFlowLogs = flowLogService.findAllByCloudbreakNodeId(nodeConfig.getId());
-        myFlowLogs.forEach(fl -> fl.setCreated(fl.getCreated() + 1));
-        transactionService.required(() -> flowLogService.saveAll(myFlowLogs));
-        return myFlowLogs;
-    }
-
     private void loggingStatusChange(String type, Long id, Status status, Status deleteFailed) {
         LOGGER.debug("{} {} status is updated from {} to {} at CB start.", type, id, status, deleteFailed);
     }
@@ -270,4 +159,3 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
                 "Couldn't retrieve the cluster's status, starting to sync.");
     }
 }
-

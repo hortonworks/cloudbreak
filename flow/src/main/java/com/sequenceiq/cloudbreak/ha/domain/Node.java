@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.domain;
+package com.sequenceiq.cloudbreak.ha.domain;
 
 import java.util.Objects;
 
@@ -8,7 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.Version;
 
 @Entity
-public class CloudbreakNode implements Comparable<CloudbreakNode> {
+public class Node implements Comparable<Node> {
 
     @Id
     private String uuid;
@@ -19,10 +19,10 @@ public class CloudbreakNode implements Comparable<CloudbreakNode> {
     @Version
     private Long version;
 
-    public CloudbreakNode() {
+    public Node() {
     }
 
-    public CloudbreakNode(String uuid) {
+    public Node(String uuid) {
         this.uuid = uuid;
     }
 
@@ -59,7 +59,7 @@ public class CloudbreakNode implements Comparable<CloudbreakNode> {
             return false;
         }
 
-        CloudbreakNode that = (CloudbreakNode) o;
+        Node that = (Node) o;
 
         return uuid.equals(that.uuid);
     }
@@ -70,13 +70,13 @@ public class CloudbreakNode implements Comparable<CloudbreakNode> {
     }
 
     @Override
-    public int compareTo(CloudbreakNode o) {
+    public int compareTo(Node o) {
         return o.uuid.compareToIgnoreCase(uuid);
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("CloudbreakNode{");
+        StringBuilder sb = new StringBuilder("Node{");
         sb.append("uuid='").append(uuid).append('\'');
         sb.append(", lastUpdated=").append(lastUpdated);
         sb.append('}');

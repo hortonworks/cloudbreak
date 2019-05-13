@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class NodeConfig {
 
-    @Value("${cb.instance.node.id:}")
+    @Value("${instance.node.id:}")
     private String id;
 
-    @Value("${cb.instance.uuid:}")
+    @Value("${instance.uuid:}")
     private String instanceUUID;
 
     public String getId() {

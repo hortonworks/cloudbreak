@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.ha;
+package com.sequenceiq.cloudbreak.ha.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
+import com.sequenceiq.cloudbreak.ha.domain.Node;
 
 @Service
 public class EvenFlowDistributor implements FlowDistributor {
@@ -17,8 +17,8 @@ public class EvenFlowDistributor implements FlowDistributor {
     private static final Logger LOGGER = LoggerFactory.getLogger(EvenFlowDistributor.class);
 
     @Override
-    public Map<CloudbreakNode, List<String>> distribute(List<String> flows, List<CloudbreakNode> nodes) {
-        Map<CloudbreakNode, List<String>> result = new HashMap<>();
+    public Map<Node, List<String>> distribute(List<String> flows, List<Node> nodes) {
+        Map<Node, List<String>> result = new HashMap<>();
         int nodeCount = nodes.size();
         int flowCount = flows.size();
         double flowPerNode = (double) flowCount / nodeCount;
