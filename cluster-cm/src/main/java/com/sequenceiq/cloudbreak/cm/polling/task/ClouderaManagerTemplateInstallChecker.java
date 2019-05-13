@@ -92,7 +92,7 @@ public class ClouderaManagerTemplateInstallChecker extends AbstractClouderaManag
             children.stream()
                     .filter(commandFailed())
                     .map(readCommand(commandsResourceApi))
-                    .forEach(cmd -> digForFailureCause(apiCommand, errorReasons, commandsResourceApi));
+                    .forEach(cmd -> digForFailureCause(cmd, errorReasons, commandsResourceApi));
         }
     }
 
