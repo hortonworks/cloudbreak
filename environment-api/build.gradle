@@ -15,4 +15,14 @@ dependencies {
   compile project(':structuredevent-model')
   compile group: 'io.swagger', name: 'swagger-jersey2-jaxrs', version: "1.5.21"
   compile group: 'javax.validation', name: 'validation-api', version: '2.0.1.Final'
+  compile group: 'org.apache.httpcomponents',     name: 'httpclient',                     version: httpClientVersion
+  compile group: 'org.bouncycastle',              name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
+  compile group: 'org.glassfish.jersey.ext',      name: 'jersey-proxy-client',            version: "2.25.1"
+  compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-json-jackson',         version: "2.25.1"
+  compile group: 'javax.activation',              name: 'activation',                     version: "1.1.1"
+  compile group: 'javax.xml.bind',                name: 'jaxb-api',                       version: "2.3.0"
+  compile group: 'com.sun.xml.bind',              name: 'jaxb-impl',                      version: "2.3.0"
+  compile group: 'com.sun.xml.bind',              name: 'jaxb-core',                      version: "2.3.0"
+  compile group: 'com.sun.xml.ws',                name: 'rt',                             version: "2.3.0"
+  compile group: 'com.sun.xml.ws',                name: 'jaxws-rt',                       version: "2.3.0"
 }
