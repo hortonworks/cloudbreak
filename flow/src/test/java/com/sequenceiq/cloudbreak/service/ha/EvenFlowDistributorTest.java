@@ -14,7 +14,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
+import com.sequenceiq.cloudbreak.ha.domain.Node;
+import com.sequenceiq.cloudbreak.ha.service.EvenFlowDistributor;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
 
@@ -33,9 +34,9 @@ public class EvenFlowDistributorTest {
 
     @Test
     public void testOddFlowDistribution() {
-        List<CloudbreakNode> nodes = getClusterNodes();
+        List<Node> nodes = getClusterNodes();
         List<String> flowLogs = getFlowIds(9);
-        Map<CloudbreakNode, List<String>> result = flowDistributor.distribute(flowLogs, nodes);
+        Map<Node, List<String>> result = flowDistributor.distribute(flowLogs, nodes);
         assertEquals(3L, result.get(nodes.get(0)).size());
         assertEquals(2L, result.get(nodes.get(1)).size());
         assertEquals(2L, result.get(nodes.get(2)).size());
@@ -44,9 +45,9 @@ public class EvenFlowDistributorTest {
 
     @Test
     public void testEvenFlowDistribution() {
-        List<CloudbreakNode> nodes = getClusterNodes();
+        List<Node> nodes = getClusterNodes();
         List<String> flowLogs = getFlowIds(12);
-        Map<CloudbreakNode, List<String>> result = flowDistributor.distribute(flowLogs, nodes);
+        Map<Node, List<String>> result = flowDistributor.distribute(flowLogs, nodes);
         assertEquals(3L, result.get(nodes.get(0)).size());
         assertEquals(3L, result.get(nodes.get(1)).size());
         assertEquals(3L, result.get(nodes.get(2)).size());
@@ -55,10 +56,10 @@ public class EvenFlowDistributorTest {
 
     @Test
     public void testEvenFlowOddNodesDistribution() {
-        List<CloudbreakNode> nodes = getClusterNodes();
+        List<Node> nodes = getClusterNodes();
         nodes.remove(3);
         List<String> flowLogs = getFlowIds(12);
-        Map<CloudbreakNode, List<String>> result = flowDistributor.distribute(flowLogs, nodes);
+        Map<Node, List<String>> result = flowDistributor.distribute(flowLogs, nodes);
         assertEquals(4L, result.get(nodes.get(0)).size());
         assertEquals(4L, result.get(nodes.get(1)).size());
         assertEquals(4L, result.get(nodes.get(2)).size());
@@ -66,10 +67,10 @@ public class EvenFlowDistributorTest {
 
     @Test
     public void testOddFlowOddNodesDistribution() {
-        List<CloudbreakNode> nodes = getClusterNodes();
+        List<Node> nodes = getClusterNodes();
         nodes.remove(3);
         List<String> flowLogs = getFlowIds(11);
-        Map<CloudbreakNode, List<String>> result = flowDistributor.distribute(flowLogs, nodes);
+        Map<Node, List<String>> result = flowDistributor.distribute(flowLogs, nodes);
         assertEquals(4L, result.get(nodes.get(0)).size());
         assertEquals(4L, result.get(nodes.get(1)).size());
         assertEquals(3L, result.get(nodes.get(2)).size());
@@ -77,18 +78,18 @@ public class EvenFlowDistributorTest {
 
     @Test
     public void testFlowDistributionSingleNode() {
-        CloudbreakNode node = new CloudbreakNode(MY_ID);
+        Node node = new Node(MY_ID);
         List<String> flowLogs = getFlowIds(11);
-        Map<CloudbreakNode, List<String>> result = flowDistributor.distribute(flowLogs, Collections.singletonList(node));
+        Map<Node, List<String>> result = flowDistributor.distribute(flowLogs, Collections.singletonList(node));
         assertEquals(11L, result.get(node).size());
     }
 
-    private List<CloudbreakNode> getClusterNodes() {
-        List<CloudbreakNode> nodes = new ArrayList<>();
-        nodes.add(new CloudbreakNode(MY_ID));
-        nodes.add(new CloudbreakNode(NODE_1_ID));
-        nodes.add(new CloudbreakNode(NODE_2_ID));
-        nodes.add(new CloudbreakNode(NODE_3_ID));
+    private List<Node> getClusterNodes() {
+        List<Node> nodes = new ArrayList<>();
+        nodes.add(new Node(MY_ID));
+        nodes.add(new Node(NODE_1_ID));
+        nodes.add(new Node(NODE_2_ID));
+        nodes.add(new Node(NODE_3_ID));
         return nodes;
     }
 

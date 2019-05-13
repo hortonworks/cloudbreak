@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,25 +44,25 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.ha.domain.Node;
+import com.sequenceiq.cloudbreak.ha.service.NodeService;
+import com.sequenceiq.cloudbreak.ha.service.FlowDistributor;
+import com.sequenceiq.cloudbreak.service.ha.HaApplication;
+import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
+import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowRegister;
-import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig;
-import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
+import com.sequenceiq.flow.core.config.FlowConfiguration;
+import com.sequenceiq.flow.core.helloworld.config.HelloWorldFlowConfig;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
 import com.sequenceiq.flow.ha.NodeConfig;
-import com.sequenceiq.cloudbreak.service.ha.FlowDistributor;
-import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
-import com.sequenceiq.cloudbreak.service.node.CloudbreakNodeService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HeartbeatServiceTest {
@@ -81,13 +82,10 @@ public class HeartbeatServiceTest {
     private NodeConfig nodeConfig;
 
     @Mock
-    private CloudbreakNodeService cloudbreakNodeService;
+    private NodeService nodeService;
 
     @Mock
     private FlowLogService flowLogService;
-
-    @Mock
-    private CloudbreakFlowLogService cloudbreakFlowLogService;
 
     @Mock
     private Flow2Handler flow2Handler;
@@ -102,10 +100,13 @@ public class HeartbeatServiceTest {
     private FlowRegister runningFlows;
 
     @Mock
-    private StackService stackService;
+    private TransactionService transactionService;
 
     @Mock
-    private TransactionService transactionService;
+    private HaApplication haApplication;
+
+    @Mock
+    private ApplicationFlowInformation applicationFlowInformation;
 
     @Captor
     private ArgumentCaptor<String> stringCaptor;
@@ -129,14 +130,14 @@ public class HeartbeatServiceTest {
 
     @Test
     public void testOneNodeTakesAllFlows() {
-        List<CloudbreakNode> clusterNodes = getClusterNodes();
+        List<Node> clusterNodes = getClusterNodes();
         clusterNodes.get(0).setLastUpdated(200_000L); // myself
         // set all nodes to failed except myself
         for (int i = 1; i < clusterNodes.size(); i++) {
-            CloudbreakNode node = clusterNodes.get(i);
+            Node node = clusterNodes.get(i);
             node.setLastUpdated(50_000L);
         }
-        when(cloudbreakNodeService.findAll()).thenReturn(clusterNodes);
+        when(nodeService.findAll()).thenReturn(clusterNodes);
         when(clock.getCurrentTimeMillis()).thenReturn(200_000L);
 
         // all flows that need to be re-distributed
@@ -149,7 +150,7 @@ public class HeartbeatServiceTest {
         suspendedFlows.addAll(node2FlowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList()));
         when(flowLogService.findAllByCloudbreakNodeId(NODE_2_ID)).thenReturn(node2FlowLogs);
 
-        Map<CloudbreakNode, List<String>> distribution = new HashMap<>();
+        Map<Node, List<String>> distribution = new HashMap<>();
         distribution.computeIfAbsent(clusterNodes.get(0), v -> new ArrayList<>()).
                 addAll(Arrays.asList(suspendedFlows.get(0), suspendedFlows.get(1), suspendedFlows.get(2),
                         suspendedFlows.get(3), suspendedFlows.get(4)));
@@ -181,14 +182,14 @@ public class HeartbeatServiceTest {
 
     @Test
     public void testOneNodeTakesAllFlowsWithCleanup() {
-        List<CloudbreakNode> clusterNodes = getClusterNodes();
+        List<Node> clusterNodes = getClusterNodes();
         clusterNodes.get(0).setLastUpdated(200_000L); // myself
         // set all nodes to failed except myself
         for (int i = 1; i < clusterNodes.size(); i++) {
-            CloudbreakNode node = clusterNodes.get(i);
+            Node node = clusterNodes.get(i);
             node.setLastUpdated(50_000L);
         }
-        when(cloudbreakNodeService.findAll()).thenReturn(clusterNodes);
+        when(nodeService.findAll()).thenReturn(clusterNodes);
         when(clock.getCurrentTimeMillis()).thenReturn(200_000L);
 
         // all flows that need to be re-distributed
@@ -201,7 +202,7 @@ public class HeartbeatServiceTest {
         suspendedFlows.addAll(node2FlowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList()));
         when(flowLogService.findAllByCloudbreakNodeId(NODE_2_ID)).thenReturn(node2FlowLogs).thenReturn(Collections.emptySet());
 
-        Map<CloudbreakNode, List<String>> distribution = new HashMap<>();
+        Map<Node, List<String>> distribution = new HashMap<>();
         distribution.computeIfAbsent(clusterNodes.get(0), v -> new ArrayList<>()).
                 addAll(Arrays.asList(suspendedFlows.get(0), suspendedFlows.get(1), suspendedFlows.get(2),
                         suspendedFlows.get(3), suspendedFlows.get(4)));
@@ -233,14 +234,14 @@ public class HeartbeatServiceTest {
 
     @Test
     public void testOneNodeTakesAllFlowsWithInvalidFlows() {
-        List<CloudbreakNode> clusterNodes = getClusterNodes();
+        List<Node> clusterNodes = getClusterNodes();
         clusterNodes.get(0).setLastUpdated(200_000L); // myself
         // set all nodes to failed except myself
         for (int i = 1; i < clusterNodes.size(); i++) {
-            CloudbreakNode node = clusterNodes.get(i);
+            Node node = clusterNodes.get(i);
             node.setLastUpdated(50_000L);
         }
-        when(cloudbreakNodeService.findAll()).thenReturn(clusterNodes);
+        when(nodeService.findAll()).thenReturn(clusterNodes);
         when(clock.getCurrentTimeMillis()).thenReturn(200_000L);
 
         // all flows that need to be re-distributed
@@ -253,7 +254,7 @@ public class HeartbeatServiceTest {
         suspendedFlows.addAll(node2FlowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList()));
         when(flowLogService.findAllByCloudbreakNodeId(NODE_2_ID)).thenReturn(node2FlowLogs);
 
-        Map<CloudbreakNode, List<String>> distribution = new HashMap<>();
+        Map<Node, List<String>> distribution = new HashMap<>();
         distribution.computeIfAbsent(clusterNodes.get(0), v -> new ArrayList<>()).
                 addAll(Arrays.asList(suspendedFlows.get(0), suspendedFlows.get(1), suspendedFlows.get(2),
                         suspendedFlows.get(3), suspendedFlows.get(4)));
@@ -267,11 +268,8 @@ public class HeartbeatServiceTest {
         when(runningFlows.get(any())).thenReturn(null);
 
         List<Long> stackIds = myNewFlowLogs.stream().map(FlowLog::getResourceId).distinct().collect(Collectors.toList());
-        List<Object[]> statusResponse = new ArrayList<>();
-        statusResponse.add(new Object[]{stackIds.get(0), Status.DELETE_IN_PROGRESS});
-        statusResponse.add(new Object[]{stackIds.get(2), Status.DELETE_IN_PROGRESS});
-        when(stackService.getStatuses(any())).thenReturn(statusResponse);
-
+        when(haApplication.getDeletingResources(anySet())).thenReturn(Set.of(stackIds.get(0), stackIds.get(2)));
+        doReturn(HelloWorldFlowConfig.class).when(applicationFlowInformation).getTerminationFlow();
         List<FlowLog> invalidFlowLogs = myNewFlowLogs.stream()
                 .filter(fl -> fl.getResourceId().equals(stackIds.get(0)) || fl.getResourceId().equals(stackIds.get(2))).collect(Collectors.toList());
 
@@ -299,29 +297,29 @@ public class HeartbeatServiceTest {
 
     @Test
     public void testOneNodeTakesAllFlowsWithTerminationFlowShouldBeDistributed() {
-        List<CloudbreakNode> clusterNodes = getClusterNodes();
+        List<Node> clusterNodes = getClusterNodes();
         clusterNodes.get(0).setLastUpdated(200_000L); // myself
         // set all nodes to failed except myself
         for (int i = 1; i < clusterNodes.size(); i++) {
-            CloudbreakNode node = clusterNodes.get(i);
+            Node node = clusterNodes.get(i);
             node.setLastUpdated(50_000L);
         }
-        when(cloudbreakNodeService.findAll()).thenReturn(clusterNodes);
+        when(nodeService.findAll()).thenReturn(clusterNodes);
         when(clock.getCurrentTimeMillis()).thenReturn(200_000L);
 
         // all flows that need to be re-distributed
 
         List<FlowLog> node1FlowLogs = getFlowLogs(2, 5000);
-        node1FlowLogs.forEach(fl -> fl.setFlowType(StackTerminationFlowConfig.class));
+        node1FlowLogs.forEach(fl -> fl.setFlowType(HelloWorldFlowConfig.class));
         List<String> suspendedFlows = node1FlowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList());
         when(flowLogService.findAllByCloudbreakNodeId(NODE_1_ID)).thenReturn(new HashSet<>(node1FlowLogs));
 
         Set<FlowLog> node2FlowLogs = new HashSet<>(getFlowLogs(3, 3000));
-        node2FlowLogs.forEach(fl -> fl.setFlowType(StackTerminationFlowConfig.class));
+        node2FlowLogs.forEach(fl -> fl.setFlowType(HelloWorldFlowConfig.class));
         suspendedFlows.addAll(node2FlowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList()));
         when(flowLogService.findAllByCloudbreakNodeId(NODE_2_ID)).thenReturn(node2FlowLogs);
 
-        Map<CloudbreakNode, List<String>> distribution = new HashMap<>();
+        Map<Node, List<String>> distribution = new HashMap<>();
         distribution.computeIfAbsent(clusterNodes.get(0), v -> new ArrayList<>()).
                 addAll(Arrays.asList(suspendedFlows.get(0), suspendedFlows.get(1), suspendedFlows.get(2),
                         suspendedFlows.get(3), suspendedFlows.get(4)));
@@ -335,10 +333,8 @@ public class HeartbeatServiceTest {
         when(runningFlows.get(any())).thenReturn(null);
 
         List<Long> stackIds = myNewFlowLogs.stream().map(FlowLog::getResourceId).distinct().collect(Collectors.toList());
-        List<Object[]> statusResponse = new ArrayList<>();
-        statusResponse.add(new Object[]{stackIds.get(0), Status.DELETE_IN_PROGRESS});
-        statusResponse.add(new Object[]{stackIds.get(2), Status.DELETE_IN_PROGRESS});
-        when(stackService.getStatuses(any())).thenReturn(statusResponse);
+        when(haApplication.getDeletingResources(anySet())).thenReturn(Set.of(stackIds.get(0), stackIds.get(2)));
+        doReturn(HelloWorldFlowConfig.class).when(applicationFlowInformation).getTerminationFlow();
 
         heartbeatService.scheduledFlowDistribution();
 
@@ -359,12 +355,12 @@ public class HeartbeatServiceTest {
 
     @Test
     public void testDistributionConcurrency() {
-        List<CloudbreakNode> clusterNodes = getClusterNodes();
+        List<Node> clusterNodes = getClusterNodes();
         clusterNodes.get(0).setLastUpdated(200_000L); // myself
         clusterNodes.get(1).setLastUpdated(50_000L); // failed node
         clusterNodes.get(2).setLastUpdated(200_000L); // active node
 
-        when(cloudbreakNodeService.findAll()).thenReturn(clusterNodes);
+        when(nodeService.findAll()).thenReturn(clusterNodes);
         when(clock.getCurrentTimeMillis()).thenReturn(200_000L);
 
         // all flows that need to be re-distributed
@@ -373,7 +369,7 @@ public class HeartbeatServiceTest {
         List<String> suspendedFlows = node1FlowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList());
         when(flowLogService.findAllByCloudbreakNodeId(NODE_1_ID)).thenReturn(new HashSet<>(node1FlowLogs));
 
-        Map<CloudbreakNode, List<String>> distribution = new HashMap<>();
+        Map<Node, List<String>> distribution = new HashMap<>();
         distribution.computeIfAbsent(clusterNodes.get(0), v -> new ArrayList<>()).
                 addAll(Arrays.asList(suspendedFlows.get(0), suspendedFlows.get(2)));
         distribution.computeIfAbsent(clusterNodes.get(2), v -> new ArrayList<>()).
@@ -401,12 +397,12 @@ public class HeartbeatServiceTest {
 
     @Test
     public void testDistributionConcurrencyWithDifferentFlows() {
-        List<CloudbreakNode> clusterNodes = getClusterNodes();
+        List<Node> clusterNodes = getClusterNodes();
         clusterNodes.get(0).setLastUpdated(200_000L); // myself
         clusterNodes.get(1).setLastUpdated(50_000L); // failed node
         clusterNodes.get(2).setLastUpdated(200_000L); // active node
 
-        when(cloudbreakNodeService.findAll()).thenReturn(clusterNodes);
+        when(nodeService.findAll()).thenReturn(clusterNodes);
         when(clock.getCurrentTimeMillis()).thenReturn(200_000L);
 
         // all flows that need to be re-distributed
@@ -415,7 +411,7 @@ public class HeartbeatServiceTest {
         List<String> suspendedFlows = node1FlowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList());
         when(flowLogService.findAllByCloudbreakNodeId(NODE_1_ID)).thenReturn(new HashSet<>(node1FlowLogs));
 
-        Map<CloudbreakNode, List<String>> distribution = new HashMap<>();
+        Map<Node, List<String>> distribution = new HashMap<>();
         distribution.computeIfAbsent(clusterNodes.get(0), v -> new ArrayList<>()).
                 addAll(Arrays.asList(suspendedFlows.get(0), suspendedFlows.get(2)));
         distribution.computeIfAbsent(clusterNodes.get(2), v -> new ArrayList<>()).
@@ -508,11 +504,11 @@ public class HeartbeatServiceTest {
         }
     }
 
-    private List<CloudbreakNode> getClusterNodes() {
-        List<CloudbreakNode> nodes = new ArrayList<>();
-        nodes.add(new CloudbreakNode(MY_ID));
-        nodes.add(new CloudbreakNode(NODE_1_ID));
-        nodes.add(new CloudbreakNode(NODE_2_ID));
+    private List<Node> getClusterNodes() {
+        List<Node> nodes = new ArrayList<>();
+        nodes.add(new Node(MY_ID));
+        nodes.add(new Node(NODE_1_ID));
+        nodes.add(new Node(NODE_2_ID));
 
         IntStream.range(0, 3).forEach(i -> nodes.get(i).setLastUpdated(BASE_DATE_TIME.plusMinutes(i).toEpochSecond(ZoneOffset.UTC)));
         return nodes;
@@ -526,7 +522,7 @@ public class HeartbeatServiceTest {
         for (int i = 0; i < flowCount; i++) {
             for (int j = 0; j < random.nextInt(99) + 1; j++) {
                 FlowLog flowLog = new FlowLog(stackId + i, "" + flowId + i, "RUNNING", false, StateStatus.PENDING);
-                flowLog.setFlowType(StackCreationFlowConfig.class);
+                flowLog.setFlowType(FlowConfiguration.class);
                 flows.add(flowLog);
             }
         }
@@ -537,8 +533,8 @@ public class HeartbeatServiceTest {
     public void testDistributeFlows() throws TransactionExecutionException {
         ReflectionTestUtils.setField(heartbeatService, "heartbeatThresholdRate", 70);
 
-        List<CloudbreakNode> clusterNodes = getClusterNodes();
-        when(cloudbreakNodeService.findAll()).thenReturn(clusterNodes);
+        List<Node> clusterNodes = getClusterNodes();
+        when(nodeService.findAll()).thenReturn(clusterNodes);
         when(clock.getCurrentTimeMillis()).thenReturn(BASE_DATE_TIME.plusMinutes(clusterNodes.size()).toEpochSecond(ZoneOffset.UTC));
 
         Set<FlowLog> failedFLowLogs1 = new HashSet<>(getFlowLogs(2, 5000));
@@ -546,16 +542,16 @@ public class HeartbeatServiceTest {
         when(flowLogService.findAllByCloudbreakNodeId(MY_ID)).thenReturn(failedFLowLogs1);
         when(flowLogService.findAllByCloudbreakNodeId(NODE_1_ID)).thenReturn(failedFlowLogs2);
 
-        Map<CloudbreakNode, List<String>> flowDistribution = createFlowDistribution(failedFLowLogs1, failedFlowLogs2);
+        Map<Node, List<String>> flowDistribution = createFlowDistribution(failedFLowLogs1, failedFlowLogs2);
         when(flowDistributor.distribute(anyList(), eq(clusterNodes.subList(2, clusterNodes.size())))).thenReturn(flowDistribution);
 
-        List<Object[]> stackStatuses = failedFLowLogs1.stream()
+        Set<Long> deletedResources = failedFLowLogs1.stream()
                 .map(FlowLog::getResourceId)
-                .map(stackId -> new Object[]{stackId, Status.DELETE_IN_PROGRESS})
-                .collect(Collectors.toList());
-        when(stackService.getStatuses(anySet())).thenReturn(stackStatuses);
+                .collect(Collectors.toSet());
+        when(haApplication.getDeletingResources(anySet())).thenReturn(deletedResources);
+        doReturn(HelloWorldFlowConfig.class).when(applicationFlowInformation).getTerminationFlow();
 
-        List<CloudbreakNode> cloudbreakNodes = heartbeatService.distributeFlows();
+        List<Node> nodes = heartbeatService.distributeFlows();
 
         ArgumentCaptor<Collection<FlowLog>> updatedLogsCaptor = ArgumentCaptor.forClass(Collection.class);
         verify(flowLogService, times(1)).saveAll(updatedLogsCaptor.capture());
@@ -564,13 +560,13 @@ public class HeartbeatServiceTest {
                 .map(FlowLog::getStateStatus)
                 .allMatch(StateStatus.SUCCESSFUL::equals));
 
-        assertEquals(clusterNodes.subList(0, 2), cloudbreakNodes);
+        assertEquals(clusterNodes.subList(0, 2), nodes);
     }
 
-    private Map<CloudbreakNode, List<String>> createFlowDistribution(Set<FlowLog> failedFLowLogs1, Set<FlowLog> failedFlowLogs2) {
-        Map<CloudbreakNode, List<String>> distribution = new HashMap<>();
+    private Map<Node, List<String>> createFlowDistribution(Set<FlowLog> failedFLowLogs1, Set<FlowLog> failedFlowLogs2) {
+        Map<Node, List<String>> distribution = new HashMap<>();
 
-        distribution.put(new CloudbreakNode(UUID.randomUUID().toString()), failedFLowLogs1.stream().map(FlowLog::getFlowId).collect(Collectors.toList()));
+        distribution.put(new Node(UUID.randomUUID().toString()), failedFLowLogs1.stream().map(FlowLog::getFlowId).collect(Collectors.toList()));
         return distribution;
     }
 }

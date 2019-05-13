@@ -10,10 +10,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.cloudbreak.service.Retry;
-import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
 import com.sequenceiq.periscope.domain.PeriscopeNode;
 import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.PeriscopeNodeRepository;

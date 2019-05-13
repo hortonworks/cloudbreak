@@ -8,4 +8,8 @@ public interface ApplicationFlowInformation  {
     List<Class<? extends FlowConfiguration<?>>> getRestartableFlows();
 
     List<String> getAllowedParallelFlows();
+
+    default Class<? extends FlowConfiguration<?>> getTerminationFlow() {
+        return null;
+    }
 }

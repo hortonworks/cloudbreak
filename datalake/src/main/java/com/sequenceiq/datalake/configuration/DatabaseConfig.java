@@ -27,7 +27,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.sequenceiq.cloudbreak.util.DatabaseUtil;
-import com.sequenceiq.datalake.service.ha.DatalakeNodeConfig;
+import com.sequenceiq.flow.ha.NodeConfig;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -76,7 +76,7 @@ public class DatabaseConfig {
     private String databaseAddress;
 
     @Inject
-    private DatalakeNodeConfig datalakeNodeConfig;
+    private NodeConfig nodeConfig;
 
     @Bean
     public DataSource dataSource() throws SQLException {
@@ -87,8 +87,8 @@ public class DatabaseConfig {
             config.addDataSourceProperty("sslfactory", "org.postgresql.ssl.SingleCertValidatingFactory");
             config.addDataSourceProperty("sslfactoryarg", "file://" + certFile);
         }
-        if (datalakeNodeConfig.isNodeIdSpecified()) {
-            config.addDataSourceProperty("ApplicationName", datalakeNodeConfig.getId());
+        if (nodeConfig.isNodeIdSpecified()) {
+            config.addDataSourceProperty("ApplicationName", nodeConfig.getId());
         }
         config.setJdbcUrl(String.format("jdbc:postgresql://%s/%s?currentSchema=%s", databaseAddress, dbName, dbSchemaName));
         config.setUsername(dbUser);

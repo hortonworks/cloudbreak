@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -24,6 +25,7 @@ import com.sequenceiq.freeipa.logger.MDCContextFilter;
 
 @Configuration
 @EnableRetry
+@EnableScheduling
 public class AppConfig {
 
     @Value("${freeipa.intermediate.threadpool.core.size:}")

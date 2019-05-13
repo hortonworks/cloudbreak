@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableSwagger2
-@EnableJpaRepositories(basePackages = { "com.sequenceiq.redbeams", "com.sequenceiq.flow" })
+@EnableJpaRepositories(basePackages = { "com.sequenceiq.redbeams", "com.sequenceiq.flow", "com.sequenceiq.cloudbreak.ha.repository" })
 @SpringBootApplication(scanBasePackages = {"com.sequenceiq.redbeams",
         "com.sequenceiq.cloudbreak.auth",
         "com.sequenceiq.cloudbreak.auth.altus",
@@ -26,7 +26,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
         "com.sequenceiq.cloudbreak.validation",
         "com.sequenceiq.cloudbreak.common.converter",
         "com.sequenceiq.flow",
-        "com.sequenceiq.cloudbreak.client"},
+        "com.sequenceiq.cloudbreak.client",
+        "com.sequenceiq.cloudbreak.ha.service"},
         exclude = WebMvcMetricsAutoConfiguration.class)
 public class RedbeamsApplication {
 
