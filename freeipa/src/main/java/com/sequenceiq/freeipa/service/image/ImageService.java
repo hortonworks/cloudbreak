@@ -47,8 +47,7 @@ public class ImageService {
         Image image = new Image();
         image.setStack(stack);
         image.setUserdata(userData);
-        //FIXME remove hardcoded image name
-        image.setImageName("ami-0a21cab39fdfb6b1a");
+        image.setImageName(imageRequest.getId());
         imageRepository.save(image);
     }
 
