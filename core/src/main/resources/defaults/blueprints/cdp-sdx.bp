@@ -318,7 +318,7 @@
         ]
       },
       {
-        "refName": "worker",
+        "refName": "m2",
         "cardinality": 1,
         "roleConfigGroupsRefNames": [
           "hbase-GATEWAY-BASE",
@@ -342,7 +342,7 @@
         ]
       },
       {
-        "refName": "compute",
+        "refName": "m3",
         "cardinality": 1,
         "roleConfigGroupsRefNames": [
           "hbase-REGIONSERVER",
