@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.env;
+package com.sequenceiq.environment.environment;
 
 import org.springframework.stereotype.Service;
 

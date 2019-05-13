@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.env.domain;
+package com.sequenceiq.environment.environment.domain;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.workspace.model.ArchivableResource;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
-import com.sequenceiq.environment.env.domain.network.BaseNetwork;
+import com.sequenceiq.environment.environment.domain.network.BaseNetwork;
 import com.sequenceiq.environment.proxy.ProxyConfig;
 import com.sequenceiq.environment.credential.Credential;
 

@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.env.domain;
+package com.sequenceiq.environment.environment.domain;
 
 import java.util.Set;
 
