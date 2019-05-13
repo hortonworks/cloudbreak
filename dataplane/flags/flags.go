@@ -245,14 +245,14 @@ var (
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:  "file",
-			Usage: "location of the blueprint JSON file",
+			Usage: "location of the input JSON file",
 		},
 	}
 	FlURL = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:  "url",
-			Usage: "URL location of the JSON file",
+			Usage: "URL location of the input JSON file",
 		},
 	}
 	FlBlueprintName = StringFlag{

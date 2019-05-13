@@ -14,7 +14,7 @@ func init() {
 		Subcommands: []cli.Command{
 			{
 				Name:  "create",
-				Usage: "adds a new recipe from a file or from a URL",
+				Usage: "adds a new recipe from a file",
 				Subcommands: []cli.Command{
 					{
 						Name:   "from-file",
