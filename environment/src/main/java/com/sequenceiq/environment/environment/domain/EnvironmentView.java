@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.env.domain;
+package com.sequenceiq.environment.environment.domain;
 
 import java.util.Objects;
 import java.util.Set;
@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 import com.sequenceiq.cloudbreak.workspace.model.CompactView;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
-import com.sequenceiq.environment.env.domain.network.BaseNetwork;
+import com.sequenceiq.environment.environment.domain.network.BaseNetwork;
 import com.sequenceiq.environment.credential.Credential;
 
 @Entity

@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.env;
+package com.sequenceiq.environment.environment;
 
 import static com.sequenceiq.cloudbreak.workspace.resource.ResourceAction.READ;
 
@@ -14,13 +14,13 @@ import org.springframework.data.repository.NoRepositoryBean;
 import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByWorkspaceId;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.environment.env.domain.EnvironmentAwareResource;
-import com.sequenceiq.environment.env.domain.EnvironmentView;
+import com.sequenceiq.environment.environment.domain.EnvironmentAwareResource;
+import com.sequenceiq.environment.environment.domain.EnvironmentView;
 
 @NoRepositoryBean
 @Transactional(TxType.REQUIRED)
 @DisableHasPermission
-public interface EnvironmentResourceRepository<T extends EnvironmentAwareResource, ID extends Serializable> extends WorkspaceResourceRepository<T, ID> {
+interface EnvironmentResourceRepository<T extends EnvironmentAwareResource, ID extends Serializable> extends WorkspaceResourceRepository<T, ID> {
 
     @CheckPermissionsByWorkspaceId(action = READ)
     Set<T> findAllByWorkspaceIdAndEnvironments(Long workspaceId, EnvironmentView environment);

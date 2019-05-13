@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.env;
+package com.sequenceiq.environment.environment;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -15,16 +15,13 @@ import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.workspace.model.ArchivableResource;
 import com.sequenceiq.cloudbreak.workspace.service.AbstractArchivistService;
-import com.sequenceiq.environment.env.domain.EnvironmentAwareResource;
-import com.sequenceiq.environment.env.domain.EnvironmentView;
+import com.sequenceiq.environment.environment.domain.EnvironmentAwareResource;
+import com.sequenceiq.environment.environment.domain.EnvironmentView;
 
 public abstract class AbstractEnvironmentAwareService<T extends EnvironmentAwareResource & ArchivableResource> extends AbstractArchivistService<T> {
 
     @Inject
     private EnvironmentViewService environmentViewService;
-
-    @Inject
-    private ResourceDetachValidator resourceDetachValidator;
 
     @Inject
     @Named("conversionService")

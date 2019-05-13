@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.authorization.UmsAuthorizationService;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -54,6 +55,9 @@ public class WorkspaceService {
     @Inject
     private UmsAuthorizationService umsAuthorizationService;
 
+    @Inject
+    private AuthenticatedUserService authenticatedUserService;
+
     public Workspace create(User user, Workspace workspace) {
         try {
             return transactionService.required(() -> {
@@ -85,6 +89,11 @@ public class WorkspaceService {
     public Set<Workspace> retrieveForUser(User user) {
         //return umsAuthorizationService.getWorkspacesOfCurrentUser(user);
         return Sets.newHashSet(getByName(getAccountWorkspaceName(user), user).get());
+    }
+
+    public Workspace getDefaultWorkspace() {
+        CloudbreakUser user = authenticatedUserService.getCbUser();
+        return workspaceRepository.getByName(getAccountWorkspaceName(user), user.getTenant());
     }
 
     public Workspace getDefaultWorkspaceForUser(User user) {

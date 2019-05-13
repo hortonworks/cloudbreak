@@ -40,8 +40,8 @@ import com.sequenceiq.cloudbreak.workspace.service.AbstractWorkspaceAwareResourc
 import com.sequenceiq.cloudbreak.workspace.service.WorkspaceService;
 import com.sequenceiq.environment.credential.exception.CredentialOperationException;
 import com.sequenceiq.environment.credential.validator.CredentialValidator;
-import com.sequenceiq.environment.env.domain.EnvironmentView;
-import com.sequenceiq.environment.env.EnvironmentViewService;
+import com.sequenceiq.environment.environment.domain.EnvironmentView;
+import com.sequenceiq.environment.environment.EnvironmentViewService;
 import com.sequenceiq.notification.Notification;
 import com.sequenceiq.notification.NotificationSender;
 import com.sequenceiq.notification.ResourceEvent;

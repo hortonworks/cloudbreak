@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.env;
+package com.sequenceiq.environment.environment;
 
 import static com.sequenceiq.cloudbreak.workspace.resource.ResourceAction.READ;
 
@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.workspace.repository.check.DisableCheckPermissi
 import com.sequenceiq.cloudbreak.workspace.repository.check.WorkspaceResourceType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
-import com.sequenceiq.environment.env.domain.EnvironmentView;
+import com.sequenceiq.environment.environment.domain.EnvironmentView;
 
 @DisableHasPermission
 @Transactional(TxType.REQUIRED)
