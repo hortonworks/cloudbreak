@@ -21,8 +21,10 @@ repositories {
 dependencies {
   compile project(':common')
   compile project(':environment-api')
+  compile project(':workspace-authorization')
   compile project(':flow')
-  
+  compile project(':notification-sender')
+
   compile     group: 'com.google.code.gson',      name: 'gson'
   compile     group: 'dnsjava',                   name: 'dnsjava'
   compile     group: 'io.micrometer',             name: 'micrometer-core'
