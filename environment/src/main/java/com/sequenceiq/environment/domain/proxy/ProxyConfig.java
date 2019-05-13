@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.domain.proxy;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -22,14 +23,19 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Where;
 
+import com.sequenceiq.cloudbreak.workspace.model.ArchivableResource;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.environment.domain.environment.EnvironmentAwareResource;
+import com.sequenceiq.environment.domain.environment.EnvironmentView;
+import com.sequenceiq.secret.SecretValue;
+import com.sequenceiq.secret.domain.Secret;
+import com.sequenceiq.secret.domain.SecretToString;
 
 @Entity
 @Where(clause = "archived = false")
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
-public class ProxyConfig implements ProvisionEntity, EnvironmentAwareResource, ArchivableResource {
+public class ProxyConfig implements Serializable, EnvironmentAwareResource, ArchivableResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "proxyconfig_generator")

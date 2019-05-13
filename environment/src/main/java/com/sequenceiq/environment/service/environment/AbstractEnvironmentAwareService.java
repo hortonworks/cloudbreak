@@ -1,27 +1,23 @@
 package com.sequenceiq.environment.service.environment;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.util.CollectionUtils;
 
-import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
-import com.sequenceiq.cloudbreak.controller.validation.environment.ResourceDetachValidator;
-import com.sequenceiq.cloudbreak.domain.ArchivableResource;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.repository.environment.EnvironmentResourceRepository;
-import com.sequenceiq.cloudbreak.service.AbstractArchivistService;
+import com.sequenceiq.cloudbreak.workspace.model.ArchivableResource;
+import com.sequenceiq.cloudbreak.workspace.service.AbstractArchivistService;
 import com.sequenceiq.environment.domain.environment.EnvironmentAwareResource;
+import com.sequenceiq.environment.domain.environment.EnvironmentView;
+import com.sequenceiq.environment.repository.environment.EnvironmentResourceRepository;
 
 public abstract class AbstractEnvironmentAwareService<T extends EnvironmentAwareResource & ArchivableResource> extends AbstractArchivistService<T> {
 
@@ -100,24 +96,24 @@ public abstract class AbstractEnvironmentAwareService<T extends EnvironmentAware
     }
 
     protected void checkClustersForDeletion(T resource) {
-        Set<Cluster> clustersWithThisProxy = getClustersUsingResource(resource);
-        if (!clustersWithThisProxy.isEmpty()) {
-            String clusters = clustersWithThisProxy
-                    .stream()
-                    .map(Cluster::getName)
-                    .collect(Collectors.joining(", "));
-            throw new BadRequestException(String.format(resource().getReadableName() + " '%s' cannot be deleted"
-                    + " because there are clusters associated with it: [%s].", resource.getName(), clusters));
-        }
+//        Set<Cluster> clustersWithThisProxy = getClustersUsingResource(resource);
+//        if (!clustersWithThisProxy.isEmpty()) {
+//            String clusters = clustersWithThisProxy
+//                    .stream()
+//                    .map(Cluster::getName)
+//                    .collect(Collectors.joining(", "));
+//            throw new BadRequestException(String.format(resource().getReadableName() + " '%s' cannot be deleted"
+//                    + " because there are clusters associated with it: [%s].", resource.getName(), clusters));
+//        }
     }
 
     protected void checkClustersForDetach(T resource, Set<EnvironmentView> envsInWorkspace) {
-        Map<EnvironmentView, Set<Cluster>> envsToClusters = envsInWorkspace.stream()
-                .collect(Collectors.toMap(env -> env, env -> getClustersUsingResourceInEnvironment(resource, env.getId())));
-        ValidationResult validationResult = resourceDetachValidator.validate(resource, envsToClusters);
-        if (validationResult.hasError()) {
-            throw new BadRequestException(validationResult.getFormattedErrors());
-        }
+//        Map<EnvironmentView, Set<Cluster>> envsToClusters = envsInWorkspace.stream()
+//                .collect(Collectors.toMap(env -> env, env -> getClustersUsingResourceInEnvironment(resource, env.getId())));
+//        ValidationResult validationResult = resourceDetachValidator.validate(resource, envsToClusters);
+//        if (validationResult.hasError()) {
+//            throw new BadRequestException(validationResult.getFormattedErrors());
+//        }
     }
 
     private void validateEnvironments(Set<EnvironmentView> environmentsInWorkspace, Set<String> environments, String messageEnding) {
@@ -136,9 +132,9 @@ public abstract class AbstractEnvironmentAwareService<T extends EnvironmentAware
 
     protected abstract EnvironmentResourceRepository<T, Long> repository();
 
-    public abstract Set<Cluster> getClustersUsingResource(T resource);
-
-    public abstract Set<Cluster> getClustersUsingResourceInEnvironment(T resource, Long environmentId);
+//    public abstract Set<Cluster> getClustersUsingResource(T resource);
+//
+//    public abstract Set<Cluster> getClustersUsingResourceInEnvironment(T resource, Long environmentId);
 
     public EnvironmentViewService environmentViewService() {
         return environmentViewService;

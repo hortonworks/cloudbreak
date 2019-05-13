@@ -8,7 +8,6 @@ import javax.transaction.Transactional.TxType;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.environment.api.EnvironmentNames;
@@ -18,6 +17,8 @@ import com.sequenceiq.environment.api.proxy.model.response.ProxyV1Response;
 import com.sequenceiq.environment.api.proxy.model.response.ProxyV1Responses;
 import com.sequenceiq.environment.domain.proxy.ProxyConfig;
 import com.sequenceiq.environment.service.proxy.ProxyConfigService;
+
+import ch.qos.logback.core.pattern.ConverterUtil;
 
 @Controller
 @Transactional(TxType.NEVER)
