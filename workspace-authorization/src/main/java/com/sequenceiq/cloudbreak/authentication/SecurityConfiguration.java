@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.client.CaasClient;
+import com.sequenceiq.cloudbreak.restclient.CaasClient;
 
 @Configuration
 public class SecurityConfiguration {

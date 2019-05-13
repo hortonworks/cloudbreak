@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.ChangeWorkspaceUsersV4Request;
 import com.sequenceiq.cloudbreak.authorization.UmsAuthorizationService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -27,8 +26,8 @@ public class WorkspaceModificationVerifierService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkspaceModificationVerifierService.class);
 
-    @Inject
-    private StackService stackService;
+//    @Inject
+//    private StackService stackService;
 
     @Inject
     private UmsAuthorizationService umsAuthorizationService;

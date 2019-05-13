@@ -3,9 +3,9 @@ package com.sequenceiq.cloudbreak.authentication;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 
-import com.sequenceiq.cloudbreak.client.CaasClient;
-import com.sequenceiq.cloudbreak.client.CaasUser;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.restclient.CaasClient;
+import com.sequenceiq.cloudbreak.restclient.CaasUser;
 
 public class CaasAuthenticationService implements AuthenticationService {
 

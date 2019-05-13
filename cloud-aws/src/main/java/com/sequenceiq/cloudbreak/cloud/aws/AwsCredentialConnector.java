@@ -14,7 +14,7 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeRegionsRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.AwsCredentialPrerequisites;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialPrerequisitesV4Response;
+import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesV4Response;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;

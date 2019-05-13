@@ -4,12 +4,14 @@ package com.sequenceiq.environment.impl.credential;
 import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -24,7 +26,10 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.account.PreferencesService;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.restclient.RestClientUtil;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
@@ -32,7 +37,9 @@ import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.workspace.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.workspace.service.WorkspaceService;
 import com.sequenceiq.environment.api.credential.model.response.CredentialPrerequisitesV1Response;
+import com.sequenceiq.environment.impl.credential.exception.CredentialOperationException;
 import com.sequenceiq.environment.impl.credential.validator.CredentialValidator;
+import com.sequenceiq.notification.Notification;
 import com.sequenceiq.notification.NotificationSender;
 import com.sequenceiq.notification.ResourceEvent;
 import com.sequenceiq.secret.service.SecretService;
@@ -63,8 +70,8 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
     @Inject
     private NotificationSender notificationSender;
 
-//    @Inject
-//    private CloudbreakMessagesService messagesService;
+    @Inject
+    private CloudbreakMessagesService messagesService;
 
     @Inject
     private WorkspaceService workspaceService;
@@ -269,7 +276,7 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
     }
 
     private void checkStacksForDeletion(Credential credential) {
-        Set<Stack> stacksForCredential = stackService.findByCredential(credential);
+        /*Set<Stack> stacksForCredential = stackService.findByCredential(credential);
         if (!stacksForCredential.isEmpty()) {
             String clusters;
             String message;
@@ -285,7 +292,7 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
                         + "The following cluster is using this credential: [%s]";
             }
             throw new BadRequestException(String.format(message, credential.getName(), clusters));
-        }
+        }*/
     }
 
     private void checkEnvironmentsForDeletion(Credential credential) {
@@ -302,10 +309,10 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
         notification.setEventType(resourceEvent.name());
         notification.setEventTimestamp(new Date().getTime());
         notification.setEventMessage(messagesService.getMessage(resourceEvent.getMessage()));
-        notification.setCloud(credential.cloudPlatform());
+        notification.setCloud(credential.getCloudPlatform());
         notification.setWorkspaceId(credential.getWorkspace().getId());
         notification.setTenantName(credential.getWorkspace().getName());
-        notificationSender.send(new Notification<>(notification));
+        notificationSender.send(new Notification<>(notification), Collections.emptyList(), RestClientUtil.get());
     }
 
     private void putToCredentialAttributes(Credential credential, Map<String, Object> attributesToAdd) {
@@ -317,13 +324,17 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
         } catch (IOException e) {
             String msg = "Credential's attributes couldn't be updated.";
             LOGGER.warn(msg, e);
-            throw new CloudbreakServiceException(msg, e);
+            throw new CredentialOperationException(msg, e);
         }
     }
 
     private String getCodeGrantFlowAppLoginUrl(String credentialAttributes) {
         Object appLoginUrl = Optional.ofNullable(new Json(credentialAttributes).getMap().get("appLoginUrl"))
-                .orElseThrow(() -> new CloudbreakServiceException("Unable to obtain App login url!"));
+                .orElseThrow(() -> new CredentialOperationException("Unable to obtain App login url!"));
         return String.valueOf(appLoginUrl);
+    }
+
+    public static Supplier<NotFoundException> notFound(String what, Object which) {
+        return () -> new NotFoundException(String.format("%s '%s' not found.", what, which));
     }
 }

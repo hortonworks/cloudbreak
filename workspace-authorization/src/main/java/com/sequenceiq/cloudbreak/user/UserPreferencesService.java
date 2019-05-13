@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import javax.inject.Inject;
+import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.util.ThrowableUtil;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.UserPreferences;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.UserPreferencesRepository;
@@ -34,7 +35,7 @@ public class UserPreferencesService {
 
     public Optional<UserPreferences> getByUserId(String userId) {
         User user = userService.getByUserId(userId)
-                .orElseThrow(NotFoundException.notFound("User", userId));
+                .orElseThrow(ThrowableUtil.notFound("User", userId));
         return getByUser(user);
     }
 
