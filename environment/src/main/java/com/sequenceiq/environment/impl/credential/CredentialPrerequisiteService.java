@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.credential;
+package com.sequenceiq.environment.impl.credential;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -11,30 +11,28 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.UserPreferences;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesV4Response;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialPrerequisitesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialPrerequisitesResult;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
+import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesV4Response;
 import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
-import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeConfigApiConnector;
 import com.sequenceiq.cloudbreak.service.sharedservice.ServiceDescriptorDefinitionProvider;
-import com.sequenceiq.cloudbreak.service.user.UserPreferencesService;
+import com.sequenceiq.cloudbreak.user.UserPreferencesService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.UserPreferences;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
 

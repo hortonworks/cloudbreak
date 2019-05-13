@@ -23,8 +23,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.authentication.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.user.UserService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByReturnValue;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByTarget;
@@ -54,7 +54,7 @@ public class PermissionCheckerService {
     private PermissionCheckingUtils permissionCheckingUtils;
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private AuthenticatedUserService authenticatedUserService;
 
     private final Map<Class<? extends Annotation>, PermissionChecker<? extends Annotation>> permissionCheckerMap = new HashMap<>();
 
@@ -103,7 +103,7 @@ public class PermissionCheckerService {
             return permissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature);
         }
 
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        User user = userService.getOrCreate(authenticatedUserService.getCbUser());
         PermissionChecker<? extends Annotation> permissionChecker = permissionCheckerMap.get(methodAnnotation.annotationType());
         WorkspaceResource resource = classWorkspaceResourceType.resource();
         return permissionChecker.checkPermissions(methodAnnotation, resource, user, proceedingJoinPoint, methodSignature);

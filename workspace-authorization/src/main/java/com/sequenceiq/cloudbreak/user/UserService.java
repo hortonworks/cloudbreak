@@ -7,7 +7,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 
 import javax.inject.Inject;
-import javax.ws.rs.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,12 +17,13 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import com.sequenceiq.cloudbreak.authentication.AuthenticationService;
+import com.sequenceiq.cloudbreak.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.tenant.TenantService;
+import com.sequenceiq.cloudbreak.util.ThrowableUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.UserPreferences;
@@ -52,7 +52,7 @@ public class UserService {
     private UserPreferencesService userPreferencesService;
 
     @Inject
-    private AuthenticationService restRequestThreadLocalService;
+    private AuthenticatedUserService authenticatedUserService;
 
     @Retryable(value = RetryException.class, maxAttempts = 5, backoff = @Backoff(delay = 500))
     public User getOrCreate(CloudbreakUser cloudbreakUser) {
@@ -97,12 +97,12 @@ public class UserService {
 
     public Set<User> getAll(CloudbreakUser cloudbreakUser) {
         User user = userRepository.findByUserId(cloudbreakUser.getUserId())
-                .orElseThrow(NotFoundException.notFound("User", cloudbreakUser.getUserId()));
+                .orElseThrow(ThrowableUtil.notFound("User", cloudbreakUser.getUserId()));
         return userRepository.findAllByTenant(user.getTenant());
     }
 
     public String evictCurrentUserDetailsForLoggedInUser() {
-        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        CloudbreakUser cloudbreakUser = authenticatedUserService.getCbUser();
         cachedUserService.evictByIdentityUser(cloudbreakUser);
         return cloudbreakUser.getUsername();
     }

@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.util;
 
+import java.util.function.Supplier;
+
+import javax.ws.rs.NotFoundException;
+
 public class ThrowableUtil {
 
     private ThrowableUtil() {
@@ -12,5 +16,9 @@ public class ThrowableUtil {
             return null;
         }
         return getSpecificCauseRecursively(t.getCause(), causeType);
+    }
+
+    public static Supplier<NotFoundException> notFound(String what, Object which) {
+        return () -> new NotFoundException(String.format("%s '%s' not found.", what, which));
     }
 }

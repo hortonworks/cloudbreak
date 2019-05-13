@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.AzureCredentialPrerequisites;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialPrerequisitesV4Response;
+import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesV4Response;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AuthenticationContextProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;

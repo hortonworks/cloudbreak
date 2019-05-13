@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.account.PreferencesService;
-import com.sequenceiq.cloudbreak.service.stack.resource.definition.credential.CredentialDefinitionService;
+import com.sequenceiq.environment.impl.credential.CredentialDefinitionService;
 
 @Component
 public class CredentialValidator {

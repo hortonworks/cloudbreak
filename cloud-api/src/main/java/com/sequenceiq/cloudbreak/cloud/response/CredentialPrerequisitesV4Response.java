@@ -1,6 +1,10 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses;
+package com.sequenceiq.cloudbreak.cloud.response;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
+import java.io.Serializable;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.AwsCredentialPrerequisites;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.AzureCredentialPrerequisites;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.GcpCredentialPrerequisites;
 import com.sequenceiq.cloudbreak.api.model.annotations.Immutable;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.CredentialModelDescription;
@@ -10,7 +14,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @Immutable
 @ApiModel
-public class CredentialPrerequisitesV4Response implements JsonEntity {
+public class CredentialPrerequisitesV4Response implements Serializable {
 
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     private String cloudPlatform;
