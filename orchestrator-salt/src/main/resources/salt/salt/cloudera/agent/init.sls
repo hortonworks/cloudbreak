@@ -15,9 +15,4 @@ replace_server_host:
     - name: /etc/cloudera-scm-agent/config.ini
     - pattern: "server_host=.*"
     - repl: "server_host=cluster-manager.{{ metadata.cluster_domain }}"
-    - unless: cat /etc/cloudera-scm-agent/config.ini | grep server_host=host-10-0-0-3.openstacklocal
-
-start_agent:
-  service.running:
-    - enable: True
-    - name: cloudera-scm-agent
+    - unless: cat /etc/cloudera-scm-agent/config.ini | grep 'server_host="cluster-manager.{{ metadata.cluster_domain }}"'

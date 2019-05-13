@@ -84,7 +84,12 @@ base:
 
   'roles:manager_server':
     - match: grain
+    - cloudera.manager.start
     - nginx.init
+
+  'roles:manager_agent':
+    - match: grain
+    - cloudera.agent.start
 
   'roles:ambari_server_standby':
     - match: grain
