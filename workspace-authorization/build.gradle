@@ -23,11 +23,14 @@ jar {
 
 dependencies {
   compile project(":auth-connector")
+  compile project(":common")
 
   compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
   compile group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
   compile group: 'org.springframework.boot',      name: 'spring-boot-starter-data-jpa',   version: springBootVersion
   compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
+  compile group: 'org.springframework.security',  name: 'spring-security-jwt',            version: '1.0.8.RELEASE'
+  compile group: 'org.springframework.retry',     name: 'spring-retry',                   version: '1.2.0.RELEASE'
 
   testCompile group: 'junit',                     name: 'junit',                          version: junitVersion
   testCompile group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion

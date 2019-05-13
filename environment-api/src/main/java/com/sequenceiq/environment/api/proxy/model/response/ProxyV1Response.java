@@ -2,9 +2,9 @@ package com.sequenceiq.environment.api.proxy.model.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.environment.api.SecretV4Response;
 import com.sequenceiq.environment.api.proxy.doc.ProxyConfigDescription;
 import com.sequenceiq.environment.api.proxy.model.ProxyV1Base;
+import com.sequenceiq.secret.model.SecretResponse;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -17,10 +17,10 @@ public class ProxyV1Response extends ProxyV1Base {
     private Long id;
 
     @ApiModelProperty(ProxyConfigDescription.USERNAME)
-    private SecretV4Response userName;
+    private SecretResponse userName;
 
     @ApiModelProperty(ProxyConfigDescription.PASSWORD)
-    private SecretV4Response password;
+    private SecretResponse password;
 
     public Long getId() {
         return id;
@@ -30,19 +30,19 @@ public class ProxyV1Response extends ProxyV1Base {
         this.id = id;
     }
 
-    public SecretV4Response getUserName() {
+    public SecretResponse getUserName() {
         return userName;
     }
 
-    public void setUserName(SecretV4Response userName) {
+    public void setUserName(SecretResponse userName) {
         this.userName = userName;
     }
 
-    public SecretV4Response getPassword() {
+    public SecretResponse getPassword() {
         return password;
     }
 
-    public void setPassword(SecretV4Response password) {
+    public void setPassword(SecretResponse password) {
         this.password = password;
     }
 }
