@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service;
+package com.sequenceiq.cloudbreak.common.converter;
 
 import java.util.UUID;
 

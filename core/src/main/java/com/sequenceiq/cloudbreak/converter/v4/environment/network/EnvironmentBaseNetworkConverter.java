@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.environment.BaseNetwork;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 
 public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetworkConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentBaseNetworkConverter.class);

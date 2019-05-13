@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.request.ManagementPackV4
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
-import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 
 @Component
 public class ManagementPackRequestToManagementPackConverter extends AbstractConversionServiceAwareConverter<ManagementPackV4Request, ManagementPack> {

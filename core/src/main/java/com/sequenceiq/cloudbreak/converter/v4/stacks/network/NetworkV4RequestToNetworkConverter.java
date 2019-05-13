@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 
 @Component
 public class NetworkV4RequestToNetworkConverter extends AbstractConversionServiceAwareConverter<NetworkV4Request, Network> {
