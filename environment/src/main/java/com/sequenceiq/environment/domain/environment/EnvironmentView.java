@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.domain.environment;
 
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -8,23 +7,21 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.environment.BaseNetwork;
-import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.json.JsonToString;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.workspace.model.CompactView;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.environment.domain.environment.network.BaseNetwork;
+import com.sequenceiq.environment.impl.credential.Credential;
 
 @Entity
 @Table(name = "Environment")
@@ -56,9 +53,6 @@ public class EnvironmentView extends CompactView {
 
     @Column(columnDefinition = "boolean default false")
     private boolean archived;
-
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "environment")
-    private Set<DatalakeResources> datalakeResources = new HashSet<>();
 
     @OneToOne(mappedBy = "environment", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private BaseNetwork network;
@@ -135,14 +129,6 @@ public class EnvironmentView extends CompactView {
     @Override
     public WorkspaceResource getResource() {
         return WorkspaceResource.ENVIRONMENT;
-    }
-
-    public Set<DatalakeResources> getDatalakeResources() {
-        return datalakeResources;
-    }
-
-    public void setDatalakeResources(Set<DatalakeResources> datalakeResources) {
-        this.datalakeResources = datalakeResources;
     }
 
     @Override
