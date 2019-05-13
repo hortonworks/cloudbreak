@@ -6,13 +6,10 @@ import javax.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.flow.domain.FlowLog;
-
 @Transactional(Transactional.TxType.REQUIRED)
-public interface CloudbreakFlowLogRepository extends Repository<FlowLog, Long> {
+public interface CloudbreakFlowLogRepository extends ServiceFlowLogRepository {
 
     @Modifying
     @Query("DELETE FROM FlowLog fl WHERE fl.resourceId IN ( SELECT st.id FROM Stack st WHERE st.stackStatus.status = 'DELETE_COMPLETED')")

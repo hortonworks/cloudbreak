@@ -23,26 +23,26 @@ import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
+import com.sequenceiq.cloudbreak.common.metrics.MetricService;
+import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.cloudbreak.ha.domain.CloudbreakNode;
+import com.sequenceiq.cloudbreak.ha.service.CloudbreakNodeService;
+import com.sequenceiq.cloudbreak.ha.service.FlowDistributor;
+import com.sequenceiq.cloudbreak.service.flowlog.RestartFlowService;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.chain.FlowChains;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig;
-import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.flow.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.cloudbreak.service.CloudbreakFlowLogService;
-import com.sequenceiq.cloudbreak.service.Retry;
-import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
-import com.sequenceiq.cloudbreak.service.node.CloudbreakNodeService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
@@ -65,7 +65,7 @@ public class HeartbeatService {
     private FlowLogService flowLogService;
 
     @Inject
-    private CloudbreakFlowLogService cloudbreakFlowLogService;
+    private RestartFlowService restartFlowService;
 
     @Inject
     private Flow2Handler flow2Handler;
@@ -89,7 +89,7 @@ public class HeartbeatService {
     private ReactorFlowManager reactorFlowManager;
 
     @Inject
-    private CloudbreakMetricService metricService;
+    private MetricService metricService;
 
     @Inject
     @Qualifier("DefaultRetryService")
@@ -112,10 +112,10 @@ public class HeartbeatService {
                     } catch (RuntimeException e) {
                         LOGGER.error("Failed to update the heartbeat timestamp", e);
                         metricService.incrementMetricCounter(MetricType.HEARTBEAT_UPDATE_FAILED);
-                        throw new ActionWentFailException(e.getMessage());
+                        throw new Retry.ActionWentFailException(e.getMessage());
                     }
                 });
-            } catch (ActionWentFailException af) {
+            } catch (Retry.ActionWentFailException af) {
                 LOGGER.error("Failed to update the heartbeat timestamp 5 times for node {}: {}", nodeId, af.getMessage());
                 cancelEveryFlowWithoutDbUpdate();
             }
@@ -243,7 +243,7 @@ public class HeartbeatService {
     }
 
     private Set<Long> findTerminatingStacksForCurrentNode() {
-        return cloudbreakFlowLogService.findTerminatingStacksByCloudbreakNodeId(nodeConfig.getId());
+        return restartFlowService.findTerminatingStacksByCloudbreakNodeId(nodeConfig.getId());
     }
 
     /**

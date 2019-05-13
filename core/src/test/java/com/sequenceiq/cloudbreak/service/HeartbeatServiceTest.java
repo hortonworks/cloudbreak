@@ -49,19 +49,20 @@ import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig;
+import com.sequenceiq.cloudbreak.ha.domain.CloudbreakNode;
+import com.sequenceiq.cloudbreak.ha.service.CloudbreakNodeService;
+import com.sequenceiq.cloudbreak.ha.service.FlowDistributor;
+import com.sequenceiq.cloudbreak.service.flowlog.RestartFlowService;
+import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowRegister;
-import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig;
-import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
 import com.sequenceiq.flow.ha.NodeConfig;
-import com.sequenceiq.cloudbreak.service.ha.FlowDistributor;
-import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
-import com.sequenceiq.cloudbreak.service.node.CloudbreakNodeService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HeartbeatServiceTest {
@@ -106,6 +107,9 @@ public class HeartbeatServiceTest {
 
     @Mock
     private TransactionService transactionService;
+
+    @Mock
+    private RestartFlowService restartFlowService;
 
     @Captor
     private ArgumentCaptor<String> stringCaptor;

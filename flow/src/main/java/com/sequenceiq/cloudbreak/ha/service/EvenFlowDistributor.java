@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.ha;
+package com.sequenceiq.cloudbreak.ha.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
+import com.sequenceiq.cloudbreak.ha.domain.CloudbreakNode;
 
 @Service
 public class EvenFlowDistributor implements FlowDistributor {

@@ -14,7 +14,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
+import com.sequenceiq.cloudbreak.ha.domain.CloudbreakNode;
+import com.sequenceiq.cloudbreak.ha.service.EvenFlowDistributor;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
 

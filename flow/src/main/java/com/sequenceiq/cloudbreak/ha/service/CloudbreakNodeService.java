@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.node;
+package com.sequenceiq.cloudbreak.ha.service;
 
 import java.util.Optional;
 
@@ -6,8 +6,8 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
-import com.sequenceiq.cloudbreak.repository.CloudbreakNodeRepository;
+import com.sequenceiq.cloudbreak.ha.domain.CloudbreakNode;
+import com.sequenceiq.cloudbreak.ha.repository.CloudbreakNodeRepository;
 
 @Service
 public class CloudbreakNodeService {

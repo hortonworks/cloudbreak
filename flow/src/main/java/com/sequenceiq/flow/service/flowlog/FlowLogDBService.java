@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.repository.ServiceFlowLogRepository;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
@@ -52,6 +53,9 @@ public class FlowLogDBService implements FlowLogService {
 
     @Inject
     private TransactionService transactionService;
+
+    @Inject
+    private ServiceFlowLogRepository serviceFlowLogRepository;
 
     public FlowLog save(FlowParameters flowParameters, String flowChanId, String key, Payload payload, Map<Object, Object> variables, Class<?> flowType,
             FlowState currentState) {
@@ -177,4 +181,19 @@ public class FlowLogDBService implements FlowLogService {
         return flowLogRepository.findAllByResourceIdOrderByCreatedDesc(id);
     }
 
+    public void purgeTerminatedStacksFlowLogs() throws TransactionService.TransactionExecutionException {
+        transactionService.required(() -> {
+            LOGGER.debug("Cleaning deleted stack's flowlog");
+            int purgedTerminatedStackLogs = serviceFlowLogRepository.purgeTerminatedStackLogs();
+            LOGGER.debug("Deleted flowlog count: {}", purgedTerminatedStackLogs);
+            LOGGER.debug("Cleaning orphan flowchainlogs");
+            int purgedOrphanFLowChainLogs = flowChainLogService.purgeOrphanFLowChainLogs();
+            LOGGER.debug("Deleted flowchainlog count: {}", purgedOrphanFLowChainLogs);
+            return null;
+        });
+    }
+
+    public Set<Long> findTerminatingStacksByCloudbreakNodeId(String id) {
+        return serviceFlowLogRepository.findTerminatingStacksByCloudbreakNodeId(id);
+    }
 }

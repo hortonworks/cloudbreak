@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.domain;
+package com.sequenceiq.cloudbreak.ha.domain;
 
 import java.util.Objects;
 
