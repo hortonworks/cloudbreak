@@ -18,12 +18,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParamet
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.RootVolumeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
+import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.entity.json.Json;
 import com.sequenceiq.freeipa.service.DefaultRootVolumeSizeProvider;
-import com.sequenceiq.freeipa.service.MissingResourceNameGenerator;
 
 @Component
 public class InstanceTemplateV4RequestToTemplateConverter implements Converter<InstanceTemplateV4Request, Template> {
