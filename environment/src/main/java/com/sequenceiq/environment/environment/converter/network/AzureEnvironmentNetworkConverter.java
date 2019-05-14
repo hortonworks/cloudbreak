@@ -26,12 +26,12 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
     @Override
     EnvironmentNetworkV1Response setProviderSpecificFields(EnvironmentNetworkV1Response result, BaseNetwork network) {
         AzureNetwork azureNetwork = (AzureNetwork) network;
-        EnvironmentNetworkAzureV1Params azureV4Params = new EnvironmentNetworkAzureV1Params();
-        azureV4Params.setNetworkId(azureNetwork.getNetworkId());
-        azureV4Params.setResourceGroupName(azureNetwork.getResourceGroupName());
-        azureV4Params.setNoPublicIp(azureNetwork.getNoPublicIp());
-        azureV4Params.setNoFirewallRules(azureNetwork.getNoFirewallRules());
-        result.setAzure(azureV4Params);
+        EnvironmentNetworkAzureV1Params azureV1Params = new EnvironmentNetworkAzureV1Params();
+        azureV1Params.setNetworkId(azureNetwork.getNetworkId());
+        azureV1Params.setResourceGroupName(azureNetwork.getResourceGroupName());
+        azureV1Params.setNoPublicIp(azureNetwork.getNoPublicIp());
+        azureV1Params.setNoFirewallRules(azureNetwork.getNoFirewallRules());
+        result.setAzure(azureV1Params);
         return result;
     }
 
