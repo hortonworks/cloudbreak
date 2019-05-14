@@ -13,11 +13,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
+import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.freeipa.converter.instance.securityrule.SecurityRuleV4RequestToSecurityRuleConverter;
 import com.sequenceiq.freeipa.entity.SecurityGroup;
 import com.sequenceiq.freeipa.entity.SecurityRule;
-import com.sequenceiq.freeipa.service.MissingResourceNameGenerator;
 
 @Component
 public class SecurityGroupV4RequestToSecurityGroupConverter implements Converter<SecurityGroupV4Request, SecurityGroup> {
