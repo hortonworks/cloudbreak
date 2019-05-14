@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.credential;
+package com.sequenceiq.environment.credential.definition;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,9 +11,9 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.service.stack.resource.definition.MissingParameterException;
-import com.sequenceiq.cloudbreak.service.stack.resource.definition.ResourceDefinitionService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.environment.definition.MissingParameterException;
+import com.sequenceiq.environment.definition.ResourceDefinitionService;
 
 @Service
 public class CredentialDefinitionService {
