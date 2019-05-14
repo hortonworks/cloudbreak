@@ -19,11 +19,13 @@ import com.sequenceiq.environment.api.proxy.model.response.ProxyV1Responses;
 import com.sequenceiq.environment.proxy.converter.ProxyConfigToProxyV1RequestConverter;
 import com.sequenceiq.environment.proxy.converter.ProxyConfigToProxyV1ResponseConverter;
 import com.sequenceiq.environment.proxy.converter.ProxyV1RequestToProxyConfigConverter;
+import com.sequenceiq.notification.NotificationController;
+import com.sequenceiq.notification.ResourceEvent;
 
 @Controller
 @Transactional(TxType.NEVER)
 @WorkspaceEntityType(ProxyConfig.class)
-public class ProxyV1Controller implements ProxyV1Endpoint {
+public class ProxyV1Controller extends NotificationController implements ProxyV1Endpoint {
 
     @Inject
     private ProxyConfigService proxyConfigService;
@@ -60,7 +62,7 @@ public class ProxyV1Controller implements ProxyV1Endpoint {
         Long workspaceId = workspaceService.getDefaultWorkspace().getId();
         ProxyConfig config = proxyV1RequestToProxyConfigConverter.convert(request);
         config = proxyConfigService.createInEnvironment(config, request.getEnvironments(), workspaceId);
-//        notify(ResourceEvent.PROXY_CONFIG_CREATED);
+        notify(ResourceEvent.PROXY_CONFIG_CREATED);
         return proxyConfigToProxyV1ResponseConverter.convert(config);
     }
 
@@ -68,7 +70,7 @@ public class ProxyV1Controller implements ProxyV1Endpoint {
     public ProxyV1Response delete(String name) {
         Long workspaceId = workspaceService.getDefaultWorkspace().getId();
         ProxyConfig deleted = proxyConfigService.deleteByNameFromWorkspace(name, workspaceId);
-//        notify(ResourceEvent.PROXY_CONFIG_DELETED);
+        notify(ResourceEvent.PROXY_CONFIG_DELETED);
         return proxyConfigToProxyV1ResponseConverter.convert(deleted);
     }
 
@@ -76,7 +78,7 @@ public class ProxyV1Controller implements ProxyV1Endpoint {
     public ProxyV1Responses deleteMultiple(Set<String> names) {
         Long workspaceId = workspaceService.getDefaultWorkspace().getId();
         Set<ProxyConfig> deleted = proxyConfigService.deleteMultipleByNameFromWorkspace(names, workspaceId);
-//        notify(ResourceEvent.PROXY_CONFIG_DELETED);
+        notify(ResourceEvent.PROXY_CONFIG_DELETED);
         Set<ProxyV1Response> responses = new HashSet<>(proxyConfigToProxyV1ResponseConverter.convert(deleted));
         return new ProxyV1Responses(responses);
     }
