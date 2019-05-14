@@ -128,7 +128,11 @@ public class GrpcUmsClient {
     }
 
     public boolean isUmsUsable(String crn) {
-        return umsConfig.isConfigured() && Crn.isCrn(crn);
+        return isUmsConfigured() && Crn.isCrn(crn);
+    }
+
+    public boolean isUmsConfigured() {
+        return umsConfig.isConfigured();
     }
 
     private ManagedChannelWrapper makeWrapper() {

@@ -18,14 +18,12 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    @ConditionalOnProperty("altus.ums.host")
-    public AuthenticationService umsAuthenticationService(GrpcUmsClient grpcUmsClient) {
-        return new UmsAuthenticationService(grpcUmsClient);
-    }
-
-    @Bean
     @ConditionalOnMissingBean
-    public AuthenticationService caasAuthenticationService(CaasClient caasClient) {
-        return new CaasAuthenticationService(caasClient);
+    public AuthenticationService authenticationService(GrpcUmsClient grpcUmsClient, CaasClient caasClient) {
+        if (grpcUmsClient.isUmsConfigured()) {
+            return new UmsAuthenticationService(grpcUmsClient);
+        } else {
+            return new CaasAuthenticationService(caasClient);
+        }
     }
 }
