@@ -224,7 +224,7 @@ public class AwsLaunchTest extends AwsComponentTest {
         return new DescribeStacksResult().withStacks(
                 new Stack().withOutputs(
                         new Output().withOutputKey("CreatedVpc").withOutputValue("vpc-id"),
-                        new Output().withOutputKey("CreatedSubnet").withOutputValue("subnet-id"),
+                        new Output().withOutputKey("CloudSubnet").withOutputValue("subnet-id"),
                         new Output().withOutputKey("EIPAllocationIDmaster1").withOutputValue("eipalloc-id")
                 ));
     }

@@ -43,7 +43,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
 
     private static final String CREATED_VPC = "CreatedVpc";
 
-    private static final String CREATED_SUBNET = "CreatedSubnet";
+    private static final String CREATED_SUBNET = "CloudSubnet";
 
     @Inject
     private Configuration freemarkerConfiguration;

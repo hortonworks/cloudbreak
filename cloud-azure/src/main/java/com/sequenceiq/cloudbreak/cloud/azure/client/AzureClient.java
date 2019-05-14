@@ -616,6 +616,16 @@ public class AzureClient {
         return resources;
     }
 
+    public Network createNetwork(String networkName, com.sequenceiq.cloudbreak.cloud.model.Region region, String resourceGroupName,
+            String networkCidr, Map<String, String> subnetCidrs) {
+        return azure.networks().define(networkName)
+                    .withRegion(region.value())
+                    .withNewResourceGroup(resourceGroupName)
+                    .withAddressSpace(networkCidr)
+                    .withSubnets(subnetCidrs)
+                    .create();
+    }
+
     private Set<VirtualMachineSize> getAllElement(Collection<VirtualMachineSize> virtualMachineSizes, Set<VirtualMachineSize> resultList) {
         resultList.addAll(virtualMachineSizes);
         return resultList;

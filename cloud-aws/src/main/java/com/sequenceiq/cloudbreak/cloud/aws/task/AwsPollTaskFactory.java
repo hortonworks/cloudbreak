@@ -22,6 +22,11 @@ public class AwsPollTaskFactory {
     @Inject
     private ApplicationContext applicationContext;
 
+    public PollTask<Boolean> newAwsCreateNetworkStatusCheckerTask(AmazonCloudFormationClient cfClient, StackStatus successStatus, StackStatus errorStatus,
+            List<StackStatus> stackErrorStatuses, String cloudFormationStackName) {
+        return createPollTask(AwsCreateNetworkStatusCheckerTask.NAME, cfClient, successStatus, errorStatus, stackErrorStatuses, cloudFormationStackName);
+    }
+
     public PollTask<Boolean> newAwsCreateStackStatusCheckerTask(AuthenticatedContext authenticatedContext, AmazonCloudFormationClient cfClient,
             AmazonAutoScalingClient asClient, StackStatus successStatus, StackStatus errorStatus, List<StackStatus> stackErrorStatuses,
             String cloudFormationStackName) {

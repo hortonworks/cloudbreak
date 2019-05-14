@@ -1,0 +1,89 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "subnet0Prefix": {
+            "type": "string",
+            "defaultValue": "2.2.2.2/24"
+        },
+        "subnet1Prefix": {
+            "type": "string",
+            "defaultValue": "3.3.3.3/24"
+        },
+        "virtualNetworkNamePrefix": {
+            "type": "string",
+            "defaultValue": "1.1.1.1/8"
+        },
+        "virtualNetworkName": {
+            "type": "string",
+            "defaultValue": "testEnv"
+        },
+        "region": {
+            "type": "string",
+            "defaultValue": "US-WEST"
+        },
+        "resourceGroupName": {
+            "type": "string",
+            "defaultValue": "testEnv"
+        }
+    },
+    "variables": {
+        "subnetID0": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName')), '/subnets/subnet0')]",
+        "subnetID1": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName')), '/subnets/subnet1')]",
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2015-05-01-preview",
+            "type": "Microsoft.Network/virtualNetworks",
+            "tags": {
+                "cb-resource-type": "NETWORK"
+            },
+            "name": "[parameters('virtualNetworkName')]",
+            "location": "[parameters('region')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('virtualNetworkNamePrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "subnet0",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnet0Prefix')]"
+                        }
+                    },
+                    {
+                        "name": "subnet1",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnet1Prefix')]"
+                        }
+                    }
+                ]
+            }
+        }
+    ],
+    "outputs": {
+        "subnetId0": {
+            "type": "string",
+            "value": "[variables('subnetID0')]"
+        },
+        "subnetCidr0": {
+            "type": "string",
+            "value": "2.2.2.2/24"
+        },
+        "subnetId1": {
+            "type": "string",
+            "value": "[variables('subnetID1')]"
+        },
+        "subnetCidr1": {
+            "type": "string",
+            "value": "3.3.3.3/24"
+        },
+        "networkId": {
+            "type": "string",
+            "value": "[variables('vnetID')]"
+        }
+    }
+}
