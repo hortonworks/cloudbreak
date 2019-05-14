@@ -20,6 +20,7 @@ repositories {
 
 dependencies {
   compile project(':common')
+  compile project(':secret-engine')
   compile project(':environment-api')
   compile project(':workspace-authorization')
   compile project(':flow')

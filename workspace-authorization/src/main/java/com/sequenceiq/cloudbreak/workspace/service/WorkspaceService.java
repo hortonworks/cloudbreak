@@ -1,16 +1,11 @@
 package com.sequenceiq.cloudbreak.workspace.service;
 
-import static com.sequenceiq.cloudbreak.workspace.model.WorkspaceStatus.DELETED;
-
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotFoundException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -29,7 +24,6 @@ import com.sequenceiq.cloudbreak.user.UserService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceRepository;
-import com.sequenceiq.cloudbreak.workspace.resource.ResourceAction;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceRole;
 
 @Service
@@ -92,8 +86,15 @@ public class WorkspaceService {
     }
 
     public Workspace getDefaultWorkspace() {
-        CloudbreakUser user = authenticatedUserService.getCbUser();
+        CloudbreakUser cbUser = authenticatedUserService.getCbUser();
+        User user = userService.getOrCreate(cbUser);
         return workspaceRepository.getByName(getAccountWorkspaceName(user), user.getTenant());
+    }
+
+    public Long getDefaultWorkspaceId() {
+        CloudbreakUser cbUser = authenticatedUserService.getCbUser();
+        User user = userService.getOrCreate(cbUser);
+        return workspaceRepository.getByName(getAccountWorkspaceName(user), user.getTenant()).getId();
     }
 
     public Workspace getDefaultWorkspaceForUser(User user) {
@@ -123,7 +124,7 @@ public class WorkspaceService {
     }
 
     public Workspace getByIdForCurrentUser(Long id) {
-        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        CloudbreakUser cloudbreakUser = authenticatedUserService.getCbUser();
         User user = userService.getOrCreate(cloudbreakUser);
         return get(id, user);
     }
@@ -132,4 +133,8 @@ public class WorkspaceService {
         return getDefaultWorkspaceForUser(user);
     }
 
+    private String getAccountWorkspaceName(User user) {
+        return Crn.isCrn(user.getUserCrn()) ? Crn.fromString(user.getUserCrn()).getAccountId()
+                : user.getTenant().getName();
+    }
 }

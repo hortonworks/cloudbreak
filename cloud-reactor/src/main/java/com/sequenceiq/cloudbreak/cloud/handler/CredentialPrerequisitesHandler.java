@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesV4Response;
+import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialPrerequisitesRequest;
@@ -36,7 +36,7 @@ public class CredentialPrerequisitesHandler implements CloudPlatformEventHandler
         try {
             LOGGER.info("Gathering credential prerequisites for platform: '{}'", cloudContext.getPlatform());
             CloudConnector<?> connector = cloudPlatformConnectors.getDefault(cloudContext.getPlatform());
-            CredentialPrerequisitesV4Response result = connector.credentials()
+            CredentialPrerequisitesResponse result = connector.credentials()
                     .getPrerequisites(cloudContext, request.getExternalId(), request.getDeploymentAddress());
             CredentialPrerequisitesResult credentialPrerequisitesResult = new CredentialPrerequisitesResult(request, result);
             request.getResult().onNext(credentialPrerequisitesResult);

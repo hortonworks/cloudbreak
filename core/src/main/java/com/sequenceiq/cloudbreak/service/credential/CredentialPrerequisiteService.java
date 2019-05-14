@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.UserPreferences;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesV4Response;
+import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialPrerequisitesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialPrerequisitesResult;
@@ -67,7 +67,7 @@ public class CredentialPrerequisiteService {
     @Inject
     private DatalakeConfigApiConnector datalakeConfigApiConnector;
 
-    public CredentialPrerequisitesV4Response getPrerequisites(User user, Workspace workspace, String cloudPlatform, String deploymentAddress) {
+    public CredentialPrerequisitesResponse getPrerequisites(User user, Workspace workspace, String cloudPlatform, String deploymentAddress) {
         CloudContext cloudContext = new CloudContext(null, null, cloudPlatform, user.getUserId(), workspace.getId());
         UserPreferences userPreferences = userPreferencesService.getWithExternalId(user);
         CredentialPrerequisitesRequest request = new CredentialPrerequisitesRequest(cloudContext, userPreferences.getExternalId(), deploymentAddress);
@@ -81,7 +81,7 @@ public class CredentialPrerequisiteService {
                 LOGGER.info(message, res.getErrorDetails());
                 throw new BadRequestException(message + res.getErrorDetails(), res.getErrorDetails());
             }
-            return res.getCredentialPrerequisitesV4Response();
+            return res.getCredentialPrerequisitesResponse();
         } catch (InterruptedException e) {
             LOGGER.error(message, e);
             throw new OperationException(e);

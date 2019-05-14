@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.authorization;
 
 import static java.lang.String.format;
+import static org.reflections.ReflectionUtils.getAllSuperTypes;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
@@ -126,12 +127,8 @@ public class PermissionCheckingUtils {
     }
 
     Optional<Class<?>> getWorkspaceAwareRepositoryClass(ProceedingJoinPoint proceedingJoinPoint) {
-        return Arrays.stream(proceedingJoinPoint.getTarget().getClass().getInterfaces())
-                .filter(i -> {
-                    List<Class<?>> interfaces = Arrays.asList(i.getInterfaces());
-                    return interfaces.contains(WorkspaceResourceRepository.class) || interfaces.contains(EnvironmentResourceRepository.class);
-                })
-                .findFirst();
+        Set<Class<?>> allSuperTypes = getAllSuperTypes(proceedingJoinPoint.getTarget().getClass(), i -> i.equals(WorkspaceResourceRepository.class));
+        return allSuperTypes.stream().findFirst();
     }
 
     Optional<Annotation> getClassAnnotation(Class<?> repositoryClass) {

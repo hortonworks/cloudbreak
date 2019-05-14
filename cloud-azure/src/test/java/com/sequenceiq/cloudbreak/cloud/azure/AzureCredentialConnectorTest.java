@@ -21,7 +21,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesV4Response;
+import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.cloud.azure.client.CBRefreshTokenClientProvider;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
@@ -69,7 +69,7 @@ public class AzureCredentialConnectorTest {
         String expected = "someAppCreationCommandValue";
         when(appCreationCommand.generate(anyString())).thenReturn(expected);
 
-        CredentialPrerequisitesV4Response result = underTest.getPrerequisites(TEST_CLOUD_CONTEXT, "2", DEPLOYMENT_ADDRESS);
+        CredentialPrerequisitesResponse result = underTest.getPrerequisites(TEST_CLOUD_CONTEXT, "2", DEPLOYMENT_ADDRESS);
 
         assertEquals(PLATFORM, result.getCloudPlatform());
         assertEquals(expected, new String(Base64.decodeBase64(result.getAzure().getAppCreationCommand())));
@@ -80,7 +80,7 @@ public class AzureCredentialConnectorTest {
         String expected = "someAppCreationCommandValue";
         when(appCreationCommand.generate(anyString())).thenReturn(expected);
 
-        CredentialPrerequisitesV4Response result = underTest.getPrerequisites(TEST_CLOUD_CONTEXT, "2", DEPLOYMENT_ADDRESS);
+        CredentialPrerequisitesResponse result = underTest.getPrerequisites(TEST_CLOUD_CONTEXT, "2", DEPLOYMENT_ADDRESS);
 
         assertNull(result.getAws());
     }
