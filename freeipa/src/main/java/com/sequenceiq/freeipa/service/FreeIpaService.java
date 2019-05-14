@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.freeipa.api.model.freeipa.FreeIpaRequest;
+import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.converter.FreeIpaRequestToFreeIpaConverter;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -24,11 +25,11 @@ public class FreeIpaService {
     }
 
     public FreeIpa findByStack(Stack stack) {
-        return repository.getByStack(stack);
+        return repository.getByStack(stack).orElseThrow(() -> new NotFoundException(String.format("FreeIpa not found for Stack [%s]", stack.getId())));
     }
 
     public FreeIpa findByStackId(Long stackId) {
-        return repository.getByStackId(stackId);
+        return repository.getByStackId(stackId).orElseThrow(() -> new NotFoundException(String.format("FreeIpa not found for Stack [%s]", stackId)));
     }
 
     public FreeIpa create(Stack stack, FreeIpaRequest request) {
