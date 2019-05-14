@@ -33,7 +33,7 @@ public class UploadRepairSingleMasterRecipesHandler implements ReactorEventHandl
         UploadRepairSingleMasterRecipesRequest request = event.getData();
         UploadRepairSingleMasterRecipesResult result;
         try {
-            clusterUpscaleService.uploadRecipesOnNewHosts(request.getStackId(), request.getHostGroupName());
+            clusterUpscaleService.uploadRecipesOnNewHosts(request.getResourceId(), request.getHostGroupName());
             result = new UploadRepairSingleMasterRecipesResult(request);
         } catch (Exception e) {
             result = new UploadRepairSingleMasterRecipesResult(e.getMessage(), e, request);

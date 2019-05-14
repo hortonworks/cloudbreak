@@ -31,7 +31,7 @@ public class StartClusterHandler implements ReactorEventHandler<StartClusterRequ
 
     @Override
     public void accept(Event<StartClusterRequest> event) {
-        Long stackId = event.getData().getStackId();
+        Long stackId = event.getData().getResourceId();
         Selectable response;
         try {
             clusterBuilderService.startCluster(stackId);

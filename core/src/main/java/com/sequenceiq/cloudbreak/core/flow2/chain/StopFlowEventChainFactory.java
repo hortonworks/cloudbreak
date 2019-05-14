@@ -24,9 +24,9 @@ public class StopFlowEventChainFactory implements FlowEventChainFactory<StackEve
     @Override
     public Queue<Selectable> createFlowTriggerEventQueue(StackEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
-        flowEventChain.add(new StackEvent(CLUSTER_STOP_EVENT.event(), event.getStackId(), event.accepted()));
-        flowEventChain.add(new StackEvent(STACK_STOP_EVENT.event(), event.getStackId()));
-        flowEventChain.add(new StackSyncTriggerEvent(STACK_SYNC_EVENT.event(), event.getStackId(), true, event.accepted()));
+        flowEventChain.add(new StackEvent(CLUSTER_STOP_EVENT.event(), event.getResourceId(), event.accepted()));
+        flowEventChain.add(new StackEvent(STACK_STOP_EVENT.event(), event.getResourceId()));
+        flowEventChain.add(new StackSyncTriggerEvent(STACK_SYNC_EVENT.event(), event.getResourceId(), true, event.accepted()));
         return flowEventChain;
     }
 }

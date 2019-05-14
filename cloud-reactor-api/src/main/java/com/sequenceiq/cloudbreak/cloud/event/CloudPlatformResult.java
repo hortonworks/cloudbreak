@@ -70,7 +70,7 @@ public class CloudPlatformResult<R extends CloudPlatformRequest<?>> implements P
     }
 
     @Override
-    public Long getStackId() {
+    public Long getResourceId() {
         return request.getCloudContext().getId();
     }
 }

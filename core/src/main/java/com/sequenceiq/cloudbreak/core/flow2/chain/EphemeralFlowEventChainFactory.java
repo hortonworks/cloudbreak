@@ -35,7 +35,7 @@ public class EphemeralFlowEventChainFactory implements FlowEventChainFactory<Eph
 
     @Override
     public Queue<Selectable> createFlowTriggerEventQueue(EphemeralClustersUpgradeTriggerEvent event) {
-        Set<Stack> ephemeralStacks = stackService.findClustersConnectedToDatalakeByDatalakeStackId(event.getStackId());
+        Set<Stack> ephemeralStacks = stackService.findClustersConnectedToDatalakeByDatalakeStackId(event.getResourceId());
         for (Stack stack : ephemeralStacks) {
             try {
                 flowManager.triggerEphemeralUpdate(stack.getId());

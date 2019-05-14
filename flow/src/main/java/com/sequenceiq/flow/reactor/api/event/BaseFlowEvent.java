@@ -23,7 +23,7 @@ public class BaseFlowEvent implements Selectable, Acceptable {
     }
 
     @Override
-    public Long getStackId() {
+    public Long getResourceId() {
         return resourceId;
     }
 

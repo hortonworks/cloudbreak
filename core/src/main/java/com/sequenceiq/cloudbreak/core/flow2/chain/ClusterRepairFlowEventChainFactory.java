@@ -104,7 +104,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
             addFullUpscale(event, flowChainTriggers, hostGroup.getName(), hostNames, true, isKerberosSecured(stack),
                     clusterService.isSingleNode(stack));
             // we need to update all ephemeral clusters that are connected to a datalake
-            if (!stackService.findClustersConnectedToDatalakeByDatalakeStackId(event.getStackId()).isEmpty()) {
+            if (!stackService.findClustersConnectedToDatalakeByDatalakeStackId(event.getResourceId()).isEmpty()) {
                 upgradeEphemeralClusters(event, flowChainTriggers);
             }
         }
@@ -124,7 +124,8 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
             addFullUpscale(event, flowChainTriggers, hostGroup.getName(), failedHostNames, false, false,
                     clusterService.isSingleNode(stack));
             // we need to update all ephemeral clusters that are connected to a datalake
-            if (gatewayInstanceGroup && !stackService.findClustersConnectedToDatalakeByDatalakeStackId(event.getStackId()).isEmpty() && primaryGatewayInstance) {
+            if (gatewayInstanceGroup
+                    && !stackService.findClustersConnectedToDatalakeByDatalakeStackId(event.getResourceId()).isEmpty() && primaryGatewayInstance) {
                 upgradeEphemeralClusters(event, flowChainTriggers);
             }
         }
@@ -133,30 +134,30 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     private void addStackDownscale(ClusterRepairTriggerEvent event, Queue<Selectable> flowChainTriggers, InstanceGroup instanceGroup, Stack stack,
             Set<String> hostNames) {
         Set<Long> privateIdsForHostNames = stackService.getPrivateIdsForHostNames(stack.getInstanceMetaDataAsList(), hostNames);
-        flowChainTriggers.add(new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getStackId(), instanceGroup.getGroupName(),
+        flowChainTriggers.add(new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), instanceGroup.getGroupName(),
                 privateIdsForHostNames, event.accepted()));
     }
 
     private void addFullDownscale(ClusterRepairTriggerEvent event, Stack stack, Queue<Selectable> flowChainTriggers, String hostGroupName,
             List<String> hostNames) {
         Set<Long> privateIdsForHostNames = stackService.getPrivateIdsForHostNames(stack.getInstanceMetaDataAsList(), hostNames);
-        flowChainTriggers.add(new ClusterAndStackDownscaleTriggerEvent(FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT, event.getStackId(),
+        flowChainTriggers.add(new ClusterAndStackDownscaleTriggerEvent(FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT, event.getResourceId(),
                 hostGroupName, Sets.newHashSet(privateIdsForHostNames), ScalingType.DOWNSCALE_TOGETHER, event.accepted(), new ClusterDownscaleDetails()));
     }
 
     private void addChangePrimaryGateway(ClusterRepairTriggerEvent event, Queue<Selectable> flowChainTriggers) {
         flowChainTriggers.add(new ChangePrimaryGatewayTriggerEvent(ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_TRIGGER_EVENT.event(),
-                event.getStackId(), event.accepted()));
+                event.getResourceId(), event.accepted()));
     }
 
     private void upgradeEphemeralClusters(ClusterRepairTriggerEvent event, Queue<Selectable> flowChainTriggers) {
         flowChainTriggers.add(new EphemeralClustersUpgradeTriggerEvent(FlowChainTriggers.EPHEMERAL_CLUSTERS_UPDATE_TRIGGER_EVENT,
-                event.getStackId(), event.accepted()));
+                event.getResourceId(), event.accepted()));
     }
 
     private void addFullUpscale(ClusterRepairTriggerEvent event, Queue<Selectable> flowChainTriggers, String hostGroupName, List<String> hostNames,
             boolean singlePrimaryGateway, boolean kerberosSecured, boolean singleNodeCluster) {
-        flowChainTriggers.add(new StackAndClusterUpscaleTriggerEvent(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT, event.getStackId(), hostGroupName,
+        flowChainTriggers.add(new StackAndClusterUpscaleTriggerEvent(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT, event.getResourceId(), hostGroupName,
                 hostNames.size(), ScalingType.UPSCALE_TOGETHER, Sets.newHashSet(hostNames), singlePrimaryGateway,
                 kerberosSecured, event.accepted(), singleNodeCluster));
     }

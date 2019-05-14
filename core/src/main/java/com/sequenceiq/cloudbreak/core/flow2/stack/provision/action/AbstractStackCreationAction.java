@@ -42,7 +42,7 @@ public abstract class AbstractStackCreationAction<P extends Payload> extends Abs
 
     @Override
     protected StackContext createFlowContext(String flowId, StateContext<StackCreationState, StackCreationEvent> stateContext, P payload) {
-        Stack stack = stackService.getByIdWithListsInTransaction(payload.getStackId());
+        Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
@@ -54,6 +54,6 @@ public abstract class AbstractStackCreationAction<P extends Payload> extends Abs
 
     @Override
     protected Object getFailurePayload(P payload, Optional<StackContext> flowContext, Exception ex) {
-        return new StackFailureEvent(payload.getStackId(), ex);
+        return new StackFailureEvent(payload.getResourceId(), ex);
     }
 }

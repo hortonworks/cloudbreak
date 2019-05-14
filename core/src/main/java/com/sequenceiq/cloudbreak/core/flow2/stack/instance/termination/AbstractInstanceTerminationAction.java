@@ -61,7 +61,7 @@ abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
     @Override
     protected InstanceTerminationContext createFlowContext(String flowId, StateContext<InstanceTerminationState, InstanceTerminationEvent> stateContext,
             P payload) {
-        Stack stack = stackService.getByIdWithListsInTransaction(payload.getStackId());
+        Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
@@ -84,7 +84,7 @@ abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
 
     @Override
     protected Object getFailurePayload(P payload, Optional<InstanceTerminationContext> flowContext, Exception ex) {
-        return new StackFailureEvent(payload.getStackId(), ex);
+        return new StackFailureEvent(payload.getResourceId(), ex);
     }
 
 }

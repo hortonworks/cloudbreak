@@ -33,10 +33,10 @@ public class BootstrapMachineHandler implements ReactorEventHandler<BootstrapMac
         BootstrapMachinesRequest request = event.getData();
         Selectable response;
         try {
-            clusterBootstrapper.bootstrapMachines(request.getStackId());
-            response = new BootstrapMachinesSuccess(request.getStackId());
+            clusterBootstrapper.bootstrapMachines(request.getResourceId());
+            response = new BootstrapMachinesSuccess(request.getResourceId());
         } catch (Exception e) {
-            response = new BootstrapMachinesFailed(request.getStackId(), e);
+            response = new BootstrapMachinesFailed(request.getResourceId(), e);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }

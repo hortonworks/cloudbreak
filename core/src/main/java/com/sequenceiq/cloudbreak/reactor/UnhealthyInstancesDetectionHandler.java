@@ -49,7 +49,7 @@ public class UnhealthyInstancesDetectionHandler implements ReactorEventHandler<U
         UnhealthyInstancesDetectionRequest request = event.getData();
         UnhealthyInstancesDetectionResult result;
 
-        Long stackId = request.getStackId();
+        Long stackId = request.getResourceId();
         Stack stack = stackService.getByIdWithTransaction(stackId);
         try {
             Set<InstanceMetaData> candidateUnhealthyInstances = unhealthyInstanceSelector.selectCandidateUnhealthyInstances(stack.getId());

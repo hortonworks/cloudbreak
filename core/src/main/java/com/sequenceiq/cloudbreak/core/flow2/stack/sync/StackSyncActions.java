@@ -125,7 +125,7 @@ public class StackSyncActions {
         @Override
         protected StackSyncContext createFlowContext(String flowId, StateContext<StackSyncState, StackSyncEvent> stateContext, P payload) {
             Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
-            Long stackId = payload.getStackId();
+            Long stackId = payload.getResourceId();
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             MDCBuilder.buildMdcContext(stack);
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
@@ -138,7 +138,7 @@ public class StackSyncActions {
 
         @Override
         protected Object getFailurePayload(P payload, Optional<StackSyncContext> flowContext, Exception ex) {
-            return new StackFailureEvent(payload.getStackId(), ex);
+            return new StackFailureEvent(payload.getResourceId(), ex);
         }
 
         private Boolean isStatusUpdateEnabled(Map<Object, Object> variables) {

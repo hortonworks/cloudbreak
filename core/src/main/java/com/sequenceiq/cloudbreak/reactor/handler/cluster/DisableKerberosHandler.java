@@ -35,7 +35,7 @@ public class DisableKerberosHandler implements ReactorEventHandler<DisableKerber
     public void accept(Event<DisableKerberosRequest> event) {
         DisableKerberosResult result;
         try {
-            clusterApiConnectors.getConnector(stackService.getByIdWithListsInTransaction(event.getData().getStackId()))
+            clusterApiConnectors.getConnector(stackService.getByIdWithListsInTransaction(event.getData().getResourceId()))
                     .clusterSecurityService().disableSecurity();
             result = new DisableKerberosResult(event.getData());
         } catch (Exception e) {

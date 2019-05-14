@@ -36,7 +36,7 @@ public class AmbariGatherInstalledComponentsHandler implements ReactorEventHandl
     @Override
     public void accept(Event<AmbariGatherInstalledComponentsRequest> event) {
         AmbariGatherInstalledComponentsRequest request = event.getData();
-        Long stackId = request.getStackId();
+        Long stackId = request.getResourceId();
         AmbariGatherInstalledComponentsResult result;
         try {
             Map<String, String> foundInstalledComponents = clusterUpscaleService.gatherInstalledComponents(stackId, request.getHostName());

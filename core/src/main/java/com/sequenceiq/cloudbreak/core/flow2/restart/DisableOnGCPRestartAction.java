@@ -25,10 +25,10 @@ public class DisableOnGCPRestartAction extends FillInMemoryStateStoreRestartActi
     @Override
     public void restart(String flowId, String flowChainId, String event, Object payload) {
         Payload stackPayload = (Payload) payload;
-        Stack stack = stackService.getByIdWithTransaction(stackPayload.getStackId());
+        Stack stack = stackService.getByIdWithTransaction(stackPayload.getResourceId());
         if (stack.getPlatformVariant().equals(GCP)) {
             try {
-                flowLogService.terminate(stackPayload.getStackId(), flowId);
+                flowLogService.terminate(stackPayload.getResourceId(), flowId);
             } catch (TransactionExecutionException e) {
                 throw new TransactionRuntimeExecutionException(e);
             }

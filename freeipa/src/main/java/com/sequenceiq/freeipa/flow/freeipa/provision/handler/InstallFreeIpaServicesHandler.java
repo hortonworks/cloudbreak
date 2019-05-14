@@ -34,10 +34,10 @@ public class InstallFreeIpaServicesHandler implements EventHandler<InstallFreeIp
         StackEvent request = event.getData();
         Selectable response;
         try {
-            freeIpaInstallService.installFreeIpa(request.getStackId());
-            response = new InstallFreeIpaServicesSuccess(request.getStackId());
+            freeIpaInstallService.installFreeIpa(request.getResourceId());
+            response = new InstallFreeIpaServicesSuccess(request.getResourceId());
         } catch (Exception e) {
-            response = new InstallFreeIpaServicesFailed(request.getStackId(), e);
+            response = new InstallFreeIpaServicesFailed(request.getResourceId(), e);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }

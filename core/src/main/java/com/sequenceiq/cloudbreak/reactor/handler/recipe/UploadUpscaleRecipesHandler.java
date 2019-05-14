@@ -32,7 +32,7 @@ public class UploadUpscaleRecipesHandler implements ReactorEventHandler<UploadUp
         UploadUpscaleRecipesRequest request = event.getData();
         UploadUpscaleRecipesResult result;
         try {
-            clusterUpscaleService.uploadRecipesOnNewHosts(request.getStackId(), request.getHostGroupName());
+            clusterUpscaleService.uploadRecipesOnNewHosts(request.getResourceId(), request.getHostGroupName());
             result = new UploadUpscaleRecipesResult(request);
         } catch (Exception e) {
             result = new UploadUpscaleRecipesResult(e.getMessage(), e, request);

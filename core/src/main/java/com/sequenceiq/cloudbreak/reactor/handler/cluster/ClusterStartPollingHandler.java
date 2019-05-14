@@ -38,7 +38,7 @@ public class ClusterStartPollingHandler implements ReactorEventHandler<ClusterSt
         ClusterStartPollingRequest request = event.getData();
         ClusterStartPollingResult result;
         try {
-            Stack stack = stackService.getByIdWithListsInTransaction(request.getStackId());
+            Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
             ClusterApi connector = clusterApiConnectors.getConnector(stack);
             connector.waitForServices(request.getRequestId());
             result = new ClusterStartPollingResult(request);

@@ -31,7 +31,7 @@ public class InstallClusterHandler implements ReactorEventHandler<InstallCluster
 
     @Override
     public void accept(Event<InstallClusterRequest> event) {
-        Long stackId = event.getData().getStackId();
+        Long stackId = event.getData().getResourceId();
         Selectable response;
         try {
             clusterBuilderService.buildCluster(stackId);

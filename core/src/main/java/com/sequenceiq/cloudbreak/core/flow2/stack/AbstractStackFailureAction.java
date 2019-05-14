@@ -29,7 +29,7 @@ public abstract class AbstractStackFailureAction<S extends FlowState, E extends 
     @Override
     protected StackFailureContext createFlowContext(String flowId, StateContext<S, E> stateContext, StackFailureEvent payload) {
         Flow flow = getFlow(flowId);
-        StackView stack = stackService.getViewByIdWithoutAuth(payload.getStackId());
+        StackView stack = stackService.getViewByIdWithoutAuth(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         flow.setFlowFailed(payload.getException());
         return new StackFailureContext(flowId, stack);

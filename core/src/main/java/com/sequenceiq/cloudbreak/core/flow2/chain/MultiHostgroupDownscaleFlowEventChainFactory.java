@@ -33,12 +33,12 @@ public class MultiHostgroupDownscaleFlowEventChainFactory implements FlowEventCh
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         for (Entry<String, Set<Long>> entry : event.getInstanceIdsByHostgroupMap().entrySet()) {
             ClusterScaleTriggerEvent cste;
-            cste = new ClusterDownscaleTriggerEvent(DECOMMISSION_EVENT.event(), event.getStackId(), entry.getKey(), entry.getValue(), event.accepted(),
+            cste = new ClusterDownscaleTriggerEvent(DECOMMISSION_EVENT.event(), event.getResourceId(), entry.getKey(), entry.getValue(), event.accepted(),
                     new ClusterDownscaleDetails());
             flowEventChain.add(cste);
             if (event.getScalingType() == ScalingType.DOWNSCALE_TOGETHER) {
                 StackScaleTriggerEvent sste;
-                sste = new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getStackId(), entry.getKey(), entry.getValue());
+                sste = new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), entry.getKey(), entry.getValue());
                 flowEventChain.add(sste);
             }
         }

@@ -251,13 +251,13 @@ public class HeartbeatService {
      * This is required as we don't want to distribute flows that will be terminated anyways.
      */
     private List<FlowLog> getInvalidFlows(Collection<FlowLog> flowLogs) {
-        Set<Long> stackIds = flowLogs.stream().map(FlowLog::getStackId).collect(Collectors.toSet());
+        Set<Long> stackIds = flowLogs.stream().map(FlowLog::getResourceId).collect(Collectors.toSet());
         if (!stackIds.isEmpty()) {
             Set<Long> deletingStackIds = stackService.getStatuses(stackIds).stream()
                     .filter(ss -> DELETE_STATUSES.contains(ss[1])).map(ss -> (Long) ss[0]).collect(Collectors.toSet());
             if (!deletingStackIds.isEmpty()) {
                 return flowLogs.stream()
-                        .filter(fl -> deletingStackIds.contains(fl.getStackId()))
+                        .filter(fl -> deletingStackIds.contains(fl.getResourceId()))
                         .filter(fl -> !fl.getFlowType().equals(StackTerminationFlowConfig.class))
                         .collect(Collectors.toList());
             }

@@ -43,7 +43,7 @@ public class ClusterStartHandler implements ReactorEventHandler<ClusterStartRequ
         ClusterStartRequest request = event.getData();
         ClusterStartResult result;
         try {
-            Stack stack = stackService.getByIdWithListsInTransaction(request.getStackId());
+            Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
             Set<HostMetadata> hostsInCluster = hostMetadataService.findHostsInCluster(stack.getCluster().getId());
             int requestId = apiConnectors.getConnector(stack).startCluster(hostsInCluster);
             result = new ClusterStartResult(request, requestId);

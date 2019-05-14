@@ -23,9 +23,9 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Stack
     @Override
     public Queue<Selectable> createFlowTriggerEventQueue(StackEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
-        flowEventChain.add(new StackEvent(CLUSTER_STOP_EVENT.event(), event.getStackId()));
-        flowEventChain.add(new StackEvent(CLUSTER_UPGRADE_EVENT.event(), event.getStackId()));
-        flowEventChain.add(new StackEvent(CLUSTER_START_EVENT.event(), event.getStackId()));
+        flowEventChain.add(new StackEvent(CLUSTER_STOP_EVENT.event(), event.getResourceId()));
+        flowEventChain.add(new StackEvent(CLUSTER_UPGRADE_EVENT.event(), event.getResourceId()));
+        flowEventChain.add(new StackEvent(CLUSTER_START_EVENT.event(), event.getResourceId()));
         return flowEventChain;
     }
 }

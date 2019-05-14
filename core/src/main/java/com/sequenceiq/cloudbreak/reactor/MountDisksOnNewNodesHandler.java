@@ -36,7 +36,7 @@ public class MountDisksOnNewNodesHandler implements ReactorEventHandler<MountDis
         MountDisksOnNewHostsRequest request = event.getData();
         MountDisksOnNewHostsResult result;
         try {
-            mountDisks.mountDisksOnNewNodes(request.getStackId(), request.getUpscaleCandidateAddresses());
+            mountDisks.mountDisksOnNewNodes(request.getResourceId(), request.getUpscaleCandidateAddresses());
             result = new MountDisksOnNewHostsResult(request);
         } catch (Exception e) {
             LOGGER.info("Failed to mount disks on new nodes. ", e);

@@ -29,10 +29,10 @@ public class WaitForSyncRestartAction extends DefaultRestartAction {
     @Override
     public void restart(String flowId, String flowChainId, String event, Object payload) {
         Payload stackPayload = (Payload) payload;
-        Stack stack = stackService.getByIdWithListsInTransaction(stackPayload.getStackId());
+        Stack stack = stackService.getByIdWithListsInTransaction(stackPayload.getResourceId());
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.WAIT_FOR_SYNC, stack.getStatusReason());
         try {
-            flowLogService.terminate(stackPayload.getStackId(), flowId);
+            flowLogService.terminate(stackPayload.getResourceId(), flowId);
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }

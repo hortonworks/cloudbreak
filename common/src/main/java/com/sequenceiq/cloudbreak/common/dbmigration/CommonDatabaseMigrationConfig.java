@@ -42,8 +42,6 @@ public class CommonDatabaseMigrationConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommonDatabaseMigrationConfig.class);
 
-    private static final String DEFAULT_SCHEMA_LOCATION_IN_SOURCE = "core/src/main/resources/schema";
-
     private static final String PENDING_OPERATION_WARNING_MSG = "WARNING: Running pending migrations out of order can create unexpected results.";
 
     @Value("${cb.schema.migration.auto:true}")

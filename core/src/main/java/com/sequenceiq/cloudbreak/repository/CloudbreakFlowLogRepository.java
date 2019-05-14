@@ -15,10 +15,10 @@ import com.sequenceiq.flow.domain.FlowLog;
 public interface CloudbreakFlowLogRepository extends Repository<FlowLog, Long> {
 
     @Modifying
-    @Query("DELETE FROM FlowLog fl WHERE fl.stackId IN ( SELECT st.id FROM Stack st WHERE st.stackStatus.status = 'DELETE_COMPLETED')")
+    @Query("DELETE FROM FlowLog fl WHERE fl.resourceId IN ( SELECT st.id FROM Stack st WHERE st.stackStatus.status = 'DELETE_COMPLETED')")
     int purgeTerminatedStackLogs();
 
-    @Query("SELECT DISTINCT fl.stackId FROM FlowLog fl "
+    @Query("SELECT DISTINCT fl.resourceId FROM FlowLog fl "
             + "WHERE fl.stateStatus = 'PENDING' "
             + "AND fl.cloudbreakNodeId = :cloudbreakNodeId "
             + "AND fl.flowType = 'com.sequenceiq.flow.core.stack.termination.StackTerminationFlowConfig'")

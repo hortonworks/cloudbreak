@@ -34,7 +34,7 @@ public class AmbariEnsureComponentsAreStoppedHandler implements ReactorEventHand
     @Override
     public void accept(Event<EnsureClusterComponentsAreStoppedRequest> event) {
         EnsureClusterComponentsAreStoppedRequest request = event.getData();
-        Long stackId = request.getStackId();
+        Long stackId = request.getResourceId();
         AmbariEnsureComponentsAreStoppedResult result;
         try {
             clusterUpscaleService.ensureComponentsAreStopped(stackId, request.getComponents(), request.getHostName());

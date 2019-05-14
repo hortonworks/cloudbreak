@@ -25,9 +25,9 @@ public class StartFlowEventChainFactory implements FlowEventChainFactory<StackEv
     @Override
     public Queue<Selectable> createFlowTriggerEventQueue(StackEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
-        flowEventChain.add(new StackEvent(STACK_START_EVENT.event(), event.getStackId(), event.accepted()));
-        flowEventChain.add(new StackEvent(CLUSTER_START_EVENT.event(), event.getStackId()));
-        flowEventChain.add(new StackSyncTriggerEvent(STACK_SYNC_EVENT.event(), event.getStackId(), true, event.accepted()));
+        flowEventChain.add(new StackEvent(STACK_START_EVENT.event(), event.getResourceId(), event.accepted()));
+        flowEventChain.add(new StackEvent(CLUSTER_START_EVENT.event(), event.getResourceId()));
+        flowEventChain.add(new StackSyncTriggerEvent(STACK_SYNC_EVENT.event(), event.getResourceId(), true, event.accepted()));
         return flowEventChain;
     }
 }

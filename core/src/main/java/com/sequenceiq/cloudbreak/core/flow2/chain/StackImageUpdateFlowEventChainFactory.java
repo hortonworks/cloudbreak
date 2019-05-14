@@ -25,9 +25,9 @@ public class StackImageUpdateFlowEventChainFactory implements FlowEventChainFact
     @Override
     public Queue<Selectable> createFlowTriggerEventQueue(StackImageUpdateTriggerEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
-        flowEventChain.add(new StackSyncTriggerEvent(StackSyncEvent.STACK_SYNC_EVENT.event(), event.getStackId(), true, event.accepted()));
-        flowEventChain.add(new StackEvent(CLUSTER_SYNC_EVENT.event(), event.getStackId()));
-        flowEventChain.add(new StackImageUpdateTriggerEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_EVENT.event(), event.getStackId(), event.getNewImageId(),
+        flowEventChain.add(new StackSyncTriggerEvent(StackSyncEvent.STACK_SYNC_EVENT.event(), event.getResourceId(), true, event.accepted()));
+        flowEventChain.add(new StackEvent(CLUSTER_SYNC_EVENT.event(), event.getResourceId()));
+        flowEventChain.add(new StackImageUpdateTriggerEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_EVENT.event(), event.getResourceId(), event.getNewImageId(),
                 event.getImageCatalogName(), event.getImageCatalogUrl()));
         return flowEventChain;
     }

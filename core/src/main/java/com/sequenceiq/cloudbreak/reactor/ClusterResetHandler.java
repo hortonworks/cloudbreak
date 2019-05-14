@@ -31,7 +31,7 @@ public class ClusterResetHandler implements ReactorEventHandler<ClusterResetRequ
         ClusterResetRequest request = event.getData();
         ClusterResetResult result;
         try {
-            ambariClusterResetService.resetCluster(request.getStackId());
+            ambariClusterResetService.resetCluster(request.getResourceId());
             result = new ClusterResetResult(request);
         } catch (Exception e) {
             result = new ClusterResetResult(e.getMessage(), e, request);

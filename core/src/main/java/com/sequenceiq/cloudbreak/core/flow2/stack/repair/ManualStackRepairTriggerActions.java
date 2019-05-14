@@ -39,7 +39,7 @@ public class ManualStackRepairTriggerActions {
 
             @Override
             protected void doExecute(StackRepairTriggerContext context, StackEvent payload, Map<Object, Object> variables) {
-                flowMessageService.fireEventAndLog(payload.getStackId(), Msg.STACK_REPAIR_DETECTION_STARTED, Status.UPDATE_IN_PROGRESS.name());
+                flowMessageService.fireEventAndLog(payload.getResourceId(), Msg.STACK_REPAIR_DETECTION_STARTED, Status.UPDATE_IN_PROGRESS.name());
                 sendEvent(context);
             }
 
@@ -73,7 +73,7 @@ public class ManualStackRepairTriggerActions {
 
             @Override
             protected void doExecute(StackRepairTriggerContext context, UnhealthyInstancesDetectionResult payload, Map<Object, Object> variables) {
-                flowMessageService.fireEventAndLog(payload.getStackId(), Msg.STACK_REPAIR_FAILED, Status.AVAILABLE.name(), payload.getStatusReason());
+                flowMessageService.fireEventAndLog(payload.getResourceId(), Msg.STACK_REPAIR_FAILED, Status.AVAILABLE.name(), payload.getStatusReason());
                 sendEvent(context);
             }
 
@@ -97,14 +97,14 @@ public class ManualStackRepairTriggerActions {
         @Override
         protected StackRepairTriggerContext createFlowContext(
                 String flowId, StateContext<ManualStackRepairTriggerState, ManualStackRepairTriggerEvent> stateContext, P payload) {
-            Long stackId = payload.getStackId();
+            Long stackId = payload.getResourceId();
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             return new StackRepairTriggerContext(flowId, stack);
         }
 
         @Override
         protected Object getFailurePayload(P payload, Optional<StackRepairTriggerContext> flowContext, Exception ex) {
-            return new StackFailureEvent(payload.getStackId(), ex);
+            return new StackFailureEvent(payload.getResourceId(), ex);
         }
     }
 }

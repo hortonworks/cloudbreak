@@ -230,7 +230,7 @@ public class StackCreationActions {
             @Override
             protected void doExecute(StackContext context, GetSSHFingerprintsResult payload, Map<Object, Object> variables) throws Exception {
                 stackCreationService.setupTls(context);
-                StackWithFingerprintsEvent fingerprintsEvent = new StackWithFingerprintsEvent(payload.getStackId(), payload.getSshFingerprints());
+                StackWithFingerprintsEvent fingerprintsEvent = new StackWithFingerprintsEvent(payload.getResourceId(), payload.getSshFingerprints());
                 sendEvent(context.getFlowId(), StackCreationEvent.TLS_SETUP_FINISHED_EVENT.event(), fingerprintsEvent);
             }
         };
@@ -260,7 +260,7 @@ public class StackCreationActions {
             protected StackFailureContext createFlowContext(
                 String flowId, StateContext<StackCreationState, StackCreationEvent> stateContext, StackFailureEvent payload) {
                 Flow flow = getFlow(flowId);
-                StackView stackView = stackService.getViewByIdWithoutAuth(payload.getStackId());
+                StackView stackView = stackService.getViewByIdWithoutAuth(payload.getResourceId());
                 MDCBuilder.buildMdcContext(stackView);
                 flow.setFlowFailed(payload.getException());
                 return new StackFailureContext(flowId, stackView);

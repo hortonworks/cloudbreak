@@ -177,7 +177,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
             } else {
                 List<String> flowIds = unassignedFlowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList());
                 for (String flowId : flowIds) {
-                    Long stackId = unassignedFlowLogs.stream().filter(f -> f.getFlowId().equalsIgnoreCase(flowId)).map(FlowLog::getStackId).findAny().get();
+                    Long stackId = unassignedFlowLogs.stream().filter(f -> f.getFlowId().equalsIgnoreCase(flowId)).map(FlowLog::getResourceId).findAny().get();
                     try {
                         flow2Handler.restartFlow(flowId);
                         stackIds.add(stackId);
@@ -218,7 +218,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
             }
             List<String> flowIds = myFlowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList());
             for (String flowId : flowIds) {
-                Long stackId = myFlowLogs.stream().filter(f -> f.getFlowId().equalsIgnoreCase(flowId)).map(FlowLog::getStackId).findAny().get();
+                Long stackId = myFlowLogs.stream().filter(f -> f.getFlowId().equalsIgnoreCase(flowId)).map(FlowLog::getResourceId).findAny().get();
                 LOGGER.debug("Restarting flow {}", flowId);
                 try {
                     flow2Handler.restartFlow(flowId);

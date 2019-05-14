@@ -79,7 +79,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
                 long execElapsed = (System.currentTimeMillis() - (long) execTime) / MS_PER_SEC;
                 String flowStateName = String.valueOf(variables.get(FLOW_STATE_NAME));
                 long executionTime = execElapsed > flowElapsed ? execElapsed : flowElapsed;
-                LOGGER.debug("Stack: {}, flow state: {}, phase: {}, execution time {} sec", payload.getStackId(),
+                LOGGER.debug("Stack: {}, flow state: {}, phase: {}, execution time {} sec", payload.getResourceId(),
                     flowStateName, execElapsed > flowElapsed ? "doExec" : "service", executionTime);
                 metricService.submit(FlowMetricType.FLOW_STEP, executionTime, Map.of("name", flowStateName.toLowerCase()));
             }

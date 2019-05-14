@@ -34,7 +34,7 @@ public class AmbariStopComponentsHandler implements ReactorEventHandler<AmbariSt
     @Override
     public void accept(Event<AmbariStopComponentsRequest> event) {
         AmbariStopComponentsRequest request = event.getData();
-        Long stackId = request.getStackId();
+        Long stackId = request.getResourceId();
         StopClusterComponentsResult result;
         try {
             clusterUpscaleService.stopComponents(stackId, request.getComponents(), request.getHostName());

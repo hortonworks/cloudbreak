@@ -49,7 +49,7 @@ public class UploadRecipesHandler implements ReactorEventHandler<UploadRecipesRe
     public void accept(Event<UploadRecipesRequest> event) {
         UploadRecipesRequest request = event.getData();
         Selectable result;
-        Long stackId = request.getStackId();
+        Long stackId = request.getResourceId();
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             Set<HostGroup> hostGroups = hostGroupService.getByCluster(stack.getCluster().getId());

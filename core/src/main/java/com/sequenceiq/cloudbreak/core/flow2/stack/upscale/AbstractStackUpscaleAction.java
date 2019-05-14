@@ -52,7 +52,7 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
     @Override
     protected StackScalingFlowContext createFlowContext(String flowId, StateContext<StackUpscaleState, StackUpscaleEvent> stateContext, P payload) {
         Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
-        Stack stack = stackService.getByIdWithListsInTransaction(payload.getStackId());
+        Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
@@ -65,7 +65,7 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
 
     @Override
     protected Object getFailurePayload(P payload, Optional<StackScalingFlowContext> flowContext, Exception ex) {
-        return new StackFailureEvent(payload.getStackId(), ex);
+        return new StackFailureEvent(payload.getResourceId(), ex);
     }
 
     private String getInstanceGroupName(Map<Object, Object> variables) {

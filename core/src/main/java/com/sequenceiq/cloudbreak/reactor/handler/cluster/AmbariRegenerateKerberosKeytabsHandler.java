@@ -34,7 +34,7 @@ public class AmbariRegenerateKerberosKeytabsHandler implements ReactorEventHandl
     @Override
     public void accept(Event<RegenerateKerberosKeytabsRequest> event) {
         RegenerateKerberosKeytabsRequest request = event.getData();
-        Long stackId = request.getStackId();
+        Long stackId = request.getResourceId();
         RegenerateKerberosKeytabsResult result;
         try {
 

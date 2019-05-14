@@ -53,7 +53,7 @@ public class FlowLogDBService implements FlowLogService {
             FlowState currentState) {
         String payloadJson = JsonWriter.objectToJson(payload, writeOptions);
         String variablesJson = JsonWriter.objectToJson(variables, writeOptions);
-        FlowLog flowLog = new FlowLog(payload.getStackId(), flowId, flowChanId, key, payloadJson, payload.getClass(), variablesJson, flowType,
+        FlowLog flowLog = new FlowLog(payload.getResourceId(), flowId, flowChanId, key, payloadJson, payload.getClass(), variablesJson, flowType,
                 currentState.toString());
         flowLog.setCloudbreakNodeId(nodeConfig.getId());
         return flowLogRepository.save(flowLog);
@@ -98,7 +98,7 @@ public class FlowLogDBService implements FlowLogService {
     }
 
     public boolean isOtherFlowRunning(Long stackId) {
-        Set<String> flowIds = flowLogRepository.findAllRunningNonTerminationFlowIdsByStackId(stackId);
+        Set<String> flowIds = flowLogRepository.findAllRunningNonTerminationFlowIdsByResourceId(stackId);
         return !flowIds.isEmpty();
     }
 
@@ -123,7 +123,7 @@ public class FlowLogDBService implements FlowLogService {
 
     @Override
     public Set<String> findAllRunningNonTerminationFlowIdsByStackId(Long stackId) {
-        return flowLogRepository.findAllRunningNonTerminationFlowIdsByStackId(stackId);
+        return flowLogRepository.findAllRunningNonTerminationFlowIdsByResourceId(stackId);
     }
 
     @Override
@@ -152,7 +152,7 @@ public class FlowLogDBService implements FlowLogService {
     }
 
     public List<FlowLog> findAllByStackIdOrderByCreatedDesc(Long id) {
-        return flowLogRepository.findAllByStackIdOrderByCreatedDesc(id);
+        return flowLogRepository.findAllByResourceIdOrderByCreatedDesc(id);
     }
 
 }

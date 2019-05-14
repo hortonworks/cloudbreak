@@ -45,21 +45,21 @@ public class DownscaleFlowEventChainFactory implements FlowEventChainFactory<Clu
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         ClusterScaleTriggerEvent cste;
         cste = event.getPrivateIds() == null
-                ? new ClusterDownscaleTriggerEvent(DECOMMISSION_EVENT.event(), event.getStackId(), event.getHostGroupName(), event.getAdjustment(),
+                ? new ClusterDownscaleTriggerEvent(DECOMMISSION_EVENT.event(), event.getResourceId(), event.getHostGroupName(), event.getAdjustment(),
                 event.accepted(), event.getDetails())
-                : new ClusterDownscaleTriggerEvent(DECOMMISSION_EVENT.event(), event.getStackId(), event.getHostGroupName(), event.getPrivateIds(),
+                : new ClusterDownscaleTriggerEvent(DECOMMISSION_EVENT.event(), event.getResourceId(), event.getHostGroupName(), event.getPrivateIds(),
                 event.accepted(), event.getDetails());
         flowEventChain.add(cste);
         if (event.getScalingType() == ScalingType.DOWNSCALE_TOGETHER) {
-            StackView stackView = stackService.getViewByIdWithoutAuth(event.getStackId());
+            StackView stackView = stackService.getViewByIdWithoutAuth(event.getResourceId());
             HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(stackView.getClusterView().getId(), event.getHostGroupName())
                     .orElseThrow(NotFoundException.notFound("hostgroup", event.getHostGroupName()));
             Constraint hostGroupConstraint = hostGroup.getConstraint();
             String instanceGroupName = Optional.ofNullable(hostGroupConstraint.getInstanceGroup()).map(InstanceGroup::getGroupName).orElse(null);
             StackScaleTriggerEvent sste;
             sste = event.getPrivateIds() == null
-                    ? new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getStackId(), instanceGroupName, event.getAdjustment())
-                    : new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getStackId(), instanceGroupName, event.getPrivateIds());
+                    ? new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), instanceGroupName, event.getAdjustment())
+                    : new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), instanceGroupName, event.getPrivateIds());
             flowEventChain.add(sste);
         }
         return flowEventChain;

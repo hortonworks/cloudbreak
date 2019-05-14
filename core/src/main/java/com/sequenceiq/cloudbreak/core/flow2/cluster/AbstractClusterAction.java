@@ -26,14 +26,14 @@ public abstract class AbstractClusterAction<P extends Payload> extends AbstractS
 
     @Override
     protected ClusterViewContext createFlowContext(String flowId, StateContext<FlowState, FlowEvent> clusterContext, P payload) {
-        StackView stack = stackService.getViewByIdWithoutAuth(payload.getStackId());
+        StackView stack = stackService.getViewByIdWithoutAuth(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack.getId().toString(), stack.getName(), "CLUSTER");
         return new ClusterViewContext(flowId, stack);
     }
 
     @Override
     protected Object getFailurePayload(P payload, Optional<ClusterViewContext> flowContext, Exception ex) {
-        return new StackFailureEvent(payload.getStackId(), ex);
+        return new StackFailureEvent(payload.getResourceId(), ex);
     }
 
     public StackService getStackService() {

@@ -52,7 +52,7 @@ public class AmbariStopServerAndAgentHandler implements ReactorEventHandler<Amba
     @Override
     public void accept(Event<AmbariStopServerAndAgentRequest> event) {
         AmbariStopServerAndAgentRequest request = event.getData();
-        Long stackId = request.getStackId();
+        Long stackId = request.getResourceId();
         AmbariStopServerAndAgentResult result;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);

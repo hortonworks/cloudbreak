@@ -25,10 +25,10 @@ public class ClusterMaintenanceModeFlowEventChainFactory implements FlowEventCha
     @Override
     public Queue<Selectable> createFlowTriggerEventQueue(MaintenanceModeValidationTriggerEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
-        flowEventChain.add(new StackSyncTriggerEvent(StackSyncEvent.STACK_SYNC_EVENT.event(), event.getStackId(), true, event.accepted()));
-        flowEventChain.add(new StackEvent(CLUSTER_SYNC_EVENT.event(), event.getStackId()));
+        flowEventChain.add(new StackSyncTriggerEvent(StackSyncEvent.STACK_SYNC_EVENT.event(), event.getResourceId(), true, event.accepted()));
+        flowEventChain.add(new StackEvent(CLUSTER_SYNC_EVENT.event(), event.getResourceId()));
         flowEventChain.add(new MaintenanceModeValidationTriggerEvent(
-                MaintenanceModeValidationEvent.START_VALIDATION_FLOW_EVENT.event(), event.getStackId()));
+                MaintenanceModeValidationEvent.START_VALIDATION_FLOW_EVENT.event(), event.getResourceId()));
         return flowEventChain;
     }
 }

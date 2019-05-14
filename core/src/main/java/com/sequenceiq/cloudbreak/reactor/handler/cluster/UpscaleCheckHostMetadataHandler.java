@@ -37,7 +37,7 @@ public class UpscaleCheckHostMetadataHandler implements ReactorEventHandler<Upsc
         UpscaleCheckHostMetadataRequest request = event.getData();
         UpscaleCheckHostMetadataResult result;
         try {
-            StackView stackView = stackService.getViewByIdWithoutAuth(request.getStackId());
+            StackView stackView = stackService.getViewByIdWithoutAuth(request.getResourceId());
             clusterService.removeTerminatedPrimaryGateway(stackView.getClusterView().getId(), request.getPrimaryGatewayHostname(),
                     request.isSinglePrimaryGateway());
             result = new UpscaleCheckHostMetadataResult(request);

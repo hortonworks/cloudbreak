@@ -34,7 +34,7 @@ public class StartAmbariServicesHandler implements ReactorEventHandler<StartAmba
 
     @Override
     public void accept(Event<StartAmbariServicesRequest> event) {
-        Long stackId = event.getData().getStackId();
+        Long stackId = event.getData().getResourceId();
         Selectable response;
         try {
             clusterServiceRunner.runAmbariServices(stackId);
