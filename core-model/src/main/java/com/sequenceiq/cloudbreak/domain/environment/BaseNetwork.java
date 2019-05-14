@@ -1,12 +1,16 @@
 package com.sequenceiq.cloudbreak.domain.environment;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -47,7 +51,7 @@ public abstract class BaseNetwork implements WorkspaceAwareResource, ArchivableR
     @JoinColumn(nullable = false)
     private Workspace workspace;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(nullable = false)
     private Environment environment;
 
@@ -56,11 +60,17 @@ public abstract class BaseNetwork implements WorkspaceAwareResource, ArchivableR
     private Long deletionTimestamp = -1L;
 
     @Convert(converter = JsonToString.class)
-    @Column(columnDefinition = "TEXT", nullable = false)
-    private Json subnetIds;
+    @Column(columnDefinition = "TEXT")
+    private Json subnets;
+
+    private String networkCidr;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private RegistrationType registrationType;
 
     public BaseNetwork() {
-        subnetIds = new Json(new HashSet<String>());
+        subnets = new Json(new HashSet<String>());
     }
 
     @Override
@@ -102,17 +112,33 @@ public abstract class BaseNetwork implements WorkspaceAwareResource, ArchivableR
         return WorkspaceResource.ENVIRONMENT;
     }
 
-    public Json getSubnetIds() {
-        return subnetIds;
+    public Json getSubnets() {
+        return subnets;
     }
 
-    public void setSubnetIds(Set<String> subnetIds) {
-        this.subnetIds = new Json(subnetIds);
+    public void setSubnets(Set<Subnet> subnets) {
+        this.subnets = new Json(subnets);
     }
 
-    public Set<String> getSubnetIdsSet() {
-        return JsonUtil.jsonToType(subnetIds.getValue(), new TypeReference<>() {
-        });
+    public String getNetworkCidr() {
+        return networkCidr;
+    }
+
+    public void setNetworkCidr(String networkCidr) {
+        this.networkCidr = networkCidr;
+    }
+
+    public RegistrationType getRegistrationType() {
+        return registrationType;
+    }
+
+    public void setRegistrationType(RegistrationType registrationType) {
+        this.registrationType = registrationType;
+    }
+
+    public Set<Subnet> getSubnetSet() {
+        return subnets.getValue() != null ? JsonUtil.jsonToType(subnets.getValue(), new TypeReference<>() {
+        }) : Collections.emptySet();
     }
 
     public boolean isArchived() {

@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static java.util.Collections.singletonList;
+
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-import static java.util.Collections.singletonList;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -102,10 +103,10 @@ import com.sequenceiq.cloudbreak.cloud.model.ZoneVmSpecifications;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceSecurityGroupFilterView;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceSshKeyFilterView;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceVpcFilterView;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @Service
 public class AwsPlatformResources implements PlatformResources {
@@ -251,7 +252,7 @@ public class AwsPlatformResources implements PlatformResources {
     public CloudNetworks networks(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         Map<String, Set<CloudNetwork>> result = new HashMap<>();
         Set<CloudNetwork> cloudNetworks = new HashSet<>();
-        AmazonEC2Client ec2Client = awsClient.createAccess(new AwsCredentialView(cloudCredential), region.value());
+        AmazonEC2Client ec2Client = awsClient.createAccess(new AwsCredentialView(cloudCredential), getRegion(region));
 
         //create vpc filter view
         PlatformResourceVpcFilterView filter = new PlatformResourceVpcFilterView(filters);
@@ -285,6 +286,10 @@ public class AwsPlatformResources implements PlatformResources {
         }
         result.put(region.value(), cloudNetworks);
         return new CloudNetworks(result);
+    }
+
+    private String getRegion(Region region) {
+        return region.value().split(",")[0];
     }
 
     private Optional<String> getName(List<Tag> tags) {

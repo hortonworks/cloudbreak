@@ -12,6 +12,9 @@ public class EnvironmentNetworkV4Response extends EnvironmentNetworkV4Request {
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
 
+    @ApiModelProperty(value = ModelDescriptions.EnvironmentNetworkDescription.NETWORK_ID)
+    private String networkId;
+
     public Long getId() {
         return id;
     }
@@ -26,5 +29,13 @@ public class EnvironmentNetworkV4Response extends EnvironmentNetworkV4Request {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getNetworkId() {
+        return networkId;
+    }
+
+    public void setNetworkId(String networkId) {
+        this.networkId = networkId;
     }
 }

@@ -10,11 +10,15 @@ public interface EnvironmentNetworkValidator {
 
     CloudPlatform getCloudPlatform();
 
-    default String missingParamErrorMessage(String paramName, String cloudPlatform) {
-        return String.format("The '%s' parameter should be specified for the '%s' environment specific network!", paramName, cloudPlatform);
+    default String getCloudPlatformName() {
+        return getCloudPlatform().name();
     }
 
-    default String missingParamsErrorMsg(CloudPlatform cloudPlatform) {
-        return String.format("The '%s' related network parameters should be specified!", cloudPlatform);
+    default String missingParamErrorMessage(String paramName) {
+        return String.format("The '%s' parameter should be specified for the '%s' environment specific network!", paramName, getCloudPlatformName());
+    }
+
+    default String missingParamsErrorMsg() {
+        return String.format("The '%s' related network parameters should be specified!", getCloudPlatformName());
     }
 }
