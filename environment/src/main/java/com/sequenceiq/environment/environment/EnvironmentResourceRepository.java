@@ -20,7 +20,7 @@ import com.sequenceiq.environment.environment.domain.EnvironmentView;
 @NoRepositoryBean
 @Transactional(TxType.REQUIRED)
 @DisableHasPermission
-interface EnvironmentResourceRepository<T extends EnvironmentAwareResource, ID extends Serializable> extends WorkspaceResourceRepository<T, ID> {
+public interface EnvironmentResourceRepository<T extends EnvironmentAwareResource, ID extends Serializable> extends WorkspaceResourceRepository<T, ID> {
 
     @CheckPermissionsByWorkspaceId(action = READ)
     Set<T> findAllByWorkspaceIdAndEnvironments(Long workspaceId, EnvironmentView environment);

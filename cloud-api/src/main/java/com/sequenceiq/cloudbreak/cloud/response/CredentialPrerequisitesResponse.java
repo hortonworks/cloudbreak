@@ -14,7 +14,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @Immutable
 @ApiModel
-public class CredentialPrerequisitesV4Response implements Serializable {
+public class CredentialPrerequisitesResponse implements Serializable {
 
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     private String cloudPlatform;
@@ -31,18 +31,18 @@ public class CredentialPrerequisitesV4Response implements Serializable {
     @ApiModelProperty(CredentialModelDescription.GCP_CREDENTIAL_PREREQUISITES)
     private GcpCredentialPrerequisites gcp;
 
-    public CredentialPrerequisitesV4Response(String cloudPlatform, String accountId, AwsCredentialPrerequisites aws) {
+    public CredentialPrerequisitesResponse(String cloudPlatform, String accountId, AwsCredentialPrerequisites aws) {
         this.cloudPlatform = cloudPlatform;
         this.accountId = accountId;
         this.aws = aws;
     }
 
-    public CredentialPrerequisitesV4Response(String cloudPlatform, AzureCredentialPrerequisites azure) {
+    public CredentialPrerequisitesResponse(String cloudPlatform, AzureCredentialPrerequisites azure) {
         this.cloudPlatform = cloudPlatform;
         this.azure = azure;
     }
 
-    public CredentialPrerequisitesV4Response(String cloudPlatform, GcpCredentialPrerequisites gcp) {
+    public CredentialPrerequisitesResponse(String cloudPlatform, GcpCredentialPrerequisites gcp) {
         this.cloudPlatform = cloudPlatform;
         this.gcp = gcp;
     }

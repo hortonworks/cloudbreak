@@ -11,11 +11,11 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.sequenceiq.cloudbreak.domain.Secret;
+import com.sequenceiq.cloudbreak.domain.SecretToString;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
-import com.sequenceiq.secret.domain.Secret;
-import com.sequenceiq.secret.domain.SecretToString;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
@@ -49,22 +49,22 @@ public class Credential implements WorkspaceAwareResource {
 
     @Override
     public Long getId() {
-        return null;
+        return id;
     }
 
     @Override
     public Workspace getWorkspace() {
-        return null;
+        return workspace;
     }
 
     @Override
     public String getName() {
-        return null;
+        return name;
     }
 
     @Override
     public void setWorkspace(Workspace workspace) {
-
+        this.workspace = workspace;
     }
 
     @Override
@@ -103,6 +103,7 @@ public class Credential implements WorkspaceAwareResource {
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
     }
+
     public String getAttributes() {
         return attributes.getRaw();
     }

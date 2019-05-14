@@ -18,10 +18,10 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.environment.api.credential.doc.CredentialDescriptor;
 import com.sequenceiq.environment.api.credential.doc.CredentialOpDescription;
 import com.sequenceiq.environment.api.credential.model.request.CredentialV1Request;
-import com.sequenceiq.environment.api.credential.model.response.CredentialPrerequisitesV1Response;
 import com.sequenceiq.environment.api.credential.model.response.CredentialV1Response;
 import com.sequenceiq.environment.api.credential.model.response.CredentialV1Responses;
 import com.sequenceiq.environment.api.credential.model.response.InteractiveCredentialV1Response;
@@ -88,7 +88,7 @@ public interface CredentialV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CredentialOpDescription.GET_PREREQUISTIES_BY_CLOUD_PROVIDER, produces = MediaType.APPLICATION_JSON,
             notes = CredentialDescriptor.CREDENTIAL_NOTES, nickname = "getPrerequisitesForCloudPlatform", httpMethod = "GET")
-    CredentialPrerequisitesV1Response getPrerequisitesForCloudPlatform(@PathParam("cloudPlatform") String platform,
+    CredentialPrerequisitesResponse getPrerequisitesForCloudPlatform(@PathParam("cloudPlatform") String platform,
             @QueryParam("deploymentAddress") String deploymentAddress);
 
     @GET

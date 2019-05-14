@@ -8,8 +8,8 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.environment.credential.Credential;
-import com.sequenceiq.environment.impl.credential.Json;
 
 @Component
 public class CredentialToCloudCredentialConverter {

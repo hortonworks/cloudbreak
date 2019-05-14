@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.credential;
 
 
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
 
 import java.io.IOException;
@@ -11,7 +12,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -27,11 +27,12 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesV4Response;
+import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.common.account.PreferencesService;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.restclient.RestClientUtil;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakNotification;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
@@ -40,8 +41,8 @@ import com.sequenceiq.cloudbreak.workspace.service.AbstractWorkspaceAwareResourc
 import com.sequenceiq.cloudbreak.workspace.service.WorkspaceService;
 import com.sequenceiq.environment.credential.exception.CredentialOperationException;
 import com.sequenceiq.environment.credential.validator.CredentialValidator;
-import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.EnvironmentViewService;
+import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.notification.Notification;
 import com.sequenceiq.notification.NotificationSender;
 import com.sequenceiq.notification.ResourceEvent;
@@ -186,7 +187,7 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
         return credentialRepository.save(credential);
     }
 
-    public CredentialPrerequisitesV4Response getPrerequisites(Long workspaceId, String cloudPlatform, String deploymentAddress) {
+    public CredentialPrerequisitesResponse getPrerequisites(Long workspaceId, String cloudPlatform, String deploymentAddress) {
         User user = getLoggedInUser();
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
         String cloudPlatformUppercased = cloudPlatform.toUpperCase();
@@ -308,7 +309,7 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
     }
 
     private void sendCredentialNotification(Credential credential, ResourceEvent resourceEvent) {
-        CloudbreakEventV4Response notification = new CloudbreakEventV4Response();
+        CloudbreakNotification notification = new CloudbreakNotification();
         notification.setEventType(resourceEvent.name());
         notification.setEventTimestamp(new Date().getTime());
         notification.setEventMessage(messagesService.getMessage(resourceEvent.getMessage()));
@@ -335,9 +336,5 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
         Object appLoginUrl = Optional.ofNullable(new Json(credentialAttributes).getMap().get("appLoginUrl"))
                 .orElseThrow(() -> new CredentialOperationException("Unable to obtain App login url!"));
         return String.valueOf(appLoginUrl);
-    }
-
-    public static Supplier<NotFoundException> notFound(String what, Object which) {
-        return () -> new NotFoundException(String.format("%s '%s' not found.", what, which));
     }
 }

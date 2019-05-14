@@ -15,6 +15,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.authorization.UmsAuthorizationService;
+import com.sequenceiq.cloudbreak.workspace.controller.request.ChangeWorkspaceUsersV1Request;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.resource.ResourceAction;
@@ -26,6 +27,7 @@ public class WorkspaceModificationVerifierService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkspaceModificationVerifierService.class);
 
+    //TODO: StackService
 //    @Inject
 //    private StackService stackService;
 
@@ -89,7 +91,7 @@ public class WorkspaceModificationVerifierService {
         }
     }
 
-    public void ensureWorkspaceManagementForUserUpdates(User currentUser, Workspace workspace, Set<ChangeWorkspaceUsersV4Request> userUpdates) {
+    public void ensureWorkspaceManagementForUserUpdates(User currentUser, Workspace workspace, Set<ChangeWorkspaceUsersV1Request> userUpdates) {
         boolean updateHasUserWithManagerRole = userUpdates.stream()
                 .filter(update -> update.getRoles() != null && update.getRoles().contains(WorkspaceRole.WORKSPACEMANAGER))
                 .findAny()
@@ -106,7 +108,7 @@ public class WorkspaceModificationVerifierService {
         }
     }
 
-    public void ensureWorkspaceManagementForChangeUsers(Set<ChangeWorkspaceUsersV4Request> usersPermissions) {
+    public void ensureWorkspaceManagementForChangeUsers(Set<ChangeWorkspaceUsersV1Request> usersPermissions) {
         if (usersPermissions.stream().noneMatch(userPermissions -> userPermissions.getRoles() != null
                 && userPermissions.getRoles().contains(WorkspaceRole.WORKSPACEMANAGER))) {
             throw new BadRequestException(String.format("No new user would have '%s' role after user change operation, "
@@ -155,11 +157,11 @@ public class WorkspaceModificationVerifierService {
             throw new BadRequestException(String.format("The following workspace '%s' could not deleted because this is your default workspace.",
                     workspaceForDelete.getName()));
         }
-        if (!stackService.findAllForWorkspace(workspaceForDelete.getId()).isEmpty()) {
-            LOGGER.info("The requested {} workspace has already existing clusters. We can not delete them until those will be deleted",
-                    workspaceForDelete.getName());
-            throw new BadRequestException(String.format("The requested '%s' workspace has already existing clusters. "
-                    + "Please delete them before you delete the workspace.", workspaceForDelete.getName()));
-        }
+//        if (!stackService.findAllForWorkspace(workspaceForDelete.getId()).isEmpty()) {
+//            LOGGER.info("The requested {} workspace has already existing clusters. We can not delete them until those will be deleted",
+//                    workspaceForDelete.getName());
+//            throw new BadRequestException(String.format("The requested '%s' workspace has already existing clusters. "
+//                    + "Please delete them before you delete the workspace.", workspaceForDelete.getName()));
+//        }
     }
 }
