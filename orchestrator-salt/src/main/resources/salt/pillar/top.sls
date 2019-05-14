@@ -15,6 +15,7 @@ base:
     - docker
     - metadata.init
     - proxy.proxy
+    - fluent
 
   'G@roles:ad_member or G@roles:ad_leave':
     - match: compound

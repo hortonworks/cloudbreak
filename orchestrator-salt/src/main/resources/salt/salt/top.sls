@@ -54,6 +54,14 @@ base:
     - match: grain
     - postgresql
 
+  'roles:fluent_start':
+    - match: grain
+    - fluent.agent-start
+
+  'roles:fluent_stop':
+    - match: grain
+    - fluent.agent-stop
+
   'roles:ambari_server_install':
     - match: grain
     - ambari.server
