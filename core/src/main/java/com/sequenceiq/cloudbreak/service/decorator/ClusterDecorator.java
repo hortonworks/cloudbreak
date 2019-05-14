@@ -18,22 +18,23 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.aspect.Measure;
+import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.AmbariHaComponentFilter;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
 public class ClusterDecorator {
@@ -112,14 +113,18 @@ public class ClusterDecorator {
                         && !ExposedService.RANGER.getServiceName().equalsIgnoreCase(es.getServiceName()))
                 .map(ExposedService::getKnoxService)
                 .collect(Collectors.toSet());
-        if (subject.getGateway() != null) {
-            subject.getGateway().getTopologies().forEach(topology -> {
+        Gateway gateway = subject.getGateway();
+        if (gateway != null) {
+            gateway.getTopologies().forEach(topology -> {
                 try {
-                    ExposedServices exposedServicesOfTopology = topology.getExposedServices().get(ExposedServices.class);
-                    exposedServicesOfTopology.getServices().removeAll(haKnoxServices);
-                    topology.setExposedServices(new Json(exposedServicesOfTopology));
+                    Json exposedServices = topology.getExposedServices();
+                    if (exposedServices != null) {
+                        ExposedServices exposedServicesOfTopology = exposedServices.get(ExposedServices.class);
+                        exposedServicesOfTopology.getServices().removeAll(haKnoxServices);
+                        topology.setExposedServices(new Json(exposedServicesOfTopology));
+                    }
                 } catch (IOException e) {
-                    LOGGER.error("This exception should never occur.", e);
+                    LOGGER.error("Failed to read the gateway topologies and exposed services", e);
                 }
             });
         }

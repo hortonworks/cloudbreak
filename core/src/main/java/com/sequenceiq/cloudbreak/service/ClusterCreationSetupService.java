@@ -116,11 +116,6 @@ public class ClusterCreationSetupService {
         }
     }
 
-    public Cluster prepare(ClusterV4Request request, Stack stack, User user) throws CloudbreakImageNotFoundException, IOException,
-            TransactionExecutionException {
-        return prepare(request, stack, null, user);
-    }
-
     public Cluster prepare(ClusterV4Request request, Stack stack, Blueprint blueprint, User user) throws IOException,
             CloudbreakImageNotFoundException, TransactionExecutionException {
         String stackName = stack.getName();

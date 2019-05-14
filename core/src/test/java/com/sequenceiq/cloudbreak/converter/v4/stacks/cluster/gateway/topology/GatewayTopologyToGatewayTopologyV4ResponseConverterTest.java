@@ -36,6 +36,7 @@ public class GatewayTopologyToGatewayTopologyV4ResponseConverterTest {
 
         Json json = mock(Json.class);
         when(source.getExposedServices()).thenReturn(json);
+        when(json.getValue()).thenReturn("{}");
         when(json.get(ExposedServices.class)).thenThrow(new IOException("Foo"));
 
         GatewayTopologyV4Response result = underTest.convert(source);
@@ -55,8 +56,9 @@ public class GatewayTopologyToGatewayTopologyV4ResponseConverterTest {
         when(exposedServices.getServices()).thenReturn(services);
 
         Json json = mock(Json.class);
-        when(source.getExposedServices()).thenReturn(json);
         when(json.get(ExposedServices.class)).thenReturn(exposedServices);
+        when(json.getValue()).thenReturn("{}");
+        when(source.getExposedServices()).thenReturn(json);
 
         GatewayTopologyV4Response result = underTest.convert(source);
 
@@ -76,6 +78,7 @@ public class GatewayTopologyToGatewayTopologyV4ResponseConverterTest {
 
         Json json = mock(Json.class);
         when(source.getExposedServices()).thenReturn(json);
+        when(json.getValue()).thenReturn("{}");
         when(json.get(ExposedServices.class)).thenReturn(exposedServices);
 
         GatewayTopologyV4Response result = underTest.convert(source);

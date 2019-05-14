@@ -266,7 +266,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             setIpaMemberRoleIfNeeded(allNodes, saltConfig, exitModel, sc, allNodeIP);
 
             // knox
-            if (!clouderaManager && primaryGateway.getKnoxGatewayEnabled()) {
+            if (primaryGateway.getKnoxGatewayEnabled()) {
                 runSaltCommand(sc, new GrainAddRunner(gatewayTargets, allNodes, "gateway"), exitModel);
             }
 

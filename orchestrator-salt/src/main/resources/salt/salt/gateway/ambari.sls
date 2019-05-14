@@ -16,13 +16,13 @@ generate_repo_from_vdf_script:
 
 include:
 {% if grains['os_family'] == 'RedHat' %}
-  - gateway.repo-redhat
+  - gateway.repo.redhat
 {% endif %}
 {% if grains['os_family'] == 'Debian' %}
-  - gateway.repo-debian
+  - gateway.repo.debian
 {% endif %}
 {% if grains['os_family'] == 'Suse' %}
-  - gateway.repo-suse
+  - gateway.repo.suse
 {% endif %}
 
 knox:

@@ -9,6 +9,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Versioned;
 public class CMRepositoryVersionUtil {
     public static final Versioned CLOUDERAMANAGER_VERSION_6_3_0 = () -> "6.3.0";
 
+    public static final Versioned CLOUDERAMANAGER_VERSION_6_4_0 = () -> "6.4.0";
+
     private CMRepositoryVersionUtil() {
     }
 
@@ -18,6 +20,10 @@ public class CMRepositoryVersionUtil {
 
     public static boolean isKeepHostTemplateSupportedViaBlueprint(ClouderaManagerRepo clouderaManagerRepoDetails) {
         return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_6_3_0);
+    }
+
+    public static boolean isKnoxGatewaySupported(ClouderaManagerRepo clouderaManagerRepoDetails) {
+        return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_6_4_0);
     }
 
     public static boolean isVersionNewerOrEqualThanLimited(Versioned currentVersion, Versioned limitedAPIVersion) {

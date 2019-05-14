@@ -15,9 +15,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
-import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
+import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
@@ -31,8 +31,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -59,6 +57,8 @@ import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
 public class StackV4RequestToTemplatePreparationObjectConverter extends AbstractConversionServiceAwareConverter<StackV4Request, TemplatePreparationObject> {
@@ -135,8 +135,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
             String blueprintText = blueprint.getBlueprintText();
             BlueprintStackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(blueprintText);
             Set<HostgroupView> hostgroupViews = getHostgroupViews(source);
-            Gateway gateway = source.getCluster().getGateway() == null || blueprintService.isClouderaManagerTemplate(blueprint)
-                    ? null : getConversionService().convert(source, Gateway.class);
+            Gateway gateway = source.getCluster().getGateway() == null ? null : getConversionService().convert(source, Gateway.class);
             BlueprintView blueprintView = new BlueprintView(blueprint.getBlueprintText(),
                     blueprintStackInfo.getVersion(), blueprintStackInfo.getType(),
                     blueprintTextProcessorFactory.createBlueprintTextProcessor(blueprint.getBlueprintText()));

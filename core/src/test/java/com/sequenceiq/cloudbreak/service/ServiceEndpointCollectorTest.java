@@ -131,7 +131,7 @@ public class ServiceEndpointCollectorTest {
                 new ExposedService[]{BEACON_SERVER, HIVE_SERVER}, GatewayType.INDIVIDUAL);
 
         String result = underTest.getAmbariServerUrl(cluster, AMBARI_IP);
-        assertEquals("", result);
+        assertEquals("https://127.0.0.1/", result);
     }
 
     @Test

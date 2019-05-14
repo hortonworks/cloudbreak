@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.produ
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ClouderaManagerStackDescriptorV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
+import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -30,13 +31,12 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
-import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
@@ -81,8 +81,7 @@ public class ClouderaManagerClusterCreationSetupService {
         return components;
     }
 
-    private void checkCmStackRepositories(ClusterComponent cmRepoConfig, Component imageComponent)
-            throws IOException {
+    private void checkCmStackRepositories(ClusterComponent cmRepoConfig, Component imageComponent) throws IOException {
         if (Objects.nonNull(cmRepoConfig)) {
             ClouderaManagerRepo clouderaManagerRepo = cmRepoConfig.getAttributes().get(ClouderaManagerRepo.class);
             Image image = imageComponent.getAttributes().get(Image.class);
@@ -155,7 +154,7 @@ public class ClouderaManagerClusterCreationSetupService {
     }
 
     private String getOsType(Optional<Component> stackImageComponent) throws IOException {
-        if (Objects.nonNull(stackImageComponent) &&  stackImageComponent.isPresent()) {
+        if (Objects.nonNull(stackImageComponent) && stackImageComponent.isPresent()) {
             Image image = stackImageComponent.get().getAttributes().get(Image.class);
             return image.getOsType();
         } else {

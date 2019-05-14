@@ -1,9 +1,10 @@
-{% if ldap.ldap %}
+{%- if ldap.ldap -%}
+# Configure external auth type
 setsettings LDAP_TYPE LDAP
-{% endif %}
-#this is to specify authentication backend
+{%- endif %}
+# Specify the authentication backend
 setsettings AUTH_BACKEND_ORDER DB_THEN_LDAP
-# this is to specify authorization backend
+# Specify the authorization backend
 setsettings LDAP_URL {{ ldap.connectionURL }}
 setsettings LDAP_BIND_DN {{ ldap.bindDn }}
 setsettings LDAP_BIND_PW {{ ldap.bindPassword }}

@@ -29,8 +29,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4Response;
-import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
@@ -39,7 +40,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintTextProcessorUtil;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.ClusterManagerType;
 
 @Service
@@ -75,10 +75,14 @@ public class ServiceEndpointCollector {
             } else {
                 Gateway gateway = cluster.getGateway();
                 if (gateway != null) {
-                    Optional<GatewayTopology> gatewayTopologyWithAmbari = getGatewayTopologyWithAmbari(gateway);
-                    Optional<String> ambariUrl = gatewayTopologyWithAmbari.map(gt -> getAmbariUrlFromGatewayTopology(ambariIp, gateway, gt));
-                    // when knox gateway is enabled, but ambari is not exposed, there is no available ambari URL
-                    return ambariUrl.orElse("");
+                    Optional<GatewayTopology> ambariTopology = getGatewayTopologyForService(gateway, ExposedService.AMBARI);
+                    Optional<String> managerUrl = ambariTopology.map(t -> getExposedServiceUrl(ambariIp, gateway, t.getTopologyName(), ExposedService.AMBARI));
+                    if (managerUrl.isEmpty()) {
+                        Optional<GatewayTopology> cmTopology = getGatewayTopologyForService(gateway, ExposedService.CLOUDERA_MANAGER);
+                        managerUrl = cmTopology.map(t -> getExposedServiceUrl(ambariIp, gateway, t.getTopologyName(), ExposedService.CLOUDERA_MANAGER));
+                    }
+                    // when knox gateway is enabled, but ambari/cm is not exposed, use the default url
+                    return managerUrl.orElse(String.format("https://%s/", ambariIp));
                 }
                 return String.format("https://%s/", ambariIp);
             }
@@ -133,10 +137,10 @@ public class ServiceEndpointCollector {
         return "HDF".equals(stackName) && versionComparator.compare(() -> stackVersion, () -> "3.2") < 0
                 ? Collections.emptyList()
                 : ExposedService.knoxServicesForComponents(blueprintComponents).stream()
-                    .filter(exposedService -> !("HDP".equals(stackName)
-                            && versionComparator.compare(() -> stackVersion, () -> "2.6") <= 0
-                            && excludedServicesForHdp26().contains(exposedService)))
-                    .collect(Collectors.toSet());
+                .filter(exposedService -> !("HDP".equals(stackName)
+                        && versionComparator.compare(() -> stackVersion, () -> "2.6") <= 0
+                        && excludedServicesForHdp26().contains(exposedService)))
+                .collect(Collectors.toSet());
     }
 
     private List<ExposedService> excludedServicesForHdp26() {
@@ -176,10 +180,7 @@ public class ServiceEndpointCollector {
             } else if (ExposedService.NAMENODE.equals(exposedService) && versionComparator.compare(() -> stackVersion, () -> "2.6") > 0) {
                 return getHdfsUIUrl(gateway, ambariIp, privateIps.get(ExposedService.NAMENODE.getServiceName()).iterator().next());
             } else {
-                String url = GatewayType.CENTRAL == gateway.getGatewayType()
-                        ? String.format("/%s/%s%s", gateway.getPath(), topologyName, exposedService.getKnoxUrl())
-                        : String.format("https://%s:%s/%s/%s%s", ambariIp, knoxPort, gateway.getPath(), topologyName, exposedService.getKnoxUrl());
-                return Optional.of(url);
+                return Optional.of(getExposedServiceUrl(ambariIp, gateway, topologyName, exposedService));
             }
         }
         return Optional.empty();
@@ -193,8 +194,8 @@ public class ServiceEndpointCollector {
         return exposedServices.contains(exposedService.getKnoxService());
     }
 
-    private Optional<GatewayTopology> getGatewayTopologyWithAmbari(Gateway gateway) {
-        return getGatewayTopology(ExposedService.AMBARI, gateway);
+    private Optional<GatewayTopology> getGatewayTopologyForService(Gateway gateway, ExposedService exposedService) {
+        return getGatewayTopology(exposedService, gateway);
     }
 
     private Optional<GatewayTopology> getGatewayTopologyWithHive(Gateway gateway) {
@@ -214,10 +215,10 @@ public class ServiceEndpointCollector {
                 .findFirst();
     }
 
-    private String getAmbariUrlFromGatewayTopology(String ambariIp, Gateway gateway, GatewayTopology gt) {
+    private String getExposedServiceUrl(String ambariIp, Gateway gateway, String topologyName, ExposedService exposedService) {
         return GatewayType.CENTRAL == gateway.getGatewayType()
-                ? String.format("/%s/%s/ambari/", gateway.getPath(), gt.getTopologyName())
-                : String.format("https://%s:%s/%s/%s/ambari/", ambariIp, knoxPort, gateway.getPath(), gt.getTopologyName());
+                ? String.format("/%s/%s%s", gateway.getPath(), topologyName, exposedService.getKnoxUrl())
+                : String.format("https://%s:%s/%s/%s%s", ambariIp, knoxPort, gateway.getPath(), topologyName, exposedService.getKnoxUrl());
     }
 
     private Optional<String> getHdfsUIUrl(Gateway gateway, String ambariIp, String nameNodePrivateIp) {

@@ -63,9 +63,13 @@ base:
     - match: grain
     - ambari.agent
 
-  'roles:gateway':
-    - match: grain
-    - gateway
+  'G@roles:gateway and G@roles:ambari*':
+    - match: compound
+    - gateway.ambari
+
+  'G@roles:gateway and G@roles:manager*':
+    - match: compound
+    - gateway.cm
 
   'roles:smartsense':
     - match: grain
