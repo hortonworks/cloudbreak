@@ -12,9 +12,18 @@ repositories {
 }
 
 dependencies {
-  compile project(':structuredevent-model')
-  compile project(':secret-engine')
+  implementation project(':structuredevent-model')
+  implementation project(':secret-engine')
+  implementation project(':common')
 
-  compile group: 'io.swagger', name: 'swagger-jersey2-jaxrs', version: "1.5.21"
-  compile group: 'javax.validation', name: 'validation-api', version: '2.0.1.Final'
+  implementation group: 'io.swagger', name: 'swagger-jersey2-jaxrs', version: "1.5.21"
+  implementation group: 'javax.validation', name: 'validation-api', version: '2.0.1.Final'
+  implementation group: 'org.glassfish.jersey.ext',      name: 'jersey-proxy-client',            version: jerseyCoreVersion
+  implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
+  implementation group: 'javax.activation',              name: 'activation',                     version: "1.1.1"
+  implementation group: 'javax.xml.bind',                name: 'jaxb-api',                       version: "2.3.0"
+  implementation group: 'com.sun.xml.bind',              name: 'jaxb-impl',                      version: "2.3.0"
+  implementation group: 'com.sun.xml.bind',              name: 'jaxb-core',                      version: "2.3.0"
+  implementation group: 'com.sun.xml.ws',                name: 'rt',                             version: "2.3.0"
+  implementation group: 'com.sun.xml.ws',                name: 'jaxws-rt',                       version: "2.3.0"
 }
