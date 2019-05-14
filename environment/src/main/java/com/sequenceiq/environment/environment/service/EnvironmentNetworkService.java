@@ -14,6 +14,7 @@ public class EnvironmentNetworkService {
     @Named("baseNetworkRepository")
     private BaseNetworkRepository networkRepository;
 
+    @SuppressWarnings("unchecked")
     public BaseNetwork save(BaseNetwork awsNetwork) {
         Object saved = networkRepository.save(awsNetwork);
         return (BaseNetwork) saved;

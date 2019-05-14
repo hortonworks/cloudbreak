@@ -16,12 +16,12 @@ import javax.inject.Named;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.BadRequestException;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
@@ -186,7 +186,7 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
             editRegionsAndLocation(request, environment, cloudRegions);
         } else if (locationChanged(request)) {
             editLocation(request, environment, cloudRegions);
-        } else if (CollectionUtils.isNotEmpty(request.getRegions())) {
+        } else if (!CollectionUtils.isEmpty(request.getRegions())) {
             LocationV1Request locationRequest = conversionService.convert(environment, LocationV1Request.class);
             request.setLocation(locationRequest);
             editRegions(request, environment, cloudRegions);
@@ -203,7 +203,7 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
     }
 
     private boolean locationAndRegionChanged(EnvironmentEditV1Request request) {
-        return CollectionUtils.isNotEmpty(request.getRegions())
+        return !CollectionUtils.isEmpty(request.getRegions())
                 && locationChanged(request);
     }
 

@@ -7,7 +7,7 @@ import com.sequenceiq.environment.api.environment.model.request.EnvironmentNetwo
 
 public interface EnvironmentNetworkValidator {
 
-    void validate(EnvironmentNetworkV1Request networkV4Request, ValidationResult.ValidationResultBuilder resultBuilder);
+    void validate(EnvironmentNetworkV1Request networkV1Request, ValidationResult.ValidationResultBuilder resultBuilder);
 
     CloudPlatform getCloudPlatform();
 

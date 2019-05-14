@@ -22,9 +22,9 @@ public class AwsEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
     @Override
     EnvironmentNetworkV1Response setProviderSpecificFields(EnvironmentNetworkV1Response result, BaseNetwork network) {
         AwsNetwork awsNetwork = (AwsNetwork) network;
-        EnvironmentNetworkAwsV1Params awsV4Params = new EnvironmentNetworkAwsV1Params();
-        awsV4Params.setVpcId(awsNetwork.getVpcId());
-        result.setAws(awsV4Params);
+        EnvironmentNetworkAwsV1Params awsV1Params = new EnvironmentNetworkAwsV1Params();
+        awsV1Params.setVpcId(awsNetwork.getVpcId());
+        result.setAws(awsV1Params);
         return result;
     }
 

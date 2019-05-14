@@ -201,11 +201,6 @@
             <!-- deprecated lib -->
             <property name="illegalPkgs" value="org.apache.commons.collections" />
         </module>
-        <module name="IllegalImport">
-            <!-- prohibited transactional -->
-            <property name="id" value="IllegalTransaction"/>
-            <property name="illegalClasses" value="javax.transaction.Transactional, org.springframework.transaction.annotation.Transactional" />
-        </module>
 
         <!-- Missing code -->
         <module name="HideUtilityClassConstructor" />

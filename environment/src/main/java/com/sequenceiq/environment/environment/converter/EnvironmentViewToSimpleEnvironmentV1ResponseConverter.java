@@ -44,8 +44,8 @@ public class EnvironmentViewToSimpleEnvironmentV1ResponseConverter extends
             CloudPlatform cloudPlatform = CloudPlatform.valueOf(source.getCloudPlatform());
             EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(cloudPlatform);
             if (environmentNetworkConverter != null) {
-                EnvironmentNetworkV1Response networkV4Response = environmentNetworkConverter.convert(source.getNetwork());
-                response.setNetwork(networkV4Response);
+                EnvironmentNetworkV1Response networkV1Response = environmentNetworkConverter.convert(source.getNetwork());
+                response.setNetwork(networkV1Response);
             }
         }
     }

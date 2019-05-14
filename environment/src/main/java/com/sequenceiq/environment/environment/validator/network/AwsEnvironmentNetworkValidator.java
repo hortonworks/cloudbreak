@@ -14,10 +14,10 @@ import com.sequenceiq.environment.api.environment.model.request.EnvironmentNetwo
 public class AwsEnvironmentNetworkValidator implements EnvironmentNetworkValidator {
 
     @Override
-    public void validate(EnvironmentNetworkV1Request networkRequest, ValidationResult.ValidationResultBuilder resultBuilder) {
-        if (networkRequest != null) {
-            if (networkRequest.getAws() != null) {
-                if (StringUtils.isEmpty(networkRequest.getAws().getVpcId())) {
+    public void validate(EnvironmentNetworkV1Request networkV1Request, ValidationResult.ValidationResultBuilder resultBuilder) {
+        if (networkV1Request != null) {
+            if (networkV1Request.getAws() != null) {
+                if (StringUtils.isEmpty(networkV1Request.getAws().getVpcId())) {
                     resultBuilder.error(missingParamErrorMessage("VPC identifier(vpcId)'", getCloudPlatform().name()));
                 }
             } else {

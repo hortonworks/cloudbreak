@@ -14,8 +14,8 @@ import com.sequenceiq.environment.api.environment.model.request.EnvironmentNetwo
 public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValidator {
 
     @Override
-    public void validate(EnvironmentNetworkV1Request networkV4Request, ValidationResult.ValidationResultBuilder resultBuilder) {
-        EnvironmentNetworkAzureV1Params azureParams = networkV4Request.getAzure();
+    public void validate(EnvironmentNetworkV1Request networkV1Request, ValidationResult.ValidationResultBuilder resultBuilder) {
+        EnvironmentNetworkAzureV1Params azureParams = networkV1Request.getAzure();
         if (azureParams != null) {
             if (StringUtils.isEmpty(azureParams.getNetworkId())) {
                 resultBuilder.error(missingParamErrorMessage("network identifier(networkId)", getCloudPlatform().name()));
