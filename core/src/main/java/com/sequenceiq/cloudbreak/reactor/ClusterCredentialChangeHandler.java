@@ -38,7 +38,7 @@ public class ClusterCredentialChangeHandler implements ReactorEventHandler<Clust
         ClusterCredentialChangeRequest request = event.getData();
         ClusterCredentialChangeResult result;
         try {
-            Stack stack = stackService.getByIdWithListsInTransaction(request.getStackId());
+            Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
             ClusterSecurityService clusterSecurityService = clusterApiConnectors.getConnector(stack).clusterSecurityService();
             switch (request.getType()) {
                 case REPLACE:

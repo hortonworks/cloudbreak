@@ -21,7 +21,7 @@ public class FlowLog {
     private Long id;
 
     @Column(nullable = false)
-    private Long stackId;
+    private Long resourceId;
 
     private Long created = new Date().getTime();
 
@@ -55,21 +55,23 @@ public class FlowLog {
     @Version
     private Long version;
 
+    private String resourceType;
+
     public FlowLog() {
 
     }
 
-    public FlowLog(Long stackId, String flowId, String currentState, Boolean finalized, StateStatus stateStatus) {
-        this.stackId = stackId;
+    public FlowLog(Long resourceId, String flowId, String currentState, Boolean finalized, StateStatus stateStatus) {
+        this.resourceId = resourceId;
         this.flowId = flowId;
         this.currentState = currentState;
         this.finalized = finalized;
         this.stateStatus = stateStatus;
     }
 
-    public FlowLog(Long stackId, String flowId, String flowChainId, String nextEvent, String payload, Class<?> payloadType, String variables, Class<?> flowType,
-            String currentState) {
-        this.stackId = stackId;
+    public FlowLog(Long resourceId, String flowId, String flowChainId, String nextEvent, String payload,
+            Class<?> payloadType, String variables, Class<?> flowType, String currentState) {
+        this.resourceId = resourceId;
         this.flowId = flowId;
         this.flowChainId = flowChainId;
         this.nextEvent = nextEvent;
@@ -88,12 +90,12 @@ public class FlowLog {
         this.id = id;
     }
 
-    public Long getStackId() {
-        return stackId;
+    public Long getResourceId() {
+        return resourceId;
     }
 
-    public void setStackId(Long stackId) {
-        this.stackId = stackId;
+    public void setResourceId(Long resourceId) {
+        this.resourceId = resourceId;
     }
 
     public Long getCreated() {
@@ -200,4 +202,11 @@ public class FlowLog {
         this.stateStatus = stateStatus;
     }
 
+    public String getResourceType() {
+        return resourceType;
+    }
+
+    public void setResourceType(String resourceType) {
+        this.resourceType = resourceType;
+    }
 }

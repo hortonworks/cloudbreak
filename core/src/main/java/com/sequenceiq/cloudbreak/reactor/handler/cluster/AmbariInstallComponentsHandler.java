@@ -34,7 +34,7 @@ public class AmbariInstallComponentsHandler implements ReactorEventHandler<Ambar
     @Override
     public void accept(Event<AmbariInstallComponentsRequest> event) {
         AmbariInstallComponentsRequest request = event.getData();
-        Long stackId = request.getStackId();
+        Long stackId = request.getResourceId();
         AmbariInstallComponentsResult result;
         try {
             clusterUpscaleService.installComponents(stackId, request.getComponents(), request.getHostName());

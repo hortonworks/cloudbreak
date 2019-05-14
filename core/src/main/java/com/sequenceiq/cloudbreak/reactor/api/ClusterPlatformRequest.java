@@ -12,7 +12,7 @@ public abstract class ClusterPlatformRequest implements Selectable {
     }
 
     @Override
-    public Long getStackId() {
+    public Long getResourceId() {
         return stackId;
     }
 

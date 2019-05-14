@@ -38,11 +38,11 @@ public class BootstrapMachineHandler implements EventHandler<BootstrapMachinesRe
         BootstrapMachinesRequest request = event.getData();
         Selectable response;
         try {
-            bootstrapService.bootstrap(request.getStackId());
-            response = new BootstrapMachinesSuccess(request.getStackId());
+            bootstrapService.bootstrap(request.getResourceId());
+            response = new BootstrapMachinesSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("Bootstrap failed", e);
-            response = new BootstrapMachinesFailed(request.getStackId(), e);
+            response = new BootstrapMachinesFailed(request.getResourceId(), e);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }

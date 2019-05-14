@@ -266,14 +266,14 @@ public class HeartbeatServiceTest {
 
         when(runningFlows.get(any())).thenReturn(null);
 
-        List<Long> stackIds = myNewFlowLogs.stream().map(FlowLog::getStackId).distinct().collect(Collectors.toList());
+        List<Long> stackIds = myNewFlowLogs.stream().map(FlowLog::getResourceId).distinct().collect(Collectors.toList());
         List<Object[]> statusResponse = new ArrayList<>();
         statusResponse.add(new Object[]{stackIds.get(0), Status.DELETE_IN_PROGRESS});
         statusResponse.add(new Object[]{stackIds.get(2), Status.DELETE_IN_PROGRESS});
         when(stackService.getStatuses(any())).thenReturn(statusResponse);
 
         List<FlowLog> invalidFlowLogs = myNewFlowLogs.stream()
-                .filter(fl -> fl.getStackId().equals(stackIds.get(0)) || fl.getStackId().equals(stackIds.get(2))).collect(Collectors.toList());
+                .filter(fl -> fl.getResourceId().equals(stackIds.get(0)) || fl.getResourceId().equals(stackIds.get(2))).collect(Collectors.toList());
 
         heartbeatService.scheduledFlowDistribution();
 
@@ -334,7 +334,7 @@ public class HeartbeatServiceTest {
 
         when(runningFlows.get(any())).thenReturn(null);
 
-        List<Long> stackIds = myNewFlowLogs.stream().map(FlowLog::getStackId).distinct().collect(Collectors.toList());
+        List<Long> stackIds = myNewFlowLogs.stream().map(FlowLog::getResourceId).distinct().collect(Collectors.toList());
         List<Object[]> statusResponse = new ArrayList<>();
         statusResponse.add(new Object[]{stackIds.get(0), Status.DELETE_IN_PROGRESS});
         statusResponse.add(new Object[]{stackIds.get(2), Status.DELETE_IN_PROGRESS});
@@ -459,7 +459,7 @@ public class HeartbeatServiceTest {
         ReflectionTestUtils.setField(heartbeatService, "retryService", new TestRetry());
 
         // Mock InMemoryStateStore for check method execution success
-        Set<Long> myStackIds = flowLogs.stream().map(FlowLog::getStackId).collect(Collectors.toSet());
+        Set<Long> myStackIds = flowLogs.stream().map(FlowLog::getResourceId).collect(Collectors.toSet());
         for (Long myStackId : myStackIds) {
             InMemoryStateStore.putStack(myStackId, PollGroup.POLLABLE);
         }
@@ -495,7 +495,7 @@ public class HeartbeatServiceTest {
         ReflectionTestUtils.setField(heartbeatService, "retryService", new TestRetryWithFail());
 
         // Mock InMemoryStateStore for check method execution success
-        Set<Long> myStackIds = flowLogs.stream().map(FlowLog::getStackId).collect(Collectors.toSet());
+        Set<Long> myStackIds = flowLogs.stream().map(FlowLog::getResourceId).collect(Collectors.toSet());
         for (Long myStackId : myStackIds) {
             InMemoryStateStore.putStack(myStackId, PollGroup.POLLABLE);
         }
@@ -550,7 +550,7 @@ public class HeartbeatServiceTest {
         when(flowDistributor.distribute(anyList(), eq(clusterNodes.subList(2, clusterNodes.size())))).thenReturn(flowDistribution);
 
         List<Object[]> stackStatuses = failedFLowLogs1.stream()
-                .map(FlowLog::getStackId)
+                .map(FlowLog::getResourceId)
                 .map(stackId -> new Object[]{stackId, Status.DELETE_IN_PROGRESS})
                 .collect(Collectors.toList());
         when(stackService.getStatuses(anySet())).thenReturn(stackStatuses);

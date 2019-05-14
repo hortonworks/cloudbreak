@@ -90,7 +90,7 @@ public class ClusterCredentialChangeActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Exception during cluster authentication change!: {}", payload.getException().getMessage());
-                flowMessageService.fireEventAndLog(payload.getStackId(), Msg.CLUSTER_CHANGE_CREDENTIAL_FAILED, UPDATE_FAILED.name());
+                flowMessageService.fireEventAndLog(payload.getResourceId(), Msg.CLUSTER_CHANGE_CREDENTIAL_FAILED, UPDATE_FAILED.name());
                 sendEvent(context);
             }
 

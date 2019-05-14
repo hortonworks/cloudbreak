@@ -32,7 +32,7 @@ public class UpscalePostRecipesHandler implements ReactorEventHandler<UpscalePos
         UpscalePostRecipesRequest request = event.getData();
         UpscalePostRecipesResult result;
         try {
-            clusterUpscaleService.executePostRecipesOnNewHosts(request.getStackId());
+            clusterUpscaleService.executePostRecipesOnNewHosts(request.getResourceId());
             result = new UpscalePostRecipesResult(request);
         } catch (Exception e) {
             result = new UpscalePostRecipesResult(e.getMessage(), e, request);

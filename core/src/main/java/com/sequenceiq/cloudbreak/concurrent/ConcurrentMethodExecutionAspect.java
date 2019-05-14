@@ -111,7 +111,7 @@ public class ConcurrentMethodExecutionAspect {
 
     private Long getStackId(JoinPoint joinPoint) {
         Payload payload = getPayload(joinPoint);
-        return payload == null ? null : payload.getStackId();
+        return payload == null ? null : payload.getResourceId();
     }
 
     private Payload getPayload(JoinPoint joinPoint) {

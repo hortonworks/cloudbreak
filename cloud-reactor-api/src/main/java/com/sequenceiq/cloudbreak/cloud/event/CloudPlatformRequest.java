@@ -35,7 +35,7 @@ public class CloudPlatformRequest<T> implements Selectable {
     }
 
     @Override
-    public Long getStackId() {
+    public Long getResourceId() {
         return cloudContext.getId();
     }
 

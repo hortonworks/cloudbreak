@@ -103,8 +103,8 @@ public class StackUpscaleActions {
                     stackUpscaleService.startAddInstances(context.getStack(), payload.getAdjustment());
                     sendEvent(context);
                 } else {
-                    List<CloudResourceStatus> list = resourceService.getAllAsCloudResourceStatus(payload.getStackId());
-                    CloudStack stack = cloudStackConverter.convert(stackService.getByIdWithListsInTransaction(payload.getStackId()));
+                    List<CloudResourceStatus> list = resourceService.getAllAsCloudResourceStatus(payload.getResourceId());
+                    CloudStack stack = cloudStackConverter.convert(stackService.getByIdWithListsInTransaction(payload.getResourceId()));
                     UpscaleStackRequest<UpscaleStackResult> request =
                             new UpscaleStackRequest<>(context.getCloudContext(), context.getCloudCredential(), stack, ResourceLists.transform(list));
                     UpscaleStackResult result = new UpscaleStackResult(request, ResourceStatus.CREATED, list);
@@ -200,7 +200,7 @@ public class StackUpscaleActions {
                     throws TransactionExecutionException {
                 Set<String> upscaleCandidateAddresses = stackUpscaleService.finishExtendMetadata(context.getStack(), context.getInstanceGroupName(), payload);
                 variables.put(UPSCALE_CANDIDATE_ADDRESSES, upscaleCandidateAddresses);
-                InstanceGroup ig = instanceGroupService.findOneByGroupNameInStack(payload.getStackId(), context.getInstanceGroupName())
+                InstanceGroup ig = instanceGroupService.findOneByGroupNameInStack(payload.getResourceId(), context.getInstanceGroupName())
                         .orElseThrow(NotFoundException.notFound("instanceGroup", context.getInstanceGroupName()));
                 if (InstanceGroupType.GATEWAY == ig.getInstanceGroupType()) {
                     Stack stack = stackService.getByIdWithListsInTransaction(context.getStack().getId());
@@ -224,7 +224,7 @@ public class StackUpscaleActions {
             protected void doExecute(StackScalingFlowContext context, GetSSHFingerprintsResult payload, Map<Object, Object> variables) throws Exception {
                 stackUpscaleService.setupTls(context);
                 BootstrapNewNodesEvent bootstrapNewNodesEvent =
-                        new BootstrapNewNodesEvent(payload.getStackId(), (Set<String>) variables.get(UPSCALE_CANDIDATE_ADDRESSES));
+                        new BootstrapNewNodesEvent(payload.getResourceId(), (Set<String>) variables.get(UPSCALE_CANDIDATE_ADDRESSES));
                 sendEvent(context.getFlowId(), StackCreationEvent.TLS_SETUP_FINISHED_EVENT.event(), bootstrapNewNodesEvent);
             }
         };

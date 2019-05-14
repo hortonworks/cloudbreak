@@ -33,9 +33,9 @@ public class ChangePrimaryGatewayHandler implements ReactorEventHandler<ChangePr
         ChangePrimaryGatewayRequest request = event.getData();
         Selectable response;
         try {
-            response = new ChangePrimaryGatewaySuccess(request.getStackId(), clusterServiceRunner.changePrimaryGateway(request.getStackId()));
+            response = new ChangePrimaryGatewaySuccess(request.getResourceId(), clusterServiceRunner.changePrimaryGateway(request.getResourceId()));
         } catch (Exception e) {
-            response = new ChangePrimaryGatewayFailed(request.getStackId(), e);
+            response = new ChangePrimaryGatewayFailed(request.getResourceId(), e);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }

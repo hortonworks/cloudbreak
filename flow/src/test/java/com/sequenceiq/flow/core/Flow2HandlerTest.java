@@ -344,7 +344,7 @@ public class Flow2HandlerTest {
         verify(defaultRestartAction, times(1)).restart(eq(FLOW_ID), eq(FLOW_CHAIN_ID), eq(NEXT_EVENT), payloadCaptor.capture());
 
         Payload captorValue = payloadCaptor.getValue();
-        assertEquals(STACK_ID, captorValue.getStackId());
+        assertEquals(STACK_ID, captorValue.getResourceId());
     }
 
     @Test

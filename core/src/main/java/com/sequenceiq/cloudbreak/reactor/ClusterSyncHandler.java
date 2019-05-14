@@ -49,8 +49,8 @@ public class ClusterSyncHandler implements ReactorEventHandler<ClusterSyncReques
         ClusterSyncRequest request = event.getData();
         ClusterSyncResult result;
         try {
-            Stack stack = stackService.getByIdWithListsInTransaction(request.getStackId());
-            Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(request.getStackId()).orElse(null);
+            Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
+            Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(request.getResourceId()).orElse(null);
             clusterStatusUpdater.updateClusterStatus(stack, cluster);
             if (cluster != null && (cluster.isAvailable() || cluster.isMaintenanceModeEnabled())) {
                 instanceMetadataUpdater.updatePackageVersionsOnAllInstances(stack);

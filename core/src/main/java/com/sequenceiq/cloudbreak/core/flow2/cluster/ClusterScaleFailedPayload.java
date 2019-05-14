@@ -17,7 +17,7 @@ public class ClusterScaleFailedPayload implements HostGroupPayload {
     }
 
     @Override
-    public Long getStackId() {
+    public Long getResourceId() {
         return stackId;
     }
 

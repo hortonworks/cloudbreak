@@ -31,7 +31,7 @@ public class ExtendHostMetadataHandler implements ReactorEventHandler<ExtendHost
         ExtendHostMetadataRequest request = event.getData();
         ExtendHostMetadataResult result;
         try {
-            hostMetadataSetup.setupNewHostMetadata(request.getStackId(), request.getUpscaleCandidateAddresses());
+            hostMetadataSetup.setupNewHostMetadata(request.getResourceId(), request.getUpscaleCandidateAddresses());
             result = new ExtendHostMetadataResult(request);
         } catch (Exception e) {
             result = new ExtendHostMetadataResult(e.getMessage(), e, request);

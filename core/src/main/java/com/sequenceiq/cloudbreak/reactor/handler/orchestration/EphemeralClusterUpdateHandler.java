@@ -33,10 +33,10 @@ public class EphemeralClusterUpdateHandler implements ReactorEventHandler<Epheme
         EphemeralClusterUpdateRequest request = event.getData();
         Selectable response;
         try {
-            clusterServiceRunner.updateSaltState(request.getStackId());
-            response = new EphemeralClusterUpdateSuccess(request.getStackId());
+            clusterServiceRunner.updateSaltState(request.getResourceId());
+            response = new EphemeralClusterUpdateSuccess(request.getResourceId());
         } catch (Exception e) {
-            response = new EphemeralClusterUpdateFailed(request.getStackId(), e);
+            response = new EphemeralClusterUpdateFailed(request.getResourceId(), e);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }

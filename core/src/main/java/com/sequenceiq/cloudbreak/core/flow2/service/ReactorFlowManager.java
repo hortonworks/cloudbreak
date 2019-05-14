@@ -272,7 +272,7 @@ public class ReactorFlowManager {
     private void notify(String selector, Acceptable acceptable, Function<Long, Stack> getStackFn) {
         Event<Acceptable> event = eventFactory.createEventWithErrHandler(acceptable);
 
-        Stack stack = getStackFn.apply(event.getData().getStackId());
+        Stack stack = getStackFn.apply(event.getData().getResourceId());
         Optional.ofNullable(stack).map(Stack::getCluster).map(Cluster::getStatus).ifPresent(isTriggerAllowedInMaintenance(selector));
 
         reactor.notify(selector, event);

@@ -45,7 +45,7 @@ public class LdapSSOConfigurationHandler implements ReactorEventHandler<LdapSSOC
 
     @Override
     public void accept(Event<LdapSSOConfigurationRequest> ldapConfigurationRequestEvent) {
-        Long stackId = ldapConfigurationRequestEvent.getData().getStackId();
+        Long stackId = ldapConfigurationRequestEvent.getData().getResourceId();
         Selectable response;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);

@@ -52,7 +52,7 @@ public class AmbariStartServerAndAgentHandler implements ReactorEventHandler<Amb
     @Override
     public void accept(Event<AmbariStartServerAndAgentRequest> event) {
         AmbariStartServerAndAgentRequest request = event.getData();
-        Long stackId = request.getStackId();
+        Long stackId = request.getResourceId();
         StartServerAndAgentResult result;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);

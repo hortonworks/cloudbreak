@@ -204,7 +204,7 @@ public class ReactorFlowManagerTest {
         }
 
         @Override
-        public Long getStackId() {
+        public Long getResourceId() {
             return STACK_ID;
         }
     }

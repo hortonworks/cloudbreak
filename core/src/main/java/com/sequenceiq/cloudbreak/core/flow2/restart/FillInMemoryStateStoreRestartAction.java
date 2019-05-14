@@ -23,7 +23,7 @@ public class FillInMemoryStateStoreRestartAction extends DefaultRestartAction {
     @Override
     public void restart(String flowId, String flowChainId, String event, Object payload) {
         Payload stackPayload = (Payload) payload;
-        Stack stack = stackService.getByIdWithListsInTransaction(stackPayload.getStackId());
+        Stack stack = stackService.getByIdWithListsInTransaction(stackPayload.getResourceId());
         restart(flowId, flowChainId, event, payload, stack);
     }
 

@@ -23,8 +23,8 @@ public class ResetFlowEventChainFactory implements FlowEventChainFactory<StackEv
     @Override
     public Queue<Selectable> createFlowTriggerEventQueue(StackEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
-        flowEventChain.add(new StackEvent(CLUSTER_RESET_EVENT.event(), event.getStackId(), event.accepted()));
-        flowEventChain.add(new StartClusterSuccess(CLUSTER_INSTALL_EVENT.event(), event.getStackId()));
+        flowEventChain.add(new StackEvent(CLUSTER_RESET_EVENT.event(), event.getResourceId(), event.accepted()));
+        flowEventChain.add(new StartClusterSuccess(CLUSTER_INSTALL_EVENT.event(), event.getResourceId()));
         return flowEventChain;
     }
 }

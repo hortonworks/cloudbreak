@@ -31,7 +31,7 @@ public class ClusterUpgradeHandler implements ReactorEventHandler<ClusterUpgrade
         ClusterUpgradeRequest request = event.getData();
         ClusterUpgradeResult result;
         try {
-            clusterManagerUpgradeService.upgradeCluster(request.getStackId());
+            clusterManagerUpgradeService.upgradeCluster(request.getResourceId());
             result = new ClusterUpgradeResult(request);
         } catch (Exception e) {
             result = new ClusterUpgradeResult(e.getMessage(), e, request);

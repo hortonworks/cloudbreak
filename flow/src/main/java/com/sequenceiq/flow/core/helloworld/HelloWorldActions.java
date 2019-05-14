@@ -34,7 +34,7 @@ public class HelloWorldActions {
             @Override
             protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) {
                 sendEvent(context.getFlowId(), FINALIZE_HELLO_WORLD_EVENT.event(),
-                        new HelloWorldFinishPayload(FINALIZE_HELLO_WORLD_EVENT.event(), payload.getStackId()));
+                        new HelloWorldFinishPayload(FINALIZE_HELLO_WORLD_EVENT.event(), payload.getResourceId()));
             }
         };
     }

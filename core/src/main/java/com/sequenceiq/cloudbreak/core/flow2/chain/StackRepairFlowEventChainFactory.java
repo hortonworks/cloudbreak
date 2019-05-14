@@ -25,13 +25,13 @@ public class StackRepairFlowEventChainFactory implements FlowEventChainFactory<S
     @Override
     public Queue<Selectable> createFlowTriggerEventQueue(StackRepairTriggerEvent event) {
         Queue<Selectable> flowChainTriggers = new ConcurrentLinkedDeque<>();
-        flowChainTriggers.add(new StackEvent(FlowChainTriggers.FULL_SYNC_TRIGGER_EVENT, event.getStackId(), event.accepted()));
+        flowChainTriggers.add(new StackEvent(FlowChainTriggers.FULL_SYNC_TRIGGER_EVENT, event.getResourceId(), event.accepted()));
         UnhealthyInstances unhealthyInstances = event.getUnhealthyInstances();
         String fullUpscaleTriggerEvent = FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT;
         for (String hostGroupName : unhealthyInstances.getHostGroups()) {
             List<String> instances = unhealthyInstances.getInstancesForGroup(hostGroupName);
             flowChainTriggers.add(
-                    new StackAndClusterUpscaleTriggerEvent(fullUpscaleTriggerEvent, event.getStackId(), hostGroupName,
+                    new StackAndClusterUpscaleTriggerEvent(fullUpscaleTriggerEvent, event.getResourceId(), hostGroupName,
                             instances.size(), ScalingType.UPSCALE_TOGETHER));
         }
         return flowChainTriggers;

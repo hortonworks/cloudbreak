@@ -34,7 +34,7 @@ public class AmbariRestartAllHandler implements ReactorEventHandler<AmbariRestar
     @Override
     public void accept(Event<AmbariRestartAllRequest> event) {
         AmbariRestartAllRequest request = event.getData();
-        Long stackId = request.getStackId();
+        Long stackId = request.getResourceId();
         AmbariRestartAllResult result;
         try {
             clusterUpscaleService.restartAll(stackId);

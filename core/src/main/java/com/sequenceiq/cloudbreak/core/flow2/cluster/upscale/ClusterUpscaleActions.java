@@ -407,13 +407,13 @@ public class ClusterUpscaleActions {
 
         @Override
         protected Object getFailurePayload(P payload, Optional<ClusterUpscaleContext> flowContext, Exception ex) {
-            return new StackFailureEvent(payload.getStackId(), ex);
+            return new StackFailureEvent(payload.getResourceId(), ex);
         }
 
         @Override
         protected ClusterUpscaleContext createFlowContext(String flowId, StateContext<ClusterUpscaleState, ClusterUpscaleEvent> stateContext, P payload) {
             Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
-            StackView stack = stackService.getViewByIdWithoutAuth(payload.getStackId());
+            StackView stack = stackService.getViewByIdWithoutAuth(payload.getResourceId());
             MDCBuilder.buildMdcContext(stack.getId().toString(), stack.getName(), "CLUSTER");
             return new ClusterUpscaleContext(
                     flowId, stack, getHostgroupName(variables), getAdjustment(variables),

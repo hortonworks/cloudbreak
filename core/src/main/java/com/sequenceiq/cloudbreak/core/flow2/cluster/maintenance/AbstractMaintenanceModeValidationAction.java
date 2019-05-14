@@ -47,7 +47,7 @@ abstract class AbstractMaintenanceModeValidationAction<P extends Payload> extend
     @Override
     protected StackContext createFlowContext(String flowId, StateContext<MaintenanceModeValidationState,
             MaintenanceModeValidationEvent> stateContext, P payload) {
-        Stack stack = stackService.getByIdWithListsInTransaction(payload.getStackId());
+        Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
@@ -59,7 +59,7 @@ abstract class AbstractMaintenanceModeValidationAction<P extends Payload> extend
 
     @Override
     protected Object getFailurePayload(P payload, Optional<StackContext> flowContext, Exception ex) {
-        return new StackFailureEvent(payload.getStackId(), ex);
+        return new StackFailureEvent(payload.getResourceId(), ex);
     }
 }
 

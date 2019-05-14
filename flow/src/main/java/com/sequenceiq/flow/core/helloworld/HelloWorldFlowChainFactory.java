@@ -19,7 +19,7 @@ public class HelloWorldFlowChainFactory implements FlowEventChainFactory<BaseFlo
     @Override
     public Queue<Selectable> createFlowTriggerEventQueue(BaseFlowEvent event) {
         Queue<Selectable> flowChainTriggers = new ConcurrentLinkedDeque<>();
-        flowChainTriggers.add(new BaseFlowEvent(HelloWorldEvent.START_HELLO_WORLD_EVENT.event(), event.getStackId(), event.accepted()));
+        flowChainTriggers.add(new BaseFlowEvent(HelloWorldEvent.START_HELLO_WORLD_EVENT.event(), event.getResourceId(), event.accepted()));
         return flowChainTriggers;
     }
 }

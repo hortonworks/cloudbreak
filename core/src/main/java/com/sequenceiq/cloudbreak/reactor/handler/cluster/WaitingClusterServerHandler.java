@@ -35,7 +35,7 @@ public class WaitingClusterServerHandler implements ReactorEventHandler<WaitForC
 
     @Override
     public void accept(Event<WaitForClusterServerRequest> event) {
-        Long stackId = event.getData().getStackId();
+        Long stackId = event.getData().getResourceId();
         Selectable response;
         try {
             Stack stack = stackService.getByIdWithTransaction(stackId);

@@ -92,7 +92,7 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
         DecommissionResult result;
         String hostGroupName = request.getHostGroupName();
         try {
-            Stack stack = stackService.getByIdWithListsInTransaction(request.getStackId());
+            Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
             ClusterDecomissionService clusterDecomissionService = clusterApiConnectors.getConnector(stack).clusterDecomissionService();
             Set<String> hostNames = getHostNamesForPrivateIds(request, stack);
             Cluster cluster = stack.getCluster();

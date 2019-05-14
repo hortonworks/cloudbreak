@@ -21,11 +21,11 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
     Optional<FlowLog> findFirstByFlowIdOrderByCreatedDesc(String flowId);
 
     @Query("SELECT DISTINCT fl.flowId FROM FlowLog fl "
-            + "WHERE fl.stateStatus = 'PENDING' AND fl.stackId = :stackId "
+            + "WHERE fl.stateStatus = 'PENDING' AND fl.resourceId = :resourceId "
             + "AND fl.flowType != 'com.sequenceiq.flow.core.stack.termination.StackTerminationFlowConfig'")
-    Set<String> findAllRunningNonTerminationFlowIdsByStackId(@Param("stackId") Long stackId);
+    Set<String> findAllRunningNonTerminationFlowIdsByResourceId(@Param("resourceId") Long resourceId);
 
-    @Query("SELECT DISTINCT fl.flowId, fl.stackId, fl.cloudbreakNodeId FROM FlowLog fl WHERE fl.stateStatus = 'PENDING'")
+    @Query("SELECT DISTINCT fl.flowId, fl.resourceId, fl.cloudbreakNodeId FROM FlowLog fl WHERE fl.stateStatus = 'PENDING'")
     List<Object[]> findAllPending();
 
     @Modifying
@@ -42,5 +42,5 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
     @Query("UPDATE FlowLog fl SET fl.stateStatus = :stateStatus WHERE fl.id = :id")
     void updateLastLogStatusInFlow(@Param("id") Long id, @Param("stateStatus") StateStatus stateStatus);
 
-    List<FlowLog> findAllByStackIdOrderByCreatedDesc(Long stackId);
+    List<FlowLog> findAllByResourceIdOrderByCreatedDesc(Long resourceId);
 }

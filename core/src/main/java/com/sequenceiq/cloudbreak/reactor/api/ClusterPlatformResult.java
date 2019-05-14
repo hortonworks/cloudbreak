@@ -51,7 +51,7 @@ public abstract class ClusterPlatformResult<R extends ClusterPlatformRequest> im
     }
 
     @Override
-    public Long getStackId() {
-        return request.getStackId();
+    public Long getResourceId() {
+        return request.getResourceId();
     }
 }

@@ -35,7 +35,7 @@ public class PrepareClusterTerminationHandler implements ReactorEventHandler<Pre
     public void accept(Event<PrepareClusterTerminationRequest> event) {
         PrepareClusterTerminationResult result;
         try {
-            clusterApiConnectors.getConnector(stackService.getByIdWithListsInTransaction(event.getData().getStackId()))
+            clusterApiConnectors.getConnector(stackService.getByIdWithListsInTransaction(event.getData().getResourceId()))
                     .clusterSecurityService().prepareSecurity();
             result = new PrepareClusterTerminationResult(event.getData());
         } catch (Exception e) {

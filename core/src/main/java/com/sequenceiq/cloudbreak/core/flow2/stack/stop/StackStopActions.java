@@ -123,7 +123,7 @@ public class StackStopActions {
 
         @Override
         protected StackStartStopContext createFlowContext(String flowId, StateContext<StackStopState, StackStopEvent> stateContext, P payload) {
-            Long stackId = payload.getStackId();
+            Long stackId = payload.getResourceId();
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             MDCBuilder.buildMdcContext(stack);
             List<InstanceMetaData> instances = new ArrayList<>(instanceMetaDataService.findNotTerminatedForStack(stackId));
@@ -136,7 +136,7 @@ public class StackStopActions {
 
         @Override
         protected Object getFailurePayload(P payload, Optional<StackStartStopContext> flowContext, Exception ex) {
-            return new StackFailureEvent(payload.getStackId(), ex);
+            return new StackFailureEvent(payload.getResourceId(), ex);
         }
     }
 }

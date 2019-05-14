@@ -29,7 +29,7 @@ public class StopInstancesResult extends CloudPlatformResult<StopInstancesReques
     }
 
     @Override
-    public Long getStackId() {
+    public Long getResourceId() {
         return cloudContext.getId();
     }
 

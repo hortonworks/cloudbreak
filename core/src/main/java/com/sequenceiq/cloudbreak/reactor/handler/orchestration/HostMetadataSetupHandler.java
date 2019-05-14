@@ -34,10 +34,10 @@ public class HostMetadataSetupHandler implements ReactorEventHandler<HostMetadat
         StackEvent request = event.getData();
         Selectable response;
         try {
-            hostMetadataSetup.setupHostMetadata(request.getStackId());
-            response = new HostMetadataSetupSuccess(request.getStackId());
+            hostMetadataSetup.setupHostMetadata(request.getResourceId());
+            response = new HostMetadataSetupSuccess(request.getResourceId());
         } catch (Exception e) {
-            response = new HostMetadataSetupFailed(request.getStackId(), e);
+            response = new HostMetadataSetupFailed(request.getResourceId(), e);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }

@@ -87,22 +87,22 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     private void handle(String key, Payload payload, String flowId, String flowChainId) throws TransactionExecutionException {
         switch (key) {
             case FLOW_CANCEL:
-                cancelRunningFlows(payload.getStackId());
+                cancelRunningFlows(payload.getResourceId());
                 break;
             case FLOW_FINAL:
-                finalizeFlow(flowId, flowChainId, payload.getStackId());
+                finalizeFlow(flowId, flowChainId, payload.getResourceId());
                 break;
             default:
                 if (flowId == null) {
                     LOGGER.debug("flow trigger arrived: key: {}, payload: {}", key, payload);
                     FlowConfiguration<?> flowConfig = flowConfigurationMap.get(key);
-                    if (flowConfig != null && flowConfig.getFlowTriggerCondition().isFlowTriggerable(payload.getStackId())) {
+                    if (flowConfig != null && flowConfig.getFlowTriggerCondition().isFlowTriggerable(payload.getResourceId())) {
                         if (!isFlowAcceptable(key, payload)) {
-                            LOGGER.info("Flow operation not allowed, other flow is running. Stack ID {}, event {}", payload.getStackId(), key);
+                            LOGGER.info("Flow operation not allowed, other flow is running. Stack ID {}, event {}", payload.getResourceId(), key);
                             return;
                         }
                         flowId = UUID.randomUUID().toString();
-                        Flow flow = flowConfig.createFlow(flowId, payload.getStackId());
+                        Flow flow = flowConfig.createFlow(flowId, payload.getResourceId());
                         flow.initialize();
                         flowLogService.save(flowId, flowChainId, key, payload, null, flowConfig.getClass(), flow.getCurrentState());
                         acceptFlow(payload);
@@ -128,7 +128,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             });
             flow.sendEvent(key, payload);
         } else {
-            LOGGER.debug("Cancelled flow finished running. Stack ID {}, flow ID {}, event {}", payload.getStackId(), flowId, key);
+            LOGGER.debug("Cancelled flow finished running. Stack ID {}, flow ID {}, event {}", payload.getResourceId(), flowId, key);
         }
     }
 
@@ -145,7 +145,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     private boolean isFlowAcceptable(String key, Payload payload) {
         if (payload instanceof Acceptable && ((Acceptable) payload).accepted() != null) {
             Acceptable acceptable = (Acceptable) payload;
-            if (!applicationFlowInformation.getAllowedParallelFlows().contains(key) && flowLogService.isOtherFlowRunning(payload.getStackId())) {
+            if (!applicationFlowInformation.getAllowedParallelFlows().contains(key) && flowLogService.isOtherFlowRunning(payload.getResourceId())) {
                 acceptable.accepted().accept(Boolean.FALSE);
                 return false;
             }
@@ -201,7 +201,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             Optional<FlowConfiguration<?>> flowConfig = flowConfigs.stream()
                     .filter(fc -> fc.getClass().equals(flowLog.getFlowType())).findFirst();
             Payload payload = (Payload) JsonReader.jsonToJava(flowLog.getPayload());
-            Flow flow = flowConfig.get().createFlow(flowLog.getFlowId(), payload.getStackId());
+            Flow flow = flowConfig.get().createFlow(flowLog.getFlowId(), payload.getResourceId());
             runningFlows.put(flow, flowLog.getFlowChainId());
             if (flowLog.getFlowChainId() != null) {
                 flowChainHandler.restoreFlowChain(flowLog.getFlowChainId());
@@ -215,7 +215,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             }
         }
         try {
-            flowLogService.terminate(flowLog.getStackId(), flowLog.getFlowId());
+            flowLogService.terminate(flowLog.getResourceId(), flowLog.getFlowId());
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }

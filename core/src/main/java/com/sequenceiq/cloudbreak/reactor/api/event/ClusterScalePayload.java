@@ -15,7 +15,7 @@ public class ClusterScalePayload implements ScalingAdjustmentPayload {
     }
 
     @Override
-    public Long getStackId() {
+    public Long getResourceId() {
         return stackId;
     }
 
