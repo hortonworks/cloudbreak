@@ -7,8 +7,8 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
-import com.sequenceiq.environment.environment.EnvironmentResourceRepository;
-import com.sequenceiq.environment.environment.AbstractEnvironmentAwareService;
+import com.sequenceiq.environment.environment.repository.EnvironmentResourceRepository;
+import com.sequenceiq.environment.environment.service.AbstractEnvironmentAwareService;
 
 @Service
 public class ProxyConfigService extends AbstractEnvironmentAwareService<ProxyConfig> {

@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment;
+package com.sequenceiq.environment.environment.repository;
 
 import static com.sequenceiq.cloudbreak.workspace.resource.ResourceAction.READ;
 

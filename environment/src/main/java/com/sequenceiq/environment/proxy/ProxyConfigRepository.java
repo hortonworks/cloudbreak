@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByWorkspaceId;
 import com.sequenceiq.cloudbreak.workspace.repository.check.WorkspaceResourceType;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
-import com.sequenceiq.environment.environment.EnvironmentResourceRepository;
+import com.sequenceiq.environment.environment.repository.EnvironmentResourceRepository;
 
 @EntityType(entityClass = ProxyConfig.class)
 @Transactional(TxType.REQUIRED)
