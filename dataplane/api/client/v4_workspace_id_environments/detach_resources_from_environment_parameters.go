@@ -67,8 +67,8 @@ type DetachResourcesFromEnvironmentParams struct {
 
 	/*Body*/
 	Body *model.EnvironmentDetachV4Request
-	/*Name*/
-	Name string
+	/*Crn*/
+	Crn string
 	/*WorkspaceID*/
 	WorkspaceID int64
 
@@ -121,15 +121,15 @@ func (o *DetachResourcesFromEnvironmentParams) SetBody(body *model.EnvironmentDe
 	o.Body = body
 }
 
-// WithName adds the name to the detach resources from environment params
-func (o *DetachResourcesFromEnvironmentParams) WithName(name string) *DetachResourcesFromEnvironmentParams {
-	o.SetName(name)
+// WithCrn adds the crn to the detach resources from environment params
+func (o *DetachResourcesFromEnvironmentParams) WithCrn(crn string) *DetachResourcesFromEnvironmentParams {
+	o.SetCrn(crn)
 	return o
 }
 
-// SetName adds the name to the detach resources from environment params
-func (o *DetachResourcesFromEnvironmentParams) SetName(name string) {
-	o.Name = name
+// SetCrn adds the crn to the detach resources from environment params
+func (o *DetachResourcesFromEnvironmentParams) SetCrn(crn string) {
+	o.Crn = crn
 }
 
 // WithWorkspaceID adds the workspaceID to the detach resources from environment params
@@ -157,8 +157,8 @@ func (o *DetachResourcesFromEnvironmentParams) WriteToRequest(r runtime.ClientRe
 		}
 	}
 
-	// path param name
-	if err := r.SetPathParam("name", o.Name); err != nil {
+	// path param crn
+	if err := r.SetPathParam("crn", o.Crn); err != nil {
 		return err
 	}
 

@@ -4,17 +4,19 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/hortonworks/cb-cli/dataplane/common"
-	"github.com/hortonworks/cb-cli/dataplane/oauth"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
-	v4cred "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_credentials"
+	"github.com/hortonworks/cb-cli/dataplane/common"
+	"github.com/hortonworks/cb-cli/dataplane/oauth"
+
+	v1cred "github.com/hortonworks/cb-cli/dataplane/api-environment/client/v1credentials"
 
 	"errors"
 
-	"github.com/hortonworks/cb-cli/dataplane/api/model"
+	"github.com/hortonworks/cb-cli/dataplane/api-environment/model"
 	"github.com/hortonworks/cb-cli/dataplane/cloud"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/dp-cli-common/utils"
@@ -99,22 +101,20 @@ func CreateCredentialFromFile(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "create credential")
 
 	req := assembleCredentialRequest(c.String(fl.FlInputJson.Name), c.String(fl.FlNameOptional.Name))
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	postCredential(cbClient.Cloudbreak.V4WorkspaceIDCredentials, workspaceID, req)
+	envClient := oauth.NewEnvironmentClientFromContext(c)
+	postCredential(envClient.Environment.V1credentials, req)
 }
 
 func ModifyCredentialFromFile(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "modify credential from file")
 
 	credReq := assembleCredentialRequest(c.String(fl.FlInputJson.Name), c.String(fl.FlNameOptional.Name))
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
+	envClient := oauth.NewEnvironmentClientFromContext(c)
 
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	putCredential(cbClient.Cloudbreak.V4WorkspaceIDCredentials, workspaceID, credReq)
+	putCredential(envClient.Environment.V1credentials, credReq)
 }
 
-func assembleCredentialRequest(path, credName string) *model.CredentialV4Request {
+func assembleCredentialRequest(path, credName string) *model.CredentialV1Request {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		utils.LogErrorAndExit(err)
 	}
@@ -122,7 +122,7 @@ func assembleCredentialRequest(path, credName string) *model.CredentialV4Request
 	log.Infof("[assembleCredentialRequest] read credential json from file: %s", path)
 	content := utils.ReadFile(path)
 
-	var req model.CredentialV4Request
+	var req model.CredentialV1Request
 	err := json.Unmarshal(content, &req)
 	if err != nil {
 		msg := fmt.Sprintf(`Invalid json format: %s. Please make sure that the json is valid (check for commas and double quotes).`, err.Error())
@@ -142,29 +142,28 @@ func assembleCredentialRequest(path, credName string) *model.CredentialV4Request
 func createCredential(c *cli.Context, govCloud bool) {
 	defer utils.TimeTrack(time.Now(), "create credential")
 
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	createCredentialImpl(c.String, c.Int64, cbClient.Cloudbreak.V4WorkspaceIDCredentials, govCloud)
+	envClient := oauth.NewEnvironmentClientFromContext(c)
+	createCredentialImpl(c.String, envClient.Environment.V1credentials, govCloud)
 }
 
 func modifyCredential(c *cli.Context, govCloud bool) {
 	defer utils.TimeTrack(time.Now(), "modify credential")
 
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	modifyCredentialImpl(c.String, c.Int64, cbClient.Cloudbreak.V4WorkspaceIDCredentials, govCloud)
+	envClient := oauth.NewEnvironmentClientFromContext(c)
+	modifyCredentialImpl(c.String, envClient.Environment.V1credentials, govCloud)
 }
 
 type modifyCredentialClient interface {
-	GetCredentialInWorkspace(params *v4cred.GetCredentialInWorkspaceParams) (*v4cred.GetCredentialInWorkspaceOK, error)
-	PutCredentialInWorkspace(params *v4cred.PutCredentialInWorkspaceParams) (*v4cred.PutCredentialInWorkspaceOK, error)
+	GetCredentialV1(params *v1cred.GetCredentialV1Params) (*v1cred.GetCredentialV1OK, error)
+	PutCredentialV1(params *v1cred.PutCredentialV1Params) (*v1cred.PutCredentialV1OK, error)
 }
 
-func modifyCredentialImpl(stringFinder func(string) string, int64Finder func(string) int64, client modifyCredentialClient, govCloud bool) *model.CredentialV4Response {
-	workspaceID := int64Finder(fl.FlWorkspaceOptional.Name)
+func modifyCredentialImpl(stringFinder func(string) string, client modifyCredentialClient, govCloud bool) *model.CredentialV1Response {
 	name := stringFinder(fl.FlName.Name)
 	description := stringFinder(fl.FlDescriptionOptional.Name)
 	provider := cloud.GetProvider()
 
-	credential := getCredential(workspaceID, name, client)
+	credential := getCredential(name, client)
 	if *credential.CloudPlatform != *provider.GetName() {
 		utils.LogErrorAndExit(errors.New("cloud provider cannot be modified"))
 	}
@@ -183,25 +182,25 @@ func modifyCredentialImpl(stringFinder func(string) string, int64Finder func(str
 	}
 	credReq.Description = &description
 
-	return putCredential(client, workspaceID, credReq)
+	return putCredential(client, credReq)
 }
 
-func getCredential(workspaceID int64, name string, client modifyCredentialClient) *model.CredentialV4Response {
+func getCredential(name string, client modifyCredentialClient) *model.CredentialV1Response {
 	defer utils.TimeTrack(time.Now(), "get credential")
 
 	log.Infof("[getCredential] get credential by name: %s", name)
-	response, err := client.GetCredentialInWorkspace(v4cred.NewGetCredentialInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(name))
+	response, err := client.GetCredentialV1(v1cred.NewGetCredentialV1Params().WithName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	return response.Payload
 }
 
-func putCredential(client modifyCredentialClient, workspaceID int64, credReq *model.CredentialV4Request) *model.CredentialV4Response {
-	var credential *model.CredentialV4Response
+func putCredential(client modifyCredentialClient, credReq *model.CredentialV1Request) *model.CredentialV1Response {
+	var credential *model.CredentialV1Response
 	log.Infof("[putCredential] modify public credential: %s", *credReq.Name)
 
-	resp, err := client.PutCredentialInWorkspace(v4cred.NewPutCredentialInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(credReq))
+	resp, err := client.PutCredentialV1(v1cred.NewPutCredentialV1Params().WithBody(credReq))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -212,23 +211,23 @@ func putCredential(client modifyCredentialClient, workspaceID int64, credReq *mo
 }
 
 type createCredentialClient interface {
-	CreateCredentialInWorkspace(*v4cred.CreateCredentialInWorkspaceParams) (*v4cred.CreateCredentialInWorkspaceOK, error)
+	CreateCredentialV1(*v1cred.CreateCredentialV1Params) (*v1cred.CreateCredentialV1OK, error)
 }
 
-func createCredentialImpl(stringFinder func(string) string, int64Finder func(string) int64, client createCredentialClient, govCloud bool) {
+func createCredentialImpl(stringFinder func(string) string, client createCredentialClient, govCloud bool) {
 	provider := cloud.GetProvider()
 	credReq, err := provider.GetCredentialRequest(stringFinder, govCloud)
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	postCredential(client, int64Finder(fl.FlWorkspaceOptional.Name), credReq)
+	postCredential(client, credReq)
 }
 
-func postCredential(client createCredentialClient, workspaceID int64, credReq *model.CredentialV4Request) *model.CredentialV4Response {
-	var credential *model.CredentialV4Response
+func postCredential(client createCredentialClient, credReq *model.CredentialV1Request) *model.CredentialV1Response {
+	var credential *model.CredentialV1Response
 
 	log.Infof("[postCredential] sending create public credential request")
-	resp, err := client.CreateCredentialInWorkspace(v4cred.NewCreateCredentialInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(credReq))
+	resp, err := client.CreateCredentialV1(v1cred.NewCreateCredentialV1Params().WithBody(credReq))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -250,10 +249,9 @@ func (c *credentialOutDescribe) DataAsStringArray() []string {
 func DescribeCredential(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "describe credential")
 
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
+	envClient := oauth.NewEnvironmentClientFromContext(c)
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	resp, err := cbClient.Cloudbreak.V4WorkspaceIDCredentials.GetCredentialInWorkspace(v4cred.NewGetCredentialInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(c.String(fl.FlName.Name)))
+	resp, err := envClient.Environment.V1credentials.GetCredentialV1(v1cred.NewGetCredentialV1Params().WithName(c.String(fl.FlName.Name)))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -264,33 +262,31 @@ func DescribeCredential(c *cli.Context) {
 
 func DeleteCredential(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "delete credential")
-
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	name := c.String(fl.FlName.Name)
-	log.Infof("[DeleteCredential] sending delete credential request with name: %s", name)
-	if _, err := cbClient.Cloudbreak.V4WorkspaceIDCredentials.DeleteCredentialInWorkspace(v4cred.NewDeleteCredentialInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(name)); err != nil {
+	envClient := oauth.NewEnvironmentClientFromContext(c)
+	val := c.String(fl.FlNames.Name)
+	names := strings.Split(val[1:len(val)-1], ",")
+	log.Infof("[DeleteCredential] sending delete credential request with names: %s", names)
+	if _, err := envClient.Environment.V1credentials.DeleteCredentialsV1(v1cred.NewDeleteCredentialsV1Params().WithBody(names)); err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	log.Infof("[DeleteCredential] credential deleted, name: %s", name)
+	log.Infof("[DeleteCredential] credential(s are) deleted, name(s): %s", names)
 }
 
 func ListCredentials(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "list credentials")
 
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
+	envClient := oauth.NewEnvironmentClientFromContext(c)
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	listCredentialsImpl(cbClient.Cloudbreak.V4WorkspaceIDCredentials, workspaceID, output.WriteList)
+	listCredentialsImpl(envClient.Environment.V1credentials, output.WriteList)
 }
 
 type listCredentialsByWorkspaceClient interface {
-	ListCredentialsByWorkspace(*v4cred.ListCredentialsByWorkspaceParams) (*v4cred.ListCredentialsByWorkspaceOK, error)
+	ListCredentialsV1(*v1cred.ListCredentialsV1Params) (*v1cred.ListCredentialsV1OK, error)
 }
 
-func listCredentialsImpl(client listCredentialsByWorkspaceClient, workspaceID int64, writer func([]string, []utils.Row)) {
+func listCredentialsImpl(client listCredentialsByWorkspaceClient, writer func([]string, []utils.Row)) {
 	log.Infof("[listCredentialsImpl] sending credential list request")
-	credResp, err := client.ListCredentialsByWorkspace(v4cred.NewListCredentialsByWorkspaceParams().WithWorkspaceID(workspaceID))
+	credResp, err := client.ListCredentialsV1(v1cred.NewListCredentialsV1Params())
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -306,13 +302,12 @@ func listCredentialsImpl(client listCredentialsByWorkspaceClient, workspaceID in
 func GetAwsCredentialPrerequisites(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "get credentials prerequisites for Aws")
 
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
+	envClient := oauth.NewEnvironmentClientFromContext(c)
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 
 	log.Infof("[GetAwsCredentialPrerequisites] sending Aws credential prerequisites request")
-	prerequisitesForCloudPlatformParams := v4cred.NewGetPrerequisitesForCloudPlatformParams().WithWorkspaceID(workspaceID).WithCloudPlatform("aws")
-	credPrereqResp, err := cbClient.Cloudbreak.V4WorkspaceIDCredentials.GetPrerequisitesForCloudPlatform(prerequisitesForCloudPlatformParams)
+	prerequisitesForCloudPlatformParams := v1cred.NewGetPrerequisitesForCloudPlatformParams().WithCloudPlatform("aws")
+	credPrereqResp, err := envClient.Environment.V1credentials.GetPrerequisitesForCloudPlatform(prerequisitesForCloudPlatformParams)
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

@@ -66,7 +66,7 @@ for the create environment operation typically these are written to a http.Reque
 type CreateEnvironmentParams struct {
 
 	/*Body*/
-	Body *model.EnvironmentV4Request
+	Body *model.EnvironmentV1Request
 	/*WorkspaceID*/
 	WorkspaceID int64
 
@@ -109,13 +109,13 @@ func (o *CreateEnvironmentParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithBody adds the body to the create environment params
-func (o *CreateEnvironmentParams) WithBody(body *model.EnvironmentV4Request) *CreateEnvironmentParams {
+func (o *CreateEnvironmentParams) WithBody(body *model.EnvironmentV1Request) *CreateEnvironmentParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the create environment params
-func (o *CreateEnvironmentParams) SetBody(body *model.EnvironmentV4Request) {
+func (o *CreateEnvironmentParams) SetBody(body *model.EnvironmentV1Request) {
 	o.Body = body
 }
 

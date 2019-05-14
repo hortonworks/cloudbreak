@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/hortonworks/cb-cli/dataplane/api-freeipa/client/v1kerberos"
-	model "github.com/hortonworks/cb-cli/dataplane/api-freeipa/model"
-	env "github.com/hortonworks/cb-cli/dataplane/env"
+	"github.com/hortonworks/cb-cli/dataplane/api-freeipa/model"
+	"github.com/hortonworks/cb-cli/dataplane/env"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
 	"github.com/hortonworks/dp-cli-common/utils"
@@ -150,13 +150,12 @@ func CreateKerberosRequest(c *cli.Context) model.CreateKerberosConfigV1Request {
 
 func SendCreateKerberosRequest(c *cli.Context, request *model.CreateKerberosConfigV1Request) error {
 	defer utils.TimeTrack(time.Now(), "create kerberos")
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	freeIpaClient := oauth.FreeIpa(*oauth.NewFreeIpaClientFromContext(c)).FreeIpa
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	return SendCreateKerberosRequestImpl(freeIpaClient.V1kerberos, workspaceID, request, output.Write)
+	return SendCreateKerberosRequestImpl(freeIpaClient.V1kerberos, request, output.Write)
 }
 
-func SendCreateKerberosRequestImpl(kerberosClient freeIpaKerberosClient, workspaceID int64, request *model.CreateKerberosConfigV1Request, writer func([]string, utils.Row)) error {
+func SendCreateKerberosRequestImpl(kerberosClient freeIpaKerberosClient, request *model.CreateKerberosConfigV1Request, writer func([]string, utils.Row)) error {
 	resp, err := kerberosClient.CreateKerberosConfigForEnvironment(v1kerberos.NewCreateKerberosConfigForEnvironmentParams().WithBody(request))
 	if err != nil {
 		utils.LogErrorAndExit(err)
@@ -170,14 +169,13 @@ func SendCreateKerberosRequestImpl(kerberosClient freeIpaKerberosClient, workspa
 func GetKerberos(c *cli.Context) error {
 	defer utils.TimeTrack(time.Now(), "describe a kerberos")
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	environmentName := c.String(fl.FlEnvironmentName.Name)
 	environment := env.GetEnvirontmentCrnByName(c, environmentName)
 	freeIpaClient := oauth.FreeIpa(*oauth.NewFreeIpaClientFromContext(c)).FreeIpa
-	return GetKerberosImpl(freeIpaClient.V1kerberos, workspaceID, environment, output.Write)
+	return GetKerberosImpl(freeIpaClient.V1kerberos, environment, output.Write)
 }
 
-func GetKerberosImpl(kerberosClient freeIpaKerberosClient, workspaceID int64, environmentName string, writer func([]string, utils.Row)) error {
+func GetKerberosImpl(kerberosClient freeIpaKerberosClient, environmentName string, writer func([]string, utils.Row)) error {
 	log.Infof("[GetKerberos] describe kerberos config from environment: %s", environmentName)
 	resp, err := kerberosClient.GetKerberosConfigForEnvironment(v1kerberos.NewGetKerberosConfigForEnvironmentParams().WithEnvironmentCrn(&environmentName))
 	if err != nil {
@@ -185,6 +183,7 @@ func GetKerberosImpl(kerberosClient freeIpaKerberosClient, workspaceID int64, en
 	}
 	kerberosResponse := resp.Payload
 	writeResponse(writer, kerberosResponse)
+	log.Infof("[GetKerberosImpl] kerberos config '%s' is fetched.", kerberosResponse.Name)
 	return nil
 }
 

@@ -83,8 +83,8 @@ type ClusterV4Response struct {
 	// name of the resource
 	Name string `json:"name,omitempty"`
 
-	// proxy configuration name for the cluster
-	Proxy *ProxyV4Response `json:"proxy,omitempty"`
+	// proxy CRN for the cluster
+	ProxyConfigCrn string `json:"proxyConfigCrn,omitempty"`
 
 	// public ambari ip of the stack
 	ServerIP string `json:"serverIp,omitempty"`
@@ -155,10 +155,6 @@ func (m *ClusterV4Response) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateLdap(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateProxy(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -401,24 +397,6 @@ func (m *ClusterV4Response) validateLdap(formats strfmt.Registry) error {
 		if err := m.Ldap.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("ldap")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *ClusterV4Response) validateProxy(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Proxy) { // not required
-		return nil
-	}
-
-	if m.Proxy != nil {
-		if err := m.Proxy.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("proxy")
 			}
 			return err
 		}

@@ -47,16 +47,16 @@ func NewDeleteEnvironmentOK() *DeleteEnvironmentOK {
 successful operation
 */
 type DeleteEnvironmentOK struct {
-	Payload *model.SimpleEnvironmentV4Response
+	Payload *model.SimpleEnvironmentV1Response
 }
 
 func (o *DeleteEnvironmentOK) Error() string {
-	return fmt.Sprintf("[DELETE /v4/{workspaceId}/environments/{name}][%d] deleteEnvironmentOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[DELETE /v4/{workspaceId}/environments/{crn}][%d] deleteEnvironmentOK  %+v", 200, o.Payload)
 }
 
 func (o *DeleteEnvironmentOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(model.SimpleEnvironmentV4Response)
+	o.Payload = new(model.SimpleEnvironmentV1Response)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

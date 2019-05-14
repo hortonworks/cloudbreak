@@ -6,10 +6,8 @@ import (
 
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
 
-	"strings"
-
-	v4Proxy "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_proxies"
-	"github.com/hortonworks/cb-cli/dataplane/api/model"
+	v1Proxy "github.com/hortonworks/cb-cli/dataplane/api-environment/client/v1proxies"
+	"github.com/hortonworks/cb-cli/dataplane/api-environment/model"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/dp-cli-common/utils"
 	log "github.com/sirupsen/logrus"
@@ -17,48 +15,46 @@ import (
 )
 
 type proxyClient interface {
-	CreateProxyConfigInWorkspace(params *v4Proxy.CreateProxyConfigInWorkspaceParams) (*v4Proxy.CreateProxyConfigInWorkspaceOK, error)
-	ListProxyConfigsByWorkspace(params *v4Proxy.ListProxyConfigsByWorkspaceParams) (*v4Proxy.ListProxyConfigsByWorkspaceOK, error)
+	CreateProxyConfigV1(params *v1Proxy.CreateProxyConfigV1Params) (*v1Proxy.CreateProxyConfigV1OK, error)
+	ListProxyConfigsV1(params *v1Proxy.ListProxyConfigsV1Params) (*v1Proxy.ListProxyConfigsV1OK, error)
 }
 
-var Header = []string{"Name", "Host", "Port", "Protocol", "Environments"}
+var Header = []string{"Name", "Host", "Port", "Protocol", "Crn"}
 
 type proxy struct {
-	Name         string `json:"Name" yaml:"Name"`
-	Host         string `json:"Host" yaml:"Host"`
-	Port         string `json:"Port" yaml:"Port"`
-	Protocol     string `json:"Protocol" yaml:"Protocol"`
-	Environments []string
+	Name     string `json:"Name" yaml:"Name"`
+	Host     string `json:"Host" yaml:"Host"`
+	Port     string `json:"Port" yaml:"Port"`
+	Protocol string `json:"Protocol" yaml:"Protocol"`
+	Crn      string `json:"Crn" yaml:"Crn"`
 }
 
 func (p *proxy) DataAsStringArray() []string {
-	return []string{p.Name, p.Host, p.Port, p.Protocol, strings.Join(p.Environments, ",")}
+	return []string{p.Name, p.Host, p.Port, p.Protocol, p.Crn}
 }
 
 func CreateProxy(c *cli.Context) error {
 	defer utils.TimeTrack(time.Now(), "create proxy")
 
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	name := c.String(fl.FlName.Name)
 	host := c.String(fl.FlProxyHost.Name)
 	port := c.String(fl.FlProxyPort.Name)
 	protocol := c.String(fl.FlProxyProtocol.Name)
 	user := c.String(fl.FlProxyUser.Name)
 	password := c.String(fl.FlProxyPassword.Name)
-	environments := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentsOptional.Name), ",")
 
 	if protocol != "http" && protocol != "https" {
 		utils.LogErrorMessageAndExit("Proxy protocol must be either http or https")
 	}
 	serverPort, _ := strconv.Atoi(port)
 
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
+	envClient := oauth.NewEnvironmentClientFromContext(c)
 
-	return createProxy(cbClient.Cloudbreak.V4WorkspaceIDProxies, workspaceID, name, host, int32(serverPort), protocol, user, password, environments)
+	return createProxy(envClient.Environment.V1proxies, name, host, int32(serverPort), protocol, user, password)
 }
 
-func createProxy(proxyClient proxyClient, workspaceID int64, name, host string, port int32, protocol, user, password string, environments []string) error {
-	proxyRequest := &model.ProxyV4Request{
+func createProxy(proxyClient proxyClient, name, host string, port int32, protocol, user, password string) error {
+	proxyRequest := &model.ProxyRequest{
 		Name:     &name,
 		Host:     &host,
 		Port:     &port,
@@ -68,29 +64,28 @@ func createProxy(proxyClient proxyClient, workspaceID int64, name, host string, 
 	}
 
 	log.Infof("[createProxy] create proxy with name: %s", name)
-	var proxy *model.ProxyV4Response
-	resp, err := proxyClient.CreateProxyConfigInWorkspace(v4Proxy.NewCreateProxyConfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(proxyRequest))
+	var proxy *model.ProxyResponse
+	resp, err := proxyClient.CreateProxyConfigV1(v1Proxy.NewCreateProxyConfigV1Params().WithBody(proxyRequest))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	proxy = resp.Payload
 
-	log.Infof("[createProxy] proxy created with name: %s, id: %d", name, proxy.ID)
+	log.Infof("[createProxy] proxy created with name: %s, CRN: %s", name, proxy.Crn)
 	return nil
 }
 
 func ListProxies(c *cli.Context) error {
 	defer utils.TimeTrack(time.Now(), "list proxies")
 
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
+	envClient := oauth.NewEnvironmentClientFromContext(c)
 
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	return listProxiesImpl(cbClient.Cloudbreak.V4WorkspaceIDProxies, output.WriteList, workspaceID)
+	return listProxiesImpl(envClient.Environment.V1proxies, output.WriteList)
 }
 
-func listProxiesImpl(proxyClient proxyClient, writer func([]string, []utils.Row), workspaceID int64) error {
-	resp, err := proxyClient.ListProxyConfigsByWorkspace(v4Proxy.NewListProxyConfigsByWorkspaceParams().WithWorkspaceID(workspaceID))
+func listProxiesImpl(proxyClient proxyClient, writer func([]string, []utils.Row)) error {
+	resp, err := proxyClient.ListProxyConfigsV1(v1Proxy.NewListProxyConfigsV1Params())
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -102,6 +97,7 @@ func listProxiesImpl(proxyClient proxyClient, writer func([]string, []utils.Row)
 			Host:     *p.Host,
 			Port:     strconv.Itoa(int(*p.Port)),
 			Protocol: *p.Protocol,
+			Crn:      p.Crn,
 		}
 		tableRows = append(tableRows, row)
 	}
@@ -113,13 +109,12 @@ func listProxiesImpl(proxyClient proxyClient, writer func([]string, []utils.Row)
 func DeleteProxy(c *cli.Context) error {
 	defer utils.TimeTrack(time.Now(), "delete a proxy")
 
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	proxyName := c.String(fl.FlName.Name)
 	log.Infof("[DeleteProxy] delete proxy config by name: %s", proxyName)
 
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
+	envClient := oauth.NewEnvironmentClientFromContext(c)
 
-	if _, err := cbClient.Cloudbreak.V4WorkspaceIDProxies.DeleteProxyConfigInWorkspace(v4Proxy.NewDeleteProxyConfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(proxyName)); err != nil {
+	if _, err := envClient.Environment.V1proxies.DeleteProxyConfigV1(v1Proxy.NewDeleteProxyConfigV1Params().WithName(proxyName)); err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	log.Infof("[DeleteProxy] proxy config deleted: %s", proxyName)

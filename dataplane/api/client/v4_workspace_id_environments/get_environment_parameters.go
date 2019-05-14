@@ -63,8 +63,8 @@ for the get environment operation typically these are written to a http.Request
 */
 type GetEnvironmentParams struct {
 
-	/*Name*/
-	Name string
+	/*Crn*/
+	Crn string
 	/*WorkspaceID*/
 	WorkspaceID int64
 
@@ -106,15 +106,15 @@ func (o *GetEnvironmentParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithName adds the name to the get environment params
-func (o *GetEnvironmentParams) WithName(name string) *GetEnvironmentParams {
-	o.SetName(name)
+// WithCrn adds the crn to the get environment params
+func (o *GetEnvironmentParams) WithCrn(crn string) *GetEnvironmentParams {
+	o.SetCrn(crn)
 	return o
 }
 
-// SetName adds the name to the get environment params
-func (o *GetEnvironmentParams) SetName(name string) {
-	o.Name = name
+// SetCrn adds the crn to the get environment params
+func (o *GetEnvironmentParams) SetCrn(crn string) {
+	o.Crn = crn
 }
 
 // WithWorkspaceID adds the workspaceID to the get environment params
@@ -136,8 +136,8 @@ func (o *GetEnvironmentParams) WriteToRequest(r runtime.ClientRequest, reg strfm
 	}
 	var res []error
 
-	// path param name
-	if err := r.SetPathParam("name", o.Name); err != nil {
+	// path param crn
+	if err := r.SetPathParam("crn", o.Crn); err != nil {
 		return err
 	}
 

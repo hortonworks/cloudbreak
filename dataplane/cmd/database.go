@@ -20,12 +20,12 @@ func init() {
 						Name:  "mysql",
 						Usage: "create mysql database configuration",
 						Flags: fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlRdsUserName, fl.FlRdsPassword, fl.FlRdsURL, fl.FlRdsDriverOptional, fl.FlRdsDatabaseEngineOptional,
-							fl.FlRdsType, fl.FlRdsValidatedOptional, fl.FlRdsConnectorJarURLOptional, fl.FlEnvironmentsOptional).AddAuthenticationFlags().Build(),
+							fl.FlRdsType, fl.FlRdsValidatedOptional, fl.FlRdsConnectorJarURLOptional).AddAuthenticationFlags().Build(),
 						Before: cf.CheckConfigAndCommandFlags,
 						Action: rds.CreateRds,
 						BashComplete: func(c *cli.Context) {
 							for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlRdsUserName, fl.FlRdsPassword, fl.FlRdsURL, fl.FlRdsDriverOptional, fl.FlRdsDatabaseEngineOptional,
-								fl.FlEnvironmentsOptional, fl.FlRdsType, fl.FlRdsValidatedOptional, fl.FlRdsConnectorJarURLOptional, fl.FlEnvironmentsOptional).AddAuthenticationFlags().Build() {
+								fl.FlRdsType, fl.FlRdsValidatedOptional, fl.FlRdsConnectorJarURLOptional).AddAuthenticationFlags().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},
@@ -34,12 +34,12 @@ func init() {
 						Name:  "oracle11",
 						Usage: "create oracle 11 database configuration",
 						Flags: fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlRdsUserName, fl.FlRdsPassword, fl.FlRdsURL, fl.FlRdsDriverOptional, fl.FlRdsDatabaseEngineOptional, fl.FlRdsType, fl.FlRdsValidatedOptional,
-							fl.FlEnvironmentsOptional, fl.FlRdsConnectorJarURLOptional).AddAuthenticationFlags().Build(),
+							fl.FlRdsConnectorJarURLOptional).AddAuthenticationFlags().Build(),
 						Before: cf.CheckConfigAndCommandFlags,
 						Action: rds.CreateRdsOracle11,
 						BashComplete: func(c *cli.Context) {
 							for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlRdsUserName, fl.FlRdsPassword, fl.FlRdsURL, fl.FlRdsDriverOptional, fl.FlRdsDatabaseEngineOptional, fl.FlRdsType,
-								fl.FlEnvironmentsOptional, fl.FlRdsValidatedOptional, fl.FlRdsConnectorJarURLOptional).AddAuthenticationFlags().Build() {
+								fl.FlRdsValidatedOptional, fl.FlRdsConnectorJarURLOptional).AddAuthenticationFlags().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},
@@ -48,12 +48,12 @@ func init() {
 						Name:  "oracle12",
 						Usage: "create oracle 12 database configuration",
 						Flags: fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlRdsUserName, fl.FlRdsPassword, fl.FlRdsURL, fl.FlRdsDriverOptional, fl.FlRdsDatabaseEngineOptional, fl.FlRdsType, fl.FlRdsValidatedOptional,
-							fl.FlEnvironmentsOptional, fl.FlRdsConnectorJarURLOptional).AddAuthenticationFlags().Build(),
+							fl.FlRdsConnectorJarURLOptional).AddAuthenticationFlags().Build(),
 						Before: cf.CheckConfigAndCommandFlags,
 						Action: rds.CreateRdsOracle12,
 						BashComplete: func(c *cli.Context) {
 							for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlRdsUserName, fl.FlRdsPassword, fl.FlRdsURL, fl.FlRdsDriverOptional, fl.FlRdsDatabaseEngineOptional, fl.FlRdsType,
-								fl.FlEnvironmentsOptional, fl.FlRdsValidatedOptional, fl.FlRdsConnectorJarURLOptional).AddAuthenticationFlags().Build() {
+								fl.FlRdsValidatedOptional, fl.FlRdsConnectorJarURLOptional).AddAuthenticationFlags().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},
@@ -61,12 +61,12 @@ func init() {
 					{
 						Name:  "postgres",
 						Usage: "create postgres database configuration",
-						Flags: fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlRdsUserName, fl.FlRdsPassword, fl.FlRdsURL, fl.FlRdsDriverOptional, fl.FlRdsDatabaseEngineOptional, fl.FlRdsType, fl.FlEnvironmentsOptional,
+						Flags: fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlRdsUserName, fl.FlRdsPassword, fl.FlRdsURL, fl.FlRdsDriverOptional, fl.FlRdsDatabaseEngineOptional, fl.FlRdsType,
 							fl.FlRdsValidatedOptional, fl.FlRdsConnectorJarURLOptional).AddAuthenticationFlags().Build(),
 						Before: cf.CheckConfigAndCommandFlags,
 						Action: rds.CreateRds,
 						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlRdsUserName, fl.FlRdsPassword, fl.FlRdsURL, fl.FlRdsDriverOptional, fl.FlEnvironmentsOptional,
+							for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlRdsUserName, fl.FlRdsPassword, fl.FlRdsURL, fl.FlRdsDriverOptional,
 								fl.FlRdsDatabaseEngineOptional, fl.FlRdsType, fl.FlRdsValidatedOptional, fl.FlRdsConnectorJarURLOptional).AddAuthenticationFlags().Build() {
 								fl.PrintFlagCompletion(f)
 							}

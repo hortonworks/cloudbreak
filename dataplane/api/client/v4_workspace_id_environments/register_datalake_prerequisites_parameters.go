@@ -67,8 +67,8 @@ type RegisterDatalakePrerequisitesParams struct {
 
 	/*Body*/
 	Body *model.DatalakePrerequisiteV4Request
-	/*Name*/
-	Name string
+	/*Crn*/
+	Crn string
 	/*WorkspaceID*/
 	WorkspaceID int64
 
@@ -121,15 +121,15 @@ func (o *RegisterDatalakePrerequisitesParams) SetBody(body *model.DatalakePrereq
 	o.Body = body
 }
 
-// WithName adds the name to the register datalake prerequisites params
-func (o *RegisterDatalakePrerequisitesParams) WithName(name string) *RegisterDatalakePrerequisitesParams {
-	o.SetName(name)
+// WithCrn adds the crn to the register datalake prerequisites params
+func (o *RegisterDatalakePrerequisitesParams) WithCrn(crn string) *RegisterDatalakePrerequisitesParams {
+	o.SetCrn(crn)
 	return o
 }
 
-// SetName adds the name to the register datalake prerequisites params
-func (o *RegisterDatalakePrerequisitesParams) SetName(name string) {
-	o.Name = name
+// SetCrn adds the crn to the register datalake prerequisites params
+func (o *RegisterDatalakePrerequisitesParams) SetCrn(crn string) {
+	o.Crn = crn
 }
 
 // WithWorkspaceID adds the workspaceID to the register datalake prerequisites params
@@ -157,8 +157,8 @@ func (o *RegisterDatalakePrerequisitesParams) WriteToRequest(r runtime.ClientReq
 		}
 	}
 
-	// path param name
-	if err := r.SetPathParam("name", o.Name); err != nil {
+	// path param crn
+	if err := r.SetPathParam("crn", o.Crn); err != nil {
 		return err
 	}
 

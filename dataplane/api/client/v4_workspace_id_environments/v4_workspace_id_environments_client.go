@@ -38,7 +38,7 @@ func (a *Client) AttachResourcesToEnvironment(params *AttachResourcesToEnvironme
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "attachResourcesToEnvironment",
 		Method:             "PUT",
-		PathPattern:        "/v4/{workspaceId}/environments/{name}/attach",
+		PathPattern:        "/v4/{workspaceId}/environments/{crn}/attach",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -51,36 +51,6 @@ func (a *Client) AttachResourcesToEnvironment(params *AttachResourcesToEnvironme
 		return nil, err
 	}
 	return result.(*AttachResourcesToEnvironmentOK), nil
-
-}
-
-/*
-ChangeCredentialInEnvironment changes the credential of the environment and the clusters in the environment
-
-Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.
-*/
-func (a *Client) ChangeCredentialInEnvironment(params *ChangeCredentialInEnvironmentParams) (*ChangeCredentialInEnvironmentOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewChangeCredentialInEnvironmentParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "changeCredentialInEnvironment",
-		Method:             "PUT",
-		PathPattern:        "/v4/{workspaceId}/environments/{name}/change_credential",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &ChangeCredentialInEnvironmentReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*ChangeCredentialInEnvironmentOK), nil
 
 }
 
@@ -128,7 +98,7 @@ func (a *Client) DeleteEnvironment(params *DeleteEnvironmentParams) (*DeleteEnvi
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "deleteEnvironment",
 		Method:             "DELETE",
-		PathPattern:        "/v4/{workspaceId}/environments/{name}",
+		PathPattern:        "/v4/{workspaceId}/environments/{crn}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -158,7 +128,7 @@ func (a *Client) DetachResourcesFromEnvironment(params *DetachResourcesFromEnvir
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "detachResourcesFromEnvironment",
 		Method:             "PUT",
-		PathPattern:        "/v4/{workspaceId}/environments/{name}/detach",
+		PathPattern:        "/v4/{workspaceId}/environments/{crn}/detach",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -188,7 +158,7 @@ func (a *Client) EditEnvironment(params *EditEnvironmentParams) (*EditEnvironmen
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "editEnvironment",
 		Method:             "PUT",
-		PathPattern:        "/v4/{workspaceId}/environments/{name}",
+		PathPattern:        "/v4/{workspaceId}/environments/{crn}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -218,7 +188,7 @@ func (a *Client) GetEnvironment(params *GetEnvironmentParams) (*GetEnvironmentOK
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getEnvironment",
 		Method:             "GET",
-		PathPattern:        "/v4/{workspaceId}/environments/{name}",
+		PathPattern:        "/v4/{workspaceId}/environments/{crn}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -276,7 +246,7 @@ func (a *Client) RegisterDatalakePrerequisites(params *RegisterDatalakePrerequis
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "registerDatalakePrerequisites",
 		Method:             "POST",
-		PathPattern:        "/v4/{workspaceId}/environments/{name}/register_datalake_prerequisites",
+		PathPattern:        "/v4/{workspaceId}/environments/{crn}/register_datalake_prerequisites",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -306,7 +276,7 @@ func (a *Client) RegisterExternalDatalake(params *RegisterExternalDatalakeParams
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "registerExternalDatalake",
 		Method:             "PUT",
-		PathPattern:        "/v4/{workspaceId}/environments/{name}/register_datalake",
+		PathPattern:        "/v4/{workspaceId}/environments/{crn}/register_datalake",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},

@@ -51,7 +51,7 @@ type DetachResourcesFromEnvironmentOK struct {
 }
 
 func (o *DetachResourcesFromEnvironmentOK) Error() string {
-	return fmt.Sprintf("[PUT /v4/{workspaceId}/environments/{name}/detach][%d] detachResourcesFromEnvironmentOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[PUT /v4/{workspaceId}/environments/{crn}/detach][%d] detachResourcesFromEnvironmentOK  %+v", 200, o.Payload)
 }
 
 func (o *DetachResourcesFromEnvironmentOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

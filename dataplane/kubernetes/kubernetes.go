@@ -21,9 +21,8 @@ import (
 var kubernetesHeader = []string{"Name", "Description", "Environments"}
 
 type kubernetes struct {
-	Name         string `json:"Name" yaml:"Name"`
-	Description  string `json:"Description" yaml:"Description"`
-	Environments []string
+	Name        string `json:"Name" yaml:"Name"`
+	Description string `json:"Description" yaml:"Description"`
 }
 
 type kubernetesOutDescribe struct {
@@ -32,7 +31,7 @@ type kubernetesOutDescribe struct {
 }
 
 func (k *kubernetes) DataAsStringArray() []string {
-	return []string{k.Name, k.Description, strings.Join(k.Environments, ",")}
+	return []string{k.Name, k.Description}
 }
 
 func (k *kubernetesOutDescribe) DataAsStringArray() []string {
@@ -53,11 +52,10 @@ func CreateKubernetes(c *cli.Context) {
 		c.Int64(fl.FlWorkspaceOptional.Name),
 		c.String(fl.FlName.Name),
 		c.String(fl.FlDescriptionOptional.Name),
-		base64.StdEncoding.EncodeToString(utils.ReadFile(c.String(fl.FlKubernetesConfigFile.Name))),
-		utils.DelimitedStringToArray(c.String(fl.FlEnvironmentsOptional.Name), ","))
+		base64.StdEncoding.EncodeToString(utils.ReadFile(c.String(fl.FlKubernetesConfigFile.Name))))
 }
 
-func createKubernetesImpl(client kubernetesClient, workspaceID int64, name string, description string, configuration string, environments []string) {
+func createKubernetesImpl(client kubernetesClient, workspaceID int64, name string, description string, configuration string) {
 	defer utils.TimeTrack(time.Now(), "create kubernetes config")
 	config := string(configuration)
 	kubernetesRequest := &model.KubernetesV4Request{

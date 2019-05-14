@@ -80,18 +80,18 @@ var (
 			Usage: "name of resource",
 		},
 	}
+	FlNames = StringSliceFlag{
+		RequiredFlag: REQUIRED,
+		StringSliceFlag: cli.StringSliceFlag{
+			Name:  "names",
+			Usage: "names of the resources",
+		},
+	}
 	FlNameOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:  "name",
 			Usage: "name of resource",
-		},
-	}
-	FlNames = StringSliceFlag{
-		RequiredFlag: REQUIRED,
-		StringSliceFlag: cli.StringSliceFlag{
-			Name:  "name",
-			Usage: "name of resource (provide option once for each name)",
 		},
 	}
 	FlClusterToUpgrade = StringFlag{

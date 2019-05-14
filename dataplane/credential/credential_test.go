@@ -5,11 +5,11 @@ import (
 	"strings"
 	"testing"
 
-	v4cred "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_credentials"
+	v1cred "github.com/hortonworks/cb-cli/dataplane/api-environment/client/v1credentials"
 
 	"errors"
 
-	"github.com/hortonworks/cb-cli/dataplane/api/model"
+	model "github.com/hortonworks/cb-cli/dataplane/api-environment/model"
 	"github.com/hortonworks/cb-cli/dataplane/cloud"
 	_ "github.com/hortonworks/cb-cli/dataplane/cloud/aws"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
@@ -22,13 +22,13 @@ func init() {
 }
 
 type mockCredentialCreate struct {
-	request chan *model.CredentialV4Request
+	request chan *model.CredentialV1Request
 }
 
-func (m *mockCredentialCreate) CreateCredentialInWorkspace(params *v4cred.CreateCredentialInWorkspaceParams) (*v4cred.CreateCredentialInWorkspaceOK, error) {
+func (m *mockCredentialCreate) CreateCredentialV1(params *v1cred.CreateCredentialV1Params) (*v1cred.CreateCredentialV1OK, error) {
 	m.request <- params.Body
 	defer close(m.request)
-	return &v4cred.CreateCredentialInWorkspaceOK{Payload: &model.CredentialV4Response{ID: int64(1), CredentialV4Base: model.CredentialV4Base{Name: &(&types.S{S: ""}).S}}}, nil
+	return &v1cred.CreateCredentialV1OK{Payload: &model.CredentialV1Response{ID: int64(1), CredentialBase: model.CredentialBase{Name: &(&types.S{S: ""}).S}}}, nil
 }
 
 func TestCreateCredentialPublic(t *testing.T) {
@@ -45,19 +45,9 @@ func TestCreateCredentialPublic(t *testing.T) {
 		}
 	}
 
-	mockInt64Finder := func(in string) int64 {
-		switch in {
-		case fl.FlWorkspaceOptional.Name:
-			return int64(2)
-		default:
-			t.Error("workspace option expected")
-			return int64(-1)
-		}
-	}
-
-	mock := mockCredentialCreate{request: make(chan *model.CredentialV4Request)}
+	mock := mockCredentialCreate{request: make(chan *model.CredentialV1Request)}
 	go func() {
-		createCredentialImpl(mockStringFinder, mockInt64Finder, &mock, false)
+		createCredentialImpl(mockStringFinder, &mock, false)
 	}()
 
 	actualCredential := <-mock.request
@@ -73,14 +63,14 @@ func TestCreateCredentialPublic(t *testing.T) {
 	}
 }
 
-type mockListCredentialsByWorkspace struct {
+type mockListCredentials struct {
 }
 
-func (m *mockListCredentialsByWorkspace) ListCredentialsByWorkspace(params *v4cred.ListCredentialsByWorkspaceParams) (*v4cred.ListCredentialsByWorkspaceOK, error) {
-	resp := make([]*model.CredentialV4Response, 0)
+func (m *mockListCredentials) ListCredentialsV1(params *v1cred.ListCredentialsV1Params) (*v1cred.ListCredentialsV1OK, error) {
+	resp := make([]*model.CredentialV1Response, 0)
 	for i := 0; i < 3; i++ {
-		resp = append(resp, &model.CredentialV4Response{
-			CredentialV4Base: model.CredentialV4Base{
+		resp = append(resp, &model.CredentialV1Response{
+			CredentialBase: model.CredentialBase{
 				Name:          &(&types.S{S: "name" + strconv.Itoa(i)}).S,
 				Description:   &(&types.S{S: "desc" + strconv.Itoa(i)}).S,
 				CloudPlatform: &(&types.S{S: "AWS"}).S,
@@ -88,7 +78,7 @@ func (m *mockListCredentialsByWorkspace) ListCredentialsByWorkspace(params *v4cr
 		})
 	}
 
-	return &v4cred.ListCredentialsByWorkspaceOK{Payload: &model.CredentialResponses{Responses: resp}}, nil
+	return &v1cred.ListCredentialsV1OK{Payload: &model.CredentialV1Responses{Responses: resp}}, nil
 }
 
 func TestListCredentialsImpl(t *testing.T) {
@@ -96,7 +86,7 @@ func TestListCredentialsImpl(t *testing.T) {
 
 	var rows []utils.Row
 
-	listCredentialsImpl(new(mockListCredentialsByWorkspace), int64(2), func(h []string, r []utils.Row) { rows = r })
+	listCredentialsImpl(new(mockListCredentials), func(h []string, r []utils.Row) { rows = r })
 
 	if len(rows) != 3 {
 		t.Fatalf("row number not match 3 == %d", len(rows))
@@ -113,19 +103,16 @@ func TestListCredentialsImpl(t *testing.T) {
 type mockCredentialModifyClient struct {
 }
 
-func (m *mockCredentialModifyClient) PutCredentialInWorkspace(params *v4cred.PutCredentialInWorkspaceParams) (*v4cred.PutCredentialInWorkspaceOK, error) {
-	return &v4cred.PutCredentialInWorkspaceOK{Payload: &model.CredentialV4Response{
+func (m *mockCredentialModifyClient) PutCredentialV1(params *v1cred.PutCredentialV1Params) (*v1cred.PutCredentialV1OK, error) {
+	return &v1cred.PutCredentialV1OK{Payload: &model.CredentialV1Response{
 		ID: int64(1),
-		CredentialV4Base: model.CredentialV4Base{
+		CredentialBase: model.CredentialBase{
 			Name:          params.Body.Name,
 			Description:   params.Body.Description,
 			CloudPlatform: params.Body.CloudPlatform,
 			Aws:           params.Body.Aws,
-			Gcp:           params.Body.Gcp,
-			Openstack:     params.Body.Openstack,
-			Yarn:          params.Body.Yarn,
 		},
-		Azure: &model.AzureCredentialV4ResponseParameters{
+		Azure: &model.AzureCredentialV1ResponseParameters{
 			SubscriptionID: "some",
 			TenantID:       "tenantid",
 		},
@@ -133,19 +120,19 @@ func (m *mockCredentialModifyClient) PutCredentialInWorkspace(params *v4cred.Put
 	}, nil
 }
 
-func (m *mockCredentialModifyClient) GetCredentialInWorkspace(params *v4cred.GetCredentialInWorkspaceParams) (*v4cred.GetCredentialInWorkspaceOK, error) {
+func (m *mockCredentialModifyClient) GetCredentialV1(params *v1cred.GetCredentialV1Params) (*v1cred.GetCredentialV1OK, error) {
 	if strings.Contains(params.Name, "invalid") {
 		return nil, errors.New("credential does not exist")
 	}
 
-	return &v4cred.GetCredentialInWorkspaceOK{Payload: &model.CredentialV4Response{
+	return &v1cred.GetCredentialV1OK{Payload: &model.CredentialV1Response{
 		ID: int64(1),
-		CredentialV4Base: model.CredentialV4Base{
+		CredentialBase: model.CredentialBase{
 			Name:          &(&types.S{S: "name"}).S,
 			Description:   &(&types.S{S: "default description"}).S,
 			CloudPlatform: &(&types.S{S: "AWS"}).S,
-			Aws: &model.AwsCredentialV4Parameters{
-				RoleBased: &model.RoleBasedCredentialParameters{
+			Aws: &model.AwsCredentialV1Parameters{
+				RoleBased: &model.RoleBasedV1Parameters{
 					RoleArn: &(&types.S{S: "default-role-arn"}).S,
 				},
 			},
@@ -173,22 +160,12 @@ func TestModifyCredentialImplForValidChange(t *testing.T) {
 		}
 	}
 
-	mockInt64Finder := func(in string) int64 {
-		switch in {
-		case fl.FlWorkspaceOptional.Name:
-			return int64(2)
-		default:
-			t.Error("workspace option expected")
-			return int64(-1)
-		}
-	}
-
-	CredentialV4Response := modifyCredentialImpl(stringFinder, mockInt64Finder, new(mockCredentialModifyClient), false)
-	resultArn := CredentialV4Response.Aws.RoleBased.RoleArn
+	CredentialV1Response := modifyCredentialImpl(stringFinder, new(mockCredentialModifyClient), false)
+	resultArn := CredentialV1Response.Aws.RoleBased.RoleArn
 	if resultArn == nil || *resultArn != expectedArn {
 		t.Errorf("roleArn does not match %s != %s", *resultArn, expectedArn)
 	}
-	resultDesc := *CredentialV4Response.Description
+	resultDesc := *CredentialV1Response.Description
 	if resultDesc != expectedDesc {
 		t.Errorf("description does not match %s != %s", resultDesc, expectedDesc)
 	}
@@ -213,22 +190,12 @@ func TestModifyCredentialImplForDescriptionChange(t *testing.T) {
 		}
 	}
 
-	mockInt64Finder := func(in string) int64 {
-		switch in {
-		case fl.FlWorkspaceOptional.Name:
-			return int64(2)
-		default:
-			t.Error("workspace option expected")
-			return int64(-1)
-		}
-	}
-
-	CredentialV4Response := modifyCredentialImpl(stringFinder, mockInt64Finder, new(mockCredentialModifyClient), false)
-	resultArn := CredentialV4Response.Aws.RoleBased.RoleArn
+	CredentialV1Response := modifyCredentialImpl(stringFinder, new(mockCredentialModifyClient), false)
+	resultArn := CredentialV1Response.Aws.RoleBased.RoleArn
 	if resultArn == nil || *resultArn != expectedArn {
 		t.Errorf("roleArn does not match %s != %s", *resultArn, expectedArn)
 	}
-	resultDesc := *CredentialV4Response.Description
+	resultDesc := *CredentialV1Response.Description
 	if resultDesc != expectedDesc {
 		t.Errorf("description does not match %s != %s", resultDesc, expectedDesc)
 	}
@@ -253,22 +220,12 @@ func TestModifyCredentialImplForDescriptionPublicChange(t *testing.T) {
 		}
 	}
 
-	mockInt64Finder := func(in string) int64 {
-		switch in {
-		case fl.FlWorkspaceOptional.Name:
-			return int64(2)
-		default:
-			t.Error("workspace option expected")
-			return int64(-1)
-		}
-	}
-
-	CredentialV4Response := modifyCredentialImpl(stringFinder, mockInt64Finder, new(mockCredentialModifyClient), false)
-	resultArn := CredentialV4Response.Aws.RoleBased.RoleArn
+	CredentialV1Response := modifyCredentialImpl(stringFinder, new(mockCredentialModifyClient), false)
+	resultArn := CredentialV1Response.Aws.RoleBased.RoleArn
 	if resultArn == nil || *resultArn != expectedArn {
 		t.Errorf("roleArn does not match %s != %s", *resultArn, expectedArn)
 	}
-	resultDesc := *CredentialV4Response.Description
+	resultDesc := *CredentialV1Response.Description
 	if resultDesc != expectedDesc {
 		t.Errorf("description does not match %s != %s", resultDesc, expectedDesc)
 	}
@@ -297,17 +254,7 @@ func TestModifyCredentialImplForInvalidCredential(t *testing.T) {
 		}
 	}
 
-	mockInt64Finder := func(in string) int64 {
-		switch in {
-		case fl.FlWorkspaceOptional.Name:
-			return int64(2)
-		default:
-			t.Error("workspace option expected")
-			return int64(-1)
-		}
-	}
-
-	modifyCredentialImpl(stringFinder, mockInt64Finder, new(mockCredentialModifyClient), false)
+	modifyCredentialImpl(stringFinder, new(mockCredentialModifyClient), false)
 	t.Error("the credential modification should fail")
 }
 

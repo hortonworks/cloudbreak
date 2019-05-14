@@ -51,7 +51,7 @@ type AttachResourcesToEnvironmentOK struct {
 }
 
 func (o *AttachResourcesToEnvironmentOK) Error() string {
-	return fmt.Sprintf("[PUT /v4/{workspaceId}/environments/{name}/attach][%d] attachResourcesToEnvironmentOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[PUT /v4/{workspaceId}/environments/{crn}/attach][%d] attachResourcesToEnvironmentOK  %+v", 200, o.Payload)
 }
 
 func (o *AttachResourcesToEnvironmentOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

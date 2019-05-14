@@ -51,7 +51,7 @@ type RegisterExternalDatalakeOK struct {
 }
 
 func (o *RegisterExternalDatalakeOK) Error() string {
-	return fmt.Sprintf("[PUT /v4/{workspaceId}/environments/{name}/register_datalake][%d] registerExternalDatalakeOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[PUT /v4/{workspaceId}/environments/{crn}/register_datalake][%d] registerExternalDatalakeOK  %+v", 200, o.Payload)
 }
 
 func (o *RegisterExternalDatalakeOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

@@ -1,6 +1,7 @@
 package cloud
 
 import (
+	envmodel "github.com/hortonworks/cb-cli/dataplane/api-environment/model"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/cb-cli/dataplane/types"
@@ -56,7 +57,7 @@ var CloudProviders = make(map[CloudType]CloudProvider)
 
 type CloudProvider interface {
 	GetName() *string
-	GetCredentialRequest(stringFinder func(string) string, govCloud bool) (*model.CredentialV4Request, error)
+	GetCredentialRequest(stringFinder func(string) string, govCloud bool) (*envmodel.CredentialV1Request, error)
 	SkippedFields() map[string]bool
 	GenerateDefaultTemplate() *model.InstanceTemplateV4Request
 	GenerateDefaultNetwork(mode NetworkMode) *model.NetworkV4Request
@@ -124,10 +125,10 @@ func getDefaultSecurityRules(node Node) []*model.SecurityRuleV4Request {
 	return rules
 }
 
-func CreateBaseCredentialRequest(stringFinder func(string) string) *model.CredentialV4Request {
+func CreateBaseCredentialRequest(stringFinder func(string) string) *envmodel.CredentialV1Request {
 	name := stringFinder(fl.FlName.Name)
-	return &model.CredentialV4Request{
-		CredentialV4Base: model.CredentialV4Base{
+	return &envmodel.CredentialV1Request{
+		CredentialBase: envmodel.CredentialBase{
 			Name:          &name,
 			Description:   &(&types.S{S: stringFinder(fl.FlDescriptionOptional.Name)}).S,
 			CloudPlatform: GetProvider().GetName(),

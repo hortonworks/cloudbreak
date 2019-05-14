@@ -15,7 +15,7 @@ import (
 
 	"github.com/hortonworks/cb-cli/dataplane/api-freeipa/client/v1ldaps"
 	"github.com/hortonworks/cb-cli/dataplane/api-freeipa/model"
-	env "github.com/hortonworks/cb-cli/dataplane/env"
+	"github.com/hortonworks/cb-cli/dataplane/env"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/dp-cli-common/utils"
 	log "github.com/sirupsen/logrus"
@@ -124,15 +124,14 @@ func CreateLDAP(c *cli.Context) error {
 	portSeparatorIndex := strings.LastIndex(server, ":")
 	serverPort, _ := strconv.Atoi(server[portSeparatorIndex+1:])
 	protocol := server[0:strings.Index(server, ":")]
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 
 	freeIpaClient := oauth.FreeIpa(*oauth.NewFreeIpaClientFromContext(c)).FreeIpa
 
-	return createLDAPImpl(freeIpaClient.V1ldaps, int32(serverPort), workspaceID, name, description, server, protocol, domain, bindDn, bindPassword, directoryType,
+	return createLDAPImpl(freeIpaClient.V1ldaps, int32(serverPort), name, description, server, protocol, domain, bindDn, bindPassword, directoryType,
 		userSearchBase, userDnPattern, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute, groupObjectClass, adminGroup, certificate, environment)
 }
 
-func createLDAPImpl(ldapClient ldapClient, port int32, workspaceID int64, name, description, server, protocol, domain, bindDn, bindPassword, directoryType,
+func createLDAPImpl(ldapClient ldapClient, port int32, name, description, server, protocol, domain, bindDn, bindPassword, directoryType,
 	userSearchBase, userDnPattern, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute,
 	groupObjectClass, adminGroup, certificate string, environment string) error {
 	defer utils.TimeTrack(time.Now(), "create ldap")

@@ -60,8 +60,8 @@ type ClusterV4Request struct {
 	// Min Length: 8
 	Password *string `json:"password"`
 
-	// proxy configuration name for the cluster
-	ProxyName string `json:"proxyName,omitempty"`
+	// proxy CRN for the cluster
+	ProxyConfigCrn string `json:"proxyConfigCrn,omitempty"`
 
 	// ambari username
 	// Required: true

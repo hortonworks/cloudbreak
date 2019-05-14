@@ -26,20 +26,6 @@ func CheckClientVersion(client utilClient, version string) {
 	}
 }
 
-func SafeCloudPlatformConvert(env *model.EnvironmentSettingsV4Response) string {
-	if env != nil {
-		return env.CloudPlatform
-	}
-	return ""
-}
-
-func SafeEnvironmentNameConvert(env *model.EnvironmentSettingsV4Response) string {
-	if env != nil {
-		return env.Name
-	}
-	return ""
-}
-
 func SafeClusterDescriptionConvert(s *model.StackV4Response) string {
 	if s.Cluster != nil {
 		return s.Cluster.Description

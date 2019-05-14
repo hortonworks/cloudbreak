@@ -22,13 +22,13 @@ import (
 	"github.com/urfave/cli"
 )
 
-var stackHeader = []string{"Name", "CloudPlatform", "Environment", "StackStatus", "ClusterStatus"}
+var stackHeader = []string{"Name", "CloudPlatform", "EnvironmentCrn", "StackStatus", "ClusterStatus"}
 
 type stackOut struct {
 	common.CloudResourceOut
-	Environment   string `json:"Environment" yaml:"Environment"`
-	StackStatus   string `json:"StackStatus" yaml:"StackStatus"`
-	ClusterStatus string `json:"ClusterStatus" yaml:"ClusterStatus"`
+	EnvironmentCrn string `json:"EnvironmentCrn" yaml:"EnvironmentCrn"`
+	StackStatus    string `json:"StackStatus" yaml:"StackStatus"`
+	ClusterStatus  string `json:"ClusterStatus" yaml:"ClusterStatus"`
 }
 
 type stackOutDescribe struct {
@@ -37,7 +37,7 @@ type stackOutDescribe struct {
 
 func (s *stackOut) DataAsStringArray() []string {
 	arr := []string{s.Name, s.CloudPlatform}
-	arr = append(arr, s.Environment)
+	arr = append(arr, s.EnvironmentCrn)
 	arr = append(arr, s.StackStatus)
 	arr = append(arr, s.ClusterStatus)
 	return arr
@@ -129,11 +129,11 @@ func convertViewResponseToStack(s *model.StackViewV4Response) *stackOut {
 	return &stackOut{
 		CloudResourceOut: common.CloudResourceOut{
 			Name:          *s.Name,
-			CloudPlatform: utils.SafeCloudPlatformConvert(s.Environment),
+			CloudPlatform: s.CloudPlatform,
 		},
-		Environment:   utils.SafeEnvironmentNameConvert(s.Environment),
-		StackStatus:   s.Status,
-		ClusterStatus: utils.SafeClusterViewStatusConvert(s),
+		EnvironmentCrn: s.EnvironmentCrn,
+		StackStatus:    s.Status,
+		ClusterStatus:  utils.SafeClusterViewStatusConvert(s),
 	}
 }
 
@@ -142,11 +142,11 @@ func convertResponseToStack(s *model.StackV4Response) *stackOut {
 		CloudResourceOut: common.CloudResourceOut{
 			Name:          *s.Name,
 			Description:   utils.SafeClusterDescriptionConvert(s),
-			CloudPlatform: utils.SafeCloudPlatformConvert(s.Environment),
+			CloudPlatform: s.CloudPlatform,
 		},
-		Environment:   utils.SafeEnvironmentNameConvert(s.Environment),
-		StackStatus:   s.Status,
-		ClusterStatus: utils.SafeClusterStatusConvert(s),
+		EnvironmentCrn: s.EnvironmentCrn,
+		StackStatus:    s.Status,
+		ClusterStatus:  utils.SafeClusterStatusConvert(s),
 	}
 }
 

@@ -51,7 +51,7 @@ type RegisterDatalakePrerequisitesOK struct {
 }
 
 func (o *RegisterDatalakePrerequisitesOK) Error() string {
-	return fmt.Sprintf("[POST /v4/{workspaceId}/environments/{name}/register_datalake_prerequisites][%d] registerDatalakePrerequisitesOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[POST /v4/{workspaceId}/environments/{crn}/register_datalake_prerequisites][%d] registerDatalakePrerequisitesOK  %+v", 200, o.Payload)
 }
 
 func (o *RegisterDatalakePrerequisitesOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

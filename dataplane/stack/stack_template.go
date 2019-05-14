@@ -3,7 +3,6 @@ package stack
 import (
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -134,9 +133,6 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 			ValidateBlueprint: false,
 		},
 		Name: &(&types.S{S: ""}).S,
-		Environment: &model.EnvironmentSettingsV4Request{
-			CredentialName: "____",
-		},
 		Placement: &model.PlacementSettingsV4Request{
 			Region:           getStringPointer(skippedFields, cloud.REGION_FIELD, "____"),
 			AvailabilityZone: getString(skippedFields, cloud.AVAILABILITY_ZONE_FIELD, "____"),
@@ -178,18 +174,10 @@ func generateAttachedTemplateImpl(stringFinder func(string) string, boolFinder f
 	} else if datalake.Status != "AVAILABLE" || datalake.Cluster.Status != "AVAILABLE" {
 		commonUtils.LogErrorMessageAndExit("Datalake must be in available state")
 	} else {
-		env := datalake.Environment
-		if env == nil {
-			commonUtils.LogErrorAndExit(errors.New("the datalake does not belong to any environment"))
-		}
-		if len(env.CloudPlatform) == 0 {
-			commonUtils.LogErrorAndExit(errors.New("the cloud platform is not specified for the source cluster"))
-		}
-		cloud.SetProviderType(cloud.CloudType(env.CloudPlatform))
 		attachedClusterTemplate := generateStackTemplateImpl(cloud.EXISTING_NETWORK_EXISTING_SUBNET, stringFinder, boolFinder, int64Finder, getBlueprintClient, storageType)
 		attachedClusterTemplate.Placement.Region = datalake.Placement.Region
 		attachedClusterTemplate.Placement.AvailabilityZone = datalake.Placement.AvailabilityZone
-		attachedClusterTemplate.Environment.CredentialName = *env.Credential.Name
+		attachedClusterTemplate.EnvironmentCrn = &datalake.EnvironmentCrn
 		attachedClusterTemplate.Network = cloud.GetProvider().GenerateNetworkRequestFromNetworkResponse(datalake.Network)
 		attachedClusterTemplate.Cluster.LdapName = *datalake.Cluster.Ldap.Name
 		attachedClusterTemplate.Cluster.CloudStorage = generateCloudStorage(datalake.Cluster.CloudStorage)

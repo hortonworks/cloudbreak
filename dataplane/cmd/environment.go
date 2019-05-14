@@ -15,15 +15,13 @@ func init() {
 			{
 				Name:  "create",
 				Usage: "creates a new Environment",
-				Flags: fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlEnvironmentCredential, fl.FlEnvironmentRegions,
-					fl.FlLdapNamesOptional, fl.FlProxyNamesOptional, fl.FlKerberosNamesOptional, fl.FlRdsNamesOptional, fl.FlEnvironmentLocationName,
+				Flags: fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlEnvironmentCredential, fl.FlEnvironmentRegions, fl.FlProxyNamesOptional, fl.FlEnvironmentLocationName,
 					fl.FlEnvironmentLongitudeOptional, fl.FlEnvironmentLatitudeOptional).AddAuthenticationFlags().Build(),
 				Before: cf.CheckConfigAndCommandFlags,
 				Action: env.CreateEnvironment,
 				BashComplete: func(c *cli.Context) {
 					for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlEnvironmentCredential, fl.FlEnvironmentRegions,
-						fl.FlLdapNamesOptional, fl.FlProxyNamesOptional, fl.FlKerberosNamesOptional, fl.FlRdsNamesOptional, fl.FlEnvironmentLocationName,
-						fl.FlEnvironmentLongitudeOptional, fl.FlEnvironmentLatitudeOptional).AddAuthenticationFlags().Build() {
+						fl.FlProxyNamesOptional, fl.FlEnvironmentLocationName, fl.FlEnvironmentLongitudeOptional, fl.FlEnvironmentLatitudeOptional).AddAuthenticationFlags().Build() {
 						fl.PrintFlagCompletion(f)
 					}
 				},
@@ -75,26 +73,6 @@ func init() {
 				},
 			},
 			{
-				Name:  "cumulus",
-				Usage: "cumulus related operations",
-				Subcommands: []cli.Command{
-					{
-						Name:  "register-datalake",
-						Usage: "register an existing Cumulus based Data Lake",
-						Flags: fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentName, fl.FlLdapNameOptional, fl.FlRdsNamesOptional,
-							fl.FlKerberosNameOptional, fl.FlRangerAdminPasswordOptional).AddAuthenticationFlags().Build(),
-						Before: cf.CheckConfigAndCommandFlags,
-						Action: env.RegisterCumulusDatalake,
-						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentName, fl.FlLdapNameOptional, fl.FlRdsNamesOptional,
-								fl.FlKerberosNameOptional, fl.FlRangerAdminPasswordOptional).AddAuthenticationFlags().Build() {
-								fl.PrintFlagCompletion(f)
-							}
-						},
-					},
-				},
-			},
-			{
 				Name:   "list",
 				Usage:  "list the available environments",
 				Flags:  fl.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build(),
@@ -120,12 +98,12 @@ func init() {
 			},
 			{
 				Name:   "delete",
-				Usage:  "deletes an environment",
-				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
+				Usage:  "deletes an environment or more if names are spearated by commas",
+				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlNames).AddOutputFlag().AddAuthenticationFlags().Build(),
 				Before: cf.CheckConfigAndCommandFlags,
 				Action: env.DeleteEnvironment,
 				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlNames).AddOutputFlag().AddAuthenticationFlags().Build() {
 						fl.PrintFlagCompletion(f)
 					}
 				},

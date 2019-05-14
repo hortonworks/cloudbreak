@@ -15,11 +15,11 @@ func init() {
 			{
 				Name:   "create",
 				Usage:  "create kubernetes configuration",
-				Flags:  fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlKubernetesConfigFile, fl.FlEnvironmentsOptional).AddAuthenticationFlags().Build(),
+				Flags:  fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlKubernetesConfigFile).AddAuthenticationFlags().Build(),
 				Before: cf.CheckConfigAndCommandFlags,
 				Action: kubernetes.CreateKubernetes,
 				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlKubernetesConfigFile, fl.FlEnvironmentsOptional).AddAuthenticationFlags().Build() {
+					for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlKubernetesConfigFile).AddAuthenticationFlags().Build() {
 						fl.PrintFlagCompletion(f)
 					}
 				},

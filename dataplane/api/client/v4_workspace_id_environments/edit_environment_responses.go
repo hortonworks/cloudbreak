@@ -47,16 +47,16 @@ func NewEditEnvironmentOK() *EditEnvironmentOK {
 successful operation
 */
 type EditEnvironmentOK struct {
-	Payload *model.DetailedEnvironmentV4Response
+	Payload *model.DetailedEnvironmentV1Response
 }
 
 func (o *EditEnvironmentOK) Error() string {
-	return fmt.Sprintf("[PUT /v4/{workspaceId}/environments/{name}][%d] editEnvironmentOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[PUT /v4/{workspaceId}/environments/{crn}][%d] editEnvironmentOK  %+v", 200, o.Payload)
 }
 
 func (o *EditEnvironmentOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(model.DetailedEnvironmentV4Response)
+	o.Payload = new(model.DetailedEnvironmentV1Response)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

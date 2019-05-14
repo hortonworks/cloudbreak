@@ -1,13 +1,13 @@
 package yarn
 
 import (
-	"github.com/hortonworks/cb-cli/dataplane/api/model"
+	"github.com/hortonworks/cb-cli/dataplane/api-environment/model"
 	"github.com/hortonworks/cb-cli/dataplane/cloud"
 	"github.com/hortonworks/cb-cli/dataplane/types"
 )
 
-func (p *YarnProvider) GetCredentialRequest(stringFinder func(string) string, govCloud bool) (*model.CredentialV4Request, error) {
-	parameters := &model.YarnCredentialV4Parameters{
+func (p *YarnProvider) GetCredentialRequest(stringFinder func(string) string, govCloud bool) (*model.CredentialV1Request, error) {
+	parameters := &model.YarnV1Parameters{
 		Endpoint: &(&types.S{S: stringFinder("yarn-endpoint")}).S,
 	}
 	credReq := cloud.CreateBaseCredentialRequest(stringFinder)

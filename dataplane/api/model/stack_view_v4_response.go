@@ -19,14 +19,17 @@ import (
 // swagger:model StackViewV4Response
 type StackViewV4Response struct {
 
+	// Cloudplatform of the stack
+	CloudPlatform string `json:"cloudPlatform,omitempty"`
+
 	// cluster object on stack
 	Cluster *ClusterViewV4Response `json:"cluster,omitempty"`
 
 	// creation time of the stack in long
 	Created int64 `json:"created,omitempty"`
 
-	// environment which the stack is assigned to
-	Environment *EnvironmentSettingsV4Response `json:"environment,omitempty"`
+	// CRN of the environment which the stack is assigned to
+	EnvironmentCrn string `json:"environmentCrn,omitempty"`
 
 	// specific version of HDP
 	HdpVersion string `json:"hdpVersion,omitempty"`
@@ -60,10 +63,6 @@ func (m *StackViewV4Response) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateEnvironment(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validateName(formats); err != nil {
 		res = append(res, err)
 	}
@@ -92,24 +91,6 @@ func (m *StackViewV4Response) validateCluster(formats strfmt.Registry) error {
 		if err := m.Cluster.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("cluster")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *StackViewV4Response) validateEnvironment(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Environment) { // not required
-		return nil
-	}
-
-	if m.Environment != nil {
-		if err := m.Environment.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("environment")
 			}
 			return err
 		}

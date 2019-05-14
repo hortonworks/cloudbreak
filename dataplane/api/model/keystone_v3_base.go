@@ -6,8 +6,6 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"encoding/json"
-
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -19,10 +17,6 @@ import (
 // swagger:model KeystoneV3Base
 type KeystoneV3Base struct {
 
-	// cloud platform
-	// Enum: [AWS GCP AZURE OPENSTACK CUMULUS_YARN YARN MOCK]
-	CloudPlatform string `json:"cloudPlatform,omitempty"`
-
 	// user domain
 	// Required: true
 	UserDomain *string `json:"userDomain"`
@@ -32,10 +26,6 @@ type KeystoneV3Base struct {
 func (m *KeystoneV3Base) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateCloudPlatform(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validateUserDomain(formats); err != nil {
 		res = append(res, err)
 	}
@@ -43,64 +33,6 @@ func (m *KeystoneV3Base) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-var keystoneV3BaseTypeCloudPlatformPropEnum []interface{}
-
-func init() {
-	var res []string
-	if err := json.Unmarshal([]byte(`["AWS","GCP","AZURE","OPENSTACK","CUMULUS_YARN","YARN","MOCK"]`), &res); err != nil {
-		panic(err)
-	}
-	for _, v := range res {
-		keystoneV3BaseTypeCloudPlatformPropEnum = append(keystoneV3BaseTypeCloudPlatformPropEnum, v)
-	}
-}
-
-const (
-
-	// KeystoneV3BaseCloudPlatformAWS captures enum value "AWS"
-	KeystoneV3BaseCloudPlatformAWS string = "AWS"
-
-	// KeystoneV3BaseCloudPlatformGCP captures enum value "GCP"
-	KeystoneV3BaseCloudPlatformGCP string = "GCP"
-
-	// KeystoneV3BaseCloudPlatformAZURE captures enum value "AZURE"
-	KeystoneV3BaseCloudPlatformAZURE string = "AZURE"
-
-	// KeystoneV3BaseCloudPlatformOPENSTACK captures enum value "OPENSTACK"
-	KeystoneV3BaseCloudPlatformOPENSTACK string = "OPENSTACK"
-
-	// KeystoneV3BaseCloudPlatformCUMULUSYARN captures enum value "CUMULUS_YARN"
-	KeystoneV3BaseCloudPlatformCUMULUSYARN string = "CUMULUS_YARN"
-
-	// KeystoneV3BaseCloudPlatformYARN captures enum value "YARN"
-	KeystoneV3BaseCloudPlatformYARN string = "YARN"
-
-	// KeystoneV3BaseCloudPlatformMOCK captures enum value "MOCK"
-	KeystoneV3BaseCloudPlatformMOCK string = "MOCK"
-)
-
-// prop value enum
-func (m *KeystoneV3Base) validateCloudPlatformEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, keystoneV3BaseTypeCloudPlatformPropEnum); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *KeystoneV3Base) validateCloudPlatform(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.CloudPlatform) { // not required
-		return nil
-	}
-
-	// value enum
-	if err := m.validateCloudPlatformEnum("cloudPlatform", "body", m.CloudPlatform); err != nil {
-		return err
-	}
-
 	return nil
 }
 

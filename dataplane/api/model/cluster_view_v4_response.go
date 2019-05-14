@@ -45,7 +45,7 @@ type ClusterViewV4Response struct {
 	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
 	Name *string `json:"name"`
 
-	// tells wether the cluster is secured or not
+	// tells whether the cluster is secured or not
 	Secure bool `json:"secure,omitempty"`
 
 	// public ambari ip of the stack

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/hortonworks/cb-cli/dataplane/api-freeipa/client/v1kerberos"
-	model "github.com/hortonworks/cb-cli/dataplane/api-freeipa/model"
+	"github.com/hortonworks/cb-cli/dataplane/api-freeipa/model"
 	"github.com/hortonworks/cb-cli/dataplane/types"
 	"github.com/hortonworks/dp-cli-common/utils"
 )
@@ -53,7 +53,7 @@ func (*mockKerberosClient) DeleteKerberosConfigForEnvironment(params *v1kerberos
 
 func TestGetKerberosImpl(t *testing.T) {
 	var row utils.Row
-	GetKerberosImpl(new(mockKerberosClient), 1, "testget", func(h []string, r utils.Row) { row = r })
+	GetKerberosImpl(new(mockKerberosClient), "testget", func(h []string, r utils.Row) { row = r })
 	expected := "kerberos_name testdescription ACTIVE_DIRECTORY testget 123"
 	CheckResponseRow(row, expected, t)
 }
@@ -68,7 +68,7 @@ func TestDeleteKerberosImpl(t *testing.T) {
 func TestCreateKerberosImpl(t *testing.T) {
 	var row utils.Row
 	environment := "env"
-	SendCreateKerberosRequestImpl(new(mockKerberosClient), 1, &model.CreateKerberosConfigV1Request{EnvironmentCrn: &environment}, func(h []string, r utils.Row) { row = r })
+	SendCreateKerberosRequestImpl(new(mockKerberosClient), &model.CreateKerberosConfigV1Request{EnvironmentCrn: &environment}, func(h []string, r utils.Row) { row = r })
 	expected := "created testdescription ACTIVE_DIRECTORY env 123"
 	CheckResponseRow(row, expected, t)
 }

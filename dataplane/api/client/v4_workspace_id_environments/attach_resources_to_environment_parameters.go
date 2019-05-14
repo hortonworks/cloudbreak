@@ -67,8 +67,8 @@ type AttachResourcesToEnvironmentParams struct {
 
 	/*Body*/
 	Body *model.EnvironmentAttachV4Request
-	/*Name*/
-	Name string
+	/*Crn*/
+	Crn string
 	/*WorkspaceID*/
 	WorkspaceID int64
 
@@ -121,15 +121,15 @@ func (o *AttachResourcesToEnvironmentParams) SetBody(body *model.EnvironmentAtta
 	o.Body = body
 }
 
-// WithName adds the name to the attach resources to environment params
-func (o *AttachResourcesToEnvironmentParams) WithName(name string) *AttachResourcesToEnvironmentParams {
-	o.SetName(name)
+// WithCrn adds the crn to the attach resources to environment params
+func (o *AttachResourcesToEnvironmentParams) WithCrn(crn string) *AttachResourcesToEnvironmentParams {
+	o.SetCrn(crn)
 	return o
 }
 
-// SetName adds the name to the attach resources to environment params
-func (o *AttachResourcesToEnvironmentParams) SetName(name string) {
-	o.Name = name
+// SetCrn adds the crn to the attach resources to environment params
+func (o *AttachResourcesToEnvironmentParams) SetCrn(crn string) {
+	o.Crn = crn
 }
 
 // WithWorkspaceID adds the workspaceID to the attach resources to environment params
@@ -157,8 +157,8 @@ func (o *AttachResourcesToEnvironmentParams) WriteToRequest(r runtime.ClientRequ
 		}
 	}
 
-	// path param name
-	if err := r.SetPathParam("name", o.Name); err != nil {
+	// path param crn
+	if err := r.SetPathParam("crn", o.Crn); err != nil {
 		return err
 	}
 

@@ -66,9 +66,9 @@ for the edit environment operation typically these are written to a http.Request
 type EditEnvironmentParams struct {
 
 	/*Body*/
-	Body *model.EnvironmentEditV4Request
-	/*Name*/
-	Name string
+	Body *model.EnvironmentEditV1Request
+	/*Crn*/
+	Crn string
 	/*WorkspaceID*/
 	WorkspaceID int64
 
@@ -111,25 +111,25 @@ func (o *EditEnvironmentParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithBody adds the body to the edit environment params
-func (o *EditEnvironmentParams) WithBody(body *model.EnvironmentEditV4Request) *EditEnvironmentParams {
+func (o *EditEnvironmentParams) WithBody(body *model.EnvironmentEditV1Request) *EditEnvironmentParams {
 	o.SetBody(body)
 	return o
 }
 
 // SetBody adds the body to the edit environment params
-func (o *EditEnvironmentParams) SetBody(body *model.EnvironmentEditV4Request) {
+func (o *EditEnvironmentParams) SetBody(body *model.EnvironmentEditV1Request) {
 	o.Body = body
 }
 
-// WithName adds the name to the edit environment params
-func (o *EditEnvironmentParams) WithName(name string) *EditEnvironmentParams {
-	o.SetName(name)
+// WithCrn adds the crn to the edit environment params
+func (o *EditEnvironmentParams) WithCrn(crn string) *EditEnvironmentParams {
+	o.SetCrn(crn)
 	return o
 }
 
-// SetName adds the name to the edit environment params
-func (o *EditEnvironmentParams) SetName(name string) {
-	o.Name = name
+// SetCrn adds the crn to the edit environment params
+func (o *EditEnvironmentParams) SetCrn(crn string) {
+	o.Crn = crn
 }
 
 // WithWorkspaceID adds the workspaceID to the edit environment params
@@ -157,8 +157,8 @@ func (o *EditEnvironmentParams) WriteToRequest(r runtime.ClientRequest, reg strf
 		}
 	}
 
-	// path param name
-	if err := r.SetPathParam("name", o.Name); err != nil {
+	// path param crn
+	if err := r.SetPathParam("crn", o.Crn); err != nil {
 		return err
 	}
 

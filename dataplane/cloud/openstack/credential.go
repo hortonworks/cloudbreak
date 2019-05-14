@@ -3,7 +3,8 @@ package openstack
 import (
 	"errors"
 	"fmt"
-	"github.com/hortonworks/cb-cli/dataplane/api/model"
+
+	"github.com/hortonworks/cb-cli/dataplane/api-environment/model"
 	"github.com/hortonworks/cb-cli/dataplane/cloud"
 	"github.com/hortonworks/cb-cli/dataplane/types"
 )
@@ -11,13 +12,13 @@ import (
 var FACINGS = []string{"public", "admin", "internal"}
 var SCOPES = []string{"project", "domain"}
 
-func (p *OpenstackProvider) GetCredentialRequest(stringFinder func(string) string, govCloud bool) (*model.CredentialV4Request, error) {
+func (p *OpenstackProvider) GetCredentialRequest(stringFinder func(string) string, govCloud bool) (*model.CredentialV1Request, error) {
 	facing, err := validateAndGet(stringFinder("facing"), FACINGS)
 	if err != nil {
 		return nil, err
 	}
 
-	parameters := &model.OpenstackCredentialV4Parameters{
+	parameters := &model.OpenstackV1Parameters{
 		Facing:   &facing,
 		UserName: &(&types.S{S: stringFinder("tenant-user")}).S,
 		Password: &(&types.S{S: stringFinder("tenant-password")}).S,

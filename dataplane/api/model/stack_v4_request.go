@@ -36,9 +36,9 @@ type StackV4Request struct {
 	// settings related to custom domain names
 	CustomDomain *CustomDomainSettingsV4Request `json:"customDomain,omitempty"`
 
-	// general configuration parameters for a cluster (e.g. 'name', 'credentialname')
+	// CRN of the environment which the stack is assigned to
 	// Required: true
-	Environment *EnvironmentSettingsV4Request `json:"environment"`
+	EnvironmentCrn *string `json:"environmentCrn"`
 
 	// port of the gateway secured proxy
 	// Maximum: 65535
@@ -114,7 +114,7 @@ func (m *StackV4Request) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateEnvironment(formats); err != nil {
+	if err := m.validateEnvironmentCrn(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -240,19 +240,10 @@ func (m *StackV4Request) validateCustomDomain(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *StackV4Request) validateEnvironment(formats strfmt.Registry) error {
+func (m *StackV4Request) validateEnvironmentCrn(formats strfmt.Registry) error {
 
-	if err := validate.Required("environment", "body", m.Environment); err != nil {
+	if err := validate.Required("environmentCrn", "body", m.EnvironmentCrn); err != nil {
 		return err
-	}
-
-	if m.Environment != nil {
-		if err := m.Environment.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("environment")
-			}
-			return err
-		}
 	}
 
 	return nil

@@ -47,7 +47,7 @@ func NewCreateEnvironmentOK() *CreateEnvironmentOK {
 successful operation
 */
 type CreateEnvironmentOK struct {
-	Payload *model.DetailedEnvironmentV4Response
+	Payload *model.DetailedEnvironmentV1Response
 }
 
 func (o *CreateEnvironmentOK) Error() string {
@@ -56,7 +56,7 @@ func (o *CreateEnvironmentOK) Error() string {
 
 func (o *CreateEnvironmentOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(model.DetailedEnvironmentV4Response)
+	o.Payload = new(model.DetailedEnvironmentV1Response)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

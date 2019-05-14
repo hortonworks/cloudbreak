@@ -29,6 +29,10 @@ type StackV4Response struct {
 	// azure specific parameters for stack
 	Azure *AzureStackV4Parameters `json:"azure,omitempty"`
 
+	// Cloudplatform of the stack
+	// Enum: [AWS GCP AZURE OPENSTACK CUMULUS_YARN YARN MOCK]
+	CloudPlatform string `json:"cloudPlatform,omitempty"`
+
 	// details of the Cloudbreak that provisioned the stack
 	CloudbreakDetails *CloudbreakDetailsV4Response `json:"cloudbreakDetails,omitempty"`
 
@@ -44,8 +48,8 @@ type StackV4Response struct {
 	// custom domains
 	CustomDomains *CustomDomainSettingsV4Response `json:"customDomains,omitempty"`
 
-	// environment
-	Environment *EnvironmentSettingsV4Response `json:"environment,omitempty"`
+	// environment crn
+	EnvironmentCrn string `json:"environmentCrn,omitempty"`
 
 	// port of the gateway secured proxy
 	GatewayPort int32 `json:"gatewayPort,omitempty"`
@@ -127,6 +131,10 @@ func (m *StackV4Response) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateCloudPlatform(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateCloudbreakDetails(formats); err != nil {
 		res = append(res, err)
 	}
@@ -140,10 +148,6 @@ func (m *StackV4Response) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateCustomDomains(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateEnvironment(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -237,6 +241,64 @@ func (m *StackV4Response) validateAzure(formats strfmt.Registry) error {
 	return nil
 }
 
+var stackV4ResponseTypeCloudPlatformPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["AWS","GCP","AZURE","OPENSTACK","CUMULUS_YARN","YARN","MOCK"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		stackV4ResponseTypeCloudPlatformPropEnum = append(stackV4ResponseTypeCloudPlatformPropEnum, v)
+	}
+}
+
+const (
+
+	// StackV4ResponseCloudPlatformAWS captures enum value "AWS"
+	StackV4ResponseCloudPlatformAWS string = "AWS"
+
+	// StackV4ResponseCloudPlatformGCP captures enum value "GCP"
+	StackV4ResponseCloudPlatformGCP string = "GCP"
+
+	// StackV4ResponseCloudPlatformAZURE captures enum value "AZURE"
+	StackV4ResponseCloudPlatformAZURE string = "AZURE"
+
+	// StackV4ResponseCloudPlatformOPENSTACK captures enum value "OPENSTACK"
+	StackV4ResponseCloudPlatformOPENSTACK string = "OPENSTACK"
+
+	// StackV4ResponseCloudPlatformCUMULUSYARN captures enum value "CUMULUS_YARN"
+	StackV4ResponseCloudPlatformCUMULUSYARN string = "CUMULUS_YARN"
+
+	// StackV4ResponseCloudPlatformYARN captures enum value "YARN"
+	StackV4ResponseCloudPlatformYARN string = "YARN"
+
+	// StackV4ResponseCloudPlatformMOCK captures enum value "MOCK"
+	StackV4ResponseCloudPlatformMOCK string = "MOCK"
+)
+
+// prop value enum
+func (m *StackV4Response) validateCloudPlatformEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, stackV4ResponseTypeCloudPlatformPropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *StackV4Response) validateCloudPlatform(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.CloudPlatform) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateCloudPlatformEnum("cloudPlatform", "body", m.CloudPlatform); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m *StackV4Response) validateCloudbreakDetails(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.CloudbreakDetails) { // not required
@@ -308,24 +370,6 @@ func (m *StackV4Response) validateCustomDomains(formats strfmt.Registry) error {
 		if err := m.CustomDomains.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("customDomains")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *StackV4Response) validateEnvironment(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Environment) { // not required
-		return nil
-	}
-
-	if m.Environment != nil {
-		if err := m.Environment.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("environment")
 			}
 			return err
 		}

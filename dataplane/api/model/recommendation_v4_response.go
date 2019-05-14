@@ -23,6 +23,12 @@ type RecommendationV4Response struct {
 	// Unique: true
 	DiskResponses []*DiskV4Response `json:"diskResponses"`
 
+	// gateway recommendation
+	GatewayRecommendation *GatewayRecommendationV4Response `json:"gatewayRecommendation,omitempty"`
+
+	// instance counts
+	InstanceCounts map[string]InstanceCountV4Response `json:"instanceCounts,omitempty"`
+
 	// recommendations
 	Recommendations map[string]VMTypeV4Response `json:"recommendations,omitempty"`
 
@@ -36,6 +42,14 @@ func (m *RecommendationV4Response) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDiskResponses(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateGatewayRecommendation(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateInstanceCounts(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -73,6 +87,46 @@ func (m *RecommendationV4Response) validateDiskResponses(formats strfmt.Registry
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("diskResponses" + "." + strconv.Itoa(i))
 				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *RecommendationV4Response) validateGatewayRecommendation(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.GatewayRecommendation) { // not required
+		return nil
+	}
+
+	if m.GatewayRecommendation != nil {
+		if err := m.GatewayRecommendation.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("gatewayRecommendation")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *RecommendationV4Response) validateInstanceCounts(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.InstanceCounts) { // not required
+		return nil
+	}
+
+	for k := range m.InstanceCounts {
+
+		if err := validate.Required("instanceCounts"+"."+k, "body", m.InstanceCounts[k]); err != nil {
+			return err
+		}
+		if val, ok := m.InstanceCounts[k]; ok {
+			if err := val.Validate(formats); err != nil {
 				return err
 			}
 		}

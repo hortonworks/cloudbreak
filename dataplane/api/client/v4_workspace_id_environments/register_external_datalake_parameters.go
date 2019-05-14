@@ -67,8 +67,8 @@ type RegisterExternalDatalakeParams struct {
 
 	/*Body*/
 	Body *model.RegisterDatalakeV4Request
-	/*Name*/
-	Name string
+	/*Crn*/
+	Crn string
 	/*WorkspaceID*/
 	WorkspaceID int64
 
@@ -121,15 +121,15 @@ func (o *RegisterExternalDatalakeParams) SetBody(body *model.RegisterDatalakeV4R
 	o.Body = body
 }
 
-// WithName adds the name to the register external datalake params
-func (o *RegisterExternalDatalakeParams) WithName(name string) *RegisterExternalDatalakeParams {
-	o.SetName(name)
+// WithCrn adds the crn to the register external datalake params
+func (o *RegisterExternalDatalakeParams) WithCrn(crn string) *RegisterExternalDatalakeParams {
+	o.SetCrn(crn)
 	return o
 }
 
-// SetName adds the name to the register external datalake params
-func (o *RegisterExternalDatalakeParams) SetName(name string) {
-	o.Name = name
+// SetCrn adds the crn to the register external datalake params
+func (o *RegisterExternalDatalakeParams) SetCrn(crn string) {
+	o.Crn = crn
 }
 
 // WithWorkspaceID adds the workspaceID to the register external datalake params
@@ -157,8 +157,8 @@ func (o *RegisterExternalDatalakeParams) WriteToRequest(r runtime.ClientRequest,
 		}
 	}
 
-	// path param name
-	if err := r.SetPathParam("name", o.Name); err != nil {
+	// path param crn
+	if err := r.SetPathParam("crn", o.Crn); err != nil {
 		return err
 	}
 

@@ -47,7 +47,7 @@ func NewListEnvironmentOK() *ListEnvironmentOK {
 successful operation
 */
 type ListEnvironmentOK struct {
-	Payload *model.SimpleEnvironmentV4Responses
+	Payload *model.SimpleEnvironmentV1Responses
 }
 
 func (o *ListEnvironmentOK) Error() string {
@@ -56,7 +56,7 @@ func (o *ListEnvironmentOK) Error() string {
 
 func (o *ListEnvironmentOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(model.SimpleEnvironmentV4Responses)
+	o.Payload = new(model.SimpleEnvironmentV1Responses)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

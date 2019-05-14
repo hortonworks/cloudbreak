@@ -63,8 +63,8 @@ for the delete environment operation typically these are written to a http.Reque
 */
 type DeleteEnvironmentParams struct {
 
-	/*Name*/
-	Name string
+	/*Crn*/
+	Crn string
 	/*WorkspaceID*/
 	WorkspaceID int64
 
@@ -106,15 +106,15 @@ func (o *DeleteEnvironmentParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithName adds the name to the delete environment params
-func (o *DeleteEnvironmentParams) WithName(name string) *DeleteEnvironmentParams {
-	o.SetName(name)
+// WithCrn adds the crn to the delete environment params
+func (o *DeleteEnvironmentParams) WithCrn(crn string) *DeleteEnvironmentParams {
+	o.SetCrn(crn)
 	return o
 }
 
-// SetName adds the name to the delete environment params
-func (o *DeleteEnvironmentParams) SetName(name string) {
-	o.Name = name
+// SetCrn adds the crn to the delete environment params
+func (o *DeleteEnvironmentParams) SetCrn(crn string) {
+	o.Crn = crn
 }
 
 // WithWorkspaceID adds the workspaceID to the delete environment params
@@ -136,8 +136,8 @@ func (o *DeleteEnvironmentParams) WriteToRequest(r runtime.ClientRequest, reg st
 	}
 	var res []error
 
-	// path param name
-	if err := r.SetPathParam("name", o.Name); err != nil {
+	// path param crn
+	if err := r.SetPathParam("crn", o.Crn); err != nil {
 		return err
 	}
 
