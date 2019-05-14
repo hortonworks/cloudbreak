@@ -15,6 +15,8 @@ public abstract class AbstractClouderaManagerCommandCheckerTask<T extends Cloude
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractClouderaManagerCommandCheckerTask.class);
 
+    private static final int BAD_GATEWAY = 502;
+
     @Override
     public boolean checkStatus(T pollerObject) {
         ApiClient apiClient = pollerObject.getApiClient();
@@ -33,8 +35,12 @@ public abstract class AbstractClouderaManagerCommandCheckerTask<T extends Cloude
                 throw new ClouderaManagerOperationFailedException("Command [" + getCommandName() + "] failed: " + resultMessage);
             }
         } catch (ApiException e) {
-            LOGGER.debug("cloudera manager is not running", e);
-            return false;
+            if (e.getCode() == BAD_GATEWAY) {
+                LOGGER.debug("cloudera manager is not running", e);
+                return false;
+            } else {
+                throw new ClouderaManagerOperationFailedException("Cloudera Manager operation failed", e);
+            }
         }
     }
 

@@ -36,6 +36,8 @@ public class ClouderaManagerPollingServiceProvider {
 
     private static final int INFINITE_ATTEMPT = -1;
 
+    private static final int TWELVE_HOUR = 8640;
+
     @Inject
     private PollingService<ClouderaManagerPollerObject> clouderaManagerPollerService;
 
@@ -90,37 +92,37 @@ public class ClouderaManagerPollingServiceProvider {
 
     public PollingResult templateInstallCheckerService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to install template. [Server address: {}]", stack.getAmbariIp());
-        return pollCommandWithListener(stack, apiClient, commandId, INFINITE_ATTEMPT, clouderaManagerTemplateInstallChecker);
+        return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, clouderaManagerTemplateInstallChecker);
     }
 
     public PollingResult parcelRepoRefreshCheckerService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to refresh parcel repo. [Server address: {}]", stack.getAmbariIp());
-        return pollCommandWithListener(stack, apiClient, commandId, INFINITE_ATTEMPT, clouderaManagerParcelRepoChecker);
+        return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, clouderaManagerParcelRepoChecker);
     }
 
     public PollingResult stopPollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager services to stop. [Server address: {}]", stack.getAmbariIp());
-        return pollCommandWithListener(stack, apiClient, commandId, INFINITE_ATTEMPT, clouderaManagerStopListenerTask);
+        return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, clouderaManagerStopListenerTask);
     }
 
     public PollingResult startPollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager services to start. [Server address: {}]", stack.getAmbariIp());
-        return pollCommandWithListener(stack, apiClient, commandId, INFINITE_ATTEMPT, clouderaManagerServiceStartListenerTask);
+        return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, clouderaManagerServiceStartListenerTask);
     }
 
     public PollingResult kerberosConfigurePollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to configure kerberos. [Server address: {}]", stack.getAmbariIp());
-        return pollCommandWithListener(stack, apiClient, commandId, INFINITE_ATTEMPT, kerberosConfigureListenerTask);
+        return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, kerberosConfigureListenerTask);
     }
 
     public PollingResult deployClientConfigPollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to deploy client configuratuions. [Server address: {}]", stack.getAmbariIp());
-        return pollCommandWithListener(stack, apiClient, commandId, INFINITE_ATTEMPT, deployClientConfigListenerTask);
+        return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, deployClientConfigListenerTask);
     }
 
     public PollingResult applyHostTemplatePollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to apply host template. [Server address: {}]", stack.getAmbariIp());
-        return pollCommandWithListener(stack, apiClient, commandId, INFINITE_ATTEMPT, applyHostTemplateListenerTask);
+        return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, applyHostTemplateListenerTask);
     }
 
     public PollingResult decommissionHostPollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
@@ -130,17 +132,17 @@ public class ClouderaManagerPollingServiceProvider {
 
     public PollingResult startManagementServicePollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to start management service. [Server address: {}]", stack.getAmbariIp());
-        return pollCommandWithListener(stack, apiClient, commandId, INFINITE_ATTEMPT, startManagementServiceListenerTask);
+        return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, startManagementServiceListenerTask);
     }
 
     public PollingResult stopManagementServicePollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to stop management service. [Server address: {}]", stack.getAmbariIp());
-        return pollCommandWithListener(stack, apiClient, commandId, INFINITE_ATTEMPT, startManagementServiceListenerTask);
+        return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, startManagementServiceListenerTask);
     }
 
     public PollingResult deleteUnusuedCredentialsPollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to delete unused credentials. [Server address: {}]", stack.getAmbariIp());
-        return pollCommandWithListener(stack, apiClient, commandId, INFINITE_ATTEMPT, deleteUnusedCredentialsListenerTask);
+        return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, deleteUnusedCredentialsListenerTask);
     }
 
     private PollingResult pollCMWithListener(Stack stack, ApiClient apiClient, StatusCheckerTask<ClouderaManagerPollerObject> listenerTask) {
@@ -149,7 +151,7 @@ public class ClouderaManagerPollingServiceProvider {
                 listenerTask,
                 clouderaManagerPollerObject,
                 POLL_INTERVAL,
-                INFINITE_ATTEMPT);
+                TWELVE_HOUR);
     }
 
     private PollingResult pollCommandWithListener(Stack stack, ApiClient apiClient, BigDecimal commandId, int numAttempts,
