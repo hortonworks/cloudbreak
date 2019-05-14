@@ -257,4 +257,12 @@ public class Environment implements WorkspaceAwareResource, ArchivableResource {
     public void setNetwork(BaseNetwork network) {
         this.network = network;
     }
+
+    public Set<ProxyConfig> getProxyConfigs() {
+        return proxyConfigs;
+    }
+
+    public void setProxyConfigs(Set<ProxyConfig> proxyConfigs) {
+        this.proxyConfigs = proxyConfigs;
+    }
 }

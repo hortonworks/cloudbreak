@@ -41,8 +41,8 @@ import com.sequenceiq.cloudbreak.workspace.service.AbstractWorkspaceAwareResourc
 import com.sequenceiq.cloudbreak.workspace.service.WorkspaceService;
 import com.sequenceiq.environment.credential.exception.CredentialOperationException;
 import com.sequenceiq.environment.credential.validator.CredentialValidator;
-import com.sequenceiq.environment.environment.EnvironmentViewService;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
+import com.sequenceiq.environment.environment.service.EnvironmentViewService;
 import com.sequenceiq.notification.Notification;
 import com.sequenceiq.notification.NotificationSender;
 import com.sequenceiq.notification.ResourceEvent;
@@ -113,7 +113,7 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
         User user = getLoggedInUser();
         credentialValidator.validateCredentialCloudPlatform(credential.getCloudPlatform());
         Credential original = credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(credential.getName(), workspaceId,
-                        preferencesService.enabledPlatforms()).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, credential.getName()));
+                preferencesService.enabledPlatforms()).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, credential.getName()));
         if (!Objects.equals(credential.getCloudPlatform(), original.getCloudPlatform())) {
             throw new BadRequestException("Modifying credential platform is forbidden");
         }

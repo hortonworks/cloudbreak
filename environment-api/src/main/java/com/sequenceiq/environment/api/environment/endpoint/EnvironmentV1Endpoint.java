@@ -14,16 +14,12 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.environment.api.WelcomeResponse;
 import com.sequenceiq.environment.api.environment.doc.EnvironmentOpDescription;
-import com.sequenceiq.environment.api.environment.model.request.DatalakePrerequisiteV1Request;
 import com.sequenceiq.environment.api.environment.model.request.EnvironmentAttachV1Request;
 import com.sequenceiq.environment.api.environment.model.request.EnvironmentChangeCredentialV1Request;
 import com.sequenceiq.environment.api.environment.model.request.EnvironmentDetachV1Request;
 import com.sequenceiq.environment.api.environment.model.request.EnvironmentEditV1Request;
 import com.sequenceiq.environment.api.environment.model.request.EnvironmentV1Request;
-import com.sequenceiq.environment.api.environment.model.request.RegisterDatalakeV1Request;
-import com.sequenceiq.environment.api.environment.model.response.DatalakePrerequisiteV1Response;
 import com.sequenceiq.environment.api.environment.model.response.DetailedEnvironmentV1Response;
 import com.sequenceiq.environment.api.environment.model.response.SimpleEnvironmentV1Response;
 import com.sequenceiq.environment.api.environment.model.response.SimpleEnvironmentV1Responses;
@@ -35,12 +31,6 @@ import io.swagger.annotations.ApiOperation;
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v1/env", protocols = "http,https")
 public interface EnvironmentV1Endpoint {
-
-    @GET
-    @Path("welcome")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "welcome", produces = MediaType.APPLICATION_JSON, nickname = "getWelcomeMessage")
-    WelcomeResponse welcome();
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -90,18 +80,4 @@ public interface EnvironmentV1Endpoint {
     @ApiOperation(value = EnvironmentOpDescription.CHANGE_CREDENTIAL, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "changeCredentialInEnvironmentV1")
     DetailedEnvironmentV1Response changeCredential(@PathParam("name") String environmentName, @Valid EnvironmentChangeCredentialV1Request request);
-
-    @PUT
-    @Path("/{name}/register_datalake")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = EnvironmentOpDescription.REGISTER_EXTERNAL_DATALAKE, produces = MediaType.APPLICATION_JSON,
-            notes = ENVIRONMENT_NOTES, nickname = "registerExternalDatalakeV1")
-    DetailedEnvironmentV1Response registerExternalDatalake(@PathParam("name") String environmentName, @Valid RegisterDatalakeV1Request request);
-
-    @POST
-    @Path("/{name}/register_datalake_prerequisites")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = EnvironmentOpDescription.DATALAKE_PREREQUISITES, produces = MediaType.APPLICATION_JSON, nickname = "registerDatalakePrerequisitesV1")
-    DatalakePrerequisiteV1Response registerDatalakePrerequisite(@PathParam("name") String environmentName,
-            @Valid DatalakePrerequisiteV1Request datalakePrerequisiteV1Request);
 }

@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment;
+package com.sequenceiq.environment.environment.service;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.workspace.model.ArchivableResource;
 import com.sequenceiq.cloudbreak.workspace.service.AbstractArchivistService;
 import com.sequenceiq.environment.environment.domain.EnvironmentAwareResource;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
+import com.sequenceiq.environment.environment.repository.EnvironmentResourceRepository;
 
 public abstract class AbstractEnvironmentAwareService<T extends EnvironmentAwareResource & ArchivableResource> extends AbstractArchivistService<T> {
 

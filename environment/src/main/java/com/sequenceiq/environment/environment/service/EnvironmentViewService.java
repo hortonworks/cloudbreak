@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment;
+package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
@@ -15,6 +15,7 @@ import org.springframework.util.CollectionUtils;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.workspace.service.AbstractWorkspaceAwareResourceService;
+import com.sequenceiq.environment.environment.repository.EnvironmentViewRepository;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 
 @Service
