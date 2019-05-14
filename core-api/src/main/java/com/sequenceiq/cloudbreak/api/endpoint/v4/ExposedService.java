@@ -12,6 +12,7 @@ public enum ExposedService {
 
     ALL("Every Service", "ALL", "", "", true, null),
 
+    CLOUDERA_MANAGER("CM", "CM-API", "CM-API", "/cm-api/", true, 7180),
     AMBARI("Ambari", "AMBARI_SERVER", "AMBARI", "/ambari/", true, 8080),
     WEBHDFS("WebHDFS", "NAMENODE", "WEBHDFS", "/webhdfs/v1", false, 50070),
     NAMENODE("Name Node", "NAMENODE", "HDFSUI", "/hdfs/", true, 50070),

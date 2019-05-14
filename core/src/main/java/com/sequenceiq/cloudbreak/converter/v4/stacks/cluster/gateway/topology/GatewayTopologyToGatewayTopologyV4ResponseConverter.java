@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.GatewayTopologyV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 
@@ -28,10 +29,13 @@ public class GatewayTopologyToGatewayTopologyV4ResponseConverter extends Abstrac
     }
 
     private ExposedServices getExposedServices(GatewayTopology source) {
-        try {
-            return source.getExposedServices().get(ExposedServices.class);
-        } catch (IOException e) {
-            LOGGER.info("Could not extract expose services", e);
+        Json exposedServices = source.getExposedServices();
+        if (exposedServices != null && exposedServices.getValue() != null) {
+            try {
+                return exposedServices.get(ExposedServices.class);
+            } catch (IOException e) {
+                LOGGER.info("Could not extract expose services", e);
+            }
         }
         return null;
     }

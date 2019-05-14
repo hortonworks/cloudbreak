@@ -9,21 +9,22 @@ install-cloudera-manager-server:
 
 {% if salt['pillar.get']('ldap', None) != None and salt['pillar.get']('ldap:local', None) == None %}
 
-/etc/cloudera-scm-server/ldap.settings:
-  file.managed:
+add_ldap_settings_to_cm:
+  file.append:
+    - name: /etc/cloudera-scm-server/cm.settings
     - makedirs: True
-    - source: salt://cloudera/manager/ldap/ldap.settings
     - template: jinja
+    - source: salt://cloudera/manager/ldap/ldap.settings
     - context:
-      ldap: {{ cloudera_manager.ldap }}
-    - mode: 744
+        ldap: {{ cloudera_manager.ldap }}
+    - unless: grep "AUTH_BACKEND_ORDER" /etc/cloudera-scm-server/cm.settings
 
 cloudera_manager_setup_ldap:
   file.replace:
     - name: /etc/default/cloudera-scm-server
     - pattern: "CMF_SERVER_ARGS=.*"
-    - repl: CMF_SERVER_ARGS="-i /etc/cloudera-scm-server/ldap.settings"
-    - unless: grep "CMF_SERVER_ARGS=\"-i /etc/cloudera-scm-server/ldap.settings\"" /etc/default/cloudera-scm-server
+    - repl: CMF_SERVER_ARGS="-i /etc/cloudera-scm-server/cm.settings"
+    - unless: grep "CMF_SERVER_ARGS=\"-i /etc/cloudera-scm-server/cm.settings\"" /etc/default/cloudera-scm-server
 
 {% endif %}
 
