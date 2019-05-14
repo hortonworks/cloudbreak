@@ -17,6 +17,8 @@ public class ClouderaManagerStartupListenerTask extends ClusterBasedStatusChecke
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerStartupListenerTask.class);
 
+    private static final int BAD_GATEWAY = 502;
+
     @Override
     public boolean checkStatus(ClouderaManagerPollerObject clouderaManagerPollerObject) {
         ApiClient apiClient = clouderaManagerPollerObject.getApiClient();
@@ -31,8 +33,12 @@ public class ClouderaManagerStartupListenerTask extends ClusterBasedStatusChecke
                 return false;
             }
         } catch (ApiException e) {
-            LOGGER.debug("cloudera manager is not running", e);
-            return false;
+            if (e.getCode() == BAD_GATEWAY) {
+                LOGGER.debug("cloudera manager is not running", e);
+                return false;
+            } else {
+                throw new ClouderaManagerOperationFailedException("Cloudera Manager startup failed", e);
+            }
         }
     }
 
