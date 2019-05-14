@@ -118,7 +118,7 @@ public class DatabaseConfig {
     public EntityManagerFactory entityManagerFactory() throws SQLException {
         LocalContainerEntityManagerFactoryBean entityManagerFactory = new LocalContainerEntityManagerFactoryBean();
 
-        entityManagerFactory.setPackagesToScan("com.sequenceiq");
+        entityManagerFactory.setPackagesToScan("com.sequenceiq.periscope", "com.sequenceiq.flow");
         entityManagerFactory.setDataSource(dataSource());
 
         entityManagerFactory.setJpaVendorAdapter(jpaVendorAdapter());
