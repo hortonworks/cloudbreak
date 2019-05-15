@@ -36,26 +36,11 @@ public class EnvironmentToDetailedEnvironmentV1ResponseConverter extends Abstrac
         response.setCloudPlatform(source.getCloudPlatform());
         response.setCredentialName(source.getCredential().getName());
         response.setLocation(getConversionService().convert(source, LocationV1Response.class));
-//        response.setLdaps(
-//                source.getLdapConfigs()
-//                        .stream()
-//                        .map(ldapConfig -> getConversionService().convert(ldapConfig, LdapV1Response.class))
-//                        .collect(Collectors.toSet()));
         response.setProxies(
                 source.getProxyConfigs()
                         .stream()
                         .map(proxyConfig -> getConversionService().convert(proxyConfig, ProxyV1Response.class))
                         .collect(Collectors.toSet()));
-//        response.setWorkloadClusterNames(
-//                response.getWorkloadClusters()
-//                        .stream()
-//                        .map(StackViewV1Response::getName)
-//                        .collect(Collectors.toSet()));
-//        response.setDatalakeClusterNames(
-//                response.getDatalakeClusters()
-//                        .stream()
-//                        .map(StackViewV1Response::getName)
-//                        .collect(Collectors.toSet()));
         setNetworkIfPossible(response, source);
         return response;
     }

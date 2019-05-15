@@ -82,25 +82,9 @@ public class Environment implements WorkspaceAwareResource, ArchivableResource {
 
     private Long deletionTimestamp = -1L;
 
-//    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-//    @JoinTable(name = "env_ldap", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "ldapid"))
-//    private Set<LdapConfig> ldapConfigs = new HashSet<>();
-
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(name = "env_proxy", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "proxyid"))
     private Set<ProxyConfig> proxyConfigs = new HashSet<>();
-
-//    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-//    @JoinTable(name = "env_rds", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "rdsid"))
-//    private Set<RDSConfig> rdsConfigs = new HashSet<>();
-//
-//    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-//    @JoinTable(name = "env_kubernetes", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "kubernetesid"))
-//    private Set<KubernetesConfig> kubernetesConfigs = new HashSet<>();
-//
-//    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-//    @JoinTable(name = "env_kdc", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "kdcid"))
-//    private Set<KerberosConfig> kerberosConfigs = new HashSet<>();
 
     @OneToOne(mappedBy = "environment", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private BaseNetwork network;
@@ -138,7 +122,6 @@ public class Environment implements WorkspaceAwareResource, ArchivableResource {
 
     @Override
     public void unsetRelationsToEntitiesToBeDeleted() {
-//        ldapConfigs = null;
         proxyConfigs = null;
     }
 
@@ -184,14 +167,6 @@ public class Environment implements WorkspaceAwareResource, ArchivableResource {
         return JsonUtil.jsonToType(regions.getValue(), new TypeReference<>() {
         });
     }
-
-//    public Set<LdapConfig> getLdapConfigs() {
-//        return ldapConfigs;
-//    }
-//
-//    public void setLdapConfigs(Set<LdapConfig> ldapConfigs) {
-//        this.ldapConfigs = ldapConfigs;
-//    }
 
     @Override
     public WorkspaceResource getResource() {

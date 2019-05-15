@@ -24,18 +24,6 @@ public class EnvironmentToSimpleEnvironmentV1ResponseConverter extends AbstractC
         response.setCloudPlatform(source.getCloudPlatform());
         response.setLocation(getConversionService().convert(source, LocationV1Response.class));
         response.setCredentialName(source.getCredential().getName());
-//        response.setWorkloadClusterNames(
-//                source.getStacks()
-//                        .stream()
-//                        .filter(stack -> stack.getType() == StackType.WORKLOAD)
-//                        .map(CompactView::getName)
-//                        .collect(Collectors.toSet()));
-//        response.setDatalakeClusterNames(
-//                source.getStacks()
-//                        .stream()
-//                        .filter(stack -> stack.getType() == StackType.DATALAKE)
-//                        .map(CompactView::getName)
-//                        .collect(Collectors.toSet()));
         return response;
     }
 }

@@ -31,23 +31,12 @@ public class EnvironmentCreationValidator {
     public ValidationResult validate(Environment environment, EnvironmentV1Request request, CloudRegions cloudRegions) {
         String cloudPlatform = environment.getCloudPlatform();
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
-//        validateLdapConfigs(environment, request, resultBuilder);
         validateProxyConfigs(environment, request, resultBuilder);
         environmentRegionValidator.validateRegions(request.getRegions(), cloudRegions, cloudPlatform, resultBuilder);
         environmentRegionValidator.validateLocation(request.getLocation(), request.getRegions(), environment, resultBuilder);
         validateNetwork(request, cloudPlatform, resultBuilder);
         return resultBuilder.build();
     }
-
-//    private void validateLdapConfigs(Environment subject, EnvironmentV4Request request, ValidationResultBuilder resultBuilder) {
-//        if (subject.getLdapConfigs().size() < request.getLdaps().size()) {
-//            Set<String> foundLdaps = subject.getLdapConfigs().stream().map(LdapConfig::getName).collect(Collectors.toSet());
-//            Set<String> requestedLdaps = new HashSet<>(request.getLdaps());
-//            requestedLdaps.removeAll(foundLdaps);
-//            resultBuilder.error(String.format("The following LDAP config(s) could not be found in the workspace: [%s]",
-//                    String.join(", ", requestedLdaps)));
-//        }
-//    }
 
     private void validateProxyConfigs(Environment subject, EnvironmentV1Request request, ValidationResultBuilder resultBuilder) {
         if (subject.getProxyConfigs().size() < request.getProxies().size()) {

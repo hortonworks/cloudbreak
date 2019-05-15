@@ -35,24 +35,8 @@ CREATE TABLE IF NOT EXISTS env_proxy (
 CREATE INDEX IF NOT EXISTS idx_env_proxy_envid ON env_proxy (envid);
 CREATE INDEX IF NOT EXISTS idx_env_proxy_proxyid ON env_proxy (proxyid);
 
---CREATE TABLE IF NOT EXISTS env_ldap (
---    envid bigint NOT NULL,
---    ldapid bigint NOT NULL,
---    CONSTRAINT fk_env_ldap_envid FOREIGN KEY (envid) REFERENCES environment(id),
---    CONSTRAINT fk_env_ldap_ldapid FOREIGN KEY (ldapid) REFERENCES ldapconfig(id),
---    CONSTRAINT uk_env_ldap_envid_ldapid UNIQUE (envid, ldapid)
---);
---CREATE INDEX IF NOT EXISTS idx_env_ldap_envid ON env_ldap (envid);
---CREATE INDEX IF NOT EXISTS idx_env_ldap_ldapid ON env_ldap (ldapid);
-
 -- //@UNDO
 -- SQL to undo the change goes here.
-
-
---DROP INDEX IF EXISTS idx_env_ldap_envid;
---DROP INDEX IF EXISTS idx_env_ldap_ldapid;
---DROP TABLE IF EXISTS env_ldap;
-
 
 DROP INDEX IF EXISTS idx_env_proxy_envid;
 DROP INDEX IF EXISTS idx_env_proxy_proxyid;
