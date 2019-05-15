@@ -13,15 +13,19 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4ViewResponses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.RecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ParametersQueryV4Response;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
+import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.BlueprintOpDescription;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ConnectorOpDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UtilityOpDescription;
 
 import io.swagger.annotations.Api;
@@ -80,4 +84,15 @@ public interface BlueprintV4Endpoint {
     @ApiOperation(value = UtilityOpDescription.CUSTOM_PARAMETERS, produces = JSON,
             nickname = "getBlueprintCustomParameters")
     ParametersQueryV4Response getParameters(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+
+    @GET
+    @Path("recommendation")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION, produces = JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "createRecommendationForWorkspace")
+    RecommendationV4Response createRecommendation(@PathParam("workspaceId") Long workspaceId,
+            @QueryParam("blueprintName") String blueprintName, @QueryParam("credentialName") String credentialName,
+            @QueryParam("region") String region, @QueryParam("platformVariant") String platformVariant,
+            @QueryParam("availabilityZone") String availabilityZone);
+
 }

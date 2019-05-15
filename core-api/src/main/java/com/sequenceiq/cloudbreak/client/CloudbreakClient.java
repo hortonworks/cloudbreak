@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintUtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.ConnectorV4Endpoint;
@@ -86,7 +85,6 @@ public class CloudbreakClient {
             UtilV4Endpoint.class,
             WorkspaceAwareUtilV4Endpoint.class,
             KerberosConfigV4Endpoint.class,
-            BlueprintUtilV4Endpoint.class,
             CloudbreakInfoV4Endpoint.class
     );
 
@@ -126,10 +124,6 @@ public class CloudbreakClient {
 
     public BlueprintV4Endpoint blueprintV4Endpoint() {
         return getEndpoint(BlueprintV4Endpoint.class);
-    }
-
-    public BlueprintUtilV4Endpoint blueprintUtilV4Endpoint() {
-        return getEndpoint(BlueprintUtilV4Endpoint.class);
     }
 
     public EnvironmentV4Endpoint environmentV4Endpoint() {
