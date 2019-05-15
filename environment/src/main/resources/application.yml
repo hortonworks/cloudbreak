@@ -1,7 +1,5 @@
 server.servlet.context-path: "/env"
 
-server.port: 8088
-
 management:
   endpoints:
     web:
