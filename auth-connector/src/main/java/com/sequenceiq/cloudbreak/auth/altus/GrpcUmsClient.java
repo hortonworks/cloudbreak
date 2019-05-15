@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsConfig;
 
@@ -45,6 +46,25 @@ public class GrpcUmsClient {
             User user = client.getUser(requestId.orElse(UUID.randomUUID().toString()), userCrn);
             LOGGER.debug("User information retrieved for userCrn: {}", user.getCrn());
             return user;
+        }
+    }
+
+    /**
+     * Retrieves machine user details from UMS.
+     *
+     * @param actorCrn  the CRN of the actor
+     * @param userCrn   the CRN of the user
+     * @param requestId an optional request Id
+     * @return the user associated with this user CRN
+     */
+    @Cacheable(cacheNames = "umsMachineUserCache")
+    public MachineUser getMachineUserDetails(String actorCrn, String userCrn, Optional<String> requestId) {
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            UmsClient client = new UmsClient(channelWrapper.getChannel(), actorCrn);
+            LOGGER.debug("Getting machineuser information for {} using request ID {}", userCrn, requestId);
+            MachineUser machineUser = client.getMachineUser(requestId.orElse(UUID.randomUUID().toString()), userCrn);
+            LOGGER.debug("MachineUser information retrieved for userCrn: {}", machineUser.getCrn());
+            return machineUser;
         }
     }
 

@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.auth.altus;
 
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,8 +13,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsConfig;
-
-import java.util.Optional;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GrpcUmsClientTest {
