@@ -6,6 +6,7 @@ base:
     - metadata
     - docker
     - recipes.runner
+    - fluent
 
   'G@roles:ad_member and G@os_family:RedHat':
     - match: compound
@@ -53,14 +54,6 @@ base:
   'roles:postgresql_server':
     - match: grain
     - postgresql
-
-  'roles:fluent_start':
-    - match: grain
-    - fluent.agent-start
-
-  'roles:fluent_stop':
-    - match: grain
-    - fluent.agent-stop
 
   'roles:ambari_server_install':
     - match: grain
