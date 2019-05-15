@@ -1,8 +1,16 @@
 package com.sequenceiq.freeipa.service.image;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -10,6 +18,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
@@ -28,6 +38,8 @@ public class ImageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageService.class);
 
+    private static final String DEFAULT_REGION = "default";
+
     @Inject
     private UserDataBuilder userDataBuilder;
 
@@ -39,16 +51,121 @@ public class ImageService {
     private ExecutorService executorService;
 
     @Inject
+    @Qualifier("conversionService")
+    private ConversionService conversionService;
+
+    @Inject
     private ImageRepository imageRepository;
+
+    @Inject
+    private ImageCatalogProvider imageCatalogProvider;
+
+    @Value("${cb.image.catalog.url}")
+    private String defaultCatalogUrl;
+
+    @Value("${cb.image.catalog.default.os}")
+    private String defaultOs;
 
     public void create(Stack stack, ImageSettingsV4Request imageRequest) {
         Future<PlatformParameters> platformParametersFuture = executorService.submit(() -> platformParameterService.getPlatformParameters(stack));
         String userData = createUserData(stack, platformParametersFuture);
-        Image image = new Image();
+        String region = stack.getRegion();
+        String platformString = stack.getCloudPlatform().toLowerCase();
+        com.sequenceiq.freeipa.api.model.image.Image imageCatalogImage = getImage(imageRequest, region, platformString);
+        String imageName = determineImageName(platformString, region, imageCatalogImage);
+        String catalogUrl = Objects.nonNull(imageRequest.getCatalog()) ? imageRequest.getCatalog() : defaultCatalogUrl;
+        LOGGER.info("Selected VM image for CloudPlatform '{}' and region '{}' is: {} from: {} image catalog",
+                platformString, region, imageName, catalogUrl);
+
+        Image image = conversionService.convert(imageCatalogImage, Image.class);
         image.setStack(stack);
         image.setUserdata(userData);
-        image.setImageName(imageRequest.getId());
+        image.setImageName(imageName);
+        image.setImageCatalogUrl(catalogUrl);
         imageRepository.save(image);
+    }
+
+    public Image getByStack(Stack stack) {
+        return imageRepository.getByStack(stack);
+    }
+
+    public com.sequenceiq.freeipa.api.model.image.Image getImage(ImageSettingsV4Request imageSettings, String region, String platform) {
+        String imageId = imageSettings.getId();
+        String catalogUrl = Objects.nonNull(imageSettings.getCatalog()) ? imageSettings.getCatalog() : defaultCatalogUrl;
+        String imageOs = Objects.nonNull(imageSettings.getOs()) ? imageSettings.getOs() : defaultOs;
+
+        List<com.sequenceiq.freeipa.api.model.image.Image> images = imageCatalogProvider.getImageCatalog(catalogUrl).getImages();
+        Optional<? extends com.sequenceiq.freeipa.api.model.image.Image> image = findImage(imageId, imageOs, images, region, platform);
+        if (image.isEmpty()) {
+            imageCatalogProvider.evictImageCatalogCache(catalogUrl);
+            images = imageCatalogProvider.getImageCatalog(catalogUrl).getImages();
+            image = findImage(imageId, imageOs, images, region, platform);
+            if (image.isEmpty()) {
+                throw new RuntimeException(String.format("Could not find any image with id: '%s' in region '%s' with OS '%s'.", imageId, region, imageOs));
+            }
+        }
+        return image.get();
+    }
+
+    public String determineImageName(String platformString, String region, com.sequenceiq.freeipa.api.model.image.Image imgFromCatalog) {
+        Optional<Map<String, String>> imagesForPlatform = findStringKeyWithEqualsIgnoreCase(platformString, imgFromCatalog.getImageSetsByProvider());
+        if (imagesForPlatform.isPresent()) {
+            Map<String, String> imagesByRegion = imagesForPlatform.get();
+            Optional<String> imageNameOpt = findStringKeyWithEqualsIgnoreCase(region, imagesByRegion);
+            if (!imageNameOpt.isPresent()) {
+                imageNameOpt = findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion);
+            }
+            if (imageNameOpt.isPresent()) {
+                return imageNameOpt.get();
+            }
+            String msg = String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",
+                    imgFromCatalog, platformString, region);
+            throw new RuntimeException(msg);
+        }
+        String msg = String.format("The selected image: '%s' doesn't contain virtual machine image for the selected platform: '%s'.",
+                imgFromCatalog, platformString);
+        throw new RuntimeException(msg);
+    }
+
+    private List<com.sequenceiq.freeipa.api.model.image.Image> filterImages(List<com.sequenceiq.freeipa.api.model.image.Image> imageList, String osType) {
+        Predicate<com.sequenceiq.freeipa.api.model.image.Image> predicate = img -> img.getOs().equalsIgnoreCase(osType);
+        Map<Boolean, List<com.sequenceiq.freeipa.api.model.image.Image>> partitionedImages =
+                Optional.ofNullable(imageList).orElse(Collections.emptyList()).stream()
+                .collect(Collectors.partitioningBy(predicate));
+        if (hasFiltered(partitionedImages)) {
+            LOGGER.debug("Used filter for: | {} | Images filtered: {}",
+                    osType,
+                    partitionedImages.get(false).stream().map(com.sequenceiq.freeipa.api.model.image.Image::toString).collect(Collectors.joining(", ")));
+        } else {
+            throw new RuntimeException(String.format("Could not find any image with filter for: '%s'.", osType));
+        }
+        return partitionedImages.get(true);
+    }
+
+    private boolean hasFiltered(Map<Boolean, List<com.sequenceiq.freeipa.api.model.image.Image>> partitioned) {
+        return !partitioned.get(true).isEmpty();
+    }
+
+    private Optional<? extends com.sequenceiq.freeipa.api.model.image.Image> findImage(String imageId, String imageOs,
+            List<com.sequenceiq.freeipa.api.model.image.Image> images, String region, String platform) {
+        if (Objects.nonNull(imageOs) && !imageOs.isEmpty()) {
+            images = filterImages(images, imageOs);
+        }
+        if (Objects.nonNull(imageId) && !imageId.isEmpty()) {
+            return images.stream()
+                    .filter(img -> img.getImageSetsByProvider().get(platform).get(region).equalsIgnoreCase(imageId))
+                    .max(Comparator.comparing(com.sequenceiq.freeipa.api.model.image.Image::getDate));
+        } else {
+            return images.stream()
+                    .max(Comparator.comparing(com.sequenceiq.freeipa.api.model.image.Image::getDate));
+        }
+    }
+
+    private <T> Optional<T> findStringKeyWithEqualsIgnoreCase(String key, Map<String, T> map) {
+        return map.entrySet().stream()
+                .filter(entry -> entry.getKey().equalsIgnoreCase(key))
+                .map(Map.Entry::getValue)
+                .findFirst();
     }
 
     private String createUserData(Stack stack, Future<PlatformParameters> platformParametersFuture) {
@@ -68,9 +185,5 @@ public class ImageService {
             LOGGER.error("Failed to get Platform parmaters", e);
             throw new RuntimeException("Failed to get Platform parmaters", e);
         }
-    }
-
-    public Image getByStack(Stack stack) {
-        return imageRepository.getByStack(stack);
     }
 }

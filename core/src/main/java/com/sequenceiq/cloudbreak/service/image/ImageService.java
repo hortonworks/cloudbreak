@@ -164,7 +164,7 @@ public class ImageService {
             if (imageNameOpt.isPresent()) {
                 return imageNameOpt.get();
             }
-            String msg = String.format("Virtual machine image couldn't found in image: '%s' for the selected platform: '%s' and region: '%s'.",
+            String msg = String.format("Virtual machine image couldn't be found in image: '%s' for the selected platform: '%s' and region: '%s'.",
                     imgFromCatalog, platformString, region);
             throw new CloudbreakImageNotFoundException(msg);
         }
