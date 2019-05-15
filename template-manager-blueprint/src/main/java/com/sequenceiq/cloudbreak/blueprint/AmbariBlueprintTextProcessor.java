@@ -38,7 +38,7 @@ import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurat
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteSettingsConfigurations;
 import com.sequenceiq.cloudbreak.template.processor.kerberos.KerberosDescriptorService;
 import com.sequenceiq.cloudbreak.template.processor.kerberos.KerberosServiceConfiguration;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 public class AmbariBlueprintTextProcessor implements BlueprintTextProcessor {
 

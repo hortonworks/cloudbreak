@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.Credential
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.service.credential.CredentialPropertyCollector;
 
 @Component

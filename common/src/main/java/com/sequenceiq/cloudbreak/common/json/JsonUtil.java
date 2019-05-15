@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.util;
+package com.sequenceiq.cloudbreak.common.json;
 
 import java.io.IOException;
 import java.io.Reader;

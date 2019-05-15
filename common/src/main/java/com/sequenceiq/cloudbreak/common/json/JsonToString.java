@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.domain.json;
+package com.sequenceiq.cloudbreak.common.json;
 
 import javax.persistence.AttributeConverter;
 

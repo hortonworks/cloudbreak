@@ -5,16 +5,16 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.cluster.ClusterUpscaleService;
-import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePostRecipesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePostRecipesResult;
-import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
+import com.sequenceiq.flow.handler.EventHandler;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class UpscalePostRecipesHandler implements ReactorEventHandler<UpscalePostRecipesRequest> {
+public class UpscalePostRecipesHandler implements EventHandler<UpscalePostRecipesRequest> {
 
     @Inject
     private EventBus eventBus;

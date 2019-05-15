@@ -7,16 +7,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.cluster.ClusterUpscaleService;
-import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariInstallComponentsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariInstallComponentsResult;
-import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
+import com.sequenceiq.flow.handler.EventHandler;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class AmbariInstallComponentsHandler implements ReactorEventHandler<AmbariInstallComponentsRequest> {
+public class AmbariInstallComponentsHandler implements EventHandler<AmbariInstallComponentsRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariInstallComponentsHandler.class);
 

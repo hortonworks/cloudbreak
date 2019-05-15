@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Versioned;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.service.filesystem.resource.definition.CloudFileSystemSupportConfigEntry;
 import com.sequenceiq.cloudbreak.service.filesystem.resource.definition.CloudFileSystemSupportMatrix;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @Service
 public class FileSystemSupportMatrixService {

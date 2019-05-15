@@ -5,16 +5,16 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
-import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesResult;
-import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
+import com.sequenceiq.flow.handler.EventHandler;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class BootstrapNewNodesHandler implements ReactorEventHandler<BootstrapNewNodesRequest> {
+public class BootstrapNewNodesHandler implements EventHandler<BootstrapNewNodesRequest> {
     @Inject
     private EventBus eventBus;
 

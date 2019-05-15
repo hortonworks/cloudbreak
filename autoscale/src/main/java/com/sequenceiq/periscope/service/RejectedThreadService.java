@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.service;
 
-import static com.sequenceiq.cloudbreak.util.JsonUtil.writeValueAsStringSilent;
+import static com.sequenceiq.cloudbreak.common.json.JsonUtil.writeValueAsStringSilent;
 
 import java.util.ArrayList;
 import java.util.Collections;

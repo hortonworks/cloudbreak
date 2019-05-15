@@ -6,17 +6,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.MountDisksOnNewHostsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.MountDisksOnNewHostsResult;
-import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
+import com.sequenceiq.flow.handler.EventHandler;
 import com.sequenceiq.cloudbreak.service.stack.flow.MountDisks;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class MountDisksOnNewNodesHandler implements ReactorEventHandler<MountDisksOnNewHostsRequest> {
+public class MountDisksOnNewNodesHandler implements EventHandler<MountDisksOnNewHostsRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MountDisksOnNewNodesHandler.class);
 

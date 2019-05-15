@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.provision;
 
 import com.sequenceiq.flow.core.FlowEvent;
-import com.sequenceiq.freeipa.flow.event.EventSelectorUtil;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesFailed;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.hostmetadatasetup.HostMetadataSetupFailed;

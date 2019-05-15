@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.blueprint.ServiceConfig;
 import com.sequenceiq.cloudbreak.template.model.ConfigProperty;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @Component
 public class ConfigUtils {

@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.flow.handler;
+package com.sequenceiq.flow.handler;
 
 import reactor.bus.Event;
 import reactor.fn.Consumer;

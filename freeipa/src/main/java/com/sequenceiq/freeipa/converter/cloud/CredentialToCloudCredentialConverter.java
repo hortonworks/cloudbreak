@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.freeipa.entity.Credential;
-import com.sequenceiq.freeipa.entity.json.Json;
+import com.sequenceiq.cloudbreak.common.json.Json;
 
 @Component
 public class CredentialToCloudCredentialConverter implements Converter<Credential, CloudCredential> {

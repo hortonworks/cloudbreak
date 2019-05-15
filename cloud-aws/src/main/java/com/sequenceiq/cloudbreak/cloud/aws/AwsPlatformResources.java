@@ -105,7 +105,7 @@ import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceVpcFilterView;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @Service
 public class AwsPlatformResources implements PlatformResources {

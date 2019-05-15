@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject
 import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntries;
 import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @Service
 public class FileSystemConfigQueryService {
