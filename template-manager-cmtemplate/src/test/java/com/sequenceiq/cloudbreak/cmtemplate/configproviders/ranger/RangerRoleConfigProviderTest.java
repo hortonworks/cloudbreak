@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +15,6 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -61,7 +59,8 @@ public class RangerRoleConfigProviderTest {
     public void testGetRoleConfigsWithSingleRolesPerHostGroup() {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
-        TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker)).build();
+        TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker))
+                .withRdsConfigs(Set.of(rdsConfig(DatabaseType.RANGER))).build();
         String inputJson = getBlueprintText("input/clouderamanager-db-config.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
@@ -75,57 +74,24 @@ public class RangerRoleConfigProviderTest {
         assertEquals(5, masterRangerAdmin.size());
 
         assertEquals("ranger_database_host", masterRangerAdmin.get(0).getName());
-        assertEquals("ranger-ranger_database_host", masterRangerAdmin.get(0).getVariable());
+        assertEquals("10.1.1.1", masterRangerAdmin.get(0).getValue());
 
         assertEquals("ranger_database_name", masterRangerAdmin.get(1).getName());
-        assertEquals("ranger-ranger_database_name", masterRangerAdmin.get(1).getVariable());
+        assertEquals("ranger", masterRangerAdmin.get(1).getValue());
 
         assertEquals("ranger_database_type", masterRangerAdmin.get(2).getName());
-        assertEquals("ranger-ranger_database_type", masterRangerAdmin.get(2).getVariable());
+        assertEquals("PostgreSQL", masterRangerAdmin.get(2).getValue());
 
         assertEquals("ranger_database_user", masterRangerAdmin.get(3).getName());
-        assertEquals("ranger-ranger_database_user", masterRangerAdmin.get(3).getVariable());
+        assertEquals("heyitsme", masterRangerAdmin.get(3).getValue());
 
         assertEquals("ranger_database_password", masterRangerAdmin.get(4).getName());
-        assertEquals("ranger-ranger_database_password", masterRangerAdmin.get(4).getVariable());
-
-    }
-
-    @Test
-    public void testGetRoleConfigVariables() {
-        HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
-        HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
-
-        TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker))
-                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(DatabaseType.RANGER)))).build();
-
-        String inputJson = getBlueprintText("input/clouderamanager-db-config.bp");
-        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-
-        List<ApiClusterTemplateVariable> roleVariables = underTest.getRoleConfigVariables(cmTemplateProcessor, preparationObject);
-
-        roleVariables.sort(Comparator.comparing(ApiClusterTemplateVariable::getName));
-
-        assertEquals(5, roleVariables.size());
-        assertEquals("ranger-ranger_database_host", roleVariables.get(0).getName());
-        assertEquals("10.1.1.1", roleVariables.get(0).getValue());
-
-        assertEquals("ranger-ranger_database_name", roleVariables.get(1).getName());
-        assertEquals("ranger", roleVariables.get(1).getValue());
-
-        assertEquals("ranger-ranger_database_password", roleVariables.get(2).getName());
-        assertEquals("iamsoosecure", roleVariables.get(2).getValue());
-
-        assertEquals("ranger-ranger_database_type", roleVariables.get(3).getName());
-        assertEquals("PostgreSQL", roleVariables.get(3).getValue());
-
-        assertEquals("ranger-ranger_database_user", roleVariables.get(4).getName());
-        assertEquals("heyitsme", roleVariables.get(4).getValue());
+        assertEquals("iamsoosecure", masterRangerAdmin.get(4).getValue());
 
     }
 
     @Test(expected = CloudbreakServiceException.class)
-    public void testGetEmptyRoleConfigVariables() {
+    public void testGetEmptyRoleConfigs() {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
 
@@ -137,7 +103,7 @@ public class RangerRoleConfigProviderTest {
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
         try {
-            underTest.getRoleConfigVariables(cmTemplateProcessor, preparationObject);
+            underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
         } catch (CloudbreakServiceException cse) {
             assertEquals("Ranger database has not been provided for RANGER_ADMIN component", cse.getMessage());
             throw cse;
@@ -145,7 +111,7 @@ public class RangerRoleConfigProviderTest {
     }
 
     @Test(expected = CloudbreakServiceException.class)
-    public void testRoleConfigVariablesForMultipleDb() {
+    public void testRoleConfigsForMultipleDb() {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
 
@@ -157,7 +123,7 @@ public class RangerRoleConfigProviderTest {
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
         try {
-            underTest.getRoleConfigVariables(cmTemplateProcessor, preparationObject);
+            underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
         } catch (CloudbreakServiceException cse) {
             assertEquals("Multiple databases have been provided for RANGER_ADMIN component", cse.getMessage());
             throw cse;

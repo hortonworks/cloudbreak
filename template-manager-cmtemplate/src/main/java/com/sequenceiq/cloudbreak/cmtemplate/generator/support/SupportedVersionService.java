@@ -29,7 +29,7 @@ public class SupportedVersionService {
             supportedVersion.setVersion(key.getVersion());
             SupportedServices supportedServices = new SupportedServices();
             for (String serviceName : value) {
-                for (ServiceConfig serviceInformation : resolver.serviceInformations()) {
+                for (ServiceConfig serviceInformation : resolver.serviceConfigs()) {
                     if (serviceInformation.getName().equals(serviceName)) {
                         SupportedService supportedService = new SupportedService();
                         supportedService.setName(serviceInformation.getName());

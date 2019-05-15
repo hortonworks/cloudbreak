@@ -30,7 +30,7 @@ public abstract class AbstractRoleConfigConfigProvider implements CmTemplateComp
                         Optional<String> roleRefOpt = findRoleRef(cmTemplate.getTemplate(), hostTemplate, roleType);
                         if (roleRefOpt.isPresent()) {
                             List<ApiClusterTemplateConfig> roleConfigs = configs.computeIfAbsent(roleRefOpt.get(), v -> new ArrayList<>());
-                            List<ApiClusterTemplateConfig> roleConfig = getRoleConfig(roleType, hostGroupView);
+                            List<ApiClusterTemplateConfig> roleConfig = getRoleConfig(roleType, hostGroupView, templatePreparationObject);
                             setConfigs(roleConfigs, roleConfig);
                         }
                     }
@@ -95,10 +95,11 @@ public abstract class AbstractRoleConfigConfigProvider implements CmTemplateComp
         return roleConfigGroup.getRefName().equals(roleConfigGroupsRefName) && roleConfigGroup.getRoleType().equals(roleType);
     }
 
-    protected abstract List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView);
+    protected abstract List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source);
 
-    protected abstract List<ApiClusterTemplateVariable> getVariables(String roleType, HostgroupView hostgroupView,
-            TemplatePreparationObject templatePreparationObject);
+    protected List<ApiClusterTemplateVariable> getVariables(String roleType, HostgroupView hostgroupView, TemplatePreparationObject source) {
+        return List.of();
+    }
 
     public String getRoleTypeVariableName(String hostGroup, String roleType, String propertyKey) {
         return String.format("%s_%s_%s", hostGroup, roleType.toLowerCase(), propertyKey);
