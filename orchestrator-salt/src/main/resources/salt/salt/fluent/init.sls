@@ -28,11 +28,17 @@
     - file_mode: 640
 {%- if salt['cmd.retcode']('test -f /lib/systemd/system/td-agent.service') == 0 %}
 update_systemd_units:
+  file.copy:
+    - name: /etc/systemd/system/td-agent.service
+    - source: /lib/systemd/system/td-agent.service
   cmd.run:
-    - names:
-      - "sed -i \"/User=/ s/=.*/={{ fluent.user }}/\" /lib/systemd/system/td-agent.service"
-      - "sed -i \"/Group=/ s/=.*/={{ fluent.group }}/\" /lib/systemd/system/td-agent.service"
-      - "systemctl daemon-reload"
+    - names: 
+      - "sed -i \"/User=/ s/=.*/={{ fluent.user }}/\" /etc/systemd/system/td-agent.service"
+      - "sed -i \"/Group=/ s/=.*/={{ fluent.group }}/\" /etc/systemd/system/td-agent.service"
+  module.wait:
+    - name: service.systemctl_reload
+    - watch:
+      - file: /etc/systemd/system/td-agent.service
 {% endif %}
 fluent_start:
   cmd.run:
