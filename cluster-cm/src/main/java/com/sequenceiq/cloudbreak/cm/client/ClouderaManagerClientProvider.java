@@ -18,6 +18,8 @@ public class ClouderaManagerClientProvider {
 
     public static final String API_V_31 = "/api/v31";
 
+    public static final String API_ROOT = "/api";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerClientProvider.class);
 
     public ApiClient getClouderaManagerClient(HttpClientConfig clientConfig, Integer port, String userName, String password) {
@@ -27,6 +29,20 @@ public class ClouderaManagerClientProvider {
         } else {
             cmClient.setBasePath("https://" + clientConfig.getApiAddress() + API_V_31);
         }
+        return decorateClient(clientConfig, userName, password, cmClient);
+    }
+
+    public ApiClient getClouderaManagerRootClient(HttpClientConfig clientConfig, Integer port, String userName, String password) {
+        ApiClient cmClient = new ApiClient();
+        if (port != null) {
+            cmClient.setBasePath("https://" + clientConfig.getApiAddress() + ':' + port + API_ROOT);
+        } else {
+            cmClient.setBasePath("https://" + clientConfig.getApiAddress() + API_ROOT);
+        }
+        return decorateClient(clientConfig, userName, password, cmClient);
+    }
+
+    private ApiClient decorateClient(HttpClientConfig clientConfig, String userName, String password, ApiClient cmClient) {
         cmClient.setUsername(userName);
         cmClient.setPassword(password);
         cmClient.setVerifyingSsl(true);

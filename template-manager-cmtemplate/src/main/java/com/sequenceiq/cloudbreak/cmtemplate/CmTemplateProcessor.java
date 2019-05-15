@@ -22,6 +22,7 @@ import javax.annotation.Nonnull;
 import org.apache.commons.lang3.NotImplementedException;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
+import com.cloudera.api.swagger.model.ApiClusterTemplateClusterSpec;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateHostInfo;
 import com.cloudera.api.swagger.model.ApiClusterTemplateHostTemplate;
@@ -31,6 +32,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroupInfo;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
 import com.cloudera.api.swagger.model.ApiConfigureForKerberosArguments;
+import com.cloudera.api.swagger.model.ApiDataContextRef;
 import com.cloudera.api.swagger.model.ApiProductVersion;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -130,7 +132,7 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         return result;
     }
 
-    public void addInstantiator(ClouderaManagerRepo clouderaManagerRepoDetails, TemplatePreparationObject templatePreparationObject) {
+    public void addInstantiator(ClouderaManagerRepo clouderaManagerRepoDetails, TemplatePreparationObject templatePreparationObject, String sdxContextName) {
         ApiClusterTemplateInstantiator instantiator = cmTemplate.getInstantiator();
         if (instantiator == null) {
             instantiator = new ApiClusterTemplateInstantiator();
@@ -154,6 +156,11 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                 instantiator.addRoleConfigGroupsItem(new ApiClusterTemplateRoleConfigGroupInfo().rcgRefName(nonBaseRef));
             }
         }
+
+        ofNullable(sdxContextName)
+                .map(name -> List.of(new ApiDataContextRef().name(name)))
+                .map(apiDataContextRefs -> new ApiClusterTemplateClusterSpec().dataContextRefs(apiDataContextRefs))
+                .ifPresent(instantiator::clusterSpec);
         cmTemplate.setInstantiator(instantiator);
     }
 

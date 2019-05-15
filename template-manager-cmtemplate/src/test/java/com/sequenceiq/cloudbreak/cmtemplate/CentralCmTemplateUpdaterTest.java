@@ -93,21 +93,21 @@ public class CentralCmTemplateUpdaterTest {
     @Test
     public void getCmTemplate() {
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager.bp"));
-        ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null);
-        Assert.assertEquals(new CmTemplateProcessor(getBlueprintText("output/clouderamanager.bp")).getTemplate().toString(), generated.toString());
+        ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null, null);
+        Assert.assertEquals(new CmTemplateProcessor(getBlueprintText("output/clouderamanager.bp")).getTemplate(), generated);
     }
 
     @Test
     public void getCmTemplateNoMetastore() {
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-nometastore.bp"));
-        ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null);
+        ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null, null);
         Assert.assertEquals(new CmTemplateProcessor(getBlueprintText("output/clouderamanager-nometastore.bp")).getTemplate(), generated);
     }
 
     @Test
     public void getCmTemplateNoMetastoreWithTemplateParams() {
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-fixparam.bp"));
-        ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null);
+        ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null, null);
         Assert.assertEquals(new CmTemplateProcessor(getBlueprintText("output/clouderamanager-fixparam.bp")).getTemplate(), generated);
     }
 

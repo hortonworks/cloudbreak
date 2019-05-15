@@ -25,9 +25,13 @@ public interface ClusterApi {
         clusterSetupService().waitForServer();
     }
 
+    default String getSdxContext() {
+        return clusterSetupService().getSdxContext();
+    }
+
     default Cluster buildCluster(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, TemplatePreparationObject templatePreparationObject,
-            Set<HostMetadata> hostsInCluster) {
-        return clusterSetupService().buildCluster(instanceMetaDataByHostGroup, templatePreparationObject, hostsInCluster);
+            Set<HostMetadata> hostsInCluster, String sdxContext) {
+        return clusterSetupService().buildCluster(instanceMetaDataByHostGroup, templatePreparationObject, hostsInCluster, sdxContext);
     }
 
     default void waitForHosts(Stack stack, Set<HostMetadata> hostsInCluster) {
@@ -119,5 +123,4 @@ public interface ClusterApi {
     ClusterStatusService clusterStatusService();
 
     ClusterDecomissionService clusterDecomissionService();
-
 }

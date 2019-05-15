@@ -38,11 +38,11 @@ public class CentralCmTemplateUpdater implements BlueprintUpdater {
     private CmTemplateComponentConfigProcessor cmTemplateComponentConfigProcessor;
 
     public ApiClusterTemplate getCmTemplate(TemplatePreparationObject source, Map<String, List<Map<String, String>>> hostGroupMappings,
-            ClouderaManagerRepo clouderaManagerRepoDetails, List<ClouderaManagerProduct> clouderaManagerProductDetails) {
+            ClouderaManagerRepo clouderaManagerRepoDetails, List<ClouderaManagerProduct> clouderaManagerProductDetails, String sdxContextName) {
         try {
             CmTemplateProcessor processor = getCmTemplateProcessor(source);
             updateCmTemplateRepoDetails(processor, clouderaManagerRepoDetails, clouderaManagerProductDetails);
-            updateCmTemplateConfiguration(processor, clouderaManagerRepoDetails, source, hostGroupMappings);
+            updateCmTemplateConfiguration(processor, clouderaManagerRepoDetails, source, hostGroupMappings, sdxContextName);
             return processor.getTemplate();
         } catch (IOException e) {
             String message = String.format("Unable to update cmTemplate with default properties which was: %s",
@@ -60,7 +60,7 @@ public class CentralCmTemplateUpdater implements BlueprintUpdater {
 
     @Override
     public String getBlueprintText(TemplatePreparationObject source) {
-        ApiClusterTemplate template = getCmTemplate(source, Map.of(), null, null);
+        ApiClusterTemplate template = getCmTemplate(source, Map.of(), null, null, null);
         return JsonUtil.writeValueAsStringSilent(template);
     }
 
@@ -70,8 +70,8 @@ public class CentralCmTemplateUpdater implements BlueprintUpdater {
     }
 
     private CmTemplateProcessor updateCmTemplateConfiguration(CmTemplateProcessor processor, ClouderaManagerRepo clouderaManagerRepoDetails,
-            TemplatePreparationObject source, Map<String, List<Map<String, String>>> hostGroupMappings) {
-        processor.addInstantiator(clouderaManagerRepoDetails, source);
+            TemplatePreparationObject source, Map<String, List<Map<String, String>>> hostGroupMappings, String sdxContextName) {
+        processor.addInstantiator(clouderaManagerRepoDetails, source, sdxContextName);
         processor.addHosts(hostGroupMappings);
         processor = cmTemplateComponentConfigProcessor.process(processor, source);
         return processor;
