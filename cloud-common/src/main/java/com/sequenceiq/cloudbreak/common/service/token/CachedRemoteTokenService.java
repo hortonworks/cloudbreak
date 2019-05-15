@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.ws.rs.ProcessingException;
 
@@ -22,7 +21,6 @@ import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConv
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -31,8 +29,8 @@ import com.sequenceiq.cloudbreak.client.CaasClient;
 import com.sequenceiq.cloudbreak.client.CaasUser;
 import com.sequenceiq.cloudbreak.client.IdentityClient;
 import com.sequenceiq.cloudbreak.client.IntrospectResponse;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.security.authentication.UmsAuthenticationService;
 
 public class CachedRemoteTokenService implements ResourceServerTokenServices {
 
@@ -52,6 +50,8 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
 
     private final JwtAccessTokenConverter jwtAccessTokenConverter;
 
+    private final UmsAuthenticationService umsAuthenticationService;
+
     public CachedRemoteTokenService(String clientId, String clientSecret, String identityServerUrl,
             GrpcUmsClient umsClient, CaasClient caasClient, IdentityClient identityClient) {
         this(clientId, clientSecret, identityServerUrl, umsClient, caasClient, null, identityClient);
@@ -66,6 +66,7 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
         this.clientSecret = clientSecret;
         objectMapper = new ObjectMapper();
         jwtAccessTokenConverter = new JwtAccessTokenConverter();
+        umsAuthenticationService = new UmsAuthenticationService(umsClient);
         LOGGER.debug("Init RemoteTokenServices with clientId: {}, identityServerUrl: {}", clientId, identityServerUrl);
     }
 
@@ -104,14 +105,14 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
         }
     }
 
-    private OAuth2Authentication getUmsAuthentication(String crn) {
-        String requestId = MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString());
-        UserManagementProto.User user = umsClient.getUserDetails(crn, crn, Optional.ofNullable(requestId));
+    private OAuth2Authentication getUmsAuthentication(String crnText) {
+        Crn crn = Crn.fromString(crnText);
+        CloudbreakUser cloudbreakUser = umsAuthenticationService.getCloudbreakUser(crnText, null);
         Map<String, Object> tokenMap = new HashMap<>();
-        tokenMap.put("tenant", Crn.fromString(crn).getAccountId());
-        tokenMap.put("crn", user.getCrn());
-        tokenMap.put("user_id", user.getUserId());
-        tokenMap.put("user_name", user.getEmail());
+        tokenMap.put("tenant", crn.getAccountId());
+        tokenMap.put("crn", crnText);
+        tokenMap.put("user_id", cloudbreakUser.getUserId());
+        tokenMap.put("user_name", cloudbreakUser.getEmail());
         tokenMap.put("scope", Arrays.asList("cloudbreak.networks.read", "periscope.cluster", "cloudbreak.usages.user", "cloudbreak.recipes", "openid",
                 "cloudbreak.templates.read", "cloudbreak.usages.account", "cloudbreak.events", "cloudbreak.stacks.read",
                 "cloudbreak.blueprints", "cloudbreak.networks", "cloudbreak.templates", "cloudbreak.credentials.read",
