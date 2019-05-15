@@ -14,8 +14,8 @@ import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.common.type.CommonStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
-import com.sequenceiq.freeipa.entity.json.Json;
-import com.sequenceiq.freeipa.entity.json.JsonToString;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonToString;
 
 @Entity
 public class Resource {

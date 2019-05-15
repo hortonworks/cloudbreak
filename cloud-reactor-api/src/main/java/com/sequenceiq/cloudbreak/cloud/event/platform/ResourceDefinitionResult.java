@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.event.platform;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 public class ResourceDefinitionResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
 

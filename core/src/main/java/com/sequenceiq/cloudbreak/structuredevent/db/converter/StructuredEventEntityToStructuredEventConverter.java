@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @Component
 public class StructuredEventEntityToStructuredEventConverter extends AbstractConversionServiceAwareConverter<StructuredEventEntity, StructuredEvent> {

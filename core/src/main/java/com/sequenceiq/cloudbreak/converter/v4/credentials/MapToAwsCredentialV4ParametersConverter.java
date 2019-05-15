@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.AwsS
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.KeyBasedCredentialParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.RoleBasedCredentialParameters;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.common.json.Json;
 
 @Component
 public class MapToAwsCredentialV4ParametersConverter extends AbstractConversionServiceAwareConverter<Map<String, Object>, AwsCredentialV4Parameters> {

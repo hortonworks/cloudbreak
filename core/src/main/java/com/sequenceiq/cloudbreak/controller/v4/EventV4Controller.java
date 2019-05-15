@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.facade.CloudbreakEventsFacade;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventContainer;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @Controller
 @Transactional(TxType.NEVER)

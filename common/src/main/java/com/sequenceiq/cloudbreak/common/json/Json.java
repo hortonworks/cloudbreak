@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.entity.json;
+package com.sequenceiq.cloudbreak.common.json;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -11,7 +11,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 import net.sf.json.JSONObject;
 

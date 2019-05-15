@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.io.CharStreams;
 import com.sequenceiq.ambari.client.services.ClusterService;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 import groovyx.net.http.HttpResponseException;
 

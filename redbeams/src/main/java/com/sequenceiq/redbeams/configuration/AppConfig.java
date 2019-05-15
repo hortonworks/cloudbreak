@@ -65,7 +65,7 @@ import com.sequenceiq.cloudbreak.client.IdentityClient;
 // import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
 // import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 // import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-// import com.sequenceiq.cloudbreak.util.JsonUtil;
+// import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @Configuration
 @EnableRetry

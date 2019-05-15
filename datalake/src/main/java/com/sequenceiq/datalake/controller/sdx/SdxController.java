@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.controller.sdx;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -11,6 +12,7 @@ import com.sequenceiq.datalake.api.endpoint.sdx.RedeploySdxClusterRequest;
 import com.sequenceiq.datalake.api.endpoint.sdx.SdxClusterRequest;
 import com.sequenceiq.datalake.api.endpoint.sdx.SdxClusterResponse;
 import com.sequenceiq.datalake.api.endpoint.sdx.SdxEndpoint;
+import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.util.RestRequestThreadLocalService;
 
@@ -26,7 +28,11 @@ public class SdxController implements SdxEndpoint {
     @Override
     public SdxClusterResponse create(String envName, @Valid SdxClusterRequest createSdxClusterRequest) {
         String userCrn = restRequestThreadLocalService.getUserCrn();
-        return sdxService.createSdx(userCrn, envName, createSdxClusterRequest);
+        SdxCluster sdxCluster = sdxService.createSdx(userCrn, envName, createSdxClusterRequest);
+        SdxClusterResponse sdxClusterResponse = new SdxClusterResponse(sdxCluster.getClusterName(), sdxCluster.getStatus());
+        sdxClusterResponse.setSdxName(sdxCluster.getClusterName());
+        return sdxClusterResponse;
+
     }
 
     @Override
@@ -42,13 +48,18 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     public SdxClusterResponse get(String envName) {
-        return null;
+        String userCrn = restRequestThreadLocalService.getUserCrn();
+        SdxCluster sdxCluster = sdxService.getByAccountIdAndEnvName(userCrn, envName);
+        return new SdxClusterResponse(sdxCluster.getClusterName(), sdxCluster.getStatus());
     }
 
     @Override
     public List<SdxClusterResponse> list(String envName) {
         String userCrn = restRequestThreadLocalService.getUserCrn();
-        return sdxService.listSdx(userCrn, envName);
+        List<SdxCluster> sdxClusters = sdxService.listSdx(userCrn, envName);
+        return sdxClusters.stream()
+                .map(c -> new SdxClusterResponse(c.getClusterName(), c.getStatus()))
+                .collect(Collectors.toList());
     }
 
 }

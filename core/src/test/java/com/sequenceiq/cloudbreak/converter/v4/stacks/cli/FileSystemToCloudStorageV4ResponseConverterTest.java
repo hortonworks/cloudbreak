@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.StorageLocations;
-import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.services.filesystem.AdlsFileSystem;
 import com.sequenceiq.cloudbreak.services.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.cloudbreak.services.filesystem.BaseFileSystem;

@@ -14,8 +14,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
 import com.sequenceiq.cloudbreak.domain.Secret;
 import com.sequenceiq.cloudbreak.domain.SecretToString;
-import com.sequenceiq.freeipa.entity.json.Json;
-import com.sequenceiq.freeipa.entity.json.JsonToString;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonToString;
 
 @Entity
 public class Template {

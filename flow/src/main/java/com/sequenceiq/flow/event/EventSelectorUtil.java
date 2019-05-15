@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.flow.event;
+package com.sequenceiq.flow.event;
 
 public class EventSelectorUtil {
     private EventSelectorUtil() {

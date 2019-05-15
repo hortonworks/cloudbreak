@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.model.RejectedThread;
 import com.sequenceiq.periscope.monitor.context.ClusterCreationEvaluatorContext;

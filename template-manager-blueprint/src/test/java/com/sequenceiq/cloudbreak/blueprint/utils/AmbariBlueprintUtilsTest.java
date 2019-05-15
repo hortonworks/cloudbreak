@@ -21,7 +21,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariBlueprintUtilsTest {

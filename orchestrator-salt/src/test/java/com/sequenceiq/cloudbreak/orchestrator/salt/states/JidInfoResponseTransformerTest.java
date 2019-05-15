@@ -13,8 +13,8 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfo;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class JidInfoResponseTransformerTest {
 

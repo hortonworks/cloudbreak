@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.freeipa.flow.event.EventSelectorUtil;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 
 import reactor.rx.Promise;
 

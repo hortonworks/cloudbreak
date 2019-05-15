@@ -5,7 +5,7 @@ import java.io.Reader;
 
 import org.apache.commons.io.IOUtils;
 
-import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 import groovyx.net.http.HttpResponseException;
 

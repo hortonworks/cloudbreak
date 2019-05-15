@@ -10,8 +10,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEven
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveCredentialCreationStatus;
 import com.sequenceiq.cloudbreak.notification.Notification;
 import com.sequenceiq.cloudbreak.notification.NotificationSender;
-import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
-import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
+import com.sequenceiq.flow.event.EventSelectorUtil;
+import com.sequenceiq.flow.handler.EventHandler;
 
 import reactor.bus.Event;
 
@@ -19,7 +19,7 @@ import reactor.bus.Event;
  * Created by perdos on 9/23/16.
  */
 @Component
-public class InteractiveCredentialCreationStatusHandler implements ReactorEventHandler<InteractiveCredentialCreationStatus> {
+public class InteractiveCredentialCreationStatusHandler implements EventHandler<InteractiveCredentialCreationStatus> {
 
     @Inject
     private NotificationSender notificationSender;

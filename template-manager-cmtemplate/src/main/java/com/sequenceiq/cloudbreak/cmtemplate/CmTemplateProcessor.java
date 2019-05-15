@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.ClusterManagerType;
 import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfigurations;
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 public class CmTemplateProcessor implements BlueprintTextProcessor {
 

@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.entity.Template;
-import com.sequenceiq.freeipa.entity.json.Json;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.freeipa.service.DefaultRootVolumeSizeProvider;
 
 @Component
