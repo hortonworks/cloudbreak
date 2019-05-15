@@ -29,7 +29,7 @@ public class CredentialPrerequisitesV4Response implements Serializable {
     private GcpCredentialPrerequisites gcp;
 
     public CredentialPrerequisitesV4Response(String cloudPlatform, String accountId, AwsCredentialPrerequisites aws, AzureCredentialPrerequisites azure,
-            GcpCredentialPrerequisites gcp ) {
+            GcpCredentialPrerequisites gcp) {
         this.cloudPlatform = cloudPlatform;
         this.accountId = accountId;
         this.aws = aws;
