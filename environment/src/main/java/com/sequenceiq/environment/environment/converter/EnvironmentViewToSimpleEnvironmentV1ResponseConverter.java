@@ -18,6 +18,7 @@ import com.sequenceiq.environment.environment.domain.network.BaseNetwork;
 @Component
 public class EnvironmentViewToSimpleEnvironmentV1ResponseConverter extends
         AbstractConversionServiceAwareConverter<EnvironmentView, SimpleEnvironmentV1Response> {
+
     @Inject
     private RegionConverter regionConverter;
 

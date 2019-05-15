@@ -93,6 +93,7 @@ public abstract class AbstractEnvironmentAwareService<T extends EnvironmentAware
     }
 
     protected void checkClustersForDeletion(T resource) {
+        //TODO Design and implement of the deletion flow between the services
 //        Set<Cluster> clustersWithThisProxy = getClustersUsingResource(resource);
 //        if (!clustersWithThisProxy.isEmpty()) {
 //            String clusters = clustersWithThisProxy
@@ -105,6 +106,7 @@ public abstract class AbstractEnvironmentAwareService<T extends EnvironmentAware
     }
 
     protected void checkClustersForDetach(T resource, Set<EnvironmentView> envsInWorkspace) {
+        //TODO Design and implement of the deletion flow between the services
 //        Map<EnvironmentView, Set<Cluster>> envsToClusters = envsInWorkspace.stream()
 //                .collect(Collectors.toMap(env -> env, env -> getClustersUsingResourceInEnvironment(resource, env.getId())));
 //        ValidationResult validationResult = resourceDetachValidator.validate(resource, envsToClusters);
@@ -129,6 +131,7 @@ public abstract class AbstractEnvironmentAwareService<T extends EnvironmentAware
 
     protected abstract EnvironmentResourceRepository<T, Long> repository();
 
+    //TODO Design and implement of the deletion flow between the services
 //    public abstract Set<Cluster> getClustersUsingResource(T resource);
 //
 //    public abstract Set<Cluster> getClustersUsingResourceInEnvironment(T resource, Long environmentId);

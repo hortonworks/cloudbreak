@@ -14,22 +14,11 @@ public abstract class EnvironmentV1BaseRequest {
     @ApiModelProperty(EnvironmentModelDescription.PROXY_CONFIGS_REQUEST)
     private Set<String> proxies = new HashSet<>();
 
-    @ApiModelProperty(EnvironmentModelDescription.PROXY_CONFIGS_REQUEST)
-    private Set<String> ldaps = new HashSet<>();
-
     public Set<String> getProxies() {
         return proxies;
     }
 
     public void setProxies(Set<String> proxies) {
         this.proxies = proxies == null ? new HashSet<>() : proxies;
-    }
-
-    public Set<String> getLdaps() {
-        return ldaps;
-    }
-
-    public void setLdaps(Set<String> ldaps) {
-        this.ldaps = ldaps == null ? new HashSet<>() : ldaps;
     }
 }

@@ -19,23 +19,6 @@ public class DetailedEnvironmentV1Response extends EnvironmentV1BaseResponse {
     @ApiModelProperty(EnvironmentModelDescription.PROXY_CONFIGS_RESPONSE)
     private Set<ProxyV1Response> proxies = new HashSet<>();
 
-//    @ApiModelProperty(EnvironmentModelDescription.LDAP_CONFIGS_RESPONSE)
-//    private final Set<LdapV1Response> ldaps = new HashSet<>();
-
-//    @ApiModelProperty(EnvironmentModelDescription.WORKLOAD_CLUSTERS)
-//    private final Set<String> workloadClusters = new HashSet<>();
-//
-//    @ApiModelProperty(EnvironmentModelDescription.DATALAKE_CLUSTERS)
-//    private final Set<String> datalakeClusters = new HashSet<>();
-
-//    public Set<String> getWorkloadClusters() {
-//        return workloadClusters;
-//    }
-
-//    public Set<String> getDatalakeClusters() {
-//        return datalakeClusters;
-//    }
-
     public void setProxies(Set<ProxyV1Response> proxies) {
         this.proxies = proxies;
     }

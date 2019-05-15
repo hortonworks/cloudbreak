@@ -16,20 +16,9 @@ public class EnvironmentAttachValidator {
 
     public ValidationResult validate(EnvironmentAttachV1Request request, Set<ProxyConfig> proxiesToAttach) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
-//        validateLdaps(request, ldapsToAttach, resultBuilder);
         validateProxies(request, proxiesToAttach, resultBuilder);
         return resultBuilder.build();
     }
-
-//    private void validateLdaps(EnvironmentAttachV4Request request, Set<LdapConfig> ldapsToAttach, ValidationResultBuilder resultBuilder) {
-//        if (ldapsToAttach.size() < request.getLdaps().size()) {
-//            Set<String> attachableNames = ldapsToAttach.stream().map(LdapConfig::getName).collect(Collectors.toSet());
-//            Set<String> requestedNames = new HashSet<>(request.getLdaps());
-//            requestedNames.removeAll(attachableNames);
-//            resultBuilder.error(String.format("LdapConfigs [%s] cannot be found in the workspace, therefore cannot be attached.",
-//                    String.join(", ", requestedNames)));
-//        }
-//    }
 
     private void validateProxies(EnvironmentAttachV1Request request, Set<ProxyConfig> proxiesToAttach, ValidationResultBuilder resultBuilder) {
         if (proxiesToAttach.size() < request.getProxies().size()) {
