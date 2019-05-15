@@ -1,0 +1,22 @@
+package com.sequenceiq.freeipa.api.v1.freeipa.stack.model;
+
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import io.swagger.annotations.ApiModel;
+
+@ApiModel("FreeIpaServerV1Request")
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class FreeIpaServerRequest extends FreeIpaServerBase {
+    @NotNull
+    private String adminPassword;
+
+    public String getAdminPassword() {
+        return adminPassword;
+    }
+
+    public void setAdminPassword(String adminPassword) {
+        this.adminPassword = adminPassword;
+    }
+}

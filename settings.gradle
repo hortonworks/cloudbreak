@@ -42,6 +42,7 @@ include 'common'
 include 'environment-api'
 include 'secret-engine'
 include 'notification-sender'
+include 'freeipa-api'
 
 rootProject.name = 'cloudbreak'
 
