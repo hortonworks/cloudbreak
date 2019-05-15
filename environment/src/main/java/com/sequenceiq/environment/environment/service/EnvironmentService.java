@@ -53,6 +53,8 @@ import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.validator.EnvironmentAttachValidator;
 import com.sequenceiq.environment.environment.validator.EnvironmentCreationValidator;
 import com.sequenceiq.environment.environment.validator.EnvironmentRegionValidator;
+import com.sequenceiq.environment.platformresource.PlatformParameterService;
+import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 import com.sequenceiq.environment.proxy.ProxyConfig;
 import com.sequenceiq.environment.proxy.ProxyConfigService;
 
@@ -89,8 +91,8 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
     @Named("conversionService")
     private ConversionService conversionService;
 
-//    @Inject
-//    private PlatformParameterService platformParameterService;
+    @Inject
+    private PlatformParameterService platformParameterService;
 
 //    @Inject
 //    private EnvironmentDetachValidator environmentDetachValidator;
@@ -164,11 +166,10 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
     }
 
     private CloudRegions getCloudRegions(Environment environment) {
-//        PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
-//        platformResourceRequest.setCredential(environment.getCredential());
-//        platformResourceRequest.setCloudPlatform(environment.getCloudPlatform());
-//        return platformParameterService.getRegionsByCredential(platformResourceRequest);
-        return null;
+        PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
+        platformResourceRequest.setCredential(environment.getCredential());
+        platformResourceRequest.setCloudPlatform(environment.getCloudPlatform());
+        return platformParameterService.getRegionsByCredential(platformResourceRequest);
     }
 
     public DetailedEnvironmentV1Response edit(String environmentName, EnvironmentEditV1Request request) {
