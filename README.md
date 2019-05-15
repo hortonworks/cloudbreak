@@ -10,11 +10,11 @@
 * Documentation: https://docs.hortonworks.com/HDPDocuments/Cloudbreak/Cloudbreak-2.7.0/index.html
 
 # Local Development Setup
-As of now this document is focusing on setting up your development environment on OSX. You'll need brew to install certain components in case you don't have them already. To get brew please follow the install instructions on the brew homepage: https://brew.sh
+As of now this document focuses on setting up your development environment on macOS. You'll need Homebrew to install certain components in case you don't have them already. To get Homebrew please follow the install instructions on the Homebrew homepage: https://brew.sh
 
-As a prerequisite you need to have Java 11 installed. You can get it from [here](https://jdk.java.net/11/).
+As a prerequisite, you need to have Java 11 installed. You can choose from many options, including the Oracle JDK, Oracle OpenJDK, or an OpenJDK from any of several providers. For help in choosing your JDK, consult [Java is Still Free](https://medium.com/@javachampions/java-is-still-free-2-0-0-6b9aa8d6d244).
 
-You'll need Docker. For Mac, use [Docker for mac](https://docs.docker.com/docker-for-mac/install/).
+You'll need Docker. For Mac, use [Docker Desktop for Mac](https://docs.docker.com/docker-for-mac/install/).
 
 ## Cloudbreak Deployer
 
@@ -30,7 +30,8 @@ The next step is to download the latest cloudbreak-deployer onto your machine:
 ```
 curl -s https://raw.githubusercontent.com/hortonworks/cloudbreak-deployer/master/install-dev | sh && cbd --version
 ```
-Add the following to the file named `Profile` under the cbd-local directory you have just created. Please note, when a `cbd` command is executed you should go to the deployment's directory where your `Profile` file could be found (`cbd-local` in our example). The CB_SCHEMA_SCRIPTS_LOCATION environment variable configures the location of SQL scripts that are in the 'core/src/main/resources/schema' directory in the cloned Cloudbreak git repository.  
+Add the following to the file named `Profile` under the cbd-local directory you have just created. Please note, when a `cbd` command is executed you should go to the deployment's directory where your `Profile` file is found (`cbd-local` in our example). The CB_SCHEMA_SCRIPTS_LOCATION environment variable configures the location of SQL scripts that are in the 'core/src/main/resources/schema' directory in the cloned Cloudbreak git repository.
+
 Please note that the full path needs to be configured and env variables like $USER cannot be used. You also have to set a password for your local Cloudbreak in UAA_DEFAULT_USER_PW:
 
 ```
@@ -42,13 +43,13 @@ export UAA_DEFAULT_USER_PW=YOUR_PASSWORD
 export VAULT_AUTO_UNSEAL=true
 ```
 
-In order to run Cloudbreak, Periscope, Datalake, Environment from IDEA, put this into your Profile:
+In order to run Cloudbreak, Periscope, Datalake, FreeIPA, Redbeams, and Environment locally (from IDEA or the command line), put this into your Profile:
 ```
-export CB_LOCAL_DEV_LIST=cloudbreak,periscope,datalake,environment
+export CB_LOCAL_DEV_LIST=cloudbreak,periscope,datalake,freeipa,redbeams,environment
 ```
 
-Cloudbreak, Periscope and Datalake containers won't be started and Uluwatu will connect to java processes running on your host.
-You don't have to put all three containers into local-dev mode, the value of the variable could be any combination of these containers.
+Containers for these applications won't be started and Uluwatu will connect to Java processes running on your host.
+You don't have to put all of the applications into local-dev mode; the value of the variable could be any combination.
 
 Then run these commands:
 ```
@@ -62,8 +63,7 @@ cbd migrate cbdb up
 cbd migrate cbdb pending
 ```
 
-
-For some reason if you encounter a similar problem with Periscope, Datalake or Environment, then run the following commands and you can restart the Cloudbreak Deployer:
+For some reason if you encounter a similar problem with Periscope, Datalake, Redbeams, or Environment, then run the following commands and you can restart the Cloudbreak Deployer:
 ```
 cbd migrate periscopedb up
 cbd migrate periscopedb pending
@@ -71,15 +71,18 @@ cbd migrate periscopedb pending
 cbd migrate datalakedb up
 cbd migrate datalakedb pending
 
+cbd migrate redbeamsdb up
+cbd migrate redbeamsdb pending
+
 cbd migrate environmentdb up
 cbd migrate environmentdb pending
 ```
-You can track the Periscope's logs to check the results by executing the following command:
+You can track any other application's logs to check the results by executing the following command:
 ```
-cbd logs periscope
+cbd logs periscope # or datalake, redbeams, environment
 ```
 
-If everything went well then Cloudbreak will be available on http://localhost. For more details and config parameters please check the documentation of [Cloudbreak Deployer](https://github.com/hortonworks/cloudbreak-deployer).
+If everything went well then Cloudbreak will be available on https://localhost. For more details and config parameters please check the documentation of [Cloudbreak Deployer](https://github.com/hortonworks/cloudbreak-deployer).
 
 The deployer has generated a `certs` directory under `cbd-local` directory which will be needed later on to set up IDEA properly.
 
@@ -90,7 +93,6 @@ cbd is unable to determine the IP address on a Linux machine. Therefore, you mus
 ```
 export PUBLIC_IP=127.0.0.1
 ```
-
 
 ## IDEA
 
@@ -119,31 +121,28 @@ IntelliJ IDEA -> Preferences -> Build, Execution, Deployment -> Gradle -> Gradle
 
 ### Import project
 
-Cloudbreak can be imported into IDEA as gradle project by specifying the cloudbreak repo root under Import Project. Once it is done, you need to import the proper code formatter by using the __File -> Import Settings...__ menu and selecting the `idea_settings.jar` located in the `config/idea` directory in Cloudbreak git repository. 
+Cloudbreak can be imported into IDEA as a Gradle project by specifying the cloudbreak repo root under Import Project. Once it is done, you need to import the proper code formatter by using the __File -> Import Settings...__ menu and selecting the `idea_settings.jar` located in the `config/idea` directory in the Cloudbreak git repository.
 
 Also you need to import inspection settings called `inpsections.xml` located in `config/idea`:
 ```
 IntelliJ IDEA -> Preferences -> Editor -> Inspections -> Settings icon -> Import Profile
 ```
 
-Cloudbreak integrates with GRPC components. This results in generated files inside the project with big file size. By default IDEA ignores anything that is more than 8Mb resulting in unknown classes inside IDEA context. 
-To circumwent this you need to add this property to your IDEA properties. 
+Cloudbreak integrates with GRPC components. This results in generated files inside the project with big file sizes. By default IDEA ignores anything that is more than 8MB, resulting in unknown classes inside the IDEA context. To circumvent this, you need to add this property to your IDEA properties.
 
 Go to: Help/Edit Custom Properties...
-``` 
-#parse files up until 15Mb
+```
+#parse files up until 15MB
 idea.max.intellisense.filesize=15000
-``` 
+```
 Restart IDEA, and Rebuild.
-
 
 ### Running cloudbreak in IDEA
 
-
-To launch the Cloudbreak application execute the `com.sequenceiq.cloudbreak.CloudbreakApplication` class  (Set 'Use classpath of module' to `core_main`) with the following VM options:
+To launch the Cloudbreak application execute the `com.sequenceiq.cloudbreak.CloudbreakApplication` class (set 'Use classpath of module' to `core_main`) with the following VM options:
 ```
 -Dcb.client.id=cloudbreak
--Dcb.client.secret=CB_SECRET_GENERATED_BY_CBD
+-Dcb.client.secret=<UAA_DEFAULT_SECRET>
 -Dcb.db.port.5432.tcp.addr=localhost
 -Dcb.db.port.5432.tcp.port=5432
 -Dcb.identity.server.url=http://localhost:8089
@@ -151,15 +150,16 @@ To launch the Cloudbreak application execute the `com.sequenceiq.cloudbreak.Clou
 -Dserver.port=9091
 -Daltus.ums.host=localhost
 -Dvault.addr=localhost
--Dvault.root.token=<TOKEN_FROM_PROFILE_FILE>
+-Dvault.root.token=<VAULT_ROOT_TOKEN>
 ```
 
-The `-Dcb.client.secret=CB_SECRET_GENERATED_BY_CBD` value has to be replaced with the value of UAA_DEFAULT_SECRET from the cdb-local/Profile file.
-The database migration scripts run automatically by Cloudbreak by default, this migration can be turned off with the `-Dcb.schema.migration.auto=false` VM option.
+Replace `<UAA_DEFAULT_SECRET>` with the value of UAA_DEFAULT_SECRET from the cdb-local/Profile file. Replace `<VAULT_ROOT_TOKEN>` with the value of VAULT_ROOT_TOKEN from the cbd-local/Profile file.
+
+The database migration scripts are run automatically by Cloudbreak, but this migration can be turned off with the `-Dcb.schema.migration.auto=false` JVM option.
 
 ### Configure Before launch task
 
-In order to be able to determine the local Cloudbreak version automatically, a `Before launch` task has to be configured for the project in IntelliJ Idea. The required steps are the following:
+In order to be able to determine the local Cloudbreak version automatically, a `Before launch` task has to be configured for the project in IntelliJ IDEA. The required steps are the following:
 
 1. Open `Run/Debug Configurations` for the project
 2. Select your project's application
@@ -169,13 +169,13 @@ In order to be able to determine the local Cloudbreak version automatically, a `
     2. `Tasks`: buildInfo
 5. Confirm and restart the application
 
-### Running periscope in IDEA
+### Running Periscope in IDEA
 
-After having imported cloudbreak repo root you can launch Periscope application by executing the com.sequenceiq.periscope.PeriscopeApplication class with the following VM options:
+After importing the cloudbreak repo root, launch the Periscope application by executing the com.sequenceiq.periscope.PeriscopeApplication class with the following JVM options:
 
 ````
 -Dperiscope.client.id=periscope
--Dperiscope.client.secret=PERISCOPE_SECRET_GENERATED_BY_CBD
+-Dperiscope.client.secret=<UAA_DEFAULT_SECRET>
 -Dperiscope.identity.server.url=http://localhost:8089
 -Dperiscope.db.port.5432.tcp.addr=localhost
 -Dperiscope.db.port.5432.tcp.port=5432
@@ -183,14 +183,14 @@ After having imported cloudbreak repo root you can launch Periscope application 
 -Dserver.port=8085
 -Daltus.ums.host=localhost
 -Dvault.addr=localhost
--Dvault.root.token=<TOKEN_FROM_PROFILE_FILE>
+-Dvault.root.token=<VAULT_ROOT_TOKEN>
 ````
 
-The -Dperiscope.client.secret=PERISCOPE_SECRET_GENERATED_BY_CBD value has to be replaced with the value of UAA_DEFAULT_SECRET from the cdb-local/Profile file.
+Replace `<UAA_DEFAULT_SECRET>` with the value of UAA_DEFAULT_SECRET from the cdb-local/Profile file. Replace `<VAULT_ROOT_TOKEN>` with the value of VAULT_ROOT_TOKEN from the cbd-local/Profile file.
 
-### Running datalake in IDEA
+### Running Datalake in IDEA
 
-After having imported cloudbreak repo root you can launch Datalake application by executing the com.sequenceiq.datalake.DatalakeApplication class with the following VM options:
+After importing the cloudbreak repo root, launch the Datalake application by executing the com.sequenceiq.datalake.DatalakeApplication class with the following JVM options:
 
 ````
 -Dserver.port=8086
@@ -198,22 +198,43 @@ After having imported cloudbreak repo root you can launch Datalake application b
 -Ddatalake.cloudbreak.url=http://localhost:8080
 ````
 
-### Running environment service in IDEA
+### Running Redbeams in IDEA
 
-After having imported cloudbreak repo root you can launch Environment application by executing the com.sequenceiq.environment.EnvironmentApplication class with the following VM options:
+After importing the cloudbreak repo root, launch the Redbeams application by executing the com.sequenceiq.redbeams.RedbeamsApplication class with the following JVM options:
 
 ```
--Dvault.root.token=<TOKEN_FROM_PROFILE_FILE>
+-Dredbeams.client.id=redbeams
+-Dredbeams.client.secret=<UAA_DEFAULT_SECRET>
+-Dredbeams.identity.server.url=http://localhost:8089
+-Dredbeams.db.port.5432.tcp.addr=localhost
+-Dredbeams.db.port.5432.tcp.port=5432
+-Dredbeams.cloudbreak.url=http://localhost:8080
+-Dserver.port=8087
+-Daltus.ums.host=localhost
+-Dvault.addr=localhost
+-Dvault.root.token=<VAULT_ROOT_TOKEN>
 ```
+
+Replace `<UAA_DEFAULT_SECRET>` with the value of UAA_DEFAULT_SECRET from the cdb-local/Profile file. Replace `<VAULT_ROOT_TOKEN>` with the value of VAULT_ROOT_TOKEN from the cbd-local/Profile file.
+
+### Running the Environment service in IDEA
+
+After importing the cloudbreak repo root, launch the Environment application by executing the com.sequenceiq.environment.EnvironmentApplication class with the following JVM options:
+
+```
+-Dvault.root.token=<VAULT_ROOT_TOKEN>
+```
+
+Replace `<VAULT_ROOT_TOKEN>` with the value of VAULT_ROOT_TOKEN from the cbd-local/Profile file.
 
 ## Command line
 
 ### Cloudbreak
-To run Cloudbreak from command line, you have to list the JVM parameters from above for gradle:
+To run Cloudbreak from the command line, run the following Gradle command:
 
 ```
 ./gradlew :core:buildInfo :core:bootRun -PjvmArgs="-Dcb.client.id=cloudbreak \
--Dcb.client.secret=CB_SECRET_GENERATED_BY_CBD \
+-Dcb.client.secret=<UAA_DEFAULT_SECRET> \
 -Dcb.db.port.5432.tcp.addr=localhost \
 -Dcb.db.port.5432.tcp.port=5432 \
 -Dcb.identity.server.url=http://localhost:8089 \
@@ -221,20 +242,20 @@ To run Cloudbreak from command line, you have to list the JVM parameters from ab
 -Dserver.port=9091 \
 -Daltus.ums.host=localhost
 -Dvault.addr=localhost
--Dvault.root.token=<TOKEN_FROM_PROFILE_FILE>
+-Dvault.root.token=<VAULT_ROOT_TOKEN>
 -Dspring.config.location=$(pwd)/cloud-common/src/main/resources/application.yml,$(pwd)/core/build/resources/main/application.properties"
 ```
 
-The `-Dcb.client.secret=CB_SECRET_GENERATED_BY_CBD` value has to be replaced with the value of UAA_DEFAULT_SECRET from the cdb-local/Profile file.
+Replace `<UAA_DEFAULT_SECRET>` with the value of UAA_DEFAULT_SECRET from the cdb-local/Profile file. Replace `<VAULT_ROOT_TOKEN>` with the value of VAULT_ROOT_TOKEN from the cbd-local/Profile file.
 
-The database migration scripts run automatically by Cloudbreak by default, this migration can be turned off with the `-Dcb.schema.migration.auto=false` VM option.
+The database migration scripts are run automatically by Cloudbreak, this migration can be turned off with the `-Dcb.schema.migration.auto=false` VM option.
 
 ### Periscope
-To run periscope from command line you have to run the below gradle command with the following list of JVM parameters:
+To run Periscope from the command line, run the following Gradle command:
 
 ````
 ./gradlew :autoscale:bootRun -PjvmArgs="-Dperiscope.client.id=periscope \
--Dperiscope.client.secret=CB_SECRET_GENERATED_BY_CBD \
+-Dperiscope.client.secret=<UAA_DEFAULT_SECRET> \
 -Dperiscope.identity.server.url=http://localhost:8089 \
 -Dperiscope.db.port.5432.tcp.addr=localhost \
 -Dperiscope.db.port.5432.tcp.port=5432 \
@@ -243,14 +264,14 @@ To run periscope from command line you have to run the below gradle command with
 -Dserver.port=8085 \
 -Daltus.ums.host=localhost \
 -Dvault.addr=localhost \
--Dvault.root.token=<TOKEN_FROM_PROFILE_FILE> \
+-Dvault.root.token=<VAULT_ROOT_TOKEN> \
 -Dspring.config.location=$(pwd)/autoscale/src/main/resources/application.yml,$(pwd)/autoscale/build/resources/main/application.properties"
-```` 
+````
 
-The `-Dcb.client.secret=CB_SECRET_GENERATED_BY_CBD` value has to be replaced with the value of UAA_DEFAULT_SECRET from the cdb-local/Profile file.
+Replace `<UAA_DEFAULT_SECRET>` with the value of UAA_DEFAULT_SECRET from the cdb-local/Profile file. Replace `<VAULT_ROOT_TOKEN>` with the value of VAULT_ROOT_TOKEN from the cbd-local/Profile file.
 
 ### Datalake
-To run datalake from command line you have to run the below gradle command with the following list of JVM parameters:
+To run Datalake from the command line, run the following Gradle command:
 
 ````
 ./gradlew :datalake:bootRun -PjvmArgs="-Ddatalake.db.env.address=localhost \
@@ -260,28 +281,52 @@ To run datalake from command line you have to run the below gradle command with 
 ````
 
 ### FreeIPA
-To run freeipa management service from command line you have to run the below gradle command with the following list of JVM parameters:
+To run the FreeIPA management service from the command line, run the following Gradle command:
 
 ````
 ./gradlew :freeipa:bootRun -PjvmArgs="-Dfreeipa.db.addr=localhost \
 -Dserver.port=8090 \
 -Dvault.addr=localhost \
--Dvault.root.token=<TOKEN_FROM_PROFILE_FILE> \
+-Dvault.root.token=<VAULT_ROOT_TOKEN> \
 -Dspring.config.location=$(pwd)/freeipa/src/main/resources/application.yml,$(pwd)/freeipa/build/resources/main/application.properties"
 ````
 
-### Environment
-To run environment service from command line you have to run the below gradle command with the following list of JVM parameters:
+Replace `<VAULT_ROOT_TOKEN>` with the value of VAULT_ROOT_TOKEN from the cbd-local/Profile file.
 
- ````
+### Redbeams
+To run Redbeams from the command line, run the following Gradle command:
+
+```
+./gradlew :redbeams:bootRun -PjvmArgs="-Dredbeams.client.id=redbeams \
+-Dredbeams.client.secret=<UAA_DEFAULT_SECRET> \
+-Dredbeams.identity.server.url=http://localhost:8089 \
+-Dredbeams.db.port.5432.tcp.addr=localhost \
+-Dredbeams.db.port.5432.tcp.port=5432 \
+-Dredbeams.cloudbreak.url=http://localhost:8080 \
+-Dredbeams.schema.scripts.location=$(pwd)/redbeams/src/main/resources/schema \
+-Dserver.port=8087 \
+-Daltus.ums.host=localhost \
+-Dvault.addr=localhost \
+-Dvault.root.token=<VAULT_ROOT_TOKEN> \
+-Dspring.config.location=$(pwd)/redbeams/src/main/resources/application.yml,$(pwd)/redbeams/build/resources/main/application.properties"
+```
+
+Replace `<UAA_DEFAULT_SECRET>` with the value of UAA_DEFAULT_SECRET from the cdb-local/Profile file. Replace `<VAULT_ROOT_TOKEN>` with the value of VAULT_ROOT_TOKEN from the cbd-local/Profile file.
+
+### Environment
+To run the Environment service from the command line, run the following Gradle command:
+
+```
 ./gradlew :environment:bootRun -PjvmArgs="\
 -Dvault.root.token=<TOKEN_FROM_PROFILE_FILE> \
 -Dspring.config.location=$(pwd)/environment/src/main/resources/application.yml,$(pwd)/environment/build/resources/main/application.properties"
-````
+```
+
+Replace `<VAULT_ROOT_TOKEN>` with the value of VAULT_ROOT_TOKEN from the cbd-local/Profile file.
 
 ## Database development
 
-If any schema change is required in Cloudbreak services databases (cbdb/environmentdb/datalakedb/redbeamsdb), then the developer needs to write SQL scripts to migrate the database accordingly. The schema migration is managed by [MYBATIS Migrations](https://github.com/mybatis/migrations) in Cloudbreak and the cbd tool provides an easy-to-use wrapper for it. The syntax for using the migration commands is `cbd migrate <database name> <command> [parameters]` e.g. `cbd migrate cbdb status`.
+If any schema change is required in Cloudbreak services databases (cbdb/environmentdb/datalakedb/redbeamsdb), then the developer needs to write SQL scripts to migrate the database accordingly. The schema migration is managed by [MyBatis Migrations](https://github.com/mybatis/migrations) in Cloudbreak and the cbd tool provides an easy-to-use wrapper for it. The syntax for using the migration commands is `cbd migrate <database name> <command> [parameters]` e.g. `cbd migrate cbdb status`.
 Create a SQL template for schema changes:
 ```
 cbd migrate cbdb new "CLOUD-123 schema change for new feature"
@@ -329,7 +374,7 @@ ID             Applied At          Description
 
 ## Building
 
-Gradle is used for build and dependency management. Gradle wrapper is added to Cloudbreak git repository, therefore building can be done with:
+Gradle is used for build and dependency management. The Gradle wrapper is added to the Cloudbreak git repository, so building can be done with:
 ```
 ./gradlew clean build
 ```
@@ -342,18 +387,18 @@ Put dps-platform path into your Profile:
 ```
 export DPS_REPO=/Users/YOUR_USERNAME/DPS_PROJECT_DIR
 ```
-By default it will build docker images from your dps-platform directory, but if you want to use a 
-specific version of DPS you can put DPS_VERSION env variable into your Profile file. 
-In this case it will download images from repository instead of build them.
+By default it will build docker images from your dps-platform directory, but if you want to use a
+specific version of DPS you can put the DPS_VERSION env variable into your Profile file.
+In this case it will download images from the repository instead of building them.
 ```
 export DPS_VERSION=2.0.0.0-132
 ```
-If you want to force build the project with docker build use FORCE_BUILD env variable.
+If you want to force build the project with `docker build` use the FORCE_BUILD env variable.
 ```
 export FORCE_BUILD=true
 ```
 
-## Additional infos:
+## Additional info
 
 > * [Retrieve OAuth Bearer Token via Cloudbreak REST API](https://github.com/hortonworks/cloudbreak/blob/master/docs/common/retrieve_oauth_token.md)
 > * [Cloudbreak Service Provider Interface (SPI)](https://github.com/hortonworks/cloudbreak/blob/master/docs/spi.md)
