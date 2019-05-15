@@ -18,15 +18,27 @@ import com.sequenceiq.cloudbreak.template.views.RdsView;
 @Component
 public class HueConfigProvider implements CmTemplateComponentConfigProvider {
 
+    private static final String HUE_DATABASE_HOST = "hue-hue_database_host";
+
+    private static final String HUE_DATABASE_PORT = "hue-hue_database_port";
+
+    private static final String HUE_DATABASE_NAME = "hue-hue_database_name";
+
+    private static final String HUE_HUE_DATABASE_TYPE = "hue-hue_database_type";
+
+    private static final String HUE_HUE_DATABASE_USER = "hue-hue_database_user";
+
+    private static final String HUE_DATABASE_PASSWORD = "hue-hue_database_password";
+
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(TemplatePreparationObject templatePreparationObject) {
         List<ApiClusterTemplateConfig> result = new ArrayList<>();
-        result.add(new ApiClusterTemplateConfig().name("database_host").variable("hue-hue_database_host"));
-        result.add(new ApiClusterTemplateConfig().name("database_port").variable("hue-hue_database_port"));
-        result.add(new ApiClusterTemplateConfig().name("database_name").variable("hue-hue_database_name"));
-        result.add(new ApiClusterTemplateConfig().name("database_type").variable("hue-hue_database_type"));
-        result.add(new ApiClusterTemplateConfig().name("database_user").variable("hue-hue_database_user"));
-        result.add(new ApiClusterTemplateConfig().name("database_password").variable("hue-hue_database_password"));
+        result.add(new ApiClusterTemplateConfig().name("database_host").variable(HUE_DATABASE_HOST));
+        result.add(new ApiClusterTemplateConfig().name("database_port").variable(HUE_DATABASE_PORT));
+        result.add(new ApiClusterTemplateConfig().name("database_name").variable(HUE_DATABASE_NAME));
+        result.add(new ApiClusterTemplateConfig().name("database_type").variable(HUE_HUE_DATABASE_TYPE));
+        result.add(new ApiClusterTemplateConfig().name("database_user").variable(HUE_HUE_DATABASE_USER));
+        result.add(new ApiClusterTemplateConfig().name("database_password").variable(HUE_DATABASE_PASSWORD));
         return result;
     }
 
@@ -34,12 +46,12 @@ public class HueConfigProvider implements CmTemplateComponentConfigProvider {
     public List<ApiClusterTemplateVariable> getServiceConfigVariables(TemplatePreparationObject source) {
         List<ApiClusterTemplateVariable> result = new ArrayList<>();
         RdsView hueRdsView = new RdsView(getFirstRDSConfigOptional(source).get());
-        result.add(new ApiClusterTemplateVariable().name("hue-hue_database_host").value(hueRdsView.getHost()));
-        result.add(new ApiClusterTemplateVariable().name("hue-hue_database_port").value(hueRdsView.getPort()));
-        result.add(new ApiClusterTemplateVariable().name("hue-hue_database_name").value(hueRdsView.getDatabaseName()));
-        result.add(new ApiClusterTemplateVariable().name("hue-hue_database_type").value(hueRdsView.getSubprotocol()));
-        result.add(new ApiClusterTemplateVariable().name("hue-hue_database_user").value(hueRdsView.getConnectionUserName()));
-        result.add(new ApiClusterTemplateVariable().name("hue-hue_database_password").value(hueRdsView.getConnectionPassword()));
+        result.add(new ApiClusterTemplateVariable().name(HUE_DATABASE_HOST).value(hueRdsView.getHost()));
+        result.add(new ApiClusterTemplateVariable().name(HUE_DATABASE_PORT).value(hueRdsView.getPort()));
+        result.add(new ApiClusterTemplateVariable().name(HUE_DATABASE_NAME).value(hueRdsView.getDatabaseName()));
+        result.add(new ApiClusterTemplateVariable().name(HUE_HUE_DATABASE_TYPE).value(hueRdsView.getSubprotocol()));
+        result.add(new ApiClusterTemplateVariable().name(HUE_HUE_DATABASE_USER).value(hueRdsView.getConnectionUserName()));
+        result.add(new ApiClusterTemplateVariable().name(HUE_DATABASE_PASSWORD).value(hueRdsView.getConnectionPassword()));
         return result;
     }
 
