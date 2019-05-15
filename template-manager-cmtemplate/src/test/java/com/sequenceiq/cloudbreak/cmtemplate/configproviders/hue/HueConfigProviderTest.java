@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cmtemplate.configproviders;
+package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,19 +24,19 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 
 public class HueConfigProviderTest {
 
-    public static final String HUE = "HUE";
+    private static final String HUE = "HUE";
 
-    public static final String DB_PROVIDER = "dbProvider";
+    private static final String DB_PROVIDER = "dbProvider";
 
-    public static final String HOST = "host";
+    private static final String HOST = "host";
 
-    public static final String PORT = "12345";
+    private static final String PORT = "12345";
 
-    public static final String DB_NAME = "dbName";
+    private static final String DB_NAME = "dbName";
 
-    public static final String USER_NAME = "userName";
+    private static final String USER_NAME = "userName";
 
-    public static final String PASSWORD = "password";
+    private static final String PASSWORD = "password";
 
     private HueConfigProvider underTest;
 
