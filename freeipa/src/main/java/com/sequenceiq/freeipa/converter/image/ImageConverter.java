@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.converter.cloud;
+package com.sequenceiq.freeipa.converter.image;
 
 import java.util.Collections;
 import java.util.Map;
