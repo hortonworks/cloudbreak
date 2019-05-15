@@ -18,7 +18,6 @@ import org.junit.Test;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.HueConfigProvider;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
