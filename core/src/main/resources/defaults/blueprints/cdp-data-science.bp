@@ -1,5 +1,5 @@
 {
-  "description": "CDP 1.0 Data Science template with Spark, Impala and Hive",
+  "description": "CDP 1.0 Data Science template with Spark and Hive",
   "blueprint": {
     "cdhVersion": "6.0.99",
     "displayName": "datascience",
@@ -43,22 +43,6 @@
           {
             "refName": "hdfs-BALANCER-BASE",
             "roleType": "BALANCER",
-            "base": true
-          }
-        ]
-      },
-      {
-        "refName": "hbase",
-        "serviceType": "HBASE",
-        "roleConfigGroups": [
-          {
-            "refName": "hbase-REGIONSERVER-BASE",
-            "roleType": "REGIONSERVER",
-            "base": true
-          },
-          {
-            "refName": "hbase-MASTER-BASE",
-            "roleType": "MASTER",
             "base": true
           }
         ]
@@ -131,42 +115,18 @@
             "base": true
           }
         ]
-      },
-      {
-        "refName": "impala",
-        "serviceType": "IMPALA",
-        "roleConfigGroups": [
-          {
-            "refName": "impala-IMPALAD-BASE",
-            "roleType": "IMPALAD",
-            "base": true
-          },
-          {
-            "refName": "impala-STATESTORE-BASE",
-            "roleType": "STATESTORE",
-            "base": true
-          },
-          {
-            "refName": "impala-CATALOGSERVER-BASE",
-            "roleType": "CATALOGSERVER",
-            "base": true
-          }
-        ]
       }
     ],
     "hostTemplates": [
       {
         "refName": "master",
         "roleConfigGroupsRefNames": [
-          "hbase-MASTER-BASE",
           "hdfs-BALANCER-BASE",
           "hdfs-NAMENODE-BASE",
           "hdfs-SECONDARYNAMENODE-BASE",
           "hive-GATEWAY-BASE",
           "hive-HIVEMETASTORE-BASE",
           "hive-HIVESERVER2-BASE",
-          "impala-CATALOGSERVER-BASE",
-          "impala-STATESTORE-BASE",
           "spark_on_yarn-GATEWAY-BASE",
           "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
           "yarn-JOBHISTORY-BASE",
@@ -177,10 +137,8 @@
       {
         "refName": "worker",
         "roleConfigGroupsRefNames": [
-          "hbase-REGIONSERVER-BASE",
           "hdfs-DATANODE-BASE",
           "hive-GATEWAY-BASE",
-          "impala-IMPALAD-BASE",
           "spark_on_yarn-GATEWAY-BASE",
           "yarn-NODEMANAGER-WORKER"
         ]

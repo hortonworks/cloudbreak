@@ -167,7 +167,7 @@ public class CmTemplateProcessorTest {
         TemplatePreparationObject.Builder tpoBuilder = new TemplatePreparationObject.Builder().withGeneralClusterConfigs(generalClusterConfigs);
         TemplatePreparationObject templatePreparationObject = tpoBuilder.build();
 
-        underTest.addInstantiator(clouderaManagerRepoDetails, templatePreparationObject);
+        underTest.addInstantiator(clouderaManagerRepoDetails, templatePreparationObject, "dszabo-sdx");
 
         ApiClusterTemplateInstantiator instantiator = underTest.getTemplate().getInstantiator();
         List<ApiClusterTemplateRoleConfigGroupInfo> roleConfigGroups = instantiator.getRoleConfigGroups();
@@ -187,7 +187,7 @@ public class CmTemplateProcessorTest {
         TemplatePreparationObject.Builder tpoBuilder = new TemplatePreparationObject.Builder().withGeneralClusterConfigs(generalClusterConfigs);
         TemplatePreparationObject templatePreparationObject = tpoBuilder.build();
 
-        underTest.addInstantiator(clouderaManagerRepoDetails, templatePreparationObject);
+        underTest.addInstantiator(clouderaManagerRepoDetails, templatePreparationObject, "dszabo-sdx");
 
         ApiClusterTemplateInstantiator instantiator = underTest.getTemplate().getInstantiator();
         List<ApiClusterTemplateRoleConfigGroupInfo> roleConfigGroups = instantiator.getRoleConfigGroups();

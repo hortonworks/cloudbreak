@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.api.swagger.CdpResourceApi;
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
@@ -30,6 +31,8 @@ import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostRef;
+import com.cloudera.api.swagger.model.ApiRemoteDataContext;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -41,6 +44,7 @@ import com.sequenceiq.cloudbreak.cm.client.DataView;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralCmTemplateUpdater;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -50,7 +54,6 @@ import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @Service
 @Scope("prototype")
@@ -111,7 +114,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Override
     public Cluster buildCluster(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, TemplatePreparationObject templatePreparationObject,
-            Set<HostMetadata> hostsInCluster) {
+            Set<HostMetadata> hostsInCluster, String sdxContext) {
         Cluster cluster = stack.getCluster();
         Long clusterId = cluster.getId();
         try {
@@ -130,11 +133,12 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                 LOGGER.warn("Unable to determine Cloudera Manager host. Skipping management services installation.");
             }
 
+            String sdxContextName = Optional.ofNullable(sdxContext).map(this::createDataContext).orElse(null);
             Map<String, List<Map<String, String>>> hostGroupMappings = hostGroupAssociationBuilder.buildHostGroupAssociations(instanceMetaDataByHostGroup);
             ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(clusterId);
             List<ClouderaManagerProduct> clouderaManagerProductDetails = clusterComponentProvider.getClouderaManagerProductDetails(clusterId);
             ApiClusterTemplate apiClusterTemplate = cmTemplateUpdater.getCmTemplate(templatePreparationObject, hostGroupMappings, clouderaManagerRepoDetails,
-                    clouderaManagerProductDetails);
+                    clouderaManagerProductDetails, sdxContextName);
 
             cluster.setExtendedBlueprintText(getExtendedBlueprintText(apiClusterTemplate));
             LOGGER.info("Generated Cloudera cluster template: {}", cluster.getExtendedBlueprintText());
@@ -157,6 +161,40 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
         return cluster;
+    }
+
+    private String createDataContext(String sdxContext) {
+        ApiClient rootClient = clouderaManagerClientFactory.getRootClient(stack, stack.getCluster(), clientConfig);
+        CdpResourceApi cdpResourceApi = new CdpResourceApi(rootClient);
+        try {
+            ApiRemoteDataContext apiRemoteDataContext = JsonUtil.readValue(sdxContext, ApiRemoteDataContext.class);
+            if (remoteContextExists(cdpResourceApi, apiRemoteDataContext.getEndPointId())) {
+                return apiRemoteDataContext.getEndPointId();
+            }
+            LOGGER.debug("Posting remote context to workload. EndpointId: {}", apiRemoteDataContext.getEndPointId());
+            return cdpResourceApi.postRemoteContext(apiRemoteDataContext).getEndPointId();
+        } catch (ApiException e) {
+            LOGGER.info("Error while creating data context using: {}", sdxContext, e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        } catch (IOException e) {
+            LOGGER.info("Failed to parse SDX context to CM API object.", e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    private Boolean remoteContextExists(CdpResourceApi cdpResourceApi, String dataContextName) {
+        try {
+            cdpResourceApi.getRemoteContext(dataContextName);
+            LOGGER.debug("Remote context [{}] already exists.", dataContextName);
+            return Boolean.TRUE;
+        } catch (ApiException e) {
+            if (org.springframework.http.HttpStatus.NOT_FOUND.value() == e.getCode()) {
+                LOGGER.debug("Remote context [{}] does not exist.", dataContextName);
+                return Boolean.FALSE;
+            }
+            LOGGER.info("Failed to check if remote context [{}] already exists.", dataContextName, e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
     }
 
     private void installCluster(Cluster cluster, ApiClusterTemplate apiClusterTemplate, ClouderaManagerResourceApi clouderaManagerResourceApi,
@@ -222,6 +260,23 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     @Override
     public void waitForServices(int requestId) {
 
+    }
+
+    @Override
+    public String getSdxContext() {
+        ApiClient rootClient = clouderaManagerClientFactory.getRootClient(stack, stack.getCluster(), clientConfig);
+        CdpResourceApi cdpResourceApi = new CdpResourceApi(rootClient);
+        try {
+            LOGGER.debug("Get remote context from SDX cluster: {}", stack.getName());
+            ApiRemoteDataContext remoteDataContext = cdpResourceApi.getRemoteContextByCluster(stack.getName());
+            return JsonUtil.writeValueAsString(remoteDataContext);
+        } catch (ApiException e) {
+            LOGGER.info("Error while getting remote context of SDX cluster: {}", stack.getName(), e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        } catch (JsonProcessingException e) {
+            LOGGER.info("Failed to serialize remote context.", e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
     }
 
     private Boolean isPrewarmed(Long clusterId) {

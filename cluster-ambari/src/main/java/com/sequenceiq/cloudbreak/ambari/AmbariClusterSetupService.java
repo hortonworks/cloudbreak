@@ -125,7 +125,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
 
     @Override
     public Cluster buildCluster(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, TemplatePreparationObject templatePreparationObject,
-            Set<HostMetadata> hostsInCluster) {
+            Set<HostMetadata> hostsInCluster, String sdxContext) {
         Cluster cluster = stack.getCluster();
         try {
             ambariRepositoryVersionService.setBaseRepoURL(stack.getName(), cluster.getId(), ambariClient);
@@ -185,6 +185,11 @@ public class AmbariClusterSetupService implements ClusterSetupService {
         }
         eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
                 cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_SERVICES_STARTED.code()));
+    }
+
+    @Override
+    public String getSdxContext() {
+        return null;
     }
 
     private void addBlueprint(Long stackId, AmbariClient ambariClient, String blueprintText, Boolean topologyValidation) {

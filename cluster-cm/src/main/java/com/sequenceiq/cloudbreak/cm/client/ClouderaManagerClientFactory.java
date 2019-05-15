@@ -44,6 +44,15 @@ public class ClouderaManagerClientFactory {
         return clouderaManagerClientProvider.getClouderaManagerClient(clientConfig, stack.getGatewayPort(), username, password);
     }
 
+    public ApiClient getRootClient(Stack stack, Cluster cluster, HttpClientConfig clientConfig) {
+        if (StringUtils.isNoneBlank(cluster.getCloudbreakAmbariUser(), cluster.getCloudbreakAmbariPassword())) {
+            return clouderaManagerClientProvider.getClouderaManagerRootClient(clientConfig,
+                    stack.getGatewayPort(), cluster.getCloudbreakAmbariUser(), cluster.getCloudbreakAmbariPassword());
+        } else {
+            return clouderaManagerClientProvider.getClouderaManagerRootClient(clientConfig, stack.getGatewayPort(), "admin", "admin");
+        }
+    }
+
     public ClouderaManagerResourceApi getClouderaManagerResourceApi(ApiClient apiClient) {
         return new ClouderaManagerResourceApi(apiClient);
     }
