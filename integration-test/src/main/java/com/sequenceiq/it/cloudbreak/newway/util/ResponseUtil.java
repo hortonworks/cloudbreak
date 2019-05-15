@@ -5,7 +5,7 @@ import java.io.IOException;
 import javax.ws.rs.ClientErrorException;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 public class ResponseUtil {
     private ResponseUtil() {

@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.requests.BlueprintV4R
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.converter.v4.blueprint.BlueprintV4RequestToBlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaulBlueprintCacheTest {

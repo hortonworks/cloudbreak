@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.newway.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.newway.client.BlueprintTestClient;

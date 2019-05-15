@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.services.filesystem.AdlsFileSystem;
 import com.sequenceiq.cloudbreak.services.filesystem.GcsFileSystem;
 import com.sequenceiq.cloudbreak.services.filesystem.S3FileSystem;

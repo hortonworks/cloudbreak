@@ -4,10 +4,10 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DisableKerberosRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DisableKerberosResult;
-import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
+import com.sequenceiq.flow.handler.EventHandler;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -15,7 +15,7 @@ import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class DisableKerberosHandler implements ReactorEventHandler<DisableKerberosRequest> {
+public class DisableKerberosHandler implements EventHandler<DisableKerberosRequest> {
 
     @Inject
     private EventBus eventBus;

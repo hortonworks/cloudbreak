@@ -6,17 +6,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationResult;
-import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
+import com.sequenceiq.flow.handler.EventHandler;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class ClusterTerminationHandler implements ReactorEventHandler<ClusterTerminationRequest> {
+public class ClusterTerminationHandler implements EventHandler<ClusterTerminationRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTerminationHandler.class);
 
     @Inject

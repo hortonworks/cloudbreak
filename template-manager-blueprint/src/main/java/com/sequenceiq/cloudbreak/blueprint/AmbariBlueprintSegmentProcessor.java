@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.template.TemplateProcessor;
 import com.sequenceiq.cloudbreak.template.model.RelatedServices;
 import com.sequenceiq.cloudbreak.template.model.ServiceName;
 import com.sequenceiq.cloudbreak.template.model.TemplateFiles;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @Component
 public class AmbariBlueprintSegmentProcessor {

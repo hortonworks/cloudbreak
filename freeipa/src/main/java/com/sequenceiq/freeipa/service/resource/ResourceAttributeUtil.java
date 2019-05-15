@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.freeipa.entity.Resource;
-import com.sequenceiq.freeipa.entity.json.Json;
+import com.sequenceiq.cloudbreak.common.json.Json;
 
 @Component
 public class ResourceAttributeUtil {

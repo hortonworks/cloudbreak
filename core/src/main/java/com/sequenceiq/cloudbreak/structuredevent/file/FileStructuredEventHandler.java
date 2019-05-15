@@ -13,13 +13,13 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.conf.StructuredEventSenderConfig;
-import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
+import com.sequenceiq.flow.handler.EventHandler;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 
 import reactor.bus.Event;
 
 @Component
-public class FileStructuredEventHandler<T extends StructuredEvent> implements ReactorEventHandler<T> {
+public class FileStructuredEventHandler<T extends StructuredEvent> implements EventHandler<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileStructuredEventHandler.class);
 

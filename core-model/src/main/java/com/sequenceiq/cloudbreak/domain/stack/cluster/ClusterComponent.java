@@ -16,8 +16,8 @@ import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
-import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.json.JsonToString;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonToString;
 
 @NamedEntityGraph(name = "ClusterComponent.cluster.rdsConfig",
         attributeNodes = @NamedAttributeNode(value = "cluster", subgraph = "rdsConfig"),

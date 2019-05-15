@@ -60,7 +60,6 @@ dependencies {
     compile group: 'org.glassfish.jersey.connectors',       name: 'jersey-apache-connector',        version: jerseyCoreVersion
     compile group: 'org.postgresql',                        name: 'postgresql',                     version: postgreSQLVersion
     compile group: 'org.apache.commons',                    name: 'commons-lang3',                  version: apacheCommonsLangVersion
-    compile group: 'org.jasypt',                            name: 'jasypt-hibernate4',              version: jasyptVersion
     compile group: 'net.sf.json-lib',                       name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
 
     testCompile group: 'junit',                             name: 'junit',                          version: junitVersion

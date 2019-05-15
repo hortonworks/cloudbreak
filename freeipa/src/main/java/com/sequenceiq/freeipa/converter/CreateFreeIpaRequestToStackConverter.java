@@ -35,7 +35,7 @@ import com.sequenceiq.freeipa.converter.network.NetworkV4RequestToNetworkConvert
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
-import com.sequenceiq.freeipa.entity.json.Json;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.freeipa.service.CostTaggingService;
 
 @Component

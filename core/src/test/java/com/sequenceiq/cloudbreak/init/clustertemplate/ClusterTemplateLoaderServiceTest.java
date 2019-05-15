@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.init.clustertemplate;
 
-import static com.sequenceiq.cloudbreak.util.JsonUtil.writeValueAsStringSilent;
+import static com.sequenceiq.cloudbreak.common.json.JsonUtil.writeValueAsStringSilent;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singleton;

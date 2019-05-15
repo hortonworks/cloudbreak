@@ -16,8 +16,8 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.notification.Notification;
 import com.sequenceiq.cloudbreak.notification.NotificationSender;
-import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
-import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
+import com.sequenceiq.flow.event.EventSelectorUtil;
+import com.sequenceiq.flow.handler.EventHandler;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.service.user.UserService;
 import reactor.bus.Event;
 
 @Component
-public class InteractiveCredentialCreationHandler implements ReactorEventHandler<InteractiveCredentialCreationRequest> {
+public class InteractiveCredentialCreationHandler implements EventHandler<InteractiveCredentialCreationRequest> {
 
     @Inject
     private CredentialService credentialService;

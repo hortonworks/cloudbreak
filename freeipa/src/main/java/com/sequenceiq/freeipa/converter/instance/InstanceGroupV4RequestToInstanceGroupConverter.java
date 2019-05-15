@@ -15,7 +15,7 @@ import com.sequenceiq.freeipa.api.model.instance.InstanceGroupV4Request;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
-import com.sequenceiq.freeipa.entity.json.Json;
+import com.sequenceiq.cloudbreak.common.json.Json;
 
 @Component
 public class InstanceGroupV4RequestToInstanceGroupConverter  implements Converter<InstanceGroupV4Request, InstanceGroup> {

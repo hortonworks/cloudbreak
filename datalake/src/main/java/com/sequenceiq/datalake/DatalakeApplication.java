@@ -9,8 +9,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableJpaRepositories(basePackages = { "com.sequenceiq" })
 @EnableSwagger2
-@SpringBootApplication(scanBasePackages = { "com.sequenceiq" },
-        exclude = WebMvcMetricsAutoConfiguration.class)
+@SpringBootApplication(scanBasePackages = { "com.sequenceiq" }, exclude = WebMvcMetricsAutoConfiguration.class)
 public class DatalakeApplication {
 
     public static void main(String[] args) {
