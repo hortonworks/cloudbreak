@@ -19,10 +19,10 @@ public class V4EventRestUrlParser extends RestUrlParser {
 
     // POST is the norm. Irregular GET requests:
     // v4/{workspaceId}/audits/zip
-    // v4/{workspaceId}/blueprints/recommendation
-    // v4/{workspaceId}/blueprints/services
-    // v4/{workspaceId}/blueprints/service-dependencies
-    // v4/{workspaceId}/blueprints/generated
+    // v4/{workspaceId}/blueprints_util/recommendation
+    // v4/{workspaceId}/blueprints_util/services
+    // v4/{workspaceId}/blueprints_util/service-dependencies
+    // v4/{workspaceId}/blueprints_util/generated
     // v4/{workspaceId}/image_catalogs/images
     // v4/{workspaceId}/connectors/{event}
     // v4/{workspaceId}/file_systems/{event}

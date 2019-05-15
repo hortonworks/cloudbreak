@@ -20,7 +20,7 @@ public class V4ExistingResourceRestUrlParser extends RestUrlParser {
     private static final Pattern ANTI_PATTERN = Pattern.compile(
             "v4/\\d+/(audits/.*"
             + "|blueprints/recommendation"
-            + "|blueprints-util/.*"
+            + "|blueprints_util/.*"
             + "|image_catalogs/images"
             + "|connectors/[a-z_]+"
             + "|file_systems/[a-z_]+)");
