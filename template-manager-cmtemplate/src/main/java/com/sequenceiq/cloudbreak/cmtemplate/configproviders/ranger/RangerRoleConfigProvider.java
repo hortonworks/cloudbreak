@@ -1,15 +1,13 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigConfigProvider;
@@ -23,62 +21,45 @@ import com.sequenceiq.cloudbreak.template.views.RdsView;
 public class RangerRoleConfigProvider extends AbstractRoleConfigConfigProvider {
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView) {
-        List<ApiClusterTemplateConfig> roleConfigs = new ArrayList<>();
-
+    protected List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
         switch (roleType) {
-            case "RANGER_ADMIN":
-                roleConfigs.add(new ApiClusterTemplateConfig().name("ranger_database_host").variable("ranger-ranger_database_host"));
-                roleConfigs.add(new ApiClusterTemplateConfig().name("ranger_database_name").variable("ranger-ranger_database_name"));
-                roleConfigs.add(new ApiClusterTemplateConfig().name("ranger_database_type").variable("ranger-ranger_database_type"));
-                roleConfigs.add(new ApiClusterTemplateConfig().name("ranger_database_user").variable("ranger-ranger_database_user"));
-                roleConfigs.add(new ApiClusterTemplateConfig().name("ranger_database_password").variable("ranger-ranger_database_password"));
-                break;
-            default:
-                break;
-        }
-
-        return roleConfigs;
-    }
-
-    @Override
-    protected List<ApiClusterTemplateVariable> getVariables(String roleType, HostgroupView hostGroupView, TemplatePreparationObject templatePreparationObject) {
-        List<ApiClusterTemplateVariable> variables = new ArrayList<>();
-
-        switch (roleType) {
-            case "RANGER_ADMIN":
-                RDSConfig rdsConfig = getRDSConfig(templatePreparationObject);
+            case RangerRoles.RANGER_ADMIN:
+                RDSConfig rdsConfig = getRDSConfig(source);
                 RdsView rangerRdsView = new RdsView(rdsConfig);
-                if (rangerRdsView.getDatabaseVendor() == DatabaseVendor.POSTGRES) {
-                    variables.add(new ApiClusterTemplateVariable().name("ranger-ranger_database_host").value(rangerRdsView.getHost()));
-                    variables.add(new ApiClusterTemplateVariable().name("ranger-ranger_database_name").value(rangerRdsView.getDatabaseName()));
-                    variables.add(new ApiClusterTemplateVariable().name("ranger-ranger_database_type").value("PostgreSQL"));
-                    variables.add(new ApiClusterTemplateVariable().name("ranger-ranger_database_user").value(rangerRdsView.getConnectionUserName()));
-                    variables.add(new ApiClusterTemplateVariable().name("ranger-ranger_database_password").value(rangerRdsView.getConnectionPassword()));
-                } else {
-                    throw new CloudbreakServiceException("Ranger database supports only PostgreSQL");
-                }
-                break;
+                return List.of(
+                        config("ranger_database_host", rangerRdsView.getHost()),
+                        config("ranger_database_name", rangerRdsView.getDatabaseName()),
+                        config("ranger_database_type", getRangerDbType(rangerRdsView)),
+                        config("ranger_database_user", rangerRdsView.getConnectionUserName()),
+                        config("ranger_database_password", rangerRdsView.getConnectionPassword())
+                );
             default:
-                break;
+                return List.of();
         }
-
-        return variables;
     }
 
     @Override
     public String getServiceType() {
-        return "RANGER";
+        return RangerRoles.RANGER;
     }
 
     @Override
     public List<String> getRoleTypes() {
-        return Collections.singletonList("RANGER_ADMIN");
+        return List.of(RangerRoles.RANGER_ADMIN);
     }
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes());
+    }
+
+    private String getRangerDbType(RdsView rdsView) {
+        switch (rdsView.getDatabaseVendor()) {
+            case POSTGRES:
+                return "PostgreSQL";
+            default:
+                throw new CloudbreakServiceException("Unsupported Ranger database type: " + rdsView.getDatabaseVendor().displayName());
+        }
     }
 
     private RDSConfig getRDSConfig(TemplatePreparationObject source) {

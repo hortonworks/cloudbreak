@@ -30,7 +30,7 @@ public class CmTemplateGeneratorConfigurationResolverTest {
     @Test
     public void testThatAllFileIsReadableShouldVerifyThatFileCountMatch() {
         Map<StackVersion, Set<String>> stackVersionSetMap = underTest.cdhConfigurations();
-        Set<ServiceConfig> serviceConfigs = underTest.serviceInformations();
+        Set<ServiceConfig> serviceConfigs = underTest.serviceConfigs();
 
         Assert.assertEquals(1L, stackVersionSetMap.size());
         Assert.assertEquals(13L, serviceConfigs.size());

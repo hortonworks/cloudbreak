@@ -135,28 +135,28 @@
       "serviceType": "HIVE",
       "serviceConfigs": [
         {
-          "name": "hive_metastore_database_password",
-          "variable": "hive-hive_metastore_database_password"
-        },
-        {
-          "name": "hive_metastore_database_port",
-          "variable": "hive-hive_metastore_database_port"
-        },
-        {
           "name": "hive_metastore_database_host",
-          "variable": "hive-hive_metastore_database_host"
-        },
-        {
-          "name": "hive_metastore_database_type",
-          "variable": "hive-hive_metastore_database_type"
+          "value": "cluster.test.com"
         },
         {
           "name": "hive_metastore_database_name",
-          "variable": "hive-hive_metastore_database_name"
+          "value": "hive"
+        },
+        {
+          "name": "hive_metastore_database_password",
+          "value": "password"
+        },
+        {
+          "name": "hive_metastore_database_port",
+          "value": "5432"
+        },
+        {
+          "name": "hive_metastore_database_type",
+          "value": "postgresql"
         },
         {
           "name": "hive_metastore_database_user",
-          "variable": "hive-hive_metastore_database_user"
+          "value": "user"
         }
       ],
       "roleConfigGroups": [
@@ -252,32 +252,6 @@
       {
         "hostName": "host2",
         "hostTemplateRefName": "master"
-      }
-    ],
-    "variables": [
-      {
-        "name": "hive-hive_metastore_database_host",
-        "value": "cluster.test.com"
-      },
-      {
-        "name": "hive-hive_metastore_database_port",
-        "value": "5432"
-      },
-      {
-        "name": "hive-hive_metastore_database_name",
-        "value": "hive"
-      },
-      {
-        "name": "hive-hive_metastore_database_type",
-        "value": "postgresql"
-      },
-      {
-        "name": "hive-hive_metastore_database_password",
-        "value": "password"
-      },
-      {
-        "name": "hive-hive_metastore_database_user",
-        "value": "user"
       }
     ],
     "roleConfigGroups": [

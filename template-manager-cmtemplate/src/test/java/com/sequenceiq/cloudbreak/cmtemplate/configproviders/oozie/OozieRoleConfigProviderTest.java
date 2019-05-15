@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.oozie;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,7 +11,6 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -37,50 +35,19 @@ public class OozieRoleConfigProviderTest {
 
         assertEquals(5, oozieServer.size());
         assertEquals("oozie_database_host", oozieServer.get(0).getName());
-        assertEquals("master_oozie_server_oozie_database_host", oozieServer.get(0).getVariable());
+        assertEquals("testhost", oozieServer.get(0).getValue());
 
         assertEquals("oozie_database_name", oozieServer.get(1).getName());
-        assertEquals("master_oozie_server_oozie_database_name", oozieServer.get(1).getVariable());
+        assertEquals("ooziedb", oozieServer.get(1).getValue());
 
         assertEquals("oozie_database_type", oozieServer.get(2).getName());
-        assertEquals("master_oozie_server_oozie_database_type", oozieServer.get(2).getVariable());
+        assertEquals("postgresql", oozieServer.get(2).getValue());
 
         assertEquals("oozie_database_user", oozieServer.get(3).getName());
-        assertEquals("master_oozie_server_oozie_database_user", oozieServer.get(3).getVariable());
+        assertEquals("testuser", oozieServer.get(3).getValue());
 
         assertEquals("oozie_database_password", oozieServer.get(4).getName());
-        assertEquals("master_oozie_server_oozie_database_password", oozieServer.get(4).getVariable());
-    }
-
-    @Test
-    public void testGetRoleConfigVariables() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject();
-        String inputJson = getBlueprintText("input/clouderamanager-db-config.bp");
-        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-
-        List<ApiClusterTemplateVariable> roleVariables = underTest.getRoleConfigVariables(cmTemplateProcessor, preparationObject);
-        roleVariables.sort(Comparator.comparing(ApiClusterTemplateVariable::getName));
-
-        assertEquals(5, roleVariables.size());
-        ApiClusterTemplateVariable databaseHost = roleVariables.get(0);
-        assertEquals("master_oozie_server_oozie_database_host", databaseHost.getName());
-        assertEquals("testhost", databaseHost.getValue());
-
-        ApiClusterTemplateVariable databaseName = roleVariables.get(1);
-        assertEquals("master_oozie_server_oozie_database_name", databaseName.getName());
-        assertEquals("ooziedb", databaseName.getValue());
-
-        ApiClusterTemplateVariable databasePassword = roleVariables.get(2);
-        assertEquals("master_oozie_server_oozie_database_password", databasePassword.getName());
-        assertEquals("testpassword", databasePassword.getValue());
-
-        ApiClusterTemplateVariable databaseType = roleVariables.get(3);
-        assertEquals("master_oozie_server_oozie_database_type", databaseType.getName());
-        assertEquals("postgresql", databaseType.getValue());
-
-        ApiClusterTemplateVariable databaseUser = roleVariables.get(4);
-        assertEquals("master_oozie_server_oozie_database_user", databaseUser.getName());
-        assertEquals("testuser", databaseUser.getValue());
+        assertEquals("testpassword", oozieServer.get(4).getValue());
     }
 
     private TemplatePreparationObject getTemplatePreparationObject() {

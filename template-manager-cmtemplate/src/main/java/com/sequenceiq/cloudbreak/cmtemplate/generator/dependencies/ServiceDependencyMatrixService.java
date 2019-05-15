@@ -30,7 +30,7 @@ public class ServiceDependencyMatrixService {
         Dependencies dependencies = new Dependencies();
         Set<String> deps = new HashSet<>();
         for (String service : services) {
-            for (ServiceConfig serviceInformation : resolver.serviceInformations()) {
+            for (ServiceConfig serviceInformation : resolver.serviceConfigs()) {
                 if (service.toUpperCase().equals(serviceInformation.getName())) {
                     for (String dependency : serviceInformation.getDependencies()) {
                         deps.add(dependency.toUpperCase());

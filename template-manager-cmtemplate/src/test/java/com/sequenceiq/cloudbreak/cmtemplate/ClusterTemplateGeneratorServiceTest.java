@@ -41,7 +41,7 @@ class ClusterTemplateGeneratorServiceTest {
         Set<String> services = Set.of("HDFS", "HIVE");
         ServiceDependencyMatrix dependentServices = new ServiceDependencyMatrix();
         Dependencies dependencies = new Dependencies();
-        dependencies.setServices(Set.of("ZOOKEPER"));
+        dependencies.setServices(Set.of("ZOOKEEPER"));
         dependentServices.setDependencies(dependencies);
 
         when(serviceDependencyMatrixService.collectServiceDependencyMatrix(services, "CDH", "6.1.1"))
@@ -50,7 +50,7 @@ class ClusterTemplateGeneratorServiceTest {
         underTest.generateTemplateByServices(services, "CDH-6.1.1");
 
         verify(generatedCMTemplateService).prepareClouderaManagerTemplate(captor.capture(), anyString(), anyString(), anyString());
-        Set<String> expectedServicesArgument = Set.of("HDFS", "HIVE", "ZOOKEPER");
+        Set<String> expectedServicesArgument = Set.of("HDFS", "HIVE", "ZOOKEEPER");
         Assertions.assertEquals(expectedServicesArgument, captor.getValue());
     }
 }

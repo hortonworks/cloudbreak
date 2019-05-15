@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,7 +13,6 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -40,24 +38,11 @@ public class HiveServer2ConfigProviderTest {
 
         assertEquals(1, hiveserver2.size());
         assertEquals("hive_hs2_config_safety_valve", hiveserver2.get(0).getName());
-        assertEquals("hive-hive_server2_wm_namespace", hiveserver2.get(0).getVariable());
-    }
-
-    @Test
-    public void testGetRoleConfigVariables() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject();
-        String inputJson = getBlueprintText("input/clouderamanager.bp");
-        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-
-        List<ApiClusterTemplateVariable> roleVariables = underTest.getRoleConfigVariables(cmTemplateProcessor, preparationObject);
-
-        roleVariables.sort(Comparator.comparing(ApiClusterTemplateVariable::getName));
-        ApiClusterTemplateVariable hiveserver2Namespace = roleVariables.get(0);
-
-        assertEquals(1, roleVariables.size());
-        assertEquals("hive-hive_server2_wm_namespace", hiveserver2Namespace.getName());
-        assertEquals("<property><name>hive.server2.wm.namespace</name><value>" + preparationObject.getGeneralClusterConfigs().getUuid() + "</value></property>",
-                hiveserver2Namespace.getValue());
+        String expected = "<property><name>hive.server2.wm.namespace</name><value>"
+                + preparationObject.getGeneralClusterConfigs().getUuid()
+                + "</value></property>";
+        assertEquals(expected,
+                hiveserver2.get(0).getValue());
     }
 
     @Test

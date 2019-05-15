@@ -93,7 +93,7 @@ public class CentralCmTemplateUpdaterTest {
     public void getCmTemplate() {
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager.bp"));
         ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null);
-        Assert.assertEquals(new CmTemplateProcessor(getBlueprintText("output/clouderamanager.bp")).getTemplate(), generated);
+        Assert.assertEquals(new CmTemplateProcessor(getBlueprintText("output/clouderamanager.bp")).getTemplate().toString(), generated.toString());
     }
 
     @Test
@@ -114,8 +114,8 @@ public class CentralCmTemplateUpdaterTest {
     public void getCmTemplateWithoutHosts() {
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-without-hosts.bp"));
         String generated = generator.getBlueprintText(templatePreparationObject);
-        Assert.assertEquals(new CmTemplateProcessor(getBlueprintText("output/clouderamanager-without-hosts.bp")).getTemplate(),
-                new CmTemplateProcessor(generated).getTemplate());
+        Assert.assertEquals(new CmTemplateProcessor(getBlueprintText("output/clouderamanager-without-hosts.bp")).getTemplate().toString(),
+                new CmTemplateProcessor(generated).getTemplate().toString());
     }
 
     private String getBlueprintText(String path) {

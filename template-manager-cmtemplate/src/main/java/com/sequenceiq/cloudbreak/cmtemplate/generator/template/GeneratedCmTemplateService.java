@@ -67,7 +67,7 @@ public class GeneratedCmTemplateService {
     private Set<ServiceConfig> collectServiceConfigs(Set<String> services) {
         Set<ServiceConfig> serviceConfigs = new HashSet<>();
         for (String service : services) {
-            for (ServiceConfig serviceInformation : resolver.serviceInformations()) {
+            for (ServiceConfig serviceInformation : resolver.serviceConfigs()) {
                 if (serviceInformation.getName().equals(service.toUpperCase())) {
                     serviceConfigs.add(serviceInformation);
                 }
