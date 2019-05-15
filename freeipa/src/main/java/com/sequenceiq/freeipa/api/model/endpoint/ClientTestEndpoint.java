@@ -14,11 +14,11 @@ import io.swagger.annotations.ApiOperation;
 
 @Path("/test")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/test", description = "FreeIPA endpoint", protocols = "http,https")
+@Api(value = "/test", description = "Client test endpoint", protocols = "http,https")
 public interface ClientTestEndpoint {
     @GET
     @Path("{id}/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Creates FreeIPA instance", produces = ContentType.JSON, nickname = "createFreeIPA")
+    @ApiOperation(value = "Creates FreeIPA instance", produces = ContentType.JSON, nickname = "userShow")
     String userShow(@PathParam("id")Long id, @PathParam("name") String name);
 }

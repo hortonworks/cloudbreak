@@ -74,6 +74,7 @@ dependencies {
   implementation project(':cloud-reactor')
   implementation project(':orchestrator-api')
   implementation project(':flow')
+  implementation project(':freeipa-api')
   implementation project(':common')
   implementation project(':core-api')
   runtime project(':orchestrator-salt')
