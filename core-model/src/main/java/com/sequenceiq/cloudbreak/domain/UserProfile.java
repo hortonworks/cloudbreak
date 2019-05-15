@@ -16,10 +16,12 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.TenantAwareResource;
 import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
+import com.sequenceiq.secret.domain.Secret;
+import com.sequenceiq.secret.domain.SecretToString;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = "user_id"))

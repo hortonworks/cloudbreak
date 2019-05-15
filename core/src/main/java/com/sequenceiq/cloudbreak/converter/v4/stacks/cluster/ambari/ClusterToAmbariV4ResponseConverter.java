@@ -5,17 +5,17 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.AmbariV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.ambarirepository.AmbariRepositoryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.stackrepository.StackRepositoryV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.secret.model.SecretResponse;
 
 @Component
 public class ClusterToAmbariV4ResponseConverter extends AbstractConversionServiceAwareConverter<Cluster, AmbariV4Response> {
@@ -25,7 +25,7 @@ public class ClusterToAmbariV4ResponseConverter extends AbstractConversionServic
         AmbariV4Response response = new AmbariV4Response();
         response.setConfigStrategy(source.getConfigStrategy());
         response.setRepository(getComponent(source, ComponentType.AMBARI_REPO_DETAILS, AmbariRepo.class, AmbariRepositoryV4Response.class));
-        response.setSecurityMasterKey(getConversionService().convert(source.getAmbariSecurityMasterKey(), SecretV4Response.class));
+        response.setSecurityMasterKey(getConversionService().convert(source.getAmbariSecurityMasterKey(), SecretResponse.class));
         response.setStackRepository(getComponent(source, ComponentType.HDP_REPO_DETAILS, StackRepoDetails.class, StackRepositoryV4Response.class));
         return response;
     }

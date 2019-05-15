@@ -16,14 +16,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.workspace.model.Tenant;
-import com.sequenceiq.cloudbreak.workspace.model.TenantAwareResource;
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.cloudbreak.domain.Secret;
-import com.sequenceiq.cloudbreak.domain.SecretProxy;
+import com.sequenceiq.secret.domain.Secret;
+import com.sequenceiq.secret.domain.SecretProxy;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
+import com.sequenceiq.cloudbreak.workspace.model.TenantAwareResource;
+import com.sequenceiq.secret.service.SecretService;
 
 @Component
 @Aspect

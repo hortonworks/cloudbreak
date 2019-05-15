@@ -19,8 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.sequenceiq.cloudbreak.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.security.authentication.AuthenticatedUserService;
 
 public class MDCContextFilter extends OncePerRequestFilter {
 

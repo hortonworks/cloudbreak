@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeRegionsRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.AwsCredentialPrerequisites;
+import com.sequenceiq.cloudbreak.cloud.response.AwsCredentialPrerequisites;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;

@@ -8,7 +8,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -23,12 +22,12 @@ import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescr
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
-import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.secret.SecretEngine;
+import com.sequenceiq.secret.service.SecretService;
 
 @ContextConfiguration
 public class CentralBlueprintContext {
@@ -78,17 +77,17 @@ public class CentralBlueprintContext {
 
         @Bean
         public SecretEngine secretEngine() {
-            return Mockito.mock(SecretEngine.class);
+            return mock(SecretEngine.class);
         }
 
         @Bean
         public SecretService secretService() {
-            return Mockito.mock(SecretService.class);
+            return mock(SecretService.class);
         }
 
         @Bean
         public MetricService metricService() {
-            return Mockito.mock(MetricService.class);
+            return mock(MetricService.class);
         }
 
         @Bean

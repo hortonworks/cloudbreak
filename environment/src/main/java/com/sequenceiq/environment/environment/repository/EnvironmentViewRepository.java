@@ -27,8 +27,7 @@ import com.sequenceiq.environment.environment.domain.EnvironmentView;
 public interface EnvironmentViewRepository extends WorkspaceResourceRepository<EnvironmentView, Long> {
 
     @CheckPermissionsByWorkspaceId(action = READ)
-    @Query("SELECT ev FROM EnvironmentView ev LEFT JOIN FETCH ev.workspace w LEFT JOIN FETCH w.tenant LEFT JOIN FETCH ev.credential "
-            + "LEFT JOIN FETCH ev.datalakeResources WHERE w.id= :id")
+    @Query("SELECT ev FROM EnvironmentView ev LEFT JOIN FETCH ev.workspace w LEFT JOIN FETCH w.tenant LEFT JOIN FETCH ev.credential WHERE w.id= :id")
     Set<EnvironmentView> findAllByWorkspaceId(@Param("id") Long workspaceId);
 
     @CheckPermissionsByWorkspaceId(action = READ, workspaceIdIndex = 1)

@@ -21,7 +21,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
@@ -34,15 +33,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage.CloudStorageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.ClusterToClouderaManagerV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.secret.model.SecretResponse;
 
 @Component
 public class ClusterToClusterV4ResponseConverter extends AbstractConversionServiceAwareConverter<Cluster, ClusterV4Response> {
@@ -189,8 +189,8 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
 
     private void convertDpSecrets(Cluster source, ClusterV4Response response) {
         if (isNotEmpty(source.getDpAmbariUserSecret()) && isNotEmpty(source.getDpAmbariPasswordSecret())) {
-            response.setCmMgmtUser(getConversionService().convert(source.getDpAmbariUserSecret(), SecretV4Response.class));
-            response.setCmMgmtPassword(getConversionService().convert(source.getDpAmbariPasswordSecret(), SecretV4Response.class));
+            response.setCmMgmtUser(getConversionService().convert(source.getDpAmbariUserSecret(), SecretResponse.class));
+            response.setCmMgmtPassword(getConversionService().convert(source.getDpAmbariPasswordSecret(), SecretResponse.class));
         }
     }
 }

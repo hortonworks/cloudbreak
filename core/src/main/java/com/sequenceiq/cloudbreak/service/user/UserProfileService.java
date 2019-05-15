@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.repository.UserProfileRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
+import com.sequenceiq.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Service

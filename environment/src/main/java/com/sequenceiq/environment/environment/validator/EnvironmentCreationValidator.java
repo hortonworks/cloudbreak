@@ -7,12 +7,12 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.springframework.boot.cloud.CloudPlatform;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.cloudbreak.util.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.api.environment.model.request.EnvironmentNetworkV1Request;
 import com.sequenceiq.environment.api.environment.model.request.EnvironmentV1Request;
 import com.sequenceiq.environment.environment.domain.Environment;

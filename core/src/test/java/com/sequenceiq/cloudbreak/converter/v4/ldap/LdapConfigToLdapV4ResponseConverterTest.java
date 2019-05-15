@@ -14,11 +14,11 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 import com.sequenceiq.cloudbreak.converter.v4.ldaps.LdapConfigToLdapV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
+import com.sequenceiq.secret.model.SecretResponse;
 
 public class LdapConfigToLdapV4ResponseConverterTest extends AbstractEntityConverterTest<LdapConfig> {
 
@@ -31,7 +31,7 @@ public class LdapConfigToLdapV4ResponseConverterTest extends AbstractEntityConve
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(conversionService.convert(anyString(), any())).thenAnswer(invocation -> new SecretV4Response(null, invocation.getArgument(0)));
+        when(conversionService.convert(anyString(), any())).thenAnswer(invocation -> new SecretResponse(null, invocation.getArgument(0)));
     }
 
     @Test

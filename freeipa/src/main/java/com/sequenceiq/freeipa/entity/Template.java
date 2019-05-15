@@ -12,8 +12,8 @@ import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
-import com.sequenceiq.cloudbreak.domain.Secret;
-import com.sequenceiq.cloudbreak.domain.SecretToString;
+import com.sequenceiq.secret.domain.Secret;
+import com.sequenceiq.secret.domain.SecretToString;
 import com.sequenceiq.freeipa.entity.json.Json;
 import com.sequenceiq.freeipa.entity.json.JsonToString;
 

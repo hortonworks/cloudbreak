@@ -13,7 +13,6 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.CredentialV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialPrerequisitesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.InteractiveCredentialV4Response;
@@ -80,11 +79,8 @@ public class CredentialV4Controller extends NotificationController implements Cr
     }
 
     @Override
-    public CredentialPrerequisitesV4Response getPrerequisitesForCloudPlatform(Long workspaceId, String platform, String deploymentAddress) {
-        CredentialPrerequisitesResponse prerequisites =
-                credentialService.getPrerequisites(workspaceId, platform, deploymentAddress);
-        return new CredentialPrerequisitesV4Response(prerequisites.getCloudPlatform(), prerequisites.getAccountId(), prerequisites.getAws(),
-                prerequisites.getAzure(), prerequisites.getGcp());
+    public CredentialPrerequisitesResponse getPrerequisitesForCloudPlatform(Long workspaceId, String platform, String deploymentAddress) {
+        return credentialService.getPrerequisites(workspaceId, platform, deploymentAddress);
     }
 
     @Override

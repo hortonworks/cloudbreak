@@ -14,8 +14,8 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.sequenceiq.cloudbreak.authentication.AuthenticationService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.security.authentication.AuthenticationService;
 
 @Service
 public class ScimAccountGroupReaderFilter extends OncePerRequestFilter {

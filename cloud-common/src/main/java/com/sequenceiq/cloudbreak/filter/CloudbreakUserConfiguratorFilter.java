@@ -9,8 +9,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.sequenceiq.cloudbreak.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 
 public class CloudbreakUserConfiguratorFilter extends OncePerRequestFilter {

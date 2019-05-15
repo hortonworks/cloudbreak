@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.repository.KubernetesConfigRepository;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentResourceRepository;
 import com.sequenceiq.cloudbreak.service.environment.AbstractEnvironmentAwareService;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
+import com.sequenceiq.secret.service.SecretService;
 
 @Service
 public class KubernetesConfigService extends AbstractEnvironmentAwareService<KubernetesConfig> {

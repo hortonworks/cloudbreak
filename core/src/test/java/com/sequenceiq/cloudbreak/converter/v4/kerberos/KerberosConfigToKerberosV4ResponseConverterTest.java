@@ -26,11 +26,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.type.KerberosType;
+import com.sequenceiq.secret.model.SecretResponse;
 
 @RunWith(Parameterized.class)
 public class KerberosConfigToKerberosV4ResponseConverterTest {
@@ -81,19 +81,19 @@ public class KerberosConfigToKerberosV4ResponseConverterTest {
     private KerberosConfig source;
 
     @Mock
-    private SecretV4Response adminSecretResponse;
+    private SecretResponse adminSecretResponse;
 
     @Mock
-    private SecretV4Response passwordSecretResponse;
+    private SecretResponse passwordSecretResponse;
 
     @Mock
-    private SecretV4Response principalSecretResponse;
+    private SecretResponse principalSecretResponse;
 
     @Mock
-    private SecretV4Response descriptorSecretResponse;
+    private SecretResponse descriptorSecretResponse;
 
     @Mock
-    private SecretV4Response krb5ConfSecretResponse;
+    private SecretResponse krb5ConfSecretResponse;
 
     private KerberosType kerberosType;
 
@@ -112,15 +112,15 @@ public class KerberosConfigToKerberosV4ResponseConverterTest {
         when(source.getContainerDn()).thenReturn(CONTAINER_DN);
         when(source.isTcpAllowed()).thenReturn(TCP_ALLOWED);
         when(source.getAdminSecret()).thenReturn(ADMIN_SECRET);
-        when(conversionService.convert(ADMIN_SECRET, SecretV4Response.class)).thenReturn(adminSecretResponse);
+        when(conversionService.convert(ADMIN_SECRET, SecretResponse.class)).thenReturn(adminSecretResponse);
         when(source.getPasswordSecret()).thenReturn(PASSWORD_SECRET);
-        when(conversionService.convert(PASSWORD_SECRET, SecretV4Response.class)).thenReturn(passwordSecretResponse);
+        when(conversionService.convert(PASSWORD_SECRET, SecretResponse.class)).thenReturn(passwordSecretResponse);
         when(source.getPrincipalSecret()).thenReturn(PRINCIPAL_SECRET);
-        when(conversionService.convert(PRINCIPAL_SECRET, SecretV4Response.class)).thenReturn(principalSecretResponse);
+        when(conversionService.convert(PRINCIPAL_SECRET, SecretResponse.class)).thenReturn(principalSecretResponse);
         when(source.getDescriptorSecret()).thenReturn(DESCRIPTOR_SECRET);
-        when(conversionService.convert(DESCRIPTOR_SECRET, SecretV4Response.class)).thenReturn(descriptorSecretResponse);
+        when(conversionService.convert(DESCRIPTOR_SECRET, SecretResponse.class)).thenReturn(descriptorSecretResponse);
         when(source.getKrb5ConfSecret()).thenReturn(KRB_5_CONF_SECRET);
-        when(conversionService.convert(KRB_5_CONF_SECRET, SecretV4Response.class)).thenReturn(krb5ConfSecretResponse);
+        when(conversionService.convert(KRB_5_CONF_SECRET, SecretResponse.class)).thenReturn(krb5ConfSecretResponse);
         when(source.getDomain()).thenReturn(DOMAIN);
         when(source.getNameServers()).thenReturn(NAMESERVERS);
         when(source.getName()).thenReturn(NAME);
@@ -158,12 +158,12 @@ public class KerberosConfigToKerberosV4ResponseConverterTest {
         assertEquals(ID, result.getId());
         assertTrue(result.getEnvironments().isEmpty());
         assertEquals(VERIFY_KDC_TRUST, result.getVerifyKdcTrust());
-        verify(conversionService, times(5)).convert(anyString(), eq(SecretV4Response.class));
-        verify(conversionService, times(1)).convert(ADMIN_SECRET, SecretV4Response.class);
-        verify(conversionService, times(1)).convert(PASSWORD_SECRET, SecretV4Response.class);
-        verify(conversionService, times(1)).convert(PRINCIPAL_SECRET, SecretV4Response.class);
-        verify(conversionService, times(1)).convert(DESCRIPTOR_SECRET, SecretV4Response.class);
-        verify(conversionService, times(1)).convert(KRB_5_CONF_SECRET, SecretV4Response.class);
+        verify(conversionService, times(5)).convert(anyString(), eq(SecretResponse.class));
+        verify(conversionService, times(1)).convert(ADMIN_SECRET, SecretResponse.class);
+        verify(conversionService, times(1)).convert(PASSWORD_SECRET, SecretResponse.class);
+        verify(conversionService, times(1)).convert(PRINCIPAL_SECRET, SecretResponse.class);
+        verify(conversionService, times(1)).convert(DESCRIPTOR_SECRET, SecretResponse.class);
+        verify(conversionService, times(1)).convert(KRB_5_CONF_SECRET, SecretResponse.class);
     }
 
 }

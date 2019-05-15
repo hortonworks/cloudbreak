@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
+import com.sequenceiq.secret.model.SecretResponse;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -15,57 +15,57 @@ import io.swagger.annotations.ApiModelProperty;
 public class KerberosV4Response extends KerberosV4ResponseBase {
 
     @ApiModelProperty(StackModelDescription.KERBEROS_ADMIN)
-    private SecretV4Response admin;
+    private SecretResponse admin;
 
     @ApiModelProperty(StackModelDescription.KERBEROS_PASSWORD)
-    private SecretV4Response password;
+    private SecretResponse password;
 
     @ApiModelProperty(StackModelDescription.KERBEROS_PRINCIPAL)
-    private SecretV4Response principal;
+    private SecretResponse principal;
 
     @ApiModelProperty(StackModelDescription.DESCRIPTOR)
-    private SecretV4Response descriptor;
+    private SecretResponse descriptor;
 
     @ApiModelProperty(StackModelDescription.KRB_5_CONF)
-    private SecretV4Response krb5Conf;
+    private SecretResponse krb5Conf;
 
-    public SecretV4Response getAdmin() {
+    public SecretResponse getAdmin() {
         return admin;
     }
 
-    public void setAdmin(SecretV4Response admin) {
+    public void setAdmin(SecretResponse admin) {
         this.admin = admin;
     }
 
-    public SecretV4Response getPassword() {
+    public SecretResponse getPassword() {
         return password;
     }
 
-    public void setPassword(SecretV4Response password) {
+    public void setPassword(SecretResponse password) {
         this.password = password;
     }
 
-    public SecretV4Response getPrincipal() {
+    public SecretResponse getPrincipal() {
         return principal;
     }
 
-    public void setPrincipal(SecretV4Response principal) {
+    public void setPrincipal(SecretResponse principal) {
         this.principal = principal;
     }
 
-    public SecretV4Response getDescriptor() {
+    public SecretResponse getDescriptor() {
         return descriptor;
     }
 
-    public void setDescriptor(SecretV4Response descriptor) {
+    public void setDescriptor(SecretResponse descriptor) {
         this.descriptor = descriptor;
     }
 
-    public SecretV4Response getKrb5Conf() {
+    public SecretResponse getKrb5Conf() {
         return krb5Conf;
     }
 
-    public void setKrb5Conf(SecretV4Response krb5Conf) {
+    public void setKrb5Conf(SecretResponse krb5Conf) {
         this.krb5Conf = krb5Conf;
     }
 }

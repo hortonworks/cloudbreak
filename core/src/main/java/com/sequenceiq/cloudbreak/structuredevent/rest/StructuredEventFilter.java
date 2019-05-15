@@ -47,15 +47,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
-import com.sequenceiq.cloudbreak.authorization.lookup.WorkspaceAwareRepositoryLookupService;
-import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.authentication.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.authorization.lookup.WorkspaceAwareRepositoryLookupService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.flow.ha.NodeConfig;
-import com.sequenceiq.cloudbreak.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
@@ -65,6 +62,9 @@ import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestResponseDetails;
 import com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
+import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.flow.ha.NodeConfig;
 
 @Component
 public class StructuredEventFilter implements WriterInterceptor, ContainerRequestFilter, ContainerResponseFilter {

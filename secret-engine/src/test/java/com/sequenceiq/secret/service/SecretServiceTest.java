@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.secret;
+package com.sequenceiq.secret.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
@@ -26,6 +26,7 @@ import org.springframework.util.ReflectionUtils;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.metrics.type.Metric;
 import com.sequenceiq.cloudbreak.common.metrics.type.MetricType;
+import com.sequenceiq.secret.SecretEngine;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SecretServiceTest {

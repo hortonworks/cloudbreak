@@ -2,9 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.response;
 
 import java.io.Serializable;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.AwsCredentialPrerequisites;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.AzureCredentialPrerequisites;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.GcpCredentialPrerequisites;
 import com.sequenceiq.cloudbreak.api.model.annotations.Immutable;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.CredentialModelDescription;

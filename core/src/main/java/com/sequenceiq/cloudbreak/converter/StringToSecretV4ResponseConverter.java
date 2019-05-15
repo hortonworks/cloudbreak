@@ -4,17 +4,17 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
+import com.sequenceiq.secret.model.SecretResponse;
+import com.sequenceiq.secret.service.SecretService;
 
 @Component
-public class StringToSecretV4ResponseConverter extends AbstractConversionServiceAwareConverter<String, SecretV4Response> {
+public class StringToSecretV4ResponseConverter extends AbstractConversionServiceAwareConverter<String, SecretResponse> {
 
     @Inject
     private SecretService secretService;
 
     @Override
-    public SecretV4Response convert(String source) {
+    public SecretResponse convert(String source) {
         return secretService.convertToExternal(source);
     }
 }

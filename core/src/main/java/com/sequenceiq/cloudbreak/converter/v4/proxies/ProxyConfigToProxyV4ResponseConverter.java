@@ -4,12 +4,12 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.view.CompactView;
+import com.sequenceiq.secret.model.SecretResponse;
 
 @Component
 public class ProxyConfigToProxyV4ResponseConverter extends AbstractConversionServiceAwareConverter<ProxyConfig, ProxyV4Response> {
@@ -22,8 +22,8 @@ public class ProxyConfigToProxyV4ResponseConverter extends AbstractConversionSer
         response.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceV4Response.class));
         response.setDescription(source.getDescription());
         response.setProtocol(source.getProtocol());
-        response.setUserName(getConversionService().convert(source.getUserNameSecret(), SecretV4Response.class));
-        response.setPassword(getConversionService().convert(source.getPasswordSecret(), SecretV4Response.class));
+        response.setUserName(getConversionService().convert(source.getUserNameSecret(), SecretResponse.class));
+        response.setPassword(getConversionService().convert(source.getPasswordSecret(), SecretResponse.class));
         response.setHost(source.getServerHost());
         response.setPort(source.getServerPort());
         response.setEnvironments(source.getEnvironments().stream()

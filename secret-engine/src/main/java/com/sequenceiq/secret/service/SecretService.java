@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,16 +29,18 @@ public class SecretService {
     @Value("${secret.engine:}")
     private String engineClass;
 
+    @Inject
     private MetricService metricService;
 
+    @Inject
     private List<SecretEngine> engines;
 
     private SecretEngine persistentEngine;
 
-    public SecretService(MetricService metricService, List<SecretEngine> engines) {
-        this.metricService = metricService;
-        this.engines = engines;
-    }
+//    public SecretService(MetricService metricService, List<SecretEngine> engines) {
+//        this.metricService = metricService;
+//        this.engines = engines;
+//    }
 
     @PostConstruct
     public void init() {

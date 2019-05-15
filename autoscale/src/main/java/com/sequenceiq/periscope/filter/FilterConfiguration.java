@@ -6,9 +6,9 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.sequenceiq.cloudbreak.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.filter.CloudbreakUserConfiguratorFilter;
 import com.sequenceiq.cloudbreak.filter.MDCContextFilter;
-import com.sequenceiq.cloudbreak.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 
 @Configuration

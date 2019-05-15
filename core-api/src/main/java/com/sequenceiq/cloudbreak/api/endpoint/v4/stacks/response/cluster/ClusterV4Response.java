@@ -12,13 +12,12 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.AmbariV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.customcontainer.CustomContainerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.GatewayV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
@@ -30,6 +29,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
+import com.sequenceiq.secret.model.SecretResponse;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -100,10 +100,10 @@ public class ClusterV4Response implements JsonEntity {
     private WorkspaceResourceV4Response workspace;
 
     @ApiModelProperty(StackModelDescription.CM_MANAGEMENT_USERNAME)
-    private SecretV4Response cmMgmtUser;
+    private SecretResponse cmMgmtUser;
 
     @ApiModelProperty(StackModelDescription.CM_MANAGEMENT_PASSWORD)
-    private SecretV4Response cmMgmtPassword;
+    private SecretResponse cmMgmtPassword;
 
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT)
     private BlueprintV4Response blueprint;
@@ -247,19 +247,19 @@ public class ClusterV4Response implements JsonEntity {
         this.uptime = uptime;
     }
 
-    public SecretV4Response getCmMgmtUser() {
+    public SecretResponse getCmMgmtUser() {
         return cmMgmtUser;
     }
 
-    public void setCmMgmtUser(SecretV4Response cmMgmtUser) {
+    public void setCmMgmtUser(SecretResponse cmMgmtUser) {
         this.cmMgmtUser = cmMgmtUser;
     }
 
-    public SecretV4Response getCmMgmtPassword() {
+    public SecretResponse getCmMgmtPassword() {
         return cmMgmtPassword;
     }
 
-    public void setCmMgmtPassword(SecretV4Response cmMgmtPassword) {
+    public void setCmMgmtPassword(SecretResponse cmMgmtPassword) {
         this.cmMgmtPassword = cmMgmtPassword;
     }
 

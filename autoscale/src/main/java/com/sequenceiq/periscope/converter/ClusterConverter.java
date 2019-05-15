@@ -7,13 +7,13 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterResponse;
 import com.sequenceiq.periscope.api.model.MetricAlertResponse;
 import com.sequenceiq.periscope.api.model.PrometheusAlertResponse;
 import com.sequenceiq.periscope.api.model.ScalingConfigurationRequest;
 import com.sequenceiq.periscope.api.model.TimeAlertResponse;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.secret.service.SecretService;
 
 @Component
 public class ClusterConverter extends AbstractConverter<AutoscaleClusterResponse, Cluster> {

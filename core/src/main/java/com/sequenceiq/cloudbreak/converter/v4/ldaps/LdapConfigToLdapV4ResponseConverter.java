@@ -4,11 +4,11 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.view.CompactView;
+import com.sequenceiq.secret.model.SecretResponse;
 
 @Component
 public class LdapConfigToLdapV4ResponseConverter extends AbstractConversionServiceAwareConverter<LdapConfig, LdapV4Response> {
@@ -22,8 +22,8 @@ public class LdapConfigToLdapV4ResponseConverter extends AbstractConversionServi
         json.setHost(config.getServerHost());
         json.setPort(config.getServerPort());
         json.setProtocol(config.getProtocol());
-        json.setBindDn(getConversionService().convert(config.getBindDnSecret(), SecretV4Response.class));
-        json.setBindPassword(getConversionService().convert(config.getBindPasswordSecret(), SecretV4Response.class));
+        json.setBindDn(getConversionService().convert(config.getBindDnSecret(), SecretResponse.class));
+        json.setBindPassword(getConversionService().convert(config.getBindPasswordSecret(), SecretResponse.class));
         json.setGroupSearchBase(config.getGroupSearchBase());
         json.setUserSearchBase(config.getUserSearchBase());
         json.setUserDnPattern(config.getUserDnPattern());

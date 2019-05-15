@@ -24,7 +24,6 @@ import org.springframework.core.convert.ConversionService;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
@@ -39,10 +38,11 @@ import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.secret.model.SecretResponse;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConverterTest<Cluster> {
@@ -85,7 +85,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         TestUtil.setSecretField(Cluster.class, "dpAmbariUser", source, "user", "secret/path");
         TestUtil.setSecretField(Cluster.class, "dpAmbariPassword", source, "pass", "secret/path");
         when(conversionService.convert(source.getProxyConfig(), ProxyV4Response.class)).thenReturn(new ProxyV4Response());
-        when(conversionService.convert("secret/path", SecretV4Response.class)).thenReturn(new SecretV4Response("kv", "pass"));
+        when(conversionService.convert("secret/path", SecretResponse.class)).thenReturn(new SecretResponse("kv", "pass"));
         when(conversionService.convert(getSource().getBlueprint(), BlueprintV4Response.class)).thenReturn(new BlueprintV4Response());
         when(serviceEndpointCollector.getAmbariServerUrl(any(Cluster.class), anyString())).thenReturn("http://server/");
         // WHEN

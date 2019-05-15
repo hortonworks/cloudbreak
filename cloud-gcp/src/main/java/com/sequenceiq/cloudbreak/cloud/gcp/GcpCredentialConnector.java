@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.gson.JsonParser;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.GcpCredentialPrerequisites;
+import com.sequenceiq.cloudbreak.cloud.response.GcpCredentialPrerequisites;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;

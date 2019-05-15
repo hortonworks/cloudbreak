@@ -6,11 +6,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.ambarirepository.AmbariRepositoryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.stackrepository.StackRepositoryV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
+import com.sequenceiq.secret.model.SecretResponse;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -32,7 +32,7 @@ public class AmbariV4Response implements JsonEntity {
     private ConfigStrategy configStrategy = ConfigStrategy.ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES;
 
     @ApiModelProperty(ClusterModelDescription.AMBARI_SECURITY_MASTER_KEY)
-    private SecretV4Response securityMasterKey;
+    private SecretResponse securityMasterKey;
 
     public StackRepositoryV4Response getStackRepository() {
         return stackRepository;
@@ -58,11 +58,11 @@ public class AmbariV4Response implements JsonEntity {
         this.configStrategy = configStrategy;
     }
 
-    public SecretV4Response getSecurityMasterKey() {
+    public SecretResponse getSecurityMasterKey() {
         return securityMasterKey;
     }
 
-    public void setSecurityMasterKey(SecretV4Response securityMasterKey) {
+    public void setSecurityMasterKey(SecretResponse securityMasterKey) {
         this.securityMasterKey = securityMasterKey;
     }
 }

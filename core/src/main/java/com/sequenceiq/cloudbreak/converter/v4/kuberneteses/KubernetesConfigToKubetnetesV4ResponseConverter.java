@@ -4,12 +4,12 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.responses.KubernetesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.KubernetesConfig;
 import com.sequenceiq.cloudbreak.domain.view.CompactView;
+import com.sequenceiq.secret.model.SecretResponse;
 
 @Component
 public class KubernetesConfigToKubetnetesV4ResponseConverter extends AbstractConversionServiceAwareConverter<KubernetesConfig, KubernetesV4Response> {
@@ -20,7 +20,7 @@ public class KubernetesConfigToKubetnetesV4ResponseConverter extends AbstractCon
         json.setId(source.getId());
         json.setName(source.getName());
         json.setDescription(source.getDescription());
-        json.setContent(getConversionService().convert(source.getConfigurationSecret(), SecretV4Response.class));
+        json.setContent(getConversionService().convert(source.getConfigurationSecret(), SecretResponse.class));
         json.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceV4Response.class));
         json.setEnvironments(source.getEnvironments().stream().map(CompactView::getName).collect(Collectors.toSet()));
         return json;

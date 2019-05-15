@@ -25,9 +25,18 @@ dependencies {
   compile project(':workspace-authorization')
   compile project(':flow')
   compile project(':notification-sender')
+  compile (project(':cloud-reactor')) {
+    exclude module: 'cloud-reactor-api'
+  }
   compile (project(':cloud-reactor-api')) {
     exclude module: 'core-api'
   }
+
+  compile project (":cloud-aws")
+  compile project (":cloud-azure")
+  compile project (":cloud-mock")
+  compile project (":cloud-yarn")
+  compile project (":cloud-cumulus-yarn")
 
   compile     group: 'com.google.code.gson',      name: 'gson'
   compile     group: 'dnsjava',                   name: 'dnsjava'
