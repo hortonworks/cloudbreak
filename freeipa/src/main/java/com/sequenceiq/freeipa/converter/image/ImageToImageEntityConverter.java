@@ -1,0 +1,21 @@
+package com.sequenceiq.freeipa.converter.image;
+
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.freeipa.entity.Image;
+
+@Component
+public class ImageToImageEntityConverter extends AbstractConversionServiceAwareConverter<com.sequenceiq.freeipa.api.model.image.Image, Image> {
+
+    @Override
+    public Image convert(com.sequenceiq.freeipa.api.model.image.Image source) {
+
+        Image imageEntity = new Image();
+        imageEntity.setImageId(source.getUuid());
+        imageEntity.setOs(source.getOs());
+        imageEntity.setOsType(source.getOsType());
+        return imageEntity;
+    }
+
+}
