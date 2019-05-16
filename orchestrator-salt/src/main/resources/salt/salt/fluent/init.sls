@@ -26,7 +26,7 @@
     - user: "{{ fluent.user }}"
     - group: "{{ fluent.group }}"
     - file_mode: 640
-{%- if salt['cmd.retcode']('test -f /lib/systemd/system/td-agent.service') == 0 %}
+{%- if fluent.is_systemd %}
 fluentd_start_with_update_systemd_units:
   file.copy:
     - name: /etc/systemd/system/td-agent.service
@@ -35,6 +35,7 @@ fluentd_start_with_update_systemd_units:
     - names: 
       - "sed -i \"/User=/ s/=.*/={{ fluent.user }}/\" /etc/systemd/system/td-agent.service"
       - "sed -i \"/Group=/ s/=.*/={{ fluent.group }}/\" /etc/systemd/system/td-agent.service"
+    - onlyif: test -f /etc/systemd/system/td-agent.service
   module.wait:
     - name: service.systemctl_reload
     - watch:

@@ -4,6 +4,11 @@
 {% else %}
     {% set fluent_enabled = False %}
 {% endif %}
+{% if grains['init'] == 'upstart' %}
+    {% set is_systemd = False %}
+{% else %}
+    {% set is_systemd = True %}
+{% endif %}
 {% set fluent_user = salt['pillar.get']('fluent:user') %}
 {% set fluent_group = salt['pillar.get']('fluent:group') %}
 {% set provider_prefix = salt['pillar.get']('fluent:providerPrefix') %}
@@ -12,6 +17,7 @@
 {% set partition_interval = salt['pillar.get']('fluent:partitionIntervalMin') %}
 
 {% do fluent.update({
+    "is_systemd" : is_systemd,
     "enabled": fluent_enabled,
     "user": fluent_user,
     "group": fluent_group,
