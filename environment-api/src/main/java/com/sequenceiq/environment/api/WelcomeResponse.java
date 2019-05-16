@@ -20,7 +20,7 @@ public class WelcomeResponse implements Serializable {
     private String message;
 
     public WelcomeResponse(String message) {
-        this(LocalDateTime.now().format(DateTimeFormatter.RFC_1123_DATE_TIME), message);
+        this(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME), message);
     }
 
     private WelcomeResponse(String time, String message) {

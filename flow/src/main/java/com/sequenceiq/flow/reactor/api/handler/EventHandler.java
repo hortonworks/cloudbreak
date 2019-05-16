@@ -1,4 +1,4 @@
-package com.sequenceiq.flow.handler;
+package com.sequenceiq.flow.reactor.api.handler;
 
 import reactor.bus.Event;
 import reactor.fn.Consumer;

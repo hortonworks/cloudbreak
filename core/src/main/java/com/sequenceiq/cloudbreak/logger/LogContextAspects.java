@@ -25,7 +25,7 @@ public class LogContextAspects {
     public void interceptCloudPlatformEventHandlersAcceptMethod() {
     }
 
-    @Pointcut("execution(public * com.sequenceiq.flow.handler.EventHandler+.accept(..))")
+    @Pointcut("execution(public * com.sequenceiq.flow.reactor.api.handler.EventHandler+.accept(..))")
     public void interceptReactorHandlersAcceptMethod() {
     }
 

@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.environment.api.EnvironmentApi;
+import com.sequenceiq.environment.env.EnvironmentController;
 import com.sequenceiq.environment.exception.mapper.DefaultExceptionMapper;
 import com.sequenceiq.environment.exception.mapper.WebApplicaitonExceptionMapper;
 
@@ -21,8 +22,6 @@ import io.swagger.jaxrs.config.SwaggerContextService;
 @ApplicationPath(EnvironmentApi.API_ROOT_CONTEXT)
 @Configuration
 public class EndpointConfig extends ResourceConfig {
-
-    private static final List<Class<?>> CONTROLLERS = List.of();
 
     private static final String VERSION_UNAVAILABLE = "unspecified";
 
@@ -72,7 +71,7 @@ public class EndpointConfig extends ResourceConfig {
     }
 
     private void registerEndpoints() {
-        CONTROLLERS.forEach(this::register);
+        register(EnvironmentController.class);
 
         register(io.swagger.jaxrs.listing.ApiListingResource.class);
         register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
