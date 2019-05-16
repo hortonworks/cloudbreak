@@ -1,4 +1,4 @@
-package com.sequenceiq.datalake.flow.create;
+package com.sequenceiq.datalake.flow;
 
 public class SdxFailureEvent extends SdxEvent {
 

@@ -49,29 +49,30 @@ public class SdxServiceTest {
     private SdxService sdxService;
 
     @BeforeEach
-    public void initMocks() {
+    void initMocks() {
         MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    public void getByAccountIdAndEnvName() {
+    void getByAccountIdAndEnvName() {
+        String clusterName = "test-sdx-cluster";
         SdxCluster sdxCluser = new SdxCluster();
         sdxCluser.setStatus(SdxClusterStatus.REQUESTED);
-        List<SdxCluster> sdxList = new ArrayList<>();
-        sdxList.add(sdxCluser);
-        when(sdxClusterRepository.findByAccountIdAndEnvName(anyString(), anyString())).thenReturn(sdxList);
-        SdxCluster returnedSdxCluster = sdxService.getByAccountIdAndEnvName(CRN, "env");
+        sdxCluser.setEnvName("env");
+        sdxCluser.setClusterName(clusterName);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(eq("hortonworks"), eq(clusterName))).thenReturn(Optional.of(sdxCluser));
+        SdxCluster returnedSdxCluster = sdxService.getByAccountIdAndSdxName(CRN, clusterName);
         Assertions.assertEquals(sdxCluser, returnedSdxCluster);
     }
 
     @Test
-    public void getByAccountIdAndEnvNameNotFound() {
-        when(sdxClusterRepository.findByAccountIdAndEnvName(anyString(), anyString())).thenReturn(new ArrayList<>());
-        Assertions.assertThrows(NotFoundException.class, () -> sdxService.getByAccountIdAndEnvName(CRN, "env"), "Sdx cluster not found");
+    void getByAccountIdAndEnvNameNotFound() {
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.empty());
+        Assertions.assertThrows(NotFoundException.class, () -> sdxService.getByAccountIdAndSdxName(CRN, "env"), "Sdx cluster not found");
     }
 
     @Test
-    public void updateSdxStatus() {
+    void updateSdxStatus() {
         long id = 1L;
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setId(id);
@@ -81,41 +82,44 @@ public class SdxServiceTest {
     }
 
     @Test
-    public void createSdxIfExists() {
+    void createSdxIfExists() {
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
         sdxClusterRequest.setAccessCidr("0.0.0.0/0");
         sdxClusterRequest.setClusterShape("big");
+        sdxClusterRequest.setEnvironment("envir");
         Map<String, String> tags = new HashMap<>();
         tags.put("mytag", "tagecske");
         sdxClusterRequest.setTags(tags);
-        when(sdxClusterRepository.findByAccountIdAndEnvName(anyString(), anyString())).thenReturn(Collections.singletonList(new SdxCluster()));
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Collections.singletonList(new SdxCluster()));
         Assertions.assertThrows(BadRequestException.class,
-                () -> sdxService.createSdx(CRN, "envir", sdxClusterRequest), "SDX cluster exists for environment name");
+                () -> sdxService.createSdx(CRN, "test-sdx-cluster", sdxClusterRequest), "SDX cluster exists for environment name");
     }
 
     @Test
-    public void createSdx() {
+    void createSdx() {
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
         sdxClusterRequest.setAccessCidr("0.0.0.0/0");
         sdxClusterRequest.setClusterShape("big");
         Map<String, String> tags = new HashMap<>();
         tags.put("mytag", "tagecske");
         sdxClusterRequest.setTags(tags);
-        when(sdxClusterRepository.findByAccountIdAndEnvName(anyString(), anyString())).thenReturn(new ArrayList<>());
+        sdxClusterRequest.setEnvironment("envir");
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
             SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
             sdxWithId.setId(id);
             return sdxWithId;
         });
-        SdxCluster createdSdxCluster = sdxService.createSdx(CRN, "envir", sdxClusterRequest);
+        String sdxName = "test-sdx-cluster";
+        SdxCluster createdSdxCluster = sdxService.createSdx(CRN, sdxName, sdxClusterRequest);
         Assertions.assertEquals(id, createdSdxCluster.getId());
         final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         SdxCluster capturedSdx = captor.getValue();
         Assertions.assertEquals("0.0.0.0/0", capturedSdx.getAccessCidr());
         Assertions.assertEquals("tagecske", capturedSdx.getTags().getValue("mytag"));
-        Assertions.assertEquals("envir-sdx-cluster", capturedSdx.getClusterName());
+        Assertions.assertEquals(sdxName, capturedSdx.getClusterName());
         Assertions.assertEquals("big", capturedSdx.getClusterShape());
         Assertions.assertEquals("envir", capturedSdx.getEnvName());
         Assertions.assertEquals("hortonworks", capturedSdx.getAccountId());
@@ -125,19 +129,34 @@ public class SdxServiceTest {
     }
 
     @Test
-    public void listSdx() {
+    void listSdx() {
         ArrayList<SdxCluster> sdxClusters = new ArrayList<>();
         sdxClusters.add(new SdxCluster());
         sdxClusters.add(new SdxCluster());
-        when(sdxClusterRepository.findByAccountIdAndEnvName(eq("hortonworks"), eq("envir"))).thenReturn(sdxClusters);
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(eq("hortonworks"), eq("envir"))).thenReturn(sdxClusters);
         List<SdxCluster> sdxList = sdxService.listSdx(CRN, "envir");
         Assertions.assertEquals(2, sdxList.size());
     }
 
     @Test
-    public void deleteSdxNotFound() {
-        Assertions.assertThrows(BadRequestException.class, () -> sdxService.deleteSdx(CRN, "envir"), "Can not find sdx cluster");
+    void deleteSdxNotFound() {
+        Assertions.assertThrows(BadRequestException.class, () -> sdxService.deleteSdx(CRN, "test-sdx-cluster"), "Can not find sdx cluster");
         verify(sdxClusterRepository, times(1))
-                .findByAccountIdAndClusterNameAndEnvName(eq("hortonworks"), eq("envir-sdx-cluster"), eq("envir"));
+                .findByAccountIdAndClusterNameAndDeletedIsNull(eq("hortonworks"), eq("test-sdx-cluster"));
+    }
+
+    @Test
+    void deleteSdx() {
+        SdxCluster sdxCluster = new SdxCluster();
+        long sdxId = 2L;
+        sdxCluster.setId(sdxId);
+        sdxCluster.setClusterName("sdx-cluster-name");
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        sdxService.deleteSdx(CRN, "envir");
+        verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(sdxId);
+        final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
+        verify(sdxClusterRepository, times(1)).save(captor.capture());
+        SdxClusterStatus sdxClusterStatus = captor.getValue().getStatus();
+        Assertions.assertEquals(SdxClusterStatus.DELETE_REQUESTED, sdxClusterStatus);
     }
 }

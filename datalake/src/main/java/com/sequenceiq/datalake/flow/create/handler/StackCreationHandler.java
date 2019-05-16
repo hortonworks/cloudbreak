@@ -45,22 +45,22 @@ public class StackCreationHandler implements EventHandler<StackCreationWaitReque
     @Override
     public void accept(Event<StackCreationWaitRequest> event) {
         StackCreationWaitRequest stackCreationWaitRequest = event.getData();
-        Long stackId = stackCreationWaitRequest.getResourceId();
+        Long sdxId = stackCreationWaitRequest.getResourceId();
         Selectable response;
         try {
-            LOGGER.debug("start polling stack creation process for id: {}", stackId);
+            LOGGER.debug("start polling stack creation process for id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
-            provisionerService.waitCloudbreakClusterCreation(stackId, pollingConfig);
-            response = new StackCreationSuccessEvent(stackId);
+            provisionerService.waitCloudbreakClusterCreation(sdxId, pollingConfig);
+            response = new StackCreationSuccessEvent(sdxId);
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Polling exited before timeout. Cause: ", userBreakException);
-            response = new StackCreationFailedEvent(stackId, userBreakException);
+            response = new StackCreationFailedEvent(sdxId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.info("Poller stopped for stack: {}", stackId);
-            response = new StackCreationFailedEvent(stackId, pollerStoppedException);
+            LOGGER.info("Poller stopped for stack: {}", sdxId);
+            response = new StackCreationFailedEvent(sdxId, pollerStoppedException);
         } catch (PollerException exception) {
-            LOGGER.info("Polling failed for stack: {}", stackId);
-            response = new StackCreationFailedEvent(stackId, exception);
+            LOGGER.info("Polling failed for stack: {}", sdxId);
+            response = new StackCreationFailedEvent(sdxId, exception);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }

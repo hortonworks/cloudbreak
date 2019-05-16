@@ -11,7 +11,7 @@ public class NotFoundExceptionMapper extends BaseExceptionMapper<NotFoundExcepti
 
     @Override
     Status getResponseStatus() {
-        return Status.FORBIDDEN;
+        return Status.NOT_FOUND;
     }
 
     @Override

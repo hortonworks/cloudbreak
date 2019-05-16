@@ -14,16 +14,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterCreationSuccessHandler;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -97,17 +95,17 @@ public class ClusterBuilderService {
         clusterService.save(connector.buildCluster(instanceMetaDataByHostGroup, templatePreparationObject, hostsInCluster));
         recipeEngine.executePostInstallRecipes(stack, instanceMetaDataByHostGroup.keySet());
         clusterCreationSuccessHandler.handleClusterCreationSuccess(stack);
-        if (StackType.DATALAKE == stack.getType()) {
-            try {
-                transactionService.required(() -> {
-                    Stack stackInTransaction = stackService.getByIdWithListsInTransaction(stackId);
-                    ambariDatalakeConfigProvider.collectAndStoreDatalakeResources(stackInTransaction);
-                    return null;
-                });
-            } catch (TransactionExecutionException e) {
-                LOGGER.info("Couldn't collect Datalake paramaters", e);
-            }
-        }
+//        if (StackType.DATALAKE == stack.getType()) {
+//            try {
+//                transactionService.required(() -> {
+//                    Stack stackInTransaction = stackService.getByIdWithListsInTransaction(stackId);
+//                    ambariDatalakeConfigProvider.collectAndStoreDatalakeResources(stackInTransaction);
+//                    return null;
+//                });
+//            } catch (TransactionExecutionException e) {
+//                LOGGER.info("Couldn't collect Datalake paramaters", e);
+//            }
+//        }
     }
 
     private Map<HostGroup, List<InstanceMetaData>> loadInstanceMetadataForHostGroups(Iterable<HostGroup> hostGroups) {

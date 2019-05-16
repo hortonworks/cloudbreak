@@ -10,6 +10,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import io.swagger.annotations.Api;
@@ -21,32 +22,32 @@ import io.swagger.annotations.ApiOperation;
 public interface SdxEndpoint {
 
     @POST
-    @Path("{envName}")
+    @Path("{sdxName}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "create SDX cluster", produces = "application/json", nickname = "createSdx")
-    SdxClusterResponse create(@PathParam("envName") String envName, @Valid SdxClusterRequest createSdxClusterRequest);
+    SdxClusterResponse create(@PathParam("sdxName") String sdxName, @Valid SdxClusterRequest createSdxClusterRequest);
 
     @DELETE
-    @Path("{envName}")
+    @Path("{sdxName}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "delete SDX cluster", produces = "application/json", nickname = "deleteSdx")
-    void delete(@PathParam("envName") String envName);
+    void delete(@PathParam("sdxName") String sdxName);
 
     @POST
-    @Path("{envName}/redeploy")
+    @Path("{sdxName}/redeploy")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "redeploy SDX cluster", produces = "application/json", nickname = "redeploySdx")
-    void redeploy(@PathParam("envName") String envName, @Valid RedeploySdxClusterRequest redeploySdxClusterRequest);
+    void redeploy(@PathParam("sdxName") String sdxName, @Valid RedeploySdxClusterRequest redeploySdxClusterRequest);
 
     @GET
-    @Path("{envName}")
+    @Path("{sdxName}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "get SDX cluster", produces = "application/json", nickname = "getSdx")
-    SdxClusterResponse get(@PathParam("envName") String envName);
+    SdxClusterResponse get(@PathParam("sdxName") String sdxName);
 
     @GET
-    @Path("{envName}/list")
+    @Path("list")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "list SDX clusters", produces = "application/json", nickname = "listSdx")
-    List<SdxClusterResponse> list(@PathParam("envName") String envName);
+    List<SdxClusterResponse> list(@QueryParam("envName") String envName);
 }

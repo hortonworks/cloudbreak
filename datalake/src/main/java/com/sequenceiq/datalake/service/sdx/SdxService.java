@@ -46,12 +46,11 @@ public class SdxService {
         }
     }
 
-    public SdxCluster getByAccountIdAndEnvName(String userCrn, String env) {
+    public SdxCluster getByAccountIdAndSdxName(String userCrn, String sdxName) {
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
-        List<SdxCluster> sdxClusters = sdxClusterRepository.findByAccountIdAndEnvName(accountIdFromCrn, env);
-        Optional<SdxCluster> firstSdxCluster = sdxClusters.stream().findFirst();
-        if (firstSdxCluster.isPresent()) {
-            return firstSdxCluster.get();
+        Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, sdxName);
+        if (sdxCluster.isPresent()) {
+            return sdxCluster.get();
         } else {
             throw new NotFoundException("Sdx cluster not found");
         }
@@ -65,9 +64,9 @@ public class SdxService {
         }, () -> LOGGER.info("Can not update sdx {} to {} status", id, sdxClusterStatus));
     }
 
-    public SdxCluster createSdx(String userCrn, String envName, SdxClusterRequest sdxClusterRequest) {
+    public SdxCluster createSdx(final String userCrn, final String sdxName, final SdxClusterRequest sdxClusterRequest) {
         SdxCluster sdxCluster = new SdxCluster();
-        sdxCluster.setClusterName(getConvolutedClusterName(envName));
+        sdxCluster.setClusterName(sdxName);
         sdxCluster.setAccountId(getAccountIdFromCrn(userCrn));
         sdxCluster.setClusterShape(sdxClusterRequest.getClusterShape());
         sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
@@ -79,16 +78,21 @@ public class SdxService {
             throw new BadRequestException("Can not convert tags", e);
         }
         sdxCluster.setInitiatorUserCrn(userCrn);
-        sdxCluster.setEnvName(envName);
+        sdxCluster.setEnvName(sdxClusterRequest.getEnvironment());
 
-        sdxClusterRepository.findByAccountIdAndEnvName(sdxCluster.getAccountId(), sdxCluster.getEnvName())
-                .stream().findFirst().ifPresent(existedSdx -> {
-            throw new BadRequestException("SDX cluster exists for environment name");
+        sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(sdxCluster.getAccountId(), sdxCluster.getClusterName())
+                .ifPresent(foundSdx -> {
+                    throw new BadRequestException("SDX cluster exists with this name: " + sdxName);
+                });
+
+        sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(sdxCluster.getAccountId(), sdxCluster.getEnvName()).stream().findFirst()
+                .ifPresent(existedSdx -> {
+            throw new BadRequestException("SDX cluster exists for environment name: " + existedSdx.getEnvName());
         });
 
         sdxCluster = sdxClusterRepository.save(sdxCluster);
 
-        LOGGER.info("trigger SDX creation");
+        LOGGER.info("trigger SDX creation: {}", sdxCluster);
         sdxReactorFlowManager.triggerSdxCreation(sdxCluster.getId());
 
         return sdxCluster;
@@ -96,25 +100,21 @@ public class SdxService {
 
     public List<SdxCluster> listSdx(String userCrn, String envName) {
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
-        return sdxClusterRepository.findByAccountIdAndEnvName(accountIdFromCrn, envName);
+        return sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(accountIdFromCrn, envName);
     }
 
-    public void deleteSdx(String userCrn, String envName) {
+    public void deleteSdx(String userCrn, String sdxName) {
         LOGGER.info("Delete sdx");
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
-        SdxCluster sdxCluster = sdxClusterRepository
-                .findByAccountIdAndClusterNameAndEnvName(accountIdFromCrn, getConvolutedClusterName(envName), envName);
-        if (sdxCluster == null) {
+        sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, sdxName).ifPresentOrElse(sdxCluster -> {
+            sdxCluster.setStatus(SdxClusterStatus.DELETE_REQUESTED);
+            sdxClusterRepository.save(sdxCluster);
+            sdxReactorFlowManager.triggerSdxDeletion(sdxCluster.getId());
+            LOGGER.info("sdx delete triggered: {}", sdxCluster.getClusterName());
+        }, () -> {
             LOGGER.info("Can not find sdx cluster");
             throw new BadRequestException("Can not find sdx cluster");
-        }
-        try {
-            cloudbreakClient.withCrn(userCrn).stackV4Endpoint().delete(0L, sdxCluster.getClusterName(), false, false);
-        } catch (Exception e) {
-            LOGGER.info("sdx cannot be deleted form CB side, removing from SDX", e);
-        }
-        sdxClusterRepository.delete(sdxCluster);
-        LOGGER.info("sdx deleted");
+        });
     }
 
     private String getAccountIdFromCrn(String userCrn) {
@@ -124,9 +124,5 @@ public class SdxService {
         } else {
             throw new BadRequestException("Can not guess account ID from CRN");
         }
-    }
-
-    private String getConvolutedClusterName(String envName) {
-        return envName + "-" + SDX_CLUSTER_NAME;
     }
 }
