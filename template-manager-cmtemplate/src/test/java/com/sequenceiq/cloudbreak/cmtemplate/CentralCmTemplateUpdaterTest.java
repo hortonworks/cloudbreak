@@ -74,6 +74,7 @@ public class CentralCmTemplateUpdaterTest {
         when(templatePreparationObject.getGeneralClusterConfigs()).thenReturn(generalClusterConfigs);
         when(templatePreparationObject.getRdsConfigs()).thenReturn(getRdsConfigs());
         when(generalClusterConfigs.getClusterName()).thenReturn("testcluster");
+        when(generalClusterConfigs.getPassword()).thenReturn("Admin123!");
         clouderaManagerRepo = new ClouderaManagerRepo();
         clouderaManagerRepo.setVersion("6.1.0");
         ReflectionTestUtils.setField(cmTemplateComponentConfigProcessor, "cmTemplateComponentConfigProviderList", cmTemplateComponentConfigProviders);

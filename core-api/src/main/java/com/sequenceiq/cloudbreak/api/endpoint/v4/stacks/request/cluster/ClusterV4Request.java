@@ -40,7 +40,11 @@ public class ClusterV4Request implements JsonEntity {
     private String userName;
 
     @NotNull
-    @Size(max = 100, min = 5, message = "The length of the password has to be in range of 5 to 100")
+    @Pattern.List({
+            @Pattern(regexp = "^.*[a-zA-Z].*$", message = "The password should contain at least one letter."),
+            @Pattern(regexp = "^.*[0-9].*$", message = "The password should contain at least one number.")
+    })
+    @Size(max = 100, min = 8, message = "The length of the password has to be in range of 8 to 100")
     @ApiModelProperty(value = StackModelDescription.PASSWORD, required = true)
     private String password;
 
