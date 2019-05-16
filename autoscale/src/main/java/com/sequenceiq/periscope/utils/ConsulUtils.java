@@ -20,7 +20,7 @@ import org.springframework.util.ReflectionUtils;
 
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.ConsulRawClient;
-import com.sequenceiq.cloudbreak.client.KeyStoreUtil;
+import com.sequenceiq.cloudbreak.certificate.KeyStoreUtil;
 import com.sequenceiq.periscope.model.TlsConfiguration;
 
 public final class ConsulUtils {

@@ -1,31 +1,32 @@
 package com.sequenceiq.cloudbreak.cloud.response;
 
-import java.io.Serializable;
+import static com.sequenceiq.cloudbreak.cloud.doc.CredentialPrerequisiteModelDescription.ACCOUNT_IDENTIFIER;
+import static com.sequenceiq.cloudbreak.cloud.doc.CredentialPrerequisiteModelDescription.AWS_CREDENTIAL_PREREQUISITES;
+import static com.sequenceiq.cloudbreak.cloud.doc.CredentialPrerequisiteModelDescription.AZURE_CREDENTIAL_PREREQUISITES;
+import static com.sequenceiq.cloudbreak.cloud.doc.CredentialPrerequisiteModelDescription.CLOUD_PLATFORM;
+import static com.sequenceiq.cloudbreak.cloud.doc.CredentialPrerequisiteModelDescription.GCP_CREDENTIAL_PREREQUISITES;
 
-import com.sequenceiq.cloudbreak.api.model.annotations.Immutable;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions.CredentialModelDescription;
+import java.io.Serializable;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@Immutable
 @ApiModel
 public class CredentialPrerequisitesResponse implements Serializable {
 
-    @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
+    @ApiModelProperty(value = CLOUD_PLATFORM, required = true)
     private String cloudPlatform;
 
-    @ApiModelProperty(CredentialModelDescription.ACCOUNT_IDENTIFIER)
+    @ApiModelProperty(ACCOUNT_IDENTIFIER)
     private String accountId;
 
-    @ApiModelProperty(CredentialModelDescription.AWS_CREDENTIAL_PREREQUISITES)
+    @ApiModelProperty(AWS_CREDENTIAL_PREREQUISITES)
     private AwsCredentialPrerequisites aws;
 
-    @ApiModelProperty(CredentialModelDescription.AZURE_CREDENTIAL_PREREQUISITES)
+    @ApiModelProperty(AZURE_CREDENTIAL_PREREQUISITES)
     private AzureCredentialPrerequisites azure;
 
-    @ApiModelProperty(CredentialModelDescription.GCP_CREDENTIAL_PREREQUISITES)
+    @ApiModelProperty(GCP_CREDENTIAL_PREREQUISITES)
     private GcpCredentialPrerequisites gcp;
 
     public CredentialPrerequisitesResponse(String cloudPlatform, String accountId, AwsCredentialPrerequisites aws) {

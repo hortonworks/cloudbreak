@@ -1,14 +1,14 @@
 package com.sequenceiq.cloudbreak.cloud.yarn.client.model.core;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 
 @JsonInclude(Include.NON_NULL)
-public class Configuration  implements JsonEntity {
+public class Configuration  implements Serializable {
     private Map<String, String> properties;
 
     private Map<String, String> env;

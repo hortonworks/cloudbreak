@@ -21,10 +21,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.client.CaasClient;
-import com.sequenceiq.cloudbreak.client.ConfigKey;
-import com.sequenceiq.cloudbreak.client.IdentityClient;
-import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.cloudbreak.auth.caas.CaasClient;
+import com.sequenceiq.cloudbreak.auth.uaa.IdentityClient;
+import com.sequenceiq.cloudbreak.restclient.ConfigKey;
+import com.sequenceiq.cloudbreak.restclient.RestClientUtil;
 import com.sequenceiq.periscope.monitor.handler.PersistRejectedThreadExecutionHandler;
 
 @Configuration

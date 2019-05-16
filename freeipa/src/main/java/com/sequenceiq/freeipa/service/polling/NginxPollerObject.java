@@ -2,7 +2,7 @@ package com.sequenceiq.freeipa.service.polling;
 
 import javax.ws.rs.client.Client;
 
-import com.sequenceiq.cloudbreak.client.CertificateTrustManager.SavingX509TrustManager;
+import com.sequenceiq.cloudbreak.certificate.CertificateTrustManager.SavingX509TrustManager;
 import com.sequenceiq.freeipa.entity.Stack;
 
 public class NginxPollerObject {

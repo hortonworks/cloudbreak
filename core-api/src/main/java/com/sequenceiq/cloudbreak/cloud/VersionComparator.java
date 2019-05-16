@@ -5,7 +5,7 @@ import java.util.Comparator;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.sequenceiq.cloudbreak.cloud.model.Versioned;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 
 public class VersionComparator implements Comparator<Versioned>, Serializable {
 

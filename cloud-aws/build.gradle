@@ -27,6 +27,7 @@ dependencies {
   compile group: 'commons-codec',                 name: 'commons-codec',                  version: '1.10'
   compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: awsSdkVersion)      { exclude group: 'commons-logging' }
   compile group: 'org.freemarker',                name: 'freemarker',                     version: freemarkerVersion
+  compile group: 'commons-net',                   name: 'commons-net',                    version: '3.6'
 
   compile group: 'org.mapstruct',                 name: 'mapstruct-jdk8',                 version: mapstructVersion
   compileOnly group: 'org.mapstruct',             name: 'mapstruct-processor',            version: mapstructVersion

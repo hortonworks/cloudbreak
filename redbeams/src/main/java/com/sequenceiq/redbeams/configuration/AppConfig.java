@@ -1,8 +1,27 @@
 package com.sequenceiq.redbeams.configuration;
 
 // import java.io.File;
+
 import java.io.IOException;
 import java.security.Security;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ResourceLoaderAware;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.retry.annotation.EnableRetry;
+
+import com.sequenceiq.cloudbreak.auth.caas.CaasClient;
+import com.sequenceiq.cloudbreak.auth.uaa.IdentityClient;
+import com.sequenceiq.cloudbreak.restclient.ConfigKey;
+
 // import java.util.ArrayList;
 // import java.util.Collection;
 // import java.util.EnumMap;
@@ -10,47 +29,30 @@ import java.security.Security;
 // import java.util.List;
 // import java.util.Map;
 // import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.inject.Named;
 // import javax.servlet.FilterChain;
 // import javax.servlet.ServletException;
 // import javax.servlet.ServletRequest;
 // import javax.servlet.ServletResponse;
 // import javax.ws.rs.client.Client;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 // import org.springframework.boot.env.PropertySourceLoader;
 // import org.springframework.boot.env.YamlPropertySourceLoader;
 // import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.context.ResourceLoaderAware;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 // import org.springframework.core.env.ConfigurableEnvironment;
 // import org.springframework.core.env.PropertySource;
 // import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 // import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 // import org.springframework.core.io.support.ResourcePatternResolver;
 // import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.retry.annotation.EnableRetry;
 // import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 // import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 // import org.springframework.security.crypto.password.PasswordEncoder;
 // import org.springframework.web.filter.GenericFilterBean;
-
 // import com.fasterxml.jackson.databind.JsonNode;
 // import com.google.common.collect.Maps;
 // import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
 // import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 // import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
 // import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
-import com.sequenceiq.cloudbreak.client.CaasClient;
-import com.sequenceiq.cloudbreak.client.ConfigKey;
-import com.sequenceiq.cloudbreak.client.IdentityClient;
 // import com.sequenceiq.cloudbreak.client.RestClientUtil;
 // import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
 // import com.sequenceiq.cloudbreak.controller.validation.environment.network.EnvironmentNetworkValidator;

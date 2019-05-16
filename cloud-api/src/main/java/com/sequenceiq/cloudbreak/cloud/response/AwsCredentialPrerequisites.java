@@ -1,17 +1,15 @@
 package com.sequenceiq.cloudbreak.cloud.response;
 
-import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.CredentialModelDescription.AWS_EXTERNAL_ID;
-import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.CredentialModelDescription.AWS_POLICY_JSON;
+import static com.sequenceiq.cloudbreak.cloud.doc.CredentialPrerequisiteModelDescription.AWS_EXTERNAL_ID;
+import static com.sequenceiq.cloudbreak.cloud.doc.CredentialPrerequisiteModelDescription.AWS_POLICY_JSON;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
-import com.sequenceiq.cloudbreak.api.model.annotations.Immutable;
+import java.io.Serializable;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@Immutable
 @ApiModel
-public class AwsCredentialPrerequisites implements JsonEntity {
+public class AwsCredentialPrerequisites implements Serializable {
 
     @ApiModelProperty(value = AWS_EXTERNAL_ID, required = true)
     private String externalId;

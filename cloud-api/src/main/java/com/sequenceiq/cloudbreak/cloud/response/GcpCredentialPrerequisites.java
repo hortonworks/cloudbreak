@@ -1,16 +1,14 @@
 package com.sequenceiq.cloudbreak.cloud.response;
 
-import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.CredentialModelDescription.GCP_CREDENTIAL_PREREQUISITES_CREATION_COMMAND;
+import static com.sequenceiq.cloudbreak.cloud.doc.CredentialPrerequisiteModelDescription.GCP_CREDENTIAL_PREREQUISITES_CREATION_COMMAND;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
-import com.sequenceiq.cloudbreak.api.model.annotations.Immutable;
+import java.io.Serializable;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@Immutable
 @ApiModel
-public class GcpCredentialPrerequisites implements JsonEntity {
+public class GcpCredentialPrerequisites implements Serializable {
 
     @ApiModelProperty(value = GCP_CREDENTIAL_PREREQUISITES_CREATION_COMMAND, required = true)
     private String creationCommand;

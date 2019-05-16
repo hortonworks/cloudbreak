@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.client;
 
+import com.sequenceiq.cloudbreak.restclient.ConfigKey;
+
 public class CloudbreakUserCrnClientBuilder {
 
     private final String cloudbreakAddress;

@@ -27,12 +27,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.client.CaasClient;
-import com.sequenceiq.cloudbreak.client.CaasUser;
-import com.sequenceiq.cloudbreak.client.IdentityClient;
-import com.sequenceiq.cloudbreak.client.IntrospectResponse;
+import com.sequenceiq.cloudbreak.auth.uaa.IdentityClient;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.auth.caas.CaasClient;
+import com.sequenceiq.cloudbreak.auth.caas.CaasUser;
+import com.sequenceiq.cloudbreak.restclient.IntrospectResponse;
 
 public class CachedRemoteTokenService implements ResourceServerTokenServices {
 

@@ -2,8 +2,8 @@ package com.sequenceiq.it.cloudbreak.newway;
 
 import java.util.function.Function;
 
-import com.sequenceiq.cloudbreak.client.ConfigKey;
-import com.sequenceiq.cloudbreak.client.IdentityClient;
+import com.sequenceiq.cloudbreak.auth.uaa.IdentityClient;
+import com.sequenceiq.cloudbreak.restclient.ConfigKey;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.newway.actor.CloudbreakUser;
 

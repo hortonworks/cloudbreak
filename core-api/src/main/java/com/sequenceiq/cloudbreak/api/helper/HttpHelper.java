@@ -9,7 +9,7 @@ import javax.ws.rs.core.Response.StatusType;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
-import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.cloudbreak.restclient.RestClientUtil;
 
 public class HttpHelper {
 

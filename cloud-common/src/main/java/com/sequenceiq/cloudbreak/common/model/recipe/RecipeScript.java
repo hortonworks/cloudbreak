@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.common.model.recipe;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import com.sequenceiq.cloudbreak.api.model.ExecutionType;
+import com.sequenceiq.cloudbreak.common.type.ExecutionType;
 
 public class RecipeScript {
 

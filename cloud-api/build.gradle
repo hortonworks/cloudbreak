@@ -17,9 +17,7 @@ jar {
 dependencies {
 
     compile project(':cloud-common')
-//    compile project(':core-api')
-    compile project(':environment-api')
-
+    
     testCompile (group: 'junit', name: 'junit', version: junitVersion) {
         exclude group: 'org.hamcrest'
     }

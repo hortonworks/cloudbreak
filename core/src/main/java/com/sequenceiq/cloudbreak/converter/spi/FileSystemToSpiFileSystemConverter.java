@@ -14,10 +14,10 @@ import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.services.filesystem.AdlsFileSystem;
-import com.sequenceiq.cloudbreak.services.filesystem.GcsFileSystem;
-import com.sequenceiq.cloudbreak.services.filesystem.S3FileSystem;
-import com.sequenceiq.cloudbreak.services.filesystem.WasbFileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsFileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.GcsFileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.S3FileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.WasbFileSystem;
 
 @Component
 public class FileSystemToSpiFileSystemConverter extends AbstractConversionServiceAwareConverter<FileSystem, SpiFileSystem> {

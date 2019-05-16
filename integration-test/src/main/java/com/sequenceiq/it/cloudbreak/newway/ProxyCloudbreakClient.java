@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
-import com.sequenceiq.cloudbreak.client.AccessToken;
-import com.sequenceiq.cloudbreak.client.ConfigKey;
-import com.sequenceiq.cloudbreak.client.IdentityClient;
+import com.sequenceiq.cloudbreak.auth.uaa.AccessToken;
+import com.sequenceiq.cloudbreak.auth.uaa.IdentityClient;
+import com.sequenceiq.cloudbreak.restclient.ConfigKey;
 
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;

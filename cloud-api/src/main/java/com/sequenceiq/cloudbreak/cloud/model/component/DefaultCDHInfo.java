@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model.component;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.cloud.model.Versioned;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DefaultCDHInfo implements Versioned {

@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.yarn.client.model.core;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
+import java.io.Serializable;
 
-public class Resource implements JsonEntity {
+public class Resource implements Serializable {
 
     private int cpus;
 

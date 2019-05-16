@@ -17,7 +17,6 @@ import org.apache.cb.yarn.service.api.records.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.AdjustmentType;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.cumulus.yarn.client.CumulusYarnClient;
@@ -37,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
+import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
 
 @org.springframework.stereotype.Service
 public class CumulusYarnResourceConnector implements ResourceConnector<Object> {

@@ -16,6 +16,9 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.certificate.CertificateTrustManager;
+import com.sequenceiq.cloudbreak.certificate.KeyStoreUtil;
+
 public class RestClientUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RestClientUtil.class);

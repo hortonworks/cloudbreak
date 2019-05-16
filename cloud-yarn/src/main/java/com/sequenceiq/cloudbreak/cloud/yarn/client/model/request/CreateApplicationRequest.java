@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.yarn.client.model.request;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.core.Configuration;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.core.YarnComponent;
 
-public class CreateApplicationRequest implements JsonEntity {
+public class CreateApplicationRequest implements Serializable {
 
     private String name;
 

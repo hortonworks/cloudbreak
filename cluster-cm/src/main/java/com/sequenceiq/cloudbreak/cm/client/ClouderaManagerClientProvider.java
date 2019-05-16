@@ -8,9 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.client.ApiClient;
-import com.sequenceiq.cloudbreak.client.CertificateTrustManager;
+import com.sequenceiq.cloudbreak.certificate.CertificateTrustManager;
+import com.sequenceiq.cloudbreak.certificate.KeyStoreUtil;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.client.KeyStoreUtil;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 
 @Service

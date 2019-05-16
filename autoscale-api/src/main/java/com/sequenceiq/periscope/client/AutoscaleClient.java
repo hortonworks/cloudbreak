@@ -15,11 +15,11 @@ import org.glassfish.jersey.client.proxy.WebResourceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.client.CaasClient;
-import com.sequenceiq.cloudbreak.client.ConfigKey;
-import com.sequenceiq.cloudbreak.client.RestClientUtil;
-import com.sequenceiq.cloudbreak.client.TokenRequest;
-import com.sequenceiq.cloudbreak.client.TokenUnavailableException;
+import com.sequenceiq.cloudbreak.auth.TokenUnavailableException;
+import com.sequenceiq.cloudbreak.auth.caas.CaasClient;
+import com.sequenceiq.cloudbreak.restclient.ConfigKey;
+import com.sequenceiq.cloudbreak.restclient.RestClientUtil;
+import com.sequenceiq.cloudbreak.restclient.TokenRequest;
 import com.sequenceiq.periscope.api.AutoscaleApi;
 import com.sequenceiq.periscope.api.endpoint.v1.AlertEndpoint;
 import com.sequenceiq.periscope.api.endpoint.v1.AutoScaleClusterV1Endpoint;

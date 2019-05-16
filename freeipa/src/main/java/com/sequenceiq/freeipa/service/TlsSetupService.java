@@ -17,10 +17,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.io.BaseEncoding;
-import com.sequenceiq.cloudbreak.client.CertificateTrustManager.SavingX509TrustManager;
-import com.sequenceiq.cloudbreak.client.PkiUtil;
-import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.cloudbreak.certificate.CertificateTrustManager.SavingX509TrustManager;
+import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.polling.PollingService;
+import com.sequenceiq.cloudbreak.restclient.RestClientUtil;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;

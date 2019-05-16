@@ -19,10 +19,10 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.client.CaasClient;
-import com.sequenceiq.cloudbreak.client.CaasUser;
-import com.sequenceiq.cloudbreak.client.IdentityClient;
-import com.sequenceiq.cloudbreak.client.IntrospectResponse;
+import com.sequenceiq.cloudbreak.auth.uaa.IdentityClient;
+import com.sequenceiq.cloudbreak.auth.caas.CaasClient;
+import com.sequenceiq.cloudbreak.auth.caas.CaasUser;
+import com.sequenceiq.cloudbreak.restclient.IntrospectResponse;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @RunWith(MockitoJUnitRunner.class)

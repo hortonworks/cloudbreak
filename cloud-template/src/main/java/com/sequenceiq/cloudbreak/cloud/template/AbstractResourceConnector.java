@@ -8,7 +8,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.AdjustmentType;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -26,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.group.GroupResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.init.ContextBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.network.NetworkResourceService;
+import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
 
 /**
  * Abstract base implementation of {@link ResourceConnector} for cloud provider which do not have template based deployments. It provides the

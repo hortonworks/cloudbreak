@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
-import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
+import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
 
 public class SpiFileSystem extends DynamicModel {
 

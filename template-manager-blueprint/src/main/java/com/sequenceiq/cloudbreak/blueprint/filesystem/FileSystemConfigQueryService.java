@@ -22,7 +22,7 @@ import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
-import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
+import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.template.HandlebarTemplate;
 import com.sequenceiq.cloudbreak.template.HandlebarUtils;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject;

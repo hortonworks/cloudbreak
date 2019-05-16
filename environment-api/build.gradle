@@ -10,9 +10,7 @@ dependencies {
   implementation project(':structuredevent-model')
   implementation project(':secret-engine')
   implementation project(':common')
-  implementation (project(':cloud-api')) {
-    exclude module: 'core-api'
-  }
+  implementation (project(':cloud-api'))
 
   implementation group: 'io.swagger', name: 'swagger-jersey2-jaxrs', version: "1.5.21"
   implementation group: 'javax.validation', name: 'validation-api', version: '2.0.1.Final'

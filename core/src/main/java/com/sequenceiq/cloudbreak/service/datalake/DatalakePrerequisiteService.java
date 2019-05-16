@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidato
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.service.events.DefaultCloudbreakEventService;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
@@ -57,7 +57,7 @@ public class DatalakePrerequisiteService {
     private LdapConfigValidator ldapConfigValidator;
 
     @Inject
-    private DefaultCloudbreakEventService defaultCloudbreakEventService;
+    private CloudbreakEventService defaultCloudbreakEventService;
 
     @Inject
     @Named("conversionService")

@@ -22,7 +22,7 @@ jar {
 }
 
 dependencies {
-    compile project(':core-api')
+//    compile project(':core-api')
     compile project(':common')
     compile project(':secret-engine')
     compile project(':workspace-authorization')

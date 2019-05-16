@@ -9,7 +9,7 @@ import java.net.URISyntaxException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 
-import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.cloudbreak.restclient.RestClientUtil;
 import com.sequenceiq.it.cloudbreak.mock.json.CBVersion;
 
 import spark.Service;

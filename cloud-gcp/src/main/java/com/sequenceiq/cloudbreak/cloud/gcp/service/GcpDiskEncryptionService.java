@@ -39,8 +39,8 @@ import org.springframework.stereotype.Service;
 import com.google.api.services.compute.model.AttachedDisk;
 import com.google.api.services.compute.model.CustomerEncryptionKey;
 import com.google.api.services.compute.model.Disk;
-import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.restclient.RestClientUtil;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 
 @Service
