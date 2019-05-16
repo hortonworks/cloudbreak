@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.blueprint.testrepeater.TestFile;
+import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.common.type.filesystem.S3FileSystem;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -224,7 +225,9 @@ class AmbariBlueprintModulTestModelProvider {
 
         Set<HostGroup> groups = getHostGroups("master", "worker", "compute");
         for (HostGroup hostGroup : groups) {
-            hostGroup.getConstraint().getInstanceGroup().getTemplate().setVolumeCount(5);
+            VolumeTemplate volumeTemplate = new VolumeTemplate();
+            volumeTemplate.setVolumeCount(5);
+            hostGroup.getConstraint().getInstanceGroup().getTemplate().setVolumeTemplates(Sets.newHashSet(volumeTemplate));
         }
         return Builder.builder()
                 .withHostgroups(groups)

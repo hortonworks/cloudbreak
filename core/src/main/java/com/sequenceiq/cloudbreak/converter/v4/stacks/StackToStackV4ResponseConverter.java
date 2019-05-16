@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.environment.Env
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.environment.placement.PlacementSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.MountedVolumeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags.TagsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
@@ -34,9 +37,11 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
@@ -69,6 +74,9 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
     @Inject
     private StackService stackService;
 
+    @Inject
+    private ResourceAttributeUtil resourceAttributeUtil;
+
     @Override
     public StackV4Response convert(Stack source) {
         StackV4Response response = new StackV4Response();
@@ -91,6 +99,7 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
         response.setTerminated(source.getTerminated());
         response.setStatusReason(source.getStatusReason());
         response.setInstanceGroups(getInstanceGroups(source));
+        addMountedVolumesToInstanceMeatdata(source, response);
         response.setCluster(getConversionService().convert(source.getCluster(), ClusterV4Response.class));
         response.setNetwork(getConversionService().convert(source, NetworkV4Response.class));
         providerParameterCalculator.parse(new HashMap<>(source.getParameters()), response);
@@ -105,6 +114,30 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
         addSharedServiceResponse(source, response);
 
         return response;
+    }
+
+    private void addMountedVolumesToInstanceMeatdata(Stack source, StackV4Response response) {
+        source.getDiskResources().stream().forEach(diskResource -> {
+            Optional<VolumeSetAttributes> attributes = resourceAttributeUtil.getTypedAttributes(diskResource, VolumeSetAttributes.class);
+            Optional<InstanceGroupV4Response> instanceGroup = response.getInstanceGroups().stream()
+                    .filter(group -> StringUtils.equals(group.getName(), diskResource.getInstanceGroup()))
+                    .findFirst();
+            if (instanceGroup.isPresent() && attributes.isPresent()) {
+                instanceGroup.get().getMetadata().stream()
+                        .filter(instanceMetadata -> StringUtils.equals(instanceMetadata.getInstanceId(), diskResource.getInstanceId()))
+                        .forEach(instanceMetaData -> attributes.get().getVolumes().stream()
+                            .forEach(volume -> addVolumeToInstanceMetadata(instanceMetaData, volume)));
+            }
+        });
+    }
+
+    private void addVolumeToInstanceMetadata(InstanceMetaDataV4Response instanceMetaData, VolumeSetAttributes.Volume volume) {
+        MountedVolumeV4Response mountedVolumeV4Response = new MountedVolumeV4Response();
+        mountedVolumeV4Response.setVolumeId(volume.getId());
+        mountedVolumeV4Response.setDevice(volume.getDevice());
+        mountedVolumeV4Response.setVolumeSize(volume.getSize().toString());
+        mountedVolumeV4Response.setVolumeType(volume.getType());
+        instanceMetaData.getMountedVolumes().add(mountedVolumeV4Response);
     }
 
     private void addNodeCount(Stack source, StackV4Response stackJson) {

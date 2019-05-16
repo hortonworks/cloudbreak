@@ -34,7 +34,8 @@ public class AmbariDecommissionTimeCalculator {
             int rootVolumeSize = template.getRootVolumeSize() == null
                     ? defaultRootVolumeSize
                     : template.getRootVolumeSize();
-            long eachNodeCapacityInGB = template.getVolumeCount() * template.getVolumeSize() + rootVolumeSize;
+            long eachNodeCapacityInGB = template.getVolumeTemplates().stream()
+                    .mapToInt(volume -> volume.getVolumeCount() * volume.getVolumeSize()).sum() + rootVolumeSize;
             long usedGlobalDfsSpace = dfsSpace.values().stream()
                     .mapToLong(dfsSpaceByUsed -> dfsSpaceByUsed.values().stream().mapToLong(Long::longValue).sum())
                     .sum();

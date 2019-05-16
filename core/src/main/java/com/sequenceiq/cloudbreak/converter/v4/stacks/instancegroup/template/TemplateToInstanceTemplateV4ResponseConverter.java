@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.template;
 import static java.util.Optional.ofNullable;
 
 import java.util.Map;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -14,9 +14,9 @@ import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.InstanceTemplateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.volume.RootVolumeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.volume.VolumeV4Response;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.common.json.Json;
 
 @Component
 public class TemplateToInstanceTemplateV4ResponseConverter extends AbstractConversionServiceAwareConverter<Template, InstanceTemplateV4Response> {
@@ -29,7 +29,9 @@ public class TemplateToInstanceTemplateV4ResponseConverter extends AbstractConve
         InstanceTemplateV4Response response = new InstanceTemplateV4Response();
         response.setId(source.getId());
         response.setRootVolume(rootVolume(source));
-        response.setAttachedVolumes(Set.of(getConversionService().convert(source, VolumeV4Response.class)));
+        response.setAttachedVolumes(source.getVolumeTemplates().stream()
+                .map(volume -> getConversionService().convert(volume, VolumeV4Response.class))
+                .collect(Collectors.toSet()));
         response.setInstanceType(source.getInstanceType());
         Json attributes = source.getAttributes();
         if (attributes != null) {

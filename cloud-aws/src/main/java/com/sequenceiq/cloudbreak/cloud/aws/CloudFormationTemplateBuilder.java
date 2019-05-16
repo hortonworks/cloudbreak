@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -53,7 +54,7 @@ public class CloudFormationTemplateBuilder {
                     group.getName(),
                     awsInstanceView.isEncryptedVolumes(),
                     group.getRootVolumeSize(),
-                    awsInstanceView.getVolumeType(),
+                    awsInstanceView.getVolumes().stream().map(volume -> volume.getType()).collect(Collectors.toList()),
                     awsInstanceView.getSpotPrice(),
                     group.getSecurity().getRules(),
                     group.getSecurity().getCloudSecurityIds(),

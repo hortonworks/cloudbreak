@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.controller.validation.LocationService;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 
@@ -43,33 +44,36 @@ public class TemplateDecorator {
         CloudVmTypes vmTypesV2 = cloudParameterService.getVmTypesV2(credential, region, variant, new HashMap<>());
         String locationString = locationService.location(region, availabilityZone);
         VolumeParameterConfig config;
-        try {
-            config = resolveVolumeParameterConfig(template, platformDisks, vmTypesV2, locationString);
-        } catch (NoSuchElementException ignored) {
-            LOGGER.debug("No VolumeParameterConfig found, which might be normal for platforms like OpenStack");
-            config = VolumeParameterConfig.EMPTY;
-        }
-
-        if (config.volumeParameterType() != null) {
-            if (template.getVolumeCount() == null) {
-                template.setVolumeCount(config.maximumNumber());
+        for (VolumeTemplate volumeTemplate : template.getVolumeTemplates()) {
+            try {
+                config = resolveVolumeParameterConfig(template, volumeTemplate, platformDisks, vmTypesV2, locationString);
+            } catch (NoSuchElementException ignored) {
+                LOGGER.debug("No VolumeParameterConfig found, which might be normal for platforms like OpenStack");
+                config = VolumeParameterConfig.EMPTY;
             }
-            if (template.getVolumeSize() == null) {
-                template.setVolumeSize(config.maximumSize());
+
+            if (config.volumeParameterType() != null) {
+                if (volumeTemplate.getVolumeCount() == null) {
+                    volumeTemplate.setVolumeCount(config.maximumNumber());
+                }
+                if (volumeTemplate.getVolumeSize() == null) {
+                    volumeTemplate.setVolumeSize(config.maximumSize());
+                }
             }
         }
 
         return template;
     }
 
-    private VolumeParameterConfig resolveVolumeParameterConfig(Template template, PlatformDisks platformDisks, CloudVmTypes vmTypesV2, String locationString) {
+    private VolumeParameterConfig resolveVolumeParameterConfig(Template template, VolumeTemplate volumeTemplate,
+            PlatformDisks platformDisks, CloudVmTypes vmTypesV2, String locationString) {
         Platform platform = Platform.platform(template.cloudPlatform());
         VmType vmType = vmTypesV2.getCloudVmResponses()
                 .getOrDefault(locationString, Collections.emptySet())
                 .stream()
                 .filter(curr -> curr.value().equals(template.getInstanceType())).findFirst().get();
         Map<String, VolumeParameterType> map = platformDisks.getDiskMappings().get(platform);
-        VolumeParameterType volumeParameterType = map.get(template.getVolumeType());
+        VolumeParameterType volumeParameterType = map.get(volumeTemplate.getVolumeType());
 
         return vmType.getVolumeParameterbyVolumeParameterType(volumeParameterType);
     }

@@ -15,8 +15,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
@@ -79,8 +81,11 @@ public class AmbariDecommissionTimeCalculatorTest {
     private List<HostMetadata> createHostMetadataList() {
         Template template = new Template();
         template.setRootVolumeSize(50);
-        template.setVolumeCount(12);
-        template.setVolumeSize(1024);
+        template.setVolumeTemplates(Sets.newHashSet());
+        VolumeTemplate volumeTemplate = new VolumeTemplate();
+        volumeTemplate.setVolumeCount(12);
+        volumeTemplate.setVolumeSize(1024);
+        template.getVolumeTemplates().add(volumeTemplate);
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setTemplate(template);
         Constraint constraint = new Constraint();

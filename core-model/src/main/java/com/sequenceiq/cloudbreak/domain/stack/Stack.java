@@ -551,7 +551,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
         StopRestrictionReason reason = StopRestrictionReason.NONE;
         if ("AWS".equals(cloudPlatform())) {
             for (InstanceGroup instanceGroup : instanceGroups) {
-                if ("ephemeral".equals(instanceGroup.getTemplate().getVolumeType())) {
+                if (instanceGroup.getTemplate().getVolumeTemplates().stream()
+                        .filter(volume -> "ephemeral".equals(volume.getVolumeType())).findAny().isPresent()) {
                     reason = StopRestrictionReason.EPHEMERAL_VOLUMES;
                     break;
                 }
