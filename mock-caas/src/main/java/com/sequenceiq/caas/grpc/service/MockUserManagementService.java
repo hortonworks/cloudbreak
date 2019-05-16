@@ -25,6 +25,9 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.sequenceiq.caas.grpc.GrpcActorContext;
 import com.sequenceiq.caas.model.AltusToken;
 import com.sequenceiq.caas.util.CrnHelper;
@@ -59,12 +62,53 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         String accountId = splittedCrn[4];
         responseObserver.onNext(
                 GetUserResponse.newBuilder()
-                        .setUser(User.newBuilder()
-                                .setUserId(UUID.nameUUIDFromBytes((accountId + "#" + userName).getBytes()).toString())
-                                .setCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
-                                .setEmail(userName)
-                                .build())
+                        .setUser(createUser(accountId, userName))
                         .build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void listUsers(UserManagementProto.ListUsersRequest request, StreamObserver<ListUsersResponse> responseObserver) {
+        if (request.getUserIdOrCrnCount() == 0) {
+            responseObserver.onNext(ListUsersResponse.newBuilder().build());
+        } else {
+            String userIdOrCrn = request.getUserIdOrCrn(0);
+            String[] splittedCrn = userIdOrCrn.split(":");
+            String userName = splittedCrn[6];
+            String accountId = splittedCrn[4];
+            responseObserver.onNext(
+                    ListUsersResponse.newBuilder()
+                            .addUser(createUser(accountId, userName))
+                            .build());
+        }
+        responseObserver.onCompleted();
+    }
+
+    private User createUser(String accountId, String userName) {
+        return User.newBuilder()
+                .setUserId(UUID.nameUUIDFromBytes((accountId + "#" + userName).getBytes()).toString())
+                .setCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
+                .setEmail(userName)
+                .build();
+    }
+
+    @Override
+    public void listMachineUsers(UserManagementProto.ListMachineUsersRequest request, StreamObserver<ListMachineUsersResponse> responseObserver) {
+        if (request.getMachineUserNameOrCrnCount() == 0) {
+            responseObserver.onNext(ListMachineUsersResponse.newBuilder().build());
+        } else {
+            String machineUserIdOrCrn = request.getMachineUserNameOrCrn(0);
+            String[] splittedCrn = machineUserIdOrCrn.split(":");
+            String userName = splittedCrn[6];
+            String accountId = splittedCrn[4];
+            responseObserver.onNext(
+                    ListMachineUsersResponse.newBuilder()
+                            .addMachineUser(MachineUser.newBuilder()
+                                    .setMachineUserId(UUID.nameUUIDFromBytes((accountId + "#" + userName).getBytes()).toString())
+                                    .setCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
+                                    .build())
+                            .build());
+        }
         responseObserver.onCompleted();
     }
 
@@ -105,8 +149,8 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
         responseObserver.onNext(
                 UserManagementProto.AuthenticateResponse.newBuilder()
-                    .setActorCrn(crn)
-                    .build());
+                        .setActorCrn(crn)
+                        .build());
         responseObserver.onCompleted();
     }
 
