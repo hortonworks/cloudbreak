@@ -1,4 +1,4 @@
-package com.sequenceiq.datalake.flow.create;
+package com.sequenceiq.datalake.flow;
 
 import org.apache.commons.lang3.StringUtils;
 

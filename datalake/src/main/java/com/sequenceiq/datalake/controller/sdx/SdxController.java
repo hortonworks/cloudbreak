@@ -26,9 +26,9 @@ public class SdxController implements SdxEndpoint {
     private SdxService sdxService;
 
     @Override
-    public SdxClusterResponse create(String envName, @Valid SdxClusterRequest createSdxClusterRequest) {
+    public SdxClusterResponse create(String sdxName, @Valid SdxClusterRequest createSdxClusterRequest) {
         String userCrn = restRequestThreadLocalService.getUserCrn();
-        SdxCluster sdxCluster = sdxService.createSdx(userCrn, envName, createSdxClusterRequest);
+        SdxCluster sdxCluster = sdxService.createSdx(userCrn, sdxName, createSdxClusterRequest);
         SdxClusterResponse sdxClusterResponse = new SdxClusterResponse(sdxCluster.getClusterName(), sdxCluster.getStatus());
         sdxClusterResponse.setSdxName(sdxCluster.getClusterName());
         return sdxClusterResponse;
@@ -36,9 +36,9 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    public void delete(String envName) {
+    public void delete(String sdxName) {
         String userCrn = restRequestThreadLocalService.getUserCrn();
-        sdxService.deleteSdx(userCrn, envName);
+        sdxService.deleteSdx(userCrn, sdxName);
     }
 
     @Override
@@ -47,9 +47,9 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    public SdxClusterResponse get(String envName) {
+    public SdxClusterResponse get(String sdxName) {
         String userCrn = restRequestThreadLocalService.getUserCrn();
-        SdxCluster sdxCluster = sdxService.getByAccountIdAndEnvName(userCrn, envName);
+        SdxCluster sdxCluster = sdxService.getByAccountIdAndSdxName(userCrn, sdxName);
         return new SdxClusterResponse(sdxCluster.getClusterName(), sdxCluster.getStatus());
     }
 

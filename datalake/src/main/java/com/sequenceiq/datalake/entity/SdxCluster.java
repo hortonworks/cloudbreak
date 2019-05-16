@@ -54,6 +54,8 @@ public class SdxCluster {
     @Enumerated(EnumType.STRING)
     private SdxClusterStatus status;
 
+    private Long deleted;
+
     public Long getId() {
         return id;
     }
@@ -132,5 +134,13 @@ public class SdxCluster {
 
     public void setTags(Json tags) {
         this.tags = tags;
+    }
+
+    public Long getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Long deleted) {
+        this.deleted = deleted;
     }
 }

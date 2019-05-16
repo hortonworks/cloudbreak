@@ -15,6 +15,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import com.cedarsoftware.util.io.JsonWriter;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -51,12 +54,30 @@ public class FlowLogDBService implements FlowLogService {
 
     public FlowLog save(String flowId, String flowChanId, String key, Payload payload, Map<Object, Object> variables, Class<?> flowType,
             FlowState currentState) {
-        String payloadJson = JsonWriter.objectToJson(payload, writeOptions);
-        String variablesJson = JsonWriter.objectToJson(variables, writeOptions);
-        FlowLog flowLog = new FlowLog(payload.getResourceId(), flowId, flowChanId, key, payloadJson, payload.getClass(), variablesJson, flowType,
+        String payloadAsString = getSerializedString(payload);
+        String variablesJson = getSerializedString(variables);
+        FlowLog flowLog = new FlowLog(payload.getResourceId(), flowId, flowChanId, key, payloadAsString, payload.getClass(), variablesJson, flowType,
                 currentState.toString());
         flowLog.setCloudbreakNodeId(nodeConfig.getId());
         return flowLogRepository.save(flowLog);
+    }
+
+    public String getSerializedString(Object object) {
+        String objectAsString;
+        try {
+            objectAsString = JsonWriter.objectToJson(object, writeOptions);
+        } catch (Exception e) {
+            LOGGER.error("Somehow can not serialize object to string, try another method..", e);
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+                objectAsString = objectMapper.writeValueAsString(object);
+            } catch (JsonProcessingException jsonProcessingException) {
+                LOGGER.error("Another json serializing method failed, sorry we have to give up.. :(", jsonProcessingException);
+                objectAsString = "Can not serialize the object, please check logs";
+            }
+        }
+        return objectAsString;
     }
 
     @Override

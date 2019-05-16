@@ -19,11 +19,8 @@ public class ReactorEventHandlerInitializer {
 
     private final EventHandlerConfiguration.EventHandlers eventHandlers;
 
-    private final EventBus eventBus;
-
     public ReactorEventHandlerInitializer(EventHandlerConfiguration.EventHandlers eventHandlers, EventBus eventBus) {
         this.eventHandlers = eventHandlers;
-        this.eventBus = eventBus;
 
         validateSelectors();
         LOGGER.debug("Registering ReactorEventHandlers");
