@@ -55,7 +55,7 @@ cert:
   ignorePreValidation: false
 
 secret:
-  application: cb/shared
+  application: freeipa/shared
   engine: "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine"
 
 vault:
