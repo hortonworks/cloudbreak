@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.MountDisksFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.MountDisksRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.MountDisksSuccess;
-import com.sequenceiq.flow.handler.EventHandler;
+import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.cloudbreak.service.stack.flow.MountDisks;
 
 import reactor.bus.Event;

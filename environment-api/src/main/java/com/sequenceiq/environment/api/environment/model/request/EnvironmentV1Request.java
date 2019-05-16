@@ -43,6 +43,9 @@ public class EnvironmentV1Request extends EnvironmentV1BaseRequest implements Cr
     @ApiModelProperty(EnvironmentModelDescription.NETWORK)
     private EnvironmentNetworkV1Request network;
 
+    @ApiModelProperty(EnvironmentModelDescription.CLOUD_PLATFORM)
+    private String cloudPlatform;
+
     public String getName() {
         return name;
     }
@@ -101,5 +104,13 @@ public class EnvironmentV1Request extends EnvironmentV1BaseRequest implements Cr
 
     public void setNetwork(EnvironmentNetworkV1Request network) {
         this.network = network;
+    }
+
+    public String getCloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public void setCloudPlatform(String cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
     }
 }

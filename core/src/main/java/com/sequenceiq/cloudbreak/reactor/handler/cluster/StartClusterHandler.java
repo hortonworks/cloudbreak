@@ -10,7 +10,7 @@ import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterSuccess;
-import com.sequenceiq.flow.handler.EventHandler;
+import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;

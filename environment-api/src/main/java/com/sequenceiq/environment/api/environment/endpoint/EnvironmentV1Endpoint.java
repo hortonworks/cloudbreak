@@ -37,7 +37,7 @@ import io.swagger.annotations.ApiOperation;
 public interface EnvironmentV1Endpoint {
 
     @GET
-    @Path("welcome")
+    @Path("/welcome")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "welcome", produces = MediaType.APPLICATION_JSON, nickname = "getWelcomeMessage")
     WelcomeResponse welcome();

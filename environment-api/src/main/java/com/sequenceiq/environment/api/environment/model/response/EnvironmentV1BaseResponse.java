@@ -43,6 +43,9 @@ public abstract class EnvironmentV1BaseResponse {
     @ApiModelProperty(EnvironmentModelDescription.NETWORK)
     private EnvironmentNetworkV1Response network;
 
+    @ApiModelProperty(EnvironmentModelDescription.STATUS)
+    private EnvironmentStatus environmentStatus;
+
     public Set<String> getDatalakeResourcesNames() {
         return datalakeResourcesNames;
     }
@@ -129,5 +132,13 @@ public abstract class EnvironmentV1BaseResponse {
 
     public void setNetwork(EnvironmentNetworkV1Response network) {
         this.network = network;
+    }
+
+    public EnvironmentStatus getEnvironmentStatus() {
+        return environmentStatus;
+    }
+
+    public void setEnvironmentStatus(EnvironmentStatus environmentStatus) {
+        this.environmentStatus = environmentStatus;
     }
 }

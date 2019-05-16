@@ -59,6 +59,7 @@ public class EnvironmentModelDescription {
     public static final String DATALAKE_RESOURCES_NAMES = "Datalake cluster resources registered to the environment.";
     public static final String DATALAKE_RESOURCES = "Datalake cluster resources registered to the environment.";
     public static final String KERBEROS_CONFIGS_RESPONSE = "Kerberos configs in the environment.";
+    public static final String STATUS = "Status of the environment.";
 
     private EnvironmentModelDescription() {
     }

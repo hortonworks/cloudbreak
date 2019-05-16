@@ -1,39 +1,33 @@
-package com.sequenceiq.flow.handler.init;
+package com.sequenceiq.flow.conf;
 
 import static reactor.bus.selector.Selectors.$;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
-import com.sequenceiq.flow.handler.EventHandler;
+import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
 import reactor.bus.EventBus;
 
-@Component
+@Configuration
 public class ReactorEventHandlerInitializer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReactorEventHandlerInitializer.class);
 
-    @Resource
-    private List<EventHandler> handlers = new ArrayList<>();
+    private final EventHandlerConfiguration.EventHandlers eventHandlers;
 
-    @Inject
-    private EventBus eventBus;
+    private final EventBus eventBus;
 
-    @PostConstruct
-    public void init() {
+    public ReactorEventHandlerInitializer(EventHandlerConfiguration.EventHandlers eventHandlers, EventBus eventBus) {
+        this.eventHandlers = eventHandlers;
+        this.eventBus = eventBus;
+
         validateSelectors();
         LOGGER.debug("Registering ReactorEventHandlers");
-        for (EventHandler handler : handlers) {
+        for (EventHandler<?> handler : eventHandlers.getEventHandlers()) {
             String selector = handler.selector();
             LOGGER.debug("Registering handler [{}] for selector [{}]", handler.getClass(), selector);
             eventBus.on($(selector), handler);
@@ -41,10 +35,10 @@ public class ReactorEventHandlerInitializer {
     }
 
     private void validateSelectors() {
-        LOGGER.debug("There are {} handlers suitable for registering", handlers.size());
-        Map<String, EventHandler> handlerMap = new HashMap<>();
-        for (EventHandler handler : handlers) {
-            EventHandler entry = handlerMap.put(handler.selector(), handler);
+        LOGGER.debug("There are {} handlers suitable for registering", eventHandlers.getEventHandlers().size());
+        Map<String, EventHandler<?>> handlerMap = new HashMap<>();
+        for (EventHandler<?> handler : eventHandlers.getEventHandlers()) {
+            EventHandler<?> entry = handlerMap.put(handler.selector(), handler);
             if (null != entry) {
                 LOGGER.error("Duplicated handlers! actual: {}, existing: {}", handler, entry);
                 throw new IllegalStateException("Duplicate handlers! first: " + handler + " second: " + entry);
