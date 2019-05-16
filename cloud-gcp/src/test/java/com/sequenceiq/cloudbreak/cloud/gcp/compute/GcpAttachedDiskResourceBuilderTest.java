@@ -151,9 +151,9 @@ class GcpAttachedDiskResourceBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), 50);
 
         List<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
-        volumes.add(new VolumeSetAttributes.Volume("1234", "noop"));
+        volumes.add(new VolumeSetAttributes.Volume("1234", "noop", 0, "eph"));
 
-        VolumeSetAttributes attributes = new VolumeSetAttributes("Ireland", 0, "eph", true, "", volumes);
+        VolumeSetAttributes attributes = new VolumeSetAttributes("Ireland", true, "", volumes);
         Map<String, Object> params = new HashMap<>();
         params.put(CloudResource.ATTRIBUTES, attributes);
         buildableResource = List.of(CloudResource.builder()

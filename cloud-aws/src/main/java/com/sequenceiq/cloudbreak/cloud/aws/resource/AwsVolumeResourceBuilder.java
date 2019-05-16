@@ -56,7 +56,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.type.CommonStatus;
@@ -99,11 +98,6 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     @Override
     public List<CloudResource> create(AwsContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
         LOGGER.debug("Create volume resources");
-        String volumeType = getVolumeType(group);
-        if (AwsDiskType.Ephemeral.value().equalsIgnoreCase(volumeType)) {
-            LOGGER.debug("Volume type is ephemeral, resource not needed.");
-            return List.of();
-        }
         List<CloudResource> computeResources = context.getComputeResources(privateId);
         Optional<CloudResource> reattachableVolumeSet = computeResources.stream()
                 .filter(resource -> ResourceType.AWS_VOLUMESET.equals(resource.getType()))
@@ -114,20 +108,12 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         return List.of(reattachableVolumeSet.orElseGet(createVolumeSet(privateId, auth, group, subnet)));
     }
 
-    public String getVolumeType(Group group) {
-        CloudInstance instance = group.getReferenceInstanceConfiguration();
-        InstanceTemplate template = instance.getTemplate();
-        Volume volumeTemplate = template.getVolumes().iterator().next();
-        return volumeTemplate.getType();
-    }
-
     private Supplier<CloudResource> createVolumeSet(long privateId, AuthenticatedContext auth, Group group, CloudResource subnetResource) {
         return () -> {
             AwsResourceNameService resourceNameService = getResourceNameService();
 
             CloudInstance instance = group.getReferenceInstanceConfiguration();
             InstanceTemplate template = instance.getTemplate();
-            Volume volumeTemplate = template.getVolumes().iterator().next();
             String groupName = group.getName();
             CloudContext cloudContext = auth.getCloudContext();
             String stackName = cloudContext.getName();
@@ -141,11 +127,11 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                     .group(group.getName())
                     .status(CommonStatus.REQUESTED)
                     .params(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
-                            .withVolumeSize(volumeTemplate.getSize())
-                            .withVolumeType(volumeTemplate.getType())
                             .withAvailabilityZone(availabilityZone)
                             .withDeleteOnTermination(Boolean.TRUE)
-                            .withVolumes(template.getVolumes().stream().map(vol -> new VolumeSetAttributes.Volume(null, null))
+                            .withVolumes(template.getVolumes().stream()
+                                    .filter(vol -> !AwsDiskType.Ephemeral.value().equalsIgnoreCase(vol.getType()))
+                                    .map(vol -> new VolumeSetAttributes.Volume(null, null, vol.getSize(), vol.getType()))
                                     .collect(Collectors.toList()))
                             .build()))
                     .build();
@@ -190,7 +176,9 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                     .map(request -> intermediateBuilderExecutor.submit(() -> {
                         CreateVolumeResult result = client.createVolume(request);
                         String volumeId = result.getVolume().getVolumeId();
-                        volumeSetMap.get(resource.getName()).add(new VolumeSetAttributes.Volume(volumeId, generator.next()));
+                        VolumeSetAttributes.Volume volume =
+                                new VolumeSetAttributes.Volume(volumeId, generator.next(), request.getSize(), request.getVolumeType());
+                        volumeSetMap.get(resource.getName()).add(volume);
                     }))
                     .collect(Collectors.toList()));
         }
@@ -225,10 +213,10 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
             VolumeSetAttributes volumeSet) {
         return volume -> new CreateVolumeRequest()
                 .withAvailabilityZone(volumeSet.getAvailabilityZone())
-                .withSize(volumeSet.getVolumeSize())
+                .withSize(volume.getSize())
                 .withSnapshotId(snapshotId)
                 .withTagSpecifications(tagSpecification)
-                .withVolumeType(volumeSet.getVolumeType());
+                .withVolumeType(volume.getType());
     }
 
     private String getEbsSnapshotIdIfNeeded(AuthenticatedContext ac, CloudStack cloudStack, Group group) {

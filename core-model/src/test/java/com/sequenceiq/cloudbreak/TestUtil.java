@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ReflectionUtils;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
@@ -64,6 +65,7 @@ import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.StorageLocations;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -75,6 +77,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.structuredevent.event.LdapDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.LdapNotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.NotificationDetails;
@@ -85,7 +88,6 @@ import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceStatus;
-import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 
 public class TestUtil {
 
@@ -144,7 +146,7 @@ public class TestUtil {
     public static Stack setEphemeral(Stack stack) {
         if (stack.cloudPlatform().equals(AWS)) {
             for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-                (instanceGroup.getTemplate()).setVolumeType("ephemeral");
+                (instanceGroup.getTemplate()).getVolumeTemplates().iterator().next().setVolumeType("ephemeral");
             }
         }
         return stack;
@@ -334,12 +336,11 @@ public class TestUtil {
         awsTemplate.setInstanceType("c3.2xlarge");
         awsTemplate.setId(id);
         awsTemplate.setCloudPlatform(AWS);
-        awsTemplate.setVolumeCount(1);
-        awsTemplate.setVolumeSize(100);
-        awsTemplate.setVolumeType("standard");
         awsTemplate.setId(1L);
         awsTemplate.setName(DUMMY_NAME);
         awsTemplate.setDescription(DUMMY_DESCRIPTION);
+        awsTemplate.setVolumeTemplates(
+                Sets.newHashSet(volumeTemplate(1, 100, "standard")));
         return awsTemplate;
     }
 
@@ -348,11 +349,11 @@ public class TestUtil {
         openStackTemplate.setInstanceType("Big");
         openStackTemplate.setCloudPlatform(OPENSTACK);
         openStackTemplate.setId(id);
-        openStackTemplate.setVolumeCount(1);
-        openStackTemplate.setVolumeSize(100);
         openStackTemplate.setName(DUMMY_NAME);
         openStackTemplate.setStatus(ResourceStatus.DEFAULT);
         openStackTemplate.setDescription(DUMMY_DESCRIPTION);
+        openStackTemplate.setVolumeTemplates(
+                Sets.newHashSet(volumeTemplate(1, 100, "HDD")));
         return openStackTemplate;
     }
 
@@ -361,12 +362,21 @@ public class TestUtil {
         gcpTemplate.setInstanceType(N1_HIGHCPU_16_INSTANCE);
         gcpTemplate.setId(id);
         gcpTemplate.setCloudPlatform(GCP);
-        gcpTemplate.setVolumeCount(1);
-        gcpTemplate.setVolumeSize(100);
         gcpTemplate.setDescription(DUMMY_DESCRIPTION);
         gcpTemplate.setStatus(ResourceStatus.DEFAULT);
         gcpTemplate.setName(DUMMY_NAME);
+        gcpTemplate.setVolumeTemplates(
+                Sets.newHashSet(volumeTemplate(1, 100, "pd-ssd")));
         return gcpTemplate;
+    }
+
+    public static VolumeTemplate volumeTemplate(Integer volumeCount, Integer volumeSize, String volumeType) {
+        VolumeTemplate volumeTemplate = new VolumeTemplate();
+        volumeTemplate.setVolumeCount(volumeCount);
+        volumeTemplate.setVolumeSize(volumeSize);
+        volumeTemplate.setVolumeType(volumeType);
+        volumeTemplate.setId(1L);
+        return volumeTemplate;
     }
 
     public static Stack stack() {

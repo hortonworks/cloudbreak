@@ -94,13 +94,11 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE);
         for (int i = 0; i < template.getVolumes().size(); i++) {
             String volumeName = resourceNameService.resourceName(resourceType(), stackName, groupName, privateId, i);
-            volumes.add(new VolumeSetAttributes.Volume(volumeName, generator.next()));
+            Volume volume = template.getVolumes().get(i);
+            volumes.add(new VolumeSetAttributes.Volume(volumeName, generator.next(), volume.getSize(), volume.getType()));
         }
-        Volume volume = template.getVolumes().iterator().next();
         String resourceName = resourceNameService.resourceName(resourceType(), stackName, groupName, privateId, 0);
         Map<String, Object> attributes = new HashMap<>(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
-                .withVolumeSize(volume.getSize())
-                .withVolumeType(volume.getType())
                 .withAvailabilityZone(location.getAvailabilityZone().value())
                 .withDeleteOnTermination(Boolean.TRUE)
                 .withVolumes(volumes).build()));
@@ -134,7 +132,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
             VolumeSetAttributes volumeSetAttributes = volumeSetResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
 
             for (VolumeSetAttributes.Volume volume : volumeSetAttributes.getVolumes()) {
-                Disk disk = createDisk(projectId, volume.getId(), cloudStack.getTags(), volumeSetAttributes);
+                Disk disk = createDisk(projectId, volume, cloudStack.getTags(), volumeSetAttributes);
 
                 gcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk);
                 Future<Void> submit = intermediateBuilderExecutor.submit(() -> {
@@ -219,11 +217,11 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         return 1;
     }
 
-    private Disk createDisk(String projectId, String resourceName, Map<String, String> tags, VolumeSetAttributes attributes) {
+    private Disk createDisk(String projectId, VolumeSetAttributes.Volume volume, Map<String, String> tags, VolumeSetAttributes attributes) {
         Disk disk = new Disk();
-        disk.setSizeGb(Long.valueOf(attributes.getVolumeSize()));
-        disk.setName(resourceName);
-        disk.setType(GcpDiskType.getUrl(projectId, attributes.getAvailabilityZone(), attributes.getVolumeType()));
+        disk.setSizeGb(Long.valueOf(volume.getSize()));
+        disk.setName(volume.getId());
+        disk.setType(GcpDiskType.getUrl(projectId, attributes.getAvailabilityZone(), volume.getType()));
 
         Map<String, String> customTags = new HashMap<>();
         customTags.putAll(tags);

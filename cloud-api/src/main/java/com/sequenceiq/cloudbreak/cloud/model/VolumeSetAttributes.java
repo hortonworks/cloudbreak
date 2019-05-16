@@ -16,10 +16,6 @@ public class VolumeSetAttributes {
 
     private String availabilityZone;
 
-    private Integer volumeSize;
-
-    private String volumeType;
-
     private Boolean deleteOnTermination;
 
     private String fstab;
@@ -29,12 +25,9 @@ public class VolumeSetAttributes {
     private String uuids;
 
     @JsonCreator
-    public VolumeSetAttributes(@JsonProperty("availabilityZone") String availabilityZone, @JsonProperty("volumeSize") Integer volumeSize,
-            @JsonProperty("volumeType") String volumeType, @JsonProperty("deleteOnTermination") Boolean deleteOnTermination,
+    public VolumeSetAttributes(@JsonProperty("availabilityZone") String availabilityZone, @JsonProperty("deleteOnTermination") Boolean deleteOnTermination,
             @JsonProperty("fstab") String fstab, @JsonProperty("volumes") List<Volume> volumes) {
         this.availabilityZone = availabilityZone;
-        this.volumeSize = volumeSize;
-        this.volumeType = volumeType;
         this.deleteOnTermination = deleteOnTermination;
         this.fstab = fstab;
         this.volumes = volumes;
@@ -46,22 +39,6 @@ public class VolumeSetAttributes {
 
     public void setAvailabilityZone(String availabilityZone) {
         this.availabilityZone = availabilityZone;
-    }
-
-    public Integer getVolumeSize() {
-        return volumeSize;
-    }
-
-    public void setVolumeSize(Integer volumeSize) {
-        this.volumeSize = volumeSize;
-    }
-
-    public String getVolumeType() {
-        return volumeType;
-    }
-
-    public void setVolumeType(String volumeType) {
-        this.volumeType = volumeType;
     }
 
     public Boolean getDeleteOnTermination() {
@@ -104,10 +81,19 @@ public class VolumeSetAttributes {
 
         private String device;
 
+        private Integer size;
+
+        private String type;
+
         public Volume(@JsonProperty("id") String id,
-                @JsonProperty("device") String device) {
+                @JsonProperty("device") String device,
+                @JsonProperty("size") Integer size,
+                @JsonProperty("type") String type) {
             this.id = id;
             this.device = device;
+            this.type = type;
+            this.size = size;
+
         }
 
         public String getId() {
@@ -125,15 +111,27 @@ public class VolumeSetAttributes {
         public String getDevice() {
             return device;
         }
+
+        public Integer getSize() {
+            return size;
+        }
+
+        public void setSize(Integer size) {
+            this.size = size;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
     }
 
     public static class Builder {
 
         private String availabilityZone;
-
-        private Integer volumeSize;
-
-        private String volumeType;
 
         private Boolean deleteOnTermination;
 
@@ -143,16 +141,6 @@ public class VolumeSetAttributes {
 
         public Builder withAvailabilityZone(String availabilityZone) {
             this.availabilityZone = availabilityZone;
-            return this;
-        }
-
-        public Builder withVolumeSize(Integer volumeSize) {
-            this.volumeSize = volumeSize;
-            return this;
-        }
-
-        public Builder withVolumeType(String volumeType) {
-            this.volumeType = volumeType;
             return this;
         }
 
@@ -172,7 +160,7 @@ public class VolumeSetAttributes {
         }
 
         public VolumeSetAttributes build() {
-            return new VolumeSetAttributes(availabilityZone, volumeSize, volumeType, deleteOnTermination, fstab, volumes);
+            return new VolumeSetAttributes(availabilityZone, deleteOnTermination, fstab, volumes);
         }
     }
 }

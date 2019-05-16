@@ -154,10 +154,12 @@ public class StackToCloudStackConverter {
         fields.putAll(secretAttributes);
 
         List<Volume> volumes = new ArrayList<>();
-        for (int i = 0; i < template.getVolumeCount(); i++) {
-            Volume volume = new Volume(VolumeUtils.VOLUME_PREFIX + (i + 1), template.getVolumeType(), template.getVolumeSize());
-            volumes.add(volume);
-        }
+        template.getVolumeTemplates().stream().forEach(volumeModel -> {
+            for (int i = 0; i < volumeModel.getVolumeCount(); i++) {
+                Volume volume = new Volume(VolumeUtils.VOLUME_PREFIX + (i + 1), volumeModel.getVolumeType(), volumeModel.getVolumeSize());
+                volumes.add(volume);
+            }
+        });
         return new InstanceTemplate(template.getInstanceType(), name, privateId, volumes, status, fields, template.getId(), instanceImageId);
     }
 

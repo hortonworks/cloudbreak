@@ -91,6 +91,7 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -648,8 +649,9 @@ public class ClusterService {
                 && inTransactionStack.getInstanceGroupsAsList().stream()
                 .filter(instanceGroup -> hg.getName().equalsIgnoreCase(instanceGroup.getGroupName()))
                 .map(InstanceGroup::getTemplate)
-                .map(Template::getVolumeType)
-                .anyMatch(REATTACH_NOT_SUPPORTED_VOLUME_TYPES::contains)) {
+                .map(Template::getVolumeTemplates)
+                .anyMatch(volumes -> volumes.stream()
+                        .map(VolumeTemplate::getVolumeType).anyMatch(REATTACH_NOT_SUPPORTED_VOLUME_TYPES::contains))) {
             throw new BadRequestException("Reattach not supported for this disk type.");
         }
     }

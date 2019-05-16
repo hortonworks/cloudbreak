@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -46,6 +49,9 @@ public class InstanceMetaDataV4Response implements JsonEntity {
 
     @ApiModelProperty(HostMetadataModelDescription.STATE)
     private String state;
+
+    @ApiModelProperty
+    private List<MountedVolumeV4Response> mountedVolumes = Lists.newArrayList();
 
     public String getInstanceGroup() {
         return instanceGroup;
@@ -125,5 +131,13 @@ public class InstanceMetaDataV4Response implements JsonEntity {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public List<MountedVolumeV4Response> getMountedVolumes() {
+        return mountedVolumes;
+    }
+
+    public void setMountedVolumes(List<MountedVolumeV4Response> mountedVolumes) {
+        this.mountedVolumes = mountedVolumes;
     }
 }

@@ -1,27 +1,32 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
+import com.sequenceiq.cloudbreak.service.secret.SecretValue;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
@@ -39,13 +44,7 @@ public class Template implements ProvisionEntity, WorkspaceAwareResource {
 
     private String instanceType;
 
-    private Integer volumeCount;
-
-    private Integer volumeSize;
-
     private Integer rootVolumeSize;
-
-    private String volumeType;
 
     private boolean deleted;
 
@@ -68,6 +67,9 @@ public class Template implements ProvisionEntity, WorkspaceAwareResource {
     @ManyToOne
     private Workspace workspace;
 
+    @OneToMany(mappedBy = "template", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Set<VolumeTemplate> volumeTemplates;
+
     public Template() {
         deleted = false;
     }
@@ -80,12 +82,12 @@ public class Template implements ProvisionEntity, WorkspaceAwareResource {
         this.id = id;
     }
 
-    public String getVolumeType() {
-        return volumeType;
+    public Set<VolumeTemplate> getVolumeTemplates() {
+        return volumeTemplates;
     }
 
-    public void setVolumeType(String volumeType) {
-        this.volumeType = volumeType;
+    public void setVolumeTemplates(Set<VolumeTemplate> volumeTemplates) {
+        this.volumeTemplates = volumeTemplates;
     }
 
     public String getName() {
@@ -102,22 +104,6 @@ public class Template implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public Integer getVolumeCount() {
-        return volumeCount;
-    }
-
-    public void setVolumeCount(Integer volumeCount) {
-        this.volumeCount = volumeCount;
-    }
-
-    public Integer getVolumeSize() {
-        return volumeSize;
-    }
-
-    public void setVolumeSize(Integer volumeSize) {
-        this.volumeSize = volumeSize;
     }
 
     public Integer getRootVolumeSize() {

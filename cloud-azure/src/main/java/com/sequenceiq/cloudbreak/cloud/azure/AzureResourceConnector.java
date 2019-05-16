@@ -336,7 +336,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             AzureCredentialView azureCredentialView, String resourceGroupName, CloudInstance instance) {
         String instanceId = instance.getInstanceId();
         Long privateId = instance.getTemplate().getPrivateId();
-        AzureDiskType azureDiskType = AzureDiskType.getByValue(instance.getTemplate().getVolumeType());
+        AzureDiskType azureDiskType = AzureDiskType.getByValue(instance.getTemplate().getVolumes().get(0).getType());
         String attachedDiskStorageName = azureStorage.getAttachedDiskStorageName(azureStorage.getArmAttachedStorageOption(stack.getParameters()),
                 azureCredentialView, privateId, ac.getCloudContext(), azureDiskType);
         Map<String, Object> resourcesToRemove = new HashMap<>();

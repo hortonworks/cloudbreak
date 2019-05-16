@@ -8,6 +8,7 @@ import java.util.stream.StreamSupport;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,15 +24,12 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsPlatformParameters.AwsDiskType;
 import com.sequenceiq.cloudbreak.cloud.aws.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
@@ -50,15 +48,7 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
     @Override
     public List<CloudResource> create(AwsContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
         LOGGER.debug("Prepare instance resource to attach to");
-        String volumeType = getVolumeType(group);
-        return AwsDiskType.Ephemeral.value().equalsIgnoreCase(volumeType) ? List.of() : context.getComputeResources(privateId);
-    }
-
-    public String getVolumeType(Group group) {
-        CloudInstance instance = group.getReferenceInstanceConfiguration();
-        InstanceTemplate template = instance.getTemplate();
-        Volume volumeTemplate = template.getVolumes().iterator().next();
-        return volumeTemplate.getType();
+        return context.getComputeResources(privateId);
     }
 
     @Override
@@ -82,6 +72,7 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
 
         VolumeSetAttributes volumeSetAttributes = volumeSet.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
         List<Future<?>> futures = volumeSetAttributes.getVolumes().stream()
+                .filter(volume -> !StringUtils.equals(AwsDiskType.Ephemeral.value(), volume.getType()))
                 .map(volume -> new AttachVolumeRequest()
                         .withInstanceId(instance.getInstanceId())
                         .withVolumeId(volume.getId())
