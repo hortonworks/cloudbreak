@@ -7,7 +7,6 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 
-
 public class CloudbreakConversionServiceFactoryBean extends ConversionServiceFactoryBean {
 
     @Override

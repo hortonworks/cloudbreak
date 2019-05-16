@@ -31,6 +31,6 @@ public class PlatformResourceModelDescription {
         public static final String GET_ENCRYPTIONKEYS = "retrive encryption keys with properties";
     }
 
-    public PlatformResourceModelDescription() {
+    private PlatformResourceModelDescription() {
     }
 }

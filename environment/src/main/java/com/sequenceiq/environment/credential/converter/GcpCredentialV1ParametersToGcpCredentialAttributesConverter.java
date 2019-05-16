@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.credential.converter;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.environment.api.credential.model.parameters.gcp.GcpCredentialV1Parameters;
 import com.sequenceiq.environment.api.credential.model.parameters.gcp.JsonParameters;
 import com.sequenceiq.environment.api.credential.model.parameters.gcp.P12Parameters;
@@ -7,6 +9,7 @@ import com.sequenceiq.environment.credential.attributes.gcp.GcpCredentialAttribu
 import com.sequenceiq.environment.credential.attributes.gcp.JsonAttributes;
 import com.sequenceiq.environment.credential.attributes.gcp.P12Attributes;
 
+@Component
 public class GcpCredentialV1ParametersToGcpCredentialAttributesConverter {
 
     public GcpCredentialAttributes convert(GcpCredentialV1Parameters source) {

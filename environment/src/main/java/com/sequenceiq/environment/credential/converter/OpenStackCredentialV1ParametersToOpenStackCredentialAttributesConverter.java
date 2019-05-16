@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.credential.converter;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.environment.api.credential.model.parameters.openstack.DomainKeystoneV3Parameters;
 import com.sequenceiq.environment.api.credential.model.parameters.openstack.KeystoneV2Parameters;
 import com.sequenceiq.environment.api.credential.model.parameters.openstack.KeystoneV3Parameters;
@@ -11,6 +13,7 @@ import com.sequenceiq.environment.credential.attributes.openstack.KeystoneV3Attr
 import com.sequenceiq.environment.credential.attributes.openstack.OpenStackCredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.openstack.ProjectKeystoneV3Attributes;
 
+@Component
 public class OpenStackCredentialV1ParametersToOpenStackCredentialAttributesConverter {
 
     public OpenStackCredentialAttributes convert(OpenstackCredentialV1Parameters source) {

@@ -36,6 +36,8 @@ dependencies {
   compile project (":cloud-azure")
   compile project (":cloud-mock")
   compile project (":cloud-yarn")
+  compile project (":cloud-gcp")
+  compile project (":cloud-openstack")
   compile project (":cloud-cumulus-yarn")
 
   compile     group: 'com.google.code.gson',      name: 'gson'

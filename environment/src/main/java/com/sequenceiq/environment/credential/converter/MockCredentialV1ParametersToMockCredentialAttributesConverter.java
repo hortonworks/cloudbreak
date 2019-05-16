@@ -1,8 +1,11 @@
 package com.sequenceiq.environment.credential.converter;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.environment.api.credential.model.parameters.mock.MockCredentialV1Parameters;
 import com.sequenceiq.environment.credential.attributes.mock.MockCredentialAttributes;
 
+@Component
 public class MockCredentialV1ParametersToMockCredentialAttributesConverter {
 
     public MockCredentialAttributes convert(MockCredentialV1Parameters source) {

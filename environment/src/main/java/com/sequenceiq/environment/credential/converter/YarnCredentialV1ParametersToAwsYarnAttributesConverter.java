@@ -1,8 +1,11 @@
 package com.sequenceiq.environment.credential.converter;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.environment.api.credential.model.parameters.yarn.YarnCredentialV1Parameters;
 import com.sequenceiq.environment.credential.attributes.yarn.YarnCredentialAttributes;
 
+@Component
 public class YarnCredentialV1ParametersToAwsYarnAttributesConverter {
 
     public YarnCredentialAttributes convert(YarnCredentialV1Parameters source) {

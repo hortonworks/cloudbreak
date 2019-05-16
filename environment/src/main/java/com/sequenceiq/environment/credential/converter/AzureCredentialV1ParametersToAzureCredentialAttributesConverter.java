@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.credential.converter;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.environment.api.credential.model.parameters.azure.AppBasedRequest;
 import com.sequenceiq.environment.api.credential.model.parameters.azure.AzureCredentialV1RequestParameters;
 import com.sequenceiq.environment.api.credential.model.parameters.azure.AzureCredentialV1ResponseParameters;
@@ -9,6 +11,7 @@ import com.sequenceiq.environment.credential.attributes.azure.AppBasedAttributes
 import com.sequenceiq.environment.credential.attributes.azure.AzureCredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.azure.RoleBasedAttributes;
 
+@Component
 public class AzureCredentialV1ParametersToAzureCredentialAttributesConverter {
 
     public AzureCredentialAttributes convert(AzureCredentialV1RequestParameters source) {

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.handler;
+package com.sequenceiq.environment.resourcepersister;
 
 import javax.inject.Inject;
 
