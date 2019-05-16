@@ -152,6 +152,16 @@
       ]
     },
     {
+      "refName": "ranger",
+      "serviceType": "RANGER",
+      "serviceConfigs": [
+        {
+          "name": "rangeradmin_user_password",
+          "value": "{{{ general.password }}}"
+        }
+      ]
+    },
+    {
       "refName": "impala",
       "serviceType": "IMPALA",
       "roleConfigGroups": [

@@ -83,7 +83,7 @@
   "flexId": 0,
   "cluster": {
     "userName": "string",
-    "password": "string",
+    "password": "string123",
     "emailNeeded": false,
     "emailTo": "string",
     "ldapConfigName": "string",

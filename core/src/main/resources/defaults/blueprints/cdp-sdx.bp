@@ -28,11 +28,11 @@
           },
           {
             "name": "rangeradmin_user_password",
-            "value": "Admin123!"
+            "value": "{{{ general.password }}}"
           },
           {
             "name": "rangertagsync_user_password",
-            "value": "Admin123!"
+            "value": "{{{ general.password }}}"
           },
           {
             "name": "solr_service",
@@ -40,11 +40,11 @@
           },
           {
             "name": "rangerusersync_user_password",
-            "value": "Admin123!"
+            "value": "{{{ general.password }}}"
           },
           {
             "name": "keyadmin_user_password",
-            "value": "Admin123!"
+            "value": "{{{ general.password }}}"
           }
         ],
         "roleConfigGroups": [
