@@ -25,7 +25,7 @@ public class AwsGroupView {
 
     private final String kmsKey;
 
-    private final String volumeType;
+    private final List<String> volumeTypes;
 
     private final Double spotPrice;
 
@@ -40,7 +40,7 @@ public class AwsGroupView {
     private final String autoScalingGroupName;
 
     public AwsGroupView(Integer instanceCount, String type, String flavor, String groupName, Boolean ebsEncrypted,
-            Integer rootVolumeSize, String volumeType, Double spotPrice, List<SecurityRule> rules, List<String> cloudSecurityIds, String subnetId,
+            Integer rootVolumeSize, List<String> volumeTypes, Double spotPrice, List<SecurityRule> rules, List<String> cloudSecurityIds, String subnetId,
             Boolean kmsKeyDefined, String kmsKey, String encryptedAMI) {
         this.instanceCount = instanceCount;
         this.type = type;
@@ -49,13 +49,13 @@ public class AwsGroupView {
         this.ebsEncrypted = ebsEncrypted;
         this.rootVolumeSize = rootVolumeSize;
         this.spotPrice = spotPrice;
-        this.volumeType = volumeType;
         this.rules = rules;
         this.cloudSecurityIds = cloudSecurityIds;
         this.subnetId = subnetId;
         this.kmsKeyDefined = kmsKeyDefined;
         this.kmsKey = kmsKey;
         this.encryptedAMI = encryptedAMI;
+        this.volumeTypes = volumeTypes;
         autoScalingGroupName = getAutoScalingGroupName(groupName);
     }
 
@@ -92,7 +92,7 @@ public class AwsGroupView {
     }
 
     public Boolean getEbsOptimized() {
-        return AwsDiskType.St1.value().equals(volumeType);
+        return volumeTypes.contains(AwsDiskType.St1.value());
     }
 
     public List<String> getCloudSecurityIds() {

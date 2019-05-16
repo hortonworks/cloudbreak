@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -160,7 +161,9 @@ public class TemplatePreparationObject {
             for (HostGroup hostGroup : hostGroups) {
                 InstanceGroup instanceGroup = hostGroup.getConstraint().getInstanceGroup();
                 if (instanceGroup != null) {
-                    int volumeCount = instanceGroup.getTemplate() == null ? 1 : instanceGroup.getTemplate().getVolumeCount();
+                    Template template = instanceGroup.getTemplate();
+                    int volumeCount = template == null ? 1 : template.getVolumeTemplates().stream()
+                            .mapToInt(volume -> volume.getVolumeCount()).sum();
                     Set<String> fqdns = instanceGroup.getAllInstanceMetaData().stream()
                             .map(InstanceMetaData::getDiscoveryFQDN)
                             .collect(Collectors.toSet());

@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -52,8 +53,11 @@ public class StackTest {
     private InstanceGroup createGroup(String volumeType) {
         InstanceGroup group = new InstanceGroup();
         Template ephemeralTemplate = new Template();
-        ephemeralTemplate.setVolumeType(volumeType);
         group.setTemplate(ephemeralTemplate);
+        ephemeralTemplate.setVolumeTemplates(Sets.newHashSet());
+        VolumeTemplate volumeTemplate = new VolumeTemplate();
+        volumeTemplate.setVolumeType(volumeType);
+        ephemeralTemplate.getVolumeTemplates().add(volumeTemplate);
         return group;
     }
 }

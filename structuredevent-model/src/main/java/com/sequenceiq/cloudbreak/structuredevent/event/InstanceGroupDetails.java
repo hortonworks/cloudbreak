@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
 import java.io.Serializable;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -14,11 +15,7 @@ public class InstanceGroupDetails implements Serializable {
 
     private String instanceType;
 
-    private String volumeType;
-
-    private Integer volumeSize;
-
-    private Integer volumeCount;
+    private List<VolumeDetails> volumes;
 
     private SecurityGroupDetails securityGroup;
 
@@ -54,28 +51,12 @@ public class InstanceGroupDetails implements Serializable {
         this.instanceType = instanceType;
     }
 
-    public String getVolumeType() {
-        return volumeType;
+    public List<VolumeDetails> getVolumes() {
+        return volumes;
     }
 
-    public void setVolumeType(String volumeType) {
-        this.volumeType = volumeType;
-    }
-
-    public Integer getVolumeSize() {
-        return volumeSize;
-    }
-
-    public void setVolumeSize(Integer volumeSize) {
-        this.volumeSize = volumeSize;
-    }
-
-    public Integer getVolumeCount() {
-        return volumeCount;
-    }
-
-    public void setVolumeCount(Integer volumeCount) {
-        this.volumeCount = volumeCount;
+    public void setVolumes(List<VolumeDetails> volumes) {
+        this.volumes = volumes;
     }
 
     public SecurityGroupDetails getSecurityGroup() {

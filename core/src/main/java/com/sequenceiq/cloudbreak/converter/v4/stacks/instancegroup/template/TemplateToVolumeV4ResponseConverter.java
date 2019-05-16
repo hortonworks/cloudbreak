@@ -4,13 +4,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.volume.VolumeV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 
 @Component
-public class TemplateToVolumeV4ResponseConverter extends AbstractConversionServiceAwareConverter<Template, VolumeV4Response> {
+public class TemplateToVolumeV4ResponseConverter extends AbstractConversionServiceAwareConverter<VolumeTemplate, VolumeV4Response> {
 
     @Override
-    public VolumeV4Response convert(Template source) {
+    public VolumeV4Response convert(VolumeTemplate source) {
         VolumeV4Response response = new VolumeV4Response();
         response.setCount(source.getVolumeCount());
         response.setSize(source.getVolumeSize());

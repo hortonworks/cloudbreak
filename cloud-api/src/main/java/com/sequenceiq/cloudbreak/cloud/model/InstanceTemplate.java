@@ -44,14 +44,6 @@ public class InstanceTemplate extends DynamicModel {
         return volumes;
     }
 
-    public String getVolumeType() {
-        return volumes.get(0).getType();
-    }
-
-    public int getVolumeSize() {
-        return volumes.get(0).getSize();
-    }
-
     public String getGroupName() {
         return groupName;
     }

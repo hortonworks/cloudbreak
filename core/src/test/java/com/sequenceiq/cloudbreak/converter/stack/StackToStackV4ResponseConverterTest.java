@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
@@ -189,6 +190,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         stack.setOrchestrator(orchestrator);
         stack.setParameters(new HashMap<>());
         stack.setCloudPlatform("OPENSTACK");
+        stack.setPlatformVariant(CloudConstants.OPENSTACK);
         stack.setGatewayPort(9443);
         stack.setCustomDomain("custom.domain");
         stack.setCustomHostname("hostname");

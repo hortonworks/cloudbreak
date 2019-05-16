@@ -22,14 +22,6 @@ public class AwsInstanceView {
         return instanceTemplate.getFlavor();
     }
 
-    public String getVolumeType() {
-        return instanceTemplate.getVolumeType();
-    }
-
-    public int getVolumeSize() {
-        return instanceTemplate.getVolumeSize();
-    }
-
     public String getGroupName() {
         return instanceTemplate.getGroupName();
     }

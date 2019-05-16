@@ -29,6 +29,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -164,7 +165,7 @@ public class StackToCloudStackConverterTest {
         Set<InstanceGroup> instanceGroups = new LinkedHashSet<>();
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
         Template template = new Template();
-        template.setVolumeCount(0);
+        template.setVolumeTemplates(Sets.newHashSet());
         instanceGroups.add(instanceGroup);
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(instanceGroup.getNotDeletedInstanceMetaDataSet()).thenReturn(Collections.emptySet());
@@ -181,7 +182,7 @@ public class StackToCloudStackConverterTest {
         Set<InstanceGroup> instanceGroups = new LinkedHashSet<>();
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
         Template template = new Template();
-        template.setVolumeCount(0);
+        template.setVolumeTemplates(Sets.newHashSet());
         instanceGroups.add(instanceGroup);
 
         InstanceMetaData metaData = new InstanceMetaData();
@@ -211,7 +212,7 @@ public class StackToCloudStackConverterTest {
         Set<InstanceGroup> instanceGroups = new LinkedHashSet<>();
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
         Template template = new Template();
-        template.setVolumeCount(0);
+        template.setVolumeTemplates(Sets.newHashSet());
         instanceGroups.add(instanceGroup);
         Set<InstanceMetaData> notDeletedMetas = new LinkedHashSet<>();
         notDeletedMetas.add(new InstanceMetaData());
@@ -235,7 +236,7 @@ public class StackToCloudStackConverterTest {
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
         String groupName = TEST_NAME;
         Template template = new Template();
-        template.setVolumeCount(0);
+        template.setVolumeTemplates(Sets.newHashSet());
         instanceGroups.add(instanceGroup);
         when(instanceGroup.getNodeCount()).thenReturn(2);
         when(instanceGroup.getGroupName()).thenReturn(groupName);
@@ -256,7 +257,7 @@ public class StackToCloudStackConverterTest {
         Set<InstanceGroup> instanceGroups = new LinkedHashSet<>();
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
         Template template = new Template();
-        template.setVolumeCount(0);
+        template.setVolumeTemplates(Sets.newHashSet());
         instanceGroups.add(instanceGroup);
         when(instanceGroup.getNodeCount()).thenReturn(0);
         when(instanceGroup.getTemplate()).thenReturn(template);
@@ -275,7 +276,7 @@ public class StackToCloudStackConverterTest {
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
         instanceGroups.add(instanceGroup);
         Template template = new Template();
-        template.setVolumeCount(0);
+        template.setVolumeTemplates(Sets.newHashSet());
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(instanceGroup.getAttributes()).thenReturn(null);
         when(instanceGroup.getNotDeletedInstanceMetaDataSet()).thenReturn(Collections.emptySet());
@@ -294,7 +295,7 @@ public class StackToCloudStackConverterTest {
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
         instanceGroups.add(instanceGroup);
         Template template = new Template();
-        template.setVolumeCount(0);
+        template.setVolumeTemplates(Sets.newHashSet());
         Map<String, Object> expected = createMap("");
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(instanceGroup.getAttributes()).thenReturn(attributes);
@@ -316,7 +317,6 @@ public class StackToCloudStackConverterTest {
         Template template = mock(Template.class);
         String platform = "platform";
         int expected = Integer.MAX_VALUE;
-        when(template.getVolumeCount()).thenReturn(0);
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(stack.getInstanceGroupsAsList()).thenReturn(new ArrayList<>(instanceGroups));
         when(template.getRootVolumeSize()).thenReturn(null);
@@ -336,7 +336,6 @@ public class StackToCloudStackConverterTest {
         instanceGroups.add(instanceGroup);
         Template template = mock(Template.class);
         int expected = Integer.MAX_VALUE;
-        when(template.getVolumeCount()).thenReturn(0);
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(stack.getInstanceGroupsAsList()).thenReturn(new ArrayList<>(instanceGroups));
         when(template.getRootVolumeSize()).thenReturn(expected);
@@ -354,7 +353,6 @@ public class StackToCloudStackConverterTest {
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
         instanceGroups.add(instanceGroup);
         Template template = mock(Template.class);
-        when(template.getVolumeCount()).thenReturn(0);
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(instanceGroup.getSecurityGroup()).thenReturn(null);
         when(stack.getInstanceGroupsAsList()).thenReturn(new ArrayList<>(instanceGroups));
@@ -375,7 +373,6 @@ public class StackToCloudStackConverterTest {
         SecurityGroup securityGroup = new SecurityGroup();
         securityGroup.setId(1L);
         securityGroup.setSecurityGroupIds(Collections.singleton(TEST_STRING_ID));
-        when(template.getVolumeCount()).thenReturn(0);
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(instanceGroup.getSecurityGroup()).thenReturn(securityGroup);
         when(stack.getInstanceGroupsAsList()).thenReturn(new ArrayList<>(instanceGroups));
@@ -400,7 +397,6 @@ public class StackToCloudStackConverterTest {
         Template template = mock(Template.class);
         SecurityGroup securityGroup = new SecurityGroup();
         securityGroup.setId(1L);
-        when(template.getVolumeCount()).thenReturn(0);
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(instanceGroup.getNotDeletedInstanceMetaDataSet()).thenReturn(Collections.emptySet());
         when(instanceGroup.getSecurityGroup()).thenReturn(securityGroup);
@@ -428,7 +424,6 @@ public class StackToCloudStackConverterTest {
         Template template = mock(Template.class);
         SecurityGroup securityGroup = new SecurityGroup();
         securityGroup.setId(1L);
-        when(template.getVolumeCount()).thenReturn(0);
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(instanceGroup.getNotDeletedInstanceMetaDataSet()).thenReturn(Collections.emptySet());
         when(instanceGroup.getSecurityGroup()).thenReturn(securityGroup);
@@ -458,7 +453,6 @@ public class StackToCloudStackConverterTest {
         Template template = mock(Template.class);
         SecurityGroup securityGroup = new SecurityGroup();
         securityGroup.setId(1L);
-        when(template.getVolumeCount()).thenReturn(0);
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(instanceGroup.getNotDeletedInstanceMetaDataSet()).thenReturn(Collections.emptySet());
         when(instanceGroup.getSecurityGroup()).thenReturn(securityGroup);
@@ -724,7 +718,7 @@ public class StackToCloudStackConverterTest {
     @Test
     public void testBuildInstanceTemplateWithAttributes() throws Exception {
         Template template = new Template();
-        template.setVolumeCount(0);
+        template.setVolumeTemplates(Sets.newHashSet());
         template.setAttributes(new Json(Map.of("someAttr", "value")));
         template.setSecretAttributes(new Json(Map.of("otherAttr", "value")).getValue());
 
@@ -739,7 +733,7 @@ public class StackToCloudStackConverterTest {
     @Test
     public void testBuildInstanceTemplateWithEncryptionAttributes() throws Exception {
         Template template = new Template();
-        template.setVolumeCount(0);
+        template.setVolumeTemplates(Sets.newHashSet());
         template.setAttributes(new Json(Map.of("keyEncryptionMethod", "RAW", "type", "CUSTOM")));
         template.setSecretAttributes(new Json(Map.of("key", "myKey")).getValue());
 

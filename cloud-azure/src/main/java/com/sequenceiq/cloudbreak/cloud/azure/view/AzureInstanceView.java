@@ -93,7 +93,7 @@ public class AzureInstanceView {
      * Used in OLD freemarker template -> backward compatibility
      */
     public boolean isBootDiagnosticsEnabled() {
-        return AzureDiskType.LOCALLY_REDUNDANT.equals(AzureDiskType.getByValue(instanceTemplate.getVolumeType()));
+        return AzureDiskType.LOCALLY_REDUNDANT.equals(AzureDiskType.getByValue(instanceTemplate.getVolumes().get(0).getType()));
     }
 
     public InstanceGroupType getType() {

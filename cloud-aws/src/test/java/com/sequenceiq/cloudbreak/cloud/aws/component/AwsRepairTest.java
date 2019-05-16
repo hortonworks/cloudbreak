@@ -174,8 +174,8 @@ public class AwsRepairTest extends AwsComponentTest {
                     assertEquals(WORKER_GROUP, cloudResource.getGroup());
                     assertEquals(CommonStatus.CREATED, cloudResource.getStatus());
                     assertEquals(AVAILABILITY_ZONE, volumeSetAttributes.getAvailabilityZone());
-                    assertEquals(Integer.valueOf(sizeDisk), volumeSetAttributes.getVolumeSize());
-                    assertEquals("standard", volumeSetAttributes.getVolumeType());
+                    assertEquals(Integer.valueOf(sizeDisk), volumeSetAttributes.getVolumes().get(0).getSize());
+                    assertEquals("standard", volumeSetAttributes.getVolumes().get(0).getType());
                     assertEquals(fstab, volumeSetAttributes.getFstab());
                 }, () -> fail("Volume resource was not saved for " + instanceId));
     }
@@ -245,10 +245,8 @@ public class AwsRepairTest extends AwsComponentTest {
         attributes.put(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
                 .withAvailabilityZone(AVAILABILITY_ZONE)
                 .withDeleteOnTermination(Boolean.FALSE)
-                .withVolumeSize(sizeDisk)
-                .withVolumeType(VOLUME_TYPE)
                 .withFstab(fstab)
-                .withVolumes(List.of(new VolumeSetAttributes.Volume(volumeId, DEVICE)))
+                .withVolumes(List.of(new VolumeSetAttributes.Volume(volumeId, DEVICE, sizeDisk, VOLUME_TYPE)))
                 .build());
         return CloudResource.builder()
                 .group(WORKER_GROUP)

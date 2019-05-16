@@ -22,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.controller.validation.LocationService;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 
@@ -71,7 +73,9 @@ public class TemplateDecoratorTest {
         Template template = new Template();
         template.setInstanceType(VM_TYPE);
         template.setCloudPlatform(PLATFORM_1);
-        template.setVolumeType(VOLUME_TYPE);
+        VolumeTemplate volumeTemplate = new VolumeTemplate();
+        volumeTemplate.setVolumeType(VOLUME_TYPE);
+        template.setVolumeTemplates(Sets.newHashSet(volumeTemplate));
 
         Platform platform = Platform.platform(PLATFORM_1);
         int minimumSize = 10;
@@ -98,8 +102,9 @@ public class TemplateDecoratorTest {
 
         Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT);
 
-        assertEquals(maximumNumber, actual.getVolumeCount().longValue());
-        assertEquals(maximumSize, actual.getVolumeSize().longValue());
+        VolumeTemplate next = actual.getVolumeTemplates().iterator().next();
+        assertEquals(maximumNumber, next.getVolumeCount().longValue());
+        assertEquals(maximumSize, next.getVolumeSize().longValue());
     }
 
     @Test
@@ -108,8 +113,7 @@ public class TemplateDecoratorTest {
 
         Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT);
 
-        Assert.assertNull(actual.getVolumeCount());
-        Assert.assertNull(actual.getVolumeSize());
+        Assert.assertTrue(actual.getVolumeTemplates().isEmpty());
     }
 
     @Test
@@ -120,7 +124,9 @@ public class TemplateDecoratorTest {
         Template template = new Template();
         template.setInstanceType("missingVmType");
         template.setCloudPlatform(PLATFORM_1);
-        template.setVolumeType(VOLUME_TYPE);
+        VolumeTemplate volumeTemplate = new VolumeTemplate();
+        volumeTemplate.setVolumeType(VOLUME_TYPE);
+        template.setVolumeTemplates(Sets.newHashSet(volumeTemplate));
 
         Platform platform = Platform.platform(PLATFORM_1);
         int minimumSize = 10;
@@ -147,8 +153,9 @@ public class TemplateDecoratorTest {
 
         Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT);
 
-        Assert.assertNull(actual.getVolumeCount());
-        Assert.assertNull(actual.getVolumeSize());
+        VolumeTemplate next = actual.getVolumeTemplates().iterator().next();
+        Assert.assertNull(next.getVolumeCount());
+        Assert.assertNull(next.getVolumeSize());
     }
 
     @Test
@@ -173,6 +180,7 @@ public class TemplateDecoratorTest {
 
     private Template initTemplate() {
         Template template = new Template();
+        template.setVolumeTemplates(Sets.newHashSet());
         cloudCredential = mock(Credential.class);
 
         CloudVmTypes cloudVmTypes = new CloudVmTypes(singletonMap(REGION, emptySet()), emptyMap());

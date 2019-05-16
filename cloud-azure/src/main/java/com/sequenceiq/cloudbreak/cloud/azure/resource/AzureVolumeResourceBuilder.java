@@ -11,7 +11,6 @@ import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
 import javax.inject.Inject;
@@ -42,7 +41,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.type.CommonStatus;
@@ -85,7 +83,6 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
 
             CloudInstance instance = group.getReferenceInstanceConfiguration();
             InstanceTemplate template = instance.getTemplate();
-            Volume volumeTemplate = template.getVolumes().iterator().next();
             String groupName = group.getName();
             CloudContext cloudContext = auth.getCloudContext();
             String stackName = cloudContext.getName();
@@ -98,14 +95,13 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                     .group(group.getName())
                     .status(CommonStatus.REQUESTED)
                     .params(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
-                            .withVolumeSize(volumeTemplate.getSize())
-                            .withVolumeType(volumeTemplate.getType())
                             .withAvailabilityZone(availabilityZone)
                             .withDeleteOnTermination(Boolean.TRUE)
                             .withVolumes(
-                                    IntStream.range(0, template.getVolumes().size())
-                                            .mapToObj(i -> new VolumeSetAttributes.Volume(resourceNameService.resourceName(
-                                                    ResourceType.AZURE_DISK, stackName, groupName, privateId, i), null))
+                                    template.getVolumes().stream()
+                                            .map(volume -> new VolumeSetAttributes.Volume(resourceNameService.resourceName(
+                                                    ResourceType.AZURE_DISK, stackName, groupName, privateId, template.getVolumes().indexOf(volume)), null,
+                                                    volume.getSize(), volume.getType()))
                                             .collect(Collectors.toList()))
                             .build()))
                     .build();
@@ -144,15 +140,14 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         for (CloudResource resource : requestedResources) {
             volumeSetMap.put(resource.getName(), Collections.synchronizedList(new ArrayList<>()));
             VolumeSetAttributes volumeSet = getVolumeSetAttributes(resource);
-            int volumeSize = volumeSet.getVolumeSize();
             DeviceNameGenerator generator = new DeviceNameGenerator();
             futures.addAll(volumeSet.getVolumes().stream()
                     .map(volume -> intermediateBuilderExecutor.submit(() -> {
                         Disk result = client.createManagedDisk(
-                                volume.getId(), volumeSize, AzureDiskType.getByValue(
-                                        volumeSet.getVolumeType()), region, resourceGroupName, cloudStack.getTags());
+                                volume.getId(), volume.getSize(), AzureDiskType.getByValue(
+                                        volume.getType()), region, resourceGroupName, cloudStack.getTags());
                         String volumeId = result.id();
-                        volumeSetMap.get(resource.getName()).add(new VolumeSetAttributes.Volume(volumeId, generator.next()));
+                        volumeSetMap.get(resource.getName()).add(new VolumeSetAttributes.Volume(volumeId, generator.next(), volume.getSize(), volume.getType()));
                     }))
                     .collect(Collectors.toList()));
         }
