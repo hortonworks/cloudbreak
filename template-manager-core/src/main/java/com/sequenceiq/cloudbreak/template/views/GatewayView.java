@@ -37,6 +37,8 @@ public class GatewayView {
 
     private final Map<String, Json> gatewayTopologies;
 
+    private final String masterSecret;
+
     public GatewayView(@Nonnull Gateway gateway, String signKey) {
         gatewayType = gateway.getGatewayType();
         path = gateway.getPath();
@@ -48,6 +50,7 @@ public class GatewayView {
         signPub = gateway.getSignPub();
         signCert = gateway.getSignCert();
         tokenCert = gateway.getTokenCert();
+        this.masterSecret = gateway.getKnoxMasterSecret();
         this.signKey = signKey;
     }
 
@@ -109,5 +112,9 @@ public class GatewayView {
 
     public Map<String, Json> getGatewayTopologies() {
         return gatewayTopologies;
+    }
+
+    public String getMasterSecret() {
+        return masterSecret;
     }
 }

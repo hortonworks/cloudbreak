@@ -8,10 +8,13 @@
 {% set vdf_url = salt['pillar.get']('hdp:stack:vdf-url') %}
 {% set os_family = salt['grains.get']('os_family') %}
 
+{% set ldap = salt['pillar.get']('ldap') %}
+
 {% set gateway = {} %}
 {% do gateway.update({
     'is_systemd' : is_systemd,
     'is_local_ldap' : is_local_ldap,
     'os_family' : os_family,
-    'vdf_url' : vdf_url
+    'vdf_url' : vdf_url,
+    'ldap': ldap
 }) %}
