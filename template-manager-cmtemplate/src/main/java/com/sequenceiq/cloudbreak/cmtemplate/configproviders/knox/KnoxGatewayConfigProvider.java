@@ -19,6 +19,8 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigConfigProvider 
 
     private static final String KNOX_MASTER_SECRET = "gateway_master_secret";
 
+    private static final String GATEWAY_PATH = "gateway_path";
+
     // This needs to be removed once Knox CSD with PAM is merged
     private static final String SEC_GROUP_MAPPING = "hadoop_security_group_mapping_class";
 
@@ -39,6 +41,7 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigConfigProvider 
 
                 config.add(config(SEC_GROUP_MAPPING, "org.apache.hadoop.security.ShellBasedUnixGroupsMapping"));
                 config.add(config(KNOX_MASTER_SECRET, source.getGatewayView().getMasterSecret()));
+                config.add(config(GATEWAY_PATH, source.getGatewayView().getPath()));
 
                 // This needs to be removed once Knox CSD with PAM is merged
                 Optional<LdapView> ldapConfigOpt = source.getLdapConfig();

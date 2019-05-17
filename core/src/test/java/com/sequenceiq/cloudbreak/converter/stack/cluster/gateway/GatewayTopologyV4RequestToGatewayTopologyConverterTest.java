@@ -79,7 +79,7 @@ public class GatewayTopologyV4RequestToGatewayTopologyConverterTest {
     public void testConvertWithAllKnoxServices() throws IOException {
         GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
         gatewayTopologyJson.setTopologyName(TOPOLOGY_NAME);
-        gatewayTopologyJson.setExposedServices(Collections.singletonList(ExposedService.ALL.getServiceName()));
+        gatewayTopologyJson.setExposedServices(Collections.singletonList(ExposedService.ALL.getAmbariServiceName()));
         ExposedServices expectedExposedServices = gatewayTopologyJsonToExposedServicesConverter.convert(gatewayTopologyJson);
         when(conversionService.convert(any(GatewayTopologyV4Request.class), eq(ExposedServices.class))).thenReturn(expectedExposedServices);
 

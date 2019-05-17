@@ -106,7 +106,6 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                 .map(ApiClusterTemplateHostTemplate::getRoleConfigGroupsRefNames)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
-
         return cmTemplate.getServices().stream()
                 .map(ApiClusterTemplateService::getRoleConfigGroups)
                 .filter(Objects::nonNull)

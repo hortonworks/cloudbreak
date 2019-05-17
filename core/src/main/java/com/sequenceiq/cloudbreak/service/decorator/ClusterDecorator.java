@@ -109,8 +109,8 @@ public class ClusterDecorator {
         String blueprintText = subject.getBlueprint().getBlueprintText();
         Set<String> haComponents = ambariHaComponentFilter.getHaComponents(new AmbariBlueprintTextProcessor(blueprintText));
         Set<String> haKnoxServices = ExposedService.filterSupportedKnoxServices().stream()
-                .filter(es -> haComponents.contains(es.getServiceName())
-                        && !ExposedService.RANGER.getServiceName().equalsIgnoreCase(es.getServiceName()))
+                .filter(es -> haComponents.contains(es.getAmbariServiceName())
+                        && !ExposedService.RANGER.getAmbariServiceName().equalsIgnoreCase(es.getAmbariServiceName()))
                 .map(ExposedService::getKnoxService)
                 .collect(Collectors.toSet());
         Gateway gateway = subject.getGateway();

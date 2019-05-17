@@ -16,7 +16,7 @@ public class ExposedServiceListValidator implements Validator<List<String>> {
     public ValidationResult validate(List<String> subject) {
         List<String> invalidKnoxServices = subject.stream()
                 .filter(es -> !ExposedService.isKnoxExposed(es))
-                .filter(es -> !ExposedService.ALL.getServiceName().equalsIgnoreCase(es))
+                .filter(es -> !ExposedService.ALL.getAmbariServiceName().equalsIgnoreCase(es))
                 .collect(Collectors.toList());
 
         return ValidationResult.builder()

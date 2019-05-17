@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
@@ -24,6 +25,7 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -46,7 +48,13 @@ public class ComponentLocatorServiceTest {
     private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
 
     @Mock
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
+
+    @Mock
     private InstanceMetaDataService instanceMetaDataService;
+
+    @Mock
+    private BlueprintService blueprintService;
 
     @InjectMocks
     private ComponentLocatorService underTest;
@@ -95,13 +103,14 @@ public class ComponentLocatorServiceTest {
 
     @Test
     public void getComponentLocation() {
+        when(blueprintService.isAmbariBlueprint(any())).thenReturn(true);
 
         Map<String, List<String>> expected = Maps.newHashMap();
         expected.put("RESOURCEMANAGER", ImmutableList.of("myhost1"));
         expected.put("HIVE_SERVER", ImmutableList.of("myhost1"));
         expected.put("NAMENODE", ImmutableList.of("myhost2"));
 
-        Map<String, List<String>> result = underTest.getComponentLocation(cluster, new HashSet<>(ExposedService.getAllServiceName()));
+        Map<String, List<String>> result = underTest.getComponentLocation(cluster, new HashSet<>(ExposedService.getAllServiceNameForAmbari()));
         Assert.assertEquals(3L, result.size());
         Assert.assertEquals(expected, result);
     }
@@ -115,7 +124,7 @@ public class ComponentLocatorServiceTest {
         expected.put("NAMENODE", ImmutableList.of("10.0.140.70"));
 
         Map<String, List<String>> result = underTest.getComponentPrivateIp(cluster.getId(), ambariBlueprintTextProcessor,
-                new HashSet<>(ExposedService.getAllServiceName()));
+                new HashSet<>(ExposedService.getAllServiceNameForAmbari()));
         Assert.assertEquals(3L, result.size());
         Assert.assertEquals(expected, result);
     }

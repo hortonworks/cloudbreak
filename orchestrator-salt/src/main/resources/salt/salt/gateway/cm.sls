@@ -15,12 +15,12 @@ cloudera_manager_setup_knox:
     - repl: CMF_SERVER_ARGS="-i /etc/cloudera-scm-server/cm.settings"
     - unless: grep "CMF_SERVER_ARGS=\"-i /etc/cloudera-scm-server/cm.settings\"" /etc/default/cloudera-scm-server
 
-/var/lib/knox/gateway/conf/topologies:
+/var/lib/knox/cloudbreak_topologies:
   file.directory:
     - mode: 777
     - makedirs: True
 
-/var/lib/knox/gateway/conf/topologies/admin.xml:
+/var/lib/knox/cloudbreak_topologies/admin.xml:
   file.managed:
     - source: salt://gateway/config/cm/admin.xml.j2
     - template: jinja
@@ -28,7 +28,7 @@ cloudera_manager_setup_knox:
     - context:
         ldap: {{ gateway.ldap }}
 
-/var/lib/knox/gateway/conf/topologies/manager.xml:
+/var/lib/knox/cloudbreak_topologies/manager.xml:
   file.managed:
     - source: salt://gateway/config/cm/manager.xml.j2
     - template: jinja
@@ -36,14 +36,28 @@ cloudera_manager_setup_knox:
     - context:
         ldap: {{ gateway.ldap }}
 
-/var/lib/knox/gateway/conf/topologies/knoxsso.xml:
+/var/lib/knox/cloudbreak_topologies/knoxsso.xml:
   file.managed:
     - source: salt://gateway/config/cm/knoxsso.xml.j2
     - template: jinja
     - mode: 777
 
-/var/lib/knox/gateway/conf/topologies/sandbox.xml:
+/var/lib/knox/cloudbreak_topologies/sandbox.xml:
   file.managed:
     - source: salt://gateway/config/cm/sandbox.xml.j2
     - template: jinja
     - mode: 777
+
+{% for topology in salt['pillar.get']('gateway:topologies') -%}
+
+/var/lib/knox/cloudbreak_topologies/{{ topology.name }}.xml:
+  file.managed:
+    - source: salt://gateway/config/cm/topology.xml.j2
+    - template: jinja
+    - context:
+      exposed: {{ topology.exposed }}
+      ports: {{ salt['pillar.get']('gateway:ports') }}
+      topology_name: {{ topology.name }}
+    - mode: 777
+
+{% endfor %}
