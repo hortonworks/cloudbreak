@@ -1,8 +1,8 @@
 {
-  "description": "CDP 1.0 Data Science template with Spark, Impala and Hive",
+  "description": "CDP 1.0 Data Mart template with Spark, Impala, Hue and Hive",
   "blueprint": {
     "cdhVersion": "6.0.99",
-    "displayName": "datascience",
+    "displayName": "datamart",
     "services": [
       {
         "refName": "zookeeper",
@@ -152,6 +152,33 @@
             "base": true
           }
         ]
+      },
+      {
+        "refName": "hue",
+        "serviceType": "HUE",
+        "roleConfigGroups": [
+          {
+            "refName": "hue-HUE_SERVER-BASE",
+            "roleType": "HUE_SERVER",
+            "base": true
+          },
+          {
+            "refName": "hue-HUE_LOAD_BALANCER-BASE",
+            "roleType": "HUE_LOAD_BALANCER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "oozie",
+        "serviceType": "OOZIE",
+        "roleConfigGroups": [
+          {
+            "refName": "oozie-OOZIE_SERVER-BASE",
+            "roleType": "OOZIE_SERVER",
+            "base": true
+          }
+        ]
       }
     ],
     "hostTemplates": [
@@ -165,8 +192,11 @@
           "hive-GATEWAY-BASE",
           "hive-HIVEMETASTORE-BASE",
           "hive-HIVESERVER2-BASE",
+          "hue-HUE_LOAD_BALANCER-BASE",
+          "hue-HUE_SERVER-BASE",
           "impala-CATALOGSERVER-BASE",
           "impala-STATESTORE-BASE",
+          "oozie-OOZIE_SERVER-BASE",
           "spark_on_yarn-GATEWAY-BASE",
           "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
           "yarn-JOBHISTORY-BASE",
