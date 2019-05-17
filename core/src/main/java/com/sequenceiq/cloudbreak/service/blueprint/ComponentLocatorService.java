@@ -13,11 +13,13 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 
 @Service
 public class ComponentLocatorService {
@@ -26,7 +28,13 @@ public class ComponentLocatorService {
     private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
 
     @Inject
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
+
+    @Inject
     private HostGroupService hostGroupService;
+
+    @Inject
+    private BlueprintService blueprintService;
 
     public Map<String, List<String>> getComponentLocation(Cluster cluster, Collection<String> componentNames) {
         return getComponentAttribute(cluster, componentNames, InstanceMetaData::getDiscoveryFQDN);
@@ -37,32 +45,37 @@ public class ComponentLocatorService {
         return getComponentAttribute(clusterId, blueprintTextProcessor, componentNames, InstanceMetaData::getPrivateIp);
     }
 
-    private Map<String, List<String>> getComponentAttribute(Cluster cluster, Collection<String> componentNames,
-            Function<InstanceMetaData, String> getterFunction) {
+    private Map<String, List<String>> getComponentAttribute(Cluster cluster, Collection<String> componentNames, Function<InstanceMetaData, String> fqdn) {
         Map<String, List<String>> result = new HashMap<>();
+        String blueprintText = cluster.getBlueprint().getBlueprintText();
+        BlueprintTextProcessor processor = isAmbariBlueprint(cluster) ? ambariBlueprintProcessorFactory.get(blueprintText)
+                : cmTemplateProcessorFactory.get(blueprintText);
         for (HostGroup hg : hostGroupService.getByCluster(cluster.getId())) {
-            String blueprintText = cluster.getBlueprint().getBlueprintText();
-            Set<String> hgComponents = ambariBlueprintProcessorFactory.get(blueprintText).getComponentsInHostGroup(hg.getName());
+            Set<String> hgComponents = processor.getComponentsInHostGroup(hg.getName());
             hgComponents.retainAll(componentNames);
-            fillList(getterFunction, result, hg, hgComponents);
+            fillList(fqdn, result, hg, hgComponents);
         }
         return result;
     }
 
+    private boolean isAmbariBlueprint(Cluster cluster) {
+        return blueprintService.isAmbariBlueprint(cluster.getBlueprint());
+    }
+
     private Map<String, List<String>> getComponentAttribute(Long clusterId, AmbariBlueprintTextProcessor blueprintTextProcessor,
-            Collection<String> componentNames, Function<InstanceMetaData, String> getterFunction) {
+            Collection<String> componentNames, Function<InstanceMetaData, String> fqdn) {
         Map<String, List<String>> result = new HashMap<>();
         for (HostGroup hg : hostGroupService.getByCluster(clusterId)) {
             Set<String> hgComponents = blueprintTextProcessor.getComponentsInHostGroup(hg.getName());
             hgComponents.retainAll(componentNames);
-            fillList(getterFunction, result, hg, hgComponents);
+            fillList(fqdn, result, hg, hgComponents);
         }
         return result;
     }
 
-    private void fillList(Function<InstanceMetaData, String> getterFunction, Map<String, List<String>> result, HostGroup hg, Set<String> hgComponents) {
+    private void fillList(Function<InstanceMetaData, String> fqdn, Map<String, List<String>> result, HostGroup hg, Set<String> hgComponents) {
         List<String> attributeList = hg.getConstraint().getInstanceGroup().getNotDeletedInstanceMetaDataSet().stream()
-                .map(getterFunction).collect(Collectors.toList());
+                .map(fqdn).collect(Collectors.toList());
         for (String service : hgComponents) {
             List<String> storedAttributes = result.get(service);
             if (storedAttributes == null) {

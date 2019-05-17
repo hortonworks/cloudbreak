@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -438,20 +437,17 @@ public class ClusterHostServiceRunner {
                 gateway.put("ports", servicePorts);
             }
         }
-
         gateway.put("kerberos", cluster.getKerberosConfig() != null);
 
-        if (blueprintService.isAmbariBlueprint(cluster.getBlueprint())) {
-            Map<String, List<String>> serviceLocation = componentLocator.getComponentLocation(cluster, new HashSet<>(ExposedService.getAllServiceName()));
-
-            List<String> rangerLocations = serviceLocation.get(ExposedService.RANGER.getServiceName());
-            if (rangerLocations != null && !rangerLocations.isEmpty()) {
-                serviceLocation.put(ExposedService.RANGER.getServiceName(), getSingleRangerFqdn(gatewayConfig.getHostname(), rangerLocations));
-            }
-
-            gateway.put("location", serviceLocation);
-            servicePillar.put("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
+        List<String> serviceNames = blueprintService.isAmbariBlueprint(cluster.getBlueprint()) ? ExposedService.getAllServiceNameForAmbari()
+                : ExposedService.getAllServiceNameForCM();
+        Map<String, List<String>> serviceLocation = componentLocator.getComponentLocation(cluster, serviceNames);
+        List<String> rangerLocations = serviceLocation.get(ExposedService.RANGER.getCmServiceName());
+        if (rangerLocations != null && !rangerLocations.isEmpty()) {
+            serviceLocation.put(ExposedService.RANGER.getCmServiceName(), getSingleRangerFqdn(gatewayConfig.getHostname(), rangerLocations));
         }
+        gateway.put("location", serviceLocation);
+        servicePillar.put("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
     }
 
     private List<String> getSingleRangerFqdn(String primaryGatewayFqdn, List<String> rangerLocations) {

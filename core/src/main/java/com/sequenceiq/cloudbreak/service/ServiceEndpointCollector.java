@@ -99,7 +99,7 @@ public class ServiceEndpointCollector {
                 Gateway gateway = cluster.getGateway();
                 Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServiceMap = new HashMap<>();
                 Map<String, List<String>> privateIps = componentLocatorService.getComponentPrivateIp(cluster.getId(), blueprintTextProcessor,
-                        knownExposedServices.stream().map(ExposedService::getServiceName).collect(Collectors.toSet()));
+                        knownExposedServices.stream().map(ExposedService::getAmbariServiceName).collect(Collectors.toSet()));
                 if (gateway != null) {
                     for (GatewayTopology gatewayTopology : gateway.getTopologies()) {
                         List<ClusterExposedServiceV4Response> clusterExposedServiceResponses = new ArrayList<>();
@@ -110,9 +110,9 @@ public class ServiceEndpointCollector {
                         for (ExposedService exposedService : knownExposedServices) {
                             ClusterExposedServiceV4Response clusterExposedServiceResponse = new ClusterExposedServiceV4Response();
                             clusterExposedServiceResponse.setMode(exposedService.isSSOSupported() ? gateway.getSsoType() : SSOType.NONE);
-                            clusterExposedServiceResponse.setDisplayName(exposedService.getPortName());
+                            clusterExposedServiceResponse.setDisplayName(exposedService.getDisaplayName());
                             clusterExposedServiceResponse.setKnoxService(exposedService.getKnoxService());
-                            clusterExposedServiceResponse.setServiceName(exposedService.getServiceName());
+                            clusterExposedServiceResponse.setServiceName(exposedService.getAmbariServiceName());
                             Optional<String> serviceUrlForService = getServiceUrlForService(exposedService, ambariIp,
                                     gateway, gatewayTopology.getTopologyName(), blueprintTextProcessor.getStackVersion(), privateIps);
                             serviceUrlForService.ifPresent(clusterExposedServiceResponse::setServiceUrl);
@@ -153,7 +153,7 @@ public class ServiceEndpointCollector {
         if (BlueprintTextProcessorUtil.getClusterManagerType(blueprintText) == ClusterManagerType.AMBARI) {
             AmbariBlueprintTextProcessor blueprintTextProcessor = ambariBlueprintProcessorFactory.get(blueprintText);
             Set<String> haComponents = ambariHaComponentFilter.getHaComponents(blueprintTextProcessor);
-            haComponents.remove(ExposedService.RANGER.getServiceName());
+            haComponents.remove(ExposedService.RANGER.getAmbariServiceName());
             return ExposedServiceV4Response.fromExposedServices(getExposedServices(blueprintTextProcessor, haComponents));
         } else {
             return List.of();
@@ -178,7 +178,7 @@ public class ServiceEndpointCollector {
             if (ExposedService.HIVE_SERVER.equals(exposedService) || ExposedService.HIVE_SERVER_INTERACTIVE.equals(exposedService)) {
                 return getHiveJdbcUrl(gateway, ambariIp);
             } else if (ExposedService.NAMENODE.equals(exposedService) && versionComparator.compare(() -> stackVersion, () -> "2.6") > 0) {
-                return getHdfsUIUrl(gateway, ambariIp, privateIps.get(ExposedService.NAMENODE.getServiceName()).iterator().next());
+                return getHdfsUIUrl(gateway, ambariIp, privateIps.get(ExposedService.NAMENODE.getAmbariServiceName()).iterator().next());
             } else {
                 return Optional.of(getExposedServiceUrl(ambariIp, gateway, topologyName, exposedService));
             }
@@ -209,7 +209,7 @@ public class ServiceEndpointCollector {
     private Optional<GatewayTopology> getGatewayTopology(ExposedService exposedService, Gateway gateway) {
         return gateway.getTopologies().stream()
                 .filter(gt -> getExposedServiceStream(gt)
-                        .anyMatch(es -> exposedService.getServiceName().equalsIgnoreCase(es)
+                        .anyMatch(es -> exposedService.getAmbariServiceName().equalsIgnoreCase(es)
                                 || exposedService.name().equalsIgnoreCase(es)
                                 || exposedService.getKnoxService().equalsIgnoreCase(es)))
                 .findFirst();

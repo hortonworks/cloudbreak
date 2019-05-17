@@ -15,7 +15,7 @@ public class AmbariHaComponentFilter {
     public Set<String> getHaComponents(AmbariBlueprintTextProcessor ambariBlueprintTextProcessor) {
         Map<String, Set<String>> componentsByHostGroup = ambariBlueprintTextProcessor.getComponentsByHostGroup();
         Set<String> haComponents = ExposedService.filterSupportedKnoxServices().stream()
-                .map(ExposedService::getServiceName)
+                .map(ExposedService::getAmbariServiceName)
                 .filter(component -> isComponentPresentMoreThanOneHostGroup(componentsByHostGroup, component))
                 .collect(Collectors.toSet());
 
@@ -35,9 +35,9 @@ public class AmbariHaComponentFilter {
     private void removeDisabledHaServices(Set<String> haServices, AmbariBlueprintTextProcessor ambariBlueprintTextProcessor) {
         Map<String, Map<String, String>> configurations = ambariBlueprintTextProcessor.getConfigurationEntries();
         removeComponentIfHaDisabled(haServices, configurations, "hdfs-site", "dfs.ha.automatic-failover.enabled",
-                ExposedService.NAMENODE.getServiceName());
+                ExposedService.NAMENODE.getAmbariServiceName());
         removeComponentIfHaDisabled(haServices, configurations, "yarn-site", "yarn.resourcemanager.ha.enabled",
-                ExposedService.RESOURCEMANAGER_WEB.getServiceName());
+                ExposedService.RESOURCEMANAGER_WEB.getAmbariServiceName());
     }
 
     private void removeComponentIfHaDisabled(Set<String> haServices, Map<String, Map<String, String>> configurations, String configName,

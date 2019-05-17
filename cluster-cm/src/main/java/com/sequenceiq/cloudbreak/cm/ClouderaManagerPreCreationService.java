@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cm;
 import static com.sequenceiq.cloudbreak.cluster.api.ClusterApi.CLOUDERA_MANAGER;
 import static com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService.BEAN_POST_TAG;
 
-import java.util.Collections;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -20,6 +19,9 @@ public class ClouderaManagerPreCreationService implements ClusterPreCreationApi 
 
     @Inject
     private ClouderaManagerSecurityConfigProvider securityConfigProvider;
+
+    @Inject
+    private ClouderaManagerBlueprintPortConfigCollector clouderaManagerBlueprintPortConfigCollector;
 
     @Override
     public boolean isVdfReady(AmbariRepo ambariRepo) {
@@ -78,6 +80,6 @@ public class ClouderaManagerPreCreationService implements ClusterPreCreationApi 
 
     @Override
     public Map<String, Integer> getServicePorts(Blueprint blueprint) {
-        return Collections.emptyMap();
+        return clouderaManagerBlueprintPortConfigCollector.getServicePorts(blueprint);
     }
 }
