@@ -35,6 +35,8 @@ public class Stack {
 
     private String environment;
 
+    private String tenant;
+
     private String region;
 
     private Long created;
@@ -237,5 +239,13 @@ public class Stack {
 
     public void setEnvironment(String environment) {
         this.environment = environment;
+    }
+
+    public String getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(String tenant) {
+        this.tenant = tenant;
     }
 }
