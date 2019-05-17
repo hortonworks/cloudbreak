@@ -48,7 +48,6 @@ import org.springframework.retry.annotation.EnableRetry;
 // import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 // import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
 // import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
-import com.sequenceiq.cloudbreak.client.CaasClient;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.IdentityClient;
 // import com.sequenceiq.cloudbreak.client.RestClientUtil;
@@ -260,10 +259,6 @@ public class AppConfig implements ResourceLoaderAware {
     // }
 
     // needed by cloud-common AuthUserService and by RemoteTokenConfig
-    @Bean
-    public CaasClient caasClient() {
-        return new CaasClient(caasProtocol, caasUrl, new ConfigKey(caasCertificateValidation, restDebug, caasIgnorePreValidation));
-    }
 
     // needed by cloud-common AuthUserService and by RemoteTokenConfig, but somehow comes from somewhere else ... ???
     // @Bean

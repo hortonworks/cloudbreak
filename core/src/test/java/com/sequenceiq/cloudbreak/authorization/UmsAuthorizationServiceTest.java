@@ -12,7 +12,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -63,11 +62,6 @@ public class UmsAuthorizationServiceTest {
 
     @InjectMocks
     private UmsAuthorizationService underTest;
-
-    @Before
-    public void setup() {
-        when(umsClient.isUmsUsable(anyString())).thenReturn(true);
-    }
 
     @Test
     public void testCheckRight() {

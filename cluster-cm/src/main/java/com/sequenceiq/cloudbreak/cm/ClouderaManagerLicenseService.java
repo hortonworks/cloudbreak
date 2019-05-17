@@ -57,8 +57,7 @@ public class ClouderaManagerLicenseService {
     }
 
     private boolean needTrialLicense(String userCrn) {
-        return !umsClient.isUmsUsable(userCrn)
-                || StringUtils.isEmpty(umsClient.getAccountDetails(userCrn, userCrn, Optional.empty()).getClouderaManagerLicenseKey());
+        return StringUtils.isEmpty(umsClient.getAccountDetails(userCrn, userCrn, Optional.empty()).getClouderaManagerLicenseKey());
     }
 
 }

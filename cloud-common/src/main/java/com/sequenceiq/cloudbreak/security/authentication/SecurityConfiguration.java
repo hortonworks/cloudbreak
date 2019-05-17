@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.client.CaasClient;
 
 @Configuration
 public class SecurityConfiguration {
@@ -19,11 +18,7 @@ public class SecurityConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public AuthenticationService authenticationService(GrpcUmsClient grpcUmsClient, CaasClient caasClient) {
-        if (grpcUmsClient.isUmsConfigured()) {
-            return new UmsAuthenticationService(grpcUmsClient);
-        } else {
-            return new CaasAuthenticationService(caasClient);
-        }
+    public AuthenticationService authenticationService(GrpcUmsClient grpcUmsClient) {
+        return new UmsAuthenticationService(grpcUmsClient);
     }
 }

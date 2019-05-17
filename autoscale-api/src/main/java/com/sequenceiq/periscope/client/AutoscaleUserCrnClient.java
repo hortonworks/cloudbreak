@@ -14,7 +14,6 @@ import org.glassfish.jersey.client.proxy.WebResourceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.periscope.api.AutoscaleApi;
@@ -40,17 +39,17 @@ public class AutoscaleUserCrnClient {
         logger.info("AutoscaleClient has been created: {}, configKey: {}", autoscaleAddress, configKey);
     }
 
-    public CloudbreakUserCrnClient.CloudbreakEndpoint withCrn(String crn) {
-        return new CloudbreakUserCrnClient.CloudbreakEndpoint(webTarget, crn);
+    public AutoscaleEndpoint withCrn(String crn) {
+        return new AutoscaleEndpoint(webTarget, crn);
     }
 
-    public static class UserCrnEndpoint {
+    public static class AutoscaleEndpoint {
 
         private WebTarget webTarget;
 
         private String crn;
 
-        public UserCrnEndpoint(WebTarget webTarget, String crn) {
+        public AutoscaleEndpoint(WebTarget webTarget, String crn) {
             this.webTarget = webTarget;
             this.crn = crn;
         }

@@ -63,7 +63,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
-import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
 import com.sequenceiq.cloudbreak.common.dbmigration.CommonDatabaseMigrationConfig;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.service.TransactionExecutorService;
@@ -196,7 +196,7 @@ public class MetricTest {
     private AuthenticatedUserService authenticatedUserService;
 
     @MockBean
-    private CloudbreakClient cloudbreakClient;
+    private CloudbreakUserCrnClient.CloudbreakEndpoint cloudbreakClient;
 
     @MockBean
     private AutoscaleV4Endpoint autoscaleEndpoint;
