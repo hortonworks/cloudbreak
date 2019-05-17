@@ -46,15 +46,26 @@ public class ImageCatalogProvider {
     @Value("#{'${cb.enabled.linux.types}'.split(',')}")
     private List<String> enabledLinuxTypes;
 
+    @Value("${cb.image.catalog.url}")
+    private String defaultCatalogUrl;
+
+    @Value("${cb.image.catalog.default.os}")
+    private String defaultOs;
+
     @Inject
     private ObjectMapper objectMapper;
 
     @Cacheable(cacheNames = "imageCatalogCache", key = "#catalogUrl")
     public ImageCatalog getImageCatalog(String catalogUrl)  {
         ImageCatalog catalog;
-        if (catalogUrl == null) {
-            LOGGER.info("No image catalog was defined!");
-            return null;
+        if (StringUtils.isEmpty(catalogUrl)) {
+            LOGGER.info("No image catalog was defined! trying for default");
+
+            if (StringUtils.isEmpty(defaultCatalogUrl)) {
+                LOGGER.info("No image catalog was defined! no default found");
+                return null;
+            }
+            catalogUrl = defaultCatalogUrl;
         }
 
         try {
