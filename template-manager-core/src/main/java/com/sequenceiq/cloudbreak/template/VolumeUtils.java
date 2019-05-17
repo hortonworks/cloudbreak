@@ -41,6 +41,18 @@ public final class VolumeUtils {
         return buildVolumePathString(volumeCount, directory, VOLUME_PREFIX);
     }
 
+    /**
+     * Builds a volume path with only a single directory, handling the case when there are no volumes attached.
+     *
+     * @param volumeCount number of volumes attached (can be 0)
+     * @param directory   directory to use as postfix
+     * @return {@code "/hadoopfs/fs1/<directory>"} if there are least one volumes, {@code "/hadoopfs/root1/<directory>"} if there are none
+     */
+    public static String buildSingleVolumePath(int volumeCount, String directory) {
+        String prefix = volumeCount > 0 ? VOLUME_PREFIX : ROOT_VOLUME_PREFIX;
+        return buildVolumePathString(FIRST_VOLUME, directory, prefix);
+    }
+
     public static String getLogVolume(String directory) {
         return getVolumeDir(FIRST_VOLUME, VOLUME_PREFIX, directory);
     }

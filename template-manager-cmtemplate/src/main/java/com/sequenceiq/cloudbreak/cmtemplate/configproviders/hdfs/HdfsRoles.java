@@ -10,6 +10,8 @@ public class HdfsRoles {
 
     public static final String SECONDARYNAMENODE = "SECONDARYNAMENODE";
 
+    public static final String JOURNALNODE = "JOURNALNODE";
+
     private HdfsRoles() { }
 
 }

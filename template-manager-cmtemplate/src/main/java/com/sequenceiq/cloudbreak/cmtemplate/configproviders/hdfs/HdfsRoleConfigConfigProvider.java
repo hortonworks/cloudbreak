@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.cloudbreak.template.VolumeUtils.buildSingleVolumePath;
 import static com.sequenceiq.cloudbreak.template.VolumeUtils.buildVolumePathStringZeroVolumeHandled;
 
 import java.util.List;
@@ -41,6 +42,10 @@ public class HdfsRoleConfigConfigProvider extends AbstractRoleConfigConfigProvid
                 return List.of(
                         config(DFS_CHECK_DIRS, buildVolumePathStringZeroVolumeHandled(hostGroupView.getVolumeCount(), "namesecondary"))
                 );
+            case HdfsRoles.JOURNALNODE:
+                return List.of(
+                        config("dfs_journalnode_edits_dir", buildSingleVolumePath(hostGroupView.getVolumeCount(), "journalnode"))
+                );
             default:
                 return List.of();
         }
@@ -53,7 +58,7 @@ public class HdfsRoleConfigConfigProvider extends AbstractRoleConfigConfigProvid
 
     @Override
     public List<String> getRoleTypes() {
-        return List.of(HdfsRoles.NAMENODE, HdfsRoles.DATANODE, HdfsRoles.SECONDARYNAMENODE);
+        return List.of(HdfsRoles.NAMENODE, HdfsRoles.DATANODE, HdfsRoles.SECONDARYNAMENODE, HdfsRoles.JOURNALNODE);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.template;
 
+import static com.sequenceiq.cloudbreak.template.VolumeUtils.buildSingleVolumePath;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
@@ -53,5 +54,20 @@ public class VolumeUtilsTest {
         String directories = VolumeUtils.buildVolumePathStringZeroVolumeHandled(3, "test");
 
         assertEquals("/hadoopfs/fs1/test,/hadoopfs/fs2/test,/hadoopfs/fs3/test", directories);
+    }
+
+    @Test
+    public void buildSingleVolumePathWithZeroDisk() {
+        assertEquals("/hadoopfs/root1/test", buildSingleVolumePath(0, "test"));
+    }
+
+    @Test
+    public void buildSingleVolumePathWithOneDisk() {
+        assertEquals("/hadoopfs/fs1/test", buildSingleVolumePath(1, "test"));
+    }
+
+    @Test
+    public void buildSingleVolumePathWithManyDisks() {
+        assertEquals("/hadoopfs/fs1/test", buildSingleVolumePath(3, "test"));
     }
 }
