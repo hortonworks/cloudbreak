@@ -5,7 +5,6 @@ import static com.cloudera.thunderhead.service.usermanagement.UserManagementProt
 import static com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest;
 import static com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse;
 import static com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
-import static com.sequenceiq.caas.service.MockCaasService.SIGNATURE_VERIFIER;
 import static org.springframework.security.jwt.JwtHelper.decodeAndVerify;
 
 import java.io.IOException;
@@ -21,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.jwt.Jwt;
+import org.springframework.security.jwt.crypto.sign.MacSigner;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc;
@@ -38,6 +38,8 @@ import io.grpc.stub.StreamObserver;
 
 @Service
 public class MockUserManagementService extends UserManagementGrpc.UserManagementImplBase {
+
+    public static final MacSigner SIGNATURE_VERIFIER = new MacSigner("titok");
 
     private static final Logger LOG = LoggerFactory.getLogger(MockUserManagementService.class);
 

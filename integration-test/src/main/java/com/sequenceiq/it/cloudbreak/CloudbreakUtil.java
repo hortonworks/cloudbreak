@@ -36,7 +36,7 @@ import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.periscope.api.endpoint.v1.HistoryEndpoint;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterHistoryResponse;
-import com.sequenceiq.periscope.client.AutoscaleClient;
+import com.sequenceiq.periscope.client.AutoscaleUserCrnClient.AutoscaleEndpoint;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -243,7 +243,7 @@ public class CloudbreakUtil {
         return waitResult;
     }
 
-    public static WaitResult waitForAutoScalingEvent(AutoscaleClient autoscaleClient, Long clusterId, Long currentTime) {
+    public static WaitResult waitForAutoScalingEvent(AutoscaleEndpoint autoscaleClient, Long clusterId, Long currentTime) {
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         Boolean exitCriteria = FALSE;
         int retryCount = 0;

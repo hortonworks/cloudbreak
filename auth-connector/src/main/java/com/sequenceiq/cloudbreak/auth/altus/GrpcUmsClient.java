@@ -143,18 +143,6 @@ public class GrpcUmsClient {
         }
     }
 
-    public boolean isConfigured() {
-        return umsConfig.isConfigured();
-    }
-
-    public boolean isUmsUsable(String crn) {
-        return isUmsConfigured() && Crn.isCrn(crn);
-    }
-
-    public boolean isUmsConfigured() {
-        return umsConfig.isConfigured();
-    }
-
     private ManagedChannelWrapper makeWrapper() {
         return new ManagedChannelWrapper(
                 ManagedChannelBuilder.forAddress(umsConfig.getEndpoint(), umsConfig.getPort())

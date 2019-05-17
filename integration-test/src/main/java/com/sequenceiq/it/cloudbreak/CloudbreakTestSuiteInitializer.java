@@ -27,7 +27,6 @@ import org.testng.annotations.Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.CredentialV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
-import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -123,11 +122,11 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         if (cleanUpBeforeStart) {
             cleanUpService.deleteTestStacksAndResources(cloudbreakClient.withCrn(userCrn), workspaceId);
         }
-        putBlueprintToContextIfExist(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class)
+        putBlueprintToContextIfExist(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakEndpoint.class)
                 .blueprintV4Endpoint(), blueprintName, workspaceId);
-        putCredentialToContext(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class)
+        putCredentialToContext(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakEndpoint.class)
                 .credentialV4Endpoint(), cloudProvider, credentialName, workspaceId);
-        putStackToContextIfExist(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class)
+        putStackToContextIfExist(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakEndpoint.class)
                 .stackV4Endpoint(), workspaceId, stackName);
         if (StringUtils.hasLength(instanceGroups)) {
             List<String[]> instanceGroupStrings = templateAdditionHelper.parseCommaSeparatedRows(instanceGroups);
