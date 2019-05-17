@@ -111,7 +111,7 @@ public class ServiceEndpointCollectorTest {
         Cluster cluster = clusterkWithOrchestrator("YARN");
         String ambariIp = AMBARI_IP;
 
-        String result = underTest.getAmbariServerUrl(cluster, ambariIp);
+        String result = underTest.getManagerServerUrl(cluster, ambariIp);
         assertEquals("http://127.0.0.1:8080", result);
     }
 
@@ -120,7 +120,7 @@ public class ServiceEndpointCollectorTest {
         Cluster cluster = clusterkWithOrchestrator("ANY");
         cluster.setGateway(null);
 
-        String result = underTest.getAmbariServerUrl(cluster, AMBARI_IP);
+        String result = underTest.getManagerServerUrl(cluster, AMBARI_IP);
         assertEquals("https://127.0.0.1/", result);
     }
 
@@ -129,7 +129,7 @@ public class ServiceEndpointCollectorTest {
         Cluster cluster = createClusterWithComponents(new ExposedService[]{ATLAS, ATLAS},
                 new ExposedService[]{BEACON_SERVER, HIVE_SERVER}, GatewayType.INDIVIDUAL);
 
-        String result = underTest.getAmbariServerUrl(cluster, AMBARI_IP);
+        String result = underTest.getManagerServerUrl(cluster, AMBARI_IP);
         assertEquals("https://127.0.0.1/", result);
     }
 
@@ -138,7 +138,7 @@ public class ServiceEndpointCollectorTest {
         Cluster cluster = createClusterWithComponents(new ExposedService[]{AMBARI, ATLAS},
                 new ExposedService[]{BEACON_SERVER, HIVE_SERVER}, GatewayType.CENTRAL);
 
-        String result = underTest.getAmbariServerUrl(cluster, AMBARI_IP);
+        String result = underTest.getManagerServerUrl(cluster, AMBARI_IP);
         assertEquals("/gateway-path/topology1/ambari/", result);
     }
 
@@ -147,7 +147,7 @@ public class ServiceEndpointCollectorTest {
         Cluster cluster = createClusterWithComponents(new ExposedService[]{AMBARI, ATLAS},
                 new ExposedService[]{BEACON_SERVER, HIVE_SERVER}, GatewayType.INDIVIDUAL);
 
-        String result = underTest.getAmbariServerUrl(cluster, AMBARI_IP);
+        String result = underTest.getManagerServerUrl(cluster, AMBARI_IP);
         assertEquals("https://127.0.0.1:8443/gateway-path/topology1/ambari/", result);
     }
 

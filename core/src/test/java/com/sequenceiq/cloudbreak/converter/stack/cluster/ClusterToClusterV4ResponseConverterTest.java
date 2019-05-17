@@ -87,7 +87,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         when(conversionService.convert(source.getProxyConfig(), ProxyV4Response.class)).thenReturn(new ProxyV4Response());
         when(conversionService.convert("secret/path", SecretResponse.class)).thenReturn(new SecretResponse("kv", "pass"));
         when(conversionService.convert(getSource().getBlueprint(), BlueprintV4Response.class)).thenReturn(new BlueprintV4Response());
-        when(serviceEndpointCollector.getAmbariServerUrl(any(Cluster.class), anyString())).thenReturn("http://server/");
+        when(serviceEndpointCollector.getManagerServerUrl(any(Cluster.class), anyString())).thenReturn("http://server/");
         // WHEN
         ClusterV4Response result = underTest.convert(source);
         // THEN
