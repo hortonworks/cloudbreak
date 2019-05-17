@@ -60,10 +60,10 @@ public class ImageService {
     @Inject
     private ImageCatalogProvider imageCatalogProvider;
 
-    @Value("${cb.image.catalog.url}")
+    @Value("${freeipa.image.catalog.url}")
     private String defaultCatalogUrl;
 
-    @Value("${cb.image.catalog.default.os}")
+    @Value("${freeipa.image.catalog.default.os}")
     private String defaultOs;
 
     public void create(Stack stack, ImageSettingsV4Request imageRequest) {
