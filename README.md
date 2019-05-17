@@ -81,6 +81,14 @@ If the profile switch is omitted, the `default` profile is saved and used.
 ```
 dp configure --server https://ec2-52-29-224-64...compute.amazonaws.com --workspace your@email --profile dataplane-staging
 ```
+
+Note: in case you are using a mocked UMS you can use the following command to generate an accesskey/privatekey pair that is accepted by the mock.
+```
+dp generate-mock-apikeys --tenant-name default --tenant-user myusername@cloudera.com
+```
+You need to update your ~/.dp/config file with these values.
+
+
 The provided parameters will be saved into the configuration profile in the user's home directory.
 To see its content: `cat ~/.dp/config`. If this config file is present you don't need to specify the connection flags anymore,
 otherwise you need to specify these flags to every command.
