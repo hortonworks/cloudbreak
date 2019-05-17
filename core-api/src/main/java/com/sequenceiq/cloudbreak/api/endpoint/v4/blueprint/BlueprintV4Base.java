@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -19,12 +18,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 public abstract class BlueprintV4Base implements JsonEntity {
-
-    @ApiModelProperty(value = ModelDescriptions.NAME)
-    @Size(max = 100, min = 1, message = "The length of the blueprint's name has to be in range of 1 to 100 and should not contain semicolon "
-            + "and percentage character.")
-    @Pattern(regexp = "^[^;\\/%]*$")
-    private String name;
 
     @Size(max = 1000)
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
@@ -52,14 +45,6 @@ public abstract class BlueprintV4Base implements JsonEntity {
 
     public void setBlueprint(String blueprint) {
         this.blueprint = blueprint;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getDescription() {
