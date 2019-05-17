@@ -99,9 +99,9 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
         clusterResponse.setBlueprint(getConversionService().convert(source.getBlueprint(), BlueprintV4Response.class));
         clusterResponse.setExtendedBlueprintText(getExtendedBlueprintText(source));
         convertDpSecrets(source, clusterResponse);
-        String ambariIp = stackUtil.extractClusterManagerIp(source.getStack());
-        clusterResponse.setServerIp(ambariIp);
-        clusterResponse.setServerUrl(serviceEndpointCollector.getAmbariServerUrl(source, ambariIp));
+        String managerIp = stackUtil.extractClusterManagerIp(source.getStack());
+        clusterResponse.setServerIp(managerIp);
+        clusterResponse.setServerUrl(serviceEndpointCollector.getManagerServerUrl(source, managerIp));
         return clusterResponse;
     }
 

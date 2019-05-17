@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.YARN;
+import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
@@ -67,24 +69,23 @@ public class ServiceEndpointCollector {
         return getKnoxServices(blueprint);
     }
 
-    public String getAmbariServerUrl(Cluster cluster, String ambariIp) {
-        if (ambariIp != null) {
+    public String getManagerServerUrl(Cluster cluster, String managerIp) {
+        if (managerIp != null) {
             String orchestrator = cluster.getStack().getOrchestrator().getType();
             if (YARN.equals(orchestrator)) {
-                return String.format("http://%s:8080", ambariIp);
+                return String.format("http://%s:8080", managerIp);
             } else {
                 Gateway gateway = cluster.getGateway();
                 if (gateway != null) {
-                    Optional<GatewayTopology> ambariTopology = getGatewayTopologyForService(gateway, ExposedService.AMBARI);
-                    Optional<String> managerUrl = ambariTopology.map(t -> getExposedServiceUrl(ambariIp, gateway, t.getTopologyName(), ExposedService.AMBARI));
-                    if (managerUrl.isEmpty()) {
-                        Optional<GatewayTopology> cmTopology = getGatewayTopologyForService(gateway, ExposedService.CLOUDERA_MANAGER);
-                        managerUrl = cmTopology.map(t -> getExposedServiceUrl(ambariIp, gateway, t.getTopologyName(), ExposedService.CLOUDERA_MANAGER));
-                    }
+                    String variant = cluster.getVariant();
+                    ExposedService exposedService = isNoneEmpty(variant) && variant.equals(ClusterApi.CLOUDERA_MANAGER)
+                            ? ExposedService.CLOUDERA_MANAGER : ExposedService.AMBARI;
+                    Optional<GatewayTopology> gatewayTopology = getGatewayTopologyForService(gateway, exposedService);
+                    Optional<String> managerUrl = gatewayTopology.map(t -> getExposedServiceUrl(managerIp, gateway, t.getTopologyName(), exposedService));
                     // when knox gateway is enabled, but ambari/cm is not exposed, use the default url
-                    return managerUrl.orElse(String.format("https://%s/", ambariIp));
+                    return managerUrl.orElse(String.format("https://%s/", managerIp));
                 }
-                return String.format("https://%s/", ambariIp);
+                return String.format("https://%s/", managerIp);
             }
         }
         return null;
