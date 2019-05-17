@@ -20,7 +20,7 @@ public final class ModelDescriptions {
         public static final String TYPE = "Type of database, aka the service name that will use the database like HIVE, DRUID, SUPERSET, RANGER, etc.";
         public static final String CONNECTOR_JAR_URL = "URL that points to the jar of the connection driver(connector)";
         public static final String DATABASE_CONNECTION_TEST_RESULT = "Result of database connection test";
-        public static final String DATABASE_REQUEST = "Unsaved database config to be tested by connectivity";
+        public static final String DATABASE_REQUEST = "Unsaved database config to be tested for connectivity";
     }
 
     public static class DatabaseServer {
@@ -33,12 +33,8 @@ public final class ModelDescriptions {
         public static final String CONNECTOR_JAR_URL = "URL that points to the JAR of the connection driver (JDBC connector)";
         public static final String CONNECTION_USER_NAME = "User name for the administrative user of the database server";
         public static final String CONNECTION_PASSWORD = "Password for the administrative user of the database server";
-        // public static final String VERSION = "Version of the Database";
-        // public static final String ORACLE = "Oracle specific properties";
-        // public static final String STACK_VERSION = "(HDP, HDF)Stack version for the RDS configuration";
-        // public static final String DATABASE_REQUEST_CLUSTER_NAME = "requested cluster name";
-        // public static final String DATABASE_CONNECTION_TEST_RESULT = "result of RDS connection test";
-        // public static final String DATABASE_REQUEST = "unsaved RDS config to be tested by connectivity";
+        public static final String DATABASE_SERVER_REQUEST = "Unsaved database server config to be tested for connectivity";
+        public static final String DATABASE_SERVER_CONNECTION_TEST_RESULT = "Result of database server connection test";
     }
 
     private ModelDescriptions() {

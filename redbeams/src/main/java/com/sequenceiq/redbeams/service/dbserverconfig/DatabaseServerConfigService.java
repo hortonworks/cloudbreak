@@ -1,5 +1,6 @@
 package com.sequenceiq.redbeams.service.dbserverconfig;
 
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -12,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.MapBindingResult;
+import org.springframework.validation.FieldError;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
@@ -21,6 +24,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.repository.DatabaseServerConfigRepository;
+import com.sequenceiq.redbeams.service.validation.DatabaseServerConnectionValidator;
 
 @Service
 public class DatabaseServerConfigService {
@@ -29,6 +33,9 @@ public class DatabaseServerConfigService {
 
     @Inject
     private DatabaseServerConfigRepository repository;
+
+    @Inject
+    private DatabaseServerConnectionValidator connectionValidator;
 
     public Set<DatabaseServerConfig> findAllInWorkspaceAndEnvironment(Long workspaceId, String environmentId, Boolean attachGlobal) {
         return repository.findAllByWorkspaceIdAndEnvironmentId(workspaceId, environmentId);
@@ -95,6 +102,21 @@ public class DatabaseServerConfigService {
         }
 
         return resources;
+    }
+
+    public String testConnection(Long workspaceId, String name) {
+        return testConnection(getByNameInWorkspace(workspaceId, name));
+    }
+
+    public String testConnection(DatabaseServerConfig resource) {
+        MapBindingResult errors = new MapBindingResult(new HashMap(), "databaseServer");
+        connectionValidator.validate(resource, errors);
+        if (!errors.hasErrors()) {
+            return "success";
+        }
+        return errors.getAllErrors().stream()
+            .map(e -> (e instanceof FieldError ? ((FieldError) e).getField() + ": " : "") + e.getDefaultMessage())
+            .collect(Collectors.joining("; "));
     }
 
     public WorkspaceResource resource() {

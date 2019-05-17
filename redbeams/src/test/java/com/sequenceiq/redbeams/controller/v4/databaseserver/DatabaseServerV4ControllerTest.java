@@ -5,7 +5,9 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
@@ -126,5 +128,28 @@ public class DatabaseServerV4ControllerTest {
         DatabaseServerV4Responses responses = underTest.deleteMultiple(nameSet);
 
         assertEquals(2, responses.getResponses().size());
+    }
+
+    @Test
+    public void testTestWithName() {
+        when(service.testConnection(DatabaseServerV4Controller.DEFAULT_WORKSPACE, "myserver")).thenReturn("yeahhh");
+        DatabaseServerTestV4Request testRequest = new DatabaseServerTestV4Request();
+        testRequest.setExistingDatabaseServerName("myserver");
+
+        DatabaseServerTestV4Response response = underTest.test(testRequest);
+
+        assertEquals("yeahhh", response.getResult());
+    }
+
+    @Test
+    public void testTestWithServer() {
+        when(converterUtil.convert(request, DatabaseServerConfig.class)).thenReturn(server);
+        when(service.testConnection(server)).thenReturn("okayyy");
+        DatabaseServerTestV4Request testRequest = new DatabaseServerTestV4Request();
+        testRequest.setDatabaseServer(request);
+
+        DatabaseServerTestV4Response response = underTest.test(testRequest);
+
+        assertEquals("okayyy", response.getResult());
     }
 }

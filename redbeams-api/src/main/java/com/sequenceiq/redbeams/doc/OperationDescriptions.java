@@ -17,15 +17,13 @@ public final class OperationDescriptions {
     }
 
     public static final class DatabaseServerOpDescription {
-        // public static final String POST_CONNECTION_TEST = "test RDS connectivity";
+        public static final String TEST_CONNECTION = "test database server connectivity";
         public static final String LIST = "list database servers";
         public static final String GET_BY_NAME = "get a database server by name";
         public static final String REGISTER = "register a database server";
         public static final String DELETE_BY_NAME = "deregister or terminate a database server by name";
         public static final String DELETE_MULTIPLE_BY_NAME = "deregister or terminate multiple database servers by name";
         // public static final String GET_REQUEST_IN_WORKSPACE = "get request in workspace";
-        // public static final String ATTACH_TO_ENVIRONMENTS = "attach RDS resource to environemnts";
-        // public static final String DETACH_FROM_ENVIRONMENTS = "detach RDS resource from environemnts";
 
         private DatabaseServerOpDescription() {
         }
