@@ -12,11 +12,11 @@ import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.domain.Secret;
-import com.sequenceiq.cloudbreak.domain.SecretToString;
 import com.sequenceiq.redbeams.converter.database.CrnConverter;
+import com.sequenceiq.secret.SecretValue;
+import com.sequenceiq.secret.domain.Secret;
+import com.sequenceiq.secret.domain.SecretToString;
 
 @Entity
 public class DatabaseConfig {

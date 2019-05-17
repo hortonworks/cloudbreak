@@ -13,12 +13,12 @@ public class DatabaseUtil {
     private DatabaseUtil() {
     }
 
-    public static void createSchemaIfNeeded(String dbType, String dbAddress, String dbName, String dbUser, String dbPassword, String dbSchema)
+    public static void createSchemaIfNeeded(String jdbcConnectionString, String dbUser, String dbPassword, String dbSchema)
             throws SQLException {
         if (!DEFAULT_SCHEMA_NAME.equals(dbSchema)) {
             SimpleDriverDataSource ds = new SimpleDriverDataSource();
             ds.setDriverClass(Driver.class);
-            ds.setUrl(String.format("jdbc:%s://%s/%s", dbType, dbAddress, dbName));
+            ds.setUrl(jdbcConnectionString);
             try (Connection conn = ds.getConnection(dbUser, dbPassword); Statement statement = conn.createStatement()) {
                     statement.execute("CREATE SCHEMA IF NOT EXISTS " + dbSchema);
             }

@@ -79,8 +79,9 @@ public class DatabaseConfig {
     private RedbeamsNodeConfig redbeamsNodeConfig;
 
     @Bean
-    public DataSource dataSource() throws SQLException {
-        DatabaseUtil.createSchemaIfNeeded("postgresql", databaseAddress, dbName, dbUser, dbPassword, dbSchemaName);
+    public DataSource dataSource(JdbcConnectionProvider jdbcConnectionProvider) throws SQLException {
+        DatabaseUtil.createSchemaIfNeeded(
+                jdbcConnectionProvider.getJdbcConnectionString(databaseAddress, dbName), dbUser, dbPassword, dbSchemaName);
         HikariConfig config = new HikariConfig();
         if (ssl && Files.exists(Paths.get(certFile))) {
             config.addDataSourceProperty("ssl", "true");
@@ -90,7 +91,10 @@ public class DatabaseConfig {
         if (redbeamsNodeConfig.isNodeIdSpecified()) {
             config.addDataSourceProperty("ApplicationName", redbeamsNodeConfig.getId());
         }
-        config.setJdbcUrl(String.format("jdbc:postgresql://%s/%s?currentSchema=%s", databaseAddress, dbName, dbSchemaName));
+        config.setJdbcUrl(jdbcConnectionProvider.getJdbcConnectionString(databaseAddress, dbName, dbSchemaName));
+        if (jdbcConnectionProvider.getJdbcDriverClassName() != null) {
+            config.setDriverClassName(jdbcConnectionProvider.getJdbcDriverClassName());
+        }
         config.setUsername(dbUser);
         config.setPassword(dbPassword);
         config.setMaximumPoolSize(poolSize);
@@ -101,9 +105,14 @@ public class DatabaseConfig {
     }
 
     @Bean
-    public PlatformTransactionManager transactionManager() throws SQLException {
+    public JdbcConnectionProvider jdbcConnectionStringProvider() {
+        return new JdbcConnectionProvider("jdbc");
+    }
+
+    @Bean
+    public PlatformTransactionManager transactionManager(JdbcConnectionProvider jdbcConnectionProvider) throws SQLException {
         JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
-        jpaTransactionManager.setEntityManagerFactory(entityManagerFactory());
+        jpaTransactionManager.setEntityManagerFactory(entityManagerFactory(jdbcConnectionProvider));
         jpaTransactionManager.afterPropertiesSet();
         return jpaTransactionManager;
     }
@@ -115,11 +124,11 @@ public class DatabaseConfig {
 
     @Bean
     @DependsOn("databaseUpMigration")
-    public EntityManagerFactory entityManagerFactory() throws SQLException {
+    public EntityManagerFactory entityManagerFactory(JdbcConnectionProvider jdbcConnectionProvider) throws SQLException {
         LocalContainerEntityManagerFactoryBean entityManagerFactory = new LocalContainerEntityManagerFactoryBean();
 
         entityManagerFactory.setPackagesToScan("com.sequenceiq.redbeams");
-        entityManagerFactory.setDataSource(dataSource());
+        entityManagerFactory.setDataSource(dataSource(jdbcConnectionProvider));
 
         entityManagerFactory.setJpaVendorAdapter(jpaVendorAdapter());
         entityManagerFactory.setJpaProperties(jpaProperties());
@@ -145,5 +154,33 @@ public class DatabaseConfig {
         properties.setProperty("hibernate.default_schema", dbSchemaName);
         properties.setProperty("hibernate.jdbc.lob.non_contextual_creation", Boolean.toString(true));
         return properties;
+    }
+
+    public static class JdbcConnectionProvider {
+
+        private final String jdbcPrefix;
+
+        private final String jdbcDriverClassName;
+
+        public JdbcConnectionProvider(String jdbcPrefix) {
+            this(jdbcPrefix, null);
+        }
+
+        public JdbcConnectionProvider(String jdbcPrefix, String jdbcDriverClassName) {
+            this.jdbcPrefix = jdbcPrefix;
+            this.jdbcDriverClassName = jdbcDriverClassName;
+        }
+
+        public String getJdbcConnectionString(String databaseAddress, String dbName, String dbSchemaName) {
+            return String.format("%s:postgresql://%s/%s?currentSchema=%s", jdbcPrefix, databaseAddress, dbName, dbSchemaName);
+        }
+
+        public String getJdbcConnectionString(String databaseAddress, String dbName) {
+            return String.format("%s:postgresql://%s/%s", jdbcPrefix, databaseAddress, dbName);
+        }
+
+        public String getJdbcDriverClassName() {
+            return jdbcDriverClassName;
+        }
     }
 }
