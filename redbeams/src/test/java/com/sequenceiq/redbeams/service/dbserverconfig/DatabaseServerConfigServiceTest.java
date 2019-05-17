@@ -1,6 +1,10 @@
 package com.sequenceiq.redbeams.service.dbserverconfig;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -11,6 +15,7 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.repository.DatabaseServerConfigRepository;
+import com.sequenceiq.redbeams.service.validation.DatabaseServerConnectionValidator;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -24,7 +29,10 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.validation.Errors;
 
 public class DatabaseServerConfigServiceTest {
 
@@ -36,6 +44,9 @@ public class DatabaseServerConfigServiceTest {
 
     @Mock
     private DatabaseServerConfigRepository repository;
+
+    @Mock
+    private DatabaseServerConnectionValidator connectionValidator;
 
     private DatabaseServerConfig server;
 
@@ -170,5 +181,34 @@ public class DatabaseServerConfigServiceTest {
             verify(repository, never()).delete(server);
             verify(repository, never()).delete(server2);
         }
+    }
+
+    @Test
+    public void testTestConnectionSuccess() {
+        when(repository.findByNameAndWorkspaceId(server.getName(), 0L)).thenReturn(Optional.of(server));
+
+        String result = underTest.testConnection(0L, server.getName());
+
+        assertEquals("success", result);
+        verify(connectionValidator).validate(eq(server), any(Errors.class));
+    }
+
+    @Test
+    public void testTestConnectionFailure() {
+        when(repository.findByNameAndWorkspaceId(server.getName(), 0L)).thenReturn(Optional.of(server));
+        doAnswer(new Answer() {
+            public Object answer(InvocationOnMock invocation) {
+                Errors errors = invocation.getArgument(1);
+                errors.rejectValue("connectorJarUrl", "", "bad jar");
+                errors.reject("", "epic fail");
+                return null;
+            }
+        }).when(connectionValidator).validate(eq(server), any(Errors.class));
+
+        String result = underTest.testConnection(0L, server.getName());
+
+        assertTrue(result.contains("epic fail"));
+        assertTrue(result.contains("connectorJarUrl: bad jar"));
+        verify(connectionValidator).validate(eq(server), any(Errors.class));
     }
 }

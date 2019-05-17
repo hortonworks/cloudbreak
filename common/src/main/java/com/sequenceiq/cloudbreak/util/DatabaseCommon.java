@@ -53,4 +53,33 @@ public class DatabaseCommon {
         Matcher matcher = DATABASE_TYPE.matcher(connectionURL);
         return matcher.matches() ? Optional.of(matcher.group(1)) : Optional.empty();
     }
+
+    public static String getConnectionURL(String vendorDriverId, String host, int port, Optional<String> database) {
+        String url;
+        switch (vendorDriverId) {
+            case "postgresql":
+                url = String.format("jdbc:postgresql://%s:%d/", host, port);
+                if (database.isPresent()) {
+                    url += database.get();
+                }
+                break;
+            case "mysql":
+                // this includes mariadb
+                url = String.format("jdbc:mysql://%s:%d", host, port);
+                if (database.isPresent()) {
+                    url += "/" + database.get();
+                }
+                break;
+            case "oracle":
+                // using sid format, not service format
+                url = String.format("jdbc:oracle:thin:@%s:%d", host, port);
+                if (database.isPresent()) {
+                    url += ":" + database.get();
+                }
+                break;
+            default:
+                throw new UnsupportedOperationException("Don't know how to form a connection URL for JDBC driver " + vendorDriverId);
+        }
+        return url;
+    }
 }

@@ -10,7 +10,9 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
@@ -61,4 +63,15 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
         return new DatabaseServerV4Responses(converterUtil.convertAllAsSet(deleted, DatabaseServerV4Response.class));
     }
 
+    @Override
+    public DatabaseServerTestV4Response test(DatabaseServerTestV4Request request) {
+        String connectionResult;
+        if (request.getExistingDatabaseServerName() != null) {
+            connectionResult = databaseServerConfigService.testConnection(DEFAULT_WORKSPACE, request.getExistingDatabaseServerName());
+        } else {
+            DatabaseServerConfig server = converterUtil.convert(request.getDatabaseServer(), DatabaseServerConfig.class);
+            connectionResult = databaseServerConfigService.testConnection(server);
+        }
+        return new DatabaseServerTestV4Response(connectionResult);
+    }
 }
