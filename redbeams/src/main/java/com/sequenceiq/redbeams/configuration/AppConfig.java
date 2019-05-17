@@ -18,7 +18,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.retry.annotation.EnableRetry;
 
-import com.sequenceiq.cloudbreak.auth.caas.CaasClient;
 import com.sequenceiq.cloudbreak.auth.uaa.IdentityClient;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 
@@ -262,10 +261,6 @@ public class AppConfig implements ResourceLoaderAware {
     // }
 
     // needed by cloud-common AuthUserService and by RemoteTokenConfig
-    @Bean
-    public CaasClient caasClient() {
-        return new CaasClient(caasProtocol, caasUrl, new ConfigKey(caasCertificateValidation, restDebug, caasIgnorePreValidation));
-    }
 
     // needed by cloud-common AuthUserService and by RemoteTokenConfig, but somehow comes from somewhere else ... ???
     // @Bean

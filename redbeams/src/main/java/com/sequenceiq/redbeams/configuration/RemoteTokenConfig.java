@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.auth.caas.CaasClient;
 import com.sequenceiq.cloudbreak.auth.uaa.IdentityClient;
 import com.sequenceiq.cloudbreak.common.service.token.CachedRemoteTokenService;
 
@@ -32,12 +31,9 @@ public class RemoteTokenConfig {
     @Inject
     private GrpcUmsClient umsClient;
 
-    @Inject
-    private CaasClient caasClient;
-
     @Bean
     public ResourceServerTokenServices remoteTokenServices() {
-        return new CachedRemoteTokenService(clientId, clientSecret, identityServerUrl, umsClient, caasClient, identityClient);
+        return new CachedRemoteTokenService(clientId, clientSecret, identityServerUrl, umsClient, identityClient);
     }
 
 }

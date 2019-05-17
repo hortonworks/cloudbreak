@@ -74,7 +74,6 @@ public class ClouderaManagerLdapServiceTest {
         stack.setCluster(cluster);
         httpClientConfig = new HttpClientConfig("apiAddress");
         MockitoAnnotations.initMocks(this);
-        when(umsClient.isUmsUsable(anyString())).thenReturn(false);
         when(clouderaManagerClientFactory.getClient(stack, cluster, httpClientConfig)).thenReturn(apiClient);
         when(clouderaManagerClientFactory.getClouderaManagerResourceApi(apiClient)).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerClientFactory.getExternalUserMappingsResourceApi(apiClient)).thenReturn(externalUserMappingsResourceApi);
