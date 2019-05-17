@@ -1,20 +1,7 @@
 package com.sequenceiq.cloudbreak.client;
 
-import static com.sequenceiq.cloudbreak.auth.altus.CrnTokenExtractor.CRN_HEADER;
-
-import java.util.Collections;
-
-import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
 
-import org.glassfish.jersey.client.proxy.WebResourceFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintUtilV4Endpoint;
@@ -41,39 +28,19 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.WorkspaceAwareUtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.WorkspaceV4Endpoint;
 
-public class CloudbreakUserCrnClient {
-
-    protected static final Form EMPTY_FORM = new Form();
-
-    private final Client client;
-
-    private final Logger logger = LoggerFactory.getLogger(CloudbreakUserCrnClient.class);
-
-    private WebTarget webTarget;
-
-    protected CloudbreakUserCrnClient(String cloudbreakAddress, ConfigKey configKey) {
-        client = RestClientUtil.get(configKey);
-        webTarget = client.target(cloudbreakAddress).path(CoreApi.API_ROOT_CONTEXT);
-        logger.info("CloudbreakUserCrnClient has been created without crn. cloudbreak: {}, configKey: {}", cloudbreakAddress, configKey);
+public class CloudbreakUserCrnClient extends AbstractUserCrnServiceClient {
+    public CloudbreakUserCrnClient(String serviceAddress, ConfigKey configKey, String apiRoot) {
+        super(serviceAddress, configKey, apiRoot);
     }
 
-    protected Client getClient() {
-        return client;
-    }
-
+    @Override
     public CloudbreakEndpoint withCrn(String crn) {
-        return new CloudbreakEndpoint(webTarget, crn);
+        return new CloudbreakEndpoint(getWebTarget(), crn);
     }
 
-    public static class CloudbreakEndpoint {
-
-        private WebTarget webTarget;
-
-        private String crn;
-
+    public static class CloudbreakEndpoint extends AbstractUserCrnServiceEndpoint {
         public CloudbreakEndpoint(WebTarget webTarget, String crn) {
-            this.webTarget = webTarget;
-            this.crn = crn;
+            super(webTarget, crn);
         }
 
         public AuditEventV4Endpoint auditV4Endpoint() {
@@ -174,16 +141,6 @@ public class CloudbreakUserCrnClient {
 
         public StackV4Endpoint stackV4Endpoint() {
             return getEndpoint(StackV4Endpoint.class);
-        }
-
-        protected <E> E getEndpoint(Class<E> clazz) {
-            MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
-            headers.add(CRN_HEADER, crn);
-            return newEndpoint(clazz, headers);
-        }
-
-        private <C> C newEndpoint(Class<C> resourceInterface, MultivaluedMap<String, Object> headers) {
-            return WebResourceFactory.newResource(resourceInterface, webTarget, false, headers, Collections.emptyList(), EMPTY_FORM);
         }
     }
 }
