@@ -6,15 +6,14 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
+import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 
 @Component
 public class NetworkV4RequestToNetworkConverter extends AbstractConversionServiceAwareConverter<NetworkV4Request, Network> {
@@ -35,7 +34,7 @@ public class NetworkV4RequestToNetworkConverter extends AbstractConversionServic
         if (parameters != null) {
             try {
                 network.setAttributes(new Json(parameters));
-            } catch (JsonProcessingException ignored) {
+            } catch (IllegalArgumentException ignored) {
                 throw new BadRequestException("Invalid parameters");
             }
         }

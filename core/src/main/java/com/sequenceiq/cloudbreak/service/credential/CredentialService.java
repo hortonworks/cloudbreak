@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.credential;
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -22,34 +21,34 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialPrerequisitesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.notification.Notification;
 import com.sequenceiq.cloudbreak.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
-import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.secret.service.SecretService;
 
 @Service
 public class CredentialService extends AbstractWorkspaceAwareResourceService<Credential> {
@@ -119,7 +118,7 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
         User user = getLoggedInUser();
         credentialValidator.validateCredentialCloudPlatform(credential.cloudPlatform());
         Credential original = credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(credential.getName(), workspaceId,
-                        preferencesService.enabledPlatforms()).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, credential.getName()));
+                preferencesService.enabledPlatforms()).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, credential.getName()));
         if (!Objects.equals(credential.cloudPlatform(), original.cloudPlatform())) {
             throw new BadRequestException("Modifying credential platform is forbidden");
         }
@@ -201,7 +200,7 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
         return credentialRepository.save(credential);
     }
 
-    public CredentialPrerequisitesV4Response getPrerequisites(Long workspaceId, String cloudPlatform, String deploymentAddress) {
+    public CredentialPrerequisitesResponse getPrerequisites(Long workspaceId, String cloudPlatform, String deploymentAddress) {
         User user = getLoggedInUser();
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
         String cloudPlatformUppercased = cloudPlatform.toUpperCase();
@@ -335,16 +334,10 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
     }
 
     private void putToCredentialAttributes(Credential credential, Map<String, Object> attributesToAdd) {
-        try {
-            Json attributes = new Json(credential.getAttributes());
-            Map<String, Object> newAttributes = attributes.getMap();
-            newAttributes.putAll(attributesToAdd);
-            credential.setAttributes(new Json(newAttributes).getValue());
-        } catch (IOException e) {
-            String msg = "Credential's attributes couldn't be updated.";
-            LOGGER.warn(msg, e);
-            throw new CloudbreakServiceException(msg, e);
-        }
+        Json attributes = new Json(credential.getAttributes());
+        Map<String, Object> newAttributes = attributes.getMap();
+        newAttributes.putAll(attributesToAdd);
+        credential.setAttributes(new Json(newAttributes).getValue());
     }
 
     private String getCodeGrantFlowAppLoginUrl(String credentialAttributes) {

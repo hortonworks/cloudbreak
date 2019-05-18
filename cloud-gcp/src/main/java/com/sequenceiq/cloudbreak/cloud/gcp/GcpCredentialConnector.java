@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 
 import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.gson.JsonParser;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialPrerequisitesV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.GcpCredentialPrerequisites;
+import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
+import com.sequenceiq.cloudbreak.cloud.response.GcpCredentialPrerequisites;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -64,10 +64,10 @@ public class GcpCredentialConnector implements CredentialConnector {
     }
 
     @Override
-    public CredentialPrerequisitesV4Response getPrerequisites(CloudContext cloudContext, String externalId, String deploymentAddress) {
+    public CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId, String deploymentAddress) {
         String prerequisitesCreationCommand = gcpPlatformParameters.getPrerequisitesCreationCommand();
         GcpCredentialPrerequisites gcpPrereqs = new GcpCredentialPrerequisites(Base64.encodeBase64String(prerequisitesCreationCommand.getBytes()));
-        return new CredentialPrerequisitesV4Response(cloudContext.getPlatform().value(), gcpPrereqs);
+        return new CredentialPrerequisitesResponse(cloudContext.getPlatform().value(), gcpPrereqs);
     }
 
     /**

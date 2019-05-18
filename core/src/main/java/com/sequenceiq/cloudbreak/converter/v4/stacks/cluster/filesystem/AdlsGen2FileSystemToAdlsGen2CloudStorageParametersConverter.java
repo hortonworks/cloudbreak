@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.AdlsGen2CloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.services.filesystem.AdlsGen2FileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsGen2FileSystem;
 
 @Component
 public class AdlsGen2FileSystemToAdlsGen2CloudStorageParametersConverter

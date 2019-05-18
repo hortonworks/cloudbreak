@@ -8,11 +8,11 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakIdentityClient;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.model.TlsConfiguration;
 import com.sequenceiq.periscope.repository.SecurityConfigRepository;
+import com.sequenceiq.secret.service.SecretService;
 
 @Service
 public class TlsSecurityService {

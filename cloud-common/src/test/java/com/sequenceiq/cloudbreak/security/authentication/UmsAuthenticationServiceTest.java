@@ -14,6 +14,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsAuthenticationException;
+import com.sequenceiq.cloudbreak.auth.security.authentication.UmsAuthenticationService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 
 @RunWith(MockitoJUnitRunner.class)

@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.yarn.client.model.request;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
+import java.io.Serializable;
 
-public class ApplicationDetailRequest implements JsonEntity {
+public class ApplicationDetailRequest implements Serializable {
 
     private String name;
 

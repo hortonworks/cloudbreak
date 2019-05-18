@@ -15,22 +15,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.requests.UserProfileV4Request;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
-import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.repository.UserProfileRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.secret.service.SecretService;
 
 @Service
 public class UserProfileService {
@@ -106,7 +105,7 @@ public class UserProfileService {
     private void addUiProperties(UserProfile userProfile) {
         try {
             userProfile.setUiProperties(new Json(new HashMap<>()).getValue());
-        } catch (JsonProcessingException ignored) {
+        } catch (IllegalArgumentException ignored) {
             userProfile.setUiProperties(null);
         }
     }
@@ -137,7 +136,7 @@ public class UserProfileService {
         Map<String, Object> map = new Json(uiPropertiesFromVault).getMap();
         try {
             userProfile.setUiProperties(new Json(map).getValue());
-        } catch (JsonProcessingException ignored) {
+        } catch (IllegalArgumentException ignored) {
             throw new BadRequestException("The modification of the ui properties was unsuccesfull.");
         }
         UserProfile newUserProfile = userProfileRepository.save(userProfile);

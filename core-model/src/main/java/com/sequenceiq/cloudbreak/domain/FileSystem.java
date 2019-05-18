@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
-import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
+import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))

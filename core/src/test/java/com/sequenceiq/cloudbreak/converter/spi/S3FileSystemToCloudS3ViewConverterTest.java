@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
-import com.sequenceiq.cloudbreak.services.filesystem.S3FileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.S3FileSystem;
 
 public class S3FileSystemToCloudS3ViewConverterTest {
 

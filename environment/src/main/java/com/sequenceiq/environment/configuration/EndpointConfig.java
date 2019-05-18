@@ -11,9 +11,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.environment.api.EnvironmentApi;
-import com.sequenceiq.environment.env.EnvironmentController;
+import com.sequenceiq.environment.credential.CredentialV1Controller;
+import com.sequenceiq.environment.environment.controller.EnvironmentV1Controller;
 import com.sequenceiq.environment.exception.mapper.DefaultExceptionMapper;
 import com.sequenceiq.environment.exception.mapper.WebApplicaitonExceptionMapper;
+import com.sequenceiq.environment.proxy.ProxyV1Controller;
 
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.config.SwaggerConfigLocator;
@@ -22,6 +24,8 @@ import io.swagger.jaxrs.config.SwaggerContextService;
 @ApplicationPath(EnvironmentApi.API_ROOT_CONTEXT)
 @Configuration
 public class EndpointConfig extends ResourceConfig {
+
+    private static final List<Class<?>> CONTROLLERS = List.of(CredentialV1Controller.class, ProxyV1Controller.class, EnvironmentV1Controller.class);
 
     private static final String VERSION_UNAVAILABLE = "unspecified";
 
@@ -71,7 +75,7 @@ public class EndpointConfig extends ResourceConfig {
     }
 
     private void registerEndpoints() {
-        register(EnvironmentController.class);
+        CONTROLLERS.forEach(this::register);
 
         register(io.swagger.jaxrs.listing.ApiListingResource.class);
         register(io.swagger.jaxrs.listing.SwaggerSerializers.class);

@@ -5,16 +5,15 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.State;
 import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.GatewayTopologyV4RequestValidator;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 
 @Component
 public class GatewayTopologyV4RequestToGatewayTopologyConverter extends AbstractConversionServiceAwareConverter<GatewayTopologyV4Request, GatewayTopology> {
@@ -40,7 +39,7 @@ public class GatewayTopologyV4RequestToGatewayTopologyConverter extends Abstract
                 ExposedServices exposedServices = getConversionService().convert(source, ExposedServices.class);
                 gatewayTopology.setExposedServices(new Json(exposedServices));
             }
-        } catch (JsonProcessingException e) {
+        } catch (IllegalArgumentException e) {
             throw new BadRequestException("Invalid exposedServices in request. Could not be parsed to JSON.", e);
         }
     }

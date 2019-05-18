@@ -6,11 +6,11 @@ import static com.sequenceiq.environment.api.doc.ModelDescriptions.ID;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.environment.api.SecretV4Response;
 import com.sequenceiq.environment.api.credential.doc.CredentialDescriptor;
 import com.sequenceiq.environment.api.credential.doc.CredentialModelDescription;
 import com.sequenceiq.environment.api.credential.model.CredentialV1Base;
 import com.sequenceiq.environment.api.credential.model.parameters.azure.AzureCredentialV1ResponseParameters;
+import com.sequenceiq.secret.model.SecretResponse;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -23,7 +23,7 @@ public class CredentialV1Response extends CredentialV1Base {
     private Long id;
 
     @ApiModelProperty(ATTRIBUTES)
-    private SecretV4Response attributes;
+    private SecretResponse attributes;
 
     @ApiModelProperty(CredentialModelDescription.AZURE_PARAMETERS)
     private AzureCredentialV1ResponseParameters azure;
@@ -45,11 +45,11 @@ public class CredentialV1Response extends CredentialV1Base {
         this.id = id;
     }
 
-    public SecretV4Response getAttributes() {
+    public SecretResponse getAttributes() {
         return attributes;
     }
 
-    public void setAttributes(SecretV4Response attributes) {
+    public void setAttributes(SecretResponse attributes) {
         this.attributes = attributes;
     }
 }

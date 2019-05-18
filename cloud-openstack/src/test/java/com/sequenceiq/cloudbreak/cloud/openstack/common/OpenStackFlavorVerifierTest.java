@@ -20,11 +20,11 @@ import org.openstack4j.api.compute.FlavorService;
 import org.openstack4j.model.compute.Flavor;
 
 import com.google.common.collect.ImmutableList;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OpenStackFlavorVerifierTest {

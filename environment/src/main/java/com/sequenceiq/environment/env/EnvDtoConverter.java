@@ -23,10 +23,10 @@ public class EnvDtoConverter {
     }
 
     public DetailedEnvironmentV1Response dtoToResponse(EnvironmentDto created) {
-        return DetailedEnvironmentV1Response.DetailedEnvironmentV1ResponseBuilder.aDetailedEnvironmentV1Response()
-                .withName(created.getName())
-                .withId(created.getId())
-                .withCloudPlatform(created.getCloudPlatform())
-                .build();
+        DetailedEnvironmentV1Response response = new DetailedEnvironmentV1Response();
+        response.setName(created.getName());
+        response.setId(created.getId());
+        response.setCloudPlatform(created.getCloudPlatform());
+        return response;
     }
 }

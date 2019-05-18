@@ -29,7 +29,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
+import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.blueprint.ServiceConfig;
 import com.sequenceiq.cloudbreak.template.model.ConfigProperty;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;

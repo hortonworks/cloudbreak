@@ -7,7 +7,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 
-import com.sequenceiq.cloudbreak.client.CaasClient;
+import com.sequenceiq.cloudbreak.auth.caas.CaasClient;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 
 @Configuration

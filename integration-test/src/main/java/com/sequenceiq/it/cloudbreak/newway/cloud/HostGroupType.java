@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.newway.cloud;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
+import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.it.cloudbreak.newway.TestParameter;
 
 public enum HostGroupType {

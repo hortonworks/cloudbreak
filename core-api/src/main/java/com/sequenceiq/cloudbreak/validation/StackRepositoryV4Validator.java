@@ -8,7 +8,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.stackrepository.StackRepositoryV4Request;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
-import com.sequenceiq.cloudbreak.cloud.model.Versioned;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 
 public class StackRepositoryV4Validator implements ConstraintValidator<ValidAmbariStack, StackRepositoryV4Request> {
 

@@ -1,0 +1,19 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+  testCompile group: 'junit', name: 'junit', version: '4.12'
+
+  compile project(":common")
+  compile project(":workspace-authorization")
+  compile project(":structuredevent-model")
+
+  implementation group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
+  implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
+  implementation group: 'org.springframework',           name: 'spring-context',                 version: springFrameworkVersion
+}

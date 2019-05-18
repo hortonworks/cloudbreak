@@ -31,6 +31,7 @@ altus:
 
 vault:
   addr: localhost
+  port: 8200
 
 environment:
   cert.dir: /certs/
@@ -50,3 +51,49 @@ environment:
       schema: public
       cert.file: database.crt
       ssl: false
+
+cb:
+  authentication:
+    disabled: true
+  intermediate.threadpool:
+    core.size: 40
+    capacity.size: 4000
+  max:
+    azure.resource.name.length: 120
+    gcp.resource.name.length: 63
+    aws.resource.name.length: 50
+    openstack.resource.name.length: 120
+    yarn.resource.name.length: 63
+  etc.config.dir: /etc/cloudbreak
+  yarn:
+    domain: default.com
+    defaultQueue: "default"
+    defaultLifeTime: -1
+  os:
+    enable.autoimport: true
+    import:
+      root.url.pattern: http://public-repo-1.hortonworks.com/HDP/cloudbreak/%s.img
+      from.format: qcow2
+      disk.format: qcow2
+      container.format: bare
+  openstack:
+#    heat.template.path: templates/openstack-heat.ftl
+    api.debug: false
+    hostkey.verify: false
+  gcp:
+    hostkey.verify: false
+    disk.encryption.url: https://cloud-certs.storage.googleapis.com/google-cloud-csek-ingress.pem
+  aws:
+    hostkey.verify: false
+    spotinstances.enabled: true
+  arm:
+#    template.path: templates/arm-v2.ftl
+#    parameter.path: templates/parameters.ftl
+    app.creation.template:
+#      command.path: templates/app-creation-command.ftl
+#      json.path: templates/app-creation.json
+      resource:
+        app.id: 797f4846-ba00-4fd7-ba43-dac1f8f63013
+        access.scope.id: 41094075-9dad-400e-a0bd-54e686782033
+  azure:
+    host.name.prefix.length: 255

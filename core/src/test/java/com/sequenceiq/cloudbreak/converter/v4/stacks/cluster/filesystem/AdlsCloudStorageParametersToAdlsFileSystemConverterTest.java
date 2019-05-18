@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.AdlsCloudStorageV4Parameters;
-import com.sequenceiq.cloudbreak.services.filesystem.AdlsFileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsFileSystem;
 
 public class AdlsCloudStorageParametersToAdlsFileSystemConverterTest {
 

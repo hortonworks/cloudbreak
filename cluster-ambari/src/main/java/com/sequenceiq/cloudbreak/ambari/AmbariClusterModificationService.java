@@ -63,7 +63,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
-import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 import groovyx.net.http.HttpResponseException;
 

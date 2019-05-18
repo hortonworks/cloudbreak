@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.WasbCloudStorageV4Parameters;
-import com.sequenceiq.cloudbreak.services.filesystem.WasbFileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.WasbFileSystem;
 
 public class WasbFileSystemToWasbCloudStorageParametersConverterTest {
 

@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationReq
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 @Component("StackPreTerminationAction")
 public class StackPreTerminationAction extends AbstractStackTerminationAction<TerminationEvent> {

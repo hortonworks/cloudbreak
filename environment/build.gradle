@@ -20,9 +20,30 @@ repositories {
 
 dependencies {
   compile project(':common')
-  compile project(':environment-api')
+  compile project(':secret-engine')
   compile project(':flow')
-  
+  compile project(':auth-connector')
+  compile (project(':environment-api')) {
+    exclude module: 'workspace-authorization'
+  }
+  compile (project(':notification-sender')) {
+    exclude module: 'workspace-authorization'
+  }
+  compile (project(':cloud-reactor')) {
+    exclude module: 'cloud-reactor-api'
+  }
+  compile (project(':cloud-reactor-api')) {
+    exclude module: 'core-api'
+  }
+
+  compile project (":cloud-aws")
+  compile project (":cloud-azure")
+  compile project (":cloud-mock")
+  compile project (":cloud-yarn")
+  compile project (":cloud-gcp")
+  compile project (":cloud-openstack")
+  compile project (":cloud-cumulus-yarn")
+
   compile     group: 'com.google.code.gson',      name: 'gson'
   compile     group: 'dnsjava',                   name: 'dnsjava'
   compile     group: 'io.micrometer',             name: 'micrometer-core'

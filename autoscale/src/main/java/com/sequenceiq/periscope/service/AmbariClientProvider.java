@@ -9,10 +9,10 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.proxy.ApplicationProxyConfig;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.model.TlsConfiguration;
 import com.sequenceiq.periscope.service.security.TlsSecurityService;
+import com.sequenceiq.secret.service.SecretService;
 
 @Service
 public class AmbariClientProvider {

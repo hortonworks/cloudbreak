@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.credential;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -17,24 +16,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.UserPreferences;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialPrerequisitesV4Response;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialPrerequisitesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialPrerequisitesResult;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
+import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeConfigApiConnector;
 import com.sequenceiq.cloudbreak.service.sharedservice.ServiceDescriptorDefinitionProvider;
 import com.sequenceiq.cloudbreak.service.user.UserPreferencesService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.UserPreferences;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
 
@@ -67,7 +66,7 @@ public class CredentialPrerequisiteService {
     @Inject
     private DatalakeConfigApiConnector datalakeConfigApiConnector;
 
-    public CredentialPrerequisitesV4Response getPrerequisites(User user, Workspace workspace, String cloudPlatform, String deploymentAddress) {
+    public CredentialPrerequisitesResponse getPrerequisites(User user, Workspace workspace, String cloudPlatform, String deploymentAddress) {
         CloudContext cloudContext = new CloudContext(null, null, cloudPlatform, user.getUserId(), workspace.getId());
         UserPreferences userPreferences = userPreferencesService.getWithExternalId(user);
         CredentialPrerequisitesRequest request = new CredentialPrerequisitesRequest(cloudContext, userPreferences.getExternalId(), deploymentAddress);
@@ -81,7 +80,7 @@ public class CredentialPrerequisiteService {
                 LOGGER.info(message, res.getErrorDetails());
                 throw new BadRequestException(message + res.getErrorDetails(), res.getErrorDetails());
             }
-            return res.getCredentialPrerequisitesV4Response();
+            return res.getCredentialPrerequisitesResponse();
         } catch (InterruptedException e) {
             LOGGER.error(message, e);
             throw new OperationException(e);
@@ -149,7 +148,7 @@ public class CredentialPrerequisiteService {
     private void saveNewAttributesToCredential(Credential credential, Map<String, Object> newAttributes) {
         try {
             credential.setAttributes(new Json(newAttributes).getValue());
-        } catch (IOException ex) {
+        } catch (IllegalArgumentException ex) {
             LOGGER.info("New prerequisite attributes could not be added to the credential.", ex);
             throw new OperationException(ex);
         }

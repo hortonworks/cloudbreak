@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -76,7 +75,7 @@ public class SdxService {
         sdxCluster.setClusterShape(sdxClusterRequest.getClusterShape());
         try {
             sdxCluster.setTags(new Json(sdxClusterRequest.getTags()));
-        } catch (JsonProcessingException e) {
+        } catch (IllegalArgumentException e) {
             throw new BadRequestException("Can not convert tags", e);
         }
         sdxCluster.setInitiatorUserCrn(userCrn);

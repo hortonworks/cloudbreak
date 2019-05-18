@@ -4,12 +4,12 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.Database;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfigModelDescription;
+import com.sequenceiq.secret.model.SecretResponse;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -37,10 +37,10 @@ public class DatabaseV4Response extends DatabaseV4Base {
     private String databaseEngineDisplayName;
 
     @ApiModelProperty(Database.USERNAME)
-    private SecretV4Response connectionUserName;
+    private SecretResponse connectionUserName;
 
     @ApiModelProperty(Database.PASSWORD)
-    private SecretV4Response connectionPassword;
+    private SecretResponse connectionPassword;
 
     @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
     private WorkspaceResourceV4Response workspace;
@@ -93,19 +93,19 @@ public class DatabaseV4Response extends DatabaseV4Base {
         this.databaseEngineDisplayName = databaseEngineDisplayName;
     }
 
-    public SecretV4Response getConnectionUserName() {
+    public SecretResponse getConnectionUserName() {
         return connectionUserName;
     }
 
-    public void setConnectionUserName(SecretV4Response connectionUserName) {
+    public void setConnectionUserName(SecretResponse connectionUserName) {
         this.connectionUserName = connectionUserName;
     }
 
-    public SecretV4Response getConnectionPassword() {
+    public SecretResponse getConnectionPassword() {
         return connectionPassword;
     }
 
-    public void setConnectionPassword(SecretV4Response connectionPassword) {
+    public void setConnectionPassword(SecretResponse connectionPassword) {
         this.connectionPassword = connectionPassword;
     }
 

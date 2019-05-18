@@ -4,16 +4,13 @@ plugins {
 
 group 'com.sequenceiq'
 
-sourceCompatibility = 1.8
-
 repositories {
   mavenCentral()
 }
 
 dependencies {
   compile project(":common")
-
-  testCompile group: 'junit', name: 'junit', version: junitVersion
+  
   implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jApiVersion
   implementation group: 'org.springframework', name: 'spring-aspects', version: springFrameworkVersion
   implementation group: 'com.google.code.gson', name: 'gson'
@@ -31,4 +28,9 @@ dependencies {
   implementation(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion) {
     force = true
   }
+
+  testCompile group: 'junit', name: 'junit', version: junitVersion
+  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
+  testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junitJupiterVersion
+  testRuntime group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitJupiterVersion
 }

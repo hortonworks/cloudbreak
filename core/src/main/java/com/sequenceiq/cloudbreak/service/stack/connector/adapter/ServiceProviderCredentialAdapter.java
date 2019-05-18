@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.adapter;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -23,14 +22,14 @@ import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
-import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteService;
+import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
 
@@ -159,7 +158,7 @@ public class ServiceProviderCredentialAdapter {
         if (newAttributesAdded) {
             try {
                 credential.setAttributes(new Json(newAttributes).getValue());
-            } catch (IOException ex) {
+            } catch (IllegalArgumentException ex) {
                 LOGGER.error("New cloudprovider attributes could not be added to the credential.", ex);
                 throw new OperationException(ex);
             }

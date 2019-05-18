@@ -22,7 +22,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigQueryService;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
-import com.sequenceiq.cloudbreak.services.filesystem.FileSystemType;
+import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;

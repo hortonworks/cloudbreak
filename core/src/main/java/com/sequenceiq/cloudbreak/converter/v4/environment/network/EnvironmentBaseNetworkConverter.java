@@ -8,15 +8,14 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.EnvironmentNetworkV4Response;
+import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.environment.BaseNetwork;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
-import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 
 public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetworkConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentBaseNetworkConverter.class);
@@ -56,7 +55,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         attributes.putAll(getAttributesForLegacyNetwork(source));
         try {
             result.setAttributes(new Json(attributes));
-        } catch (JsonProcessingException e) {
+        } catch (IllegalArgumentException e) {
             LOGGER.debug("Environment's network could not be converted to network.", e);
         }
         return result;

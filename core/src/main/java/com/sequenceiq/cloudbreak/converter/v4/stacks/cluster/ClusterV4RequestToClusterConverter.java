@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.REQUESTED;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,7 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
@@ -31,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
@@ -43,7 +42,6 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
@@ -119,7 +117,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         try {
             Json json = new Json(convertContainerConfigs(source.getCustomContainer()));
             cluster.setCustomContainerDefinition(json);
-        } catch (JsonProcessingException ignored) {
+        } catch (IllegalArgumentException ignored) {
             cluster.setCustomContainerDefinition(null);
         }
         updateDatabases(source, cluster, workspace);
@@ -157,7 +155,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
                 : Collections.emptyMap();
         try {
             cluster.setAttributes((new Json(attributesMap)).getValue());
-        } catch (JsonProcessingException e) {
+        } catch (IllegalArgumentException e) {
             LOGGER.warn("Could not initiate the attribute map on cluster object: ", e);
             throw new CloudbreakApiException("Failed to store exposedServices", e);
         }
@@ -223,7 +221,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         return repositoryObject -> {
             try {
                 return new Json(repositoryObject);
-            } catch (IOException e) {
+            } catch (IllegalArgumentException e) {
                 throw new BadRequestException("Cannot serialize the stack template", e);
             }
         };

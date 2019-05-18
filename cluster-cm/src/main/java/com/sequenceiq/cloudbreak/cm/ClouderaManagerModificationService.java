@@ -40,7 +40,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 @Service
 @Scope("prototype")

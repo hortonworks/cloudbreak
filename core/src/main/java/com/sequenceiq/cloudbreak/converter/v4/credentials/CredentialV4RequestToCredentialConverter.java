@@ -4,12 +4,11 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.credential.CredentialPropertyCollector;
 
 @Component
@@ -29,7 +28,7 @@ public class CredentialV4RequestToCredentialConverter extends AbstractConversion
             if (source.getAws() != null) {
                 credential.setGovCloud(source.getAws().getGovCloud());
             }
-        } catch (JsonProcessingException ignored) {
+        } catch (IllegalArgumentException ignored) {
             throw new BadRequestException("Invalid parameters");
         }
         return credential;

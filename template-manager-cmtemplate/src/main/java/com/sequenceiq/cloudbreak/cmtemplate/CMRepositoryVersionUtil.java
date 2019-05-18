@@ -4,7 +4,7 @@ import java.util.Comparator;
 
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
-import com.sequenceiq.cloudbreak.cloud.model.Versioned;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 
 public class CMRepositoryVersionUtil {
     public static final Versioned CLOUDERAMANAGER_VERSION_6_3_0 = () -> "6.3.0";

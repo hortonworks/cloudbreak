@@ -53,6 +53,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.UserProfileV4Endpoi
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.WorkspaceAwareUtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.WorkspaceV4Endpoint;
+import com.sequenceiq.cloudbreak.auth.TokenUnavailableException;
+import com.sequenceiq.cloudbreak.auth.caas.CaasClient;
+import com.sequenceiq.cloudbreak.restclient.TokenRequest;
 
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;

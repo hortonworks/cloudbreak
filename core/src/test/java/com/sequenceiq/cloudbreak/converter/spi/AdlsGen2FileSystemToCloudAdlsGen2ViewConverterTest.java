@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
-import com.sequenceiq.cloudbreak.services.filesystem.AdlsGen2FileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsGen2FileSystem;
 
 public class AdlsGen2FileSystemToCloudAdlsGen2ViewConverterTest {
 

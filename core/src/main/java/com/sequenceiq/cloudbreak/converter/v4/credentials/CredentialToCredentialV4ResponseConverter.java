@@ -12,7 +12,6 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
@@ -21,6 +20,7 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.service.credential.CredentialParameterSetterUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.definition.credential.CredentialDefinitionService;
+import com.sequenceiq.secret.model.SecretResponse;
 
 @Component
 public class CredentialToCredentialV4ResponseConverter extends AbstractConversionServiceAwareConverter<Credential, CredentialV4Response> {
@@ -53,7 +53,7 @@ public class CredentialToCredentialV4ResponseConverter extends AbstractConversio
             if (credentialJson.getAws() != null) {
                 credentialJson.getAws().setGovCloud(source.getGovCloud());
             }
-            credentialJson.setAttributes(getConversionService().convert(source.getAttributesSecret(), SecretV4Response.class));
+            credentialJson.setAttributes(getConversionService().convert(source.getAttributesSecret(), SecretResponse.class));
         }
         credentialJson.setDescription(source.getDescription() == null ? "" : source.getDescription());
         credentialJson.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceV4Response.class));
