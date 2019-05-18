@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.client;
+package com.sequenceiq.cloudbreak.auth;
 
 public class SSLConnectionException extends RuntimeException {
 

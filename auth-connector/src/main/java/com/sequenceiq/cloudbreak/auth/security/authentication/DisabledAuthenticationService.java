@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.security.authentication;
+package com.sequenceiq.cloudbreak.auth.security.authentication;
 
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.client;
+package com.sequenceiq.cloudbreak.auth.uaa;
 
 import static javax.ws.rs.core.Response.Status.fromStatusCode;
 
@@ -23,6 +23,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.util.Assert;
+
+import com.sequenceiq.cloudbreak.auth.SSLConnectionException;
+import com.sequenceiq.cloudbreak.auth.TokenUnavailableException;
+import com.sequenceiq.cloudbreak.client.ConfigKey;
+import com.sequenceiq.cloudbreak.client.RestClientUtil;
 
 public class IdentityClient {
 

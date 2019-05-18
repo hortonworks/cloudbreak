@@ -64,6 +64,14 @@ public class ProxyConfig implements Serializable, EnvironmentAwareResource, Auth
     @Column
     private String accountId;
 
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @JoinTable(name = "env_proxy", joinColumns = @JoinColumn(name = "proxyid"), inverseJoinColumns = @JoinColumn(name = "envid"))
+    private Set<EnvironmentView> environments = new HashSet<>();
+
+    private boolean archived;
+
+    private Long deletionTimestamp = -1L;
+
     @Override
     public String getAccountId() {
         return accountId;
@@ -73,14 +81,6 @@ public class ProxyConfig implements Serializable, EnvironmentAwareResource, Auth
     public void setAccountId(String accountId) {
         this.accountId = accountId;
     }
-
-    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    @JoinTable(name = "env_proxy", joinColumns = @JoinColumn(name = "proxyid"), inverseJoinColumns = @JoinColumn(name = "envid"))
-    private Set<EnvironmentView> environments = new HashSet<>();
-
-    private boolean archived;
-
-    private Long deletionTimestamp = -1L;
 
     public Long getId() {
         return id;
