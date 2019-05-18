@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.client;
+package com.sequenceiq.cloudbreak.auth.uaa;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

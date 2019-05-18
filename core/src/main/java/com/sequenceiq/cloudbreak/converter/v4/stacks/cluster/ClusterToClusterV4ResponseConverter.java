@@ -62,7 +62,6 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
     @Inject
     private BlueprintService blueprintService;
 
-
     @Inject
     private ConverterUtil converterUtil;
 

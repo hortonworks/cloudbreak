@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.security.authentication;
+package com.sequenceiq.cloudbreak.auth.security.authentication;
 
 import java.io.IOException;
 import java.util.Map;
@@ -16,8 +16,8 @@ import org.springframework.security.oauth2.provider.authentication.OAuth2Authent
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.cloudbreak.common.service.token.CachedRemoteTokenService.MapTypeReference;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.util.MapTypeReference;
 
 @Service
 public class AuthenticatedUserService {

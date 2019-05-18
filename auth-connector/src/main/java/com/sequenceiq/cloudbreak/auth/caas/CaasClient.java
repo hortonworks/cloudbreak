@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.client;
+package com.sequenceiq.cloudbreak.auth.caas;
 
 import static javax.ws.rs.client.Entity.entity;
 
@@ -15,6 +15,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
+
+import com.sequenceiq.cloudbreak.client.ConfigKey;
+import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.cloudbreak.restclient.IntrospectRequest;
+import com.sequenceiq.cloudbreak.restclient.IntrospectResponse;
+import com.sequenceiq.cloudbreak.restclient.TokenRequest;
+import com.sequenceiq.cloudbreak.restclient.TokenResponse;
 
 public class CaasClient {
 

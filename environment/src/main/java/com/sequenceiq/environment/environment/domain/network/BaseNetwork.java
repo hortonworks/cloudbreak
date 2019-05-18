@@ -55,6 +55,10 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
     @Column
     private String accountId;
 
+    public BaseNetwork() {
+        subnetIds = new Json(new HashSet<String>());
+    }
+
     @Override
     public Set<EnvironmentView> getEnvironments() {
         Set<EnvironmentView> environmentViews = new HashSet<>();
@@ -78,10 +82,6 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
     @Override
     public void setAccountId(String accountId) {
         this.accountId = accountId;
-    }
-
-    public BaseNetwork() {
-        subnetIds = new Json(new HashSet<String>());
     }
 
     public void setDeletionTimestamp(Long timestampMillisecs) {

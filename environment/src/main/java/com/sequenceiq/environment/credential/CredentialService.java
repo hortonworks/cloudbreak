@@ -141,7 +141,6 @@ public class CredentialService {
         return delete(name, TEMP_USER_ID);
     }
 
-
     public Credential archiveCredential(Credential credential) {
         credential.setName(generateArchiveName(credential.getName()));
         credential.setArchived(true);
