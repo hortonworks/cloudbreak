@@ -28,8 +28,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.AdjustmentType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -51,7 +49,9 @@ import com.sequenceiq.cloudbreak.cloud.yarn.client.model.request.ApplicationDeta
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.request.CreateApplicationRequest;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ApplicationDetailResponse;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ResponseContext;
+import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
 import com.sequenceiq.cloudbreak.common.type.CommonStatus;
+import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class YarnResourceConnectorTest {

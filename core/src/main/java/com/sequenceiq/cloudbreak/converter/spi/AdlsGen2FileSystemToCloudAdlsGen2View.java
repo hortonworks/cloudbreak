@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.services.filesystem.AdlsGen2FileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsGen2FileSystem;
 
 @Component
 public class AdlsGen2FileSystemToCloudAdlsGen2View

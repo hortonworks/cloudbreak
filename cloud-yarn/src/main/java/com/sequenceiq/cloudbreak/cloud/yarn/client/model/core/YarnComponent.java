@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.yarn.client.model.core;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 
-public class YarnComponent implements JsonEntity {
+public class YarnComponent implements Serializable {
 
     private String name;
 

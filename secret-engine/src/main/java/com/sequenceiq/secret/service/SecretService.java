@@ -28,9 +28,9 @@ public class SecretService {
     @Value("${secret.engine:}")
     private String engineClass;
 
-    private MetricService metricService;
+    private final MetricService metricService;
 
-    private List<SecretEngine> engines;
+    private final List<SecretEngine> engines;
 
     private SecretEngine persistentEngine;
 

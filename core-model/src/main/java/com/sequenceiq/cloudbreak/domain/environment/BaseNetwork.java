@@ -20,15 +20,14 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.Where;
 
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.sequenceiq.cloudbreak.domain.ArchivableResource;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.domain.ArchivableResource;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @Entity
 @Where(clause = "archived = false")
@@ -61,11 +60,7 @@ public abstract class BaseNetwork implements WorkspaceAwareResource, ArchivableR
     private Json subnetIds;
 
     public BaseNetwork() {
-        try {
-            subnetIds = new Json(new HashSet<String>());
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException(e);
-        }
+        subnetIds = new Json(new HashSet<String>());
     }
 
     @Override
@@ -112,11 +107,7 @@ public abstract class BaseNetwork implements WorkspaceAwareResource, ArchivableR
     }
 
     public void setSubnetIds(Set<String> subnetIds) {
-        try {
-            this.subnetIds = new Json(subnetIds);
-        } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException(e);
-        }
+        this.subnetIds = new Json(subnetIds);
     }
 
     public Set<String> getSubnetIdsSet() {

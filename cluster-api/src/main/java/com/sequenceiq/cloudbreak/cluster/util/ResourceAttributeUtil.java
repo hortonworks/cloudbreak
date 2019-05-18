@@ -6,9 +6,8 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 
 @Component
@@ -26,7 +25,7 @@ public class ResourceAttributeUtil {
     public <T> void setTypedAttributes(Resource resource, T attributes) {
         try {
             resource.setAttributes(new Json(attributes));
-        } catch (JsonProcessingException e) {
+        } catch (IllegalArgumentException e) {
             throw new CloudbreakServiceException("Failed to parse attributes from type: " + attributes.getClass().getSimpleName(), e);
         }
     }

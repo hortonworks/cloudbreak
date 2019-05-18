@@ -36,18 +36,16 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.ImmutableSet;
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialPrerequisitesV4Response;
-import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Topology;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
@@ -55,12 +53,14 @@ import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
-import com.sequenceiq.cloudbreak.service.secret.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.secret.service.SecretService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CredentialServiceTest {
@@ -493,11 +493,11 @@ public class CredentialServiceTest {
 
     @Test
     public void testGetPrerequisitesBothCredentialValidatorAndCredentialPrerequisiteServiceIsCalled() {
-        CredentialPrerequisitesV4Response expected = mock(CredentialPrerequisitesV4Response.class);
+        CredentialPrerequisitesResponse expected = mock(CredentialPrerequisitesResponse.class);
         doNothing().when(credentialValidator).validateCredentialCloudPlatform(PLATFORM);
         when(credentialPrerequisiteService.getPrerequisites(user, workspace, PLATFORM, "")).thenReturn(expected);
 
-        CredentialPrerequisitesV4Response result = underTest.getPrerequisites(workspace.getId(), PLATFORM, "");
+        CredentialPrerequisitesResponse result = underTest.getPrerequisites(workspace.getId(), PLATFORM, "");
 
         assertEquals("The result CredentialPrerequisites object is not the expected one!", expected, result);
         verify(credentialValidator, times(1)).validateCredentialCloudPlatform(anyString());
@@ -507,12 +507,12 @@ public class CredentialServiceTest {
 
     @Test
     public void testGetPrerequisitesBothCredentialValidatorAndCredentialPrerequisiteServiceIsCalledAndDeploymentAddressIsNotEmpty() {
-        CredentialPrerequisitesV4Response expected = mock(CredentialPrerequisitesV4Response.class);
+        CredentialPrerequisitesResponse expected = mock(CredentialPrerequisitesResponse.class);
         String deploymentAddress = "https://MYDEPLOYMENT_ADDRESS";
         doNothing().when(credentialValidator).validateCredentialCloudPlatform(PLATFORM);
         when(credentialPrerequisiteService.getPrerequisites(user, workspace, PLATFORM, deploymentAddress)).thenReturn(expected);
 
-        CredentialPrerequisitesV4Response result = underTest.getPrerequisites(workspace.getId(), PLATFORM, deploymentAddress);
+        CredentialPrerequisitesResponse result = underTest.getPrerequisites(workspace.getId(), PLATFORM, deploymentAddress);
 
         assertEquals("The result CredentialPrerequisites object is not the expected one!", expected, result);
         verify(credentialValidator, times(1)).validateCredentialCloudPlatform(anyString());

@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeRegionsRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.AwsCredentialPrerequisites;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialPrerequisitesV4Response;
+import com.sequenceiq.cloudbreak.cloud.response.AwsCredentialPrerequisites;
+import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -74,9 +74,9 @@ public class AwsCredentialConnector implements CredentialConnector {
     }
 
     @Override
-    public CredentialPrerequisitesV4Response getPrerequisites(CloudContext cloudContext, String externalId, String deploymentAddress) {
+    public CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId, String deploymentAddress) {
         AwsCredentialPrerequisites awsPrerequisites = new AwsCredentialPrerequisites(externalId, awsPlatformParameters.getCredentialPoliciesJson());
-        return new CredentialPrerequisitesV4Response(cloudContext.getPlatform().value(), accountId, awsPrerequisites);
+        return new CredentialPrerequisitesResponse(cloudContext.getPlatform().value(), accountId, awsPrerequisites);
     }
 
     private CloudCredentialStatus verifyIamRoleIsAssumable(CloudCredential cloudCredential) {

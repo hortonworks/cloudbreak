@@ -40,13 +40,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
@@ -70,6 +68,8 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -77,6 +77,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRu
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
+import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
@@ -91,7 +92,6 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -111,7 +111,6 @@ import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.constraint.ConstraintService;
-import com.sequenceiq.cloudbreak.service.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -121,7 +120,7 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
@@ -975,7 +974,7 @@ public class ClusterService {
                     try {
                         clusterComponentConfigProvider.store(new ClusterComponent(ComponentType.AMBARI_REPO_DETAILS,
                                 new Json(ambariRepoUpgrade), stack.getCluster()));
-                    } catch (JsonProcessingException ignored) {
+                    } catch (IllegalArgumentException ignored) {
                         throw new BadRequestException(String.format("Ambari repo details cannot be saved. %s", ambariRepoUpgrade));
                     }
                 } else {
@@ -987,7 +986,7 @@ public class ClusterService {
                     try {
                         component.setAttributes(new Json(ambariRepo));
                         clusterComponentConfigProvider.store(component);
-                    } catch (JsonProcessingException ignored) {
+                    } catch (IllegalArgumentException ignored) {
                         throw new BadRequestException(String.format("Ambari repo details cannot be saved. %s", ambariRepoUpgrade));
                     }
                 }
@@ -1008,7 +1007,7 @@ public class ClusterService {
                 try {
                     ClusterComponent clusterComp = new ClusterComponent(ComponentType.HDP_REPO_DETAILS, new Json(stackRepoDetailsUpdate), stack.getCluster());
                     clusterComponentConfigProvider.store(clusterComp);
-                } catch (JsonProcessingException ignored) {
+                } catch (IllegalArgumentException ignored) {
                     throw new BadRequestException(String.format("HDP Repo parameters cannot be converted. %s", stackRepoDetailsUpdate));
                 }
             } else {
@@ -1022,7 +1021,7 @@ public class ClusterService {
                 try {
                     component.setAttributes(new Json(stackRepoDetails));
                     clusterComponentConfigProvider.store(component);
-                } catch (JsonProcessingException ignored) {
+                } catch (IllegalArgumentException ignored) {
                     throw new BadRequestException(String.format("HDP Repo parameters cannot be converted. %s", stackRepoDetailsUpdate));
                 }
             }
@@ -1211,7 +1210,7 @@ public class ClusterService {
         try {
             component.setAttributes(new Json(ambariRepo));
             clusterComponentConfigProvider.store(component);
-        } catch (JsonProcessingException ignored) {
+        } catch (IllegalArgumentException ignored) {
             throw new BadRequestException("Ambari repo details cannot be saved.");
         }
     }
@@ -1244,7 +1243,7 @@ public class ClusterService {
         try {
             component.setAttributes(new Json(hdpRepo));
             clusterComponentConfigProvider.store(component);
-        } catch (JsonProcessingException ignored) {
+        } catch (IllegalArgumentException ignored) {
             throw new BadRequestException("HDP repo details cannot be saved.");
         }
     }
@@ -1309,7 +1308,7 @@ public class ClusterService {
         try {
             component.setAttributes(new Json(hdfRepo));
             clusterComponentConfigProvider.store(component);
-        } catch (JsonProcessingException ignored) {
+        } catch (IllegalArgumentException ignored) {
             throw new BadRequestException("HDF repo details cannot be saved.");
         }
     }

@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.environment.env.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.env.flow.creation.event.EnvCreationStateSelectors;
 import com.sequenceiq.environment.env.service.EnvironmentDto;
-import com.sequenceiq.environment.env.service.EnvironmentService;
+import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.network.NetworkCreationService;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;

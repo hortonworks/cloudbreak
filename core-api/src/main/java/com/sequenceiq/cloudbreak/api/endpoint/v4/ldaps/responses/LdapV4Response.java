@@ -3,10 +3,10 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapV4Base;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.LdapConfigModelDescription;
+import com.sequenceiq.secret.model.SecretResponse;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -19,10 +19,10 @@ public class LdapV4Response extends LdapV4Base {
     private Long id;
 
     @ApiModelProperty(LdapConfigModelDescription.BIND_DN)
-    private SecretV4Response bindDn;
+    private SecretResponse bindDn;
 
     @ApiModelProperty(LdapConfigModelDescription.BIND_PASSWORD)
-    private SecretV4Response bindPassword;
+    private SecretResponse bindPassword;
 
     @JsonProperty("id")
     public Long getId() {
@@ -33,19 +33,19 @@ public class LdapV4Response extends LdapV4Base {
         this.id = id;
     }
 
-    public SecretV4Response getBindDn() {
+    public SecretResponse getBindDn() {
         return bindDn;
     }
 
-    public void setBindDn(SecretV4Response bindDn) {
+    public void setBindDn(SecretResponse bindDn) {
         this.bindDn = bindDn;
     }
 
-    public SecretV4Response getBindPassword() {
+    public SecretResponse getBindPassword() {
         return bindPassword;
     }
 
-    public void setBindPassword(SecretV4Response bindPassword) {
+    public void setBindPassword(SecretResponse bindPassword) {
         this.bindPassword = bindPassword;
     }
 }

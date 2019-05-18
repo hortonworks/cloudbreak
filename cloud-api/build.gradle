@@ -1,35 +1,36 @@
 apply plugin: 'java'
 
 repositories {
-    mavenLocal()
-    maven { url = "$repoUrl" }
-    maven { url 'http://repo.spring.io/libs-release' }
-    mavenLocal()
-    mavenCentral()
-    maven { url = "$repoUrl" }
+  mavenLocal()
+  maven { url = "$repoUrl" }
+  maven { url 'http://repo.spring.io/libs-release' }
+  mavenLocal()
+  mavenCentral()
+  maven { url = "$repoUrl" }
 }
 
 jar {
-    baseName = 'cloud-api'
-    archiveName = 'cloud-api.jar'
+  baseName = 'cloud-api'
+  archiveName = 'cloud-api.jar'
 }
 
 dependencies {
+  compile project(':cloud-common')
+//    compile project(':core-api')
 
-    compile project(':cloud-common')
-    compile project(':core-api')
+  compile group: 'io.swagger', name: 'swagger-annotations', version: swaggerVersion
 
-    testCompile (group: 'junit', name: 'junit', version: junitVersion) {
-        exclude group: 'org.hamcrest'
-    }
-    testCompile (group: 'org.mockito', name:'mockito-core', version: mockitoVersion) {
-      exclude group: 'org.hamcrest'
-    }
-    testCompile 'org.hamcrest:java-hamcrest:2.0.0.0'
+  testCompile(group: 'junit', name: 'junit', version: junitVersion) {
+    exclude group: 'org.hamcrest'
+  }
+  testCompile(group: 'org.mockito', name: 'mockito-core', version: mockitoVersion) {
+    exclude group: 'org.hamcrest'
+  }
+  testCompile 'org.hamcrest:java-hamcrest:2.0.0.0'
 
-  runtime group: 'org.glassfish.jersey.core',     name: 'jersey-common',                  version: jerseyCoreVersion
-    compile (group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',               version: jacksonVersion) {
-      force = true
-    }
+  runtime group: 'org.glassfish.jersey.core', name: 'jersey-common', version: jerseyCoreVersion
+  compile(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion) {
+    force = true
+  }
 
 }

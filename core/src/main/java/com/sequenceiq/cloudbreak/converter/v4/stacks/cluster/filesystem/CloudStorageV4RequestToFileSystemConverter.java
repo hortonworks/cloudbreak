@@ -9,24 +9,23 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.CloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsFileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsGen2FileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.BaseFileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.GcsFileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.S3FileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.WasbFileSystem;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.StorageLocations;
-import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemResolver;
-import com.sequenceiq.cloudbreak.services.filesystem.AdlsFileSystem;
-import com.sequenceiq.cloudbreak.services.filesystem.AdlsGen2FileSystem;
-import com.sequenceiq.cloudbreak.services.filesystem.BaseFileSystem;
-import com.sequenceiq.cloudbreak.services.filesystem.GcsFileSystem;
-import com.sequenceiq.cloudbreak.services.filesystem.S3FileSystem;
-import com.sequenceiq.cloudbreak.services.filesystem.WasbFileSystem;
 
 @Component
 public class CloudStorageV4RequestToFileSystemConverter extends AbstractConversionServiceAwareConverter<CloudStorageV4Request, FileSystem> {
@@ -55,7 +54,7 @@ public class CloudStorageV4RequestToFileSystemConverter extends AbstractConversi
             StorageLocations storageLocations = new StorageLocations();
             storageLocations.setLocations(locations);
             fileSystem.setLocations(new Json(storageLocations));
-        } catch (JsonProcessingException ignored) {
+        } catch (IllegalArgumentException ignored) {
             throw new BadRequestException(String.format("Storage locations could not be parsed: %s", source));
         }
         BaseFileSystem baseFileSystem = null;
@@ -72,7 +71,7 @@ public class CloudStorageV4RequestToFileSystemConverter extends AbstractConversi
         }
         try {
             fileSystem.setConfigurations(new Json(baseFileSystem));
-        } catch (JsonProcessingException ignored) {
+        } catch (IllegalArgumentException ignored) {
             throw new BadRequestException(String.format("Storage configuration could not be parsed: %s", source));
         }
         return fileSystem;

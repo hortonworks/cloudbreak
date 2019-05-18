@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.ambarirepository.AmbariRepositoryV4Request;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
-import com.sequenceiq.cloudbreak.cloud.model.Versioned;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 
 public class AmbariRepositoryV4Validator implements ConstraintValidator<ValidAmbariRepo, AmbariRepositoryV4Request> {
 

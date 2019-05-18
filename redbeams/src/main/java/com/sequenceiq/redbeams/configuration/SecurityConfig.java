@@ -4,13 +4,8 @@ import static com.sequenceiq.redbeams.api.RedbeamsApi.API_ROOT_CONTEXT;
 
 import javax.inject.Inject;
 
-// import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
-// import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
-// import org.springframework.beans.factory.annotation.Value;
-// import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-// import org.springframework.context.annotation.Scope;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
@@ -23,8 +18,14 @@ import org.springframework.security.oauth2.provider.token.ResourceServerTokenSer
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
 import com.sequenceiq.cloudbreak.auth.altus.CrnTokenExtractor;
-import com.sequenceiq.cloudbreak.security.ScimAccountGroupReaderFilter;
+import com.sequenceiq.cloudbreak.auth.security.ScimAccountGroupReaderFilter;
 import com.sequenceiq.redbeams.service.security.TenantBasedPermissionEvaluator;
+
+// import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
+// import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+// import org.springframework.beans.factory.annotation.Value;
+// import org.springframework.context.annotation.Bean;
+// import org.springframework.context.annotation.Scope;
 
 @Configuration
 public class SecurityConfig {

@@ -14,10 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.bootstrap.config.ContainerConfigBuilder.Builder;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
@@ -77,7 +77,7 @@ public class ContainerConfigService {
 
             Component component = new Component(ComponentType.CONTAINER, dc.name(), new Json(config), stack);
             return componentConfigProviderService.store(component);
-        } catch (IOException ignored) {
+        } catch (IllegalArgumentException ignored) {
             throw new CloudbreakServiceException(String.format("Failed to parse component ContainerConfig for stack: %d, container: %s",
                     stack.getId(), dc.getName()));
         }

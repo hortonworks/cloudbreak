@@ -7,13 +7,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.SecretV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.CompactView;
+import com.sequenceiq.secret.model.SecretResponse;
 
 @Component
 public class RDSConfigToDatabaseV4ResponseConverter extends AbstractConversionServiceAwareConverter<RDSConfig, DatabaseV4Response> {
@@ -29,8 +29,8 @@ public class RDSConfigToDatabaseV4ResponseConverter extends AbstractConversionSe
         json.setConnectionURL(source.getConnectionURL());
         json.setDatabaseEngine(source.getDatabaseEngine().name());
         json.setConnectionDriver(source.getConnectionDriver());
-        json.setConnectionUserName(getConversionService().convert(source.getConnectionUserNameSecret(), SecretV4Response.class));
-        json.setConnectionPassword(getConversionService().convert(source.getConnectionPasswordSecret(), SecretV4Response.class));
+        json.setConnectionUserName(getConversionService().convert(source.getConnectionUserNameSecret(), SecretResponse.class));
+        json.setConnectionPassword(getConversionService().convert(source.getConnectionPasswordSecret(), SecretResponse.class));
         json.setDatabaseEngineDisplayName(source.getDatabaseEngine().displayName());
         json.setConnectorJarUrl(source.getConnectorJarUrl());
         json.setCreationDate(source.getCreationDate());

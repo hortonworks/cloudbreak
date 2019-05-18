@@ -11,6 +11,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 import net.sf.json.JSONObject;
 
@@ -22,8 +23,12 @@ public class Json implements Serializable {
         this.value = value;
     }
 
-    public Json(Object value) throws JsonProcessingException {
-        this.value = JsonUtil.writeValueAsString(value);
+    public Json(Object value) {
+        try {
+            this.value = JsonUtil.writeValueAsString(value);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     private Json() {

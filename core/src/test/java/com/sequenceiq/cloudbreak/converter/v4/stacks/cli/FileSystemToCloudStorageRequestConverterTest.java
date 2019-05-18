@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.cli;
 
-import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.ADLS;
-import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.ADLS_GEN_2;
-import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.GCS;
-import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.S3;
-import static com.sequenceiq.cloudbreak.services.filesystem.FileSystemType.WASB;
+import static com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType.ADLS;
+import static com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType.ADLS_GEN_2;
+import static com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType.GCS;
+import static com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType.S3;
+import static com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType.WASB;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -37,11 +37,11 @@ import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.StorageLocations;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.services.filesystem.AdlsFileSystem;
-import com.sequenceiq.cloudbreak.services.filesystem.AdlsGen2FileSystem;
-import com.sequenceiq.cloudbreak.services.filesystem.GcsFileSystem;
-import com.sequenceiq.cloudbreak.services.filesystem.S3FileSystem;
-import com.sequenceiq.cloudbreak.services.filesystem.WasbFileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsFileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsGen2FileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.GcsFileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.S3FileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.WasbFileSystem;
 
 public class FileSystemToCloudStorageRequestConverterTest {
 

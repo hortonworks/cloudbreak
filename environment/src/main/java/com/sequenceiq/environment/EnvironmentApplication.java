@@ -8,9 +8,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableSwagger2
-@EnableJpaRepositories(basePackages = { "com.sequenceiq" })
-@SpringBootApplication(scanBasePackages = {"com.sequenceiq" },
-        exclude = WebMvcMetricsAutoConfiguration.class)
+@EnableJpaRepositories(basePackages = {"com.sequenceiq"})
+@SpringBootApplication(scanBasePackages = {"com.sequenceiq"},
+        exclude = {WebMvcMetricsAutoConfiguration.class})
 public class EnvironmentApplication {
 
     public static void main(String[] args) {

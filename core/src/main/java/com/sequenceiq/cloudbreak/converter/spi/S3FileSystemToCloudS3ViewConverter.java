@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.services.filesystem.S3FileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.S3FileSystem;
 
 @Component
 public class S3FileSystemToCloudS3ViewConverter extends AbstractConversionServiceAwareConverter<S3FileSystem, CloudS3View> {

@@ -1,7 +1,5 @@
 package com.sequenceiq.environment.api.environment.model.response;
 
-import java.util.Set;
-
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.environment.doc.EnvironmentModelDescription;
 
@@ -31,44 +29,11 @@ public abstract class EnvironmentV1BaseResponse {
     @ApiModelProperty(EnvironmentModelDescription.LOCATION)
     private LocationV1Response location;
 
-    @ApiModelProperty(EnvironmentModelDescription.DATALAKE_RESOURCES_NAMES)
-    private Set<String> datalakeResourcesNames;
-
-    @ApiModelProperty(EnvironmentModelDescription.DATALAKE_CLUSTER_NAMES)
-    private Set<String> datalakeClusterNames;
-
-    @ApiModelProperty(EnvironmentModelDescription.WORKLOAD_CLUSTER_NAMES)
-    private Set<String> workloadClusterNames;
-
     @ApiModelProperty(EnvironmentModelDescription.NETWORK)
     private EnvironmentNetworkV1Response network;
 
     @ApiModelProperty(EnvironmentModelDescription.STATUS)
     private EnvironmentStatus environmentStatus;
-
-    public Set<String> getDatalakeResourcesNames() {
-        return datalakeResourcesNames;
-    }
-
-    public void setDatalakeResourcesNames(Set<String> datalakeResourcesNames) {
-        this.datalakeResourcesNames = datalakeResourcesNames;
-    }
-
-    public Set<String> getDatalakeClusterNames() {
-        return datalakeClusterNames;
-    }
-
-    public void setDatalakeClusterNames(Set<String> datalakeClusterNames) {
-        this.datalakeClusterNames = datalakeClusterNames;
-    }
-
-    public Set<String> getWorkloadClusterNames() {
-        return workloadClusterNames;
-    }
-
-    public void setWorkloadClusterNames(Set<String> workloadClusterNames) {
-        this.workloadClusterNames = workloadClusterNames;
-    }
 
     public Long getId() {
         return id;

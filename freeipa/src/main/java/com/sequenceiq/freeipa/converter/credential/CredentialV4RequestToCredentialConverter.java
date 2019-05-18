@@ -4,9 +4,9 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
-import com.sequenceiq.cloudbreak.domain.Secret;
-import com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine;
-import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
+import com.sequenceiq.secret.domain.Secret;
+import com.sequenceiq.secret.vault.VaultKvV2Engine;
+import com.sequenceiq.secret.vault.VaultSecret;
 import com.sequenceiq.freeipa.api.model.credential.CredentialRequest;
 import com.sequenceiq.freeipa.entity.Credential;
 

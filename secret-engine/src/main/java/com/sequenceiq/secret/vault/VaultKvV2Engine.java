@@ -17,7 +17,7 @@ import org.springframework.vault.support.Versioned;
 import com.sequenceiq.secret.model.SecretResponse;
 
 @Component("VaultKvV2Engine")
-public class VaultKvV2Engine extends AbstractVautEngine<VaultKvV2Engine> {
+public class VaultKvV2Engine extends AbstractVaultEngine<VaultKvV2Engine> {
 
     @Value("${vault.kv.engine.v2.path:}")
     private String enginePath;

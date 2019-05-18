@@ -23,11 +23,10 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Where;
 
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.ArchivableResource;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
@@ -35,12 +34,12 @@ import com.sequenceiq.cloudbreak.domain.KubernetesConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.view.ClusterApiView;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @Entity
 @Where(clause = "archived = false")
@@ -127,11 +126,7 @@ public class Environment implements WorkspaceAwareResource, ArchivableResource {
     private BaseNetwork network;
 
     public Environment() {
-        try {
-            regions = new Json(new HashSet<Region>());
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException(e);
-        }
+        regions = new Json(new HashSet<Region>());
     }
 
     @Override
@@ -198,11 +193,7 @@ public class Environment implements WorkspaceAwareResource, ArchivableResource {
     }
 
     public void setRegions(Set<Region> regions) {
-        try {
-            this.regions = new Json(regions);
-        } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException(e);
-        }
+        this.regions = new Json(regions);
     }
 
     public Set<Region> getRegionSet() {

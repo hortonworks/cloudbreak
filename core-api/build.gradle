@@ -12,7 +12,12 @@ jar {
 }
 
 dependencies {
+  compile project(':auth-connector')
+  compile project(':cloud-api')
   compile project(':common')
+  compile project(':secret-engine')
+  compile project(':structuredevent-model')
+
   compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
   compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: jerseyCoreVersion
   compile group: 'io.swagger',                    name: 'swagger-annotations',            version: swaggerVersion
@@ -47,10 +52,6 @@ dependencies {
   testCompile group: 'junit',                     name: 'junit',                          version: junitVersion
   testCompile group: 'org.apache.tomcat.embed',   name: 'tomcat-embed-el',                version: '9.0.8'
   testCompile group: 'com.openpojo',              name: 'openpojo',                       version: '0.8.10'
-
-  compile project(':structuredevent-model')
-  compile project(':auth-connector')
-  compile project(':common')
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {

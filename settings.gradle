@@ -40,7 +40,8 @@ include 'environment'
 include 'workspace-authorization'
 include 'common'
 include 'environment-api'
+include 'secret-engine'
+include 'notification-sender'
 
 rootProject.name = 'cloudbreak'
-include 'secret-engine'
 

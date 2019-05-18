@@ -19,11 +19,11 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.StorageLocations;
-import com.sequenceiq.cloudbreak.services.filesystem.AdlsFileSystem;
-import com.sequenceiq.cloudbreak.services.filesystem.AdlsGen2FileSystem;
-import com.sequenceiq.cloudbreak.services.filesystem.GcsFileSystem;
-import com.sequenceiq.cloudbreak.services.filesystem.S3FileSystem;
-import com.sequenceiq.cloudbreak.services.filesystem.WasbFileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsFileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsGen2FileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.GcsFileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.S3FileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.WasbFileSystem;
 
 @Component
 public class FileSystemToCloudStorageV4ResponseConverter extends AbstractConversionServiceAwareConverter<FileSystem, CloudStorageV4Response> {

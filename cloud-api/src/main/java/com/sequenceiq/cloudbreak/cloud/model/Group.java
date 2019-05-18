@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
+import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 
 public class Group extends DynamicModel {
 

@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.AdjustmentType;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -55,6 +54,7 @@ import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ApplicationDet
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ApplicationErrorResponse;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ResponseContext;
 import com.sequenceiq.cloudbreak.cloud.yarn.status.YarnApplicationStatus;
+import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
 
 @Service
 public class YarnResourceConnector implements ResourceConnector<Object> {

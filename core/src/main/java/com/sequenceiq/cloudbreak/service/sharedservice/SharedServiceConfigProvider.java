@@ -17,22 +17,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.cluster.KerberosConfigProvider;
 import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Service
 public class SharedServiceConfigProvider {
@@ -109,13 +108,13 @@ public class SharedServiceConfigProvider {
             publicStack.setDatalakeResourceId(datalakeResources.getId());
             Map<String, String> additionalParams = ambariDatalakeConfigProvider.getAdditionalParameters(publicStack, datalakeResources);
             Map<String, String> blueprintConfigParams =
-            ambariDatalakeConfigProvider.getBlueprintConfigParameters(datalakeResources, publicStack, connector);
+                    ambariDatalakeConfigProvider.getBlueprintConfigParameters(datalakeResources, publicStack, connector);
             StackInputs stackInputs = publicStack.getInputs().get(StackInputs.class);
             stackInputs.setDatalakeInputs((Map) blueprintConfigParams);
             stackInputs.setFixInputs((Map) additionalParams);
             try {
                 publicStack.setInputs(new Json(stackInputs));
-            } catch (JsonProcessingException e) {
+            } catch (IllegalArgumentException e) {
                 throw new BadRequestException("An error occured under the stackinput persistence which cause a stack creation problem", e);
             }
             return true;

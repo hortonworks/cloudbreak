@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.CloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.services.filesystem.BaseFileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.BaseFileSystem;
 
 @Service
 public class FileSystemResolver {

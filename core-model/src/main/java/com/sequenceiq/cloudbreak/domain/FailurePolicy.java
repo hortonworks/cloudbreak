@@ -8,7 +8,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.AdjustmentType;
+import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
 
 @Entity
 public class FailurePolicy implements ProvisionEntity {

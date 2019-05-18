@@ -75,6 +75,7 @@ dependencies {
   implementation project(':orchestrator-api')
   implementation project(':flow')
   implementation project(':common')
+  implementation project(':core-api')
   runtime project(':orchestrator-salt')
   runtime project(':cloud-openstack')
   runtime project(':cloud-gcp')

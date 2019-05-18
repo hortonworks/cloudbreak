@@ -35,7 +35,6 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -45,24 +44,24 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
+import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.ExposedServiceListValidator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology.GatewayTopologyV4RequestToExposedServicesConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ServiceEndpointCollectorTest {
@@ -290,7 +289,7 @@ public class ServiceEndpointCollectorTest {
                 .stream()
                 .anyMatch(exposedServiceResponse -> exposedServiceResponse.stream()
                         .anyMatch(clusterExposedService -> StringUtils.equals(clusterExposedService.getKnoxService(), "HDFSUI")
-                            && clusterExposedService.getServiceUrl().contains("?host=http://10.0.0.1:50070"))));
+                                && clusterExposedService.getServiceUrl().contains("?host=http://10.0.0.1:50070"))));
     }
 
     private void mockBlueprintTextProcessor(Set<String> components, String stackName, String stackVersion) {
@@ -311,18 +310,14 @@ public class ServiceEndpointCollectorTest {
     }
 
     private GatewayTopology gatewayTopology(String name, ExposedService... services) {
-        try {
-            GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
-            gatewayTopologyJson.setTopologyName(name);
-            gatewayTopologyJson.setExposedServices(Arrays.stream(services).map(ExposedService::getKnoxService).collect(Collectors.toList()));
-            ExposedServices exposedServices = exposedServicesConverter.convert(gatewayTopologyJson);
-            GatewayTopology gatewayTopology = new GatewayTopology();
-            gatewayTopology.setTopologyName(name);
-            gatewayTopology.setExposedServices(new Json(exposedServices));
-            return gatewayTopology;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
+        gatewayTopologyJson.setTopologyName(name);
+        gatewayTopologyJson.setExposedServices(Arrays.stream(services).map(ExposedService::getKnoxService).collect(Collectors.toList()));
+        ExposedServices exposedServices = exposedServicesConverter.convert(gatewayTopologyJson);
+        GatewayTopology gatewayTopology = new GatewayTopology();
+        gatewayTopology.setTopologyName(name);
+        gatewayTopology.setExposedServices(new Json(exposedServices));
+        return gatewayTopology;
     }
 
     private Cluster clusterkWithOrchestrator(String orchestratorType) {

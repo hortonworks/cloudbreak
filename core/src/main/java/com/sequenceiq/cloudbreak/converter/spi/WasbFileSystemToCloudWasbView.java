@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudWasbView;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.services.filesystem.WasbFileSystem;
+import com.sequenceiq.cloudbreak.common.type.filesystem.WasbFileSystem;
 
 @Component
 public class WasbFileSystemToCloudWasbView

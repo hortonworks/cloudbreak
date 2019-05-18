@@ -7,10 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
@@ -45,7 +44,7 @@ public class StructuredEventToStructuredEventEntityConverter extends AbstractCon
             }
 
             return structuredEventEntity;
-        } catch (JsonProcessingException e) {
+        } catch (IllegalArgumentException e) {
             LOGGER.error("Failed to parse structured event JSON", e);
             return null;
         }

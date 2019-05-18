@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 
 import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.AzureCredentialPrerequisites;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialPrerequisitesV4Response;
+import com.sequenceiq.cloudbreak.cloud.response.AzureCredentialPrerequisites;
+import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AuthenticationContextProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -79,11 +79,11 @@ public class AzureCredentialConnector implements CredentialConnector {
     }
 
     @Override
-    public CredentialPrerequisitesV4Response getPrerequisites(CloudContext cloudContext, String externalId, String deploymentAddress) {
+    public CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId, String deploymentAddress) {
         String creationCommand = appCreationCommand.generate(deploymentAddress);
         String encodedCommand = Base64.encodeBase64String(creationCommand.getBytes());
         AzureCredentialPrerequisites azurePrerequisites = new AzureCredentialPrerequisites(encodedCommand);
-        return new CredentialPrerequisitesV4Response(cloudContext.getPlatform().value(), azurePrerequisites);
+        return new CredentialPrerequisitesResponse(cloudContext.getPlatform().value(), azurePrerequisites);
     }
 
     @Override
