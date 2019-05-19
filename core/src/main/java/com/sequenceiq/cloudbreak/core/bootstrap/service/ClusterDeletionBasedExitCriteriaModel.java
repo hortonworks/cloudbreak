@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
+import java.util.Optional;
+
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
 public class ClusterDeletionBasedExitCriteriaModel extends ExitCriteriaModel {
@@ -13,16 +15,20 @@ public class ClusterDeletionBasedExitCriteriaModel extends ExitCriteriaModel {
         this.clusterId = clusterId;
     }
 
-    public Long getStackId() {
-        return stackId;
+    public Optional<Long> getStackId() {
+        return Optional.ofNullable(stackId);
     }
 
-    public Long getClusterId() {
-        return clusterId;
+    public Optional<Long> getClusterId() {
+        return Optional.ofNullable(clusterId);
     }
 
     public static ExitCriteriaModel clusterDeletionBasedModel(Long stackId, Long clusterId) {
         return new ClusterDeletionBasedExitCriteriaModel(stackId, clusterId);
+    }
+
+    public static ExitCriteriaModel nonCancellableModel() {
+        return new ClusterDeletionBasedExitCriteriaModel(null, null);
     }
 
     @Override

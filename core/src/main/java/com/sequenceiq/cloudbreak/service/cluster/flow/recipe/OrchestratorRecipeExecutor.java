@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 import com.google.api.client.util.Joiner;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.GeneratedRecipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.service.recipe.GeneratedRecipeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
 class OrchestratorRecipeExecutor {
@@ -150,7 +151,7 @@ class OrchestratorRecipeExecutor {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
-            hostOrchestrator.preTerminationRecipes(gatewayConfig, nodes, clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
+            hostOrchestrator.preTerminationRecipes(gatewayConfig, nodes, ClusterDeletionBasedExitCriteriaModel.nonCancellableModel());
         } catch (CloudbreakOrchestratorFailedException e) {
             String message = getRecipeExecutionFaiureMessage(stack, e);
             throw new CloudbreakException(message, e);

@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
-
 import java.util.Collection;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -11,12 +9,14 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -42,12 +42,11 @@ public class PreTerminationStateExecutor {
             try {
                 HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
                 GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+                ExitCriteriaModel noExitModel = ClusterDeletionBasedExitCriteriaModel.nonCancellableModel();
                 if (cluster.isAdJoinable()) {
-                    hostOrchestrator.leaveDomain(gatewayConfig, stackUtil.collectNodes(stack), "ad_member", "ad_leave",
-                            clusterDeletionBasedModel(stack.getId(), cluster.getId()));
+                    hostOrchestrator.leaveDomain(gatewayConfig, stackUtil.collectNodes(stack), "ad_member", "ad_leave", noExitModel);
                 } else if (cluster.isIpaJoinable()) {
-                    hostOrchestrator.leaveDomain(gatewayConfig, stackUtil.collectNodes(stack), "ipa_member", "ipa_leave",
-                            clusterDeletionBasedModel(stack.getId(), cluster.getId()));
+                    hostOrchestrator.leaveDomain(gatewayConfig, stackUtil.collectNodes(stack), "ipa_member", "ipa_leave", noExitModel);
                 }
             } catch (CloudbreakOrchestratorFailedException e) {
                 Set<Entry<String, Collection<String>>> entries = e.getNodesWithErrors().asMap().entrySet();

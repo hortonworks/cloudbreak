@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
 import static com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup.CANCELLED;
 
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,22 +20,26 @@ public class ClusterDeletionBasedExitCriteria implements ExitCriteria {
         ClusterDeletionBasedExitCriteriaModel model = (ClusterDeletionBasedExitCriteriaModel) exitCriteriaModel;
         LOGGER.debug("Check isExitNeeded for model: {}", model);
 
-        PollGroup stackPollGroup = InMemoryStateStore.getStack(model.getStackId());
-        if (CANCELLED.equals(stackPollGroup)) {
-            LOGGER.debug("Stack is getting terminated, polling is cancelled.");
-            return true;
-        }
-        PollGroup clusterPollGroup = null;
-        if (model.getClusterId() != null) {
-            clusterPollGroup = InMemoryStateStore.getCluster(model.getClusterId());
-            if (CANCELLED.equals(clusterPollGroup)) {
-                LOGGER.debug("Cluster is getting terminated, polling is cancelled.");
+        Optional<Long> stackIdOpt = model.getStackId();
+        if (stackIdOpt.isPresent()) {
+            PollGroup stackPollGroup = InMemoryStateStore.getStack(stackIdOpt.get());
+            if (CANCELLED.equals(stackPollGroup)) {
+                LOGGER.debug("Stack is getting terminated, polling is cancelled.");
                 return true;
             }
-        }
-        if (stackPollGroup == null && clusterPollGroup == null) {
-            LOGGER.debug("Cluster is getting terminated, polling is cancelled. No InMemoryState found");
-            return true;
+            PollGroup clusterPollGroup = null;
+            Optional<Long> clusterIdOpt = model.getClusterId();
+            if (clusterIdOpt.isPresent()) {
+                clusterPollGroup = InMemoryStateStore.getCluster(clusterIdOpt.get());
+                if (CANCELLED.equals(clusterPollGroup)) {
+                    LOGGER.debug("Cluster is getting terminated, polling is cancelled.");
+                    return true;
+                }
+            }
+            if (stackPollGroup == null && clusterPollGroup == null) {
+                LOGGER.debug("Cluster is getting terminated, polling is cancelled. No InMemoryState found");
+                return true;
+            }
         }
 
         return false;
