@@ -16,6 +16,7 @@ import org.testng.annotations.Parameters;
 
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.SuiteContext;
+import com.sequenceiq.it.cloudbreak.context.CloudbreakITContextConstants;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 import com.sequenceiq.periscope.client.AutoscaleUserCrnClient;
 import com.sequenceiq.periscope.client.AutoscaleUserCrnClientBuilder;

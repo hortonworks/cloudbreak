@@ -36,10 +36,11 @@ import org.testng.xml.XmlSuite;
 import org.uncommons.reportng.JUnitXMLReporter;
 
 import com.google.common.collect.ImmutableMap;
-import com.sequenceiq.it.cloudbreak.config.ITProps;
-import com.sequenceiq.it.cloudbreak.newway.cloud.v2.aws.AwsProperties;
-import com.sequenceiq.it.cloudbreak.newway.listener.ReportListener;
-import com.sequenceiq.it.cloudbreak.newway.logsearch.CustomHTMLReporter;
+import com.sequenceiq.it.config.ITProps;
+import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsProperties;
+import com.sequenceiq.it.cloudbreak.listener.ReportListener;
+import com.sequenceiq.it.cloudbreak.listener.ThreadLocalTestListener;
+import com.sequenceiq.it.cloudbreak.logsearch.CustomHTMLReporter;
 
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class,
         HibernateJpaAutoConfiguration.class})

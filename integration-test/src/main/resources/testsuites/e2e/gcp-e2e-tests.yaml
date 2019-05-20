@@ -2,6 +2,6 @@ name: "gcp-e2e-tests"
 tests:
   - name: "gcp e2e tests"
     classes:
-      - com.sequenceiq.it.cloudbreak.newway.testcase.e2e.BasicStackTests
+      - BasicStackTests
     packages:
-      - com.sequenceiq.it.cloudbreak.newway.testcase.e2e.gcp.*
+      - com.sequenceiq.it.cloudbreak.testcase.e2e.gcp.*

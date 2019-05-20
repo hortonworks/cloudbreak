@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.context.CloudbreakITContextConstants;
 
 public class TemplateAdditionHelper {
 

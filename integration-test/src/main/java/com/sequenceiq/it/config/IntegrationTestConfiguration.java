@@ -21,10 +21,9 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.util.StringUtils;
 import org.testng.TestNG;
 
-import com.sequenceiq.it.SuiteContext;
-import com.sequenceiq.it.cloudbreak.newway.TestParameter;
-import com.sequenceiq.it.cloudbreak.newway.spark.SparkServer;
-import com.sequenceiq.it.cloudbreak.newway.spark.SparkServerPool;
+import com.sequenceiq.it.TestParameter;
+import com.sequenceiq.it.cloudbreak.spark.SparkServer;
+import com.sequenceiq.it.cloudbreak.spark.SparkServerPool;
 
 @Configuration
 @ComponentScan("com.sequenceiq.it")
@@ -39,11 +38,6 @@ public class IntegrationTestConfiguration {
     @Bean
     public static PropertyResourceConfigurer propertySourcesPlaceholderConfigurer() {
         return new PropertySourcesPlaceholderConfigurer();
-    }
-
-    @Bean
-    public SuiteContext suiteContext() {
-        return new SuiteContext();
     }
 
     @Bean

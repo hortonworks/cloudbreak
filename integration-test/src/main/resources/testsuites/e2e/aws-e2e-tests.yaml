@@ -2,4 +2,4 @@ name: "aws-e2e-tests"
 tests:
   - name: "aws e2e tests"
     packages:
-      - com.sequenceiq.it.cloudbreak.newway.testcase.e2e.aws.*
+      - com.sequenceiq.it.cloudbreak.testcase.e2e.aws.*
