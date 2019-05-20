@@ -21,6 +21,9 @@ dependencies {
   compile group: 'org.springframework.security',        name: 'spring-security-jwt',            version: '1.0.8.RELEASE'
   compile group: 'org.bouncycastle',                    name: 'bcprov-jdk15on',                 version: bouncycastleVersion
   compile group: 'org.bouncycastle',                    name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
+  implementation group: 'org.glassfish.jersey.core',    name: 'jersey-client',                  version: jerseyCoreVersion
+  implementation group: 'org.glassfish.jersey.media',   name: 'jersey-media-multipart',         version: jerseyCoreVersion
+  implementation group: 'org.apache.httpcomponents',    name: 'httpclient',                     version: httpClientVersion
 
   compile ("io.grpc:grpc-all:1.19.0") {
     exclude group: 'org.mockito'
