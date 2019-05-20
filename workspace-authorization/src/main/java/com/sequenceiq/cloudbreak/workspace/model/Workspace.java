@@ -13,8 +13,6 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-
 @Entity
 public class Workspace implements TenantAwareResource, Serializable {
 
@@ -93,18 +91,6 @@ public class Workspace implements TenantAwareResource, Serializable {
 
     public void setResourceCrn(String resourceCrn) {
         this.resourceCrn = resourceCrn;
-    }
-
-    public void setResourceCrnByUser(User user) {
-        if (user.getUserCrn() != null) {
-            resourceCrn = Crn.builder()
-                    .setAccountId(Crn.fromString(user.getUserCrn()).getAccountId())
-                    .setResource(getTenant().getName() + "#" + getName())
-                    .setResourceType(Crn.ResourceType.WORKSPACE)
-                    .setService(Crn.fromString(user.getUserCrn()).getService())
-                    .build()
-                    .toString();
-        }
     }
 
     @Override

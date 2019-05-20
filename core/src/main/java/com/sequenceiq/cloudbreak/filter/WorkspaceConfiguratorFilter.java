@@ -15,12 +15,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.cloudbreak.workspace.model.WorkspaceStatus;
 
 public class WorkspaceConfiguratorFilter extends OncePerRequestFilter {
 
@@ -47,11 +47,10 @@ public class WorkspaceConfiguratorFilter extends OncePerRequestFilter {
         CloudbreakUser cloudbreakUser = authenticatedUserService.getCbUser();
         if (cloudbreakUser != null) {
             User user = userService.getOrCreate(cloudbreakUser);
-            String workspaceName = cloudbreakUser.getUserCrn() != null ? Crn.fromString(cloudbreakUser.getUserCrn()).getAccountId()
-                    : cloudbreakUser.getTenant();
+            String workspaceName = Crn.fromString(cloudbreakUser.getUserCrn()).getAccountId();
             Optional<Workspace> tenantDefaultWorkspace = workspaceService.getByName(workspaceName, user);
             if (!tenantDefaultWorkspace.isPresent()) {
-                tenantDefaultWorkspace = createTenantDefaultWorkspace(user, workspaceName);
+                throw new BadRequestException("Tenant default workspace not exists!");
             }
             Long workspaceId = tenantDefaultWorkspace.get().getId();
             restRequestThreadLocalService.setRequestedWorkspaceId(workspaceId);
@@ -60,14 +59,5 @@ public class WorkspaceConfiguratorFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         }
         restRequestThreadLocalService.removeRequestedWorkspaceId();
-    }
-
-    private Optional<Workspace> createTenantDefaultWorkspace(User user, String workspaceName) {
-        Workspace workspace = new Workspace();
-        workspace.setTenant(user.getTenant());
-        workspace.setName(workspaceName);
-        workspace.setStatus(WorkspaceStatus.ACTIVE);
-        workspace.setResourceCrnByUser(user);
-        return Optional.of(workspaceService.create(workspace));
     }
 }

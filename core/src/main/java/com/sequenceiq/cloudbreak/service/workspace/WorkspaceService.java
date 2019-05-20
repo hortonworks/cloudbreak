@@ -62,7 +62,6 @@ public class WorkspaceService {
     public Workspace create(User user, Workspace workspace) {
         try {
             return transactionService.required(() -> {
-                workspace.setResourceCrnByUser(user);
                 umsAuthorizationService.assignResourceRoleToUserInWorkspace(user, workspace, WorkspaceRole.WORKSPACEMANAGER);
                 return workspaceRepository.save(workspace);
             });

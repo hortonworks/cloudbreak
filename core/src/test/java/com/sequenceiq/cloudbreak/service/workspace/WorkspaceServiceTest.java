@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.workspace;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -30,7 +29,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.requests.ChangeWorkspaceUsersV4Request;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.authorization.UmsAuthorizationService;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceRole;
 import com.sequenceiq.cloudbreak.common.service.Clock;
@@ -265,8 +263,6 @@ public class WorkspaceServiceTest {
         underTest.create(initiator, testWorkspace);
 
         verify(umsAuthorizationService, times(1)).assignResourceRoleToUserInWorkspace(eq(initiator), eq(testWorkspace), eq(WorkspaceRole.WORKSPACEMANAGER));
-        assertNotNull(testWorkspace.getResourceCrn());
-        assertTrue(testWorkspace.getResourceCrn().contains(testWorkspace.getId().toString() + ":" + Crn.ResourceType.WORKSPACE.toString()));
     }
 
     private Set<ChangeWorkspaceUsersV4Request> changeWorkspaceUsersJsons(WorkspaceRole role) {
