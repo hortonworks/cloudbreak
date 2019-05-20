@@ -12,7 +12,12 @@ import com.sequenceiq.redbeams.service.crn.CrnService;
 public class CrnConverter implements AttributeConverter<Crn, String> {
 
     @Inject
-    private CrnService crnService;
+    private static CrnService crnService;
+
+    @Inject
+    public void init(CrnService crnServiceComponent) {
+        crnService = crnServiceComponent;
+    }
 
     @Override
     public String convertToDatabaseColumn(Crn attribute) {
