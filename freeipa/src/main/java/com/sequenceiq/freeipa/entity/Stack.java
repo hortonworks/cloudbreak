@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"tenant", "environment", "name"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"environment", "name"}))
 public class Stack {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "stack_generator")

@@ -12,16 +12,21 @@
 ALTER TABLE stack
     ADD tenant VARCHAR(255);
 
-CREATE INDEX tenant_uindex
+CREATE UNIQUE INDEX tenant_uindex
     ON stack (tenant);
 
-CREATE INDEX environment_tenant_uindex
-    ON stack (environment, tenant);
+CREATE UNIQUE INDEX environment_tenant_uindex
+    ON stack (name, environment, tenant);
+
+CREATE UNIQUE INDEX stack_name_environment_tenant_uindex
+    ON stack (name, environment, tenant);
 
 -- //@UNDO
 
 DROP INDEX tenant_uindex;
 
 DROP INDEX environment_tenant_uindex;
+
+DROP INDEX stack_name_environment_tenant_uindex;
 
 ALTER TABLE stack DROP COLUMN tenant;
