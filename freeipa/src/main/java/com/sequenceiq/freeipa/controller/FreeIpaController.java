@@ -21,9 +21,7 @@ public class FreeIpaController implements FreeIpaEndpoint {
 
     @Override
     public CreateFreeIpaResponse create(String environmentName, CreateFreeIpaRequest request) {
-        // TODO: Get customer id (tenant from header crn)
-        String tenant = "test_tenant";
-        freeIpaCreationService.launchFreeIpa(request, environmentName, tenant);
+        freeIpaCreationService.launchFreeIpa(request, environmentName);
         return new CreateFreeIpaResponse();
     }
 
