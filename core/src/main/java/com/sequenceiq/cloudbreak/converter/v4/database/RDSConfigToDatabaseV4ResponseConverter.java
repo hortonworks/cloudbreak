@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.CompactView;
-import com.sequenceiq.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 @Component
 public class RDSConfigToDatabaseV4ResponseConverter extends AbstractConversionServiceAwareConverter<RDSConfig, DatabaseV4Response> {

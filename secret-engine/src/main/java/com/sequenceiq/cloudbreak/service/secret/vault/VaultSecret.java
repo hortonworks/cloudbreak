@@ -1,4 +1,4 @@
-package com.sequenceiq.secret.vault;
+package com.sequenceiq.cloudbreak.service.secret.vault;
 
 public class VaultSecret {
 

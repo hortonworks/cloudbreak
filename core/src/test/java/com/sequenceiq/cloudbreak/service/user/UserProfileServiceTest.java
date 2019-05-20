@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.repository.UserProfileRepository;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 
 public class UserProfileServiceTest {
 

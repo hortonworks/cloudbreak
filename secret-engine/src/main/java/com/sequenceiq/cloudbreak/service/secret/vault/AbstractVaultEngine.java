@@ -1,4 +1,4 @@
-package com.sequenceiq.secret.vault;
+package com.sequenceiq.cloudbreak.service.secret.vault;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.sequenceiq.secret.SecretEngine;
+import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
 
 abstract class AbstractVaultEngine<E> implements SecretEngine {
 

@@ -1,4 +1,4 @@
-package com.sequenceiq.secret.service;
+package com.sequenceiq.cloudbreak.service.secret.service;
 
 import static java.lang.String.format;
 
@@ -17,8 +17,8 @@ import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.metrics.type.MetricType;
-import com.sequenceiq.secret.SecretEngine;
-import com.sequenceiq.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 @Service
 public class SecretService {

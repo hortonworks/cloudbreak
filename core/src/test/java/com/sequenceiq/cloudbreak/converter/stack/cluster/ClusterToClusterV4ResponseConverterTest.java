@@ -42,7 +42,7 @@ import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConverterTest<Cluster> {

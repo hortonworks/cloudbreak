@@ -48,7 +48,7 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
-import com.sequenceiq.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 
 @Service
 public class CredentialService extends AbstractWorkspaceAwareResourceService<Credential> {

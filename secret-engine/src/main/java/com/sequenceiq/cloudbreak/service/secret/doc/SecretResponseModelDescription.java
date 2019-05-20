@@ -1,4 +1,4 @@
-package com.sequenceiq.secret.doc;
+package com.sequenceiq.cloudbreak.service.secret.doc;
 
 public class SecretResponseModelDescription {
 

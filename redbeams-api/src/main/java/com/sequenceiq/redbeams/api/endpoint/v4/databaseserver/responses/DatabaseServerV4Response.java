@@ -4,7 +4,7 @@ package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 // import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.base.DatabaseServerV4Base;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;

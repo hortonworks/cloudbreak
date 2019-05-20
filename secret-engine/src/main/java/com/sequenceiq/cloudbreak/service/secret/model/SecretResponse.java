@@ -1,10 +1,10 @@
-package com.sequenceiq.secret.model;
+package com.sequenceiq.cloudbreak.service.secret.model;
 
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.secret.doc.SecretResponseModelDescription;
+import com.sequenceiq.cloudbreak.service.secret.doc.SecretResponseModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

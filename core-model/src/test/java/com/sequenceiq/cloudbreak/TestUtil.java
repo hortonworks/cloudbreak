@@ -85,7 +85,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceStatus;
-import com.sequenceiq.secret.domain.Secret;
+import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 
 public class TestUtil {
 

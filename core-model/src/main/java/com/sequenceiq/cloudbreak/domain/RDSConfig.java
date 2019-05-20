@@ -32,8 +32,8 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
-import com.sequenceiq.secret.domain.Secret;
-import com.sequenceiq.secret.domain.SecretToString;
+import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
+import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 
 @Entity
 @Where(clause = "archived = false")

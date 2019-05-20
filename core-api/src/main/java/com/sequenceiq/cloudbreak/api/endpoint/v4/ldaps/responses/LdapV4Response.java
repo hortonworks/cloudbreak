@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapV4Base;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.LdapConfigModelDescription;
-import com.sequenceiq.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

@@ -42,7 +42,7 @@ import com.sequenceiq.environment.environment.service.EnvironmentViewService;
 import com.sequenceiq.notification.Notification;
 import com.sequenceiq.notification.NotificationSender;
 import com.sequenceiq.notification.ResourceEvent;
-import com.sequenceiq.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 
 @Service
 public class CredentialService {

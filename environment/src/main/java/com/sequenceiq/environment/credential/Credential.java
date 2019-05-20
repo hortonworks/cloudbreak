@@ -12,8 +12,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
-import com.sequenceiq.secret.domain.Secret;
-import com.sequenceiq.secret.domain.SecretToString;
+import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
+import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 
 @Entity
 @Table

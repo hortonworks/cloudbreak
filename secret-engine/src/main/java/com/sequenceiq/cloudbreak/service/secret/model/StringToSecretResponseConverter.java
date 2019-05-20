@@ -1,10 +1,10 @@
-package com.sequenceiq.secret.model;
+package com.sequenceiq.cloudbreak.service.secret.model;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 
 @Component
 public class StringToSecretResponseConverter {

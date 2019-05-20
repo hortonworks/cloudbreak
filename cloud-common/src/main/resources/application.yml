@@ -43,7 +43,7 @@ cert:
 
 secret:
   application: cb/shared
-  engine: "com.sequenceiq.secret.vault.VaultKvV2Engine"
+  engine: "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine"
 
 vault:
   addr: vault.service.consul

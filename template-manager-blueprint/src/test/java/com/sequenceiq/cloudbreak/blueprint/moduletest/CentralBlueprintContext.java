@@ -26,8 +26,8 @@ import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
-import com.sequenceiq.secret.SecretEngine;
-import com.sequenceiq.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 
 @ContextConfiguration
 public class CentralBlueprintContext {

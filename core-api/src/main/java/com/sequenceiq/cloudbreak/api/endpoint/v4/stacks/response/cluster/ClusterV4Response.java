@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
-import com.sequenceiq.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 import io.swagger.annotations.ApiModelProperty;
 

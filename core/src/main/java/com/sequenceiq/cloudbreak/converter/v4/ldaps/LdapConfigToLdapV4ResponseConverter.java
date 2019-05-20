@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.view.CompactView;
-import com.sequenceiq.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 @Component
 public class LdapConfigToLdapV4ResponseConverter extends AbstractConversionServiceAwareConverter<LdapConfig, LdapV4Response> {

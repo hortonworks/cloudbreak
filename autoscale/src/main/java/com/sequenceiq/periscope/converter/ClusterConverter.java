@@ -13,7 +13,7 @@ import com.sequenceiq.periscope.api.model.PrometheusAlertResponse;
 import com.sequenceiq.periscope.api.model.ScalingConfigurationRequest;
 import com.sequenceiq.periscope.api.model.TimeAlertResponse;
 import com.sequenceiq.periscope.domain.Cluster;
-import com.sequenceiq.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 
 @Component
 public class ClusterConverter extends AbstractConverter<AutoscaleClusterResponse, Cluster> {
