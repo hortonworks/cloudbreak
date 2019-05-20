@@ -1,4 +1,4 @@
-package com.sequenceiq.secret.domain;
+package com.sequenceiq.cloudbreak.service.secret.domain;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -6,7 +6,7 @@ import javax.persistence.AttributeConverter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 

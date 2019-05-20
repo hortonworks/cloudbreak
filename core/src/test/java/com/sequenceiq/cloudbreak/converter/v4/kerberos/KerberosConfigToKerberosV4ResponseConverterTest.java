@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Re
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.type.KerberosType;
-import com.sequenceiq.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 @RunWith(Parameterized.class)
 public class KerberosConfigToKerberosV4ResponseConverterTest {

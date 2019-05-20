@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.service.credential.CredentialParameterSetterUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.definition.credential.CredentialDefinitionService;
-import com.sequenceiq.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 @Component
 public class CredentialToCredentialV4ResponseConverter extends AbstractConversionServiceAwareConverter<Credential, CredentialV4Response> {

@@ -10,7 +10,7 @@ import com.sequenceiq.environment.api.credential.doc.CredentialDescriptor;
 import com.sequenceiq.environment.api.credential.doc.CredentialModelDescription;
 import com.sequenceiq.environment.api.credential.model.CredentialV1Base;
 import com.sequenceiq.environment.api.credential.model.parameters.azure.AzureCredentialV1ResponseParameters;
-import com.sequenceiq.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

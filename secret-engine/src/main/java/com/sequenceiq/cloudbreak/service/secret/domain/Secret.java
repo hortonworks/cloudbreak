@@ -1,4 +1,4 @@
-package com.sequenceiq.secret.domain;
+package com.sequenceiq.cloudbreak.service.secret.domain;
 
 import java.io.Serializable;
 

@@ -15,8 +15,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.redbeams.converter.database.CrnConverter;
-import com.sequenceiq.secret.domain.Secret;
-import com.sequenceiq.secret.domain.SecretToString;
+import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
+import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 
 @Entity
 public class DatabaseConfig {

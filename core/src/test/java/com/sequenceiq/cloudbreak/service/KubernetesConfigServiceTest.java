@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.repository.KubernetesConfigRepository;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class KubernetesConfigServiceTest {

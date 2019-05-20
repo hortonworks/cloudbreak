@@ -1,6 +1,6 @@
-package com.sequenceiq.secret.domain;
+package com.sequenceiq.cloudbreak.service.secret.domain;
 
-import com.sequenceiq.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 
 public class SecretProxy extends Secret {
 

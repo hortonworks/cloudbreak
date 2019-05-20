@@ -2,7 +2,7 @@ package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses;
 
 import static org.junit.Assert.assertEquals;
 
-import com.sequenceiq.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 import org.junit.Before;
 import org.junit.Test;

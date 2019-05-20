@@ -42,7 +42,7 @@ import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
-import com.sequenceiq.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 @Component
 public class ClusterToClusterV4ResponseConverter extends AbstractConversionServiceAwareConverter<Cluster, ClusterV4Response> {

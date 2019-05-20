@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.environment.api.proxy.model.response.ProxyV1Response;
 import com.sequenceiq.environment.environment.domain.CompactView;
 import com.sequenceiq.environment.proxy.ProxyConfig;
-import com.sequenceiq.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 @Component
 public class ProxyConfigToProxyV1ResponseConverter extends AbstractConversionServiceAwareConverter<ProxyConfig, ProxyV1Response> {

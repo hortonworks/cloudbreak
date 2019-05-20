@@ -17,7 +17,7 @@ import com.sequenceiq.environment.credential.Credential;
 import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
 import com.sequenceiq.environment.credential.validation.CredentialValidator;
 import com.sequenceiq.environment.credential.validation.definition.CredentialDefinitionService;
-import com.sequenceiq.secret.model.StringToSecretResponseConverter;
+import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 
 @Component
 public class CredentialToCredentialV1ResponseConverter {

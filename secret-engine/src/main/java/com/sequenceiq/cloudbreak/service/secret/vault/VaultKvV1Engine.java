@@ -1,4 +1,4 @@
-package com.sequenceiq.secret.vault;
+package com.sequenceiq.cloudbreak.service.secret.vault;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.VaultResponse;
 
-import com.sequenceiq.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 @Component("VaultKvV1Engine")
 public class VaultKvV1Engine extends AbstractVaultEngine<VaultKvV1Engine> {

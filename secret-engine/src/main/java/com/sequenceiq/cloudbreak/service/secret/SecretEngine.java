@@ -1,6 +1,6 @@
-package com.sequenceiq.secret;
+package com.sequenceiq.cloudbreak.service.secret;
 
-import com.sequenceiq.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 public interface SecretEngine {
     String put(String key, String value);

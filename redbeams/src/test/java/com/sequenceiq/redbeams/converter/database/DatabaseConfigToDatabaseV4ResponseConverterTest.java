@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.service.crn.CrnServiceTest;
-import com.sequenceiq.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 public class DatabaseConfigToDatabaseV4ResponseConverterTest {
 

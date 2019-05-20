@@ -20,8 +20,8 @@ import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.TenantAwareResource;
 import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.secret.domain.Secret;
-import com.sequenceiq.secret.domain.SecretToString;
+import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
+import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = "user_id"))

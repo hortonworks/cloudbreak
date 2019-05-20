@@ -1,4 +1,4 @@
-package com.sequenceiq.secret.vault;
+package com.sequenceiq.cloudbreak.service.secret.vault;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -15,7 +15,7 @@ import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.VaultResponse;
 
 import com.google.gson.Gson;
-import com.sequenceiq.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 @RunWith(MockitoJUnitRunner.class)
 public class VaultKvV1EngineTest {

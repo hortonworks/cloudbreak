@@ -1,4 +1,4 @@
-package com.sequenceiq.secret;
+package com.sequenceiq.cloudbreak.service.secret;
 
 public class SecretOperationException extends RuntimeException {
 

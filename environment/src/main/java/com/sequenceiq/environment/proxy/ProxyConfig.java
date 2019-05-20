@@ -24,9 +24,9 @@ import org.hibernate.annotations.Where;
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.environment.environment.domain.EnvironmentAwareResource;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
-import com.sequenceiq.secret.SecretValue;
-import com.sequenceiq.secret.domain.Secret;
-import com.sequenceiq.secret.domain.SecretToString;
+import com.sequenceiq.cloudbreak.service.secret.SecretValue;
+import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
+import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 
 @Entity
 @Where(clause = "archived = false")

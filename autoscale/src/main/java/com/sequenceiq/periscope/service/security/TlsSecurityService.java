@@ -12,7 +12,7 @@ import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.model.TlsConfiguration;
 import com.sequenceiq.periscope.repository.SecurityConfigRepository;
-import com.sequenceiq.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 
 @Service
 public class TlsSecurityService {

@@ -3,7 +3,7 @@ package com.sequenceiq.redbeams.converter.database;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
-import com.sequenceiq.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 public class DatabaseConfigToDatabaseV4ResponseConverter extends AbstractConversionServiceAwareConverter<DatabaseConfig, DatabaseV4Response> {
 

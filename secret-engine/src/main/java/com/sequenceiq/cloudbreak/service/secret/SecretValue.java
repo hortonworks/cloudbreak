@@ -1,4 +1,4 @@
-package com.sequenceiq.secret;
+package com.sequenceiq.cloudbreak.service.secret;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

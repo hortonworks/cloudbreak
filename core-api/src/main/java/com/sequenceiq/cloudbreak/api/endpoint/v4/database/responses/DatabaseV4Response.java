@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceRe
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.Database;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfigModelDescription;
-import com.sequenceiq.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
