@@ -44,6 +44,12 @@
     {
       "refName": "hdfs",
       "serviceType": "HDFS",
+      "serviceConfigs": [
+        {
+          "name": "redaction_policy_enabled",
+          "value": "false"
+        }
+      ],
       "roleConfigGroups": [
         {
           "refName": "hdfs-NAMENODE-BASE",

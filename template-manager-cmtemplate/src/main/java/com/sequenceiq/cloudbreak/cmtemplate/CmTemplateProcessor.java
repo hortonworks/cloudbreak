@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate;
 
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toMap;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -31,13 +33,13 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
 import com.cloudera.api.swagger.model.ApiConfigureForKerberosArguments;
 import com.cloudera.api.swagger.model.ApiProductVersion;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.ClusterManagerType;
 import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfigurations;
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 public class CmTemplateProcessor implements BlueprintTextProcessor {
 
@@ -163,7 +165,34 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     }
 
     public void addServiceConfigs(String serviceType, List<String> roleTypes, List<ApiClusterTemplateConfig> configs) {
-        getServiceByType(serviceType).ifPresent(service -> configs.forEach(service::addServiceConfigsItem));
+        getServiceByType(serviceType).ifPresent(service -> mergeServiceConfigs(service, configs));
+    }
+
+    private void mergeServiceConfigs(ApiClusterTemplateService service, List<ApiClusterTemplateConfig> configs) {
+        if (ofNullable(service.getServiceConfigs()).orElse(List.of()).isEmpty()) {
+            setServiceConfigs(service, configs);
+            return;
+        }
+
+        Map<String, ApiClusterTemplateConfig> configMap = mapByName(service.getServiceConfigs());
+        configs.forEach(config -> configMap.putIfAbsent(config.getName(), config));
+        setServiceConfigs(service, configMap.values());
+    }
+
+    private Map<String, ApiClusterTemplateConfig> mapByName(Collection<ApiClusterTemplateConfig> configs) {
+        return configs.stream()
+                    .collect(toMap(
+                            ApiClusterTemplateConfig::getName,
+                            Function.identity()
+                    ));
+    }
+
+    private void setServiceConfigs(ApiClusterTemplateService service, Collection<ApiClusterTemplateConfig> configs) {
+        service.setServiceConfigs(new ArrayList<>(configs));
+    }
+
+    private void setRoleConfigs(ApiClusterTemplateRoleConfigGroup rcg, Collection<ApiClusterTemplateConfig> configs) {
+        rcg.setConfigs(new ArrayList<>(configs));
     }
 
     public void addRoleConfigs(String serviceType, Map<String, List<ApiClusterTemplateConfig>> newConfigMap) {
@@ -171,23 +200,19 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         if (serviceOpt.isPresent()) {
             ApiClusterTemplateService service = serviceOpt.get();
             newConfigMap.forEach((configRef, newConfigs) -> service.getRoleConfigGroups().stream().filter(rcg -> rcg.getRefName().equals(configRef))
-                    .findFirst().ifPresent(group -> addOrOverrideConfigs(group, newConfigs)));
+                    .findFirst().ifPresent(group -> mergeRoleConfigs(group, newConfigs)));
         }
     }
 
-    private void addOrOverrideConfigs(ApiClusterTemplateRoleConfigGroup configGroup, List<ApiClusterTemplateConfig> newConfigs) {
-        for (ApiClusterTemplateConfig newConfig : newConfigs) {
-            List<ApiClusterTemplateConfig> preDefinedConfigs = ofNullable(configGroup.getConfigs()).orElse(new ArrayList<>());
-            Optional<ApiClusterTemplateConfig> existingConfOpt = preDefinedConfigs.stream().filter(pc -> pc.getName().equals(newConfig.getName())).findFirst();
-            if (existingConfOpt.isPresent()) {
-                ApiClusterTemplateConfig existingConf = existingConfOpt.get();
-                existingConf.setName(newConfig.getName());
-                existingConf.setVariable(newConfig.getVariable());
-                existingConf.setValue(newConfig.getValue());
-            } else {
-                configGroup.addConfigsItem(newConfig);
-            }
+    private void mergeRoleConfigs(ApiClusterTemplateRoleConfigGroup configGroup, List<ApiClusterTemplateConfig> newConfigs) {
+        if (ofNullable(configGroup.getConfigs()).orElse(List.of()).isEmpty()) {
+            setRoleConfigs(configGroup, newConfigs);
+            return;
         }
+
+        Map<String, ApiClusterTemplateConfig> configMap = mapByName(configGroup.getConfigs());
+        newConfigs.forEach(config -> configMap.putIfAbsent(config.getName(), config));
+        setRoleConfigs(configGroup, configMap.values());
     }
 
     public boolean isRoleTypePresentInService(String serviceType, List<String> roleTypes) {
