@@ -26,34 +26,36 @@ cd $INTEGCB_LOCATION
 ./cbd start-wait identity commondb vault cloudbreak
 cd ..
 
-echo -e "\n\033[1;96m--- Setting User CRN for test variables:\033[0m\n"
-export INTEGRATIONTEST_USER_CRN="crn:altus:iam:us-west-1:default:user:mockuser@cloudera.com"
+if [[ "$CIRCLECI" ]]; then
+    echo -e "\n\033[1;96m--- Setting User CRN for test variables:\033[0m\n"
+    export INTEGRATIONTEST_USER_CRN="crn:altus:iam:us-west-1:default:user:mockuser@cloudera.com"
 
-export INTEGRATIONTEST_SUITEFILES=$INTEGRATIONTEST_SUITEFILES
-export INTEGRATIONTEST_TESTSUITE_POLLINGINTERVAL=$INTEGRATIONTEST_TESTSUITE_POLLINGINTERVAL
+    export INTEGRATIONTEST_SUITEFILES=$INTEGRATIONTEST_SUITEFILES
+    export INTEGRATIONTEST_TESTSUITE_POLLINGINTERVAL=$INTEGRATIONTEST_TESTSUITE_POLLINGINTERVAL
 
 
-if [[ -n "${INTEGRATIONTEST_YARN_QUEUE}" ]]; then
-    echo -e "\n\033[1;96m--- YARN smoke testing variables:\033[0m\n"
-    export INTEGRATIONTEST_CLOUDPROVIDER=$INTEGRATIONTEST_CLOUDPROVIDER
-    export INTEGRATIONTEST_CLUSTERDEFINITIONNAME=$INTEGRATIONTEST_CLUSTERDEFINITIONNAME
-    export INTEGRATIONTEST_YARN_QUEUE=$INTEGRATIONTEST_YARN_QUEUE
-    export INTEGRATIONTEST_YARN_IMAGE_CATALOG_URL=$INTEGRATIONTEST_YARN_IMAGE_CATALOG_URL
-    export INTEGRATIONTEST_YARN_IMAGE_ID=$INTEGRATIONTEST_YARN_IMAGE_ID
-    export INTEGRATIONTEST_YARN_REGION=$INTEGRATIONTEST_YARN_REGION
-    export INTEGRATIONTEST_YARN_LOCATION=$INTEGRATIONTEST_YARN_LOCATION
-else
-    export INTEGRATIONTEST_CLOUDPROVIDER="MOCK"
+    if [[ -n "${INTEGRATIONTEST_YARN_QUEUE}" ]]; then
+        echo -e "\n\033[1;96m--- YARN smoke testing variables:\033[0m\n"
+        export INTEGRATIONTEST_CLOUDPROVIDER=$INTEGRATIONTEST_CLOUDPROVIDER
+        export INTEGRATIONTEST_CLUSTERDEFINITIONNAME=$INTEGRATIONTEST_CLUSTERDEFINITIONNAME
+        export INTEGRATIONTEST_YARN_QUEUE=$INTEGRATIONTEST_YARN_QUEUE
+        export INTEGRATIONTEST_YARN_IMAGE_CATALOG_URL=$INTEGRATIONTEST_YARN_IMAGE_CATALOG_URL
+        export INTEGRATIONTEST_YARN_IMAGE_ID=$INTEGRATIONTEST_YARN_IMAGE_ID
+        export INTEGRATIONTEST_YARN_REGION=$INTEGRATIONTEST_YARN_REGION
+        export INTEGRATIONTEST_YARN_LOCATION=$INTEGRATIONTEST_YARN_LOCATION
+    else
+        export INTEGRATIONTEST_CLOUDPROVIDER="MOCK"
+    fi
+
+    echo -e "\n\033[1;96m--- Tests to run:\033[0m\n"
+    echo $INTEGRATIONTEST_SUITEFILES
+
+    echo -e "\n\033[1;96m--- Start testing... (it may take few minutes to finish.)\033[0m\n"
+    rm -rf test-output
+
+    $INTEGCB_LOCATION/.deps/bin/docker-compose up test > test.out
+    echo -e "\n\033[1;96m--- Test finished\033[0m\n"
 fi
-
-echo -e "\n\033[1;96m--- Tests to run:\033[0m\n"
-echo $INTEGRATIONTEST_SUITEFILES
-
-echo -e "\n\033[1;96m--- Start testing... (it may take few minutes to finish.)\033[0m\n"
-rm -rf test-output
-
-$INTEGCB_LOCATION/.deps/bin/docker-compose up test > test.out
-echo -e "\n\033[1;96m--- Test finished\033[0m\n"
 
 echo -e "\n\033[1;96m--- Swagger check\033[0m\n"
 $INTEGCB_LOCATION/.deps/bin/docker-compose up swagger-diff
