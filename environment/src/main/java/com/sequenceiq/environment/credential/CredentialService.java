@@ -89,8 +89,8 @@ public class CredentialService {
         return repository.findActiveByIdAndAccountFilterByPlatforms(id, TEMP_ACCOUNT_ID, ENABLED_PLATFORMS).get();
     }
 
-    public Credential getByNameForAccountId(String name, Long workspaceId) {
-        return repository.findActiveByNameAndAccountIdFilterByPlatforms(name, TEMP_ACCOUNT_ID, ENABLED_PLATFORMS).get();
+    public Credential getByNameForAccountId(String name, String accountId) {
+        return repository.findActiveByNameAndAccountIdFilterByPlatforms(name, accountId, ENABLED_PLATFORMS).get();
     }
 
     public Map<String, String> interactiveLogin(Long workspaceId, Credential credential) {
@@ -113,11 +113,11 @@ public class CredentialService {
     }
 
     @Retryable(value = BadRequestException.class, maxAttempts = 30, backoff = @Backoff(delay = 2000))
-    public void createWithRetry(Credential credential, Long workspaceId) {
-        create(credential, workspaceId);
+    public void createWithRetry(Credential credential, String accountId) {
+        create(credential, accountId);
     }
 
-    public Credential create(Credential credential, @Nonnull Long workspaceId) {
+    public Credential create(Credential credential, @Nonnull String accountId) {
         credentialValidator.validateCredentialCloudPlatform(credential.getCloudPlatform());
         credentialValidator.validateParameters(Platform.platform(credential.getCloudPlatform()), new Json(credential.getAttributes()).getMap());
         Credential created = repository.save(credentialAdapter.verify(credential, TEMP_WORKSPACE_ID));

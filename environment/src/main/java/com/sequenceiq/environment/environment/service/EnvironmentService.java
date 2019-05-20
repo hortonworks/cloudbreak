@@ -2,7 +2,6 @@ package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.environment.TempConstants.TEMP_ACCOUNT_ID;
-import static com.sequenceiq.environment.TempConstants.TEMP_WORKSPACE_ID;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.util.HashSet;
@@ -213,7 +212,7 @@ public class EnvironmentService {
     private Environment initEnvironment(EnvironmentV1Request request, String accountId) {
         Environment environment = conversionService.convert(request, Environment.class);
         environment.setProxyConfigs(proxyConfigService.findByNamesInAccount(request.getProxies(), accountId));
-        Credential credential = environmentCredentialOperationService.getCredentialFromRequest(request, TEMP_WORKSPACE_ID);
+        Credential credential = environmentCredentialOperationService.getCredentialFromRequest(request, accountId);
         environment.setCredential(credential);
         environment.setCloudPlatform(credential.getCloudPlatform());
         return environment;

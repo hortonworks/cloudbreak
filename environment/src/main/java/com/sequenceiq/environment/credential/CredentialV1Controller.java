@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.credential;
 
+import static com.sequenceiq.environment.TempConstants.TEMP_ACCOUNT_ID;
 import static com.sequenceiq.environment.TempConstants.TEMP_WORKSPACE_ID;
 
 import java.util.Map;
@@ -45,7 +46,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
 
     @Override
     public CredentialV1Response get(String name) {
-        return credentialConverter.convert(credentialService.getByNameForAccountId(name, TEMP_WORKSPACE_ID));
+        return credentialConverter.convert(credentialService.getByNameForAccountId(name, TEMP_ACCOUNT_ID));
     }
 
     @Override
@@ -53,7 +54,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
         Credential credential = credentialConverter.convert(request);
         notify(ResourceEvent.CREDENTIAL_CREATED);
         return credentialConverter
-                .convert(credentialService.create(credential, TEMP_WORKSPACE_ID));
+                .convert(credentialService.create(credential, TEMP_ACCOUNT_ID));
     }
 
     @Override
