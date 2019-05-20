@@ -15,12 +15,7 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
-import com.sequenceiq.cloudbreak.workspace.model.Tenant;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.UserPreferences;
-import com.sequenceiq.cloudbreak.workspace.repository.workspace.UserRepository;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -28,6 +23,13 @@ import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.tenant.TenantService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.UserPreferences;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.workspace.model.WorkspaceStatus;
+import com.sequenceiq.cloudbreak.workspace.repository.workspace.UserRepository;
 
 @Service
 public class UserService {
@@ -53,6 +55,9 @@ public class UserService {
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private WorkspaceService workspaceService;
 
     @Retryable(value = RetryException.class, maxAttempts = 5, backoff = @Backoff(delay = 500))
     public User getOrCreate(CloudbreakUser cloudbreakUser) {
@@ -113,7 +118,7 @@ public class UserService {
                 Optional<User> userByIdAndTenantName = userRepository.findByTenantNameAndUserId(cloudbreakUser.getTenant(), cloudbreakUser.getUserId());
                 if (userByIdAndTenantName.isPresent()) {
                     User user = userByIdAndTenantName.get();
-                    if (user.getUserCrn() == null && !StringUtils.isEmpty(cloudbreakUser.getUserCrn())) {
+                    if (user.getUserCrn() == null) {
                         user.setUserCrn(cloudbreakUser.getUserCrn());
                         user = userRepository.save(user);
                     }
@@ -132,17 +137,17 @@ public class UserService {
                 User user = new User();
                 user.setUserId(cloudbreakUser.getUserId());
                 user.setUserName(cloudbreakUser.getUsername());
+                user.setUserCrn(cloudbreakUser.getUserCrn());
 
                 Tenant tenant = tenantService.findByName(cloudbreakUser.getTenant()).orElse(null);
                 if (tenant == null) {
                     tenant = new Tenant();
                     tenant.setName(cloudbreakUser.getTenant());
                     tenant = tenantService.save(tenant);
+                    createTenantDefaultWorkspace(tenant);
                 }
                 user.setTenant(tenant);
-                if (!StringUtils.isEmpty(cloudbreakUser.getUserCrn())) {
-                    user.setUserCrn(cloudbreakUser.getUserCrn());
-                }
+
                 user = userRepository.save(user);
 
                 UserPreferences userPreferences = new UserPreferences(null, user);
@@ -154,6 +159,14 @@ public class UserService {
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
+    }
+
+    private void createTenantDefaultWorkspace(Tenant tenant) {
+        Workspace workspace = new Workspace();
+        workspace.setTenant(tenant);
+        workspace.setName(tenant.getName());
+        workspace.setStatus(WorkspaceStatus.ACTIVE);
+        workspaceService.create(workspace);
     }
 
 }

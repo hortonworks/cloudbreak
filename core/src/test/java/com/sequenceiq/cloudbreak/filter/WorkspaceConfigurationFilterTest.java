@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.filter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -20,9 +18,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -30,6 +29,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -38,6 +38,9 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @RunWith(MockitoJUnitRunner.class)
 public class WorkspaceConfigurationFilterTest {
+
+    @Rule
+    public final ExpectedException expectedException = ExpectedException.none();
 
     @Mock
     private CloudbreakRestRequestThreadLocalService cloudbreakRestRequestThreadLocalService;
@@ -83,7 +86,7 @@ public class WorkspaceConfigurationFilterTest {
     }
 
     @Test
-    public void filterWhenCbUserWithCrnAndWorkspaceExist() throws ServletException, IOException {
+    public void filterWhenWorkspaceExists() throws ServletException, IOException {
         CloudbreakUser cbUser = createCbUserWithCrn();
         when(authenticatedUserService.getCbUser()).thenReturn(cbUser);
         when(userService.getOrCreate(any())).thenReturn(new User());
@@ -97,50 +100,20 @@ public class WorkspaceConfigurationFilterTest {
     }
 
     @Test
-    public void filterWhenCbUserWithoutCrnAndWorkspaceExist() throws ServletException, IOException {
-        CloudbreakUser cbUser = createCbUserWithoutCrn();
-        when(authenticatedUserService.getCbUser()).thenReturn(cbUser);
-        when(userService.getOrCreate(any())).thenReturn(new User());
-        when(workspaceService.getByName(anyString(), any())).thenReturn(Optional.of(createWorkspace()));
-
-        underTest.doFilterInternal(request, response, filterChain);
-
-        verify(workspaceService, times(0)).create(any());
-        verify(workspaceService, times(1)).getByName(eq(cbUser.getTenant()), any());
-        assertNull(cbUser.getUserCrn());
-    }
-
-    @Test
-    public void filterWhenWorkspaceDoesntExistAndCrnIsPresent() throws ServletException, IOException {
+    public void filterWhenWorkspaceDoesntExist() throws ServletException, IOException {
         CloudbreakUser cbUser = createCbUserWithCrn();
         when(authenticatedUserService.getCbUser()).thenReturn(cbUser);
         when(userService.getOrCreate(any())).thenReturn(new User());
         when(workspaceService.getByName(anyString(), any())).thenReturn(Optional.empty());
-        ArgumentCaptor<Workspace> workspaceCaptor = ArgumentCaptor.forClass(Workspace.class);
-        when(workspaceService.create(workspaceCaptor.capture())).thenReturn(createWorkspace());
+
+        expectedException.expect(BadRequestException.class);
+        expectedException.expectMessage("Tenant default workspace not exists!");
 
         underTest.doFilterInternal(request, response, filterChain);
 
-        assertEquals(Crn.fromString(cbUser.getUserCrn()).getAccountId(), workspaceCaptor.getValue().getName());
         verify(workspaceService, times(1)).create(any());
         verify(workspaceService, times(1)).getByName(eq(Crn.fromString(cbUser.getUserCrn()).getAccountId()), any());
         verify(workspaceService, times(0)).getByName(eq(cbUser.getTenant()), any());
-    }
-
-    @Test
-    public void filterWhenWorkspaceDoesntExistAndCrnIsNotPresent() throws ServletException, IOException {
-        CloudbreakUser cbUser = createCbUserWithoutCrn();
-        when(authenticatedUserService.getCbUser()).thenReturn(cbUser);
-        when(userService.getOrCreate(any())).thenReturn(new User());
-        when(workspaceService.getByName(anyString(), any())).thenReturn(Optional.empty());
-        ArgumentCaptor<Workspace> workspaceCaptor = ArgumentCaptor.forClass(Workspace.class);
-        when(workspaceService.create(workspaceCaptor.capture())).thenReturn(createWorkspace());
-
-        underTest.doFilterInternal(request, response, filterChain);
-
-        assertEquals(cbUser.getTenant(), workspaceCaptor.getValue().getName());
-        verify(workspaceService, times(1)).create(any());
-        verify(workspaceService, times(1)).getByName(eq(cbUser.getTenant()), any());
     }
 
     private CloudbreakUser createCbUserWithCrn() {
