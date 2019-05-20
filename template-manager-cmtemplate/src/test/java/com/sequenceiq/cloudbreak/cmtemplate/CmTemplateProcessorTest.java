@@ -46,6 +46,23 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
+    public void addExistingServiceConfigs() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-existing-conf.bp"));
+        List<ApiClusterTemplateConfig> configs = new ArrayList<>();
+        configs.add(new ApiClusterTemplateConfig().name("redaction_policy_enabled").value("true"));
+        configs.add(new ApiClusterTemplateConfig().name("not_present_in_template").value("some_value"));
+
+        underTest.addServiceConfigs("HDFS", List.of("NAMENODE"), configs);
+
+        ApiClusterTemplateService service = underTest.getTemplate().getServices().stream().filter(srv -> "HDFS".equals(srv.getServiceType())).findAny().get();
+        List<ApiClusterTemplateConfig> serviceConfigs = service.getServiceConfigs();
+        assertEquals(2, serviceConfigs.size());
+        assertEquals("redaction_policy_enabled", serviceConfigs.get(0).getName());
+        assertEquals("false", serviceConfigs.get(0).getValue());
+        assertEquals(configs.get(1), serviceConfigs.get(1));
+    }
+
+    @Test
     public void testAddRoleConfigs() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
         Map<String, List<ApiClusterTemplateConfig>> configs = new HashMap<>();
@@ -86,7 +103,7 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
-    public void testAddRoleConfigsWithExistingConfig() {
+    public void addExistingRoleConfigs() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-existing-conf.bp"));
         Map<String, List<ApiClusterTemplateConfig>> configs = new HashMap<>();
         configs.put("hdfs-NAMENODE-BASE", List.of(new ApiClusterTemplateConfig().name("dfs_name_dir_list").variable("master_NAMENODE")));
@@ -106,8 +123,8 @@ public class CmTemplateProcessorTest {
         assertEquals(4, dnConfigs.size());
         assertEquals("dfs_name_dir_list", nnConfigs.get(0).getName());
         ApiClusterTemplateConfig dfs1Config = dnConfigs.stream().filter(c -> "dfs_data_dir_list".equals(c.getName())).findFirst().get();
-        assertEquals("worker_DATANODE", dfs1Config.getVariable());
-        assertNull(dfs1Config.getValue());
+        assertEquals("/dfs/dn", dfs1Config.getValue());
+        assertNull(dfs1Config.getVariable());
         ApiClusterTemplateConfig dfs2Config = dnConfigs.stream().filter(c -> "dfs_data_dir_list_2".equals(c.getName())).findFirst().get();
         assertEquals("worker_DATANODE_2", dfs2Config.getVariable());
         assertNull(dfs2Config.getValue());
