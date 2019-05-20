@@ -80,7 +80,11 @@ public class Environment implements AuthResource {
     @OneToOne(mappedBy = "environment", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private BaseNetwork network;
 
+    @Column(nullable = false)
     private String accountId;
+
+    @Column(nullable = false)
+    private String resourceCRN;
 
     public Environment() {
         regions = new Json(new HashSet<Region>());
@@ -215,5 +219,15 @@ public class Environment implements AuthResource {
 
     public void setProxyConfigs(Set<ProxyConfig> proxyConfigs) {
         this.proxyConfigs = proxyConfigs;
+    }
+
+    @Override
+    public String getResourceCRN() {
+        return resourceCRN;
+    }
+
+    @Override
+    public void setResourceCRN(String resourceCRN) {
+        this.resourceCRN = resourceCRN;
     }
 }

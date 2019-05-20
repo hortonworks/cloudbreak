@@ -56,8 +56,11 @@ public class EnvironmentView extends CompactView implements AuthResource {
     @OneToOne(mappedBy = "environment", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private BaseNetwork network;
 
-    @Column
+    @Column(nullable = false)
     private String accountId;
+
+    @Column(nullable = false)
+    private String resourceCRN;
 
     public Json getRegions() {
         return regions;
@@ -153,5 +156,15 @@ public class EnvironmentView extends CompactView implements AuthResource {
     @Override
     public void setAccountId(String accountId) {
         this.accountId = accountId;
+    }
+
+    @Override
+    public String getResourceCRN() {
+        return resourceCRN;
+    }
+
+    @Override
+    public void setResourceCRN(String resourceCRN) {
+        this.resourceCRN = resourceCRN;
     }
 }

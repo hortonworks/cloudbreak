@@ -42,8 +42,11 @@ public class Credential implements Serializable, AuthResource {
     @Column
     private Boolean govCloud = Boolean.FALSE;
 
-    @Column
+    @Column(nullable = false)
     private String accountId;
+
+    @Column(nullable = false)
+    private String resourceCRN;
 
     public Long getId() {
         return id;
@@ -117,5 +120,15 @@ public class Credential implements Serializable, AuthResource {
     @Override
     public void setAccountId(String accountId) {
         this.accountId = accountId;
+    }
+
+    @Override
+    public String getResourceCRN() {
+        return resourceCRN;
+    }
+
+    @Override
+    public void setResourceCRN(String resourceCRN) {
+        this.resourceCRN = resourceCRN;
     }
 }
