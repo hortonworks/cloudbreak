@@ -6,7 +6,7 @@ endif
 
 all: download-cbd buildcb runtest
 
-runtest: create-image create-cloudbreak-context docker-compose stop-containers check-results
+runtest: create-image create-cloudbreak-context docker-compose generate-swagger stop-containers check-results
 
 delete-and-run: download-cbd cbd-delete buildcb runtest
 
@@ -43,6 +43,9 @@ remove-test-containers:
 
 docker-build:
 	./scripts/docker-build.sh
+
+generate-swagger:
+	./scripts/generate-swagger.sh
 
 revert-db:
 	./scripts/revert-db.sh
