@@ -1,0 +1,30 @@
+package com.sequenceiq.it.cloudbreak.action.v4.imagecatalog;
+
+import static java.lang.String.format;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.action.Action;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.log.Log;
+
+public class ImageCatalogDeleteAction implements Action<ImageCatalogTestDto> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogDeleteAction.class);
+
+    @Override
+    public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
+        Log.log(LOGGER, format(" Name: %s", testDto.getRequest().getName()));
+        Log.logJSON(LOGGER, format(" Image catalog DELETE request:%n"), testDto.getRequest());
+        testDto.setResponse(
+                cloudbreakClient.getCloudbreakClient()
+                        .imageCatalogV4Endpoint()
+                        .delete(cloudbreakClient.getWorkspaceId(), testDto.getName()));
+        Log.logJSON(LOGGER, format(" Image catalog has been deleted successfully:%n"), testDto.getResponse());
+        Log.log(LOGGER, format(" ID: %s", testDto.getResponse().getId()));
+
+        return testDto;
+    }
+}

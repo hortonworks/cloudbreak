@@ -2,6 +2,6 @@ name: "azure-e2e-tests"
 tests:
   - name: "azure e2e tests"
     classes:
-      - com.sequenceiq.it.cloudbreak.newway.testcase.e2e.BasicStackTests
+      - BasicStackTests
     packages:
-      - com.sequenceiq.it.cloudbreak.newway.testcase.e2e.azure.*
+      - com.sequenceiq.it.cloudbreak.testcase.e2e.azure.*
