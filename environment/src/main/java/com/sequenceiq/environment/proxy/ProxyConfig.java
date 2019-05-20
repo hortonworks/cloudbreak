@@ -61,8 +61,11 @@ public class ProxyConfig implements Serializable, EnvironmentAwareResource, Auth
     @SecretValue
     private Secret password = Secret.EMPTY;
 
-    @Column
+    @Column(nullable = false)
     private String accountId;
+
+    @Column(nullable = false)
+    private String resourceCRN;
 
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(name = "env_proxy", joinColumns = @JoinColumn(name = "proxyid"), inverseJoinColumns = @JoinColumn(name = "envid"))
@@ -186,5 +189,15 @@ public class ProxyConfig implements Serializable, EnvironmentAwareResource, Auth
 
     public Long getDeletionTimestamp() {
         return deletionTimestamp;
+    }
+
+    @Override
+    public String getResourceCRN() {
+        return resourceCRN;
+    }
+
+    @Override
+    public void setResourceCRN(String resourceCRN) {
+        this.resourceCRN = resourceCRN;
     }
 }

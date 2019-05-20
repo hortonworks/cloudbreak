@@ -52,8 +52,11 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
     @Column(columnDefinition = "TEXT", nullable = false)
     private Json subnetIds;
 
-    @Column
+    @Column(nullable = false)
     private String accountId;
+
+    @Column(nullable = false)
+    private String resourceCRN;
 
     public BaseNetwork() {
         subnetIds = new Json(new HashSet<String>());
@@ -123,5 +126,15 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String getResourceCRN() {
+        return resourceCRN;
+    }
+
+    @Override
+    public void setResourceCRN(String resourceCRN) {
+        this.resourceCRN = resourceCRN;
     }
 }
