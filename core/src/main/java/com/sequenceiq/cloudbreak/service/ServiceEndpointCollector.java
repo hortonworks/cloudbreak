@@ -111,7 +111,7 @@ public class ServiceEndpointCollector {
                         for (ExposedService exposedService : knownExposedServices) {
                             ClusterExposedServiceV4Response clusterExposedServiceResponse = new ClusterExposedServiceV4Response();
                             clusterExposedServiceResponse.setMode(exposedService.isSSOSupported() ? gateway.getSsoType() : SSOType.NONE);
-                            clusterExposedServiceResponse.setDisplayName(exposedService.getDisaplayName());
+                            clusterExposedServiceResponse.setDisplayName(exposedService.getDisplayName());
                             clusterExposedServiceResponse.setKnoxService(exposedService.getKnoxService());
                             clusterExposedServiceResponse.setServiceName(exposedService.getAmbariServiceName());
                             Optional<String> serviceUrlForService = getServiceUrlForService(exposedService, ambariIp,
@@ -145,7 +145,7 @@ public class ServiceEndpointCollector {
     }
 
     private List<ExposedService> excludedServicesForHdp26() {
-        return Lists.newArrayList(ExposedService.LIVY_SERVER, ExposedService.RESOURCEMANAGER_WEB_V2,
+        return Lists.newArrayList(ExposedService.LIVY2_SERVER, ExposedService.RESOURCEMANAGER_WEB_V2,
                 ExposedService.LOGSEARCH);
     }
 
@@ -241,7 +241,7 @@ public class ServiceEndpointCollector {
     private String getHdfsUIUrlWithHostParameterFromGatewayTopology(String ambariIp, GatewayTopology gt, String nameNodePrivateIp) {
         Gateway gateway = gt.getGateway();
         String url = String.format("https://%s:%s/%s/%s%s?host=http://%s:%s", ambariIp, knoxPort, gateway.getPath(), gt.getTopologyName(),
-                ExposedService.NAMENODE.getKnoxUrl(), nameNodePrivateIp, ExposedService.NAMENODE.getDefaultPort());
+                ExposedService.NAMENODE.getKnoxUrl(), nameNodePrivateIp, ExposedService.NAMENODE.getAmbariPort());
         return url;
     }
 }

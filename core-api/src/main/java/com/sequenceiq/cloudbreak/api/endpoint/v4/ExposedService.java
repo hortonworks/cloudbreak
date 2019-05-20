@@ -13,42 +13,60 @@ public enum ExposedService {
 
     ALL("Every Service", "ALL", "ALL", "", "", true, null),
 
-    CLOUDERA_MANAGER("CM", "CM-API", "CM-API", "CM-API", "/cm-api/", true, 7180),
-    AMBARI("Ambari", "AMBARI_SERVER", "", "AMBARI", "/ambari/", true, 8080),
+    CLOUDERA_MANAGER("CM", "CM-API", "CM-API", "CM-API", "/cm-api/", true, null, 7180),
+    AMBARI("Ambari", "AMBARI_SERVER", "", "AMBARI", "/ambari/", true, 8080, null),
     WEBHDFS("WebHDFS", "NAMENODE", "NAMENODE", "WEBHDFS", "/webhdfs/v1", false, 50070),
-    NAMENODE("Name Node", "NAMENODE", "NAMENODE", "HDFSUI", "/hdfs/", true, 50070),
+    NAMENODE("Name Node", "NAMENODE", "NAMENODE", "HDFSUI", "/hdfs/", true, 50070, 20102),
     RESOURCEMANAGER_WEB("Resource Manager", "RESOURCEMANAGER", "RESOURCEMANAGER", "YARNUI", "/yarn/", true, 8088),
     RESOURCEMANAGER_WEB_V2("Resource Manager V2", "RESOURCEMANAGER", "RESOURCEMANAGER", "YARNUIV2", "/yarnuiv2/", true, 8088),
     JOB_HISTORY_SERVER("Job History Server", "HISTORYSERVER", "JOBHISTORY", "JOBHISTORYUI", "/jobhistory/", true, 19888),
-    HIVE_SERVER("Hive Server", "HIVE_SERVER", "HIVESERVER2", "HIVE", "/hive/", false, 10001),
+    HIVE_SERVER("Hive Server", "HIVE_SERVER", "HIVESERVER2", "HIVE", "/hive/", false, 10001, 10002),
     HIVE_SERVER_INTERACTIVE("Hive Server Interactive", "HIVE_SERVER_INTERACTIVE", "", "HIVE_INTERACTIVE", "/hive/", false, 10501),
     ATLAS("Atlas", "ATLAS_SERVER", "ATLAS_SERVER", "ATLAS", "/atlas/", true, 21000),
-    SPARK_HISTORY_SERVER("Spark 1.x History Server", "SPARK_JOBHISTORYSERVER", "SPARK_YARN_HISTORY_SERVER", "SPARKHISTORYUI", "/sparkhistory/", true, 18080),
-    SPARK2_HISTORY_SERVER("Spark History Server", "SPARK2_JOBHISTORYSERVER", "SPARK_YARN_HISTORY_SERVER", "SPARK2HISTORYUI", "/sparkhistory/", true, 18081),
+    SPARK_HISTORY_SERVER("Spark 1.x History Server", "SPARK_JOBHISTORYSERVER", "SPARK_YARN_HISTORY_SERVER", "SPARKHISTORYUI",
+            "/sparkhistory/", true, 18080, 18488),
+    SPARK2_HISTORY_SERVER("Spark History Server", "SPARK2_JOBHISTORYSERVER", "", "SPARK2HISTORYUI",
+            "/sparkhistory/", true, 18081),
     ZEPPELIN("Zeppelin", "ZEPPELIN_MASTER", "ZEPPELIN_SERVER", "ZEPPELIN", "/zeppelin/", false, 9995),
-    RANGER("Ranger", "RANGER_ADMIN", "RANGER_ADMIN", "RANGER", "/ranger/", true, 6080),
-    DP_PROFILER_AGENT("DP Profiler Agent", "DP_PROFILER_AGENT", "", "PROFILER-AGENT", "", true, 21900),
-    BEACON_SERVER("Beacon", "BEACON_SERVER", "", "BEACON", "", true, 25968),
-    LOGSEARCH("Log Search", "LOGSEARCH_SERVER", "", "LOGSEARCH", "/logsearch", true, 61888),
-    LIVY_SERVER("Livy Server", "LIVY2_SERVER", "LIVY_SERVER", "LIVYSERVER", "/livy/v1/sessions/", true, 8999);
+    RANGER("Ranger", "RANGER_ADMIN", "RANGER_ADMIN", "RANGER", "/ranger/", true, 6080, 6080),
+    DP_PROFILER_AGENT("DP Profiler Agent", "DP_PROFILER_AGENT", "", "PROFILER-AGENT", "", true, 21900, null),
+    BEACON_SERVER("Beacon", "BEACON_SERVER", "", "BEACON", "/beacon", true, 25968, null),
+    LOGSEARCH("Log Search", "LOGSEARCH_SERVER", "", "LOGSEARCH", "/logsearch", true, 61888, null),
+    LIVY2_SERVER("Livy Server 2", "LIVY2_SERVER", "", "LIVYSERVER", "/livy/v1/sessions/", true, 8999, null),
+    LIVY_SERVER("Livy Server", "", "LIVY_SERVER", "LIVYSERVER1", "/livy/v1/", true, null, 8998),
+    OOZIE_UI("Oozie Server", "", "OOZIE_SERVER", "OOZIEUI", "/oozie/", true, null, 11443);
 
     private final String ambariServiceName;
     private final String cmServiceName;
-    private final String disaplayName;
+    private final String displayName;
     private final String knoxService;
     private final String knoxUrl;
     private final boolean ssoSupported;
-    private final Integer defaultPort;
+    private final Integer ambariPort;
+    private final Integer cmPort;
 
-    ExposedService(String disaplayName, String ambariServiceName, String cmServiceName,
+    ExposedService(String displayName, String ambariServiceName, String cmServiceName,
             String knoxService, String knoxUrl, boolean ssoSupported, Integer defaultPort) {
-        this.disaplayName = disaplayName;
+        this.displayName = displayName;
         this.ambariServiceName = ambariServiceName;
         this.cmServiceName = cmServiceName;
         this.knoxService = knoxService;
         this.knoxUrl = knoxUrl;
         this.ssoSupported = ssoSupported;
-        this.defaultPort = defaultPort;
+        this.ambariPort = defaultPort;
+        this.cmPort = defaultPort;
+    }
+
+    ExposedService(String displayName, String ambariServiceName, String cmServiceName,
+            String knoxService, String knoxUrl, boolean ssoSupported, Integer ambariPort, Integer cmPort) {
+        this.displayName = displayName;
+        this.ambariServiceName = ambariServiceName;
+        this.cmServiceName = cmServiceName;
+        this.knoxService = knoxService;
+        this.knoxUrl = knoxUrl;
+        this.ssoSupported = ssoSupported;
+        this.ambariPort = ambariPort;
+        this.cmPort = cmPort;
     }
 
     public static boolean isKnoxExposed(String knoxService) {
@@ -87,7 +105,7 @@ public enum ExposedService {
 
     public static Map<String, Integer> getAllServicePortsForCM() {
         return Arrays.stream(values()).filter(x -> !Strings.isNullOrEmpty(x.cmServiceName))
-                .filter(x -> !Strings.isNullOrEmpty(x.knoxService)).collect(Collectors.toMap(k -> k.knoxService, v -> v.defaultPort));
+                .filter(x -> !Strings.isNullOrEmpty(x.knoxService)).collect(Collectors.toMap(k -> k.knoxService, v -> v.cmPort));
     }
 
     public String getAmbariServiceName() {
@@ -98,8 +116,8 @@ public enum ExposedService {
         return cmServiceName;
     }
 
-    public String getDisaplayName() {
-        return disaplayName;
+    public String getDisplayName() {
+        return displayName;
     }
 
     public String getKnoxService() {
@@ -114,7 +132,12 @@ public enum ExposedService {
         return ssoSupported;
     }
 
-    public Integer getDefaultPort() {
-        return defaultPort;
+    public Integer getAmbariPort() {
+        return ambariPort;
     }
+
+    public Integer getCmPort() {
+        return cmPort;
+    }
+
 }

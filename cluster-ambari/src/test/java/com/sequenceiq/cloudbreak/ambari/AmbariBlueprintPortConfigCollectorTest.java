@@ -42,11 +42,11 @@ public class AmbariBlueprintPortConfigCollectorTest {
         assertEquals(HIVE_PORT, result.get(ExposedService.HIVE_SERVER.getKnoxService()).intValue());
         assertEquals(ZEPPELIN_PORT, result.get(ExposedService.ZEPPELIN.getKnoxService()).intValue());
         assertEquals(YARN_PORT, result.get(ExposedService.RESOURCEMANAGER_WEB.getKnoxService()).intValue());
-        assertEquals(ExposedService.BEACON_SERVER.getDefaultPort(), result.get(ExposedService.BEACON_SERVER.getKnoxService()));
-        assertEquals(ExposedService.AMBARI.getDefaultPort(), result.get(ExposedService.AMBARI.getKnoxService()));
-        assertEquals(ExposedService.RANGER.getDefaultPort(), result.get(ExposedService.RANGER.getKnoxService()));
-        assertEquals(ExposedService.ATLAS.getDefaultPort(), result.get(ExposedService.ATLAS.getKnoxService()));
-        assertEquals(ExposedService.SPARK_HISTORY_SERVER.getDefaultPort(), result.get(ExposedService.SPARK_HISTORY_SERVER.getKnoxService()));
+        assertEquals(ExposedService.BEACON_SERVER.getAmbariPort(), result.get(ExposedService.BEACON_SERVER.getKnoxService()));
+        assertEquals(ExposedService.AMBARI.getAmbariPort(), result.get(ExposedService.AMBARI.getKnoxService()));
+        assertEquals(ExposedService.RANGER.getAmbariPort(), result.get(ExposedService.RANGER.getKnoxService()));
+        assertEquals(ExposedService.ATLAS.getAmbariPort(), result.get(ExposedService.ATLAS.getKnoxService()));
+        assertEquals(ExposedService.SPARK_HISTORY_SERVER.getAmbariPort(), result.get(ExposedService.SPARK_HISTORY_SERVER.getKnoxService()));
     }
 
     @Test
@@ -55,13 +55,13 @@ public class AmbariBlueprintPortConfigCollectorTest {
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText(blueprintText);
         Map<String, Integer> result = underTest.getServicePorts(blueprint);
-        assertEquals(ExposedService.HIVE_SERVER.getDefaultPort(), result.get(ExposedService.HIVE_SERVER.getKnoxService()));
-        assertEquals(ExposedService.ZEPPELIN.getDefaultPort(), result.get(ExposedService.ZEPPELIN.getKnoxService()));
-        assertEquals(ExposedService.RESOURCEMANAGER_WEB.getDefaultPort(), result.get(ExposedService.RESOURCEMANAGER_WEB.getKnoxService()));
-        assertEquals(ExposedService.BEACON_SERVER.getDefaultPort(), result.get(ExposedService.BEACON_SERVER.getKnoxService()));
-        assertEquals(ExposedService.AMBARI.getDefaultPort(), result.get(ExposedService.AMBARI.getKnoxService()));
-        assertEquals(ExposedService.RANGER.getDefaultPort(), result.get(ExposedService.RANGER.getKnoxService()));
-        assertEquals(ExposedService.ATLAS.getDefaultPort(), result.get(ExposedService.ATLAS.getKnoxService()));
-        assertEquals(ExposedService.SPARK_HISTORY_SERVER.getDefaultPort(), result.get(ExposedService.SPARK_HISTORY_SERVER.getKnoxService()));
+        assertEquals(ExposedService.HIVE_SERVER.getAmbariPort(), result.get(ExposedService.HIVE_SERVER.getKnoxService()));
+        assertEquals(ExposedService.ZEPPELIN.getAmbariPort(), result.get(ExposedService.ZEPPELIN.getKnoxService()));
+        assertEquals(ExposedService.RESOURCEMANAGER_WEB.getAmbariPort(), result.get(ExposedService.RESOURCEMANAGER_WEB.getKnoxService()));
+        assertEquals(ExposedService.BEACON_SERVER.getAmbariPort(), result.get(ExposedService.BEACON_SERVER.getKnoxService()));
+        assertEquals(ExposedService.AMBARI.getAmbariPort(), result.get(ExposedService.AMBARI.getKnoxService()));
+        assertEquals(ExposedService.RANGER.getAmbariPort(), result.get(ExposedService.RANGER.getKnoxService()));
+        assertEquals(ExposedService.ATLAS.getAmbariPort(), result.get(ExposedService.ATLAS.getKnoxService()));
+        assertEquals(ExposedService.SPARK_HISTORY_SERVER.getAmbariPort(), result.get(ExposedService.SPARK_HISTORY_SERVER.getKnoxService()));
     }
 }

@@ -127,11 +127,11 @@
     {%- endif %}
 
     {% if 'SPARK_YARN_HISTORY_SERVER' in salt['pillar.get']('gateway:location') -%}
-    {% if 'SPARK2HISTORYUI' in exposed -%}
+    {% if 'SPARKHISTORYUI' in exposed -%}
     <service>
         <role>SPARKHISTORYUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['SPARK_YARN_HISTORY_SERVER'] -%}
-        <url>http://{{ hostloc }}:{{ ports['SPARK2HISTORYUI'] }}/</url>
+        <url>http://{{ hostloc }}:{{ ports['SPARKHISTORYUI'] }}/</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -183,7 +183,7 @@
     {%- endif %}
 
    {% if 'LIVY_SERVER' in salt['pillar.get']('gateway:location') -%}
-   {% if 'LIVYSERVER' in exposed -%}
+   {% if 'LIVYSERVER1' in exposed -%}
    <service>
         <role>LIVYSERVER</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['LIVY_SERVER'] -%}
