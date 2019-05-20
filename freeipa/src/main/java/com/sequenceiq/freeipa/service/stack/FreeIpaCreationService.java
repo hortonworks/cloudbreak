@@ -63,9 +63,10 @@ public class FreeIpaCreationService {
     @Inject
     private FreeIpaService freeIpaService;
 
-    public void launchFreeIpa(CreateFreeIpaRequest request, String environmentName) {
+    public void launchFreeIpa(CreateFreeIpaRequest request, String environmentName, String accountId) {
         Stack stack = stackConverter.convert(request);
         stack.setEnvironment(environmentName);
+        stack.setAccountId(accountId);
         GetPlatformTemplateRequest getPlatformTemplateRequest = templateService.triggerGetTemplate(stack);
 
         SecurityConfig securityConfig = tlsSecurityService.generateSecurityKeys();
