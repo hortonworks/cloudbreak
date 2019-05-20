@@ -19,8 +19,8 @@ public class FreeIpaDeletionService {
     @Inject
     private FreeIpaFlowManager flowManager;
 
-    public void delete(String environment, String name) {
-        Stack stack = stackService.getByNameAndEnvironment(name, environment);
+    public void delete(String accountId, String environment, String name) {
+        Stack stack = stackService.getByAccountIdEnvironmentAndName(accountId, environment, name);
         flowManager.notify(TERMINATION_EVENT.event(), new TerminationEvent(TERMINATION_EVENT.event(), stack.getId(), false));
     }
 }

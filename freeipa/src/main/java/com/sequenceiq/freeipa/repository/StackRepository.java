@@ -17,4 +17,16 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
     Optional<Stack> findOneWithLists(@Param("id") Long id);
 
     Optional<Stack> findByNameAndEnvironment(String name, String environment);
+
+    @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId and s.environment = :environment ")
+    Optional<Stack> findByAccountIdAndEnvironment(String accountId, String environment);
+
+    @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId and s.environment = :environment and s.name = :name")
+    Optional<Stack> findByAccountIdEnvironmentAndName(
+            @Param("accountId") String accountId,
+            @Param("environment")  String environment,
+            @Param("name") String name);
+
+    @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId ")
+    Optional<Stack> findByAccountId(String accountId);
 }

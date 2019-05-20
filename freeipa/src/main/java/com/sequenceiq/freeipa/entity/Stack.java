@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"environment", "name"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"accountid", "environment", "name"}))
 public class Stack {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "stack_generator")
@@ -34,6 +34,8 @@ public class Stack {
     private String name;
 
     private String environment;
+
+    private String accountId;
 
     private String region;
 
@@ -237,5 +239,13 @@ public class Stack {
 
     public void setEnvironment(String environment) {
         this.environment = environment;
+    }
+
+    public String getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
     }
 }
