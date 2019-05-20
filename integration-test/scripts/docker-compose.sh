@@ -52,6 +52,6 @@ echo $INTEGRATIONTEST_SUITEFILES
 echo -e "\n\033[1;96m--- Start testing... (it may take few minutes to finish.)\033[0m\n"
 rm -rf test-output
 
-$INTEGCB_LOCATION/.deps/bin/docker-compose up test > test.out 2>&1
+$INTEGCB_LOCATION/.deps/bin/docker-compose run test > test.out 2>&1
 echo -e "\n\033[1;96m--- Test finished\033[0m\n"
 
