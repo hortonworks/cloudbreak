@@ -55,7 +55,7 @@ public class ExposedServiceV4Response {
         List<ExposedServiceV4Response> exposedServiceV4ResponseList = new ArrayList<>();
         for (ExposedService service : exposedServices) {
             ExposedServiceV4Response exposedServiceV4Response = new ExposedServiceV4Response();
-            exposedServiceV4Response.displayName = service.getDisaplayName();
+            exposedServiceV4Response.displayName = service.getDisplayName();
             exposedServiceV4Response.serviceName = service.getAmbariServiceName();
             exposedServiceV4Response.knoxService = service.getKnoxService();
             exposedServiceV4Response.knoxUrl = service.getKnoxUrl();

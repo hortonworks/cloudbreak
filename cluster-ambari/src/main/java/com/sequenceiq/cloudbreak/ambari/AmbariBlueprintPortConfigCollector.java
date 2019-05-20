@@ -73,7 +73,7 @@ public class AmbariBlueprintPortConfigCollector {
         Arrays.stream(ExposedService.values()).forEach(exposedService -> {
             if (StringUtils.isNotEmpty(exposedService.getKnoxService())) {
                 if (!collectedPorts.containsKey(exposedService.getKnoxService())) {
-                    collectedPorts.put(exposedService.getKnoxService(), exposedService.getDefaultPort());
+                    collectedPorts.put(exposedService.getKnoxService(), exposedService.getAmbariPort());
                 }
             }
         });
