@@ -24,26 +24,26 @@ public class EnvironmentCredentialOperationService {
     @Named("conversionService")
     private ConversionService conversionService;
 
-    public Credential getCredentialFromRequest(CredentialAwareEnvV1Request request, Long workspaceId) {
+    public Credential getCredentialFromRequest(CredentialAwareEnvV1Request request, String accountId) {
         Credential credential;
         if (StringUtils.isNotEmpty(request.getCredentialName())) {
             try {
-                credential = credentialService.getByNameForAccountId(request.getCredentialName(), workspaceId);
+                credential = credentialService.getByNameForAccountId(request.getCredentialName(), accountId);
             } catch (NotFoundException e) {
                 throw new BadRequestException(String.format("No credential found with name [%s] in the workspace.",
                         request.getCredentialName()), e);
             }
         } else {
             Credential converted = conversionService.convert(request.getCredential(), Credential.class);
-            credential = credentialService.create(converted, workspaceId);
+            credential = credentialService.create(converted, accountId);
         }
         return credential;
     }
 
-    public Credential validatePlatformAndGetCredential(CredentialAwareEnvV1Request request, Environment environment, Long workspaceId) {
+    public Credential validatePlatformAndGetCredential(CredentialAwareEnvV1Request request, Environment environment, String accountId) {
         String requestedPlatform;
         if (StringUtils.isNotEmpty(request.getCredentialName())) {
-            Credential credential = credentialService.getByNameForAccountId(request.getCredentialName(), workspaceId);
+            Credential credential = credentialService.getByNameForAccountId(request.getCredentialName(), accountId);
             requestedPlatform = credential.getCloudPlatform();
             validatePlatform(environment, requestedPlatform);
             return credential;
@@ -51,7 +51,7 @@ public class EnvironmentCredentialOperationService {
             requestedPlatform = request.getCredential().getCloudPlatform();
             validatePlatform(environment, requestedPlatform);
             Credential converted = conversionService.convert(request.getCredential(), Credential.class);
-            return credentialService.create(converted, workspaceId);
+            return credentialService.create(converted, accountId);
         }
     }
 
