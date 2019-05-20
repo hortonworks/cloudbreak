@@ -28,7 +28,7 @@ type mockCredentialCreate struct {
 func (m *mockCredentialCreate) CreateCredentialInWorkspace(params *v4cred.CreateCredentialInWorkspaceParams) (*v4cred.CreateCredentialInWorkspaceOK, error) {
 	m.request <- params.Body
 	defer close(m.request)
-	return &v4cred.CreateCredentialInWorkspaceOK{Payload: &model.CredentialV4Response{ID: int64(1), Name: &(&types.S{S: ""}).S}}, nil
+	return &v4cred.CreateCredentialInWorkspaceOK{Payload: &model.CredentialV4Response{ID: int64(1), CredentialV4Base: model.CredentialV4Base{Name: &(&types.S{S: ""}).S}}}, nil
 }
 
 func TestCreateCredentialPublic(t *testing.T) {
@@ -80,9 +80,11 @@ func (m *mockListCredentialsByWorkspace) ListCredentialsByWorkspace(params *v4cr
 	resp := make([]*model.CredentialV4Response, 0)
 	for i := 0; i < 3; i++ {
 		resp = append(resp, &model.CredentialV4Response{
-			Name:          &(&types.S{S: "name" + strconv.Itoa(i)}).S,
-			Description:   &(&types.S{S: "desc" + strconv.Itoa(i)}).S,
-			CloudPlatform: &(&types.S{S: "AWS"}).S,
+			CredentialV4Base: model.CredentialV4Base{
+				Name:          &(&types.S{S: "name" + strconv.Itoa(i)}).S,
+				Description:   &(&types.S{S: "desc" + strconv.Itoa(i)}).S,
+				CloudPlatform: &(&types.S{S: "AWS"}).S,
+			},
 		})
 	}
 
@@ -113,18 +115,20 @@ type mockCredentialModifyClient struct {
 
 func (m *mockCredentialModifyClient) PutCredentialInWorkspace(params *v4cred.PutCredentialInWorkspaceParams) (*v4cred.PutCredentialInWorkspaceOK, error) {
 	return &v4cred.PutCredentialInWorkspaceOK{Payload: &model.CredentialV4Response{
-		ID:            int64(1),
-		Name:          params.Body.Name,
-		Description:   params.Body.Description,
-		CloudPlatform: params.Body.CloudPlatform,
-		Aws:           params.Body.Aws,
+		ID: int64(1),
+		CredentialV4Base: model.CredentialV4Base{
+			Name:          params.Body.Name,
+			Description:   params.Body.Description,
+			CloudPlatform: params.Body.CloudPlatform,
+			Aws:           params.Body.Aws,
+			Gcp:           params.Body.Gcp,
+			Openstack:     params.Body.Openstack,
+			Yarn:          params.Body.Yarn,
+		},
 		Azure: &model.AzureCredentialV4ResponseParameters{
 			SubscriptionID: "some",
 			TenantID:       "tenantid",
 		},
-		Gcp:       params.Body.Gcp,
-		Openstack: params.Body.Openstack,
-		Yarn:      params.Body.Yarn,
 	},
 	}, nil
 }
@@ -135,13 +139,15 @@ func (m *mockCredentialModifyClient) GetCredentialInWorkspace(params *v4cred.Get
 	}
 
 	return &v4cred.GetCredentialInWorkspaceOK{Payload: &model.CredentialV4Response{
-		ID:            int64(1),
-		Name:          &(&types.S{S: "name"}).S,
-		Description:   &(&types.S{S: "default description"}).S,
-		CloudPlatform: &(&types.S{S: "AWS"}).S,
-		Aws: &model.AwsCredentialV4Parameters{
-			RoleBased: &model.RoleBasedCredentialParameters{
-				RoleArn: &(&types.S{S: "default-role-arn"}).S,
+		ID: int64(1),
+		CredentialV4Base: model.CredentialV4Base{
+			Name:          &(&types.S{S: "name"}).S,
+			Description:   &(&types.S{S: "default description"}).S,
+			CloudPlatform: &(&types.S{S: "AWS"}).S,
+			Aws: &model.AwsCredentialV4Parameters{
+				RoleBased: &model.RoleBasedCredentialParameters{
+					RoleArn: &(&types.S{S: "default-role-arn"}).S,
+				},
 			},
 		},
 	},

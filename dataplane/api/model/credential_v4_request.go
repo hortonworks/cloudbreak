@@ -10,53 +10,70 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
-	"github.com/go-openapi/validate"
 )
 
-// CredentialV4Request Credential request related data
+// CredentialV4Request credential v4 request
 // swagger:model CredentialV4Request
 type CredentialV4Request struct {
-
-	// custom parameters for AWS credential
-	Aws *AwsCredentialV4Parameters `json:"aws,omitempty"`
+	CredentialV4Base
 
 	// custom parameters for Azure credential
 	Azure *AzureCredentialV4RequestParameters `json:"azure,omitempty"`
+}
 
-	// type of cloud provider
-	// Required: true
-	CloudPlatform *string `json:"cloudPlatform"`
+// UnmarshalJSON unmarshals this object from a JSON structure
+func (m *CredentialV4Request) UnmarshalJSON(raw []byte) error {
+	// AO0
+	var aO0 CredentialV4Base
+	if err := swag.ReadJSON(raw, &aO0); err != nil {
+		return err
+	}
+	m.CredentialV4Base = aO0
 
-	// custom parameters for Cumulus Yarn credential
-	Cumulus *CumulusYarnCredentialV4Parameters `json:"cumulus,omitempty"`
+	// AO1
+	var dataAO1 struct {
+		Azure *AzureCredentialV4RequestParameters `json:"azure,omitempty"`
+	}
+	if err := swag.ReadJSON(raw, &dataAO1); err != nil {
+		return err
+	}
 
-	// description of the resource
-	// Max Length: 1000
-	// Min Length: 0
-	Description *string `json:"description,omitempty"`
+	m.Azure = dataAO1.Azure
 
-	// custom parameters for GCP credential
-	Gcp *GcpCredentialV4Parameters `json:"gcp,omitempty"`
+	return nil
+}
 
-	// name of the resource
-	// Required: true
-	// Max Length: 100
-	// Min Length: 5
-	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
-	Name *string `json:"name"`
+// MarshalJSON marshals this object to a JSON structure
+func (m CredentialV4Request) MarshalJSON() ([]byte, error) {
+	_parts := make([][]byte, 0, 2)
 
-	// custom parameters for Openstack credential
-	Openstack *OpenstackCredentialV4Parameters `json:"openstack,omitempty"`
+	aO0, err := swag.WriteJSON(m.CredentialV4Base)
+	if err != nil {
+		return nil, err
+	}
+	_parts = append(_parts, aO0)
 
-	// custom parameters for Yarn credential
-	Yarn *YarnCredentialV4Parameters `json:"yarn,omitempty"`
+	var dataAO1 struct {
+		Azure *AzureCredentialV4RequestParameters `json:"azure,omitempty"`
+	}
+
+	dataAO1.Azure = m.Azure
+
+	jsonDataAO1, errAO1 := swag.WriteJSON(dataAO1)
+	if errAO1 != nil {
+		return nil, errAO1
+	}
+	_parts = append(_parts, jsonDataAO1)
+
+	return swag.ConcatJSON(_parts...), nil
 }
 
 // Validate validates this credential v4 request
 func (m *CredentialV4Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateAws(formats); err != nil {
+	// validation for a type composition with CredentialV4Base
+	if err := m.CredentialV4Base.Validate(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -64,55 +81,9 @@ func (m *CredentialV4Request) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateCloudPlatform(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateCumulus(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateDescription(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateGcp(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateName(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateOpenstack(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateYarn(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *CredentialV4Request) validateAws(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Aws) { // not required
-		return nil
-	}
-
-	if m.Aws != nil {
-		if err := m.Aws.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("aws")
-			}
-			return err
-		}
-	}
-
 	return nil
 }
 
@@ -126,125 +97,6 @@ func (m *CredentialV4Request) validateAzure(formats strfmt.Registry) error {
 		if err := m.Azure.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("azure")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *CredentialV4Request) validateCloudPlatform(formats strfmt.Registry) error {
-
-	if err := validate.Required("cloudPlatform", "body", m.CloudPlatform); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *CredentialV4Request) validateCumulus(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Cumulus) { // not required
-		return nil
-	}
-
-	if m.Cumulus != nil {
-		if err := m.Cumulus.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("cumulus")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *CredentialV4Request) validateDescription(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Description) { // not required
-		return nil
-	}
-
-	if err := validate.MinLength("description", "body", string(*m.Description), 0); err != nil {
-		return err
-	}
-
-	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *CredentialV4Request) validateGcp(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Gcp) { // not required
-		return nil
-	}
-
-	if m.Gcp != nil {
-		if err := m.Gcp.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("gcp")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *CredentialV4Request) validateName(formats strfmt.Registry) error {
-
-	if err := validate.Required("name", "body", m.Name); err != nil {
-		return err
-	}
-
-	if err := validate.MinLength("name", "body", string(*m.Name), 5); err != nil {
-		return err
-	}
-
-	if err := validate.MaxLength("name", "body", string(*m.Name), 100); err != nil {
-		return err
-	}
-
-	if err := validate.Pattern("name", "body", string(*m.Name), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *CredentialV4Request) validateOpenstack(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Openstack) { // not required
-		return nil
-	}
-
-	if m.Openstack != nil {
-		if err := m.Openstack.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("openstack")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *CredentialV4Request) validateYarn(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Yarn) { // not required
-		return nil
-	}
-
-	if m.Yarn != nil {
-		if err := m.Yarn.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("yarn")
 			}
 			return err
 		}

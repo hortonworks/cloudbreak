@@ -20,7 +20,7 @@ import (
 type KerberosV4Response struct {
 
 	// kerberos admin user
-	Admin *SecretV4Response `json:"admin,omitempty"`
+	Admin *SecretResponse `json:"admin,omitempty"`
 
 	// kerberos admin server URL
 	AdminURL string `json:"adminUrl,omitempty"`
@@ -34,7 +34,7 @@ type KerberosV4Response struct {
 	Description *string `json:"description,omitempty"`
 
 	// Ambari kerberos descriptor
-	Descriptor *SecretV4Response `json:"descriptor,omitempty"`
+	Descriptor *SecretResponse `json:"descriptor,omitempty"`
 
 	// cluster instances will set this as the domain part of their hostname
 	Domain string `json:"domain,omitempty"`
@@ -47,7 +47,7 @@ type KerberosV4Response struct {
 	ID int64 `json:"id,omitempty"`
 
 	// Ambari kerberos krb5.conf template
-	Krb5Conf *SecretV4Response `json:"krb5Conf,omitempty"`
+	Krb5Conf *SecretResponse `json:"krb5Conf,omitempty"`
 
 	// ldap Url
 	LdapURL string `json:"ldapUrl,omitempty"`
@@ -60,16 +60,16 @@ type KerberosV4Response struct {
 	NameServers string `json:"nameServers,omitempty"`
 
 	// kerberos admin password
-	Password *SecretV4Response `json:"password,omitempty"`
+	Password *SecretResponse `json:"password,omitempty"`
 
 	// kerberos principal
-	Principal *SecretV4Response `json:"principal,omitempty"`
+	Principal *SecretResponse `json:"principal,omitempty"`
 
 	// realm
 	Realm string `json:"realm,omitempty"`
 
 	// tcp allowed
-	TCPAllowed *bool `json:"tcpAllowed,omitempty"`
+	TCPAllowed bool `json:"tcpAllowed,omitempty"`
 
 	// type
 	// Required: true
@@ -80,7 +80,7 @@ type KerberosV4Response struct {
 	URL string `json:"url,omitempty"`
 
 	// Allows to select either a trusting SSL connection or a validating (non-trusting) SSL connection to KDC
-	VerifyKdcTrust *bool `json:"verifyKdcTrust,omitempty"`
+	VerifyKdcTrust bool `json:"verifyKdcTrust,omitempty"`
 }
 
 // Validate validates this kerberos v4 response

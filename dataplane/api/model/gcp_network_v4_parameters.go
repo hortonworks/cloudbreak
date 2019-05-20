@@ -19,10 +19,10 @@ type GcpNetworkV4Parameters struct {
 	NetworkID string `json:"networkId,omitempty"`
 
 	// no firewall rules
-	NoFirewallRules *bool `json:"noFirewallRules,omitempty"`
+	NoFirewallRules bool `json:"noFirewallRules,omitempty"`
 
 	// no public Ip
-	NoPublicIP *bool `json:"noPublicIp,omitempty"`
+	NoPublicIP bool `json:"noPublicIp,omitempty"`
 
 	// shared project Id
 	SharedProjectID string `json:"sharedProjectId,omitempty"`

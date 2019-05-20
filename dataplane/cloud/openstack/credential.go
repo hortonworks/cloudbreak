@@ -32,7 +32,9 @@ func (p *OpenstackProvider) GetCredentialRequest(stringFinder func(string) strin
 		if "project" == scope {
 			parameters.KeystoneV3 = &model.KeystoneV3Parameters{
 				Project: &model.ProjectKeystoneV3Parameters{
-					UserDomain:        &(&types.S{S: stringFinder("user-domain")}).S,
+					KeystoneV3Base: model.KeystoneV3Base{
+						UserDomain: &(&types.S{S: stringFinder("user-domain")}).S,
+					},
 					ProjectDomainName: &(&types.S{S: stringFinder("project-domain-name")}).S,
 					ProjectName:       &(&types.S{S: stringFinder("project-name")}).S,
 				},
@@ -40,7 +42,9 @@ func (p *OpenstackProvider) GetCredentialRequest(stringFinder func(string) strin
 		} else {
 			parameters.KeystoneV3 = &model.KeystoneV3Parameters{
 				Domain: &model.DomainKeystoneV3Parameters{
-					UserDomain: &(&types.S{S: stringFinder("user-domain")}).S,
+					KeystoneV3Base: model.KeystoneV3Base{
+						UserDomain: &(&types.S{S: stringFinder("user-domain")}).S,
+					},
 					DomainName: &(&types.S{S: stringFinder("domain-name")}).S,
 				},
 			}

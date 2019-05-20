@@ -3,7 +3,6 @@ package gcp
 import (
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	"github.com/hortonworks/cb-cli/dataplane/cloud"
-	"github.com/hortonworks/cb-cli/dataplane/types"
 )
 
 func (p *GcpProvider) GenerateDefaultNetwork(mode cloud.NetworkMode) *model.NetworkV4Request {
@@ -20,8 +19,8 @@ func (p *GcpProvider) GenerateDefaultNetwork(mode cloud.NetworkMode) *model.Netw
 			Gcp: &model.GcpNetworkV4Parameters{
 				NetworkID:       "____",
 				SubnetID:        "____",
-				NoPublicIP:      &(&types.B{B: false}).B,
-				NoFirewallRules: &(&types.B{B: false}).B,
+				NoPublicIP:      false,
+				NoFirewallRules: false,
 			},
 		}
 	case cloud.LEGACY_NETWORK:
@@ -36,7 +35,7 @@ func (p *GcpProvider) GenerateDefaultNetwork(mode cloud.NetworkMode) *model.Netw
 			Gcp: &model.GcpNetworkV4Parameters{
 				NetworkID:       "____",
 				SubnetID:        "____",
-				NoFirewallRules: &(&types.B{B: true}).B,
+				NoFirewallRules: true,
 				SharedProjectID: "____",
 			},
 		}

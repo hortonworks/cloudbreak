@@ -3,7 +3,6 @@ package azure
 import (
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	"github.com/hortonworks/cb-cli/dataplane/cloud"
-	"github.com/hortonworks/cb-cli/dataplane/types"
 	"github.com/hortonworks/dp-cli-common/utils"
 )
 
@@ -15,8 +14,8 @@ func (p *AzureProvider) GenerateDefaultNetwork(mode cloud.NetworkMode) *model.Ne
 				ResourceGroupName: "____",
 				NetworkID:         "____",
 				SubnetID:          "____",
-				NoPublicIP:        &(&types.B{B: false}).B,
-				NoFirewallRules:   &(&types.B{B: false}).B,
+				NoPublicIP:        false,
+				NoFirewallRules:   false,
 			},
 		}
 	default:
@@ -28,7 +27,7 @@ func (p *AzureProvider) GenerateDefaultNetwork(mode cloud.NetworkMode) *model.Ne
 
 func (p *AzureProvider) SetParametersTemplate(request *model.StackV4Request) {
 	request.Azure = &model.AzureStackV4Parameters{
-		EncryptStorage: &(&types.B{B: true}).B,
+		EncryptStorage: true,
 	}
 }
 

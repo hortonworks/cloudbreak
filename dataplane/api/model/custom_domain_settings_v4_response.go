@@ -16,13 +16,13 @@ import (
 type CustomDomainSettingsV4Response struct {
 
 	// using the cluster name to create subdomain
-	ClusterNameAsSubdomain *bool `json:"clusterNameAsSubdomain,omitempty"`
+	ClusterNameAsSubdomain bool `json:"clusterNameAsSubdomain,omitempty"`
 
 	// custom domain name for the nodes in the stack
 	DomainName string `json:"domainName,omitempty"`
 
 	// using the hostgroup names to create hostnames
-	HostgroupNameAsHostname *bool `json:"hostgroupNameAsHostname,omitempty"`
+	HostgroupNameAsHostname bool `json:"hostgroupNameAsHostname,omitempty"`
 
 	// custom hostname for nodes in the stack
 	Hostname string `json:"hostname,omitempty"`

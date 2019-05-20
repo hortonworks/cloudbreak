@@ -11,24 +11,21 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// SecretV4Response secret v4 response
-// swagger:model SecretV4Response
-type SecretV4Response struct {
+// CloudbreakInfoResponse cloudbreak info response
+// swagger:model CloudbreakInfoResponse
+type CloudbreakInfoResponse struct {
 
-	// Engine path of the secret.
-	EnginePath string `json:"enginePath,omitempty"`
-
-	// Path of the secret.
-	SecretPath string `json:"secretPath,omitempty"`
+	// info
+	Info map[string]interface{} `json:"info,omitempty"`
 }
 
-// Validate validates this secret v4 response
-func (m *SecretV4Response) Validate(formats strfmt.Registry) error {
+// Validate validates this cloudbreak info response
+func (m *CloudbreakInfoResponse) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (m *SecretV4Response) MarshalBinary() ([]byte, error) {
+func (m *CloudbreakInfoResponse) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -36,8 +33,8 @@ func (m *SecretV4Response) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *SecretV4Response) UnmarshalBinary(b []byte) error {
-	var res SecretV4Response
+func (m *CloudbreakInfoResponse) UnmarshalBinary(b []byte) error {
+	var res CloudbreakInfoResponse
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

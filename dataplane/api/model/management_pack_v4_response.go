@@ -23,13 +23,13 @@ type ManagementPackV4Response struct {
 	Description *string `json:"description,omitempty"`
 
 	// if true, management pack will be installed with '--force' flag
-	Force *bool `json:"force,omitempty"`
+	Force bool `json:"force,omitempty"`
 
 	// id of the resource
 	ID int64 `json:"id,omitempty"`
 
 	// if true, then we dont validate the url
-	IgnoreValidation *bool `json:"ignoreValidation,omitempty"`
+	IgnoreValidation bool `json:"ignoreValidation,omitempty"`
 
 	// url of the ambari management pack
 	// Required: true
@@ -44,7 +44,7 @@ type ManagementPackV4Response struct {
 	Name *string `json:"name"`
 
 	// if true, management pack will be installed with '--purge' flag
-	Purge *bool `json:"purge,omitempty"`
+	Purge bool `json:"purge,omitempty"`
 
 	// if provided, management pack will be installed with '--purgeList' option with this values
 	PurgeList []string `json:"purgeList"`

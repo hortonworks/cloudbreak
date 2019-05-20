@@ -18,7 +18,7 @@ import (
 type SecurityRuleV4Request struct {
 
 	// flag for making the rule modifiable
-	Modifiable *bool `json:"modifiable,omitempty"`
+	Modifiable bool `json:"modifiable,omitempty"`
 
 	// list of accessible ports
 	// Required: true

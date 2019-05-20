@@ -150,8 +150,8 @@ func GenerateAzureEnvironmentTemplate(c *cli.Context) error {
 	template.Network.Azure = &model.EnvironmentNetworkAzureV4Params{
 		ResourceGroupName: new(string),
 		NetworkID:         new(string),
-		NoFirewallRules:   new(bool),
-		NoPublicIP:        new(bool),
+		NoFirewallRules:   false,
+		NoPublicIP:        false,
 	}
 	return printTemplate(template)
 }

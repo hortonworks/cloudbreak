@@ -13,9 +13,9 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// CredentialPrerequisitesV4Response credential prerequisites v4 response
-// swagger:model CredentialPrerequisitesV4Response
-type CredentialPrerequisitesV4Response struct {
+// CredentialPrerequisitesResponse credential prerequisites response
+// swagger:model CredentialPrerequisitesResponse
+type CredentialPrerequisitesResponse struct {
 
 	// provider specific identifier of the account/subscription/project that is used by Cloudbreak
 	AccountID string `json:"accountId,omitempty"`
@@ -34,8 +34,8 @@ type CredentialPrerequisitesV4Response struct {
 	Gcp *GcpCredentialPrerequisites `json:"gcp,omitempty"`
 }
 
-// Validate validates this credential prerequisites v4 response
-func (m *CredentialPrerequisitesV4Response) Validate(formats strfmt.Registry) error {
+// Validate validates this credential prerequisites response
+func (m *CredentialPrerequisitesResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAws(formats); err != nil {
@@ -60,7 +60,7 @@ func (m *CredentialPrerequisitesV4Response) Validate(formats strfmt.Registry) er
 	return nil
 }
 
-func (m *CredentialPrerequisitesV4Response) validateAws(formats strfmt.Registry) error {
+func (m *CredentialPrerequisitesResponse) validateAws(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Aws) { // not required
 		return nil
@@ -78,7 +78,7 @@ func (m *CredentialPrerequisitesV4Response) validateAws(formats strfmt.Registry)
 	return nil
 }
 
-func (m *CredentialPrerequisitesV4Response) validateAzure(formats strfmt.Registry) error {
+func (m *CredentialPrerequisitesResponse) validateAzure(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Azure) { // not required
 		return nil
@@ -96,7 +96,7 @@ func (m *CredentialPrerequisitesV4Response) validateAzure(formats strfmt.Registr
 	return nil
 }
 
-func (m *CredentialPrerequisitesV4Response) validateCloudPlatform(formats strfmt.Registry) error {
+func (m *CredentialPrerequisitesResponse) validateCloudPlatform(formats strfmt.Registry) error {
 
 	if err := validate.Required("cloudPlatform", "body", m.CloudPlatform); err != nil {
 		return err
@@ -105,7 +105,7 @@ func (m *CredentialPrerequisitesV4Response) validateCloudPlatform(formats strfmt
 	return nil
 }
 
-func (m *CredentialPrerequisitesV4Response) validateGcp(formats strfmt.Registry) error {
+func (m *CredentialPrerequisitesResponse) validateGcp(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Gcp) { // not required
 		return nil
@@ -124,7 +124,7 @@ func (m *CredentialPrerequisitesV4Response) validateGcp(formats strfmt.Registry)
 }
 
 // MarshalBinary interface implementation
-func (m *CredentialPrerequisitesV4Response) MarshalBinary() ([]byte, error) {
+func (m *CredentialPrerequisitesResponse) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -132,8 +132,8 @@ func (m *CredentialPrerequisitesV4Response) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *CredentialPrerequisitesV4Response) UnmarshalBinary(b []byte) error {
-	var res CredentialPrerequisitesV4Response
+func (m *CredentialPrerequisitesResponse) UnmarshalBinary(b []byte) error {
+	var res CredentialPrerequisitesResponse
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

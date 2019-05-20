@@ -49,7 +49,7 @@ type UpdateClusterV4Request struct {
 	UserNamePassword *UserNamePasswordV4Request `json:"userNamePassword,omitempty"`
 
 	// blueprint validation
-	ValidateBlueprint *bool `json:"validateBlueprint,omitempty"`
+	ValidateBlueprint bool `json:"validateBlueprint,omitempty"`
 }
 
 // Validate validates this update cluster v4 request

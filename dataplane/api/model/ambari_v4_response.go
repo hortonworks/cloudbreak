@@ -27,7 +27,7 @@ type AmbariV4Response struct {
 	Repository *AmbariRepositoryV4Response `json:"repository,omitempty"`
 
 	// a master key for encrypting the passwords in Ambari
-	SecurityMasterKey *SecretV4Response `json:"securityMasterKey,omitempty"`
+	SecurityMasterKey *SecretResponse `json:"securityMasterKey,omitempty"`
 
 	// details of the Ambari stack
 	StackRepository *StackRepositoryV4Response `json:"stackRepository,omitempty"`

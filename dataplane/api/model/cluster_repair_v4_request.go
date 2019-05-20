@@ -25,7 +25,7 @@ type ClusterRepairV4Request struct {
 	Nodes *ClusterRepairNodesV4Request `json:"nodes,omitempty"`
 
 	// If true, the failed nodes will only be removed, otherwise the failed nodes will be removed and new nodes will be started.
-	RemoveOnly *bool `json:"removeOnly,omitempty"`
+	RemoveOnly bool `json:"removeOnly,omitempty"`
 }
 
 // Validate validates this cluster repair v4 request

@@ -18,7 +18,7 @@ import (
 type KubernetesV4Response struct {
 
 	// Kubernetes configuration
-	Content *SecretV4Response `json:"content,omitempty"`
+	Content *SecretResponse `json:"content,omitempty"`
 
 	// description of the resource
 	// Max Length: 1000

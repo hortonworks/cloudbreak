@@ -35,6 +35,12 @@ type ClusterV4Response struct {
 	// cm
 	Cm *ClouderaManagerV4Response `json:"cm,omitempty"`
 
+	// CM password for shared usage
+	CmMgmtPassword *SecretResponse `json:"cmMgmtPassword,omitempty"`
+
+	// CM username for shared usage
+	CmMgmtUser *SecretResponse `json:"cmMgmtUser,omitempty"`
+
 	// Epoch time of cluster creation finish
 	CreationFinished int64 `json:"creationFinished,omitempty"`
 
@@ -49,12 +55,6 @@ type ClusterV4Response struct {
 
 	// description of the resource
 	Description string `json:"description,omitempty"`
-
-	// ambari password for Dataplane
-	DpPassword *SecretV4Response `json:"dpPassword,omitempty"`
-
-	// ambari username for Dataplane
-	DpUser *SecretV4Response `json:"dpUser,omitempty"`
 
 	// cluster exposed services for topologies
 	ExposedServices map[string][]ClusterExposedServiceV4Response `json:"exposedServices,omitempty"`
@@ -126,19 +126,19 @@ func (m *ClusterV4Response) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateCmMgmtPassword(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateCmMgmtUser(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateCustomContainers(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateDatabases(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateDpPassword(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateDpUser(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -248,6 +248,42 @@ func (m *ClusterV4Response) validateCm(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *ClusterV4Response) validateCmMgmtPassword(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.CmMgmtPassword) { // not required
+		return nil
+	}
+
+	if m.CmMgmtPassword != nil {
+		if err := m.CmMgmtPassword.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("cmMgmtPassword")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *ClusterV4Response) validateCmMgmtUser(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.CmMgmtUser) { // not required
+		return nil
+	}
+
+	if m.CmMgmtUser != nil {
+		if err := m.CmMgmtUser.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("cmMgmtUser")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (m *ClusterV4Response) validateCustomContainers(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.CustomContainers) { // not required
@@ -286,42 +322,6 @@ func (m *ClusterV4Response) validateDatabases(formats strfmt.Registry) error {
 			}
 		}
 
-	}
-
-	return nil
-}
-
-func (m *ClusterV4Response) validateDpPassword(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.DpPassword) { // not required
-		return nil
-	}
-
-	if m.DpPassword != nil {
-		if err := m.DpPassword.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("dpPassword")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *ClusterV4Response) validateDpUser(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.DpUser) { // not required
-		return nil
-	}
-
-	if m.DpUser != nil {
-		if err := m.DpUser.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("dpUser")
-			}
-			return err
-		}
 	}
 
 	return nil

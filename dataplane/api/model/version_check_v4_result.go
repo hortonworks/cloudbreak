@@ -19,7 +19,7 @@ type VersionCheckV4Result struct {
 	Message string `json:"message,omitempty"`
 
 	// version check ok
-	VersionCheckOk *bool `json:"versionCheckOk,omitempty"`
+	VersionCheckOk bool `json:"versionCheckOk,omitempty"`
 }
 
 // Validate validates this version check v4 result

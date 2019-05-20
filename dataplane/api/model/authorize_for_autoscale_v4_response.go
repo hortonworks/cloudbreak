@@ -16,7 +16,7 @@ import (
 type AuthorizeForAutoscaleV4Response struct {
 
 	// success
-	Success *bool `json:"success,omitempty"`
+	Success bool `json:"success,omitempty"`
 }
 
 // Validate validates this authorize for autoscale v4 response

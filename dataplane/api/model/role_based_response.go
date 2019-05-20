@@ -19,7 +19,7 @@ type RoleBasedResponse struct {
 	AppObjectID string `json:"appObjectId,omitempty"`
 
 	// code grant flow
-	CodeGrantFlow *bool `json:"codeGrantFlow,omitempty"`
+	CodeGrantFlow bool `json:"codeGrantFlow,omitempty"`
 
 	// role name
 	RoleName string `json:"roleName,omitempty"`

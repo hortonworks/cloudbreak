@@ -20,7 +20,7 @@ type GcpInstanceTemplateV4Parameters struct {
 	Encryption *GcpEncryptionV4Parameters `json:"encryption,omitempty"`
 
 	// preemptible
-	Preemptible *bool `json:"preemptible,omitempty"`
+	Preemptible bool `json:"preemptible,omitempty"`
 }
 
 // Validate validates this gcp instance template v4 parameters

@@ -24,6 +24,9 @@ type AdlsGen2CloudStorageV4Parameters struct {
 	// account name
 	// Required: true
 	AccountName *string `json:"accountName"`
+
+	// secure
+	Secure bool `json:"secure,omitempty"`
 }
 
 // Validate validates this adls gen2 cloud storage v4 parameters

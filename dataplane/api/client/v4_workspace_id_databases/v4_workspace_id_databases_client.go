@@ -25,7 +25,7 @@ type Client struct {
 }
 
 /*
-AttachDatabaseToEnvironments attaches r d s resource to environemnts
+AttachDatabaseToEnvironments attaches r d s resource to environments
 
 A Database Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
 */
@@ -55,7 +55,7 @@ func (a *Client) AttachDatabaseToEnvironments(params *AttachDatabaseToEnvironmen
 }
 
 /*
-CreateDatabaseInWorkspace creates r d s config in workspace
+CreateDatabaseInWorkspace creates r d s config
 
 A Database Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
 */
@@ -85,7 +85,7 @@ func (a *Client) CreateDatabaseInWorkspace(params *CreateDatabaseInWorkspacePara
 }
 
 /*
-DeleteDatabaseInWorkspace deletes r d s config by name in workspace
+DeleteDatabaseInWorkspace deletes r d s config by name
 
 A Database Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
 */
@@ -115,7 +115,7 @@ func (a *Client) DeleteDatabaseInWorkspace(params *DeleteDatabaseInWorkspacePara
 }
 
 /*
-DeleteDatabasesInWorkspace deletes multiple r d s configs by name in workspace
+DeleteDatabasesInWorkspace deletes multiple r d s configs by name
 
 A Database Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
 */
@@ -145,7 +145,7 @@ func (a *Client) DeleteDatabasesInWorkspace(params *DeleteDatabasesInWorkspacePa
 }
 
 /*
-DetachDatabaseFromEnvironments detaches r d s resource from environemnts
+DetachDatabaseFromEnvironments detaches r d s resource from environments
 
 A Database Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
 */
@@ -175,7 +175,7 @@ func (a *Client) DetachDatabaseFromEnvironments(params *DetachDatabaseFromEnviro
 }
 
 /*
-GetDatabaseInWorkspace gets r d s config by name in workspace
+GetDatabaseInWorkspace gets r d s config by name
 
 A Database Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
 */
@@ -205,7 +205,7 @@ func (a *Client) GetDatabaseInWorkspace(params *GetDatabaseInWorkspaceParams) (*
 }
 
 /*
-GetDatabaseRequestFromNameInWorkspace gets request in workspace
+GetDatabaseRequestFromNameInWorkspace gets request
 
 A Database Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
 */
@@ -235,7 +235,7 @@ func (a *Client) GetDatabaseRequestFromNameInWorkspace(params *GetDatabaseReques
 }
 
 /*
-ListDatabasesByWorkspace lists r d s configs for the given workspace
+ListDatabasesByWorkspace lists r d s configs
 
 A Database Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
 */

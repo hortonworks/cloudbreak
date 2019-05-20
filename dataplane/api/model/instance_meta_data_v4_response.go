@@ -20,7 +20,7 @@ import (
 type InstanceMetaDataV4Response struct {
 
 	// ambari server address
-	AmbariServer *bool `json:"ambariServer,omitempty"`
+	AmbariServer bool `json:"ambariServer,omitempty"`
 
 	// the fully qualified domain name of the node in the service discovery cluster
 	DiscoveryFQDN string `json:"discoveryFQDN,omitempty"`

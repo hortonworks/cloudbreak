@@ -46,7 +46,7 @@ type ClusterViewV4Response struct {
 	Name *string `json:"name"`
 
 	// tells wether the cluster is secured or not
-	Secure *bool `json:"secure,omitempty"`
+	Secure bool `json:"secure,omitempty"`
 
 	// public ambari ip of the stack
 	ServerIP string `json:"serverIp,omitempty"`

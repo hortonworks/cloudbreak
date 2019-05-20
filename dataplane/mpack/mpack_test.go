@@ -26,7 +26,6 @@ func (m *mockMpackClient) CreateManagementPackInWorkspace(params *v4mpack.Create
 }
 
 func (m *mockMpackClient) ListManagementPacksByWorkspace(params *v4mpack.ListManagementPacksByWorkspaceParams) (*v4mpack.ListManagementPacksByWorkspaceOK, error) {
-	yes := true
 	resp := v4mpack.ListManagementPacksByWorkspaceOK{
 		Payload: &model.ManagementPackV4Responses{
 			Responses: []*model.ManagementPackV4Response{
@@ -43,22 +42,22 @@ func (m *mockMpackClient) ListManagementPacksByWorkspace(params *v4mpack.ListMan
 					Name:        &(&types.S{S: "mpack"}).S,
 					MpackURL:    &(&types.S{S: "http://localhost/mpack.tar.gz"}).S,
 					Description: &(&types.S{S: "my test mpack"}).S,
-					Purge:       &yes,
+					Purge:       true,
 				},
 				{
 					Name:        &(&types.S{S: "mpack"}).S,
 					MpackURL:    &(&types.S{S: "http://localhost/mpack.tar.gz"}).S,
 					Description: &(&types.S{S: "my test mpack"}).S,
-					Purge:       &yes,
+					Purge:       true,
 					PurgeList:   []string{"stack-definitions", "service-definitions", "mpacks"},
 				},
 				{
 					Name:        &(&types.S{S: "mpack"}).S,
 					MpackURL:    &(&types.S{S: "http://localhost/mpack.tar.gz"}).S,
 					Description: &(&types.S{S: "my test mpack"}).S,
-					Purge:       &yes,
+					Purge:       true,
 					PurgeList:   []string{"stack-definitions", "service-definitions", "mpacks"},
-					Force:       &yes,
+					Force:       true,
 				},
 			},
 		},
@@ -157,8 +156,8 @@ func checkReqParams(req *model.ManagementPackV4Request, purgeList string, t *tes
 	if *req.MpackURL != "http://localhost/mpack.tar.gz" {
 		t.Errorf("mpack url does not match %s == %s", *req.MpackURL, "http://localhost/mpack.tar.gz")
 	}
-	if *req.Purge != true {
-		t.Errorf("mpack purge does not match %v == %v", *req.Purge, true)
+	if !req.Purge {
+		t.Errorf("mpack purge does not match %v == %v", req.Purge, true)
 	}
 	if strings.Join(req.PurgeList, ",") != purgeList {
 		t.Errorf("mpack purge list does not match %s == %s", req.PurgeList, []string{"stack-definitions", "service-definitions", "mpacks"})

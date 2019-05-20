@@ -16,10 +16,10 @@ import (
 type AzureInstanceTemplateV4Parameters struct {
 
 	// encrypted
-	Encrypted *bool `json:"encrypted,omitempty"`
+	Encrypted bool `json:"encrypted,omitempty"`
 
 	// managed disk
-	ManagedDisk *bool `json:"managedDisk,omitempty"`
+	ManagedDisk bool `json:"managedDisk,omitempty"`
 
 	// private id for azure
 	PrivateID string `json:"privateId,omitempty"`

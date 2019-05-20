@@ -57,9 +57,9 @@ func createMpackImpl(client mpackClient, workspaceID int64, name, description, u
 		Name:        &name,
 		Description: &description,
 		MpackURL:    &url,
-		Purge:       &purge,
+		Purge:       purge,
 		PurgeList:   pList,
-		Force:       &force,
+		Force:       force,
 	}
 
 	var mpackResponse *model.ManagementPackV4Response
@@ -108,10 +108,10 @@ func listMpacksImpl(mpackClient mpackClient, writer func([]string, []utils.Row),
 		purgeString := "false"
 		forceString := "false"
 		desc := ""
-		if m.Purge != nil && *m.Purge {
+		if m.Purge {
 			purgeString = "true"
 		}
-		if m.Force != nil && *m.Force {
+		if m.Force {
 			forceString = "true"
 		}
 		if m.Description != nil && len(*m.Description) > 0 {

@@ -14,14 +14,14 @@ func (p *AwsProvider) GetCredentialRequest(stringFinder func(string) string, gov
 				AccessKey: &(&types.S{S: stringFinder("access-key")}).S,
 				SecretKey: &(&types.S{S: stringFinder("secret-key")}).S,
 			},
-			GovCloud: govCloud,
+			GovCloud: &govCloud,
 		}
 	} else {
 		parameters = &model.AwsCredentialV4Parameters{
 			RoleBased: &model.RoleBasedCredentialParameters{
 				RoleArn: &(&types.S{S: stringFinder("role-arn")}).S,
 			},
-			GovCloud: govCloud,
+			GovCloud: &govCloud,
 		}
 	}
 	credReq := cloud.CreateBaseCredentialRequest(stringFinder)

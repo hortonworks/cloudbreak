@@ -64,11 +64,11 @@ func CreateAdKerberos(c *cli.Context) error {
 	containerDn := c.String(fl.FlKerberosContainerDn.Name)
 
 	adRequest := model.ActiveDirectoryKerberosDescriptor{
-		VerifyKdcTrust: &verifyKdcTrust,
+		VerifyKdcTrust: verifyKdcTrust,
 		Domain:         domain,
 		NameServers:    nameServers,
 		Password:       &password,
-		TCPAllowed:     tcpAllowed,
+		TCPAllowed:     &tcpAllowed,
 		Principal:      &principal,
 		URL:            &url,
 		AdminURL:       &adminUrl,
@@ -95,11 +95,11 @@ func CreateCustomKerberos(c *cli.Context) error {
 	descriptor := base64.StdEncoding.EncodeToString([]byte(c.String(fl.FlKerberosDescriptor.Name)))
 
 	customRequest := model.AmbariKerberosDescriptor{
-		VerifyKdcTrust: &verifyKdcTrust,
+		VerifyKdcTrust: verifyKdcTrust,
 		Domain:         domain,
 		NameServers:    nameServers,
 		Password:       &password,
-		TCPAllowed:     tcpAllowed,
+		TCPAllowed:     &tcpAllowed,
 		Principal:      &principal,
 		Krb5Conf:       &krb5Conf,
 		Descriptor:     &descriptor,
@@ -124,11 +124,11 @@ func CreateFreeIpaKerberos(c *cli.Context) error {
 	realm := c.String(fl.FlKerberosRealm.Name)
 
 	freeIpaRequest := model.FreeIPAKerberosDescriptor{
-		VerifyKdcTrust: &verifyKdcTrust,
+		VerifyKdcTrust: verifyKdcTrust,
 		Domain:         domain,
 		NameServers:    nameServers,
 		Password:       &password,
-		TCPAllowed:     tcpAllowed,
+		TCPAllowed:     &tcpAllowed,
 		Principal:      &principal,
 		URL:            &url,
 		AdminURL:       &adminUrl,

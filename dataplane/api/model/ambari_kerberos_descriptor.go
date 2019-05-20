@@ -47,10 +47,10 @@ type AmbariKerberosDescriptor struct {
 
 	// kerberos configuration name
 	// Required: true
-	TCPAllowed bool `json:"tcpAllowed"`
+	TCPAllowed *bool `json:"tcpAllowed"`
 
 	// Allows to select either a trusting SSL connection or a validating (non-trusting) SSL connection to KDC
-	VerifyKdcTrust *bool `json:"verifyKdcTrust,omitempty"`
+	VerifyKdcTrust bool `json:"verifyKdcTrust,omitempty"`
 }
 
 // Validate validates this ambari kerberos descriptor
@@ -146,7 +146,7 @@ func (m *AmbariKerberosDescriptor) validatePrincipal(formats strfmt.Registry) er
 
 func (m *AmbariKerberosDescriptor) validateTCPAllowed(formats strfmt.Registry) error {
 
-	if err := validate.Required("tcpAllowed", "body", bool(m.TCPAllowed)); err != nil {
+	if err := validate.Required("tcpAllowed", "body", m.TCPAllowed); err != nil {
 		return err
 	}
 

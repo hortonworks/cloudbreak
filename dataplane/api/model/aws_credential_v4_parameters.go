@@ -19,7 +19,7 @@ type AwsCredentialV4Parameters struct {
 
 	// gov cloud
 	// Required: true
-	GovCloud bool `json:"govCloud"`
+	GovCloud *bool `json:"govCloud"`
 
 	// key based
 	KeyBased *KeyBasedCredentialParameters `json:"keyBased,omitempty"`
@@ -52,7 +52,7 @@ func (m *AwsCredentialV4Parameters) Validate(formats strfmt.Registry) error {
 
 func (m *AwsCredentialV4Parameters) validateGovCloud(formats strfmt.Registry) error {
 
-	if err := validate.Required("govCloud", "body", bool(m.GovCloud)); err != nil {
+	if err := validate.Required("govCloud", "body", m.GovCloud); err != nil {
 		return err
 	}
 

@@ -30,7 +30,7 @@ type ClusterExposedServiceV4Response struct {
 	Mode string `json:"mode,omitempty"`
 
 	// open
-	Open *bool `json:"open,omitempty"`
+	Open bool `json:"open,omitempty"`
 
 	// service name
 	ServiceName string `json:"serviceName,omitempty"`

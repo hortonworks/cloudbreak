@@ -35,7 +35,7 @@ type AmbariV4Request struct {
 	StackRepository *StackRepositoryV4Request `json:"stackRepository,omitempty"`
 
 	// ambari and stack repository validation
-	ValidateRepositories *bool `json:"validateRepositories,omitempty"`
+	ValidateRepositories bool `json:"validateRepositories,omitempty"`
 }
 
 // Validate validates this ambari v4 request

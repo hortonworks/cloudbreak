@@ -134,7 +134,7 @@ func listImagecatalogsImpl(client listImageCatalogsByWorkspaceClient, workspaceI
 
 	var tableRows []utils.Row
 	for _, ic := range imagecatalogResp.Payload.Responses {
-		tableRows = append(tableRows, &imagecatalogOut{*ic.Name, utils.SafeStringConvert(ic.Description), ic.UsedAsDefault, *ic.URL})
+		tableRows = append(tableRows, &imagecatalogOut{*ic.Name, utils.SafeStringConvert(ic.Description), *ic.UsedAsDefault, *ic.URL})
 	}
 
 	writer(imagecatalogHeader, tableRows)
@@ -181,9 +181,9 @@ func DescribeImagecatalog(c *cli.Context) {
 
 	imgc := resp.Payload
 	if imgc.ID == nil {
-		output.Write(imagecatalogHeader, &imagecatalogOut{*imgc.Name, utils.SafeStringConvert(imgc.Description), imgc.UsedAsDefault, *imgc.URL})
+		output.Write(imagecatalogHeader, &imagecatalogOut{*imgc.Name, utils.SafeStringConvert(imgc.Description), *imgc.UsedAsDefault, *imgc.URL})
 	} else {
-		output.Write(append(imagecatalogHeader, "ID"), &imagecatalogOutDescribe{&imagecatalogOut{*imgc.Name, utils.SafeStringConvert(imgc.Description), imgc.UsedAsDefault, *imgc.URL}, strconv.FormatInt(*imgc.ID, 10)})
+		output.Write(append(imagecatalogHeader, "ID"), &imagecatalogOutDescribe{&imagecatalogOut{*imgc.Name, utils.SafeStringConvert(imgc.Description), *imgc.UsedAsDefault, *imgc.URL}, strconv.FormatInt(*imgc.ID, 10)})
 	}
 }
 

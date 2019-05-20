@@ -19,7 +19,7 @@ type ShowTerminatedClustersPreferencesV4Request struct {
 
 	// active
 	// Required: true
-	Active bool `json:"active"`
+	Active *bool `json:"active"`
 
 	// timeout
 	Timeout *DurationV4Request `json:"timeout,omitempty"`
@@ -45,7 +45,7 @@ func (m *ShowTerminatedClustersPreferencesV4Request) Validate(formats strfmt.Reg
 
 func (m *ShowTerminatedClustersPreferencesV4Request) validateActive(formats strfmt.Registry) error {
 
-	if err := validate.Required("active", "body", bool(m.Active)); err != nil {
+	if err := validate.Required("active", "body", m.Active); err != nil {
 		return err
 	}
 

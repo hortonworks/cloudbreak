@@ -24,9 +24,11 @@ import (
 func NewGetFileSystemParametersParams() *GetFileSystemParametersParams {
 	var (
 		attachedClusterDefault = bool(false)
+		secureDefault          = bool(false)
 	)
 	return &GetFileSystemParametersParams{
 		AttachedCluster: &attachedClusterDefault,
+		Secure:          &secureDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -37,9 +39,11 @@ func NewGetFileSystemParametersParams() *GetFileSystemParametersParams {
 func NewGetFileSystemParametersParamsWithTimeout(timeout time.Duration) *GetFileSystemParametersParams {
 	var (
 		attachedClusterDefault = bool(false)
+		secureDefault          = bool(false)
 	)
 	return &GetFileSystemParametersParams{
 		AttachedCluster: &attachedClusterDefault,
+		Secure:          &secureDefault,
 
 		timeout: timeout,
 	}
@@ -50,9 +54,11 @@ func NewGetFileSystemParametersParamsWithTimeout(timeout time.Duration) *GetFile
 func NewGetFileSystemParametersParamsWithContext(ctx context.Context) *GetFileSystemParametersParams {
 	var (
 		attachedClusterDefault = bool(false)
+		secureDefault          = bool(false)
 	)
 	return &GetFileSystemParametersParams{
 		AttachedCluster: &attachedClusterDefault,
+		Secure:          &secureDefault,
 
 		Context: ctx,
 	}
@@ -63,9 +69,11 @@ func NewGetFileSystemParametersParamsWithContext(ctx context.Context) *GetFileSy
 func NewGetFileSystemParametersParamsWithHTTPClient(client *http.Client) *GetFileSystemParametersParams {
 	var (
 		attachedClusterDefault = bool(false)
+		secureDefault          = bool(false)
 	)
 	return &GetFileSystemParametersParams{
 		AttachedCluster: &attachedClusterDefault,
+		Secure:          &secureDefault,
 		HTTPClient:      client,
 	}
 }
@@ -85,6 +93,8 @@ type GetFileSystemParametersParams struct {
 	ClusterName string
 	/*FileSystemType*/
 	FileSystemType string
+	/*Secure*/
+	Secure *bool
 	/*StorageName*/
 	StorageName string
 	/*WorkspaceID*/
@@ -183,6 +193,17 @@ func (o *GetFileSystemParametersParams) SetFileSystemType(fileSystemType string)
 	o.FileSystemType = fileSystemType
 }
 
+// WithSecure adds the secure to the get file system parameters params
+func (o *GetFileSystemParametersParams) WithSecure(secure *bool) *GetFileSystemParametersParams {
+	o.SetSecure(secure)
+	return o
+}
+
+// SetSecure adds the secure to the get file system parameters params
+func (o *GetFileSystemParametersParams) SetSecure(secure *bool) {
+	o.Secure = secure
+}
+
 // WithStorageName adds the storageName to the get file system parameters params
 func (o *GetFileSystemParametersParams) WithStorageName(storageName string) *GetFileSystemParametersParams {
 	o.SetStorageName(storageName)
@@ -270,6 +291,22 @@ func (o *GetFileSystemParametersParams) WriteToRequest(r runtime.ClientRequest, 
 		if err := r.SetQueryParam("fileSystemType", qFileSystemType); err != nil {
 			return err
 		}
+	}
+
+	if o.Secure != nil {
+
+		// query param secure
+		var qrSecure bool
+		if o.Secure != nil {
+			qrSecure = *o.Secure
+		}
+		qSecure := swag.FormatBool(qrSecure)
+		if qSecure != "" {
+			if err := r.SetQueryParam("secure", qSecure); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	// query param storageName

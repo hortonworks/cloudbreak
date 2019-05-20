@@ -38,6 +38,9 @@ type FileSystemParameterV4Response struct {
 	// related services
 	// Unique: true
 	RelatedServices []string `json:"relatedServices"`
+
+	// secure
+	Secure bool `json:"secure,omitempty"`
 }
 
 // Validate validates this file system parameter v4 response

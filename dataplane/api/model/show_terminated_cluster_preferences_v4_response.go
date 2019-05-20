@@ -17,7 +17,7 @@ import (
 type ShowTerminatedClusterPreferencesV4Response struct {
 
 	// active
-	Active *bool `json:"active,omitempty"`
+	Active bool `json:"active,omitempty"`
 
 	// source
 	Source string `json:"source,omitempty"`

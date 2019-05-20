@@ -38,10 +38,6 @@ func (*mockWorkspaceClient) GetWorkspaces(params *v4ws.GetWorkspacesParams) (*v4
 	return &v4ws.GetWorkspacesOK{Payload: &model.WorkspaceV4Responses{Responses: resp}}, nil
 }
 
-func (*mockWorkspaceClient) CreateWorkspace(params *v4ws.CreateWorkspaceParams) (*v4ws.CreateWorkspaceOK, error) {
-	return nil, nil
-}
-
 func TestListWorkspacesImpl(t *testing.T) {
 	var rows []utils.Row
 	listWorkspacesImpl(new(mockWorkspaceClient), func(h []string, r []utils.Row) { rows = r })

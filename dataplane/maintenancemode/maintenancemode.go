@@ -133,7 +133,7 @@ func GenerateHdpRepoJson(_ *cli.Context) {
 		VersionDefinitionFileURL: "____",
 		UtilsRepoID:              "____",
 		UtilsBaseURL:             "____",
-		EnableGplRepo:            &(&types.B{B: true}).B,
+		EnableGplRepo:            true,
 		Mpacks:                   []*model.ManagementPackDetailsV4Request{},
 		Version:                  &(&types.S{S: "____"}).S,
 	}
@@ -156,12 +156,12 @@ func GenerateHdfRepoJson(_ *cli.Context) {
 		VersionDefinitionFileURL: "____",
 		UtilsRepoID:              "____",
 		UtilsBaseURL:             "____",
-		EnableGplRepo:            &(&types.B{B: true}).B,
+		EnableGplRepo:            true,
 		MpackURL:                 "____",
 		Mpacks: []*model.ManagementPackDetailsV4Request{
 			{
 				Name:         &(&types.S{S: "____"}).S,
-				PreInstalled: &(&types.B{B: false}).B,
+				PreInstalled: false,
 			},
 		},
 		Version: &(&types.S{S: "____"}).S,

@@ -131,7 +131,7 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 			UserName:          &(&types.S{S: "____"}).S,
 			Password:          &(&types.S{S: ""}).S,
 			BlueprintName:     "____",
-			ValidateBlueprint: &(&types.B{B: false}).B,
+			ValidateBlueprint: false,
 		},
 		Name: &(&types.S{S: ""}).S,
 		Environment: &model.EnvironmentSettingsV4Request{
@@ -289,8 +289,8 @@ func preExtendTemplateWithOptionalBlocks(template *model.StackV4Request, boolFin
 		template.CustomDomain = &model.CustomDomainSettingsV4Request{
 			DomainName:              "____",
 			Hostname:                "____",
-			ClusterNameAsSubdomain:  &(&types.B{B: false}).B,
-			HostgroupNameAsHostname: &(&types.B{B: false}).B,
+			ClusterNameAsSubdomain:  false,
+			HostgroupNameAsHostname: false,
 		}
 	}
 	if withTags := boolFinder(fl.FlWithTagsOptional.Name); withTags {
@@ -307,7 +307,7 @@ func preExtendTemplateWithOptionalBlocks(template *model.StackV4Request, boolFin
 		}
 	}
 	if withBlueprintValidation := boolFinder(fl.FlWithBlueprintValidation.Name); withBlueprintValidation {
-		template.Cluster.ValidateBlueprint = &(&types.B{B: true}).B
+		template.Cluster.ValidateBlueprint = true
 	}
 	extendTemplateWithStorageType(template, storageType)
 }
@@ -373,7 +373,7 @@ func extendTemplateWithStorageType(template *model.StackV4Request, storageType c
 			Wasb: &model.WasbCloudStorageV4Parameters{
 				AccountKey:  &(&types.S{S: "____"}).S,
 				AccountName: &(&types.S{S: "____"}).S,
-				Secure:      &(&types.B{B: false}).B,
+				Secure:      false,
 			},
 			Locations: []*model.StorageLocationV4Request{},
 		}

@@ -49,10 +49,10 @@ type StackDetails struct {
 	DetailedStatus string `json:"detailedStatus,omitempty"`
 
 	// existing network
-	ExistingNetwork *bool `json:"existingNetwork,omitempty"`
+	ExistingNetwork bool `json:"existingNetwork,omitempty"`
 
 	// existing subnet
-	ExistingSubnet *bool `json:"existingSubnet,omitempty"`
+	ExistingSubnet bool `json:"existingSubnet,omitempty"`
 
 	// id
 	ID int64 `json:"id,omitempty"`
@@ -70,7 +70,7 @@ type StackDetails struct {
 	PlatformVariant string `json:"platformVariant,omitempty"`
 
 	// prewarmed image
-	PrewarmedImage *bool `json:"prewarmedImage,omitempty"`
+	PrewarmedImage bool `json:"prewarmedImage,omitempty"`
 
 	// region
 	Region string `json:"region,omitempty"`

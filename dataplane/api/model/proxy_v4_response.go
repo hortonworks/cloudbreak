@@ -44,7 +44,7 @@ type ProxyV4Response struct {
 	Name *string `json:"name"`
 
 	// Password to use for basic authentication
-	Password *SecretV4Response `json:"password,omitempty"`
+	Password *SecretResponse `json:"password,omitempty"`
 
 	// port of proxy server (typically: 3128 or 8080)
 	// Required: true
@@ -58,7 +58,7 @@ type ProxyV4Response struct {
 	Protocol *string `json:"protocol"`
 
 	// Username to use for basic authentication
-	UserName *SecretV4Response `json:"userName,omitempty"`
+	UserName *SecretResponse `json:"userName,omitempty"`
 
 	// workspace of the resource
 	Workspace *WorkspaceResourceV4Response `json:"workspace,omitempty"`

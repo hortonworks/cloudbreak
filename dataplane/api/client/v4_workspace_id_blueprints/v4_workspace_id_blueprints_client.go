@@ -55,36 +55,6 @@ func (a *Client) CreateBlueprintInWorkspace(params *CreateBlueprintInWorkspacePa
 }
 
 /*
-CreateRecommendationForWorkspace creates a recommendation that advises cloud resources for the given blueprint
-
-Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
-*/
-func (a *Client) CreateRecommendationForWorkspace(params *CreateRecommendationForWorkspaceParams) (*CreateRecommendationForWorkspaceOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewCreateRecommendationForWorkspaceParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "createRecommendationForWorkspace",
-		Method:             "GET",
-		PathPattern:        "/v4/{workspaceId}/blueprints/recommendation",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &CreateRecommendationForWorkspaceReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*CreateRecommendationForWorkspaceOK), nil
-
-}
-
-/*
 DeleteBlueprintInWorkspace deletes blueprint by name in workspace
 
 Cluster definitions are a declarative definition of a Hadoop cluster. With a blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.

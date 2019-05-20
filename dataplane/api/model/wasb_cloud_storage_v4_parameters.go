@@ -26,7 +26,7 @@ type WasbCloudStorageV4Parameters struct {
 	AccountName *string `json:"accountName"`
 
 	// secure
-	Secure *bool `json:"secure,omitempty"`
+	Secure bool `json:"secure,omitempty"`
 }
 
 // Validate validates this wasb cloud storage v4 parameters

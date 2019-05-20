@@ -20,7 +20,7 @@ import (
 type StackRepositoryV4Response struct {
 
 	// enable gpl repository
-	EnableGplRepo *bool `json:"enableGplRepo,omitempty"`
+	EnableGplRepo bool `json:"enableGplRepo,omitempty"`
 
 	// url the MPACK that needs to be installed before HDF installation
 	// Pattern: ^http[s]?://.*
@@ -51,7 +51,7 @@ type StackRepositoryV4Response struct {
 	UtilsRepoID string `json:"utilsRepoId,omitempty"`
 
 	// whether to verify or not the repo url
-	Verify *bool `json:"verify,omitempty"`
+	Verify bool `json:"verify,omitempty"`
 
 	// version of the stack
 	// Pattern: (^[0-9]+\.[0-9]+$)

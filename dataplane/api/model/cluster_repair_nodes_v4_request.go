@@ -16,7 +16,7 @@ import (
 type ClusterRepairNodesV4Request struct {
 
 	// If true, delete volumes, otherwise reattaches them to a newly created node instance.
-	DeleteVolumes *bool `json:"deleteVolumes,omitempty"`
+	DeleteVolumes bool `json:"deleteVolumes,omitempty"`
 
 	// Node ID list of nodes that need replacement.
 	Ids []string `json:"ids"`

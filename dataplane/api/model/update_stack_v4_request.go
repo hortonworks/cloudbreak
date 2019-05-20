@@ -27,7 +27,7 @@ type UpdateStackV4Request struct {
 	Status string `json:"status,omitempty"`
 
 	// on stack update, update cluster too
-	WithClusterEvent *bool `json:"withClusterEvent,omitempty"`
+	WithClusterEvent bool `json:"withClusterEvent,omitempty"`
 }
 
 // Validate validates this update stack v4 request

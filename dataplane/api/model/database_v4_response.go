@@ -26,14 +26,14 @@ type DatabaseV4Response struct {
 	ConnectionDriver *string `json:"connectionDriver"`
 
 	// Password to use for the jdbc connection
-	ConnectionPassword *SecretV4Response `json:"connectionPassword,omitempty"`
+	ConnectionPassword *SecretResponse `json:"connectionPassword,omitempty"`
 
 	// JDBC connection URL in the form of jdbc:<db-type>://<address>:<port>/<db>
 	// Required: true
 	ConnectionURL *string `json:"connectionURL"`
 
 	// Username to use for the jdbc connection
-	ConnectionUserName *SecretV4Response `json:"connectionUserName,omitempty"`
+	ConnectionUserName *SecretResponse `json:"connectionUserName,omitempty"`
 
 	// URL that points to the jar of the connection driver(connector)
 	ConnectorJarURL string `json:"connectorJarUrl,omitempty"`

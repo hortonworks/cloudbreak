@@ -22,10 +22,10 @@ type EnvironmentNetworkAzureV4Params struct {
 	NetworkID *string `json:"networkId"`
 
 	// Subnet ids of the specified networks
-	NoFirewallRules *bool `json:"noFirewallRules,omitempty"`
+	NoFirewallRules bool `json:"noFirewallRules,omitempty"`
 
 	// Subnet ids of the specified networks
-	NoPublicIP *bool `json:"noPublicIp,omitempty"`
+	NoPublicIP bool `json:"noPublicIp,omitempty"`
 
 	// Subnet ids of the specified networks
 	// Required: true

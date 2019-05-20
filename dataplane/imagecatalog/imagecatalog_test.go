@@ -20,7 +20,7 @@ func (*mockListImageCatalogsByWorkspaceClient) ListImageCatalogsByWorkspace(para
 		{
 			Name:          &(&types.S{S: "test"}).S,
 			Description:   &(&types.S{S: "description"}).S,
-			UsedAsDefault: (&types.B{B: true}).B,
+			UsedAsDefault: &(&types.B{B: true}).B,
 			URL:           &(&types.S{S: "testurl"}).S,
 		},
 	}

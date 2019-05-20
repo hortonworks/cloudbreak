@@ -28,19 +28,19 @@ type ClusterDetails struct {
 	DatabaseType string `json:"databaseType,omitempty"`
 
 	// default file system
-	DefaultFileSystem *bool `json:"defaultFileSystem,omitempty"`
+	DefaultFileSystem bool `json:"defaultFileSystem,omitempty"`
 
 	// description
 	Description string `json:"description,omitempty"`
 
 	// external database
-	ExternalDatabase *bool `json:"externalDatabase,omitempty"`
+	ExternalDatabase bool `json:"externalDatabase,omitempty"`
 
 	// file system type
 	FileSystemType string `json:"fileSystemType,omitempty"`
 
 	// gateway enabled
-	GatewayEnabled *bool `json:"gatewayEnabled,omitempty"`
+	GatewayEnabled bool `json:"gatewayEnabled,omitempty"`
 
 	// gateway type
 	GatewayType string `json:"gatewayType,omitempty"`

@@ -25,7 +25,7 @@ type ManagementPackDetailsV4Response struct {
 	Name *string `json:"name"`
 
 	// Denotes that the image is prewarmed or base image.
-	PreInstalled *bool `json:"preInstalled,omitempty"`
+	PreInstalled bool `json:"preInstalled,omitempty"`
 }
 
 // Validate validates this management pack details v4 response

@@ -21,7 +21,7 @@ type SecurityRuleV4Response struct {
 	ID int64 `json:"id,omitempty"`
 
 	// flag for making the rule modifiable
-	Modifiable *bool `json:"modifiable,omitempty"`
+	Modifiable bool `json:"modifiable,omitempty"`
 
 	// list of accessible ports
 	// Required: true

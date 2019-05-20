@@ -47,14 +47,14 @@ type FreeIPAKerberosDescriptor struct {
 
 	// kerberos configuration name
 	// Required: true
-	TCPAllowed bool `json:"tcpAllowed"`
+	TCPAllowed *bool `json:"tcpAllowed"`
 
 	// kerberos KDC server URL
 	// Required: true
 	URL *string `json:"url"`
 
 	// Allows to select either a trusting SSL connection or a validating (non-trusting) SSL connection to KDC
-	VerifyKdcTrust *bool `json:"verifyKdcTrust,omitempty"`
+	VerifyKdcTrust bool `json:"verifyKdcTrust,omitempty"`
 }
 
 // Validate validates this free IP a kerberos descriptor
@@ -154,7 +154,7 @@ func (m *FreeIPAKerberosDescriptor) validateRealm(formats strfmt.Registry) error
 
 func (m *FreeIPAKerberosDescriptor) validateTCPAllowed(formats strfmt.Registry) error {
 
-	if err := validate.Required("tcpAllowed", "body", bool(m.TCPAllowed)); err != nil {
+	if err := validate.Required("tcpAllowed", "body", m.TCPAllowed); err != nil {
 		return err
 	}
 

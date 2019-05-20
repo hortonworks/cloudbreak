@@ -42,7 +42,7 @@ type ImageCatalogV4Response struct {
 
 	// true if image catalog is the default one
 	// Required: true
-	UsedAsDefault bool `json:"usedAsDefault"`
+	UsedAsDefault *bool `json:"usedAsDefault"`
 
 	// workspace of the resource
 	Workspace *WorkspaceResourceV4Response `json:"workspace,omitempty"`
@@ -162,7 +162,7 @@ func (m *ImageCatalogV4Response) validateURL(formats strfmt.Registry) error {
 
 func (m *ImageCatalogV4Response) validateUsedAsDefault(formats strfmt.Registry) error {
 
-	if err := validate.Required("usedAsDefault", "body", bool(m.UsedAsDefault)); err != nil {
+	if err := validate.Required("usedAsDefault", "body", m.UsedAsDefault); err != nil {
 		return err
 	}
 

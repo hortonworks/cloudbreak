@@ -23,10 +23,10 @@ type LdapV4Response struct {
 	AdminGroup string `json:"adminGroup,omitempty"`
 
 	// bind distinguished name for connection test and group search (e.g. cn=admin,dc=example,dc=org)
-	BindDn *SecretV4Response `json:"bindDn,omitempty"`
+	BindDn *SecretResponse `json:"bindDn,omitempty"`
 
 	// password for the provided bind DN
-	BindPassword *SecretV4Response `json:"bindPassword,omitempty"`
+	BindPassword *SecretResponse `json:"bindPassword,omitempty"`
 
 	// Self-signed certificate of LDAPS server
 	Certificate string `json:"certificate,omitempty"`

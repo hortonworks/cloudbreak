@@ -55,14 +55,14 @@ type ActiveDirectoryKerberosDescriptor struct {
 
 	// kerberos configuration name
 	// Required: true
-	TCPAllowed bool `json:"tcpAllowed"`
+	TCPAllowed *bool `json:"tcpAllowed"`
 
 	// kerberos KDC server URL
 	// Required: true
 	URL *string `json:"url"`
 
 	// Allows to select either a trusting SSL connection or a validating (non-trusting) SSL connection to KDC
-	VerifyKdcTrust *bool `json:"verifyKdcTrust,omitempty"`
+	VerifyKdcTrust bool `json:"verifyKdcTrust,omitempty"`
 }
 
 // Validate validates this active directory kerberos descriptor
@@ -188,7 +188,7 @@ func (m *ActiveDirectoryKerberosDescriptor) validateRealm(formats strfmt.Registr
 
 func (m *ActiveDirectoryKerberosDescriptor) validateTCPAllowed(formats strfmt.Registry) error {
 
-	if err := validate.Required("tcpAllowed", "body", bool(m.TCPAllowed)); err != nil {
+	if err := validate.Required("tcpAllowed", "body", m.TCPAllowed); err != nil {
 		return err
 	}
 

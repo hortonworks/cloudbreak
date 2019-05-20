@@ -26,11 +26,17 @@ type BlueprintV4Request struct {
 	Description *string `json:"description,omitempty"`
 
 	// name of the resource
-	// Required: true
 	// Max Length: 100
 	// Min Length: 1
 	// Pattern: ^[^;\/%]*$
-	Name *string `json:"name"`
+	Name string `json:"name,omitempty"`
+
+	// platform
+	Platform string `json:"platform,omitempty"`
+
+	// services
+	// Unique: true
+	Services []string `json:"services"`
 
 	// user defined tags for blueprint
 	Tags map[string]interface{} `json:"tags,omitempty"`
@@ -48,6 +54,10 @@ func (m *BlueprintV4Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateName(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateServices(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -76,19 +86,32 @@ func (m *BlueprintV4Request) validateDescription(formats strfmt.Registry) error 
 
 func (m *BlueprintV4Request) validateName(formats strfmt.Registry) error {
 
-	if err := validate.Required("name", "body", m.Name); err != nil {
+	if swag.IsZero(m.Name) { // not required
+		return nil
+	}
+
+	if err := validate.MinLength("name", "body", string(m.Name), 1); err != nil {
 		return err
 	}
 
-	if err := validate.MinLength("name", "body", string(*m.Name), 1); err != nil {
+	if err := validate.MaxLength("name", "body", string(m.Name), 100); err != nil {
 		return err
 	}
 
-	if err := validate.MaxLength("name", "body", string(*m.Name), 100); err != nil {
+	if err := validate.Pattern("name", "body", string(m.Name), `^[^;\/%]*$`); err != nil {
 		return err
 	}
 
-	if err := validate.Pattern("name", "body", string(*m.Name), `^[^;\/%]*$`); err != nil {
+	return nil
+}
+
+func (m *BlueprintV4Request) validateServices(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Services) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("services", "body", m.Services); err != nil {
 		return err
 	}
 

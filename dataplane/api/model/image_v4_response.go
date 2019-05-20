@@ -20,7 +20,7 @@ type ImageV4Response struct {
 	Date string `json:"date,omitempty"`
 
 	// default image
-	DefaultImage *bool `json:"defaultImage,omitempty"`
+	DefaultImage bool `json:"defaultImage,omitempty"`
 
 	// description
 	Description string `json:"description,omitempty"`

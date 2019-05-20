@@ -127,8 +127,10 @@ func getDefaultSecurityRules(node Node) []*model.SecurityRuleV4Request {
 func CreateBaseCredentialRequest(stringFinder func(string) string) *model.CredentialV4Request {
 	name := stringFinder(fl.FlName.Name)
 	return &model.CredentialV4Request{
-		Name:          &name,
-		Description:   &(&types.S{S: stringFinder(fl.FlDescriptionOptional.Name)}).S,
-		CloudPlatform: GetProvider().GetName(),
+		CredentialV4Base: model.CredentialV4Base{
+			Name:          &name,
+			Description:   &(&types.S{S: stringFinder(fl.FlDescriptionOptional.Name)}).S,
+			CloudPlatform: GetProvider().GetName(),
+		},
 	}
 }

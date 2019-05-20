@@ -28,7 +28,7 @@ type DeploymentPreferencesV4Response struct {
 	PlatformEnablement map[string]bool `json:"platformEnablement,omitempty"`
 
 	// platform selection disabled
-	PlatformSelectionDisabled *bool `json:"platformSelectionDisabled,omitempty"`
+	PlatformSelectionDisabled bool `json:"platformSelectionDisabled,omitempty"`
 
 	// supported external databases
 	// Unique: true

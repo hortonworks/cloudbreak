@@ -321,7 +321,7 @@ func GetAwsCredentialPrerequisites(c *cli.Context) {
 	output.Write(AwsPrerequisiteOutputHeader, convertAwsPrerequisitesToJSON(prerequisites))
 }
 
-func convertAwsPrerequisitesToJSON(prerequisites *model.CredentialPrerequisitesV4Response) *awsPrerequisiteOutput {
+func convertAwsPrerequisitesToJSON(prerequisites *model.CredentialPrerequisitesResponse) *awsPrerequisiteOutput {
 	policyJsonEncoded := utils.SafeStringConvert(prerequisites.Aws.PolicyJSON)
 	policyJson, err := base64.StdEncoding.DecodeString(policyJsonEncoded)
 	if err != nil {

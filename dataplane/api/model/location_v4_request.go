@@ -18,7 +18,7 @@ import (
 type LocationV4Request struct {
 
 	// empty
-	Empty *bool `json:"empty,omitempty"`
+	Empty bool `json:"empty,omitempty"`
 
 	// Location latitude of the environment.
 	Latitude float64 `json:"latitude,omitempty"`

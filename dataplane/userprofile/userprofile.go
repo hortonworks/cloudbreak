@@ -1,6 +1,7 @@
 package userprofile
 
 import (
+	"github.com/hortonworks/cb-cli/dataplane/types"
 	"strconv"
 
 	log "github.com/Sirupsen/logrus"
@@ -43,7 +44,7 @@ func GetShowTerminatedClustersPreferences(c *cli.Context) {
 
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	output.Write(showClustersPreferencesHeader, &showClustersPreferencesOut{
-		*resp.Payload.Active,
+		resp.Payload.Active,
 		resp.Payload.Source,
 		*resp.Payload.Timeout.Days,
 		*resp.Payload.Timeout.Hours,
@@ -56,7 +57,7 @@ func ActivateShowTerminatedClusters(c *cli.Context) {
 
 	timeout := getTimeoutRequestFromCommandLine(c)
 	showClustersRequest := &model.ShowTerminatedClustersPreferencesV4Request{
-		Active:  true,
+		Active:  &(&types.B{B: true}).B,
 		Timeout: timeout,
 	}
 
@@ -71,7 +72,7 @@ func DectivateShowTerminatedClusters(c *cli.Context) {
 	log.Infof("[DectivateShowTerminatedClusters] Turn off show terminated clusters for a user")
 
 	showClustersRequest := &model.ShowTerminatedClustersPreferencesV4Request{
-		Active:  false,
+		Active:  &(&types.B{B: false}).B,
 		Timeout: nil,
 	}
 

@@ -26,7 +26,7 @@ type CloudStorageV4Request struct {
 	AdlsGen2 *AdlsGen2CloudStorageV4Parameters `json:"adlsGen2,omitempty"`
 
 	// true if fs.defaultFS should point to this filesystem
-	DefaultFs *bool `json:"defaultFs,omitempty"`
+	DefaultFs bool `json:"defaultFs,omitempty"`
 
 	// gcs
 	Gcs *GcsCloudStorageV4Parameters `json:"gcs,omitempty"`

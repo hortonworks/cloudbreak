@@ -268,7 +268,7 @@ func RepairStackNodes(c *cli.Context) {
 	var request model.ClusterRepairV4Request
 	deleteVolumes := c.Bool(fl.FlDeleteVolumes.Name)
 	nodes := strings.Split(c.String(fl.FlNodes.Name), ",")
-	request.Nodes = &model.ClusterRepairNodesV4Request{DeleteVolumes: &deleteVolumes, Ids: nodes}
+	request.Nodes = &model.ClusterRepairNodesV4Request{DeleteVolumes: deleteVolumes, Ids: nodes}
 
 	log.Infof("[RepairStackNodes] repairing stack nodes, deleteVolumes: %t, ids: %s", deleteVolumes, nodes)
 
@@ -278,7 +278,7 @@ func RepairStackNodes(c *cli.Context) {
 func repairStackCommon(c *cli.Context, request model.ClusterRepairV4Request) {
 	cbClient := CloudbreakStack(*oauth.NewCloudbreakHTTPClientFromContext(c))
 	removeOnly := c.Bool(fl.FlRemoveOnly.Name)
-	request.RemoveOnly = &removeOnly
+	request.RemoveOnly = removeOnly
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	name := c.String(fl.FlName.Name)
 	log.Infof("[RepairStack] repairing stack, id: %s, removeOnly: %t, workspaceId: %d", name, removeOnly, workspaceID)

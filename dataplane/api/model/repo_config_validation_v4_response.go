@@ -16,22 +16,22 @@ import (
 type RepoConfigValidationV4Response struct {
 
 	// Indicates the request's value with the same key is valid and reachable by Cloudbreak or not
-	AmbariBaseURL *bool `json:"ambariBaseUrl,omitempty"`
+	AmbariBaseURL bool `json:"ambariBaseUrl,omitempty"`
 
 	// Indicates the request's value with the same key is valid and reachable by Cloudbreak or not
-	AmbariGpgKeyURL *bool `json:"ambariGpgKeyUrl,omitempty"`
+	AmbariGpgKeyURL bool `json:"ambariGpgKeyUrl,omitempty"`
 
 	// Indicates the request's value with the same key is valid and reachable by Cloudbreak or not
-	MpackURL *bool `json:"mpackUrl,omitempty"`
+	MpackURL bool `json:"mpackUrl,omitempty"`
 
 	// Indicates the request's value with the same key is valid and reachable by Cloudbreak or not
-	StackBaseURL *bool `json:"stackBaseURL,omitempty"`
+	StackBaseURL bool `json:"stackBaseURL,omitempty"`
 
 	// Indicates the request's value with the same key is valid and reachable by Cloudbreak or not
-	UtilsBaseURL *bool `json:"utilsBaseURL,omitempty"`
+	UtilsBaseURL bool `json:"utilsBaseURL,omitempty"`
 
 	// Indicates the request's value with the same key is valid and reachable by Cloudbreak or not
-	VersionDefinitionFileURL *bool `json:"versionDefinitionFileUrl,omitempty"`
+	VersionDefinitionFileURL bool `json:"versionDefinitionFileUrl,omitempty"`
 }
 
 // Validate validates this repo config validation v4 response

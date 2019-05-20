@@ -57,7 +57,7 @@ type ClusterV4Request struct {
 	// ambari password
 	// Required: true
 	// Max Length: 100
-	// Min Length: 5
+	// Min Length: 8
 	Password *string `json:"password"`
 
 	// proxy configuration name for the cluster
@@ -71,7 +71,7 @@ type ClusterV4Request struct {
 	UserName *string `json:"userName"`
 
 	// blueprint validation
-	ValidateBlueprint *bool `json:"validateBlueprint,omitempty"`
+	ValidateBlueprint bool `json:"validateBlueprint,omitempty"`
 }
 
 // Validate validates this cluster v4 request
@@ -272,7 +272,7 @@ func (m *ClusterV4Request) validatePassword(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.MinLength("password", "body", string(*m.Password), 5); err != nil {
+	if err := validate.MinLength("password", "body", string(*m.Password), 8); err != nil {
 		return err
 	}
 

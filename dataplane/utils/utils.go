@@ -21,7 +21,7 @@ func CheckClientVersion(client utilClient, version string) {
 	}
 	valid := resp.Payload.VersionCheckOk
 	message := resp.Payload.Message
-	if valid == nil || !*valid {
+	if !valid {
 		commonutils.LogErrorAndExit(errors.New(message))
 	}
 }

@@ -47,7 +47,7 @@ func NewGetPrerequisitesForCloudPlatformOK() *GetPrerequisitesForCloudPlatformOK
 successful operation
 */
 type GetPrerequisitesForCloudPlatformOK struct {
-	Payload *model.CredentialPrerequisitesV4Response
+	Payload *model.CredentialPrerequisitesResponse
 }
 
 func (o *GetPrerequisitesForCloudPlatformOK) Error() string {
@@ -56,7 +56,7 @@ func (o *GetPrerequisitesForCloudPlatformOK) Error() string {
 
 func (o *GetPrerequisitesForCloudPlatformOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(model.CredentialPrerequisitesV4Response)
+	o.Payload = new(model.CredentialPrerequisitesResponse)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

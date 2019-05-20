@@ -16,7 +16,7 @@ import (
 type AzureStackV4Parameters struct {
 
 	// encrypt storage
-	EncryptStorage *bool `json:"encryptStorage,omitempty"`
+	EncryptStorage bool `json:"encryptStorage,omitempty"`
 
 	// resource group name
 	ResourceGroupName string `json:"resourceGroupName,omitempty"`

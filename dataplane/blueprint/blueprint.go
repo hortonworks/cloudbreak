@@ -85,7 +85,7 @@ func createBlueprintImpl(client blueprintClient, name string, description string
 	defer utils.TimeTrack(time.Now(), "create clusger definition")
 	tags := map[string]interface{}{"shared_services_ready": dl}
 	bpRequest := &model.BlueprintV4Request{
-		Name:        &name,
+		Name:        name,
 		Description: &description,
 		Blueprint:   base64.StdEncoding.EncodeToString(blueprint),
 		Tags:        tags,
