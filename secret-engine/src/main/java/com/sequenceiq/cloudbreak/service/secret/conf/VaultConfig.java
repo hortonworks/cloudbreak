@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.conf;
+package com.sequenceiq.cloudbreak.service.secret.conf;
 
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
@@ -45,7 +45,6 @@ import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Configuration
@@ -107,7 +106,7 @@ public class VaultConfig extends AbstractVaultConfiguration {
                         .build();
                 return new KubernetesAuthentication(k8sOptions, restOperations());
             } catch (IOException e) {
-                throw new CloudbreakServiceException("Failed to read the Kubernetes service account token", e);
+                throw new RuntimeException("Failed to read the Kubernetes service account token", e);
             }
         } else {
             LOGGER.info("Token based Vault auth is configured");
@@ -120,7 +119,7 @@ public class VaultConfig extends AbstractVaultConfiguration {
         try {
             return new ClientFactoryWrapper(new HttpComponents().usingHttpComponents(clientOptions(), sslConfiguration()));
         } catch (Exception e) {
-            throw new CloudbreakServiceException("Failed to create client factory for Vault connection", e);
+            throw new RuntimeException("Failed to create client factory for Vault connection", e);
         }
     }
 

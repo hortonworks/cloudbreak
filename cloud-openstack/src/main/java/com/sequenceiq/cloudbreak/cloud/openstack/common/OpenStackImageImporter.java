@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.common.service.url.UrlAccessValidationService;
+import com.sequenceiq.cloudbreak.auth.service.url.UrlAccessValidationService;
 
 /**
  * Import image doc: http://www.openstack4j.com/learn/image-v2

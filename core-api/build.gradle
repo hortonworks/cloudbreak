@@ -15,7 +15,6 @@ dependencies {
   compile project(':auth-connector')
   compile project(':cloud-api')
   compile project(':common')
-  compile project(':secret-engine')
   compile project(':structuredevent-model')
 
   compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion

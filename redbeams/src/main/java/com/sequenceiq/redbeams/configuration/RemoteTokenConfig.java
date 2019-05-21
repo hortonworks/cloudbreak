@@ -10,7 +10,7 @@ import org.springframework.security.oauth2.provider.token.ResourceServerTokenSer
 
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.uaa.IdentityClient;
-import com.sequenceiq.cloudbreak.common.service.token.CachedRemoteTokenService;
+import com.sequenceiq.cloudbreak.auth.service.CachedRemoteTokenService;
 
 @Configuration
 public class RemoteTokenConfig {

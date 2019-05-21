@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.common.service.url;
+package com.sequenceiq.cloudbreak.auth.service.url;
 
 import javax.annotation.PostConstruct;
 import javax.ws.rs.ProcessingException;

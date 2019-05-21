@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.common.service.token;
+package com.sequenceiq.cloudbreak.auth.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;

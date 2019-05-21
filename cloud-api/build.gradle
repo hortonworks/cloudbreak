@@ -15,8 +15,8 @@ jar {
 }
 
 dependencies {
-  compile project(':cloud-common')
-//    compile project(':core-api')
+
+  compile project(":common")
 
   compile group: 'io.swagger', name: 'swagger-annotations', version: swaggerVersion
 

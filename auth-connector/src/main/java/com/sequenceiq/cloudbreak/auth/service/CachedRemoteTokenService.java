@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.common.service.token;
+package com.sequenceiq.cloudbreak.auth.service;
 
 import java.util.Arrays;
 import java.util.HashMap;

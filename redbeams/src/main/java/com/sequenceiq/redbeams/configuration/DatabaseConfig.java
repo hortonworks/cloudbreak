@@ -26,8 +26,8 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import com.sequenceiq.cloudbreak.util.DatabaseUtil;
 import com.sequenceiq.redbeams.service.ha.RedbeamsNodeConfig;
-import com.sequenceiq.redbeams.util.DatabaseUtil;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 

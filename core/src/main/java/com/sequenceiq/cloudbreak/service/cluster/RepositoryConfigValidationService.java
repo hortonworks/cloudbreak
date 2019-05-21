@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.RepoConfigValidationV4Response;
-import com.sequenceiq.cloudbreak.common.service.url.UrlAccessValidationService;
+import com.sequenceiq.cloudbreak.auth.service.url.UrlAccessValidationService;
 
 @Service
 public class RepositoryConfigValidationService {

@@ -16,10 +16,10 @@ import org.springframework.security.core.Authentication;
 
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.Clustered;
+import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TenantBasedPermissionEvaluatorTest {
@@ -28,7 +28,7 @@ public class TenantBasedPermissionEvaluatorTest {
     private TenantBasedPermissionEvaluator underTest;
 
     @Mock
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private AutoscaleRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Mock
     private AuthenticatedUserService authenticatedUserService;

@@ -149,6 +149,7 @@ dependencies {
     compile project(':autoscale-api')
     compile project(':common')
     compile project(':workspace-authorization')
+    compile project(':secret-engine')
 }
 
 task buildInfo(type: BuildInfoTask, dependsOn: processResources) {

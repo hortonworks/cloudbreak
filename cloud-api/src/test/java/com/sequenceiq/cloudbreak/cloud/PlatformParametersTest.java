@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
-import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 
 public class PlatformParametersTest {
 
@@ -74,7 +73,7 @@ public class PlatformParametersTest {
 
         @Override
         public PlatformOrchestrator orchestratorParams() {
-            return new PlatformOrchestrator(Collections.singletonList(orchestrator(OrchestratorConstants.SALT)), orchestrator(OrchestratorConstants.SALT));
+            return new PlatformOrchestrator(Collections.singletonList(orchestrator("SALT")), orchestrator("SALT"));
         }
 
         @Override
