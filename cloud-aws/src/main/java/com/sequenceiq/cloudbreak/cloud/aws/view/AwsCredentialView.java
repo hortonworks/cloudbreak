@@ -19,10 +19,6 @@ public class AwsCredentialView {
     }
 
     public String getRoleArn() {
-        String roleArn = cloudCredential.getStringParameter("roleArn");
-        if (roleArn != null) {
-            return roleArn;
-        }
         Map<String, String> roleBased = getRoleBased();
         if (roleBased == null) {
             return null;
@@ -31,10 +27,6 @@ public class AwsCredentialView {
     }
 
     public String getExternalId() {
-        String externalId = cloudCredential.getStringParameter("externalId");
-        if (externalId != null) {
-            return externalId;
-        }
         Map<String, String> roleBased = getRoleBased();
         if (roleBased == null) {
             return null;
@@ -53,10 +45,6 @@ public class AwsCredentialView {
     }
 
     public String getAccessKey() {
-        String accessKey = cloudCredential.getStringParameter("accessKey");
-        if (accessKey != null) {
-            return accessKey;
-        }
         Map<String, String> keyBased = getKeyBased();
         if (keyBased == null) {
             return null;
@@ -65,31 +53,15 @@ public class AwsCredentialView {
     }
 
     public String getSecretKey() {
-        String secretKey = cloudCredential.getStringParameter("secretKey");
-        if (secretKey != null) {
-            return secretKey;
-        }
-        Map<String, String> keyBased = getKeyBased();
-        if (keyBased == null) {
-            return null;
-        }
-        return keyBased.get("secretKey");
+        return getKeyBased().get("secretKey");
     }
 
     public Map<String, String> getKeyBased() {
-        Map aws = cloudCredential.getParameter("aws", Map.class);
-        if (aws == null) {
-            return null;
-        }
-        return (Map<String, String>) aws.get("keyBased");
+        return (Map<String, String>) cloudCredential.getParameter("aws", Map.class).get("keyBased");
     }
 
     public Map<String, String> getRoleBased() {
-        Map aws = cloudCredential.getParameter("aws", Map.class);
-        if (aws == null) {
-            return null;
-        }
-        return (Map<String, String>) aws.get("roleBased");
+        return (Map<String, String>) cloudCredential.getParameter("aws", Map.class).get("roleBased");
     }
 
     public Long getId() {
