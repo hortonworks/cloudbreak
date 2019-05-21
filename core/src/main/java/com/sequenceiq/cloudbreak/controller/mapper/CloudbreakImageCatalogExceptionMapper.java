@@ -11,7 +11,7 @@ public class CloudbreakImageCatalogExceptionMapper extends SendNotificationExcep
 
     @Override
     Status getResponseStatus() {
-        return Status.FORBIDDEN;
+        return Status.NOT_FOUND;
     }
 
     @Override

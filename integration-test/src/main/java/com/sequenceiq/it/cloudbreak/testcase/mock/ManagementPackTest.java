@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.NotFoundException;
 
 import org.testng.annotations.Test;
 
@@ -95,7 +95,7 @@ public class ManagementPackTest extends AbstractIntegrationTest {
         testContext
                 .given(MPackTestDto.class)
                 .when(mpackTestClient.deleteV4(), RunningParameter.key(generatedKey))
-                .expect(ForbiddenException.class, RunningParameter.key(generatedKey))
+                .expect(NotFoundException.class, RunningParameter.key(generatedKey))
                 .validate();
     }
 

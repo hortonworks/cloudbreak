@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.NotFoundException;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -69,7 +69,7 @@ public class SecurityGroupsTest extends AbstractIntegrationTest {
                         "The credentialId or the credentialName must be specified in the request",
                         TestCaseDescription.TestCaseDescriptionBuilder.createWithGiven("platform security groups").when("credenetial name is null")
                                 .then("credential validator error")},
-                {getBean(MockedTestContext.class), "andNowForSomethingCompletelyDifferent", "forbidden", ForbiddenException.class,
+                {getBean(MockedTestContext.class), "andNowForSomethingCompletelyDifferent", "notfound", NotFoundException.class,
                         "No credential found with name 'andNowForSomethingCompletelyDifferent'",
                         TestCaseDescription.TestCaseDescriptionBuilder.createWithGiven("platform security groups").when("credenetial name is null")
                                 .then("credential not found error")}

@@ -1,7 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import javax.inject.Inject;
-import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +72,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .when(stackTestClient.getV4(), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
-                .expect(ForbiddenException.class, RunningParameter.key(FORBIDDEN_KEY))
+                .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
                 .validate();
     }
 
@@ -81,7 +81,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
         testContext
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.getV4(), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
-                .expect(ForbiddenException.class, RunningParameter.key(FORBIDDEN_KEY))
+                .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
                 .validate();
     }
 
@@ -92,7 +92,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .withBlueprint(BLUEPRINT_TEXT)
                 .when(blueprintTestClient.createV4())
                 .when(blueprintTestClient.getV4(), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
-                .expect(ForbiddenException.class, RunningParameter.key(FORBIDDEN_KEY))
+                .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
                 .validate();
     }
 
@@ -102,7 +102,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .given(RecipeTestDto.class)
                 .when(recipeTestClient.createV4())
                 .when(recipeTestClient.getV4(), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
-                .expect(ForbiddenException.class, RunningParameter.key(FORBIDDEN_KEY))
+                .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
                 .validate();
     }
 
@@ -112,7 +112,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .given(LdapTestDto.class)
                 .when(ldapTestClient.createV4())
                 .when(ldapTestClient.getV4(), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
-                .expect(ForbiddenException.class, RunningParameter.key(FORBIDDEN_KEY))
+                .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
                 .validate();
     }
 
@@ -123,7 +123,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .when(imageCatalogTestClient.createV4())
                 .when(imageCatalogTestClient.getImagesByNameV4(), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN)
                         .withLogError(false))
-                .expect(ForbiddenException.class, RunningParameter.key(FORBIDDEN_KEY))
+                .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
                 .validate();
     }
 
@@ -134,7 +134,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .when(imageCatalogTestClient.createV4())
                 .when(imageCatalogTestClient.getV4(Boolean.FALSE), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN)
                         .withLogError(false))
-                .expect(ForbiddenException.class, RunningParameter.key(FORBIDDEN_KEY))
+                .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
                 .validate();
     }
 
@@ -144,7 +144,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .given(ProxyTestDto.class)
                 .when(proxyTestClient.createV4())
                 .when(proxyTestClient.getV4(), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
-                .expect(ForbiddenException.class, RunningParameter.key(FORBIDDEN_KEY))
+                .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
                 .validate();
     }
 
@@ -154,7 +154,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .given(KerberosTestDto.class)
                 .when(kerberosTestClient.createV4())
                 .when(kerberosTestClient.getV4(), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
-                .expect(ForbiddenException.class, RunningParameter.key(FORBIDDEN_KEY))
+                .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
                 .validate();
     }
 

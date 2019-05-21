@@ -4,7 +4,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.NotFoundException;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -89,11 +89,11 @@ public class EncryptionKeysTest extends AbstractIntegrationTest {
                 {
                         getBean(MockedTestContext.class),
                         "andNowForSomethingCompletelyDifferent",
-                        ForbiddenException.class,
+                        NotFoundException.class,
                         new TestCaseDescription.TestCaseDescriptionBuilder()
                                 .given("there is a running cloudbreak")
                                 .when("calling get encryption keys endpoint with a non-existent credential name")
-                                .then("a ForbiddenException should be returned")
+                                .then("a NotFoundException should be returned")
                 }
         };
     }

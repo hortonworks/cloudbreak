@@ -6,6 +6,8 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COM
 
 import java.util.Optional;
 
+import javax.ws.rs.NotFoundException;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,7 +76,8 @@ public class WaitUtil {
                     currStatus = statusResult.get();
                 }
                 currentStatus = currStatus;
-            } catch (RuntimeException ForbiddenException) {
+            } catch (NotFoundException notFoundException) {
+                LOGGER.info("Stack not found: {}", stackName);
                 currentStatus = DELETE_COMPLETED;
                 break;
             }
