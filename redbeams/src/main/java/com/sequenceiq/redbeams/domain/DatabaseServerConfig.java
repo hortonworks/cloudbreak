@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 
 @Entity
 @Where(clause = "archived = false")
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name", "deletionTimestamp", "environmentId"}))
 public class DatabaseServerConfig implements ProvisionEntity, ArchivableResource {
 
     @Id
