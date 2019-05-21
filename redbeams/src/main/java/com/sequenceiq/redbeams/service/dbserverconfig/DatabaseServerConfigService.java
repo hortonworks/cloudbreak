@@ -9,9 +9,11 @@ import javax.inject.Inject;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
@@ -40,18 +42,14 @@ public class DatabaseServerConfigService {
             // prepareCreation(resource);
             resource.setWorkspaceId(workspaceId);
             return repository.save(resource);
-        } catch (AccessDeniedException e) {
-            ConstraintViolationException cve = null;
-            for (Throwable t = e.getCause(); t != null; t = t.getCause()) {
-                if (t instanceof ConstraintViolationException) {
-                    cve = (ConstraintViolationException) t;
-                    break;
-                }
-            }
-            if (cve != null) {
+        } catch (AccessDeniedException | DataIntegrityViolationException e) {
+            Optional<Throwable> cve = Throwables.getCausalChain(e).stream()
+                .filter(c -> c instanceof ConstraintViolationException)
+                .findFirst();
+            if (cve.isPresent()) {
                 String message = String.format("%s already exists with name '%s' in workspace %d",
                         resource().getShortName(), resource.getName(), resource.getWorkspaceId());
-                throw new BadRequestException(message, e);
+                throw new BadRequestException(message, cve.get());
             }
             throw e;
         }
