@@ -4,7 +4,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.NotFoundException;
 
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -86,11 +86,11 @@ public class IpPoolsTest extends AbstractIntegrationTest {
                 {
                         getBean(MockedTestContext.class),
                         "andNowForSomethingCompletelyDifferent",
-                        ForbiddenException.class,
+                        NotFoundException.class,
                         new TestCaseDescription.TestCaseDescriptionBuilder()
                                 .given("created a MOCK credential")
                                 .when("calling ip pools endpoint with a credential which is not in the same account")
-                                .then("getting a ForbiddenException")
+                                .then("getting a NotFoundException")
                 }
         };
     }

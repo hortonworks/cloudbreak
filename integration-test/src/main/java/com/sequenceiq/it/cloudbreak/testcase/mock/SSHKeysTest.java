@@ -4,7 +4,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.NotFoundException;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -76,9 +76,9 @@ public class SSHKeysTest extends AbstractIntegrationTest {
                                 .when("credential name is null")
                                 .then("get bad request ecxeption")},
                 {getBean(MockedTestContext.class), "andNowForSomethingCompletelyDifferent", "forbidden",
-                        ForbiddenException.class, TestCaseDescription.TestCaseDescriptionBuilder.createWithGiven("platform ssh keys")
+                        NotFoundException.class, TestCaseDescription.TestCaseDescriptionBuilder.createWithGiven("platform ssh keys")
                         .when("credential name is not exists")
-                        .then("get forbidden ecxeption")}
+                        .then("get NotFoundException ecxeption")}
         };
     }
 }

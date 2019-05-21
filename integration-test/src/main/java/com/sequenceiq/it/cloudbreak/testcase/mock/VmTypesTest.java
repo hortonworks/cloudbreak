@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.NotFoundException;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -88,11 +88,11 @@ public class VmTypesTest extends AbstractIntegrationTest {
                 {
                         getBean(MockedTestContext.class),
                         "andNowForSomethingCompletelyDifferent",
-                        ForbiddenException.class,
+                        NotFoundException.class,
                         new TestCaseDescription.TestCaseDescriptionBuilder()
                                 .given("a region")
                                 .when("credential name is null")
-                                .then("throw bad request exception")}
+                                .then("throw NotFoundException")}
         };
     }
 

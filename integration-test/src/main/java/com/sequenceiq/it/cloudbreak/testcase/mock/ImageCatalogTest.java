@@ -4,7 +4,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.NotFoundException;
 
 import org.testng.annotations.Test;
 
@@ -220,7 +220,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .when(imageCatalogTestClient.createV4(), key(catalogKey))
                 .when(imageCatalogTestClient.deleteV4(), key(catalogKey))
                 .when(imageCatalogTestClient.getImagesByNameV4(), key(imgCatalogName))
-                .expect(ForbiddenException.class, key(imgCatalogName)
+                .expect(NotFoundException.class, key(imgCatalogName)
                         .withExpectedMessage("catalog does not exist or does not belongs to your account"))
                 .validate();
     }
@@ -279,7 +279,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
     @Description(
             given = "image catalog get with a non existing name",
             when = "calling get with that name",
-            then = "getting a ForbiddenException")
+            then = "getting a NotFoundException")
     public void testGetImageCatalogWhenTheSpecifiedCatalogDoesNotExistWithName(TestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
@@ -289,7 +289,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
                 .withName(imgCatalogName)
                 .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(imageCatalogTestClient.getImagesByNameV4(), key(imgCatalogName))
-                .expect(ForbiddenException.class, key(imgCatalogName))
+                .expect(NotFoundException.class, key(imgCatalogName))
                 .validate();
     }
 

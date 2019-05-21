@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.NotFoundException;
 
 import org.testng.annotations.Test;
 
@@ -357,13 +357,13 @@ public class EnvironmentTest extends AbstractIntegrationTest {
     @Description(
             given = "there is a running cloudbreak",
             when = "a delete request is sent for a non-existing environment",
-            then = "a ForbiddenException should be returned")
+            then = "a NotFoundException should be returned")
     public void testDeleteEnvironmentNotExist(TestContext testContext) {
         String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .init(EnvironmentTestDto.class)
                 .when(environmentTestClient.deleteV4(), RunningParameter.key(forbiddenKey))
-                .expect(ForbiddenException.class, RunningParameter.key(forbiddenKey))
+                .expect(NotFoundException.class, RunningParameter.key(forbiddenKey))
                 .validate();
     }
 
@@ -547,7 +547,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
     @Description(
             given = "there is an rds config",
             when = "an rds config attach request is sent for a non-existing environment",
-            then = "a ForbiddenException should be returned")
+            then = "a NotFoundException should be returned")
     public void testAttachRdsToNonExistingEnv(TestContext testContext) {
         String env = resourcePropertyProvider().getName();
         String forbiddenKey = resourcePropertyProvider().getName();
@@ -559,7 +559,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .withName(env)
                 .withRdsConfigs(validRds)
                 .when(environmentTestClient.attachV4(), RunningParameter.key(forbiddenKey))
-                .expect(ForbiddenException.class, RunningParameter.key(forbiddenKey))
+                .expect(NotFoundException.class, RunningParameter.key(forbiddenKey))
                 .validate();
     }
 
@@ -651,7 +651,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
     @Description(
             given = "there is an available environment",
             when = "a modifyV4 credential request is sent for the environment with a non-existing credential",
-            then = "a ForbiddenException should be returned")
+            then = "a NotFoundException should be returned")
     public void testCreateEnvironmentChangeCredNonExistingName(TestContext testContext) {
         String notExistingCred = resourcePropertyProvider().getName();
         String forbiddenKey = resourcePropertyProvider().getName();
@@ -661,7 +661,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .given(EnvironmentTestDto.class)
                 .withCredentialName(notExistingCred)
                 .when(environmentTestClient.changeCredential(), RunningParameter.key(forbiddenKey))
-                .expect(ForbiddenException.class, RunningParameter.key(forbiddenKey))
+                .expect(NotFoundException.class, RunningParameter.key(forbiddenKey))
                 .validate();
     }
 
