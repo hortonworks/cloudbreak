@@ -131,7 +131,7 @@ public class FreeIpaClientBuilder {
                 }
 
                 throw new FreeIpaClientException(String.format("Encountered unexpected response from "
-                        + "FreeIPA; details:%n%n"
+                        + "FreeIPA; get:%n%n"
                         + "code: %s%n"
                         + "headers: %s", response.getStatusLine().getStatusCode(), response.getAllHeaders()));
             }
