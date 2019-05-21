@@ -2,9 +2,9 @@ package com.sequenceiq.environment.credential.converter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.environment.api.credential.model.parameters.gcp.GcpCredentialV1Parameters;
-import com.sequenceiq.environment.api.credential.model.parameters.gcp.JsonParameters;
-import com.sequenceiq.environment.api.credential.model.parameters.gcp.P12Parameters;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.GcpCredentialParameters;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.JsonParameters;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.P12Parameters;
 import com.sequenceiq.environment.credential.attributes.gcp.GcpCredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.gcp.JsonAttributes;
 import com.sequenceiq.environment.credential.attributes.gcp.P12Attributes;
@@ -12,15 +12,15 @@ import com.sequenceiq.environment.credential.attributes.gcp.P12Attributes;
 @Component
 public class GcpCredentialV1ParametersToGcpCredentialAttributesConverter {
 
-    public GcpCredentialAttributes convert(GcpCredentialV1Parameters source) {
+    public GcpCredentialAttributes convert(GcpCredentialParameters source) {
         GcpCredentialAttributes response = new GcpCredentialAttributes();
         response.setJson(getJson(source.getJson()));
         response.setP12(getP12(source.getP12()));
         return response;
     }
 
-    public GcpCredentialV1Parameters convert(GcpCredentialAttributes source) {
-        GcpCredentialV1Parameters response = new GcpCredentialV1Parameters();
+    public GcpCredentialParameters convert(GcpCredentialAttributes source) {
+        GcpCredentialParameters response = new GcpCredentialParameters();
         response.setJson(getJson(source.getJson()));
         response.setP12(getP12(source.getP12()));
         return response;

@@ -228,7 +228,8 @@ public class Crn {
         KCLUSTER("kcluster"),
         SAML_PROVIDER("samlProvider"),
         WORKSPACE("workspace"),
-        DATABASE("database");
+        DATABASE("database"),
+        CREDENTIAL("credential");
 
         private static final ImmutableMap<String, ResourceType> FROM_STRING;
         static {

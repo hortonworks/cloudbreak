@@ -3,7 +3,7 @@ package com.sequenceiq.environment.platformresource;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sequenceiq.environment.credential.Credential;
+import com.sequenceiq.environment.credential.domain.Credential;
 
 public class PlatformResourceRequest {
 

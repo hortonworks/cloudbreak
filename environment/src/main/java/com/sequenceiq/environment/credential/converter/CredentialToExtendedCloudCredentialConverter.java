@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserS
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.environment.credential.Credential;
+import com.sequenceiq.environment.credential.domain.Credential;
 
 @Component
 public class CredentialToExtendedCloudCredentialConverter {

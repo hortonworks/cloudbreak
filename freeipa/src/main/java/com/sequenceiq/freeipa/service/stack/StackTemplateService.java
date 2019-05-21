@@ -37,7 +37,7 @@ public class StackTemplateService {
     public GetPlatformTemplateRequest triggerGetTemplate(Stack stack) {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getCloudPlatform(), stack.getCloudPlatform(),
-                location, stack.getOwner(), 0L);
+                location, stack.getOwner(), "0");
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         GetPlatformTemplateRequest getPlatformTemplateRequest = new GetPlatformTemplateRequest(cloudContext, cloudCredential);
         eventBus.notify(getPlatformTemplateRequest.selector(), new Event<>(getPlatformTemplateRequest));

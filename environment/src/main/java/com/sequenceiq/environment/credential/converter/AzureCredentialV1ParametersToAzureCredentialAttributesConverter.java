@@ -2,11 +2,11 @@ package com.sequenceiq.environment.credential.converter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.environment.api.credential.model.parameters.azure.AppBasedRequest;
-import com.sequenceiq.environment.api.credential.model.parameters.azure.AzureCredentialV1RequestParameters;
-import com.sequenceiq.environment.api.credential.model.parameters.azure.AzureCredentialV1ResponseParameters;
-import com.sequenceiq.environment.api.credential.model.parameters.azure.RoleBasedRequest;
-import com.sequenceiq.environment.api.credential.model.parameters.azure.RoleBasedResponse;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AppBasedRequest;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialRequestParameters;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialResponseParameters;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.RoleBasedRequest;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.RoleBasedResponse;
 import com.sequenceiq.environment.credential.attributes.azure.AppBasedAttributes;
 import com.sequenceiq.environment.credential.attributes.azure.AzureCredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.azure.RoleBasedAttributes;
@@ -14,7 +14,7 @@ import com.sequenceiq.environment.credential.attributes.azure.RoleBasedAttribute
 @Component
 public class AzureCredentialV1ParametersToAzureCredentialAttributesConverter {
 
-    public AzureCredentialAttributes convert(AzureCredentialV1RequestParameters source) {
+    public AzureCredentialAttributes convert(AzureCredentialRequestParameters source) {
         AzureCredentialAttributes response = new AzureCredentialAttributes();
         response.setAppBased(getAppBased(source.getAppBased()));
         response.setRoleBased(getRoleBased(source.getRoleBased()));
@@ -23,8 +23,8 @@ public class AzureCredentialV1ParametersToAzureCredentialAttributesConverter {
         return response;
     }
 
-    public AzureCredentialV1ResponseParameters convert(AzureCredentialAttributes source) {
-        AzureCredentialV1ResponseParameters response = new AzureCredentialV1ResponseParameters();
+    public AzureCredentialResponseParameters convert(AzureCredentialAttributes source) {
+        AzureCredentialResponseParameters response = new AzureCredentialResponseParameters();
         response.setAccessKey(source.getAccessKey());
         response.setRoleBased(getRoleBased(source.getRoleBased()));
         response.setSubscriptionId(source.getSubscriptionId());

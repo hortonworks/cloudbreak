@@ -60,7 +60,8 @@ public class ServiceProviderCredentialAdapter {
 
     public Credential verify(Credential credential, Long workspaceId, String userId) {
         credential = credentialPrerequisiteService.decorateCredential(credential, userId);
-        CloudContext cloudContext = new CloudContext(credential.getId(), credential.getName(), credential.cloudPlatform(), userId, workspaceId);
+        CloudContext cloudContext = new CloudContext(credential.getId(), credential.getName(),
+                credential.cloudPlatform(), userId, workspaceId.toString());
         CloudCredential cloudCredential = credentialConverter.convert(credential);
 
         CredentialVerificationRequest request = new CredentialVerificationRequest(cloudContext, cloudCredential);
@@ -89,7 +90,7 @@ public class ServiceProviderCredentialAdapter {
 
     public Map<String, String> interactiveLogin(Credential credential, Long workspaceId, String userId) {
         CloudContext cloudContext = new CloudContext(credential.getId(), credential.getName(),
-                credential.cloudPlatform(), userId, workspaceId);
+                credential.cloudPlatform(), userId, workspaceId.toString());
         ExtendedCloudCredential cloudCredential = extendedCloudCredentialConverter.convert(credential);
         InteractiveLoginRequest request = new InteractiveLoginRequest(cloudContext, cloudCredential);
         LOGGER.debug("Triggering event: {}", request);
@@ -115,7 +116,7 @@ public class ServiceProviderCredentialAdapter {
 
     public Credential initCodeGrantFlow(Credential credential, Long workspaceId, String userId) {
         CloudContext cloudContext = new CloudContext(credential.getId(), credential.getName(),
-                credential.cloudPlatform(), userId, workspaceId);
+                credential.cloudPlatform(), userId, workspaceId.toString());
         CloudCredential cloudCredential = credentialConverter.convert(credential);
         InitCodeGrantFlowRequest request = requestProvider.getInitCodeGrantFlowRequest(cloudContext, cloudCredential);
         LOGGER.info("Triggering event: {}", request);
