@@ -16,8 +16,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.environment.CloudPlatform;
-import com.sequenceiq.environment.environment.converter.network.EnvironmentNetworkConverter;
-import com.sequenceiq.environment.environment.validator.network.EnvironmentNetworkValidator;
+import com.sequenceiq.environment.network.converter.EnvironmentNetworkConverter;
+import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.logger.MDCContextFilter;
 import com.sequenceiq.environment.logger.MDCCleanerTaskDecorator;
 

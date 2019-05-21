@@ -46,7 +46,7 @@ public class Credential implements Serializable, AuthResource {
     private String accountId;
 
     @Column(nullable = false)
-    private String resourceCRN;
+    private String resourceCrn;
 
     public Long getId() {
         return id;
@@ -123,12 +123,12 @@ public class Credential implements Serializable, AuthResource {
     }
 
     @Override
-    public String getResourceCRN() {
-        return resourceCRN;
+    public String getResourceCrn() {
+        return resourceCrn;
     }
 
     @Override
-    public void setResourceCRN(String resourceCRN) {
-        this.resourceCRN = resourceCRN;
+    public void setResourceCrn(String resourceCrn) {
+        this.resourceCrn = resourceCrn;
     }
 }

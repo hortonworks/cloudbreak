@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.environment.credential.domain.Credential;
-import com.sequenceiq.environment.environment.domain.network.BaseNetwork;
+import com.sequenceiq.environment.network.BaseNetwork;
 
 @Entity
 @Table(name = "Environment")
@@ -60,7 +60,7 @@ public class EnvironmentView extends CompactView implements AuthResource {
     private String accountId;
 
     @Column(nullable = false)
-    private String resourceCRN;
+    private String resourceCrn;
 
     public Json getRegions() {
         return regions;
@@ -159,12 +159,12 @@ public class EnvironmentView extends CompactView implements AuthResource {
     }
 
     @Override
-    public String getResourceCRN() {
-        return resourceCRN;
+    public String getResourceCrn() {
+        return resourceCrn;
     }
 
     @Override
-    public void setResourceCRN(String resourceCRN) {
-        this.resourceCRN = resourceCRN;
+    public void setResourceCrn(String resourceCrn) {
+        this.resourceCrn = resourceCrn;
     }
 }

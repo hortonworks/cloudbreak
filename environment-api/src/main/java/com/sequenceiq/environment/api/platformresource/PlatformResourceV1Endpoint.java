@@ -20,7 +20,7 @@ import com.sequenceiq.environment.api.platformresource.model.PlatformNetworksV1R
 import com.sequenceiq.environment.api.platformresource.model.PlatformSecurityGroupsV1Response;
 import com.sequenceiq.environment.api.platformresource.model.PlatformSshKeysV1Response;
 import com.sequenceiq.environment.api.platformresource.model.PlatformVmtypesV1Response;
-import com.sequenceiq.environment.api.platformresource.model.RegionV1Response;
+import com.sequenceiq.environment.api.platformresource.model.RegionResponse;
 import com.sequenceiq.environment.api.platformresource.model.TagSpecificationsV1Response;
 
 import io.swagger.annotations.Api;
@@ -44,7 +44,7 @@ public interface PlatformResourceV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OpDescription.GET_REGION_R_BY_TYPE, produces = JSON_CONTENT_TYPE, notes = ModelDescriptions.CONNECTOR_NOTES,
             nickname = "getRegionsByCredentialAndWorkspace")
-    RegionV1Response getRegionsByCredential(@QueryParam("credentialName") String credentialName, @QueryParam("region") String region,
+    RegionResponse getRegionsByCredential(@QueryParam("credentialName") String credentialName, @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant, @QueryParam("availabilityZone") String availabilityZone);
 
     @GET

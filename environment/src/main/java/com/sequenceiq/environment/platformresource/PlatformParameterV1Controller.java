@@ -34,7 +34,7 @@ import com.sequenceiq.environment.api.platformresource.model.PlatformNetworksV1R
 import com.sequenceiq.environment.api.platformresource.model.PlatformSecurityGroupsV1Response;
 import com.sequenceiq.environment.api.platformresource.model.PlatformSshKeysV1Response;
 import com.sequenceiq.environment.api.platformresource.model.PlatformVmtypesV1Response;
-import com.sequenceiq.environment.api.platformresource.model.RegionV1Response;
+import com.sequenceiq.environment.api.platformresource.model.RegionResponse;
 import com.sequenceiq.environment.api.platformresource.model.TagSpecificationsV1Response;
 
 @Controller
@@ -62,12 +62,12 @@ public class PlatformParameterV1Controller implements PlatformResourceV1Endpoint
     }
 
     @Override
-    public RegionV1Response getRegionsByCredential(String credentialName, String region, String platformVariant, String availabilityZone) {
+    public RegionResponse getRegionsByCredential(String credentialName, String region, String platformVariant, String availabilityZone) {
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(accountId, credentialName, region, platformVariant,
                 availabilityZone);
         CloudRegions regions = platformParameterService.getRegionsByCredential(request);
-        return convertersionService.convert(regions, RegionV1Response.class);
+        return convertersionService.convert(regions, RegionResponse.class);
     }
 
     @Override
