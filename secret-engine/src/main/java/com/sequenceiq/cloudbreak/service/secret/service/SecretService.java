@@ -12,15 +12,20 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.metrics.type.MetricType;
 import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
+import com.sequenceiq.cloudbreak.service.secret.conf.VaultConfig;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV1Engine;
+import com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine;
 
 @Service
+@ConditionalOnBean({VaultKvV2Engine.class, VaultKvV1Engine.class, VaultConfig.class})
 public class SecretService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecretService.class);
@@ -43,7 +48,7 @@ public class SecretService {
     public void init() {
         if (StringUtils.hasLength(engineClass)) {
             persistentEngine = engines.stream().filter(e -> e.getClass().getCanonicalName().startsWith(engineClass)).findFirst()
-                    .orElseThrow(() -> new RuntimeException(format("Selected secret engine (%s) is not found, please check cb.secret.engine", engineClass)));
+                    .orElseThrow(() -> new RuntimeException(format("Selected secret engine (%s) is not found, please check secret.engine", engineClass)));
         }
     }
 

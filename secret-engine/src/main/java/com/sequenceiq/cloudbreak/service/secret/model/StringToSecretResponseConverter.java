@@ -4,10 +4,11 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 
 @Component
-public class StringToSecretResponseConverter {
+public class StringToSecretResponseConverter extends AbstractConversionServiceAwareConverter<String, SecretResponse> {
 
     @Inject
     private SecretService secretService;

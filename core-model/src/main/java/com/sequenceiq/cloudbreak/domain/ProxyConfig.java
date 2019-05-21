@@ -22,7 +22,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Where;
 
-import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
+import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
