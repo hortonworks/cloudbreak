@@ -1,5 +1,5 @@
 {
-  "description": "CDP 1.0 Data Engineering template with Spark, Hue, Livy and Zeppelin",
+  "description": "CDP 1.0 Data Engineering template",
   "blueprint": {
     "cdhVersion": "7.0.0",
     "displayName": "dataengineering",
@@ -84,28 +84,70 @@
         ]
       },
       {
-        "refName": "hive",
-        "serviceType": "HIVE",
+        "refName": "tez",
+        "serviceType": "TEZ",
+        "serviceConfigs": [
+          {
+            "name": "yarn_service",
+            "ref": "yarn"
+          }
+        ],
         "roleConfigGroups": [
           {
-            "refName": "hive-GATEWAY-BASE",
+            "refName": "tez-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hms",
+        "serviceType": "HIVE",
+        "displayName": "Hive Metastore",
+        "roleConfigGroups": [
+          {
+            "refName": "hms-GATEWAY-BASE",
             "roleType": "GATEWAY",
             "base": true
           },
           {
-            "refName": "hive-HIVESERVER2-BASE",
-            "roleType": "HIVESERVER2",
-            "configs": [
-              {
-                "name": "hs2_execution_engine",
-                "value": "spark"
-              }
-            ],
+            "refName": "hms-HIVEMETASTORE-BASE",
+            "roleType": "HIVEMETASTORE",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hive_on_tez",
+        "serviceType": "HIVE_ON_TEZ",
+        "displayName": "Hive",
+        "serviceConfigs": [
+          {
+            "name": "hms_connector",
+            "ref": "hms"
+          },
+          {
+            "name": "tez_service",
+            "ref": "tez"
+          },
+          {
+            "name": "zookeeper_service",
+            "ref": "zookeeper"
+          },
+          {
+            "name": "mapreduce_yarn_service",
+            "ref": "yarn"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "hive_on_tez-GATEWAY-BASE",
+            "roleType": "GATEWAY",
             "base": true
           },
           {
-            "refName": "hive-HIVEMETASTORE-BASE",
-            "roleType": "HIVEMETASTORE",
+            "refName": "hive_on_tez-HIVESERVER2-BASE",
+            "roleType": "HIVESERVER2",
             "base": true
           }
         ]
@@ -152,22 +194,6 @@
         ]
       },
       {
-        "refName": "hue",
-        "serviceType": "HUE",
-        "roleConfigGroups": [
-          {
-            "refName": "hue-HUE_SERVER-BASE",
-            "roleType": "HUE_SERVER",
-            "base": true
-          },
-          {
-            "refName": "hue-HUE_LOAD_BALANCER-BASE",
-            "roleType": "HUE_LOAD_BALANCER",
-            "base": true
-          }
-        ]
-      },
-      {
         "refName": "oozie",
         "serviceType": "OOZIE",
         "roleConfigGroups": [
@@ -187,16 +213,16 @@
           "hdfs-BALANCER-BASE",
           "hdfs-NAMENODE-BASE",
           "hdfs-SECONDARYNAMENODE-BASE",
-          "hive-GATEWAY-BASE",
-          "hive-HIVEMETASTORE-BASE",
-          "hive-HIVESERVER2-BASE",
-          "hue-HUE_LOAD_BALANCER-BASE",
-          "hue-HUE_SERVER-BASE",
-          "oozie-OOZIE_SERVER-BASE",
+          "hms-GATEWAY-BASE",
+          "hms-HIVEMETASTORE-BASE",
+          "hive_on_tez-HIVESERVER2-BASE",
+          "hive_on_tez-GATEWAY-BASE",
+          "tez-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",
           "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
           "livy-LIVY_SERVER-BASE",
           "zeppelin-ZEPPELIN_SERVER-BASE",
+          "oozie-OOZIE_SERVER-BASE",
           "yarn-JOBHISTORY-BASE",
           "yarn-RESOURCEMANAGER-BASE",
           "zookeeper-SERVER-BASE"
@@ -207,7 +233,9 @@
         "cardinality": 1,
         "roleConfigGroupsRefNames": [
           "hdfs-DATANODE-BASE",
-          "hive-GATEWAY-BASE",
+          "hms-GATEWAY-BASE",
+          "hive_on_tez-GATEWAY-BASE",
+          "tez-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",
           "livy-GATEWAY-BASE",
           "yarn-NODEMANAGER-WORKER"
@@ -217,7 +245,9 @@
         "refName": "compute",
         "cardinality": 0,
         "roleConfigGroupsRefNames": [
-          "hive-GATEWAY-BASE",
+          "hms-GATEWAY-BASE",
+          "hive_on_tez-GATEWAY-BASE",
+          "tez-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",
           "yarn-NODEMANAGER-COMPUTE"
         ]

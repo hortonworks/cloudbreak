@@ -145,7 +145,7 @@ cb:
                 CDH 6.2 - Data Science: Apache Spark, Apache Hive=cdh6-data-science;
                 CDH 6.2 - Data Lake: Hive Metastore=cdh6-shared-services;
                 CDP 1.0 - Data Science: Apache Spark, Apache Hive=cdp-data-science;
-                CDP 1.0 - Data Engineering: Apache Spark, Apache Livy, Apache Zeppelin, Hue=cdp-data-engineering;
+                CDP 1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering;
                 CDP 1.0 - Data Engineering HA: Apache Spark, Apache Livy, Apache Zeppelin=cdp-data-engineering-ha;
                 CDP 1.0 - Data Mart: Apache Impala, Hue=cdp-data-mart;
                 CDP 1.0 - SDX: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx
