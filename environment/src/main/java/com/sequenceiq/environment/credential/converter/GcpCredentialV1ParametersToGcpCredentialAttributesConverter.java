@@ -13,6 +13,9 @@ import com.sequenceiq.environment.credential.attributes.gcp.P12Attributes;
 public class GcpCredentialV1ParametersToGcpCredentialAttributesConverter {
 
     public GcpCredentialAttributes convert(GcpCredentialParameters source) {
+        if (source == null) {
+            return null;
+        }
         GcpCredentialAttributes response = new GcpCredentialAttributes();
         response.setJson(getJson(source.getJson()));
         response.setP12(getP12(source.getP12()));
@@ -20,37 +23,52 @@ public class GcpCredentialV1ParametersToGcpCredentialAttributesConverter {
     }
 
     public GcpCredentialParameters convert(GcpCredentialAttributes source) {
+        if (source == null) {
+            return null;
+        }
         GcpCredentialParameters response = new GcpCredentialParameters();
         response.setJson(getJson(source.getJson()));
         response.setP12(getP12(source.getP12()));
         return response;
     }
 
-    private P12Attributes getP12(P12Parameters p12) {
+    private P12Attributes getP12(P12Parameters source) {
+        if (source == null) {
+            return null;
+        }
         P12Attributes response = new P12Attributes();
-        response.setProjectId(p12.getProjectId());
-        response.setServiceAccountId(p12.getServiceAccountId());
-        response.setServiceAccountPrivateKey(p12.getServiceAccountPrivateKey());
+        response.setProjectId(source.getProjectId());
+        response.setServiceAccountId(source.getServiceAccountId());
+        response.setServiceAccountPrivateKey(source.getServiceAccountPrivateKey());
         return response;
     }
 
-    private JsonAttributes getJson(JsonParameters json) {
+    private JsonAttributes getJson(JsonParameters source) {
+        if (source == null) {
+            return null;
+        }
         JsonAttributes response = new JsonAttributes();
-        response.setCredentialJson(json.getCredentialJson());
+        response.setCredentialJson(source.getCredentialJson());
         return response;
     }
 
-    private P12Parameters getP12(P12Attributes p12) {
+    private P12Parameters getP12(P12Attributes source) {
+        if (source == null) {
+            return null;
+        }
         P12Parameters response = new P12Parameters();
-        response.setProjectId(p12.getProjectId());
-        response.setServiceAccountId(p12.getServiceAccountId());
-        response.setServiceAccountPrivateKey(p12.getServiceAccountPrivateKey());
+        response.setProjectId(source.getProjectId());
+        response.setServiceAccountId(source.getServiceAccountId());
+        response.setServiceAccountPrivateKey(source.getServiceAccountPrivateKey());
         return response;
     }
 
-    private JsonParameters getJson(JsonAttributes json) {
+    private JsonParameters getJson(JsonAttributes source) {
+        if (source == null) {
+            return null;
+        }
         JsonParameters response = new JsonParameters();
-        response.setCredentialJson(json.getCredentialJson());
+        response.setCredentialJson(source.getCredentialJson());
         return response;
     }
 }

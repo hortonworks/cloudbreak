@@ -38,6 +38,9 @@ abstract class AbstractVaultEngine<E> implements SecretEngine {
     }
 
     protected VaultSecret convertToVaultSecret(String secret) {
+        if (secret == null) {
+            return null;
+        }
         try {
             VaultSecret vaultSecret = gson.fromJson(secret, VaultSecret.class);
             if (Stream.of(vaultSecret.getEnginePath(), vaultSecret.getEngineClass(), vaultSecret.getPath()).allMatch(Objects::nonNull)) {

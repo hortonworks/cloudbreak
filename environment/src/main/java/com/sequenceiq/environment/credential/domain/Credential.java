@@ -12,6 +12,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
+import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 
@@ -37,6 +38,7 @@ public class Credential implements Serializable, AuthResource {
     private String cloudPlatform;
 
     @Convert(converter = SecretToString.class)
+    @SecretValue
     private Secret attributes = Secret.EMPTY;
 
     @Column

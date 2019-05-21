@@ -9,6 +9,9 @@ import com.sequenceiq.environment.credential.attributes.cumulus.CumulusYarnCrede
 public class CumulusCredentialV1ParametersToCumulusCredentialAttributesConverter {
 
     public CumulusYarnCredentialAttributes convert(CumulusYarnParameters source) {
+        if (source == null) {
+            return null;
+        }
         CumulusYarnCredentialAttributes response = new CumulusYarnCredentialAttributes();
         response.setAmbariPassword(source.getAmbariPassword());
         response.setAmbariUrl(source.getAmbariUrl());
@@ -17,6 +20,9 @@ public class CumulusCredentialV1ParametersToCumulusCredentialAttributesConverter
     }
 
     public CumulusYarnParameters convert(CumulusYarnCredentialAttributes source) {
+        if (source == null) {
+            return null;
+        }
         CumulusYarnParameters response = new CumulusYarnParameters();
         response.setAmbariPassword(source.getAmbariPassword());
         response.setAmbariUrl(source.getAmbariUrl());
