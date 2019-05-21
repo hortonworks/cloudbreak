@@ -13,10 +13,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.freeipa.api.FreeIpaApi;
-import com.sequenceiq.freeipa.controller.ClientTestController;
+import com.sequenceiq.freeipa.controller.ClientTestV1Controller;
 import com.sequenceiq.freeipa.controller.FreeIpaController;
 import com.sequenceiq.freeipa.controller.FreeIpaV1Controller;
-import com.sequenceiq.freeipa.controller.UsersyncController;
+import com.sequenceiq.freeipa.controller.UsersyncV1Controller;
 import com.sequenceiq.freeipa.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.freeipa.controller.mapper.WebApplicaitonExceptionMapper;
 
@@ -29,7 +29,7 @@ import io.swagger.jaxrs.config.SwaggerContextService;
 public class EndpointConfig extends ResourceConfig {
 
     private static final List<Class<?>> CONTROLLERS = List.of(
-            FreeIpaController.class, UsersyncController.class, ClientTestController.class, FreeIpaV1Controller.class);
+            FreeIpaController.class, UsersyncV1Controller.class, ClientTestV1Controller.class, FreeIpaV1Controller.class);
 
     private static final String VERSION_UNAVAILABLE = "unspecified";
 

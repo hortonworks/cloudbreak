@@ -2,7 +2,7 @@ package com.sequenceiq.freeipa.api.client;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.test.ClientTestV1Endpoint;
-import com.sequenceiq.freeipa.api.v1.freeipa.users.UsersyncV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.UsersyncV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.kerberos.KerberosConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.ldap.LdapConfigV1Endpoint;
 

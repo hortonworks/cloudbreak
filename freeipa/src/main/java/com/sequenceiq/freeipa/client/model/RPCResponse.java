@@ -9,6 +9,10 @@ public class RPCResponse<R> {
 
     private R result;
 
+    private Object failed;
+
+    private Object completed;
+
     private Object value;
 
     private String summary;
@@ -37,6 +41,22 @@ public class RPCResponse<R> {
 
     public void setResult(R result) {
         this.result = result;
+    }
+
+    public Object getFailed() {
+        return failed;
+    }
+
+    public void setFailed(Object failed) {
+        this.failed = failed;
+    }
+
+    public Object getCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(Object completed) {
+        this.completed = completed;
     }
 
     public Object getValue() {
