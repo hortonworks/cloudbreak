@@ -34,7 +34,7 @@ integrationtest:
 
   # aws parameters
   aws:
-    defaultBlueprintName: "CDP 1.0 - Data Science: Apache Spark, Apache Hive, Impala"
+    defaultBlueprintName: "CDP 1.0 - Data Mart: Apache Spark, Apache Hive, Impala, Hue"
     region: eu-west-1
     location: eu-west-1
     availabilityZone: eu-west-1a
@@ -55,11 +55,11 @@ integrationtest:
       redhat7:
         imageId: 963f81ae-efd1-4bfb-7f91-4aa357950c02
         blueprints:
-          - "CDP 1.0 - Data Science: Apache Spark, Apache Hive, Impala"
+          - "CDP 1.0 - Data Mart: Apache Spark, Apache Hive, Impala, Hue"
 
   # azure parameters
   azure:
-    defaultBlueprintName: "CDP 1.0 - Data Science: Apache Spark, Apache Hive, Impala"
+    defaultBlueprintName: "CDP 1.0 - Data Mart: Apache Spark, Apache Hive, Impala, Hue"
     availabilityZone:
     region: West Europe
     location: West Europe
@@ -80,7 +80,7 @@ integrationtest:
 
   # gcp parameters
   gcp:
-    defaultBlueprintName: "CDP 1.0 - Data Science: Apache Spark, Apache Hive, Impala"
+    defaultBlueprintName: "CDP 1.0 - Data Mart: Apache Spark, Apache Hive, Impala, Hue"
     availabilityZone: europe-west2-a
     region: europe-west2
     location: europe-west2
@@ -100,7 +100,7 @@ integrationtest:
 
   # openstack parameters
   openstack:
-    defaultBlueprintName: "CDP 1.0 - Data Science: Apache Spark, Apache Hive, Impala"
+    defaultBlueprintName: "CDP 1.0 - Data Mart: Apache Spark, Apache Hive, Impala, Hue"
     availabilityZone: nova
     region: RegionOne
     location: Texas
@@ -119,7 +119,7 @@ integrationtest:
 
   # yarn parameters
   yarn:
-    defaultBlueprintName: "CDP 1.0 - Data Science: Apache Spark, Apache Hive, Impala"
+    defaultBlueprintName: "CDP 1.0 - Data Mart: Apache Spark, Apache Hive, Impala, Hue"
     availabilityZone:
     region: default
     location: Frankfurt
