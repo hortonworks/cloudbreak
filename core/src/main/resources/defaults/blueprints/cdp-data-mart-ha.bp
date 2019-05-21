@@ -1,0 +1,263 @@
+{
+  "description": "CDP 1.0 (HA) Data Mart template with Impala and Hue",
+  "blueprint": {
+    "cdhVersion": "6.0.99",
+    "displayName": "datamart-ha",
+    "services": [
+      {
+        "refName": "zookeeper",
+        "serviceType": "ZOOKEEPER",
+        "roleConfigGroups": [
+          {
+            "refName": "zookeeper-SERVER-BASE",
+            "roleType": "SERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hdfs",
+        "serviceType": "HDFS",
+        "serviceConfigs": [
+          {
+            "name": "redaction_policy_enabled",
+            "value": "false"
+          },
+          {
+            "name": "zookeeper_service",
+            "ref": "zookeeper"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "hdfs-NAMENODE-BASE",
+            "roleType": "NAMENODE",
+            "configs": [
+              {
+                "name": "autofailover_enabled",
+                "value": "true"
+              },
+              {
+                "name": "dfs_federation_namenode_nameservice",
+                "value": "ns1"
+              },
+              {
+                "name": "dfs_namenode_quorum_journal_name",
+                "value": "ns1"
+              }
+            ],
+            "base": true
+          },
+          {
+            "refName": "hdfs-FAILOVERCONTROLLER-BASE",
+            "roleType": "FAILOVERCONTROLLER",
+            "base": true
+          },
+          {
+            "refName": "hdfs-JOURNALNODE-BASE",
+            "roleType": "JOURNALNODE",
+            "base": true
+          },
+          {
+            "refName": "hdfs-DATANODE-BASE",
+            "roleType": "DATANODE",
+            "base": true
+          },
+          {
+            "refName": "hdfs-SECONDARYNAMENODE-BASE",
+            "roleType": "SECONDARYNAMENODE",
+            "configs": [
+              {
+                "name": "fs_checkpoint_dir_list",
+                "value": "/should_not_be_required_in_HA_setup"
+              }
+            ],
+            "base": true
+          },
+          {
+            "refName": "hdfs-BALANCER-BASE",
+            "roleType": "BALANCER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hive",
+        "serviceType": "HIVE",
+        "roleConfigGroups": [
+          {
+            "refName": "hive-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "hive-HIVESERVER2-BASE",
+            "roleType": "HIVESERVER2",
+            "configs": [
+              {
+                "name": "hs2_execution_engine",
+                "value": "spark"
+              }
+            ],
+            "base": true
+          },
+          {
+            "refName": "hive-HIVEMETASTORE-BASE",
+            "roleType": "HIVEMETASTORE",
+            "configs": [
+              {
+                "name": "metastore_canary_health_enabled",
+                "value": "false"
+              }
+            ],
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "spark_on_yarn",
+        "serviceType": "SPARK_ON_YARN",
+        "roleConfigGroups": [
+          {
+            "refName": "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+            "roleType": "SPARK_YARN_HISTORY_SERVER",
+            "base": true
+          },
+          {
+            "refName": "spark_on_yarn-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "yarn",
+        "serviceType": "YARN",
+        "roleConfigGroups": [
+          {
+            "refName": "yarn-RESOURCEMANAGER-BASE",
+            "roleType": "RESOURCEMANAGER",
+            "base": true
+          },
+          {
+            "refName": "yarn-NODEMANAGER-WORKER",
+            "roleType": "NODEMANAGER",
+            "base": false
+          },
+          {
+            "refName": "yarn-NODEMANAGER-COMPUTE",
+            "roleType": "NODEMANAGER",
+            "base": false
+          },
+          {
+            "refName": "yarn-JOBHISTORY-BASE",
+            "roleType": "JOBHISTORY",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hue",
+        "serviceType": "HUE",
+        "roleConfigGroups": [
+          {
+            "refName": "hue-HUE_SERVER-BASE",
+            "roleType": "HUE_SERVER",
+            "base": true
+          },
+          {
+            "refName": "hue-HUE_LOAD_BALANCER-BASE",
+            "roleType": "HUE_LOAD_BALANCER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "impala",
+        "serviceType": "IMPALA",
+        "roleConfigGroups": [
+          {
+            "refName": "impala-IMPALAD-BASE",
+            "roleType": "IMPALAD",
+            "base": true
+          },
+          {
+            "refName": "impala-STATESTORE-BASE",
+            "roleType": "STATESTORE",
+            "base": true
+          },
+          {
+            "refName": "impala-CATALOGSERVER-BASE",
+            "roleType": "CATALOGSERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "oozie",
+        "serviceType": "OOZIE",
+        "roleConfigGroups": [
+          {
+            "refName": "oozie-OOZIE_SERVER-BASE",
+            "roleType": "OOZIE_SERVER",
+            "base": true
+          }
+        ]
+      }
+    ],
+    "hostTemplates": [
+      {
+        "refName": "gateway",
+        "roleConfigGroupsRefNames": [
+          "hdfs-BALANCER-BASE",
+          "hive-GATEWAY-BASE",
+          "hue-HUE_LOAD_BALANCER-BASE",
+          "impala-STATESTORE-BASE",
+          "impala-CATALOGSERVER-BASE",
+          "oozie-OOZIE_SERVER-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
+          "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+          "yarn-JOBHISTORY-BASE"
+        ]
+      },
+      {
+        "refName": "master",
+        "roleConfigGroupsRefNames": [
+          "hdfs-FAILOVERCONTROLLER-BASE",
+          "hdfs-NAMENODE-BASE",
+          "hive-GATEWAY-BASE",
+          "hive-HIVEMETASTORE-BASE",
+          "hive-HIVESERVER2-BASE",
+          "hue-HUE_SERVER-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
+          "yarn-RESOURCEMANAGER-BASE"
+        ]
+      },
+      {
+        "refName": "worker",
+        "roleConfigGroupsRefNames": [
+          "hdfs-DATANODE-BASE",
+          "hive-GATEWAY-BASE",
+          "impala-IMPALAD-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
+          "yarn-NODEMANAGER-WORKER"
+        ]
+      },
+      {
+        "refName": "compute",
+        "roleConfigGroupsRefNames": [
+          "hive-GATEWAY-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
+          "yarn-NODEMANAGER-COMPUTE"
+        ]
+      },
+      {
+        "refName": "quorum",
+        "roleConfigGroupsRefNames": [
+          "hdfs-JOURNALNODE-BASE",
+          "zookeeper-SERVER-BASE"
+        ]
+      }
+    ]
+  }
+}
