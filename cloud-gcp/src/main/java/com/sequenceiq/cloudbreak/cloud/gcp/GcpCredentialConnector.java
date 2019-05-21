@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
@@ -10,10 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.api.client.auth.oauth2.TokenResponseException;
-import com.google.gson.JsonParser;
-import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
-import com.sequenceiq.cloudbreak.cloud.response.GcpCredentialPrerequisites;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -22,6 +22,8 @@ import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
+import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
+import com.sequenceiq.cloudbreak.cloud.response.GcpCredentialPrerequisites;
 
 @Service
 public class GcpCredentialConnector implements CredentialConnector {
@@ -107,9 +109,14 @@ public class GcpCredentialConnector implements CredentialConnector {
      */
     private Optional<String> getErrDescriptionFromTokenResponse(TokenResponseException e) {
         try {
-            return Optional.of(new JsonParser().parse(e.getContent()).getAsJsonObject().get("error_description").getAsString());
-        } catch (RuntimeException re) {
-            LOGGER.debug("Could not parse TokenResponseException", re);
+            ObjectNode objectNode = new ObjectMapper().readValue(e.getContent(), ObjectNode.class);
+            if (objectNode.has("error_description")) {
+                return Optional.of(objectNode.get("error_description").asText());
+            } else {
+                return Optional.empty();
+            }
+        } catch (IOException ioe) {
+            LOGGER.debug("Could not parse TokenResponseException", ioe);
             return Optional.empty();
         }
     }

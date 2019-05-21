@@ -38,3 +38,7 @@ datalake:
       schema: public
       cert.file: database.crt
       ssl: false
+
+cb:
+  authentication:
+    disabled: true

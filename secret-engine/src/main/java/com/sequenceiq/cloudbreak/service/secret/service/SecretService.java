@@ -42,7 +42,7 @@ public class SecretService {
     @PostConstruct
     public void init() {
         if (StringUtils.hasLength(engineClass)) {
-            persistentEngine = engines.stream().filter(e -> e.getClass().getCanonicalName().startsWith(engineClass + "$$")).findFirst()
+            persistentEngine = engines.stream().filter(e -> e.getClass().getCanonicalName().startsWith(engineClass)).findFirst()
                     .orElseThrow(() -> new RuntimeException(format("Selected secret engine (%s) is not found, please check cb.secret.engine", engineClass)));
         }
     }

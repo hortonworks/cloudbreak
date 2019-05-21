@@ -13,6 +13,7 @@ jar {
 
 dependencies {
     compile project(':cloud-common')
+    compile project(':secret-engine')
     compile project(':core-api')
     compile project(':workspace-authorization')
 

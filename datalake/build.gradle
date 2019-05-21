@@ -50,7 +50,7 @@ dependencies {
   testImplementation group: 'org.mockito',               name: 'mockito-junit-jupiter',           version: mockitoVersion
 
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
-  implementation group: 'net.bytebuddy',             name: 'byte-buddy',                      version: '1.9.12'
+  implementation group: 'net.bytebuddy',                 name: 'byte-buddy',                      version: '1.9.12'
 }
 
 bootRun {

@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterResponse;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
@@ -19,6 +18,7 @@ import com.sequenceiq.periscope.converter.ClusterConverter;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
+import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.HistoryService;
 
@@ -39,7 +39,7 @@ public class AutoScaleClusterCommonService {
     private HttpNotificationSender notificationSender;
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private AutoscaleRestRequestThreadLocalService restRequestThreadLocalService;
 
     public List<AutoscaleClusterResponse> getClusters() {
         List<Cluster> clusters = clusterService.findAllByUser(restRequestThreadLocalService.getCloudbreakUser());

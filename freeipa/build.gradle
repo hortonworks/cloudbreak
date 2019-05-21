@@ -77,6 +77,7 @@ dependencies {
   implementation project(':freeipa-api')
   implementation project(':common')
   implementation project(':core-api')
+  implementation project(':secret-engine')
   runtime project(':orchestrator-salt')
   runtime project(':cloud-openstack')
   runtime project(':cloud-gcp')

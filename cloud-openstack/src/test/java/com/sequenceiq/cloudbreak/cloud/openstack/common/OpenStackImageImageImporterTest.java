@@ -20,7 +20,7 @@ import org.openstack4j.model.image.v2.Task.TaskStatus;
 import org.openstack4j.openstack.image.v2.domain.GlanceTask;
 
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.common.service.url.UrlAccessValidationService;
+import com.sequenceiq.cloudbreak.auth.service.url.UrlAccessValidationService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OpenStackImageImageImporterTest {
