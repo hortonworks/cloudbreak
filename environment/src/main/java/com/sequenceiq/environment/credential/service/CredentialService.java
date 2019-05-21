@@ -97,7 +97,7 @@ public class CredentialService {
         return credentialAdapter.interactiveLogin(credential, accountId, "0");
     }
 
-    public Credential updateByWorkspaceId(Credential credential, String accountId) {
+    public Credential updateByAccountId(Credential credential, String accountId) {
         Credential original = repository.findByNameAndAccountId(credential.getName(), accountId, ENABLED_PLATFORMS)
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, credential.getName()));
         if (!Objects.equals(credential.getCloudPlatform(), original.getCloudPlatform())) {
@@ -105,6 +105,7 @@ public class CredentialService {
         }
         credential.setId(original.getId());
         credential.setAccountId(accountId);
+        credential.setResourceCrn(original.getResourceCrn());
         Credential updated = repository.save(credentialAdapter.verify(credential, accountId));
         secretService.delete(original.getAttributesSecret());
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_MODIFIED);
@@ -118,7 +119,7 @@ public class CredentialService {
 
     public Credential create(Credential credential, @Nonnull String accountId) {
         credentialValidator.validateCredentialCloudPlatform(credential.getCloudPlatform());
-        credentialValidator.validateParameters(Platform.platform(credential.getCloudPlatform()), new Json(credential.getAttributes()).getMap());
+        credentialValidator.validateParameters(Platform.platform(credential.getCloudPlatform()), new Json(credential.getAttributes()));
         credential.setResourceCrn(createCRN(accountId));
         credential.setAccountId(accountId);
         Credential created = repository.save(credentialAdapter.verify(credential, accountId));

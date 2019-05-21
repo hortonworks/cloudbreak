@@ -9,6 +9,9 @@ import com.sequenceiq.environment.credential.attributes.yarn.YarnCredentialAttri
 public class YarnCredentialV1ParametersToAwsYarnAttributesConverter {
 
     public YarnCredentialAttributes convert(YarnParameters source) {
+        if (source == null) {
+            return null;
+        }
         YarnCredentialAttributes response = new YarnCredentialAttributes();
         response.setAmbariUser(source.getAmbariUser());
         response.setEndpoint(source.getEndpoint());
@@ -16,6 +19,9 @@ public class YarnCredentialV1ParametersToAwsYarnAttributesConverter {
     }
 
     public YarnParameters convert(YarnCredentialAttributes source) {
+        if (source == null) {
+            return null;
+        }
         YarnParameters response = new YarnParameters();
         response.setAmbariUser(source.getAmbariUser());
         response.setEndpoint(source.getEndpoint());

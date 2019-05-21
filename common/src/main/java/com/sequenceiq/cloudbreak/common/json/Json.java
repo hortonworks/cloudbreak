@@ -3,8 +3,10 @@ package com.sequenceiq.cloudbreak.common.json;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -73,7 +75,7 @@ public class Json implements Serializable {
         for (int i = 0; i < split.length - 1; i++) {
             object = object.getJSONObject(split[i]);
         }
-        return (T) object.get(split[split.length - 1]);
+        return object.containsKey(split[split.length - 1]) ? (T) object.get(split[split.length - 1]) : null;
     }
 
     @Override
@@ -98,5 +100,54 @@ public class Json implements Serializable {
         return new HashCodeBuilder(17, 37)
                 .append(value)
                 .toHashCode();
+    }
+
+    @JsonIgnore
+    public void remove(String path) {
+        String[] split = path.split("\\.");
+        JSONObject jsonObject = JSONObject.fromObject(value);
+        if (split.length == 1) {
+            jsonObject.remove(split[0]);
+        }
+
+        JSONObject object = jsonObject;
+        for (int i = 0; i < split.length - 1; i++) {
+            object = object.getJSONObject(split[i]);
+        }
+        object.remove(split[split.length - 1]);
+        value = jsonObject.toString();
+    }
+
+    @JsonIgnore
+    public Set<String> flatPaths() {
+        Set<String> set = new HashSet<>();
+        generateNode(getMap(), "", set);
+        return set;
+    }
+
+    @JsonIgnore
+    private void generateNode(Map map, String path, Set<String> set) {
+        map.forEach((key, value) -> {
+            if (value instanceof Map) {
+                generateNode((Map) value, path + key + '.', set);
+            } else if (value != null) {
+                set.add(path + key);
+            }
+        });
+    }
+
+    public void replaceValue(String path, String newValue) {
+        String[] split = path.split("\\.");
+        JSONObject jsonObject = JSONObject.fromObject(value);
+        if (split.length == 1) {
+            jsonObject.put(split[0], newValue);
+        }
+
+        JSONObject object = jsonObject;
+        for (int i = 0; i < split.length - 1; i++) {
+            object = object.getJSONObject(split[i]);
+        }
+        object.put(split[split.length - 1], newValue);
+        value = jsonObject.toString();
     }
 }

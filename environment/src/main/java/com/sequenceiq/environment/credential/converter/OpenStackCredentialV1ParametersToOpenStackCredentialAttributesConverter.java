@@ -17,6 +17,9 @@ import com.sequenceiq.environment.credential.attributes.openstack.ProjectKeyston
 public class OpenStackCredentialV1ParametersToOpenStackCredentialAttributesConverter {
 
     public OpenStackCredentialAttributes convert(OpenstackParameters source) {
+        if (source == null) {
+            return null;
+        }
         OpenStackCredentialAttributes response = new OpenStackCredentialAttributes();
         response.setEndpoint(source.getEndpoint());
         response.setFacing(source.getFacing());
@@ -28,6 +31,9 @@ public class OpenStackCredentialV1ParametersToOpenStackCredentialAttributesConve
     }
 
     public OpenstackParameters convert(OpenStackCredentialAttributes source) {
+        if (source == null) {
+            return null;
+        }
         OpenstackParameters response = new OpenstackParameters();
         response.setEndpoint(source.getEndpoint());
         response.setFacing(source.getFacing());
@@ -38,59 +44,83 @@ public class OpenStackCredentialV1ParametersToOpenStackCredentialAttributesConve
         return response;
     }
 
-    private KeystoneV2Attributes getKeystoneV2(KeystoneV2Parameters keystoneV2) {
+    private KeystoneV2Attributes getKeystoneV2(KeystoneV2Parameters source) {
+        if (source == null) {
+            return null;
+        }
         KeystoneV2Attributes response = new KeystoneV2Attributes();
-        response.setTenantName(keystoneV2.getTenantName());
+        response.setTenantName(source.getTenantName());
         return response;
     }
 
-    private KeystoneV3Attributes getKeystoneV3(KeystoneV3Parameters keystoneV3) {
+    private KeystoneV3Attributes getKeystoneV3(KeystoneV3Parameters source) {
+        if (source == null) {
+            return null;
+        }
         KeystoneV3Attributes response = new KeystoneV3Attributes();
-        response.setDomain(getDomain(keystoneV3.getDomain()));
-        response.setProject(getProject(keystoneV3.getProject()));
+        response.setDomain(getDomain(source.getDomain()));
+        response.setProject(getProject(source.getProject()));
         return response;
     }
 
-    private ProjectKeystoneV3Attributes getProject(ProjectKeystoneV3Parameters project) {
+    private ProjectKeystoneV3Attributes getProject(ProjectKeystoneV3Parameters source) {
+        if (source == null) {
+            return null;
+        }
         ProjectKeystoneV3Attributes response = new ProjectKeystoneV3Attributes();
-        response.setProjectDomainName(project.getProjectDomainName());
-        response.setProjectName(project.getProjectName());
-        response.setUserDomain(project.getUserDomain());
+        response.setProjectDomainName(source.getProjectDomainName());
+        response.setProjectName(source.getProjectName());
+        response.setUserDomain(source.getUserDomain());
         return response;
     }
 
-    private DomainKeystoneV3Attributes getDomain(DomainKeystoneV3Parameters domain) {
+    private DomainKeystoneV3Attributes getDomain(DomainKeystoneV3Parameters source) {
+        if (source == null) {
+            return null;
+        }
         DomainKeystoneV3Attributes response = new DomainKeystoneV3Attributes();
-        response.setDomainName(domain.getDomainName());
-        response.setUserDomain(domain.getUserDomain());
+        response.setDomainName(source.getDomainName());
+        response.setUserDomain(source.getUserDomain());
         return response;
     }
 
-    private KeystoneV2Parameters getKeystoneV2(KeystoneV2Attributes keystoneV2) {
+    private KeystoneV2Parameters getKeystoneV2(KeystoneV2Attributes source) {
+        if (source == null) {
+            return null;
+        }
         KeystoneV2Parameters response = new KeystoneV2Parameters();
-        response.setTenantName(keystoneV2.getTenantName());
+        response.setTenantName(source.getTenantName());
         return response;
     }
 
-    private KeystoneV3Parameters getKeystoneV3(KeystoneV3Attributes keystoneV3) {
+    private KeystoneV3Parameters getKeystoneV3(KeystoneV3Attributes source) {
+        if (source == null) {
+            return null;
+        }
         KeystoneV3Parameters response = new KeystoneV3Parameters();
-        response.setDomain(getDomain(keystoneV3.getDomain()));
-        response.setProject(getProject(keystoneV3.getProject()));
+        response.setDomain(getDomain(source.getDomain()));
+        response.setProject(getProject(source.getProject()));
         return response;
     }
 
-    private ProjectKeystoneV3Parameters getProject(ProjectKeystoneV3Attributes project) {
+    private ProjectKeystoneV3Parameters getProject(ProjectKeystoneV3Attributes source) {
+        if (source == null) {
+            return null;
+        }
         ProjectKeystoneV3Parameters response = new ProjectKeystoneV3Parameters();
-        response.setProjectDomainName(project.getProjectDomainName());
-        response.setProjectName(project.getProjectName());
-        response.setUserDomain(project.getUserDomain());
+        response.setProjectDomainName(source.getProjectDomainName());
+        response.setProjectName(source.getProjectName());
+        response.setUserDomain(source.getUserDomain());
         return response;
     }
 
-    private DomainKeystoneV3Parameters getDomain(DomainKeystoneV3Attributes domain) {
+    private DomainKeystoneV3Parameters getDomain(DomainKeystoneV3Attributes source) {
+        if (source == null) {
+            return null;
+        }
         DomainKeystoneV3Parameters response = new DomainKeystoneV3Parameters();
-        response.setDomainName(domain.getDomainName());
-        response.setUserDomain(domain.getUserDomain());
+        response.setDomainName(source.getDomainName());
+        response.setUserDomain(source.getUserDomain());
         return response;
     }
 }

@@ -1,9 +1,10 @@
 package com.sequenceiq.environment.credential.converter;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -11,13 +12,13 @@ import javax.ws.rs.BadRequestException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
-import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
+import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.validation.CredentialValidator;
 import com.sequenceiq.environment.credential.validation.definition.CredentialDefinitionService;
-import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 
 @Component
 public class CredentialToCredentialV1ResponseConverter {
@@ -56,6 +57,9 @@ public class CredentialToCredentialV1ResponseConverter {
     private StringToSecretResponseConverter secretConverter;
 
     public CredentialResponse convert(Credential source) {
+        if (source == null) {
+            return null;
+        }
         CredentialResponse response = new CredentialResponse();
         response.setId(source.getId());
         credentialValidator.validateCredentialCloudPlatform(source.getCloudPlatform());
@@ -63,22 +67,21 @@ public class CredentialToCredentialV1ResponseConverter {
         response.setName(source.getName());
         if (source.getAttributes() != null) {
             try {
-                CredentialAttributes attributes = new Json(source.getAttributes()).get(CredentialAttributes.class);
-                response.setAzure(azureConverter.convert(attributes.getAzure()));
-                response.setAws(awsConverter.convert(attributes.getAws()));
-                response.setCumulus(cumulusConverter.convert(attributes.getCumulus()));
-                response.setGcp(gcpConverter.convert(attributes.getGcp()));
-                response.setMock(mockConverter.convert(attributes.getMock()));
-                response.setOpenstack(openstackConverter.convert(attributes.getOpenstack()));
-                response.setYarn(yarnConverter.convert(attributes.getYarn()));
+                Json json = new Json(source.getAttributes());
+                credentialDefinitionService.removeSensitives(platform(source.getCloudPlatform()), json);
+                coverSensitiveData(json);
+                CredentialAttributes credentialAttributes = json.get(CredentialAttributes.class);
+                response.setAzure(azureConverter.convert(credentialAttributes.getAzure()));
+                response.setAws(awsConverter.convert(credentialAttributes.getAws()));
+                response.setCumulus(cumulusConverter.convert(credentialAttributes.getCumulus()));
+                response.setGcp(gcpConverter.convert(credentialAttributes.getGcp()));
+                response.setMock(mockConverter.convert(credentialAttributes.getMock()));
+                response.setOpenstack(openstackConverter.convert(credentialAttributes.getOpenstack()));
+                response.setYarn(yarnConverter.convert(credentialAttributes.getYarn()));
             } catch (IOException e) {
                 throw new BadRequestException("Cannot deserialize the credential's attributes", e);
             }
 
-            //TODO: remove sesitives: Bubba
-//            Map<String, Object> parameters = credentialDefinitionService.removeSensitives(platform(source.getCloudPlatform()), secretAttributes.getMap());
-//            coverSensitiveData(parameters);
-//            credentialParameterSetterUtil.setProperParameters(source.getCloudPlatform(), response, parameters);
             if (response.getAws() != null) {
                 response.getAws().setGovCloud(source.getGovCloud());
             }
@@ -90,6 +93,9 @@ public class CredentialToCredentialV1ResponseConverter {
     }
 
     public Credential convert(CredentialRequest source) {
+        if (source == null) {
+            return null;
+        }
         Credential credential = new Credential();
         credential.setName(source.getName());
         credential.setDescription(source.getDescription());
@@ -109,11 +115,11 @@ public class CredentialToCredentialV1ResponseConverter {
         return credential;
     }
 
-    private void coverSensitiveData(Map<String, Object> params) {
+    private void coverSensitiveData(Json json) {
         for (String field : FIELDS_TO_COVER) {
-            if (params.get(field) != null) {
-                params.put(field, PLACEHOLDER);
-            }
+            json.flatPaths()
+                    .stream().filter(v -> v.contains(field))
+                    .forEach(v -> json.replaceValue(v, PLACEHOLDER));
         }
     }
 }

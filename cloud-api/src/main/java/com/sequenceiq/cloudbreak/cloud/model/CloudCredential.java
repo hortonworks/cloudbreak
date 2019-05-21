@@ -7,6 +7,8 @@ import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 
 public class CloudCredential extends DynamicModel {
 
+    public static final String GOV_CLOUD = "govCloud";
+
     private final Long id;
 
     private final String name;

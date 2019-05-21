@@ -9,12 +9,18 @@ import com.sequenceiq.environment.credential.attributes.mock.MockCredentialAttri
 public class MockCredentialV1ParametersToMockCredentialAttributesConverter {
 
     public MockCredentialAttributes convert(MockParameters source) {
+        if (source == null) {
+            return null;
+        }
         MockCredentialAttributes response = new MockCredentialAttributes();
         response.setMockEndpoint(source.getMockEndpoint());
         return response;
     }
 
     public MockParameters convert(MockCredentialAttributes source) {
+        if (source == null) {
+            return null;
+        }
         MockParameters response = new MockParameters();
         response.setMockEndpoint(source.getMockEndpoint());
         return response;

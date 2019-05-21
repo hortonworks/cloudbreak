@@ -26,7 +26,7 @@ public abstract class NotificationController {
     @Inject
     private AuthenticatedUserService authenticatedUserService;
 
-    @Value("${notification.url:http://localhost:8089}")
+    @Value("${notification.url:http://localhost:3000/notifications}")
     private String notificationUrl;
 
     protected final void executeAndNotify(Consumer<CloudbreakUser> consumer, ResourceEvent resourceEvent) {
@@ -46,6 +46,7 @@ public abstract class NotificationController {
         notification.setEventType(resourceEvent.name());
         notification.setEventMessage(messagesService.getMessage(resourceEvent.getMessage(), messageArgs));
         notification.setTenantName(cloudbreakUser.getTenant());
+        notification.setUserId(cloudbreakUser.getUserId());
         notificationSender.send(new Notification<>(notification), Collections.singletonList(notificationUrl), RestClientUtil.get());
     }
 }

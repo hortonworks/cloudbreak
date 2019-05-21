@@ -2,15 +2,15 @@ package com.sequenceiq.environment.credential.validation.definition;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 import com.sequenceiq.environment.definition.ResourceDefinitionService;
 import com.sequenceiq.environment.exception.MissingParameterException;
@@ -25,12 +25,12 @@ public class CredentialDefinitionService {
     @Inject
     private ResourceDefinitionService definitionService;
 
-    public void checkProperties(Platform cloudPlatform, Map<String, Object> properties) {
-        processValues(getDefinition(cloudPlatform), properties);
+    public void checkProperties(Platform cloudPlatform, Json json) {
+        processValues(getDefinition(cloudPlatform), json);
     }
 
-    public Map<String, Object> removeSensitives(Platform cloudPlatform, Map<String, Object> properties) {
-        return processValues(getDefinition(cloudPlatform), properties);
+    public void removeSensitives(Platform cloudPlatform, Json json) {
+        processValues(getDefinition(cloudPlatform), json);
     }
 
     private Definition getDefinition(Platform cloudPlatform) {
@@ -42,14 +42,12 @@ public class CredentialDefinitionService {
         }
     }
 
-    private Map<String, Object> processValues(Definition definition, Map<String, Object> properties) {
-        Map<String, Object> processed = new HashMap<>(processValues(properties, definition.getDefaultValues()));
-        Object selector = properties.get(SELECTOR);
+    private void processValues(Definition definition, Json json) {
+        processValues(json, definition.getDefaultValues());
+        Object selector = json.getValue(SELECTOR);
         if (selector != null) {
-            processed.put(SELECTOR, selector);
-            processed.putAll(processValues(properties, collectSelectorValues(definition, String.valueOf(selector))));
+            processValues(json, collectSelectorValues(definition, String.valueOf(selector)));
         }
-        return processed;
     }
 
     private Iterable<Value> collectSelectorValues(Definition definition, String selectorName) {
@@ -73,16 +71,16 @@ public class CredentialDefinitionService {
         return null;
     }
 
-    private Map<String, Object> processValues(Map<String, Object> properties, Iterable<Value> values) {
-        Map<String, Object> processed = new HashMap<>();
+    private void processValues(Json json, Iterable<Value> values) {
+        Set<String> flatValues = json.flatPaths();
         for (Value value : values) {
             String key = value.getName();
-            String property = getProperty(properties, key, isOptional(value));
+            String property = getProperty(json, key, isOptional(value));
             if (!isSensitve(value) && property != null) {
-                processed.put(key, property);
+                flatValues.remove(value.getName());
             }
         }
-        return processed;
+        flatValues.forEach(json::remove);
     }
 
     private boolean isSensitve(Value value) {
@@ -99,8 +97,8 @@ public class CredentialDefinitionService {
         return null != object;
     }
 
-    private String getProperty(Map<String, Object> properties, String key, boolean optional) {
-        Object value = properties.get(key);
+    private String getProperty(Json json, String key, boolean optional) {
+        Object value = json.getValue(key);
         if (value == null && !optional) {
             throw new MissingParameterException(String.format("Missing '%s' property!", key));
         }

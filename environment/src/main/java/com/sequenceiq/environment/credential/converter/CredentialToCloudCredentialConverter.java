@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.credential.converter;
 
+import static com.sequenceiq.cloudbreak.cloud.model.CloudCredential.GOV_CLOUD;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.util.HashMap;
@@ -27,6 +28,7 @@ public class CredentialToCloudCredentialConverter {
             fields = new Json(credential.getAttributes()).getMap();
         }
         fields.put(CREDENTIAL_ID, credential.getId());
+        fields.put(GOV_CLOUD, credential.getGovCloud());
         return new CloudCredential(credential.getId(), credential.getName(), fields);
     }
 

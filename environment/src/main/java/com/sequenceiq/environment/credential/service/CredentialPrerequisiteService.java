@@ -1,17 +1,13 @@
 package com.sequenceiq.environment.credential.service;
 
-import static com.sequenceiq.environment.TempConstants.TEMP_EXTERNAL_ID;
 import static com.sequenceiq.environment.TempConstants.TEMP_USER_ID;
 import static com.sequenceiq.environment.TempConstants.TEMP_WORKSPACE_ID;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,7 +19,9 @@ import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.service.OperationException;
+import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
 import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.user.UserPreferencesService;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
@@ -43,9 +41,13 @@ public class CredentialPrerequisiteService {
     @Inject
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
+    @Inject
+    private UserPreferencesService userPreferencesService;
+
     public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, String deploymentAddress) {
         CloudContext cloudContext = new CloudContext(null, null, cloudPlatform, TEMP_USER_ID, TEMP_WORKSPACE_ID);
-        CredentialPrerequisitesRequest request = new CredentialPrerequisitesRequest(cloudContext, TEMP_EXTERNAL_ID, deploymentAddress);
+        CredentialPrerequisitesRequest request = new CredentialPrerequisitesRequest(cloudContext,
+                userPreferencesService.getExternalIdForCurrentUser(), deploymentAddress);
         LOGGER.debug("Triggering event: {}", request);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         String message = String.format("Failed to get prerequisites for platform '%s': ", cloudPlatform);
@@ -64,24 +66,31 @@ public class CredentialPrerequisiteService {
     }
 
     public Credential decorateCredential(Credential credential) {
-        String attributes = credential.getAttributes();
-        Map<String, Object> newAttributes = convertJsonStringToMap(attributes);
         boolean attributesChanged = false;
-        if (StringUtils.isNoneEmpty((String) newAttributes.get(ROLE_ARN_PARAMTER_KEY))) {
-            newAttributes.put(EXTERNAL_ID_PARAMETER_KEY, TEMP_EXTERNAL_ID);
-            attributesChanged = true;
-        }
-        if (attributesChanged) {
-            saveNewAttributesToCredential(credential, newAttributes);
+        CredentialAttributes credentialAttributes = getCredentialAttributes(credential);
+        if (isRoleArnSet(credentialAttributes)) {
+            credentialAttributes.getAws().getRoleBased().setExternalId(userPreferencesService.getExternalIdForCurrentUser());
+            saveNewAttributesToCredential(credential, credentialAttributes);
         }
         return credential;
     }
 
-    private Map<String, Object> convertJsonStringToMap(String attributes) {
-        return isEmpty(attributes) ? new HashMap<>() : new Json(attributes).getMap();
+    private boolean isRoleArnSet(CredentialAttributes credentialAttributes) {
+        return credentialAttributes != null
+                && credentialAttributes.getAws() != null
+                && credentialAttributes.getAws().getRoleBased() != null
+                && credentialAttributes.getAws().getRoleBased().getRoleArn() != null;
     }
 
-    private void saveNewAttributesToCredential(Credential credential, Map<String, Object> newAttributes) {
-        credential.setAttributes(new Json(newAttributes).getValue());
+    private CredentialAttributes getCredentialAttributes(Credential credential) {
+        try {
+            return new Json(credential.getAttributes()).get(CredentialAttributes.class);
+        } catch (IOException ignore) {
+        }
+        return null;
+    }
+
+    private void saveNewAttributesToCredential(Credential credential, CredentialAttributes credentialAttributes) {
+        credential.setAttributes(new Json(credentialAttributes).getValue());
     }
 }
