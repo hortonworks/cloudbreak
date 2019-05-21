@@ -5,24 +5,39 @@ import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFo
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.sequenceiq.environment.api.environment.v1.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.repository.EnvironmentViewRepository;
 
 @Service
 public class EnvironmentViewService {
 
-    @Inject
-    private EnvironmentViewRepository environmentViewRepository;
+    private final EnvironmentViewRepository environmentViewRepository;
+
+    private final ConversionService conversionService;
+
+    public EnvironmentViewService(EnvironmentViewRepository environmentViewRepository, ConversionService conversionService) {
+        this.environmentViewRepository = environmentViewRepository;
+        this.conversionService = conversionService;
+    }
 
     public Set<EnvironmentView> findByNamesInAccount(Set<String> names, @NotNull String accountid) {
         return CollectionUtils.isEmpty(names) ? new HashSet<>() : environmentViewRepository.findAllByNameInAndAccountId(names, accountid);
+    }
+
+    public Set<SimpleEnvironmentResponse> listByAccountId(String accountId) {
+        Set<SimpleEnvironmentResponse> environmentResponses = findAllByAccountId(accountId).stream()
+                .map(env -> conversionService.convert(env, SimpleEnvironmentResponse.class))
+                .collect(Collectors.toSet());
+        return environmentResponses;
     }
 
     public Set<EnvironmentView> findAllByAccountId(String accountId) {

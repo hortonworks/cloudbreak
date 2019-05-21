@@ -38,6 +38,14 @@ public class AuthenticatedUserService {
         return null;
     }
 
+    public String getAccountId() {
+        CloudbreakUser cbUser = getCbUser();
+        if (cbUser == null) {
+            throw new IllegalStateException("No authentication found in the SecurityContextHolder!");
+        }
+        return cbUser.getTenant();
+    }
+
     public String getTokenValue(OAuth2Authentication auth) {
         return ((OAuth2AuthenticationDetails) auth.getDetails()).getTokenValue();
     }

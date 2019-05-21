@@ -65,7 +65,7 @@ public class ProxyConfig implements Serializable, EnvironmentAwareResource, Auth
     private String accountId;
 
     @Column(nullable = false)
-    private String resourceCRN;
+    private String resourceCrn;
 
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(name = "env_proxy", joinColumns = @JoinColumn(name = "proxyid"), inverseJoinColumns = @JoinColumn(name = "envid"))
@@ -192,12 +192,12 @@ public class ProxyConfig implements Serializable, EnvironmentAwareResource, Auth
     }
 
     @Override
-    public String getResourceCRN() {
-        return resourceCRN;
+    public String getResourceCrn() {
+        return resourceCrn;
     }
 
     @Override
-    public void setResourceCRN(String resourceCRN) {
-        this.resourceCRN = resourceCRN;
+    public void setResourceCrn(String resourceCrn) {
+        this.resourceCrn = resourceCrn;
     }
 }

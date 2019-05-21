@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.util;
 
 import java.util.function.Supplier;
 
-import javax.ws.rs.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 
 public class ThrowableUtil {
 

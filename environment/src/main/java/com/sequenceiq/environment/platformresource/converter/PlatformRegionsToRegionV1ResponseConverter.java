@@ -16,14 +16,14 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.environment.api.platformresource.model.RegionV1Response;
+import com.sequenceiq.environment.api.platformresource.model.RegionResponse;
 
 @Component
-public class PlatformRegionsToRegionV1ResponseConverter extends AbstractConversionServiceAwareConverter<CloudRegions, RegionV1Response> {
+public class PlatformRegionsToRegionV1ResponseConverter extends AbstractConversionServiceAwareConverter<CloudRegions, RegionResponse> {
 
     @Override
-    public RegionV1Response convert(CloudRegions source) {
-        RegionV1Response json = new RegionV1Response();
+    public RegionResponse convert(CloudRegions source) {
+        RegionResponse json = new RegionResponse();
 
         Set<String> regions = new HashSet<>();
         for (Region region : source.getCloudRegions().keySet()) {

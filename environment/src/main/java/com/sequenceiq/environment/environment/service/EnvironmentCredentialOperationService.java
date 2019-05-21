@@ -1,7 +1,5 @@
 package com.sequenceiq.environment.environment.service;
 
-import javax.inject.Inject;
-import javax.inject.Named;
 import javax.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -9,7 +7,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.environment.api.environment.model.request.CredentialAwareEnvV1Request;
+import com.sequenceiq.environment.api.environment.v1.model.request.CredentialAwareEnvRequest;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -17,14 +15,16 @@ import com.sequenceiq.environment.environment.domain.Environment;
 @Service
 public class EnvironmentCredentialOperationService {
 
-    @Inject
-    private CredentialService credentialService;
+    private final CredentialService credentialService;
 
-    @Inject
-    @Named("conversionService")
-    private ConversionService conversionService;
+    private final ConversionService conversionService;
 
-    public Credential getCredentialFromRequest(CredentialAwareEnvV1Request request, String accountId) {
+    public EnvironmentCredentialOperationService(CredentialService credentialService, ConversionService conversionService) {
+        this.credentialService = credentialService;
+        this.conversionService = conversionService;
+    }
+
+    public Credential getCredentialFromRequest(CredentialAwareEnvRequest request, String accountId) {
         Credential credential;
         if (StringUtils.isNotEmpty(request.getCredentialName())) {
             try {
@@ -40,7 +40,7 @@ public class EnvironmentCredentialOperationService {
         return credential;
     }
 
-    public Credential validatePlatformAndGetCredential(CredentialAwareEnvV1Request request, Environment environment, String accountId) {
+    public Credential validatePlatformAndGetCredential(CredentialAwareEnvRequest request, Environment environment, String accountId) {
         String requestedPlatform;
         if (StringUtils.isNotEmpty(request.getCredentialName())) {
             Credential credential = credentialService.getByNameForAccountId(request.getCredentialName(), accountId);

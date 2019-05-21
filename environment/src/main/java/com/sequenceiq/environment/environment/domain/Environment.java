@@ -22,12 +22,12 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
-import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.environment.credential.domain.Credential;
-import com.sequenceiq.environment.environment.domain.network.BaseNetwork;
+import com.sequenceiq.environment.network.BaseNetwork;
 import com.sequenceiq.environment.proxy.ProxyConfig;
 
 @Entity
@@ -84,7 +84,7 @@ public class Environment implements AuthResource {
     private String accountId;
 
     @Column(nullable = false)
-    private String resourceCRN;
+    private String resourceCrn;
 
     public Environment() {
         regions = new Json(new HashSet<Region>());
@@ -222,12 +222,12 @@ public class Environment implements AuthResource {
     }
 
     @Override
-    public String getResourceCRN() {
-        return resourceCRN;
+    public String getResourceCrn() {
+        return resourceCrn;
     }
 
     @Override
-    public void setResourceCRN(String resourceCRN) {
-        this.resourceCRN = resourceCRN;
+    public void setResourceCrn(String resourceCrn) {
+        this.resourceCrn = resourceCrn;
     }
 }

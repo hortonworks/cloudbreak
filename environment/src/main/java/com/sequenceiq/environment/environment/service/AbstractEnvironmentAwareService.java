@@ -69,8 +69,10 @@ public abstract class AbstractEnvironmentAwareService<T extends EnvironmentAware
         return repository().getByNameAndAccountId(name, accountId);
     }
 
-    public Set<T> findByNamesInAccount(Set<String> names, String accountId) {
-        return CollectionUtils.isEmpty(names) ? new HashSet<>() : repository().findAllByNameInAndAccountId(names, accountId);
+    public Set<T> findByNamesInAccount(Set<String> proxyNames, String accountId) {
+        return CollectionUtils.isEmpty(proxyNames)
+                ? new HashSet<>()
+                : repository().findAllByNameInAndAccountId(proxyNames, accountId);
     }
 
     public Set<T> findAllInAccountAndEnvironment(String accountId, EnvironmentView environment) {

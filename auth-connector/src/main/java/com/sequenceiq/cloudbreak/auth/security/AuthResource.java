@@ -6,7 +6,7 @@ public interface AuthResource {
 
     void setAccountId(String accountId);
 
-    String getResourceCRN();
+    String getResourceCrn();
 
-    void setResourceCRN(String resourceCRN);
+    void setResourceCrn(String resourceCrn);
 }
