@@ -685,11 +685,6 @@ public class ModelDescriptions {
         public static final String NETWORK = "Network related specifics of the environment.";
     }
 
-    public static class SecretResponseModelDescription {
-        public static final String ENGINE_PATH = "Engine path of the secret.";
-        public static final String SECRET_PATH = "Path of the secret.";
-    }
-
     public static class DatalakeResourcesDescription {
         public static final String SERVICE_DESCRIPTORS = "Descriptors of the datalake services";
         public static final String SERVICE_NAME = "Name of the datalake service";

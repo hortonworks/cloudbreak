@@ -10,7 +10,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.reflections.Reflections;
 
-import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
+import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.workspace.model.TenantAwareResource;
 
 public class EntityTest {

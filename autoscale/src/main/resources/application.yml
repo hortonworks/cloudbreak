@@ -66,6 +66,7 @@ vault:
   port: 8200
   ssl.enabled: false
   kv.engine.v2.path: secret
+  config.enabled: true
   auth:
     type: "token"
     kubernetes:

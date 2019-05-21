@@ -1,4 +1,24 @@
-Someone who wants to use the secret module, they should create the proper `@Aspect` with the proper `@Pointcut`. For example:
+Someone who wants to use the secret module first of all they have to enable the configuration with `vault.config.enabled=true` and add the following properties to the application.yml or as run parameters for example:
+```
+secret:
+  application: env/shared
+  engine: "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine"
+
+vault:
+  addr: vault.service.consul
+  port: 8200
+  ssl.enabled: false
+  kv.engine.v2.path: secret
+  config.enabled: true
+  auth:
+    type: "token"
+    kubernetes:
+      service.account.token.path: /var/run/secrets/kubernetes.io/serviceaccount/token
+      mount.path: "dps-dev"
+      login.role: "cloudbreak.default"
+```
+
+Futhermore, you should create the proper `@Aspect` with the proper `@Pointcut`. For example:
 ```
 @Component
 @Aspect

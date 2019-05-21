@@ -7,15 +7,18 @@ import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.VaultResponse;
 
+import com.sequenceiq.cloudbreak.service.secret.conf.VaultConfig;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 @Component("VaultKvV1Engine")
+@ConditionalOnBean(VaultConfig.class)
 public class VaultKvV1Engine extends AbstractVaultEngine<VaultKvV1Engine> {
 
     @Value("${vault.kv.engine.path:}")
