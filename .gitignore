@@ -55,6 +55,7 @@ start-local.sh
 cloudbreak.log
 cloudbreak-log/*.log
 autoscale-log/
+environment-log/
 core/cloudbreak-log/
 
 .deps/
