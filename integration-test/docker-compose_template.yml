@@ -64,6 +64,8 @@ services:
       - INTEGRATIONTEST_YARN_IMAGE_ID
       - INTEGRATIONTEST_YARN_REGION
       - INTEGRATIONTEST_YARN_LOCATION
+      - CM_PRIVATE_REPO_USER
+      - CM_PRIVATE_REPO_PASSWORD
     image: openjdk:11-jdk
   swagger-diff:
     networks:
