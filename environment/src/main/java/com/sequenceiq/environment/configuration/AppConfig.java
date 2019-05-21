@@ -7,16 +7,19 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
+import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.environment.converter.network.EnvironmentNetworkConverter;
 import com.sequenceiq.environment.environment.validator.network.EnvironmentNetworkValidator;
+import com.sequenceiq.environment.logger.MDCContextFilter;
+import com.sequenceiq.environment.logger.MDCCleanerTaskDecorator;
 
 @Configuration
 public class AppConfig {
@@ -26,6 +29,9 @@ public class AppConfig {
 
     @Inject
     private List<EnvironmentNetworkConverter> environmentNetworkConverters;
+
+    @Inject
+    private AuthenticatedUserService authenticatedUserService;
 
     @Value("${cb.intermediate.threadpool.core.size:}")
     private int intermediateCorePoolSize;
@@ -57,5 +63,14 @@ public class AppConfig {
         executor.setTaskDecorator(new MDCCleanerTaskDecorator());
         executor.initialize();
         return executor;
+    }
+
+    @Bean
+    public FilterRegistrationBean<MDCContextFilter> mdcContextFilterRegistrationBean() {
+        FilterRegistrationBean<MDCContextFilter> registrationBean = new FilterRegistrationBean<>();
+        MDCContextFilter filter = new MDCContextFilter(authenticatedUserService, null);
+        registrationBean.setFilter(filter);
+        registrationBean.setOrder(Integer.MAX_VALUE);
+        return registrationBean;
     }
 }

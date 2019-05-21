@@ -103,7 +103,7 @@ public class MDCBuilder {
         }
     }
 
-    static String getFieldValue(Object o, String field) {
+    public static String getFieldValue(Object o, String field) {
         try {
             Field privateStringField = FieldUtils.getField(o.getClass(), field, true);
             privateStringField.setAccessible(true);
