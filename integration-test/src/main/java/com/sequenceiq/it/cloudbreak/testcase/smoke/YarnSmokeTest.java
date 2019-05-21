@@ -35,16 +35,6 @@ public class YarnSmokeTest extends AbstractE2ETest {
 
     private static final String CREATE_CM_USER_SCRIPT_FILE = "classpath:/recipes/create-cm-user.sh";
 
-    private static final String REPOSITORY_VERSION = "7.x.0";
-
-    private static final String REPOSITORY_URL = "http://cloudera-build-3-us-central-1.gce.cloudera.com/s3/build/1072240/cm7/7.x.0/redhat7/yum/";
-
-    private static final String PRODUCT_VERSION = "6.0.99-1.cdh6.0.99.p0.181";
-
-    private static final String PRODUCT_PARCEL = "http://cloudera-build-3-us-central-1.gce.cloudera.com/s3/build/1071671/cdh/6.x/parcels/";
-
-    private static final String PRODUCT_NAME = "CDH";
-
     @Inject
     private StackTestClient stackTestClient;
 
@@ -65,13 +55,18 @@ public class YarnSmokeTest extends AbstractE2ETest {
         String cm = resourcePropertyProvider().getName();
         String cmcluster = resourcePropertyProvider().getName();
         String stack = resourcePropertyProvider().getName();
+        String repositoryUrl = ClouderaManagerUtil.getRepositoryUrl(testContext, commonCloudProperties.getCloudProvider());
+        String repositoryVersion = ClouderaManagerUtil.getRepositoryVersion(testContext);
+        String productParcel = ClouderaManagerUtil.getProductParcel(testContext, commonCloudProperties.getCloudProvider());
+        String productVersion = ClouderaManagerUtil.getProductVersion(testContext);
+        String productName = ClouderaManagerUtil.getProductName(testContext);
 
         testContext
                 .given(cm, ClouderaManagerTestDto.class)
                 .withClouderaManagerRepository(new ClouderaManagerRepositoryTestDto(testContext)
-                        .withVersion(REPOSITORY_VERSION).withBaseUrl(REPOSITORY_URL))
+                        .withVersion(repositoryVersion).withBaseUrl(repositoryUrl))
                 .withClouderaManagerProduct(new ClouderaManagerProductTestDto(testContext)
-                        .withName(PRODUCT_NAME).withParcel(PRODUCT_PARCEL).withVersion(PRODUCT_VERSION))
+                        .withName(productName).withParcel(productParcel).withVersion(productVersion))
                 .given(cmcluster, ClusterTestDto.class).withValidateBlueprint(Boolean.FALSE).withClouderaManager(cm)
                 .given(RecipeTestDto.class)
                 .withName(postCmStartRecipeName).withContent(generateCreateCMUserRecipeContent(CREATE_CM_USER_SCRIPT_FILE))
