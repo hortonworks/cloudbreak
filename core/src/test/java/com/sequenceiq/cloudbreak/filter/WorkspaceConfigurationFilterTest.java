@@ -29,7 +29,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -106,8 +105,8 @@ public class WorkspaceConfigurationFilterTest {
         when(userService.getOrCreate(any())).thenReturn(new User());
         when(workspaceService.getByName(anyString(), any())).thenReturn(Optional.empty());
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage("Tenant default workspace not exists!");
+        expectedException.expect(IllegalStateException.class);
+        expectedException.expectMessage("Tenant default workspace does not exist!");
 
         underTest.doFilterInternal(request, response, filterChain);
 
