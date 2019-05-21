@@ -7,24 +7,17 @@ import javax.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupV4Base;
+import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
+import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerRepositoryTestDto;
+import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerProductTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
-import com.sequenceiq.it.cloudbreak.assertion.Assertion;
-import com.sequenceiq.it.cloudbreak.context.Description;
-import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerProductTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 
 public class AwsBasicStackTests extends AbstractE2ETest {
-
-    private static final String REPOSITORY_VERSION = "7.x.0";
-
-    private static final String REPOSITORY_URL = "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1072240/cm7/7.x.0/redhat7/yum/";
-
-    private static final String REPOSITORY_GPG = "";
 
     private static final String PRODUCT_VERSION = "6.0.99-1.cdh6.0.99.p0.181";
 
@@ -46,8 +39,6 @@ public class AwsBasicStackTests extends AbstractE2ETest {
         String stack = resourcePropertyProvider().getName();
 
         testContext.given(cm, ClouderaManagerTestDto.class)
-                .withClouderaManagerRepository(new ClouderaManagerRepositoryTestDto(testContext)
-                        .withVersion(REPOSITORY_VERSION).withBaseUrl(REPOSITORY_URL))
                 .withClouderaManagerProduct(new ClouderaManagerProductTestDto(testContext)
                         .withName(PRODUCT_NAME).withParcel(PRODUCT_PARCEL).withVersion(PRODUCT_VERSION))
                 .given(cmcluster, ClusterTestDto.class)
@@ -79,8 +70,6 @@ public class AwsBasicStackTests extends AbstractE2ETest {
         Integer downscaleCount = 3;
         String groupToScale = "worker";
         testContext.given(cm, ClouderaManagerTestDto.class)
-                .withClouderaManagerRepository(new ClouderaManagerRepositoryTestDto(testContext)
-                        .withVersion(REPOSITORY_VERSION).withBaseUrl(REPOSITORY_URL).withGpgKeyUrl(REPOSITORY_GPG))
                 .withClouderaManagerProduct(new ClouderaManagerProductTestDto(testContext)
                         .withName(PRODUCT_NAME).withParcel(PRODUCT_PARCEL).withVersion(PRODUCT_VERSION))
                 .given(cmcluster, ClusterTestDto.class)
