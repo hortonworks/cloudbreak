@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.api.v1.freeipa.users;
+package com.sequenceiq.freeipa.api.v1.freeipa.user;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -7,9 +7,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.freeipa.api.v1.freeipa.users.model.SynchronizeUsersRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.users.model.SynchronizeUsersResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.users.model.SynchronizeUsersStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUsersRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUsersResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUsersStatus;
 import com.sequenceiq.service.api.doc.ContentType;
 
 import io.swagger.annotations.Api;
