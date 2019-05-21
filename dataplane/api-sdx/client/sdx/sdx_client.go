@@ -36,7 +36,7 @@ func (a *Client) CreateSdx(params *CreateSdxParams) (*CreateSdxOK, error) {
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "createSdx",
 		Method:             "POST",
-		PathPattern:        "/sdx/{envName}",
+		PathPattern:        "/sdx/{sdxName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -64,7 +64,7 @@ func (a *Client) DeleteSdx(params *DeleteSdxParams) error {
 	_, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "deleteSdx",
 		Method:             "DELETE",
-		PathPattern:        "/sdx/{envName}",
+		PathPattern:        "/sdx/{sdxName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -92,7 +92,7 @@ func (a *Client) GetSdx(params *GetSdxParams) (*GetSdxOK, error) {
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getSdx",
 		Method:             "GET",
-		PathPattern:        "/sdx/{envName}",
+		PathPattern:        "/sdx/{sdxName}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -120,7 +120,7 @@ func (a *Client) ListSdx(params *ListSdxParams) (*ListSdxOK, error) {
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "listSdx",
 		Method:             "GET",
-		PathPattern:        "/sdx/{envName}/list",
+		PathPattern:        "/sdx/list",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -148,7 +148,7 @@ func (a *Client) RedeploySdx(params *RedeploySdxParams) error {
 	_, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "redeploySdx",
 		Method:             "POST",
-		PathPattern:        "/sdx/{envName}/redeploy",
+		PathPattern:        "/sdx/{sdxName}/redeploy",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},

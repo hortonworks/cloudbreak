@@ -16,6 +16,7 @@ import (
 var sdxClusterHeader = []string{"Name"}
 
 type sdxClusterOutput struct {
+	SdxCrn  string `json:"Crn" yaml:"Crn"`
 	SdxName string `json:"Name" yaml:"Name"`
 	Status  string `json:"Status" yaml:"Status"`
 }
@@ -33,30 +34,40 @@ type clientSdx interface {
 func CreateSdx(c *cli.Context) {
 	defer commonutils.TimeTrack(time.Now(), "create SDX cluster")
 
-	name := c.String(fl.FlEnvironmentName.Name)
+	name := c.String(fl.FlName.Name)
+	envName := c.String(fl.FlEnvironmentName.Name)
+	cidrOptional := c.String(fl.FlCidrOptional.Name)
+	clusterShape := c.String(fl.FlClusterShape.Name)
+
+	var cidr string
+	if cidr = cidrOptional; cidrOptional == "" {
+		cidr = "0.0.0.0/0"
+	}
+
 	SdxRequest := &sdxModel.SdxClusterRequest{
-		AccessCidr:   "",
-		ClusterShape: "",
+		AccessCidr:   &cidr,
+		ClusterShape: &clusterShape,
+		Environment:  &envName,
 		Tags:         nil,
 	}
 
 	sdxClient := ClientSdx(*oauth.NewSDXClientFromContext(c)).Sdx
-	resp, err := sdxClient.Sdx.CreateSdx(sdx.NewCreateSdxParams().WithEnvName(name).WithBody(SdxRequest))
+	resp, err := sdxClient.Sdx.CreateSdx(sdx.NewCreateSdxParams().WithSdxName(name).WithBody(SdxRequest))
 
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	sdxCluster := resp.Payload
 
-	log.Infof("[createSdx] SDX cluster created in environment: %s, with name: %s", name, sdxCluster.SdxName)
+	log.Infof("[createSdx] SDX cluster created in environment: %s, with name: %s", envName, sdxCluster.SdxName)
 }
 
 func DeleteSdx(c *cli.Context) {
 	defer commonutils.TimeTrack(time.Now(), "delete SDX cluster")
-	name := c.String(fl.FlEnvironmentName.Name)
+	name := c.String(fl.FlName.Name)
 
 	sdxClient := ClientSdx(*oauth.NewSDXClientFromContext(c)).Sdx
-	err := sdxClient.Sdx.DeleteSdx(sdx.NewDeleteSdxParams().WithEnvName(name))
+	err := sdxClient.Sdx.DeleteSdx(sdx.NewDeleteSdxParams().WithSdxName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -64,6 +75,7 @@ func DeleteSdx(c *cli.Context) {
 }
 
 func ListSdx(c *cli.Context) {
+	defer utils.TimeTrack(time.Now(), "List sdx clusters in environment")
 	envName := c.String(fl.FlEnvironmentName.Name)
 	sdxClient := ClientSdx(*oauth.NewSDXClientFromContext(c))
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
@@ -73,19 +85,35 @@ func ListSdx(c *cli.Context) {
 }
 
 func listSdxClusterImpl(client clientSdx, envName string, writer func([]string, []utils.Row)) {
-	resp, err := client.ListSdx(sdx.NewListSdxParams().WithEnvName(envName))
+	resp, err := client.ListSdx(sdx.NewListSdxParams().WithEnvName(&envName))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 
 	var tableRows []utils.Row
 	for _, sdxCluster := range resp.Payload {
-		tableRows = append(tableRows, &sdxClusterOutput{sdxCluster.SdxName, sdxCluster.Status})
+		tableRows = append(tableRows, &sdxClusterOutput{sdxCluster.SdxCrn, sdxCluster.SdxName, sdxCluster.Status})
 	}
 
 	writer(sdxClusterHeader, tableRows)
 }
 
 func DescribeSdx(c *cli.Context) {
-	log.Infof("[DescribeSdx] Not supported")
+	defer utils.TimeTrack(time.Now(), "describe sdx cluster")
+	name := c.String(fl.FlName.Name)
+	sdxClient := ClientSdx(*oauth.NewSDXClientFromContext(c)).Sdx.Sdx
+	resp, err := sdxClient.GetSdx(sdx.NewGetSdxParams().WithSdxName(name))
+
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+
+	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
+	sdxCluster := resp.Payload
+	if output.Format != "table" {
+		output.Write(append(sdxClusterHeader, "ContentAsBase64", "ID"), &sdxClusterOutput{sdxCluster.SdxCrn, sdxCluster.SdxName, sdxCluster.Status})
+	} else {
+		output.Write(append(sdxClusterHeader, "ID"), &sdxClusterOutput{sdxCluster.SdxCrn, sdxCluster.SdxName, sdxCluster.Status})
+	}
+	log.Infof("[DescribeSdx] Describe a particular SDX cluster")
 }

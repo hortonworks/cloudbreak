@@ -61,8 +61,8 @@ for the get sdx operation typically these are written to a http.Request
 */
 type GetSdxParams struct {
 
-	/*EnvName*/
-	EnvName string
+	/*SdxName*/
+	SdxName string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -102,15 +102,15 @@ func (o *GetSdxParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithEnvName adds the envName to the get sdx params
-func (o *GetSdxParams) WithEnvName(envName string) *GetSdxParams {
-	o.SetEnvName(envName)
+// WithSdxName adds the sdxName to the get sdx params
+func (o *GetSdxParams) WithSdxName(sdxName string) *GetSdxParams {
+	o.SetSdxName(sdxName)
 	return o
 }
 
-// SetEnvName adds the envName to the get sdx params
-func (o *GetSdxParams) SetEnvName(envName string) {
-	o.EnvName = envName
+// SetSdxName adds the sdxName to the get sdx params
+func (o *GetSdxParams) SetSdxName(sdxName string) {
+	o.SdxName = sdxName
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -121,8 +121,8 @@ func (o *GetSdxParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regist
 	}
 	var res []error
 
-	// path param envName
-	if err := r.SetPathParam("envName", o.EnvName); err != nil {
+	// path param sdxName
+	if err := r.SetPathParam("sdxName", o.SdxName); err != nil {
 		return err
 	}
 

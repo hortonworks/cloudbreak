@@ -584,6 +584,13 @@ var (
 			Usage: "name of the region",
 		},
 	}
+	FlClusterShape = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "cluster-shape",
+			Usage: "defines the used cluster shape",
+		},
+	}
 	FlAvailabilityZoneOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
@@ -737,6 +744,13 @@ var (
 		StringFlag: cli.StringFlag{
 			Name:  "connector-jar-url",
 			Usage: "URL of the jdbc jar file",
+		},
+	}
+	FlCidrOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "cidr",
+			Usage: "defines Classless Inter-Domain Routing for cluster",
 		},
 	}
 	FlWithCustomDomainOptional = BoolFlag{

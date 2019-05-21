@@ -65,8 +65,8 @@ type CreateSdxParams struct {
 
 	/*Body*/
 	Body *model.SdxClusterRequest
-	/*EnvName*/
-	EnvName string
+	/*SdxName*/
+	SdxName string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -117,15 +117,15 @@ func (o *CreateSdxParams) SetBody(body *model.SdxClusterRequest) {
 	o.Body = body
 }
 
-// WithEnvName adds the envName to the create sdx params
-func (o *CreateSdxParams) WithEnvName(envName string) *CreateSdxParams {
-	o.SetEnvName(envName)
+// WithSdxName adds the sdxName to the create sdx params
+func (o *CreateSdxParams) WithSdxName(sdxName string) *CreateSdxParams {
+	o.SetSdxName(sdxName)
 	return o
 }
 
-// SetEnvName adds the envName to the create sdx params
-func (o *CreateSdxParams) SetEnvName(envName string) {
-	o.EnvName = envName
+// SetSdxName adds the sdxName to the create sdx params
+func (o *CreateSdxParams) SetSdxName(sdxName string) {
+	o.SdxName = sdxName
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -142,8 +142,8 @@ func (o *CreateSdxParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 		}
 	}
 
-	// path param envName
-	if err := r.SetPathParam("envName", o.EnvName); err != nil {
+	// path param sdxName
+	if err := r.SetPathParam("sdxName", o.SdxName); err != nil {
 		return err
 	}
 

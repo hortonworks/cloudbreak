@@ -53,7 +53,7 @@ func (o *RedeploySdxDefault) Code() int {
 }
 
 func (o *RedeploySdxDefault) Error() string {
-	return fmt.Sprintf("[POST /sdx/{envName}/redeploy][%d] redeploySdx default ", o._statusCode)
+	return fmt.Sprintf("[POST /sdx/{sdxName}/redeploy][%d] redeploySdx default ", o._statusCode)
 }
 
 func (o *RedeploySdxDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

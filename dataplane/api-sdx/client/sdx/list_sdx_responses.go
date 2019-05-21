@@ -51,7 +51,7 @@ type ListSdxOK struct {
 }
 
 func (o *ListSdxOK) Error() string {
-	return fmt.Sprintf("[GET /sdx/{envName}/list][%d] listSdxOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /sdx/list][%d] listSdxOK  %+v", 200, o.Payload)
 }
 
 func (o *ListSdxOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

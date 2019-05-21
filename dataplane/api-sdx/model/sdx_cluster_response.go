@@ -19,11 +19,14 @@ import (
 // swagger:model SdxClusterResponse
 type SdxClusterResponse struct {
 
+	// sdx crn
+	SdxCrn string `json:"sdxCrn,omitempty"`
+
 	// sdx name
 	SdxName string `json:"sdxName,omitempty"`
 
 	// status
-	// Enum: [REQUESTED REQUESTED_FROM_CLOUDBREAK]
+	// Enum: [REQUESTED REQUESTED_FROM_CLOUDBREAK RUNNING PROVISIONING_FAILED DELETE_REQUESTED DELETED DELETE_FAILED]
 	Status string `json:"status,omitempty"`
 }
 
@@ -45,7 +48,7 @@ var sdxClusterResponseTypeStatusPropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["REQUESTED","REQUESTED_FROM_CLOUDBREAK"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["REQUESTED","REQUESTED_FROM_CLOUDBREAK","RUNNING","PROVISIONING_FAILED","DELETE_REQUESTED","DELETED","DELETE_FAILED"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -60,6 +63,21 @@ const (
 
 	// SdxClusterResponseStatusREQUESTEDFROMCLOUDBREAK captures enum value "REQUESTED_FROM_CLOUDBREAK"
 	SdxClusterResponseStatusREQUESTEDFROMCLOUDBREAK string = "REQUESTED_FROM_CLOUDBREAK"
+
+	// SdxClusterResponseStatusRUNNING captures enum value "RUNNING"
+	SdxClusterResponseStatusRUNNING string = "RUNNING"
+
+	// SdxClusterResponseStatusPROVISIONINGFAILED captures enum value "PROVISIONING_FAILED"
+	SdxClusterResponseStatusPROVISIONINGFAILED string = "PROVISIONING_FAILED"
+
+	// SdxClusterResponseStatusDELETEREQUESTED captures enum value "DELETE_REQUESTED"
+	SdxClusterResponseStatusDELETEREQUESTED string = "DELETE_REQUESTED"
+
+	// SdxClusterResponseStatusDELETED captures enum value "DELETED"
+	SdxClusterResponseStatusDELETED string = "DELETED"
+
+	// SdxClusterResponseStatusDELETEFAILED captures enum value "DELETE_FAILED"
+	SdxClusterResponseStatusDELETEFAILED string = "DELETE_FAILED"
 )
 
 // prop value enum

@@ -8,7 +8,9 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // SdxClusterRequest sdx cluster request
@@ -16,10 +18,16 @@ import (
 type SdxClusterRequest struct {
 
 	// access cidr
-	AccessCidr string `json:"accessCidr,omitempty"`
+	// Required: true
+	AccessCidr *string `json:"accessCidr"`
 
 	// cluster shape
-	ClusterShape string `json:"clusterShape,omitempty"`
+	// Required: true
+	ClusterShape *string `json:"clusterShape"`
+
+	// environment
+	// Required: true
+	Environment *string `json:"environment"`
 
 	// tags
 	Tags map[string]string `json:"tags,omitempty"`
@@ -27,6 +35,50 @@ type SdxClusterRequest struct {
 
 // Validate validates this sdx cluster request
 func (m *SdxClusterRequest) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateAccessCidr(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateClusterShape(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateEnvironment(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *SdxClusterRequest) validateAccessCidr(formats strfmt.Registry) error {
+
+	if err := validate.Required("accessCidr", "body", m.AccessCidr); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *SdxClusterRequest) validateClusterShape(formats strfmt.Registry) error {
+
+	if err := validate.Required("clusterShape", "body", m.ClusterShape); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *SdxClusterRequest) validateEnvironment(formats strfmt.Registry) error {
+
+	if err := validate.Required("environment", "body", m.Environment); err != nil {
+		return err
+	}
+
 	return nil
 }
 

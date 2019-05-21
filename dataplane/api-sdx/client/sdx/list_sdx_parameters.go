@@ -62,7 +62,7 @@ for the list sdx operation typically these are written to a http.Request
 type ListSdxParams struct {
 
 	/*EnvName*/
-	EnvName string
+	EnvName *string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -103,13 +103,13 @@ func (o *ListSdxParams) SetHTTPClient(client *http.Client) {
 }
 
 // WithEnvName adds the envName to the list sdx params
-func (o *ListSdxParams) WithEnvName(envName string) *ListSdxParams {
+func (o *ListSdxParams) WithEnvName(envName *string) *ListSdxParams {
 	o.SetEnvName(envName)
 	return o
 }
 
 // SetEnvName adds the envName to the list sdx params
-func (o *ListSdxParams) SetEnvName(envName string) {
+func (o *ListSdxParams) SetEnvName(envName *string) {
 	o.EnvName = envName
 }
 
@@ -121,9 +121,20 @@ func (o *ListSdxParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regis
 	}
 	var res []error
 
-	// path param envName
-	if err := r.SetPathParam("envName", o.EnvName); err != nil {
-		return err
+	if o.EnvName != nil {
+
+		// query param envName
+		var qrEnvName string
+		if o.EnvName != nil {
+			qrEnvName = *o.EnvName
+		}
+		qEnvName := qrEnvName
+		if qEnvName != "" {
+			if err := r.SetQueryParam("envName", qEnvName); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	if len(res) > 0 {
