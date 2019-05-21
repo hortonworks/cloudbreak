@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import com.sequenceiq.environment.api.credential.model.request.CredentialV1Request;
+import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.environment.doc.EnvironmentModelDescription;
 
@@ -31,7 +31,7 @@ public class EnvironmentV1Request extends EnvironmentV1BaseRequest implements Cr
     private String credentialName;
 
     @ApiModelProperty(EnvironmentModelDescription.CREDENTIAL_REQUEST)
-    private CredentialV1Request credential;
+    private CredentialRequest credential;
 
     @ApiModelProperty(EnvironmentModelDescription.REGIONS)
     private Set<String> regions = new HashSet<>();
@@ -73,12 +73,12 @@ public class EnvironmentV1Request extends EnvironmentV1BaseRequest implements Cr
     }
 
     @Override
-    public CredentialV1Request getCredential() {
+    public CredentialRequest getCredential() {
         return credential;
     }
 
     @Override
-    public void setCredential(CredentialV1Request credential) {
+    public void setCredential(CredentialRequest credential) {
         this.credential = credential;
     }
 

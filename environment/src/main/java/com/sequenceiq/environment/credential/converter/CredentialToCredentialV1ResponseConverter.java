@@ -11,9 +11,9 @@ import javax.ws.rs.BadRequestException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.environment.api.credential.model.request.CredentialV1Request;
-import com.sequenceiq.environment.api.credential.model.response.CredentialV1Response;
-import com.sequenceiq.environment.credential.Credential;
+import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
+import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
 import com.sequenceiq.environment.credential.validation.CredentialValidator;
 import com.sequenceiq.environment.credential.validation.definition.CredentialDefinitionService;
@@ -55,8 +55,8 @@ public class CredentialToCredentialV1ResponseConverter {
     @Inject
     private StringToSecretResponseConverter secretConverter;
 
-    public CredentialV1Response convert(Credential source) {
-        CredentialV1Response response = new CredentialV1Response();
+    public CredentialResponse convert(Credential source) {
+        CredentialResponse response = new CredentialResponse();
         response.setId(source.getId());
         credentialValidator.validateCredentialCloudPlatform(source.getCloudPlatform());
         response.setCloudPlatform(source.getCloudPlatform());
@@ -83,12 +83,13 @@ public class CredentialToCredentialV1ResponseConverter {
                 response.getAws().setGovCloud(source.getGovCloud());
             }
             response.setAttributes(secretConverter.convert(source.getAttributesSecret()));
+            response.setResourceCrn(source.getResourceCRN());
         }
         response.setDescription(source.getDescription() == null ? "" : source.getDescription());
         return response;
     }
 
-    public Credential convert(CredentialV1Request source) {
+    public Credential convert(CredentialRequest source) {
         Credential credential = new Credential();
         credential.setName(source.getName());
         credential.setDescription(source.getDescription());

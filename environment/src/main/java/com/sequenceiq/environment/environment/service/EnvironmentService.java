@@ -44,7 +44,7 @@ import com.sequenceiq.environment.api.environment.model.request.EnvironmentV1Req
 import com.sequenceiq.environment.api.environment.model.request.LocationV1Request;
 import com.sequenceiq.environment.api.environment.model.response.DetailedEnvironmentV1Response;
 import com.sequenceiq.environment.api.environment.model.response.SimpleEnvironmentV1Response;
-import com.sequenceiq.environment.credential.Credential;
+import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.env.service.EnvironmentDto;
 import com.sequenceiq.environment.env.service.EnvironmentStatus;
 import com.sequenceiq.environment.environment.converter.network.EnvironmentNetworkConverter;

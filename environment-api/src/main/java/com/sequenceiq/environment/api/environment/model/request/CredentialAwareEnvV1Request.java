@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.api.environment.model.request;
 
-import com.sequenceiq.environment.api.credential.model.request.CredentialV1Request;
+import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 
 public interface CredentialAwareEnvV1Request {
 
@@ -8,7 +8,7 @@ public interface CredentialAwareEnvV1Request {
 
     void setCredentialName(String credentialName);
 
-    CredentialV1Request getCredential();
+    CredentialRequest getCredential();
 
-    void setCredential(CredentialV1Request credential);
+    void setCredential(CredentialRequest credential);
 }

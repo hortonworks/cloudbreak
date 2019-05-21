@@ -7,6 +7,7 @@ public class ModelDescriptions {
 
     public static final String CONNECTOR_NOTES = "Each cloud provider has it's own specific resources like instance types and disk types."
             + " These endpoints are collecting them.";
+    public static final String CRN = "global identifiers of the resource";
 
     private ModelDescriptions() {
     }

@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.environment.api.EnvironmentApi;
-import com.sequenceiq.environment.credential.CredentialV1Controller;
+import com.sequenceiq.environment.credential.controller.CredentialV1Controller;
 import com.sequenceiq.environment.environment.controller.EnvironmentV1Controller;
 import com.sequenceiq.environment.exception.mapper.DefaultExceptionMapper;
 import com.sequenceiq.environment.exception.mapper.WebApplicaitonExceptionMapper;

@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.api.environment.model.request;
 
-import com.sequenceiq.environment.api.credential.model.request.CredentialV1Request;
+import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.api.environment.doc.EnvironmentModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -11,7 +11,7 @@ public class EnvironmentChangeCredentialV1Request implements CredentialAwareEnvV
     private String credentialName;
 
     @ApiModelProperty(EnvironmentModelDescription.CREDENTIAL_REQUEST)
-    private CredentialV1Request credential;
+    private CredentialRequest credential;
 
     @Override
     public String getCredentialName() {
@@ -24,12 +24,12 @@ public class EnvironmentChangeCredentialV1Request implements CredentialAwareEnvV
     }
 
     @Override
-    public CredentialV1Request getCredential() {
+    public CredentialRequest getCredential() {
         return credential;
     }
 
     @Override
-    public void setCredential(CredentialV1Request credential) {
+    public void setCredential(CredentialRequest credential) {
         this.credential = credential;
     }
 }

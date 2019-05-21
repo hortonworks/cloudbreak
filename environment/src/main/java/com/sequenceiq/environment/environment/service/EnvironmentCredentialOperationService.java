@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.environment.api.environment.model.request.CredentialAwareEnvV1Request;
-import com.sequenceiq.environment.credential.Credential;
-import com.sequenceiq.environment.credential.CredentialService;
+import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.domain.Environment;
 
 @Service

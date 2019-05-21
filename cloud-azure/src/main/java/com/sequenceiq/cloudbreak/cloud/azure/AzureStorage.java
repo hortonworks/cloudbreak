@@ -127,7 +127,7 @@ public class AzureStorage {
         name = name.length() > MAX_LENGTH_OF_NAME_SLICE ? name.substring(0, MAX_LENGTH_OF_NAME_SLICE) : name;
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-            String storageAccountId = acv.getId() + "#" + cloudContext.getId() + '#' + cloudContext.getWorkspaceId();
+            String storageAccountId = acv.getId() + "#" + cloudContext.getId() + '#' + cloudContext.getAccountId();
             LOGGER.debug("Storage account internal id: {}", storageAccountId);
             byte[] digest = messageDigest.digest(storageAccountId.getBytes());
             String paddedId = "";
@@ -136,7 +136,7 @@ public class AzureStorage {
             }
             result = name + storageType.getAbbreviation() + paddedId + new BigInteger(1, digest).toString(RADIX);
         } catch (NoSuchAlgorithmException ignored) {
-            result = name + acv.getId() + cloudContext.getId() + cloudContext.getWorkspaceId();
+            result = name + acv.getId() + cloudContext.getId() + cloudContext.getAccountId();
         }
         if (result.length() > MAX_LENGTH_OF_RESOURCE_NAME) {
             result = result.substring(0, MAX_LENGTH_OF_RESOURCE_NAME);

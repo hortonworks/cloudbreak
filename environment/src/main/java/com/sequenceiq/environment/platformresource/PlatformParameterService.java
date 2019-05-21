@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
-import com.sequenceiq.environment.credential.CredentialService;
+import com.sequenceiq.environment.credential.service.CredentialService;
 
 @Service
 public class PlatformParameterService {

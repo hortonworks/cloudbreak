@@ -6,12 +6,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.environment.api.credential.model.request.CredentialV1Request;
-import com.sequenceiq.environment.credential.Credential;
+import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
+import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
 
 @Component
-public class CredentialV1RequestToCredentialConverter extends AbstractConversionServiceAwareConverter<CredentialV1Request, Credential> {
+public class CredentialV1RequestToCredentialConverter extends AbstractConversionServiceAwareConverter<CredentialRequest, Credential> {
 
     @Inject
     private AwsCredentialV1ParametersToAwsCredentialAttributesConverter awsConverter;
@@ -35,7 +35,7 @@ public class CredentialV1RequestToCredentialConverter extends AbstractConversion
     private YarnCredentialV1ParametersToAwsYarnAttributesConverter yarnConverter;
 
     @Override
-    public Credential convert(CredentialV1Request source) {
+    public Credential convert(CredentialRequest source) {
         Credential credential = new Credential();
         credential.setName(source.getName());
         credential.setDescription(source.getDescription());

@@ -2,9 +2,9 @@ package com.sequenceiq.environment.credential.converter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.environment.api.credential.model.parameters.aws.AwsCredentialV1Parameters;
-import com.sequenceiq.environment.api.credential.model.parameters.aws.KeyBasedCredentialParameters;
-import com.sequenceiq.environment.api.credential.model.parameters.aws.RoleBasedCredentialParameters;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.KeyBasedParameters;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.RoleBasedParameters;
 import com.sequenceiq.environment.credential.attributes.aws.AwsCredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.aws.KeyBasedCredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.aws.RoleBasedCredentialAttributes;
@@ -12,41 +12,41 @@ import com.sequenceiq.environment.credential.attributes.aws.RoleBasedCredentialA
 @Component
 public class AwsCredentialV1ParametersToAwsCredentialAttributesConverter {
 
-    public AwsCredentialAttributes convert(AwsCredentialV1Parameters source) {
+    public AwsCredentialAttributes convert(AwsCredentialParameters source) {
         AwsCredentialAttributes response = new AwsCredentialAttributes();
         response.setKeyBased(getKeyBased(source.getKeyBased()));
         response.setRoleBased(getRoleBased(source.getRoleBased()));
         return response;
     }
 
-    public AwsCredentialV1Parameters convert(AwsCredentialAttributes source) {
-        AwsCredentialV1Parameters response = new AwsCredentialV1Parameters();
+    public AwsCredentialParameters convert(AwsCredentialAttributes source) {
+        AwsCredentialParameters response = new AwsCredentialParameters();
         response.setKeyBased(getKeyBased(source.getKeyBased()));
         response.setRoleBased(getRoleBased(source.getRoleBased()));
         return response;
     }
 
-    private RoleBasedCredentialAttributes getRoleBased(RoleBasedCredentialParameters source) {
+    private RoleBasedCredentialAttributes getRoleBased(RoleBasedParameters source) {
         RoleBasedCredentialAttributes roleBased = new RoleBasedCredentialAttributes();
         roleBased.setRoleArn(source.getRoleArn());
         return roleBased;
     }
 
-    private KeyBasedCredentialAttributes getKeyBased(KeyBasedCredentialParameters source) {
+    private KeyBasedCredentialAttributes getKeyBased(KeyBasedParameters source) {
         KeyBasedCredentialAttributes keyBased = new KeyBasedCredentialAttributes();
         keyBased.setAccessKey(source.getAccessKey());
         keyBased.setSecretKey(source.getSecretKey());
         return keyBased;
     }
 
-    private RoleBasedCredentialParameters getRoleBased(RoleBasedCredentialAttributes source) {
-        RoleBasedCredentialParameters roleBased = new RoleBasedCredentialParameters();
+    private RoleBasedParameters getRoleBased(RoleBasedCredentialAttributes source) {
+        RoleBasedParameters roleBased = new RoleBasedParameters();
         roleBased.setRoleArn(source.getRoleArn());
         return roleBased;
     }
 
-    private KeyBasedCredentialParameters getKeyBased(KeyBasedCredentialAttributes source) {
-        KeyBasedCredentialParameters keyBased = new KeyBasedCredentialParameters();
+    private KeyBasedParameters getKeyBased(KeyBasedCredentialAttributes source) {
+        KeyBasedParameters keyBased = new KeyBasedParameters();
         keyBased.setAccessKey(source.getAccessKey());
         keyBased.setSecretKey(source.getSecretKey());
         return keyBased;

@@ -74,7 +74,7 @@ public class ServiceProviderConnectorAdapter {
         LOGGER.debug("Assembling downscale stack event for stack: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
-                location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
+                location, stack.getCreator().getUserId(), stack.getWorkspace().getId().toString());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
         List<CloudInstance> instances = new ArrayList<>();
@@ -108,7 +108,7 @@ public class ServiceProviderConnectorAdapter {
         LOGGER.debug("Assembling terminate stack event for stack: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
-                location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
+                location, stack.getCreator().getUserId(), stack.getWorkspace().getId().toString());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
@@ -143,7 +143,7 @@ public class ServiceProviderConnectorAdapter {
     public GetPlatformTemplateRequest triggerGetTemplate(Stack stack) {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
-                location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
+                location, stack.getCreator().getUserId(), stack.getWorkspace().getId().toString());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         GetPlatformTemplateRequest getPlatformTemplateRequest = new GetPlatformTemplateRequest(cloudContext, cloudCredential);
         eventBus.notify(getPlatformTemplateRequest.selector(), eventFactory.createEvent(getPlatformTemplateRequest));
@@ -162,7 +162,7 @@ public class ServiceProviderConnectorAdapter {
         } catch (InterruptedException e) {
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
             CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
-                    location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
+                    location, stack.getCreator().getUserId(), stack.getWorkspace().getId().toString());
             LOGGER.error("Error while getting template: " + cloudContext, e);
             throw new OperationException(e);
         }
@@ -172,7 +172,7 @@ public class ServiceProviderConnectorAdapter {
         LOGGER.debug("Get platform parameters for: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
-                location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
+                location, stack.getCreator().getUserId(), stack.getWorkspace().getId().toString());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         PlatformParameterRequest parameterRequest = new PlatformParameterRequest(cloudContext, cloudCredential);
         eventBus.notify(parameterRequest.selector(), eventFactory.createEvent(parameterRequest));
@@ -194,7 +194,7 @@ public class ServiceProviderConnectorAdapter {
         LOGGER.debug("Get platform variant for: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
-                location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
+                location, stack.getCreator().getUserId(), stack.getWorkspace().getId().toString());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CheckPlatformVariantRequest checkPlatformVariantRequest = new CheckPlatformVariantRequest(cloudContext, cloudCredential);
         eventBus.notify(checkPlatformVariantRequest.selector(), eventFactory.createEvent(checkPlatformVariantRequest));

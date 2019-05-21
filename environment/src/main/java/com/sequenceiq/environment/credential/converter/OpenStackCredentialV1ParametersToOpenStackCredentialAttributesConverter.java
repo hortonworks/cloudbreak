@@ -2,11 +2,11 @@ package com.sequenceiq.environment.credential.converter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.environment.api.credential.model.parameters.openstack.DomainKeystoneV3Parameters;
-import com.sequenceiq.environment.api.credential.model.parameters.openstack.KeystoneV2Parameters;
-import com.sequenceiq.environment.api.credential.model.parameters.openstack.KeystoneV3Parameters;
-import com.sequenceiq.environment.api.credential.model.parameters.openstack.OpenstackCredentialV1Parameters;
-import com.sequenceiq.environment.api.credential.model.parameters.openstack.ProjectKeystoneV3Parameters;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.openstack.DomainKeystoneV3Parameters;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.openstack.KeystoneV2Parameters;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.openstack.KeystoneV3Parameters;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.openstack.OpenstackParameters;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.openstack.ProjectKeystoneV3Parameters;
 import com.sequenceiq.environment.credential.attributes.openstack.DomainKeystoneV3Attributes;
 import com.sequenceiq.environment.credential.attributes.openstack.KeystoneV2Attributes;
 import com.sequenceiq.environment.credential.attributes.openstack.KeystoneV3Attributes;
@@ -16,7 +16,7 @@ import com.sequenceiq.environment.credential.attributes.openstack.ProjectKeyston
 @Component
 public class OpenStackCredentialV1ParametersToOpenStackCredentialAttributesConverter {
 
-    public OpenStackCredentialAttributes convert(OpenstackCredentialV1Parameters source) {
+    public OpenStackCredentialAttributes convert(OpenstackParameters source) {
         OpenStackCredentialAttributes response = new OpenStackCredentialAttributes();
         response.setEndpoint(source.getEndpoint());
         response.setFacing(source.getFacing());
@@ -27,8 +27,8 @@ public class OpenStackCredentialV1ParametersToOpenStackCredentialAttributesConve
         return response;
     }
 
-    public OpenstackCredentialV1Parameters convert(OpenStackCredentialAttributes source) {
-        OpenstackCredentialV1Parameters response = new OpenstackCredentialV1Parameters();
+    public OpenstackParameters convert(OpenStackCredentialAttributes source) {
+        OpenstackParameters response = new OpenstackParameters();
         response.setEndpoint(source.getEndpoint());
         response.setFacing(source.getFacing());
         response.setKeystoneV2(getKeystoneV2(source.getKeystoneV2()));
