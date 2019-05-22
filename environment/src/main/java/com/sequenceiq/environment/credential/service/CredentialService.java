@@ -119,7 +119,7 @@ public class CredentialService {
     public Credential create(Credential credential, @Nonnull String accountId) {
         credentialValidator.validateCredentialCloudPlatform(credential.getCloudPlatform());
         credentialValidator.validateParameters(Platform.platform(credential.getCloudPlatform()), new Json(credential.getAttributes()).getMap());
-        credential.setResourceCRN(createCRN(accountId));
+        credential.setResourceCrn(createCRN(accountId));
         credential.setAccountId(accountId);
         Credential created = repository.save(credentialAdapter.verify(credential, accountId));
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_CREATED);

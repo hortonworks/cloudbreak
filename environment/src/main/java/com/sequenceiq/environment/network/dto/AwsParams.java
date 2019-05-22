@@ -12,7 +12,6 @@ public class AwsParams {
         this.vpcId = vpcId;
     }
 
-
     public static final class AwsParamsBuilder {
         private String vpcId;
 

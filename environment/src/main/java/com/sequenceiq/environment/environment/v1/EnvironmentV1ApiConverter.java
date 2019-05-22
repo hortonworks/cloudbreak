@@ -6,16 +6,16 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
-import com.sequenceiq.environment.api.environment.v1.model.EnvironmentNetworkAwsParams;
-import com.sequenceiq.environment.api.environment.v1.model.EnvironmentNetworkAzureParams;
-import com.sequenceiq.environment.api.environment.v1.model.request.EnvironmentEditRequest;
-import com.sequenceiq.environment.api.environment.v1.model.request.EnvironmentNetworkRequest;
-import com.sequenceiq.environment.api.environment.v1.model.request.EnvironmentRequest;
-import com.sequenceiq.environment.api.environment.v1.model.request.LocationRequest;
-import com.sequenceiq.environment.api.environment.v1.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.environment.api.environment.v1.model.response.EnvironmentNetworkResponse;
-import com.sequenceiq.environment.api.environment.v1.model.response.EnvironmentStatus;
-import com.sequenceiq.environment.api.environment.v1.model.response.LocationResponse;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
 import com.sequenceiq.environment.api.proxy.model.response.ProxyV1Response;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -122,7 +122,7 @@ public class EnvironmentV1ApiConverter {
                 .build();
     }
 
-    private EnvironmentStatus convertEnvStatus(com.sequenceiq.environment.environment.dto.EnvironmentStatus environmentStatus) {
+    public EnvironmentStatus convertEnvStatus(com.sequenceiq.environment.environment.dto.EnvironmentStatus environmentStatus) {
         switch (environmentStatus) {
             case ARCHIVED:
                 return EnvironmentStatus.ARCHIVED;
@@ -145,6 +145,7 @@ public class EnvironmentV1ApiConverter {
     public EnvironmentEditDto initEditDto(EnvironmentEditRequest request) {
         return EnvironmentEditDto.EnvironmentEditDtoBuilder.anEnvironmentEditDto()
                 .withDescription(request.getDescription())
+                .withAccountId(authenticatedUserService.getAccountId())
                 .withLocation(locationRequestToDto(request.getLocation()))
                 .withRegions(request.getRegions())
                 .build();

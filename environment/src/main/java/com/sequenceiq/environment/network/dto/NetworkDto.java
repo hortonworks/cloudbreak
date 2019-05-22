@@ -5,7 +5,6 @@ import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-
 public class NetworkDto {
 
     private final Long id;

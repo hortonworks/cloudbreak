@@ -7,15 +7,17 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import com.sequenceiq.environment.environment.domain.Environment;
 
 @Transactional(TxType.REQUIRED)
 public interface EnvironmentRepository extends JpaRepository<Environment, Long> {
 
-    Set<Environment> findAllByNameInAndAccountId(Set<String> names, String accountId);
+    Set<Environment> findByAccountId(String accountId);
 
     Set<Environment> findByNameInAndAccountId(Set<String> names, String accountId);
 
+    @Query("SELECT e FROM Environment e WHERE e.accountId = :accountId AND (e.name= :name OR e.resourceCrn = :name)")
     Optional<Environment> findByNameAndAccountId(String name, String accountId);
 }

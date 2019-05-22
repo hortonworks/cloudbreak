@@ -7,7 +7,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
-import com.sequenceiq.environment.credential.Credential;
+import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.proxy.ProxyConfig;
@@ -17,14 +17,6 @@ public class EnvironmentDto implements Payload {
     private Long id;
 
     private LocationDto location;
-
-    public LocationDto getLocation() {
-        return location;
-    }
-
-    public void setLocation(LocationDto location) {
-        this.location = location;
-    }
 
     private String name;
 
@@ -55,6 +47,14 @@ public class EnvironmentDto implements Payload {
     @Override
     public Long getResourceId() {
         return id;
+    }
+
+    public LocationDto getLocation() {
+        return location;
+    }
+
+    public void setLocation(LocationDto location) {
+        this.location = location;
     }
 
     public Long getId() {
@@ -271,7 +271,6 @@ public class EnvironmentDto implements Payload {
             this.environmentStatus = environmentStatus;
             return this;
         }
-
 
         public EnvironmentDto build() {
             EnvironmentDto environmentDto = new EnvironmentDto();

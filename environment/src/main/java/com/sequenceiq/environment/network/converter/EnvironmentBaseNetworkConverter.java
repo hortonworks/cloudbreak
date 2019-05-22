@@ -2,7 +2,7 @@ package com.sequenceiq.environment.network.converter;
 
 import java.util.Set;
 
-import com.sequenceiq.environment.api.environment.v1.model.response.EnvironmentNetworkResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.network.BaseNetwork;

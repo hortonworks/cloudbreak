@@ -2,8 +2,8 @@ package com.sequenceiq.environment.api.v1.credential.model.response;
 
 
 
-import static com.sequenceiq.environment.api.environment.doc.EnvironmentModelDescription.INTERACTIVE_LOGIN_CREDENTIAL_USER_CODE;
-import static com.sequenceiq.environment.api.environment.doc.EnvironmentModelDescription.INTERACTIVE_LOGIN_CREDENTIAL_VERIFICATION_URL;
+import static com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription.INTERACTIVE_LOGIN_CREDENTIAL_USER_CODE;
+import static com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription.INTERACTIVE_LOGIN_CREDENTIAL_VERIFICATION_URL;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

@@ -2,17 +2,21 @@ package com.sequenceiq.environment.proxy;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.environment.environment.repository.EnvironmentResourceRepository;
 import com.sequenceiq.environment.environment.service.AbstractEnvironmentAwareService;
+import com.sequenceiq.environment.environment.service.EnvironmentViewService;
 
 @Service
 public class ProxyConfigService extends AbstractEnvironmentAwareService<ProxyConfig> {
 
     private final ProxyConfigRepository proxyConfigRepository;
 
-    public ProxyConfigService(ProxyConfigRepository proxyConfigRepository) {
+    public ProxyConfigService(ProxyConfigRepository proxyConfigRepository, EnvironmentViewService environmentViewService,
+            ConversionService conversionService) {
+        super(environmentViewService, conversionService);
         this.proxyConfigRepository = proxyConfigRepository;
     }
 

@@ -16,7 +16,7 @@ import com.sequenceiq.environment.credential.domain.Credential;
 @Transactional(TxType.REQUIRED)
 public interface CredentialRepository extends JpaRepository<Credential, Long> {
 
-    @Query("SELECT c FROM Credential c WHERE c.accountId= :accountId AND (c.name= :name OR c.resourceCRN= :name) "
+    @Query("SELECT c FROM Credential c WHERE c.accountId= :accountId AND (c.name= :name OR c.resourceCrn= :name) "
             + "AND c.archived IS FALSE AND cloudPlatform IN (:cloudPlatforms)")
     Optional<Credential> findByNameAndAccountId(
             @Param("name") String name,

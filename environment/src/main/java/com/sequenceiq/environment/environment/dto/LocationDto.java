@@ -76,8 +76,7 @@ public class LocationDto {
         }
 
         public LocationDto build() {
-            LocationDto locationDto = new LocationDto(name, displayName, latitude, longitude);
-            return locationDto;
+            return new LocationDto(name, displayName, latitude, longitude);
         }
     }
 }
