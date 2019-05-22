@@ -187,7 +187,7 @@
    <service>
         <role>LIVYSERVER</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['LIVY_SERVER'] -%}
-        <url>http://{{ hostloc }}:{{ ports['LIVYSERVER'] }}</url>
+        <url>http://{{ hostloc }}:{{ ports['LIVYSERVER1'] }}</url>
         {%- endfor %}
    </service>
    {%- endif %}
