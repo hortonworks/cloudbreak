@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.v4.kerberos;
 
-import java.util.stream.Collectors;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
@@ -14,7 +12,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Req
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.MITKerberosDescriptor;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.domain.view.CompactView;
 
 @Component
 public class KerberosConfigToKerberosV4RequestConverter extends AbstractConversionServiceAwareConverter<KerberosConfig, KerberosV4Request> {
@@ -37,8 +34,6 @@ public class KerberosConfigToKerberosV4RequestConverter extends AbstractConversi
         KerberosV4Request request = new KerberosV4Request();
         request.setName(source.getName());
         request.setDescription(source.getDescription());
-        request.setEnvironments(source.getEnvironments().stream()
-                .map(CompactView::getName).collect(Collectors.toSet()));
         switch (source.getType()) {
             case ACTIVE_DIRECTORY:
                 request.setActiveDirectory(getActiveDirectory(source));

@@ -12,7 +12,6 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
@@ -421,14 +420,6 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         Set<LdapV4Response> ldapV4ResponseSet = environment.getResponse().getLdaps();
         if (!ldapV4ResponseSet.isEmpty()) {
             throw new TestFailException("Environment has attached ldap");
-        }
-        return environment;
-    }
-
-    static EnvironmentTestDto checkEnvHasNoKerberos(TestContext testContext, EnvironmentTestDto environment, CloudbreakClient cloudbreakClient) {
-        Set<KerberosV4Response> kerberosV4ResponseSet = environment.getResponse().getKerberoses();
-        if (!kerberosV4ResponseSet.isEmpty()) {
-            throw new TestFailException("Environment has attached kerberos");
         }
         return environment;
     }

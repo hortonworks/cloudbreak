@@ -84,7 +84,7 @@ public class KerberosConfigServiceTest {
 
         thrown.expect(BadRequestException.class);
 
-        underTest.createInEnvironment(resource, Sets.newHashSet(), 1L);
+        underTest.create(resource, 1L, user);
     }
 
     @Test
@@ -105,7 +105,7 @@ public class KerberosConfigServiceTest {
         when(kerberosConfigRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.empty());
         when(kerberosConfigRepository.save(any())).thenReturn(resource);
 
-        KerberosConfig kerberosConfig = underTest.createInEnvironment(resource, Sets.newHashSet(), 1L);
+        KerberosConfig kerberosConfig = underTest.create(resource,  1L, user);
         assertEquals(kerberosConfig.getId(), resource.getId());
     }
 
@@ -119,18 +119,6 @@ public class KerberosConfigServiceTest {
         Set<Cluster> clustersUsingResource = underTest.getClustersUsingResource(kerberosConfig);
 
         assertTrue(clustersUsingResource.contains(cluster));
-    }
-
-    @Test
-    public void testGetClusterUsingResourceInEnv() {
-        Cluster cluster = new Cluster();
-        KerberosConfig kerberosConfig = new KerberosConfig();
-        kerberosConfig.setId(1L);
-        when(clusterService.findAllClustersByKerberosConfigInEnvironment(eq(kerberosConfig), eq(1L))).thenReturn(Sets.newHashSet(cluster));
-
-        Set<Cluster> clustersUsingResourceInEnvironment = underTest.getClustersUsingResourceInEnvironment(kerberosConfig, 1L);
-
-        assertTrue(clustersUsingResourceInEnvironment.contains(cluster));
     }
 
     @Test

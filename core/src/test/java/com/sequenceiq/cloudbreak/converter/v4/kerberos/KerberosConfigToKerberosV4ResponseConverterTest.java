@@ -6,15 +6,11 @@ import static com.sequenceiq.cloudbreak.type.KerberosType.FREEIPA;
 import static com.sequenceiq.cloudbreak.type.KerberosType.MIT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,9 +24,8 @@ import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
-import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.type.KerberosType;
 
 @RunWith(Parameterized.class)
 public class KerberosConfigToKerberosV4ResponseConverterTest {
@@ -68,8 +63,6 @@ public class KerberosConfigToKerberosV4ResponseConverterTest {
     private static final String DESCRIPTION = "someDescription";
 
     private static final Long ID = 1L;
-
-    private Set<EnvironmentView> environmentViews = new LinkedHashSet<>();
 
     @Mock
     private ConversionService conversionService;
@@ -126,7 +119,6 @@ public class KerberosConfigToKerberosV4ResponseConverterTest {
         when(source.getName()).thenReturn(NAME);
         when(source.getDescription()).thenReturn(DESCRIPTION);
         when(source.getId()).thenReturn(ID);
-        when(source.getEnvironments()).thenReturn(environmentViews);
         when(source.getVerifyKdcTrust()).thenReturn(VERIFY_KDC_TRUST);
     }
 
@@ -156,7 +148,6 @@ public class KerberosConfigToKerberosV4ResponseConverterTest {
         assertEquals(NAME, result.getName());
         assertEquals(DESCRIPTION, result.getDescription());
         assertEquals(ID, result.getId());
-        assertTrue(result.getEnvironments().isEmpty());
         assertEquals(VERIFY_KDC_TRUST, result.getVerifyKdcTrust());
         verify(conversionService, times(5)).convert(anyString(), eq(SecretResponse.class));
         verify(conversionService, times(1)).convert(ADMIN_SECRET, SecretResponse.class);

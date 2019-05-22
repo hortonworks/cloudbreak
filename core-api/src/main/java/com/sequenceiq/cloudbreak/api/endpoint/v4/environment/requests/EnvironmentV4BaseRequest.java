@@ -23,9 +23,6 @@ public abstract class EnvironmentV4BaseRequest {
     @ApiModelProperty(EnvironmentRequestModelDescription.KUBERNETES_CONFIGS)
     private Set<String> kubernetes = new HashSet<>();
 
-    @ApiModelProperty(EnvironmentRequestModelDescription.KERBEROS_CONFIGS)
-    private Set<String> kerberoses = new HashSet<>();
-
     public Set<String> getProxies() {
         return proxies;
     }
@@ -58,11 +55,4 @@ public abstract class EnvironmentV4BaseRequest {
         this.kubernetes = kubernetes == null ? new HashSet<>() : kubernetes;
     }
 
-    public Set<String> getKerberoses() {
-        return kerberoses;
-    }
-
-    public void setKerberoses(Set<String> kerberoses) {
-        this.kerberoses = kerberoses == null ? new HashSet<>() : kerberoses;
-    }
 }

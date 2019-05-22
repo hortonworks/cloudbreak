@@ -2,9 +2,6 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests;
 
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.KERBEROS_CONFIG_NAME;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -47,20 +44,9 @@ public class KerberosV4Request implements JsonEntity {
     @NotEmpty
     private String name;
 
-    @ApiModelProperty(ModelDescriptions.ENVIRONMENTS)
-    private Set<String> environments = new HashSet<>();
-
     @Size(max = 1000)
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
-
-    public Set<String> getEnvironments() {
-        return environments;
-    }
-
-    public void setEnvironments(Set<String> environments) {
-        this.environments = environments;
-    }
 
     public ActiveDirectoryKerberosDescriptor getActiveDirectory() {
         return activeDirectory;

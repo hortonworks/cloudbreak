@@ -80,7 +80,6 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withLocation(VALID_LOCATION)
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
-                .withKerberosConfigs(getKerberosAsList(testContext))
                 .when(environmentTestClient.createV4())
                 .given(ClusterTestDto.class).valid()
                 .withRdsConfigNames(rdsList)
@@ -100,13 +99,11 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withName(testContext.get(EnvironmentTestDto.class).getName())
                 .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
-                .withKerberosConfigs(getKerberosAsList(testContext))
 
                 .when(environmentTestClient.detachV4())
                 .when(environmentTestClient.getV4())
                 .then(EnvironmentClusterTest::checkEnvHasNoRds)
                 .then(EnvironmentClusterTest::checkEnvHasNoLdap)
-                .then(EnvironmentClusterTest::checkEnvHasNoKerberos)
                 .validate();
     }
 

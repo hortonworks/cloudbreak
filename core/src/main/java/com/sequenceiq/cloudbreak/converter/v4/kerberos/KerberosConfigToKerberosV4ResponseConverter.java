@@ -1,13 +1,10 @@
 package com.sequenceiq.cloudbreak.converter.v4.kerberos;
 
-import java.util.stream.Collectors;
-
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.domain.view.CompactView;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 @Component
@@ -34,7 +31,6 @@ public class KerberosConfigToKerberosV4ResponseConverter extends AbstractConvers
         kerberosV4Response.setDescription(source.getDescription());
         kerberosV4Response.setId(source.getId());
         kerberosV4Response.setVerifyKdcTrust(source.getVerifyKdcTrust());
-        kerberosV4Response.setEnvironments(source.getEnvironments().stream().map(CompactView::getName).collect(Collectors.toSet()));
         return kerberosV4Response;
     }
 }

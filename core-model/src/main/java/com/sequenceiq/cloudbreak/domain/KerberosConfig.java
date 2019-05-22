@@ -1,38 +1,29 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
 import org.hibernate.annotations.Where;
 
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
-import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
-import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
-import com.sequenceiq.cloudbreak.type.KerberosType;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
+import com.sequenceiq.cloudbreak.type.KerberosType;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @Entity
 @Where(clause = "archived = false")
-public class KerberosConfig implements ProvisionEntity, EnvironmentAwareResource, ArchivableResource {
+public class KerberosConfig implements ProvisionEntity, WorkspaceAwareResource, ArchivableResource {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "kerberosconfig_generator")
     @SequenceGenerator(name = "kerberosconfig_generator", sequenceName = "kerberosconfig_id_seq", allocationSize = 1)
@@ -98,10 +89,6 @@ public class KerberosConfig implements ProvisionEntity, EnvironmentAwareResource
 
     @ManyToOne
     private Workspace workspace;
-
-    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    @JoinTable(name = "env_kdc", joinColumns = @JoinColumn(name = "kdcid"), inverseJoinColumns = @JoinColumn(name = "envid"))
-    private Set<EnvironmentView> environments = new HashSet<>();
 
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
@@ -276,16 +263,6 @@ public class KerberosConfig implements ProvisionEntity, EnvironmentAwareResource
 
     public void setNameServers(String nameServers) {
         this.nameServers = nameServers;
-    }
-
-    @Override
-    public Set<EnvironmentView> getEnvironments() {
-        return environments;
-    }
-
-    @Override
-    public void setEnvironments(Set<EnvironmentView> environments) {
-        this.environments = environments;
     }
 
     public void setName(String name) {
