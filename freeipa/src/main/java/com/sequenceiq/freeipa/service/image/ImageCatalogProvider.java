@@ -26,14 +26,13 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.freeipa.api.model.image.Image;
 import com.sequenceiq.freeipa.api.model.image.ImageCatalog;
+import com.sequenceiq.freeipa.api.model.image.Images;
 
 @Service
 public class ImageCatalogProvider {
@@ -68,16 +67,13 @@ public class ImageCatalogProvider {
             } else {
                 content = readCatalogFromFile(catalogUrl);
             }
-            JsonNode images = objectMapper.readTree(content);
-            JsonNode freeIpaImages = images.at("/images/freeipa-images");
-            catalog = objectMapper.readValue(objectMapper.treeAsTokens(freeIpaImages), new TypeReference<ImageCatalog>() { });
-            catalog = filterImagesByOsType(catalog);
+            catalog = filterImagesByOsType(objectMapper.readValue(content, ImageCatalog.class));
             long timeOfParse = System.currentTimeMillis() - started;
             LOGGER.debug("ImageCatalog was fetched and parsed from '{}' and took '{}' ms.", catalogUrl, timeOfParse);
         } catch (RuntimeException e) {
             throw new RuntimeException(String.format("Failed to get image catalog: %s from %s", e.getCause(), catalogUrl), e);
         } catch (JsonMappingException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw new RuntimeException(String.format("Invalid json format for image catalog with error: %s", e.getMessage()), e);
         } catch (IOException e) {
             throw new RuntimeException(String.format("Failed to read image catalog from file: '%s'", catalogUrl), e);
         }
@@ -93,9 +89,9 @@ public class ImageCatalogProvider {
         if (CollectionUtils.isEmpty(getEnabledLinuxTypes()) || Objects.isNull(catalog) || Objects.isNull(catalog.getImages())) {
             return catalog;
         }
-        List<Image> catalogImages = catalog.getImages();
+        List<Image> catalogImages = catalog.getImages().getFreeipaImages();
         List<Image> filterImages = filterImages(catalogImages, enabledOsPredicate());
-        return new ImageCatalog(filterImages);
+        return new ImageCatalog(new Images(filterImages));
     }
 
     private List<Image> filterImages(List<Image> imageList, Predicate<Image> predicate) {

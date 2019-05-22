@@ -57,7 +57,7 @@ public class ImageCatalogProviderTest {
         ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", Collections.emptyList());
 
         ImageCatalog catalog = underTest.getImageCatalog(IMAGE_CATALOG_JSON);
-        List<com.sequenceiq.freeipa.api.model.image.Image> images = catalog.getImages();
+        List<com.sequenceiq.freeipa.api.model.image.Image> images = catalog.getImages().getFreeipaImages();
         assertEquals(3, images.size());
         assertEquals("61851893-8340-411d-afb7-e1b55107fb10", images.get(0).getUuid());
     }
@@ -69,7 +69,7 @@ public class ImageCatalogProviderTest {
         ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", Collections.emptyList());
         String errorMessage = getErrorMessage(IMAGE_CATALOG_NULL_FIELD_JSON);
 
-        String expected = "Cannot deserialize instance of `com.sequenceiq.freeipa.api.model.image.ImageCatalog`";
+        String expected = "Invalid json format for image catalog with error: Missing required creator property 'images'";
         Assert.assertTrue("Check that the 'images' field is missing", errorMessage.startsWith(expected));
     }
 
@@ -80,7 +80,7 @@ public class ImageCatalogProviderTest {
         ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", Collections.emptyList());
         String errorMessage = getErrorMessage(IMAGE_CATALOG_INVALID_FIELD_JSON);
 
-        String expected = "Cannot deserialize instance of `com.sequenceiq.freeipa.api.model.image.ImageCatalog`";
+        String expected = "Invalid json format for image catalog with error: Missing required creator property 'images'";
         Assert.assertTrue("Check that the 'images' field is missing", errorMessage.startsWith(expected));
     }
 
@@ -107,7 +107,7 @@ public class ImageCatalogProviderTest {
         assertEquals(IMAGE_CATALOG_OS_TYPES, actualOsTypes);
 
         assertEquals(Arrays.asList("61851893-8340-411d-afb7-e1b55107fb10", "71851893-8340-411d-afb7-e1b55107fb10",
-                "81851893-8340-411d-afb7-e1b55107fb10"), mapToUuid(actualCatalog.getImages()));
+                "81851893-8340-411d-afb7-e1b55107fb10"), mapToUuid(actualCatalog.getImages().getFreeipaImages()));
     }
 
     @Test
@@ -122,8 +122,8 @@ public class ImageCatalogProviderTest {
         assertEquals(CB_CENTOS_7_FILTER, actualOsTypes);
 
         List<String> expectedImagesList = Collections.singletonList("81851893-8340-411d-afb7-e1b55107fb10");
-        assertEquals(expectedImagesList, mapToUuid(actualCatalog.getImages()));
-        assertEquals(1, actualCatalog.getImages().size());
+        assertEquals(expectedImagesList, mapToUuid(actualCatalog.getImages().getFreeipaImages()));
+        assertEquals(1, actualCatalog.getImages().getFreeipaImages().size());
     }
 
     @Test
@@ -136,8 +136,8 @@ public class ImageCatalogProviderTest {
 
         List<String> actualOsTypes = getImageCatalogOses(actualCatalog);
         assertEquals(Collections.emptyList(), actualOsTypes);
-        assertEquals(Collections.emptyList(), mapToUuid(actualCatalog.getImages()));
-        assertEquals(0, actualCatalog.getImages().size());
+        assertEquals(Collections.emptyList(), mapToUuid(actualCatalog.getImages().getFreeipaImages()));
+        assertEquals(0, actualCatalog.getImages().getFreeipaImages().size());
     }
 
     private String getErrorMessage(String catalogUrl) {
@@ -160,7 +160,7 @@ public class ImageCatalogProviderTest {
     }
 
     private List<String> getImageCatalogOses(ImageCatalog actualCatalog) {
-        return actualCatalog.getImages().stream()
+        return actualCatalog.getImages().getFreeipaImages().stream()
                 .map(Image::getOs)
                 .distinct()
                 .collect(Collectors.toList());
