@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
-import com.sequenceiq.environment.api.environment.v1.model.request.EnvironmentAttachRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAttachRequest;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentAwareResource;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
@@ -29,7 +29,6 @@ public class EnvironmentValidatorService {
     private final EnvironmentDetachValidator detachValidator;
 
     private final EnvironmentRegionValidator regionValidator;
-
 
     public EnvironmentValidatorService(EnvironmentCreationValidator creationValidator, EnvironmentAttachValidator attachValidator,
             EnvironmentDetachValidator detachValidator, EnvironmentRegionValidator regionValidator) {

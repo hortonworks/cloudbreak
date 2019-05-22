@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.sequenceiq.environment.api.environment.v1.model.request.CredentialAwareEnvRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.CredentialAwareEnvRequest;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 public class EnvironmentCreationDto {
@@ -28,8 +28,11 @@ public class EnvironmentCreationDto {
 
     private final Set<String> proxyNames;
 
-    public EnvironmentCreationDto(String name, String description, String cloudPlatform, String accountId, LocationDto location, NetworkDto network,
-            CredentialAwareEnvRequest credential, Set<String> regions, Set<String> proxyNames) {
+    //CHECKSTYLE:OFF
+    public EnvironmentCreationDto(String name, String description, String cloudPlatform, String accountId,
+            LocationDto location, NetworkDto network, CredentialAwareEnvRequest credential,
+            Set<String> regions, Set<String> proxyNames) {
+        //CHECKSTYLE:ON
         this.name = name;
         this.description = description;
         this.cloudPlatform = cloudPlatform;

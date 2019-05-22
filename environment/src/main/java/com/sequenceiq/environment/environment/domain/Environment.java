@@ -31,8 +31,8 @@ import com.sequenceiq.environment.network.BaseNetwork;
 import com.sequenceiq.environment.proxy.ProxyConfig;
 
 @Entity
-@Where(clause = "archived = false")
 @Table
+@Where(clause = "archived = false")
 public class Environment implements AuthResource {
 
     @Id

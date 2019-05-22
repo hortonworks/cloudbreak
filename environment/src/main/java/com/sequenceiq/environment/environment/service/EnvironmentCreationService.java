@@ -2,23 +2,23 @@ package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_NETWORK_CREATION_EVENT;
 
+import java.util.UUID;
+
+import javax.annotation.Nonnull;
 import javax.ws.rs.BadRequestException;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
-import com.sequenceiq.environment.CloudPlatform;
-import com.sequenceiq.environment.credential.Credential;
+import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
-import com.sequenceiq.environment.network.BaseNetwork;
-import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.proxy.ProxyConfigService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 
@@ -31,22 +31,19 @@ public class EnvironmentCreationService {
 
     private final ProxyConfigService proxyConfigService;
 
-    private final EnvironmentCredentialOperationService environmentCredentialOperationService;
-
-    private final EnvironmentNetworkService environmentNetworkService;
+    private final EnvironmentResourceService environmentResourceService;
 
     private final EventSender eventSender;
 
     private final EnvironmentDtoConverter environmentDtoConverter;
 
     public EnvironmentCreationService(EnvironmentService environmentService, EnvironmentValidatorService validatorService,
-            ProxyConfigService proxyConfigService, EnvironmentCredentialOperationService environmentCredentialOperationService,
-            EnvironmentNetworkService environmentNetworkService, EventSender eventSender, EnvironmentDtoConverter environmentDtoConverter) {
+            ProxyConfigService proxyConfigService, EnvironmentResourceService environmentResourceService,
+            EventSender eventSender, EnvironmentDtoConverter environmentDtoConverter) {
         this.environmentService = environmentService;
         this.validatorService = validatorService;
         this.proxyConfigService = proxyConfigService;
-        this.environmentCredentialOperationService = environmentCredentialOperationService;
-        this.environmentNetworkService = environmentNetworkService;
+        this.environmentResourceService = environmentResourceService;
         this.eventSender = eventSender;
         this.environmentDtoConverter = environmentDtoConverter;
     }
@@ -62,38 +59,47 @@ public class EnvironmentCreationService {
     }
 
     public EnvironmentDto create(EnvironmentCreationDto creationDto) {
-        Environment environment = initEnvironment(creationDto);
-        CloudRegions cloudRegions = environmentService.getRegionsByEnvironment(environment);
-        environmentService.setLocation(environment, creationDto.getLocation(), cloudRegions);
-        ValidationResult validationResult;
-        if (cloudRegions.areRegionsSupported()) {
-            environmentService.setRegions(environment, creationDto.getRegions(), cloudRegions);
-        }
-        validationResult = validatorService.validateCreation(environment, creationDto, cloudRegions);
-        if (validationResult.hasError()) {
-            throw new BadRequestException(validationResult.getFormattedErrors());
-        }
-        MDCBuilder.buildMdcContext(environment);
+        Environment environment = initializeEnvironment(creationDto);
+        CloudRegions cloudRegions = setLocationAndRegions(creationDto, environment);
+        validateCreation(creationDto, environment, cloudRegions);
         environment = environmentService.save(environment);
-        createAndSetNetwork(environment, creationDto.getNetwork());
+        environmentResourceService.createAndSetNetwork(environment, creationDto.getNetwork());
         return environmentDtoConverter.environmentToDto(environment);
     }
 
-    private Environment initEnvironment(EnvironmentCreationDto creationDto) {
+    private Environment initializeEnvironment(EnvironmentCreationDto creationDto) {
         Environment environment = environmentDtoConverter.creationDtoToEnvironment(creationDto);
+        environment.setResourceCrn(createCrn(creationDto.getAccountId()));
         environment.setProxyConfigs(proxyConfigService.findByNamesInAccount(creationDto.getProxyNames(), creationDto.getAccountId()));
-        Credential credential = environmentCredentialOperationService
+        Credential credential = environmentResourceService
                 .getCredentialFromRequest(creationDto.getCredential(), creationDto.getAccountId());
         environment.setCredential(credential);
         return environment;
     }
 
-    private void createAndSetNetwork(Environment environment, NetworkDto networkDto) {
-        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
-        BaseNetwork network = environmentNetworkService.createNetworkIfPossible(environment, networkDto, cloudPlatform);
-        if (network != null) {
-            environment.setNetwork(network);
+    private CloudRegions setLocationAndRegions(EnvironmentCreationDto creationDto, Environment environment) {
+        CloudRegions cloudRegions = environmentService.getRegionsByEnvironment(environment);
+        environmentService.setLocation(environment, creationDto.getLocation(), cloudRegions);
+        if (cloudRegions.areRegionsSupported()) {
+            environmentService.setRegions(environment, creationDto.getRegions(), cloudRegions);
+        }
+        return cloudRegions;
+    }
+
+    private void validateCreation(EnvironmentCreationDto creationDto, Environment environment, CloudRegions cloudRegions) {
+        ValidationResult validationResult = validatorService.validateCreation(environment, creationDto, cloudRegions);
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
         }
     }
 
+    public String createCrn(@Nonnull String accountId) {
+        return Crn.builder()
+                .setService(Crn.Service.ENVIRONMENTS)
+                .setAccountId(accountId)
+                .setResourceType(Crn.ResourceType.ENVIRONMENT)
+                .setResource(UUID.randomUUID().toString())
+                .build()
+                .toString();
+    }
 }

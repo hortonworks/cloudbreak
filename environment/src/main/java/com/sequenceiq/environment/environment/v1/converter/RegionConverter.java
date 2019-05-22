@@ -7,7 +7,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.environment.api.environment.v1.model.response.CompactRegionResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegionResponse;
 import com.sequenceiq.environment.environment.domain.Region;
 
 @Component

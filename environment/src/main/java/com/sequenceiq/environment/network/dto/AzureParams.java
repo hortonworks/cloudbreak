@@ -42,7 +42,6 @@ public class AzureParams {
         this.noFirewallRules = noFirewallRules;
     }
 
-
     public static final class AzureParamsBuilder {
         private String networkId;
 

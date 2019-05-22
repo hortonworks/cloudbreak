@@ -4,8 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.inject.Named;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.BadRequestException;
 
@@ -19,12 +17,14 @@ import com.sequenceiq.environment.environment.repository.EnvironmentResourceRepo
 
 public abstract class AbstractEnvironmentAwareService<T extends EnvironmentAwareResource> {
 
-    @Inject
-    private EnvironmentViewService environmentViewService;
+    private final EnvironmentViewService environmentViewService;
 
-    @Inject
-    @Named("conversionService")
-    private ConversionService conversionService;
+    private final ConversionService conversionService;
+
+    protected AbstractEnvironmentAwareService(EnvironmentViewService environmentViewService, ConversionService conversionService) {
+        this.environmentViewService = environmentViewService;
+        this.conversionService = conversionService;
+    }
 
     public T createInEnvironment(T resource, Set<String> environments, String accountId) {
         Set<EnvironmentView> environmentsInWorkspace = environmentViewService.findByNamesInAccount(environments, accountId);

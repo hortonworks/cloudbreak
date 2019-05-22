@@ -8,7 +8,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.environment.api.environment.v1.model.response.CompactRegionResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegionResponse;
 import com.sequenceiq.environment.api.platformresource.PlatformResourceModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;

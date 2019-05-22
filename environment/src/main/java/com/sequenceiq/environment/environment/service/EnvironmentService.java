@@ -1,7 +1,6 @@
 package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-import static com.sequenceiq.environment.TempConstants.TEMP_ACCOUNT_ID;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.util.HashSet;
@@ -10,9 +9,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -29,22 +25,9 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.cloudbreak.util.ValidationResult.ValidationResultBuilder;
-import com.sequenceiq.environment.CloudPlatform;
-import com.sequenceiq.environment.api.environment.model.request.EnvironmentAttachV1Request;
-import com.sequenceiq.environment.api.environment.model.request.EnvironmentDetachV1Request;
-import com.sequenceiq.environment.api.environment.model.request.EnvironmentEditV1Request;
-import com.sequenceiq.environment.api.environment.model.request.EnvironmentNetworkV1Request;
-import com.sequenceiq.environment.api.environment.model.request.EnvironmentV1Request;
-import com.sequenceiq.environment.api.environment.model.request.LocationV1Request;
-import com.sequenceiq.environment.api.environment.model.response.DetailedEnvironmentV1Response;
-import com.sequenceiq.environment.api.environment.model.response.SimpleEnvironmentV1Response;
-import com.sequenceiq.environment.credential.domain.Credential;
-import com.sequenceiq.environment.env.service.EnvironmentDto;
-import com.sequenceiq.environment.env.service.EnvironmentStatus;
-import com.sequenceiq.environment.environment.converter.network.EnvironmentNetworkConverter;
-import com.sequenceiq.environment.api.environment.v1.model.request.EnvironmentDetachRequest;
-import com.sequenceiq.environment.api.environment.v1.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.environment.api.environment.v1.model.response.SimpleEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentDetachRequest;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
@@ -61,30 +44,32 @@ public class EnvironmentService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
 
-    @Inject
-    private EnvironmentValidatorService validatorService;
+    private final EnvironmentValidatorService validatorService;
 
-    @Inject
-    private EnvironmentCredentialOperationService environmentCredentialOperationService;
+    private final EnvironmentRepository environmentRepository;
 
-    @Inject
-    private EnvironmentRepository environmentRepository;
+    private final ConversionService conversionService;
 
-    @Inject
-    @Named("conversionService")
-    private ConversionService conversionService;
+    private final PlatformParameterService platformParameterService;
 
-    @Inject
-    private PlatformParameterService platformParameterService;
+    private final EnvironmentDtoConverter environmentDtoConverter;
 
-    private EnvironmentDtoConverter environmentDtoConverter;
+    public EnvironmentService(EnvironmentValidatorService validatorService, EnvironmentRepository environmentRepository,
+            ConversionService conversionService, PlatformParameterService platformParameterService,
+            EnvironmentDtoConverter environmentDtoConverter) {
+        this.validatorService = validatorService;
+        this.environmentRepository = environmentRepository;
+        this.conversionService = conversionService;
+        this.platformParameterService = platformParameterService;
+        this.environmentDtoConverter = environmentDtoConverter;
+    }
 
     public Environment save(Environment environment) {
         return environmentRepository.save(environment);
     }
 
-    public DetailedEnvironmentResponse get(String environmentName) {
-        Environment environment = getByNameForAccountId(environmentName, TEMP_ACCOUNT_ID);
+    public DetailedEnvironmentResponse get(String environmentName, String accountId) {
+        Environment environment = getByNameForAccountId(environmentName, accountId);
         return conversionService.convert(environment, DetailedEnvironmentResponse.class);
     }
 
@@ -108,12 +93,8 @@ public class EnvironmentService {
         return object.get();
     }
 
-    public Set<Environment> findByNamesInWorkspace(Set<String> names, @NotNull Long workspaceId) {
-        return CollectionUtils.isEmpty(names) ? new HashSet<>() : environmentRepository.findAllByNameInAndAccountId(names, TEMP_ACCOUNT_ID);
-    }
-
-    public SimpleEnvironmentResponse delete(String environmentName) {
-        Environment environment = getByNameForAccountId(environmentName, TEMP_ACCOUNT_ID);
+    public SimpleEnvironmentResponse delete(String environmentName, String accountId) {
+        Environment environment = getByNameForAccountId(environmentName, accountId);
         LOGGER.debug(String.format("Starting to archive environment [name: %s]", environment.getName()));
         delete(environment);
         return conversionService.convert(environment, SimpleEnvironmentResponse.class);
@@ -127,7 +108,7 @@ public class EnvironmentService {
     }
 
     public DetailedEnvironmentResponse edit(String environmentName, EnvironmentEditDto editDto) {
-        Environment environment = getByNameForAccountId(environmentName, TEMP_ACCOUNT_ID);
+        Environment environment = getByNameForAccountId(environmentName, editDto.getAccountId());
         if (StringUtils.isNotEmpty(editDto.getDescription())) {
             environment.setDescription(editDto.getDescription());
         }
@@ -227,8 +208,8 @@ public class EnvironmentService {
         }
     }
 
-    public DetailedEnvironmentResponse detachResources(String environmentName, EnvironmentDetachRequest request) {
-        Environment environment = getByNameForAccountId(environmentName, TEMP_ACCOUNT_ID);
+    public DetailedEnvironmentResponse detachResources(String environmentName, String accountId, EnvironmentDetachRequest request) {
+        Environment environment = getByNameForAccountId(environmentName, accountId);
         ValidationResult validationResult = validateAndDetachProxies(request, environment);
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());

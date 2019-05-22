@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.cloudbreak.util.ValidationResult.ValidationResultBuilder;
-import com.sequenceiq.environment.api.environment.v1.model.request.EnvironmentAttachRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAttachRequest;
 import com.sequenceiq.environment.proxy.ProxyConfig;
 
 @Component

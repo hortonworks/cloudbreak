@@ -11,10 +11,13 @@ public class EnvironmentEditDto {
 
     private final Set<String> regions;
 
-    private final LocationDto location;
+    private final String accountId;
 
-    public EnvironmentEditDto(String description, Set<String> regions, LocationDto location) {
+    private LocationDto location;
+
+    public EnvironmentEditDto(String description, Set<String> regions, String accountId, LocationDto location) {
         this.description = description;
+        this.accountId = accountId;
         if (CollectionUtils.isEmpty(regions)) {
             this.regions = new HashSet<>();
         } else {
@@ -35,10 +38,21 @@ public class EnvironmentEditDto {
         return location;
     }
 
+    public void setLocation(LocationDto location) {
+        this.location = location;
+    }
+
+    public String getAccountId() {
+        return accountId;
+    }
 
     public static final class EnvironmentEditDtoBuilder {
         private String description;
+
         private Set<String> regions;
+
+        private String accountId;
+
         private LocationDto location;
 
         private EnvironmentEditDtoBuilder() {
@@ -58,13 +72,18 @@ public class EnvironmentEditDto {
             return this;
         }
 
+        public EnvironmentEditDtoBuilder withAccountId(String accountId) {
+            this.accountId = accountId;
+            return this;
+        }
+
         public EnvironmentEditDtoBuilder withLocation(LocationDto location) {
             this.location = location;
             return this;
         }
 
         public EnvironmentEditDto build() {
-            return new EnvironmentEditDto(description, regions, location);
+            return new EnvironmentEditDto(description, regions, accountId, location);
         }
     }
 }

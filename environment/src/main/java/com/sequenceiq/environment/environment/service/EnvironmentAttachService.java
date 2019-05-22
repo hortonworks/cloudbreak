@@ -10,8 +10,8 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.util.ValidationResult;
-import com.sequenceiq.environment.api.environment.v1.model.request.EnvironmentAttachRequest;
-import com.sequenceiq.environment.api.environment.v1.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAttachRequest;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.proxy.ProxyConfig;

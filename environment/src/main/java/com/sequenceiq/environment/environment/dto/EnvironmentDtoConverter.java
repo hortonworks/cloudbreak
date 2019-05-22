@@ -28,7 +28,7 @@ public class EnvironmentDtoConverter {
                 .withDeletionTimestamp(environment.getDeletionTimestamp())
                 .withLocationDto(environmentToLocationDto(environment))
                 //TODO: .withEnvironmentStatus(environment.getEnvironmentStatus())
-                .withNetwork(environmentNetworkConverterMap.get(environment.getCloudPlatform())
+                .withNetwork(environmentNetworkConverterMap.get(CloudPlatform.valueOf(environment.getCloudPlatform()))
                         .convertToDto(environment.getNetwork()))
                 .build();
     }
@@ -46,8 +46,6 @@ public class EnvironmentDtoConverter {
         environment.setLocationDisplayName(creationDto.getLocation().getDisplayName());
         return environment;
     }
-
-
 
     public LocationDto environmentToLocationDto(Environment environment) {
         return LocationDto.LocationDtoBuilder.aLocationDto()
