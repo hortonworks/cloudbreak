@@ -5,23 +5,19 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidationV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SubscriptionV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CloudStorageSupportedV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.DeploymentPreferencesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.RepoConfigValidationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SubscriptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SupportedExternalDatabaseServiceEntryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VersionCheckV4Result;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.domain.Subscription;
 import com.sequenceiq.cloudbreak.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
@@ -29,7 +25,6 @@ import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.cluster.RepositoryConfigValidationService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixService;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
-import com.sequenceiq.cloudbreak.service.subscription.SubscriptionService;
 import com.sequenceiq.cloudbreak.util.ClientVersionUtil;
 import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedDatabaseProvider;
 
@@ -50,9 +45,6 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
 
     @Inject
     private SecurityRuleService securityRuleService;
-
-    @Inject
-    private SubscriptionService subscriptionService;
 
     @Inject
     private ConverterUtil converterUtil;
@@ -93,13 +85,6 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     @Override
     public SecurityRulesV4Response getDefaultSecurityRules(Boolean knoxEnabled) {
         return securityRuleService.getDefaultSecurityRules(knoxEnabled);
-    }
-
-    @Override
-    public SubscriptionV4Response subscribe(SubscriptionV4Request subscriptionV4Request) {
-        Subscription subscription = new Subscription(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(),
-                subscriptionV4Request.getEndpointUrl());
-        return new SubscriptionV4Response(subscriptionService.subscribe(subscription));
     }
 
     @Override

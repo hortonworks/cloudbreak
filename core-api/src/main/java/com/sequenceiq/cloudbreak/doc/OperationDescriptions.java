@@ -225,10 +225,6 @@ public class OperationDescriptions {
         public static final String GET_ENCRYPTIONKEYS = "retrive encryption keys with properties";
     }
 
-    public static class SubscriptionOpDescription {
-        public static final String SUBSCRIBE = "retrive subscribe identifier";
-    }
-
     public static class ImageCatalogOpDescription {
         public static final String PUT_BY_NAME = "update Image Catalog by id";
         public static final String GET_BY_IMAGE_CATALOG_NAME = "retrieve imagecatalog request by imagecatalog name";

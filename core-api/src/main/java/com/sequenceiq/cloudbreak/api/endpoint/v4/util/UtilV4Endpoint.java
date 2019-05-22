@@ -11,13 +11,11 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidationV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SubscriptionV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CloudStorageSupportedV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.DeploymentPreferencesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.RepoConfigValidationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SubscriptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VersionCheckV4Result;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
@@ -25,7 +23,6 @@ import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.AccountPreferencesDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.RepositoryConfigsValidationOpDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.SecurityRuleOpDescription;
-import com.sequenceiq.cloudbreak.doc.OperationDescriptions.SubscriptionOpDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UtilityOpDescription;
 
 import io.swagger.annotations.Api;
@@ -69,13 +66,6 @@ public interface UtilV4Endpoint {
     @ApiOperation(value = SecurityRuleOpDescription.GET_DEFAULT_SECURITY_RULES, produces = ContentType.JSON,
             notes = Notes.SECURITY_RULE_NOTES, nickname = "getDefaultSecurityRules")
     SecurityRulesV4Response getDefaultSecurityRules(@QueryParam("knoxEnabled") @DefaultValue("false") Boolean knoxEnabled);
-
-    @POST
-    @Path("subscribe")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = SubscriptionOpDescription.SUBSCRIBE, produces = ContentType.JSON, notes = Notes.SUBSCRIPTION_NOTES,
-            nickname = "subscribeSubscription")
-    SubscriptionV4Response subscribe(@Valid SubscriptionV4Request subscriptionV4Request);
 
     @GET
     @Path("deployment")
