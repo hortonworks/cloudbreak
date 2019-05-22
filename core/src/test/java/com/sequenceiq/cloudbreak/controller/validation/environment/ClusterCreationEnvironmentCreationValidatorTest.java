@@ -17,21 +17,20 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.environment.network.EnvironmentNetworkValidator;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.environment.Region;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterCreationEnvironmentCreationValidatorTest {
@@ -198,7 +197,6 @@ public class ClusterCreationEnvironmentCreationValidatorTest {
         LdapConfig ldapConfig = new LdapConfig();
         ldapConfig.setId(TestUtil.generateUniqueId());
         ldapConfig.setName(name);
-        ldapConfig.setEnvironments(environments.stream().map(env -> createEnvironmentView(env)).collect(Collectors.toSet()));
         return ldapConfig;
     }
 
@@ -208,13 +206,6 @@ public class ClusterCreationEnvironmentCreationValidatorTest {
         proxyConfig.setName(name);
         proxyConfig.setEnvironments(environments.stream().map(env -> createEnvironmentView(env)).collect(Collectors.toSet()));
         return proxyConfig;
-    }
-
-    private DatabaseV4Request createRdsConfigRequest(String name, Set<String> environments) {
-        DatabaseV4Request rdsConfigRequest = new DatabaseV4Request();
-        rdsConfigRequest.setName(name);
-        rdsConfigRequest.setEnvironments(environments);
-        return rdsConfigRequest;
     }
 
     private RDSConfig createRdsConfig(String name, Set<String> environments) {

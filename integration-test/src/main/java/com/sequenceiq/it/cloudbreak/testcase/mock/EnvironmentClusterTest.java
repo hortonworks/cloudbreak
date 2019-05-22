@@ -12,7 +12,6 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
@@ -99,7 +98,6 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .when(environmentTestClient.detachV4())
                 .when(environmentTestClient.getV4())
                 .then(EnvironmentClusterTest::checkEnvHasNoRds)
-                .then(EnvironmentClusterTest::checkEnvHasNoLdap)
                 .then(EnvironmentClusterTest::checkEnvHasNoProxy)
                 .validate();
     }
@@ -412,14 +410,6 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         Set<DatabaseV4Response> rdsConfigResponseSet = environment.getResponse().getDatabases();
         if (!rdsConfigResponseSet.isEmpty()) {
             throw new TestFailException("Environment has attached rds");
-        }
-        return environment;
-    }
-
-    static EnvironmentTestDto checkEnvHasNoLdap(TestContext testContext, EnvironmentTestDto environment, CloudbreakClient cloudbreakClient) {
-        Set<LdapV4Response> ldapV4ResponseSet = environment.getResponse().getLdaps();
-        if (!ldapV4ResponseSet.isEmpty()) {
-            throw new TestFailException("Environment has attached ldap");
         }
         return environment;
     }

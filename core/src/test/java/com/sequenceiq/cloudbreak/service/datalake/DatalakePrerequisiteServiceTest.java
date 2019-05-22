@@ -142,7 +142,6 @@ public class DatalakePrerequisiteServiceTest {
         doNothing().when(defaultCloudbreakEventService).fireRdsEvent(any(RdsDetails.class), anyString(), anyString(), anyBoolean());
 
         when(kerberosConfigService.create(any(KerberosConfig.class), anyLong(), any())).thenReturn(kerberosConfig());
-        when(ldapConfigService.createInEnvironment(any(LdapConfig.class), anySet(), anyLong())).thenReturn(ldapConfig());
         when(rdsConfigService.createInEnvironment(any(RDSConfig.class), anySet(), anyLong())).thenReturn(rdsConfig());
 
         underTest.prepare(workspaceId, environmentName, datalakePrerequisiteRequest());

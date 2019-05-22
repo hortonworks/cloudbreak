@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.validation.environment;
 
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -18,6 +17,7 @@ import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
 import com.sequenceiq.cloudbreak.domain.environment.Region;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
@@ -46,7 +46,8 @@ public class ClusterCreationEnvironmentValidator {
                     stackEnv.getName(), stackEnv.getRegionSet().stream().map(Region::getName).sorted().collect(Collectors.joining(","))));
         }
         Long workspaceId = stack.getWorkspace().getId();
-        validateLdapConfig(workspaceId, clusterRequest, stackEnv, resultBuilder);
+
+        validateLdapConfig(clusterRequest.getLdapName(), resultBuilder, workspaceId);
         validateProxyConfig(workspaceId, clusterRequest, stackEnv, resultBuilder);
         validateRdsConfigs(workspaceId, clusterRequest, stackEnv, resultBuilder);
         return resultBuilder.build();
@@ -59,17 +60,20 @@ public class ClusterCreationEnvironmentValidator {
         if (!CollectionUtils.isEmpty(environment.getDatalakeResources())) {
             resultBuilder.error("Only one external datalake can be registered to an environment!");
         }
-        validateEnvironmentAwareResource(ldapConfigService.getByNameForWorkspaceId(registerDatalakeRequest.getLdapName(), workspaceId),
-                environmentName, resultBuilder);
+
+        validateLdapConfig(registerDatalakeRequest.getLdapName(), resultBuilder, workspaceId);
+
         for (String rdsConfigName : registerDatalakeRequest.getDatabaseNames()) {
             validateEnvironmentAwareResource(rdsConfigService.getByNameForWorkspaceId(rdsConfigName, workspaceId), environmentName, resultBuilder);
         }
         return resultBuilder.build();
     }
 
-    private void validateLdapConfig(Long workspaceId, ClusterV4Request request, EnvironmentView stackEnv, ValidationResultBuilder resultBuilder) {
-        if (request.getLdapName() != null) {
-            validateEnvironmentAwareResource(ldapConfigService.getByNameForWorkspaceId(request.getLdapName(), workspaceId), stackEnv, resultBuilder);
+    private void validateLdapConfig(String ldapConfigName, ValidationResultBuilder resultBuilder, Long workspaceId) {
+        try {
+            ldapConfigService.getByNameForWorkspaceId(ldapConfigName, workspaceId);
+        } catch (NotFoundException nfe) {
+            resultBuilder.error(String.format("Stack cannot use %s LdapConfig resource which doesn't exist in the same workspace.", ldapConfigName));
         }
     }
 
@@ -83,22 +87,6 @@ public class ClusterCreationEnvironmentValidator {
         if (request.getDatabases() != null) {
             for (String rdsConfigName : request.getDatabases()) {
                 validateEnvironmentAwareResource(rdsConfigService.getByNameForWorkspaceId(rdsConfigName, workspaceId), stackEnv, resultBuilder);
-            }
-        }
-    }
-
-    private void validateEnvironments(String resourceName, String resourceType, Set<String> environments, EnvironmentView stackEnv,
-            ValidationResultBuilder resultBuilder) {
-        if (stackEnv == null) {
-            if (!CollectionUtils.isEmpty(environments)) {
-                resultBuilder.error(String.format("Stack without environment cannot use %s %s resource which attached to an environment.",
-                        resourceName, resourceType));
-            }
-        } else {
-            if (!CollectionUtils.isEmpty(environments)
-                    && environments.stream().noneMatch(resEnv -> resEnv.equals(stackEnv.getName()))) {
-                resultBuilder.error(String.format("Stack cannot use %s %s resource which is not attached to %s environment and not global.",
-                        resourceName, resourceType, stackEnv.getName()));
             }
         }
     }
