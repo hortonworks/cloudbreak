@@ -138,7 +138,6 @@ cb:
                 CDP 1.0 - Data Science: Apache Spark, Apache Hive, Impala=cdp-data-science;
                 CDP 1.0 - Data Engineering: Apache Spark, Apache Livy, Apache Zeppelin, Hue=cdp-data-engineering;
                 CDP 1.0 - Data Engineering HA: Apache Spark, Apache Livy, Apache Zeppelin=cdp-data-engineering-ha;
-                CDP 1.0 - SDX: Hive Metastore=cdp-shared-services;
                 CDP 1.0 - SDX: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx
 
     ambari:
