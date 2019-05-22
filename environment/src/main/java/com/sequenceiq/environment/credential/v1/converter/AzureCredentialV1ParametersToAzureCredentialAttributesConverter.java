@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.credential.converter;
+package com.sequenceiq.environment.credential.v1.converter;
 
 import org.springframework.stereotype.Component;
 
