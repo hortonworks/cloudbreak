@@ -9,13 +9,16 @@ public class NetworkDto {
 
     private final Long id;
 
+    private final String resourceCrn;
+
     private final AwsParams aws;
 
     private final AzureParams azure;
 
     private final Set<String> subnetIds;
 
-    public NetworkDto(Long id, AwsParams aws, AzureParams azure, Set<String> subnetIds) {
+    public NetworkDto(String resourceCrn, Long id, AwsParams aws, AzureParams azure, Set<String> subnetIds) {
+        this.resourceCrn = resourceCrn;
         this.id = id;
         this.aws = aws;
         this.azure = azure;
@@ -42,8 +45,14 @@ public class NetworkDto {
         return subnetIds;
     }
 
+    public String getResourceCrn() {
+        return resourceCrn;
+    }
+
     public static final class NetworkDtoBuilder {
         private Long id;
+
+        private String resourceCrn;
 
         private AwsParams aws;
 
@@ -78,8 +87,13 @@ public class NetworkDto {
             return this;
         }
 
+        public NetworkDtoBuilder withResourceCrn(String resourceCrn) {
+            this.resourceCrn = resourceCrn;
+            return this;
+        }
+
         public NetworkDto build() {
-            return new NetworkDto(id, aws, azure, subnetIds);
+            return new NetworkDto(resourceCrn, id, aws, azure, subnetIds);
         }
     }
 }

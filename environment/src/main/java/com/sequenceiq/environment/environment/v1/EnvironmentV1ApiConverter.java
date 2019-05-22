@@ -1,7 +1,5 @@
 package com.sequenceiq.environment.environment.v1;
 
-import java.util.stream.Collectors;
-
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +14,6 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
-import com.sequenceiq.environment.api.proxy.model.response.ProxyV1Response;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
@@ -51,7 +48,6 @@ public class EnvironmentV1ApiConverter {
                 .withCredential(request)
                 .withLocation(locationRequestToDto(request.getLocation()))
                 .withNetwork(networkRequestToDto(request.getNetwork()))
-                .withProxyNames(request.getProxies())
                 .withRegions(request.getRegions())
                 .build();
     }
@@ -82,7 +78,7 @@ public class EnvironmentV1ApiConverter {
 
     public DetailedEnvironmentResponse dtoToDetailedResponse(EnvironmentDto environmentDto) {
         return DetailedEnvironmentResponse.DetailedEnvironmentResponseBuilder.aDetailedEnvironmentResponse()
-                .withId(environmentDto.getId())
+                .withId(environmentDto.getResourceCrn())
                 .withName(environmentDto.getName())
                 .withDescription(environmentDto.getDescription())
                 .withCloudPlatform(environmentDto.getCloudPlatform())
@@ -90,16 +86,13 @@ public class EnvironmentV1ApiConverter {
                 .withEnvironmentStatus(convertEnvStatus(environmentDto.getEnvironmentStatus()))
                 .withLocation(locationDtoToResponse(environmentDto.getLocation()))
                 .withNetwork(networkDtoToResponse(environmentDto.getNetwork()))
-                .withProxies(environmentDto.getProxyConfigs().stream()
-                        .map(proxyConfig -> conversionService.convert(proxyConfig, ProxyV1Response.class))
-                        .collect(Collectors.toSet()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()))
                 .build();
     }
 
     public EnvironmentNetworkResponse networkDtoToResponse(NetworkDto network) {
         return EnvironmentNetworkResponse.EnvironmentNetworkResponseBuilder.anEnvironmentNetworkResponse()
-                .withId(network.getId())
+                .withId(network.getResourceCrn())
                 .withSubnetIds(network.getSubnetIds())
                 .withAws(EnvironmentNetworkAwsParams.EnvironmentNetworkAwsParamsBuilder.anEnvironmentNetworkAwsParams()
                         .withVpcId(network.getAws().getVpcId())
@@ -148,6 +141,7 @@ public class EnvironmentV1ApiConverter {
                 .withAccountId(authenticatedUserService.getAccountId())
                 .withLocation(locationRequestToDto(request.getLocation()))
                 .withRegions(request.getRegions())
+                .withNetwork(networkRequestToDto(request.getNetwork()))
                 .build();
     }
 }

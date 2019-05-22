@@ -24,6 +24,9 @@ public class EnvironmentEditRequest {
     @ApiModelProperty(EnvironmentModelDescription.LOCATION)
     private LocationRequest location;
 
+    @ApiModelProperty(EnvironmentModelDescription.NETWORK)
+    private EnvironmentNetworkRequest network;
+
     public String getDescription() {
         return description;
     }
@@ -46,5 +49,13 @@ public class EnvironmentEditRequest {
 
     public void setLocation(LocationRequest location) {
         this.location = location;
+    }
+
+    public EnvironmentNetworkRequest getNetwork() {
+        return network;
+    }
+
+    public void setNetwork(EnvironmentNetworkRequest network) {
+        this.network = network;
     }
 }

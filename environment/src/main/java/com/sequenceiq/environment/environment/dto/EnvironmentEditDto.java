@@ -5,6 +5,8 @@ import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 
+import com.sequenceiq.environment.network.dto.NetworkDto;
+
 public class EnvironmentEditDto {
 
     private final String description;
@@ -15,7 +17,14 @@ public class EnvironmentEditDto {
 
     private LocationDto location;
 
-    public EnvironmentEditDto(String description, Set<String> regions, String accountId, LocationDto location) {
+    private NetworkDto network;
+
+    public EnvironmentEditDto(
+        String description,
+        Set<String> regions,
+        String accountId,
+        LocationDto location,
+        NetworkDto network) {
         this.description = description;
         this.accountId = accountId;
         if (CollectionUtils.isEmpty(regions)) {
@@ -23,6 +32,7 @@ public class EnvironmentEditDto {
         } else {
             this.regions = regions;
         }
+        this.network = network;
         this.location = location;
     }
 
@@ -46,6 +56,10 @@ public class EnvironmentEditDto {
         return accountId;
     }
 
+    public NetworkDto getNetworkDto() {
+        return network;
+    }
+
     public static final class EnvironmentEditDtoBuilder {
         private String description;
 
@@ -54,6 +68,8 @@ public class EnvironmentEditDto {
         private String accountId;
 
         private LocationDto location;
+
+        private NetworkDto network;
 
         private EnvironmentEditDtoBuilder() {
         }
@@ -82,8 +98,14 @@ public class EnvironmentEditDto {
             return this;
         }
 
-        public EnvironmentEditDto build() {
-            return new EnvironmentEditDto(description, regions, accountId, location);
+        public EnvironmentEditDtoBuilder withNetwork(NetworkDto network) {
+            this.network = network;
+            return this;
         }
+
+        public EnvironmentEditDto build() {
+            return new EnvironmentEditDto(description, regions, accountId, location, network);
+        }
+
     }
 }
