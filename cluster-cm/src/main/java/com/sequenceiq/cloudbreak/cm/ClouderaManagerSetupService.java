@@ -74,6 +74,9 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     private ClusterComponentConfigProvider clusterComponentProvider;
 
     @Inject
+    private ClouderaManagerLicenseService clouderaManagerLicenseService;
+
+    @Inject
     private ClouderaManagerMgmtSetupService mgmtSetupService;
 
     @Inject
@@ -119,6 +122,8 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             Optional<ApiHost> optionalCmHost = hostsResourceApi.readHosts(DataView.SUMMARY.name()).getItems().stream().filter(
                     host -> host.getHostname().equals(templatePreparationObject.getGeneralClusterConfigs().getPrimaryGatewayInstanceDiscoveryFQDN().get()))
                     .findFirst();
+
+            clouderaManagerLicenseService.beginTrialIfNeeded(stack.getCreator(), client);
 
             if (optionalCmHost.isPresent()) {
                 ApiHost cmHost = optionalCmHost.get();
