@@ -160,7 +160,6 @@ public class ClusterCreationEnvironmentCreationValidatorTest {
         LdapConfig ldapConfig = new LdapConfig();
         ldapConfig.setId(TestUtil.generateUniqueId());
         ldapConfig.setName(name);
-        ldapConfig.setEnvironments(environments.stream().map(env -> createEnvironmentView(env)).collect(Collectors.toSet()));
         return ldapConfig;
     }
 

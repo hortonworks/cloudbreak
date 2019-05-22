@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.responses.KubernetesV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.EnvironmentResponseModelDescription;
@@ -21,9 +20,6 @@ import io.swagger.annotations.ApiModelProperty;
 public class DetailedEnvironmentV4Response extends EnvironmentV4BaseResponse {
     @ApiModelProperty(EnvironmentResponseModelDescription.PROXY_CONFIGS)
     private Set<ProxyV4Response> proxies = new HashSet<>();
-
-    @ApiModelProperty(EnvironmentResponseModelDescription.LDAP_CONFIGS)
-    private Set<LdapV4Response> ldaps = new HashSet<>();
 
     @ApiModelProperty(EnvironmentResponseModelDescription.RDS_CONFIGS)
     private Set<DatabaseV4Response> databases = new HashSet<>();
@@ -46,14 +42,6 @@ public class DetailedEnvironmentV4Response extends EnvironmentV4BaseResponse {
 
     public void setProxies(Set<ProxyV4Response> proxies) {
         this.proxies = proxies;
-    }
-
-    public Set<LdapV4Response> getLdaps() {
-        return ldaps;
-    }
-
-    public void setLdaps(Set<LdapV4Response> ldaps) {
-        this.ldaps = ldaps;
     }
 
     public Set<DatabaseV4Response> getDatabases() {

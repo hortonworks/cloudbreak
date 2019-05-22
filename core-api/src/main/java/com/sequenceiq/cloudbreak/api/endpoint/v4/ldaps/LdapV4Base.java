@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -85,9 +82,6 @@ public abstract class LdapV4Base implements JsonEntity {
     @JsonSerialize(using = Base64Serializer.class)
     @JsonDeserialize(using = Base64Deserializer.class)
     private String certificate;
-
-    @ApiModelProperty(ModelDescriptions.ENVIRONMENTS)
-    private Set<String> environments = new HashSet<>();
 
     public String getName() {
         return name;
@@ -223,13 +217,5 @@ public abstract class LdapV4Base implements JsonEntity {
 
     public void setCertificate(String certificate) {
         this.certificate = certificate;
-    }
-
-    public Set<String> getEnvironments() {
-        return environments;
-    }
-
-    public void setEnvironments(Set<String> environments) {
-        this.environments = environments == null ? new HashSet<>() : environments;
     }
 }

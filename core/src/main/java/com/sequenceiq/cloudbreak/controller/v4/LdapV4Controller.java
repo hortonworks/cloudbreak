@@ -34,8 +34,7 @@ public class LdapV4Controller extends NotificationController implements LdapConf
 
     @Override
     public LdapV4Responses list(Long workspaceId, String environment, Boolean attachGlobal) {
-        Set<LdapConfig> allInWorkspaceAndEnvironment = ldapConfigService.findAllInWorkspaceAndEnvironment(workspaceId,
-                environment, attachGlobal);
+        Set<LdapConfig> allInWorkspaceAndEnvironment = ldapConfigService.findAllInWorkspace(workspaceId);
         return new LdapV4Responses(converterUtil.convertAllAsSet(allInWorkspaceAndEnvironment, LdapV4Response.class));
     }
 
@@ -48,7 +47,7 @@ public class LdapV4Controller extends NotificationController implements LdapConf
     @Override
     public LdapV4Response post(Long workspaceId, LdapV4Request request) {
         LdapConfig ldapConfig = converterUtil.convert(request, LdapConfig.class);
-        ldapConfig = ldapConfigService.createInEnvironment(ldapConfig, request.getEnvironments(), workspaceId);
+        ldapConfig = ldapConfigService.createForLoggedInUser(ldapConfig, workspaceId);
         notify(ResourceEvent.LDAP_CREATED);
         return converterUtil.convert(ldapConfig, LdapV4Response.class);
     }
@@ -83,11 +82,11 @@ public class LdapV4Controller extends NotificationController implements LdapConf
 
     @Override
     public LdapV4Response attach(Long workspaceId, String name, EnvironmentNames environmentNames) {
-        return ldapConfigService.attachToEnvironmentsAndConvert(name, environmentNames.getEnvironmentNames(), workspaceId, LdapV4Response.class);
+        throw new UnsupportedOperationException("Attaching LDAP config to environment is not supported anymore!");
     }
 
     @Override
     public LdapV4Response detach(Long workspaceId, String name, EnvironmentNames environmentNames) {
-        return ldapConfigService.detachFromEnvironmentsAndConvert(name, environmentNames.getEnvironmentNames(), workspaceId, LdapV4Response.class);
+        throw new UnsupportedOperationException("Attaching LDAP config to environment is not supported anymore!");
     }
 }

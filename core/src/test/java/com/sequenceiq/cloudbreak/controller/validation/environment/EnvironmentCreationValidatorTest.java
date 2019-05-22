@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.environment.network.EnvironmentNetworkValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.environment.Region;
@@ -51,17 +50,12 @@ public class EnvironmentCreationValidatorTest {
         assertNotNull(environmentRegionValidator);
         Credential credential = new Credential();
 
-        LdapConfig ldapConfig = new LdapConfig();
-        ldapConfig.setId(0L);
-        ldapConfig.setName("ldap1");
-
         ProxyConfig proxyConfig = new ProxyConfig();
         proxyConfig.setId(0L);
         proxyConfig.setName("proxy1");
 
         Environment environment = new Environment();
         environment.setCredential(credential);
-        environment.setLdapConfigs(Set.of(ldapConfig));
         environment.setProxyConfigs(Set.of(proxyConfig));
 
         Region region1 = new Region();
@@ -70,7 +64,6 @@ public class EnvironmentCreationValidatorTest {
         region2.setName("region2");
         environment.setRegions(Set.of(region1, region2));
         EnvironmentV4Request environmentRequest = new EnvironmentV4Request();
-        environmentRequest.setLdaps(Set.of("ldap1", "ldap2"));
         environmentRequest.setProxies(Set.of("proxy1", "proxy2"));
         environmentRequest.setRegions(Set.of("region1", "region2", "region3"));
         LocationV4Request locationRequest = new LocationV4Request();
@@ -81,9 +74,7 @@ public class EnvironmentCreationValidatorTest {
         ValidationResult result = environmentCreationValidator.validate(environment, environmentRequest, cloudRegions);
 
         assertEquals(ERROR, result.getState());
-        assertEquals(3L, result.getErrors().size());
-        assertTrue(result.getFormattedErrors().contains("[ldap2]"));
-        assertTrue(result.getFormattedErrors().contains("[proxy2]"));
+        assertEquals(1L, result.getErrors().size());
         assertTrue(result.getFormattedErrors().contains("[region3]"));
     }
 
@@ -93,7 +84,6 @@ public class EnvironmentCreationValidatorTest {
         Credential credential = new Credential();
         Environment environment = new Environment();
         environment.setCredential(credential);
-        environment.setLdapConfigs(Collections.emptySet());
         environment.setProxyConfigs(Collections.emptySet());
         EnvironmentV4Request environmentRequest = new EnvironmentV4Request();
         environmentRequest.setLdaps(Collections.emptySet());
@@ -118,7 +108,6 @@ public class EnvironmentCreationValidatorTest {
         Credential credential = new Credential();
         Environment environment = new Environment();
         environment.setCredential(credential);
-        environment.setLdapConfigs(Collections.emptySet());
         environment.setProxyConfigs(Collections.emptySet());
         environment.setRegions(Set.of());
         EnvironmentV4Request environmentRequest = new EnvironmentV4Request();
@@ -144,17 +133,12 @@ public class EnvironmentCreationValidatorTest {
         // GIVEN
         Credential credential = new Credential();
 
-        LdapConfig ldapConfig = new LdapConfig();
-        ldapConfig.setId(0L);
-        ldapConfig.setName("ldap1");
-
         ProxyConfig proxyConfig = new ProxyConfig();
         proxyConfig.setId(0L);
         proxyConfig.setName("proxy1");
 
         Environment environment = new Environment();
         environment.setCredential(credential);
-        environment.setLdapConfigs(Set.of(ldapConfig));
         environment.setProxyConfigs(Set.of(proxyConfig));
         Region region1 = new Region();
         region1.setName("region1");
@@ -184,17 +168,12 @@ public class EnvironmentCreationValidatorTest {
         // GIVEN
         Credential credential = new Credential();
 
-        LdapConfig ldapConfig = new LdapConfig();
-        ldapConfig.setId(0L);
-        ldapConfig.setName("ldap1");
-
         ProxyConfig proxyConfig = new ProxyConfig();
         proxyConfig.setId(0L);
         proxyConfig.setName("proxy1");
 
         Environment environment = new Environment();
         environment.setCredential(credential);
-        environment.setLdapConfigs(Set.of(ldapConfig));
         environment.setProxyConfigs(Set.of(proxyConfig));
         environment.setLocation("region1");
         environment.setLatitude(1.1);
@@ -222,17 +201,12 @@ public class EnvironmentCreationValidatorTest {
         // GIVEN
         Credential credential = new Credential();
 
-        LdapConfig ldapConfig = new LdapConfig();
-        ldapConfig.setId(0L);
-        ldapConfig.setName("ldap1");
-
         ProxyConfig proxyConfig = new ProxyConfig();
         proxyConfig.setId(0L);
         proxyConfig.setName("proxy1");
 
         Environment environment = new Environment();
         environment.setCredential(credential);
-        environment.setLdapConfigs(Set.of(ldapConfig));
         environment.setProxyConfigs(Set.of(proxyConfig));
         environment.setLocation("region1");
         environment.setLatitude(1.1);

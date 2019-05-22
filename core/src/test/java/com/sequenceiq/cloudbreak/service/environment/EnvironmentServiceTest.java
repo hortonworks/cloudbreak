@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.environment;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,24 +35,16 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.springframework.core.convert.ConversionService;
 
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.requests.CredentialV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.base.EnvironmentNetworkAwsV4Params;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.base.EnvironmentNetworkAzureV4Params;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentChangeCredentialV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentDetachV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentEditV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.LocationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.LocationV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapV4Base;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.ProxyV4Base;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -62,9 +53,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentCreationValidator;
-import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentDetachValidator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentRegionValidator;
-import com.sequenceiq.cloudbreak.converter.v4.database.RDSConfigToDatabaseV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.EnvironmentToDetailedEnvironmentV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.EnvironmentToLocationV4RequestConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.EnvironmentToLocationV4ResponseConverter;
@@ -72,33 +61,20 @@ import com.sequenceiq.cloudbreak.converter.v4.environment.RegionConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.AwsEnvironmentNetworkConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.AzureEnvironmentNetworkConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
-import com.sequenceiq.cloudbreak.converter.v4.kerberos.KerberosConfigToKerberosV4ResponseConverter;
-import com.sequenceiq.cloudbreak.converter.v4.ldaps.LdapConfigToLdapV4ResponseConverter;
-import com.sequenceiq.cloudbreak.converter.v4.proxies.ProxyConfigToProxyV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.view.StackApiViewToStackViewV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.domain.ProxyConfig;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.environment.AwsNetwork;
 import com.sequenceiq.cloudbreak.domain.environment.AzureNetwork;
 import com.sequenceiq.cloudbreak.domain.environment.BaseNetwork;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentRepository;
-import com.sequenceiq.cloudbreak.service.KubernetesConfigService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
-import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.util.EnvironmentUtils;
@@ -109,8 +85,6 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 public class EnvironmentServiceTest {
 
     private static final Long WORKSPACE_ID = 1L;
-
-    private static final Long ENVIRONMENT_ID = 1L;
 
     private static final String CREDENTIAL_NAME = "cred1";
 
@@ -132,16 +106,7 @@ public class EnvironmentServiceTest {
     private RdsConfigService rdsConfigService;
 
     @Mock
-    private KubernetesConfigService kubernetesConfigService;
-
-    @Mock
-    private LdapConfigService ldapConfigService;
-
-    @Mock
     private ProxyConfigService proxyConfigService;
-
-    @Mock
-    private KerberosConfigService kerberosConfigService;
 
     @Mock
     private EnvironmentCredentialOperationService environmentCredentialOperationService;
@@ -153,16 +118,10 @@ public class EnvironmentServiceTest {
     private StackApiViewService stackApiViewService;
 
     @Mock
-    private StackService stackService;
-
-    @Mock
     private ConversionService conversionService;
 
     @Mock
     private EnvironmentRepository environmentRepository;
-
-    @Mock
-    private CloudParameterCache cloudParameterCache;
 
     @Mock
     private PlatformParameterService platformParameterService;
@@ -181,9 +140,6 @@ public class EnvironmentServiceTest {
 
     @Mock
     private AzureEnvironmentNetworkConverter azureEnvironmentNetworkConverter;
-
-    @Spy
-    private final EnvironmentDetachValidator environmentDetachValidator = new EnvironmentDetachValidator();
 
     @Spy
     private final EnvironmentRegionValidator environmentRegionValidator = new EnvironmentRegionValidator();
@@ -213,18 +169,6 @@ public class EnvironmentServiceTest {
     private EnvironmentToDetailedEnvironmentV4ResponseConverter environmentConverter;
 
     @InjectMocks
-    private LdapConfigToLdapV4ResponseConverter ldapConfigResponseConverter;
-
-    @InjectMocks
-    private ProxyConfigToProxyV4ResponseConverter proxyConfigResponseConverter;
-
-    @InjectMocks
-    private RDSConfigToDatabaseV4ResponseConverter rdsConfigResponseConverter;
-
-    @InjectMocks
-    private KerberosConfigToKerberosV4ResponseConverter kerberosConfigResponseConverter;
-
-    @InjectMocks
     private StackApiViewToStackViewV4ResponseConverter stackApiViewToStackViewResponseConverter;
 
     @Before
@@ -232,7 +176,6 @@ public class EnvironmentServiceTest {
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any());
         workspace.setId(WORKSPACE_ID);
         workspace.setName("ws");
-        when(ldapConfigService.findByNamesInWorkspace(anySet(), anyLong())).thenReturn(Collections.emptySet());
         when(rdsConfigService.findByNamesInWorkspace(anySet(), anyLong())).thenReturn(Collections.emptySet());
         when(proxyConfigService.findByNamesInWorkspace(anySet(), anyLong())).thenReturn(Collections.emptySet());
         when(environmentCreationValidator.validate(any(), any(), any())).thenReturn(ValidationResult.builder().build());
@@ -243,7 +186,6 @@ public class EnvironmentServiceTest {
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);
         when(workspaceService.retrieveForUser(any())).thenReturn(Set.of(workspace));
         assertNotNull(regionConverter);
-        assertNotNull(environmentDetachValidator);
         assertNotNull(environmentRegionValidator);
     }
 
@@ -332,51 +274,6 @@ public class EnvironmentServiceTest {
         assertEquals("display1", orderedRegions.get(0).getDisplayName());
         assertEquals("region2", orderedRegions.get(1).getName());
         assertEquals("display2", orderedRegions.get(1).getDisplayName());
-    }
-
-    @Test
-    public void testDetach() {
-        String notAttachedLdap = "not-attached-ldap";
-        String ldapName1 = "ldap1";
-        String proxyName1 = "proxy1";
-        String ldapName2 = "ldap2";
-        String proxyName2 = "proxy2";
-
-        Environment environment = new Environment();
-        LdapConfig ldap1 = new LdapConfig();
-        ldap1.setId(1L);
-        ldap1.setName(ldapName1);
-        LdapConfig ldap2 = new LdapConfig();
-        ldap2.setId(2L);
-        ldap2.setName(ldapName2);
-        environment.setLdapConfigs(Sets.newHashSet(ldap1, ldap2));
-        ProxyConfig proxy1 = new ProxyConfig();
-        proxy1.setId(1L);
-        proxy1.setName(proxyName1);
-        ProxyConfig proxy2 = new ProxyConfig();
-        proxy2.setId(2L);
-        proxy2.setName(proxyName2);
-        environment.setProxyConfigs(Sets.newHashSet(proxy1, proxy2));
-
-        setCredential(environment);
-
-        when(environmentRepository.findByNameAndWorkspaceId(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(Optional.of(environment));
-        when(environmentRepository.save(any(Environment.class)))
-                .thenAnswer((Answer<Environment>) invocation -> (Environment) invocation.getArgument(0));
-        mockConverters();
-
-        EnvironmentDetachV4Request detachRequest = new EnvironmentDetachV4Request();
-        detachRequest.getLdaps().add(ldapName1);
-        detachRequest.getLdaps().add(notAttachedLdap);
-        detachRequest.getProxies().add(proxyName1);
-
-        DetailedEnvironmentV4Response detachResponse = underTest.detachResources(ENVIRONMENT_NAME, detachRequest, WORKSPACE_ID);
-
-        assertFalse(detachResponse.getLdaps().stream().map(LdapV4Base::getName).collect(Collectors.toSet()).contains(notAttachedLdap));
-        assertFalse(detachResponse.getLdaps().stream().map(LdapV4Base::getName).collect(Collectors.toSet()).contains(ldapName1));
-        assertFalse(detachResponse.getProxies().stream().map(ProxyV4Base::getName).collect(Collectors.toSet()).contains(proxyName1));
-        assertTrue(detachResponse.getLdaps().stream().map(LdapV4Base::getName).collect(Collectors.toSet()).contains(ldapName2));
-        assertTrue(detachResponse.getProxies().stream().map(ProxyV4Base::getName).collect(Collectors.toSet()).contains(proxyName2));
     }
 
     @Test
@@ -471,122 +368,6 @@ public class EnvironmentServiceTest {
         request.setCredentialName("credential2");
 
         underTest.changeCredential(ENVIRONMENT_NAME, WORKSPACE_ID, request);
-    }
-
-    @Test
-    public void testDetachHappyPath() {
-        Environment environment = new Environment();
-        environment.setName(ENVIRONMENT_NAME);
-        setCredential(environment);
-
-        LdapConfig ldap1 = new LdapConfig();
-        ldap1.setId(1L);
-        String ldapName1 = "ldap1";
-        ldap1.setName(ldapName1);
-
-        LdapConfig ldap2 = new LdapConfig();
-        ldap2.setId(2L);
-        String ldapName2 = "ldap2";
-        ldap2.setName(ldapName2);
-
-        LdapConfig ldap3 = new LdapConfig();
-        ldap3.setId(3L);
-        String ldapName3 = "ldap3";
-        ldap3.setName(ldapName3);
-
-        ProxyConfig proxy1 = new ProxyConfig();
-        proxy1.setId(1L);
-        String proxyName1 = "proxy1";
-        proxy1.setName(proxyName1);
-
-        ProxyConfig proxy2 = new ProxyConfig();
-        proxy2.setId(2L);
-        String proxyName2 = "proxy2";
-        proxy2.setName(proxyName2);
-
-        environment.setLdapConfigs(Sets.newHashSet(ldap1, ldap2, ldap3));
-        environment.setProxyConfigs(Sets.newHashSet(proxy1, proxy2));
-
-        EnvironmentDetachV4Request request = new EnvironmentDetachV4Request();
-        request.setLdaps(Sets.newHashSet(ldapName1, ldapName2));
-        request.setProxies(Sets.newHashSet(proxyName1));
-
-        when(environmentRepository.findByNameAndWorkspaceId(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(Optional.of(environment));
-        when(environmentRepository.save(any(Environment.class)))
-                .thenAnswer((Answer<Environment>) invocation -> (Environment) invocation.getArgument(0));
-        mockConverters();
-
-        DetailedEnvironmentV4Response result = underTest.detachResources(ENVIRONMENT_NAME, request, WORKSPACE_ID);
-
-        assertEquals(1, result.getLdaps().size());
-        assertEquals(1, result.getProxies().size());
-        assertEquals(ldapName3, result.getLdaps().iterator().next().getName());
-        assertEquals(proxyName2, result.getProxies().iterator().next().getName());
-    }
-
-    @Test
-    public void testDetachWithUsedResources() {
-        Environment environment = new Environment();
-        environment.setId(ENVIRONMENT_ID);
-        environment.setName(ENVIRONMENT_NAME);
-        setCredential(environment);
-
-        LdapConfig ldap1 = new LdapConfig();
-        ldap1.setId(1L);
-        String ldapName1 = "ldap1";
-        ldap1.setName(ldapName1);
-
-        LdapConfig ldap2 = new LdapConfig();
-        ldap2.setId(2L);
-        String ldapName2 = "ldap2";
-        ldap2.setName(ldapName2);
-
-        LdapConfig ldap3 = new LdapConfig();
-        ldap3.setId(3L);
-        String ldapName3 = "ldap3";
-        ldap3.setName(ldapName3);
-
-        ProxyConfig proxy1 = new ProxyConfig();
-        proxy1.setId(1L);
-        String proxyName1 = "proxy1";
-        proxy1.setName(proxyName1);
-
-        ProxyConfig proxy2 = new ProxyConfig();
-        proxy2.setId(2L);
-        String proxyName2 = "proxy2";
-        proxy2.setName(proxyName2);
-
-        Cluster cluster1 = new Cluster();
-        cluster1.setId(1L);
-        String clusterName1 = "cluster1";
-        cluster1.setName(clusterName1);
-
-        Cluster cluster2 = new Cluster();
-        cluster2.setId(2L);
-        String clusterName2 = "cluster2";
-        cluster2.setName(clusterName2);
-
-        environment.setLdapConfigs(Sets.newHashSet(ldap1, ldap2, ldap3));
-        environment.setProxyConfigs(Sets.newHashSet(proxy1, proxy2));
-
-        EnvironmentDetachV4Request request = new EnvironmentDetachV4Request();
-        request.setLdaps(Sets.newHashSet(ldapName1, ldapName2));
-        request.setProxies(Sets.newHashSet(proxyName1));
-
-        when(environmentRepository.findByNameAndWorkspaceId(ENVIRONMENT_NAME, WORKSPACE_ID)).thenReturn(Optional.of(environment));
-        when(ldapConfigService.getClustersUsingResourceInEnvironment(ldap1, ENVIRONMENT_ID)).thenReturn(Sets.newHashSet(cluster1));
-        when(ldapConfigService.getClustersUsingResourceInEnvironment(ldap2, ENVIRONMENT_ID)).thenReturn(Sets.newHashSet(cluster1, cluster2));
-        when(proxyConfigService.getClustersUsingResourceInEnvironment(proxy1, ENVIRONMENT_ID)).thenReturn(Sets.newHashSet(cluster1));
-
-        exceptionRule.expect(BadRequestException.class);
-        exceptionRule.expectMessage(String.format("Proxy config '%s' cannot be detached from environment 'EnvName' "
-                + "because it is used by the following cluster(s): [%s]", proxyName1, clusterName1));
-        exceptionRule.expectMessage(String.format("LDAP config '%s' cannot be detached from environment 'EnvName' "
-                + "because it is used by the following cluster(s): [%s]", ldapName1, clusterName1));
-        exceptionRule.expectMessage(String.format("LDAP config '%s' cannot be detached from environment 'EnvName' "
-                + "because it is used by the following cluster(s): [%s, %s]", ldapName2, clusterName1, clusterName2));
-
-        underTest.detachResources(ENVIRONMENT_NAME, request, WORKSPACE_ID);
     }
 
     @Test
@@ -885,18 +666,5 @@ public class EnvironmentServiceTest {
         credential.setName("credential1");
         environment.setCredential(credential);
         environment.setStacks(new HashSet<>());
-    }
-
-    private void mockConverters() {
-        when(conversionService.convert(any(Environment.class), eq(DetailedEnvironmentV4Response.class)))
-                .thenAnswer((Answer<DetailedEnvironmentV4Response>) invocation -> environmentConverter.convert((Environment) invocation.getArgument(0)));
-        when(conversionService.convert(any(LdapConfig.class), eq(LdapV4Response.class)))
-                .thenAnswer((Answer<LdapV4Response>) invocation -> ldapConfigResponseConverter.convert((LdapConfig) invocation.getArgument(0)));
-        when(conversionService.convert(any(ProxyConfig.class), eq(ProxyV4Response.class)))
-                .thenAnswer((Answer<ProxyV4Response>) invocation -> proxyConfigResponseConverter.convert((ProxyConfig) invocation.getArgument(0)));
-        when(conversionService.convert(any(RDSConfig.class), eq(DatabaseV4Response.class)))
-                .thenAnswer((Answer<DatabaseV4Response>) invocation -> rdsConfigResponseConverter.convert((RDSConfig) invocation.getArgument(0)));
-        when(conversionService.convert(any(KerberosConfig.class), eq(KerberosV4Response.class)))
-                .thenAnswer((Answer<KerberosV4Response>) invocation -> kerberosConfigResponseConverter.convert((KerberosConfig) invocation.getArgument(0)));
     }
 }

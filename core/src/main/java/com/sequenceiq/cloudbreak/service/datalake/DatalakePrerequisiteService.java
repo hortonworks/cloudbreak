@@ -131,7 +131,7 @@ public class DatalakePrerequisiteService {
 
     private LdapConfig createLdapConfig(Long workspaceId, String environment, DatalakePrerequisiteV4Request datalakePrerequisiteV4Request) {
         LdapConfig ldapConfig = prepareLdapConfig(environment, datalakePrerequisiteV4Request.getLdap());
-        return ldapConfigService.createInEnvironment(ldapConfig, Set.of(environment), workspaceId);
+        return ldapConfigService.createForLoggedInUser(ldapConfig, workspaceId);
     }
 
     private KerberosConfig createKerberosConfig(Long workspaceId, String environment, DatalakePrerequisiteV4Request datalakePrerequisiteV4Request) {

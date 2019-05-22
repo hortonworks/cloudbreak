@@ -1,13 +1,10 @@
 package com.sequenceiq.cloudbreak.converter.v4.ldaps;
 
-import java.util.stream.Collectors;
-
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.domain.view.CompactView;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 @Component
@@ -36,7 +33,6 @@ public class LdapConfigToLdapV4ResponseConverter extends AbstractConversionServi
         json.setGroupMemberAttribute(config.getGroupMemberAttribute());
         json.setAdminGroup(config.getAdminGroup());
         json.setCertificate(config.getCertificate());
-        json.setEnvironments(config.getEnvironments().stream().map(CompactView::getName).collect(Collectors.toSet()));
         return json;
     }
 }

@@ -29,7 +29,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.springframework.core.convert.ConversionService;
 
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapMinimalV4Request;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.environment.ResourceDetachValidator;
@@ -37,13 +36,13 @@ import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigVali
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -57,7 +56,7 @@ public class LdapConfigServiceTest {
 
     private static final String ENV_2 = "env2";
 
-    private static final String NONEXISTENT_ENV = "I am missing!";
+    private static final String NONEXISTENT_WORKSPACE = "I am missing!";
 
     private static final String LDAP_1 = "ldap1";
 
@@ -72,9 +71,6 @@ public class LdapConfigServiceTest {
 
     @Mock
     private UserService userService;
-
-    @Mock
-    private EnvironmentViewService environmentViewService;
 
     @Mock
     private ConversionService conversionService;
@@ -131,75 +127,19 @@ public class LdapConfigServiceTest {
     }
 
     @Test
-    public void testCreateInEnvironment() {
-        Set<String> environments = Set.of(ENV_1, ENV_2);
-        Set<EnvironmentView> environmentViews = Set.of(env1, env2);
-
-        when(environmentViewService.findByNamesInWorkspace(environments, WORKSPACE_ID)).thenReturn(environmentViews);
-
-        LdapConfig created = underTest.createInEnvironment(ldapConfig, environments, WORKSPACE_ID);
+    public void testCreateInWorkspace() {
+        LdapConfig created = underTest.createForLoggedInUser(ldapConfig, WORKSPACE_ID);
 
         assertEquals(workspace.getId(), created.getWorkspace().getId());
-        assertEquals(environments.size(), created.getEnvironments().size());
-        assertTrue(created.getEnvironments().contains(env1));
-        assertTrue(created.getEnvironments().contains(env2));
     }
 
     @Test
     public void testCreateInEnvironmentWithNonexistentEnvironment() {
-        Set<String> environments = Set.of(ENV_1, ENV_2, NONEXISTENT_ENV);
-        Set<EnvironmentView> environmentViews = Set.of(env1, env2);
+        when(workspaceService.get(WORKSPACE_ID, user)).thenThrow(new NotFoundException(NONEXISTENT_WORKSPACE));
+        exceptionRule.expect(NotFoundException.class);
+        exceptionRule.expectMessage(NONEXISTENT_WORKSPACE);
 
-        when(environmentViewService.findByNamesInWorkspace(environments, WORKSPACE_ID)).thenReturn(environmentViews);
-        exceptionRule.expect(BadRequestException.class);
-        exceptionRule.expectMessage(NONEXISTENT_ENV);
-
-        underTest.createInEnvironment(ldapConfig, environments, WORKSPACE_ID);
-    }
-
-    @Test
-    public void testAttach() {
-        Set<String> environments = Set.of(ENV_1, ENV_2);
-        Set<EnvironmentView> environmentViews = Set.of(env1, env2);
-
-        when(environmentViewService.findByNamesInWorkspace(environments, WORKSPACE_ID)).thenReturn(environmentViews);
-        when(ldapConfigRepository.findByNameAndWorkspaceId(LDAP_1, WORKSPACE_ID)).thenReturn(Optional.ofNullable(ldapConfig));
-
-        LdapConfig created = underTest.attachToEnvironments(LDAP_1, environments, WORKSPACE_ID);
-
-        assertEquals(environments.size(), created.getEnvironments().size());
-        assertTrue(created.getEnvironments().contains(env1));
-        assertTrue(created.getEnvironments().contains(env2));
-    }
-
-    @Test
-    public void testAttachToNonExistentEnv() {
-        Set<String> environments = Set.of(ENV_1, ENV_2, NONEXISTENT_ENV);
-        Set<EnvironmentView> environmentViews = Set.of(env1, env2);
-
-        when(environmentViewService.findByNamesInWorkspace(environments, WORKSPACE_ID)).thenReturn(environmentViews);
-
-        when(environmentViewService.findByNamesInWorkspace(environments, WORKSPACE_ID)).thenReturn(environmentViews);
-        exceptionRule.expect(BadRequestException.class);
-        exceptionRule.expectMessage(NONEXISTENT_ENV);
-
-        underTest.attachToEnvironments(LDAP_1, environments, WORKSPACE_ID);
-    }
-
-    @Test
-    public void testAttachWithAlreadyAttachedEnv() {
-        ldapConfig.setEnvironments(Sets.newHashSet(env1, env2));
-        Set<String> environments = Sets.newHashSet(ENV_1, ENV_2);
-        Set<EnvironmentView> environmentViews = Sets.newHashSet(env1, env2);
-
-        when(environmentViewService.findByNamesInWorkspace(environments, WORKSPACE_ID)).thenReturn(environmentViews);
-        when(ldapConfigRepository.findByNameAndWorkspaceId(LDAP_1, WORKSPACE_ID)).thenReturn(Optional.ofNullable(ldapConfig));
-
-        LdapConfig created = underTest.attachToEnvironments(LDAP_1, environments, WORKSPACE_ID);
-
-        assertEquals(2, created.getEnvironments().size());
-        assertTrue(created.getEnvironments().contains(env1));
-        assertTrue(created.getEnvironments().contains(env2));
+        underTest.createForLoggedInUser(ldapConfig, WORKSPACE_ID);
     }
 
     @Test
@@ -251,95 +191,6 @@ public class LdapConfigServiceTest {
         underTest.deleteByNameFromWorkspace(ldapConfig.getName(), WORKSPACE_ID);
 
         verify(ldapConfigRepository, never()).delete(any());
-    }
-
-    @Test
-    public void testDetachHappyPath() {
-        EnvironmentView env1 = new EnvironmentView();
-        Long envId1 = 1L;
-        env1.setId(envId1);
-        String envName1 = "env1";
-        env1.setName(envName1);
-
-        EnvironmentView env2 = new EnvironmentView();
-        Long envId2 = 2L;
-        env2.setId(envId2);
-        String envName2 = "env2";
-        env2.setName(envName2);
-
-        Set<String> envNames = Sets.newHashSet(envName1, envName2);
-        Set<EnvironmentView> environments = Sets.newHashSet(env1, env2);
-
-        EnvironmentView env3 = new EnvironmentView();
-        Long envId3 = 3L;
-        env3.setId(envId3);
-        String envName3 = "env3";
-        env3.setName(envName3);
-
-        ldapConfig.setEnvironments(Sets.newHashSet(env1, env2, env3));
-
-        when(environmentViewService.findByNamesInWorkspace(envNames, WORKSPACE_ID)).thenReturn(environments);
-        when(ldapConfigRepository.findByNameAndWorkspaceId(ldapConfig.getName(), WORKSPACE_ID)).thenReturn(Optional.ofNullable(ldapConfig));
-        when(clusterService.findAllClustersByLdapConfigInEnvironment(ldapConfig, envId1)).thenReturn(Collections.emptySet());
-        when(clusterService.findAllClustersByLdapConfigInEnvironment(ldapConfig, envId2)).thenReturn(Collections.emptySet());
-
-        LdapConfig result = underTest.detachFromEnvironments(LDAP_1, envNames, WORKSPACE_ID);
-        assertEquals(1, result.getEnvironments().size());
-        assertTrue(result.getEnvironments().contains(env3));
-    }
-
-    @Test
-    public void testDetachWithLdapIsUsedByClustersInEnvironments() {
-        EnvironmentView env1 = new EnvironmentView();
-        Long envId1 = 1L;
-        env1.setId(envId1);
-        String envName1 = "env1";
-        env1.setName(envName1);
-
-        EnvironmentView env2 = new EnvironmentView();
-        Long envId2 = 2L;
-        env2.setId(envId2);
-        String envName2 = "env2";
-        env2.setName(envName2);
-        Set<String> envNames = Sets.newHashSet(envName1, envName2);
-        Set<EnvironmentView> environments = Sets.newHashSet(env1, env2);
-
-        Cluster env1Cluster1 = new Cluster();
-        env1Cluster1.setId(1L);
-        String env1Cluster1Name = "env1Cluster1";
-        env1Cluster1.setName(env1Cluster1Name);
-        env1Cluster1.setEnvironment(env1);
-
-        Cluster env1Cluster2 = new Cluster();
-        env1Cluster2.setId(2L);
-        String env1Cluster2Name = "env1Cluster2";
-        env1Cluster2.setName(env1Cluster2Name);
-        env1Cluster2.setEnvironment(env1);
-
-        Cluster env2Cluster1 = new Cluster();
-        env2Cluster1.setId(3L);
-        String env2Cluster1Name = "env2Cluster1";
-        env2Cluster1.setName(env2Cluster1Name);
-        env2Cluster1.setEnvironment(env2);
-
-        Cluster env2Cluster2 = new Cluster();
-        env2Cluster2.setId(4L);
-        String env2Cluster2Name = "env2Cluster2";
-        env2Cluster2.setName(env2Cluster2Name);
-        env2Cluster2.setEnvironment(env2);
-
-        when(environmentViewService.findByNamesInWorkspace(envNames, WORKSPACE_ID)).thenReturn(environments);
-        when(ldapConfigRepository.findByNameAndWorkspaceId(ldapConfig.getName(), WORKSPACE_ID)).thenReturn(Optional.ofNullable(ldapConfig));
-        when(clusterService.findAllClustersByLdapConfigInEnvironment(ldapConfig, envId1)).thenReturn(Sets.newHashSet(env1Cluster1, env1Cluster2));
-        when(clusterService.findAllClustersByLdapConfigInEnvironment(ldapConfig, envId2)).thenReturn(Sets.newHashSet(env2Cluster1, env2Cluster2));
-
-        exceptionRule.expect(BadRequestException.class);
-        exceptionRule.expectMessage(String.format("%s '%s' cannot be detached from environment '%s' because it is used by the following cluster(s): [%s, %s]",
-                ldapConfig.getResource().getReadableName(), ldapConfig.getName(), envName1, env1Cluster1Name, env1Cluster2Name));
-        exceptionRule.expectMessage(String.format("%s '%s' cannot be detached from environment '%s' because it is used by the following cluster(s): [%s, %s]",
-                ldapConfig.getResource().getReadableName(), ldapConfig.getName(), envName2, env2Cluster1Name, env2Cluster2Name));
-
-        underTest.detachFromEnvironments(LDAP_1, envNames, WORKSPACE_ID);
     }
 
     @Test

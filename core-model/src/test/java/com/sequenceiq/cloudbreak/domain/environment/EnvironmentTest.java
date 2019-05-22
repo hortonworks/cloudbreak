@@ -39,7 +39,6 @@ public class EnvironmentTest {
 
         underTest.unsetRelationsToEntitiesToBeDeleted();
 
-        assertNull(underTest.getLdapConfigs());
         assertNull(underTest.getProxyConfigs());
         assertEquals(credential, underTest.getCredential());
         assertEquals(workspace, underTest.getWorkspace());

@@ -60,12 +60,12 @@ public class EnvironmentV4Controller implements EnvironmentV4Endpoint {
 
     @Override
     public DetailedEnvironmentV4Response attach(Long workspaceId, String environmentName, @Valid EnvironmentAttachV4Request request) {
-        return environmentService.attachResources(environmentName, request, workspaceId);
+        throw new UnsupportedOperationException("Attaching resource to an environment is not supported anymore!");
     }
 
     @Override
     public DetailedEnvironmentV4Response detach(Long workspaceId, String environmentName, @Valid EnvironmentDetachV4Request request) {
-        return environmentService.detachResources(environmentName, request, workspaceId);
+        throw new UnsupportedOperationException("Detaching resource from an environment is not supported anymore!");
     }
 
     @Override
