@@ -32,15 +32,11 @@ public class ClouderaManagerLdapService {
     @Inject
     private ClouderaManagerClientFactory clouderaManagerClientFactory;
 
-    @Inject
-    private ClouderaManagerLicenseService licenseService;
-
     public void setupLdap(Stack stack, Cluster cluster, HttpClientConfig clientConfig) throws ApiException {
         LdapConfig ldapConfig = cluster.getLdapConfig();
 
         if (ldapConfig != null) {
             ApiClient client = clouderaManagerClientFactory.getClient(stack, cluster, clientConfig);
-            licenseService.beginTrialIfNeeded(stack.getCreator(), client);
 
             LOGGER.debug("Setup LDAP on ClouderaManager API for stack: {}", stack.getId());
             LdapView ldapView = new LdapView(ldapConfig, ldapConfig.getBindDn(), ldapConfig.getBindPassword());

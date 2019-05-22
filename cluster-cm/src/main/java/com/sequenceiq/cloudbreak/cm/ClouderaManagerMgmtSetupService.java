@@ -30,6 +30,7 @@ import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceState;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cm.client.DataView;
@@ -54,16 +55,10 @@ public class ClouderaManagerMgmtSetupService {
 
     private static final String REPORTSMANAGER = "REPORTSMANAGER";
 
-    private static final String NAVIGATOR = "NAVIGATOR";
-
-    private static final String NAVIGATORMETASERVER = "NAVIGATORMETASERVER";
-
     // This map contains the roles and their internal config name that's necessary for setting database config values
     private static final Map<String, String> ROLE_TYPE_TO_INTERNAL_NAME = ImmutableMap.of(
             ACTIVITYMONITOR, "firehose",
-            REPORTSMANAGER, "headlamp",
-            NAVIGATOR, "navigator",
-            NAVIGATORMETASERVER, "nav_metaserver");
+            REPORTSMANAGER, "headlamp");
 
     private static final String TELEMETRYPUBLISHER = "TELEMETRYPUBLISHER";
 
@@ -74,6 +69,9 @@ public class ClouderaManagerMgmtSetupService {
     private static final String TELEMETRY_COLLECT_JOB_LOGS = "telemetry_collect_job_logs";
 
     private static final String TELEMETRY_ALTUS_ACCOUNT = "telemetry_altus_account";
+
+    private static final List<String> BLACKLISTED_ROLE_TYPES = ImmutableList.of(
+            TELEMETRYPUBLISHER, "NAVIGATOR", "NAVIGATORMETASERVER");
 
     @Inject
     private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
@@ -107,7 +105,7 @@ public class ClouderaManagerMgmtSetupService {
         ApiRoleList mgmtRoles = new ApiRoleList();
         List<String> roleTypes = mgmtServiceResourceApi.listRoleTypes().getItems();
         for (String roleType : roleTypes) {
-            if (!roleType.equals(TELEMETRYPUBLISHER)) {
+            if (!BLACKLISTED_ROLE_TYPES.contains(roleType)) {
                 ApiRole apiRole = new ApiRole();
                 apiRole.setName(roleType);
                 apiRole.setType(roleType);
@@ -184,14 +182,6 @@ public class ClouderaManagerMgmtSetupService {
                 case REPORTSMANAGER:
                     rdsConfig =
                             findDbConfig(DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE_REPORTS_MANAGER, rdsConfigs);
-                    break;
-                case NAVIGATOR:
-                    rdsConfig =
-                            findDbConfig(DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE_NAVIGATOR, rdsConfigs);
-                    break;
-                case NAVIGATORMETASERVER:
-                    rdsConfig =
-                            findDbConfig(DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE_NAVIGATOR_METASERVER, rdsConfigs);
                     break;
                 default:
                     break;
