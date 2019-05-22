@@ -5,7 +5,7 @@ import javax.ws.rs.client.WebTarget;
 import com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceEndpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.test.ClientTestV1Endpoint;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.UsersyncV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.kerberos.KerberosConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.ldap.LdapConfigV1Endpoint;
 
@@ -30,8 +30,8 @@ public class FreeIpaApiUserCrnClient extends AbstractUserCrnServiceEndpoint impl
     }
 
     @Override
-    public UsersyncV1Endpoint getUsersyncV1Endpoint() {
-        return getEndpoint(UsersyncV1Endpoint.class);
+    public UserV1Endpoint getUsersyncV1Endpoint() {
+        return getEndpoint(UserV1Endpoint.class);
     }
 
     @Override

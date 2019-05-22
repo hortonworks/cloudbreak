@@ -1,9 +1,7 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.user.doc;
 
-public class UsersyncModelDescriptions {
-    // TODO use the FreeIpaModelDescriptions where available
-    public static final String ENVIRONMENT_NAME = "name of the environment";
-    public static final String STACK_NAME = "name of the stack";
+public class UserModelDescriptions {
+
     public static final String USERSYNC_GROUPS = "groups to sync";
     public static final String USERSYNC_USERS = "users to sync";
     public static final String GROUP_NAME = "name of the group";
@@ -12,7 +10,9 @@ public class UsersyncModelDescriptions {
     public static final String USER_LASTNAME = "last name of the user";
     public static final String USER_PASSWORD = "the user's password";
     public static final String USER_GROUPS = "the user's groups";
+    public static final String SUCCESS_ENVIRONMENTNAME = "environment names where operation succeeded";
+    public static final String FAILURE_ENVIRONMENTNAME = "environment names where operation failed";
 
-    private UsersyncModelDescriptions() {
+    private UserModelDescriptions() {
     }
 }

@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
@@ -34,5 +36,9 @@ public class StackService {
     public Stack getByEnvironmentCrn(String environmentCrn) {
         return stackRepository.findByEnvironment(environmentCrn)
                 .orElseThrow(() -> new NotFoundException(String.format("Stack by environment [%s] not found", environmentCrn)));
+    }
+
+    public List<Stack> getAllByAccountId(String accountId) {
+        return stackRepository.findByAccountId(accountId);
     }
 }

@@ -5,7 +5,7 @@ import java.util.Set;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UsersyncModelDescriptions;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UserModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -15,22 +15,18 @@ import io.swagger.annotations.ApiModelProperty;
 public class User {
 
     @NotNull
-    @ApiModelProperty(value = UsersyncModelDescriptions.USER_NAME, required = true)
+    @ApiModelProperty(value = UserModelDescriptions.USER_NAME, required = true)
     private String name;
 
     @NotNull
-    @ApiModelProperty(value = UsersyncModelDescriptions.USER_FIRSTNAME, required = true)
+    @ApiModelProperty(value = UserModelDescriptions.USER_FIRSTNAME, required = true)
     private String firstName;
 
     @NotNull
-    @ApiModelProperty(value = UsersyncModelDescriptions.USER_LASTNAME, required = true)
+    @ApiModelProperty(value = UserModelDescriptions.USER_LASTNAME, required = true)
     private String lastName;
 
-    // TODO make this secret
-    @ApiModelProperty(value = UsersyncModelDescriptions.USER_PASSWORD)
-    private String password;
-
-    @ApiModelProperty(value = UsersyncModelDescriptions.USERSYNC_GROUPS)
+    @ApiModelProperty(value = UserModelDescriptions.USER_GROUPS)
     private Set<String> groups;
 
     public String getName() {
@@ -43,10 +39,6 @@ public class User {
 
     public String getLastName() {
         return lastName;
-    }
-
-    public String getPassword() {
-        return password;
     }
 
     public Set<String> getGroups() {
