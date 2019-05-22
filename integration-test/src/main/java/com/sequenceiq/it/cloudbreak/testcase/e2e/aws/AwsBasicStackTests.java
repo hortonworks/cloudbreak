@@ -11,19 +11,12 @@ import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerProductTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 
 public class AwsBasicStackTests extends AbstractE2ETest {
-
-    private static final String PRODUCT_VERSION = "6.0.99-1.cdh6.0.99.p0.181";
-
-    private static final String PRODUCT_PARCEL = "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1071671/cdh/6.x/parcels/";
-
-    private static final String PRODUCT_NAME = "CDH";
 
     @Inject
     private StackTestClient stackTestClient;
@@ -39,8 +32,6 @@ public class AwsBasicStackTests extends AbstractE2ETest {
         String stack = resourcePropertyProvider().getName();
 
         testContext.given(cm, ClouderaManagerTestDto.class)
-                .withClouderaManagerProduct(new ClouderaManagerProductTestDto(testContext)
-                        .withName(PRODUCT_NAME).withParcel(PRODUCT_PARCEL).withVersion(PRODUCT_VERSION))
                 .given(cmcluster, ClusterTestDto.class)
                 .withValidateBlueprint(Boolean.FALSE)
                 .withClouderaManager(cm)
@@ -70,8 +61,6 @@ public class AwsBasicStackTests extends AbstractE2ETest {
         Integer downscaleCount = 3;
         String groupToScale = "worker";
         testContext.given(cm, ClouderaManagerTestDto.class)
-                .withClouderaManagerProduct(new ClouderaManagerProductTestDto(testContext)
-                        .withName(PRODUCT_NAME).withParcel(PRODUCT_PARCEL).withVersion(PRODUCT_VERSION))
                 .given(cmcluster, ClusterTestDto.class)
                 .withValidateBlueprint(Boolean.FALSE)
                 .withClouderaManager(cm)
