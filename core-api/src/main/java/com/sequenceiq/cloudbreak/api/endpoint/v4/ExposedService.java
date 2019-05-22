@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 
@@ -110,6 +112,10 @@ public enum ExposedService {
 
     public String getAmbariServiceName() {
         return ambariServiceName;
+    }
+
+    public static String getServiceNameBasedOnClusterVariant(ExposedService exposedService) {
+        return StringUtils.isEmpty(exposedService.ambariServiceName) ? exposedService.cmServiceName : exposedService.ambariServiceName;
     }
 
     public String getCmServiceName() {

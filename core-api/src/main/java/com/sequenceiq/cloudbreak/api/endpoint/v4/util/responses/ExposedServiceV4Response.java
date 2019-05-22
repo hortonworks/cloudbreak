@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.getServiceNameBasedOnClusterVariant;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -56,7 +58,7 @@ public class ExposedServiceV4Response {
         for (ExposedService service : exposedServices) {
             ExposedServiceV4Response exposedServiceV4Response = new ExposedServiceV4Response();
             exposedServiceV4Response.displayName = service.getDisplayName();
-            exposedServiceV4Response.serviceName = service.getAmbariServiceName();
+            exposedServiceV4Response.serviceName = getServiceNameBasedOnClusterVariant(service);
             exposedServiceV4Response.knoxService = service.getKnoxService();
             exposedServiceV4Response.knoxUrl = service.getKnoxUrl();
             exposedServiceV4ResponseList.add(exposedServiceV4Response);

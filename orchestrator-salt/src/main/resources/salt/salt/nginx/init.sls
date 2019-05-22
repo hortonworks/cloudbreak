@@ -59,7 +59,7 @@ update_nginx_conf_manager_port:
 
 # when gateway is defined, we do NOT config user facing cert and ssl for port 443, because services are available through knox on 8443
 # we still config ssl for port 9443 (for internal communication with ambari)
-{% if gateway.path is defined and gateway.path is not none %}
+{% if gateway.path is defined and gateway.path is not none and "manager_server" not in grains.get('roles', []) %}
 
 restart_nginx_after_ssl_reconfig:
   service.running:
