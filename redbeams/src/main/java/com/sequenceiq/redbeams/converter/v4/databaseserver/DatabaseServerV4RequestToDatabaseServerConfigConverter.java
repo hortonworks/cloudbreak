@@ -37,7 +37,6 @@ public class DatabaseServerV4RequestToDatabaseServerConfigConverter
         server.setConnectionUserName(source.getConnectionUserName());
         server.setConnectionPassword(source.getConnectionPassword());
 
-        server.setCreationDate(System.currentTimeMillis());
         server.setResourceStatus(ResourceStatus.USER_MANAGED);
 
         if (server.getDatabaseVendor() != DatabaseVendor.POSTGRES && Strings.isNullOrEmpty(source.getConnectorJarUrl())) {

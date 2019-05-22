@@ -21,6 +21,9 @@ public class DatabaseServerV4ResponseTest {
         response.setId(1L);
         assertEquals(1L, response.getId().longValue());
 
+        response.setCrn("crn:myserver");
+        assertEquals("crn:myserver", response.getCrn());
+
         response.setDatabaseVendorDisplayName("PostgreSQL");
         assertEquals("PostgreSQL", response.getDatabaseVendorDisplayName());
 

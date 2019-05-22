@@ -19,13 +19,16 @@ import org.springframework.validation.FieldError;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.repository.DatabaseServerConfigRepository;
+import com.sequenceiq.redbeams.service.crn.CrnService;
 import com.sequenceiq.redbeams.service.validation.DatabaseServerConnectionValidator;
 
 @Service
@@ -39,6 +42,12 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
     @Inject
     private DatabaseServerConnectionValidator connectionValidator;
 
+    @Inject
+    private Clock clock;
+
+    @Inject
+    private CrnService crnService;
+
     public Set<DatabaseServerConfig> findAllInWorkspaceAndEnvironment(Long workspaceId, String environmentId, Boolean attachGlobal) {
         return repository.findAllByWorkspaceIdAndEnvironmentId(workspaceId, environmentId);
     }
@@ -49,6 +58,10 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         try {
             MDCBuilder.buildMdcContext(resource);
             // prepareCreation(resource);
+            resource.setCreationDate(clock.getCurrentTimeMillis());
+            Crn crn = crnService.createCrn(resource);
+            resource.setResourceCrn(crn);
+            resource.setAccountId(crn.getAccountId());
             resource.setWorkspaceId(workspaceId);
             return repository.save(resource);
         } catch (AccessDeniedException | DataIntegrityViolationException e) {

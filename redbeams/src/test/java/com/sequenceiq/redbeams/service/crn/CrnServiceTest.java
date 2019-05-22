@@ -5,6 +5,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.redbeams.domain.DatabaseConfig;
+import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 
 public class CrnServiceTest {
 
@@ -13,21 +15,21 @@ public class CrnServiceTest {
     private final CrnService crnService = new CrnService();
 
     @Test
-    public void testCreateDatabaseCrnFrom() {
-        Crn crn = crnService.createDatabaseCrnFrom(RESOURCE_ID);
+    public void testCreateCrnDatabaseConfig() {
+        DatabaseConfig resource = new DatabaseConfig();
+        Crn crn = crnService.createCrn(resource);
 
-        assertEquals(RESOURCE_ID, crn.getResource());
-        assertEquals(Crn.ResourceType.DATABASE, crn.getResourceType());
         assertEquals(Crn.Service.REDBEAMS, crn.getService());
-        assertEquals("ACCOUNT_ID", crn.getAccountId());
+        assertEquals(Crn.ResourceType.DATABASE, crn.getResourceType());
     }
 
-    public static Crn getValidCrn() {
-        return Crn.builder()
-                .setService(Crn.Service.REDBEAMS)
-                .setAccountId("ACCOUNT_ID")
-                .setResourceType(Crn.ResourceType.DATABASE)
-                .setResource("resourceId")
-                .build();
+    @Test
+    public void testCreateCrnDatabaseServerConfig() {
+        DatabaseServerConfig resource = new DatabaseServerConfig();
+        Crn crn = crnService.createCrn(resource);
+
+        assertEquals(Crn.Service.REDBEAMS, crn.getService());
+        assertEquals(Crn.ResourceType.DATABASE_SERVER, crn.getResourceType());
     }
+
 }

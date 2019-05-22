@@ -14,6 +14,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Where;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.archive.ArchivableResource;
@@ -21,16 +22,24 @@ import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.redbeams.converter.CrnConverter;
 
 @Entity
 @Where(clause = "archived = false")
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name", "deletionTimestamp", "environmentId"}))
-public class DatabaseServerConfig implements ProvisionEntity, ArchivableResource {
+public class DatabaseServerConfig implements ArchivableResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "databaseserverconfig_generator")
     @SequenceGenerator(name = "databaseserverconfig_generator", sequenceName = "databaseserverconfig_id_seq", allocationSize = 1)
     private Long id;
+
+    @Column(nullable = false)
+    private String accountId;
+
+    @Convert(converter = CrnConverter.class)
+    @Column(nullable = false)
+    private Crn resourceCrn;
 
     @Column(name = "workspace_id", nullable = false)
     private Long workspaceId;
@@ -88,6 +97,22 @@ public class DatabaseServerConfig implements ProvisionEntity, ArchivableResource
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
+    }
+
+    public Crn getResourceCrn() {
+        return resourceCrn;
+    }
+
+    public void setResourceCrn(Crn resourceCrn) {
+        this.resourceCrn = resourceCrn;
     }
 
     public Long getWorkspaceId() {

@@ -20,6 +20,9 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
 
+    @ApiModelProperty(ModelDescriptions.CRN)
+    private String crn;
+
     @ApiModelProperty(value = DatabaseServer.DATABASE_VENDOR_DISPLAY_NAME, required = true)
     private String databaseVendorDisplayName;
 
@@ -41,6 +44,14 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getCrn() {
+        return crn;
+    }
+
+    public void setCrn(String crn) {
+        this.crn = crn;
     }
 
     public String getDatabaseVendorDisplayName() {
