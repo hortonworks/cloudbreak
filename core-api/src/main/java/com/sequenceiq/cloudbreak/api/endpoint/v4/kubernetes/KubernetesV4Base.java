@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -27,9 +24,6 @@ public abstract class KubernetesV4Base {
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
 
-    @ApiModelProperty(ModelDescriptions.ENVIRONMENTS)
-    private Set<String> environments = new HashSet<>();
-
     public String getName() {
         return name;
     }
@@ -46,11 +40,4 @@ public abstract class KubernetesV4Base {
         this.description = description;
     }
 
-    public Set<String> getEnvironments() {
-        return environments;
-    }
-
-    public void setEnvironments(Set<String> environments) {
-        this.environments = environments;
-    }
 }

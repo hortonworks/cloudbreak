@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
-import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -21,11 +20,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.domain.KubernetesConfig;
-import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.repository.KubernetesConfigRepository;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @RunWith(MockitoJUnitRunner.class)
 public class KubernetesConfigServiceTest {
@@ -59,7 +57,6 @@ public class KubernetesConfigServiceTest {
         KubernetesConfig originalConfig = new KubernetesConfig();
         originalConfig.setId(1L);
         originalConfig.setWorkspace(new Workspace());
-        originalConfig.setEnvironments(Set.of(new EnvironmentView()));
         when(kubernetesConfigRepository.findByNameAndWorkspaceId(any(), anyLong())).thenReturn(Optional.of(originalConfig));
 
         KubernetesConfig result = underTest.updateByWorkspaceId(1L, new KubernetesConfig());
@@ -68,6 +65,5 @@ public class KubernetesConfigServiceTest {
 
         Assert.assertEquals(originalConfig.getId(), result.getId());
         Assert.assertEquals(originalConfig.getWorkspace(), result.getWorkspace());
-        Assert.assertEquals(originalConfig.getEnvironments(), result.getEnvironments());
     }
 }

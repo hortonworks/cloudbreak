@@ -80,7 +80,7 @@ public class KubernetesTestDto extends DeletableTestDto<KubernetesV4Request, Kub
     @Override
     public List<KubernetesV4Response> getAll(CloudbreakClient client) {
         KubernetesV4Endpoint kubernetesV4Endpoint = client.getCloudbreakClient().kubernetesV4Endpoint();
-        return kubernetesV4Endpoint.list(client.getWorkspaceId(), null, Boolean.FALSE).getResponses().stream()
+        return kubernetesV4Endpoint.list(client.getWorkspaceId()).getResponses().stream()
                 .filter(s -> s.getName() != null)
                 .collect(Collectors.toList());
     }

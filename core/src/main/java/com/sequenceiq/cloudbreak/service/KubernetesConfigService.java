@@ -2,28 +2,20 @@ package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 
-import java.util.Collections;
-import java.util.Set;
-
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.domain.KubernetesConfig;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.repository.KubernetesConfigRepository;
-import com.sequenceiq.cloudbreak.repository.environment.EnvironmentResourceRepository;
-import com.sequenceiq.cloudbreak.service.environment.AbstractEnvironmentAwareService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @Service
-public class KubernetesConfigService extends AbstractEnvironmentAwareService<KubernetesConfig> {
+public class KubernetesConfigService extends AbstractWorkspaceAwareResourceService<KubernetesConfig> {
 
     private static final String NOT_FOUND_FORMAT_MESS_NAME = "Kubernetes config with name:";
 
@@ -36,30 +28,11 @@ public class KubernetesConfigService extends AbstractEnvironmentAwareService<Kub
     @Inject
     private SecretService secretService;
 
-    @Override
-    public KubernetesConfig attachToEnvironments(String resourceName, Set<String> environments, @NotNull Long workspaceId) {
-        try {
-            return transactionService.required(() -> super.attachToEnvironments(resourceName, environments, workspaceId));
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
-    }
-
-    @Override
-    public KubernetesConfig detachFromEnvironments(String resourceName, Set<String> environments, @NotNull Long workspaceId) {
-        try {
-            return transactionService.required(() -> super.detachFromEnvironments(resourceName, environments, workspaceId));
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
-    }
-
     public KubernetesConfig updateByWorkspaceId(Long workspaceId, KubernetesConfig kubernetesConfig) {
         KubernetesConfig original = kubernetesConfigRepository.findByNameAndWorkspaceId(kubernetesConfig.getName(), workspaceId)
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, kubernetesConfig.getName()));
         kubernetesConfig.setId(original.getId());
         kubernetesConfig.setWorkspace(original.getWorkspace());
-        kubernetesConfig.setEnvironments(original.getEnvironments());
         KubernetesConfig updated = kubernetesConfigRepository.save(kubernetesConfig);
         secretService.delete(original.getConfigurationSecret());
         return updated;
@@ -70,13 +43,8 @@ public class KubernetesConfigService extends AbstractEnvironmentAwareService<Kub
     }
 
     @Override
-    public Set<Cluster> getClustersUsingResource(KubernetesConfig resource) {
-        return Collections.emptySet();
-    }
-
-    @Override
-    public Set<Cluster> getClustersUsingResourceInEnvironment(KubernetesConfig kubernetesConfig, Long environmentId) {
-        return Collections.emptySet();
+    protected WorkspaceResourceRepository<KubernetesConfig, Long> repository() {
+        return kubernetesConfigRepository;
     }
 
     @Override
@@ -84,12 +52,13 @@ public class KubernetesConfigService extends AbstractEnvironmentAwareService<Kub
     }
 
     @Override
+    protected void prepareCreation(KubernetesConfig resource) {
+
+    }
+
+    @Override
     public WorkspaceResource resource() {
         return WorkspaceResource.KUBERNETES;
     }
 
-    @Override
-    public EnvironmentResourceRepository<KubernetesConfig, Long> repository() {
-        return kubernetesConfigRepository;
-    }
 }
