@@ -6,7 +6,6 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.responses.KubernetesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
@@ -31,9 +30,6 @@ public class DetailedEnvironmentV4Response extends EnvironmentV4BaseResponse {
 
     @ApiModelProperty(EnvironmentResponseModelDescription.KUBERNETES_CONFIGS)
     private Set<KubernetesV4Response> kubernetes = new HashSet<>();
-
-    @ApiModelProperty(EnvironmentResponseModelDescription.KERBEROS_CONFIGS)
-    private Set<KerberosV4Response> kerberoses = new HashSet<>();
 
     @ApiModelProperty(EnvironmentResponseModelDescription.DATALAKE_RESOURCES)
     private Set<DatalakeResourcesV4Response> datalakeResourcesResponses;
@@ -100,11 +96,4 @@ public class DetailedEnvironmentV4Response extends EnvironmentV4BaseResponse {
         this.datalakeClusters = datalakeClusters;
     }
 
-    public Set<KerberosV4Response> getKerberoses() {
-        return kerberoses;
-    }
-
-    public void setKerberoses(Set<KerberosV4Response> kerberoses) {
-        this.kerberoses = kerberoses;
-    }
 }

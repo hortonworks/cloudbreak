@@ -226,7 +226,6 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
         environment.setProxyConfigs(proxyConfigService.findByNamesInWorkspace(request.getProxies(), workspaceId));
         environment.setRdsConfigs(rdsConfigService.findByNamesInWorkspace(request.getDatabases(), workspaceId));
         environment.setKubernetesConfigs(kubernetesConfigService.findByNamesInWorkspace(request.getKubernetes(), workspaceId));
-        environment.setKerberosConfigs(kerberosConfigService.findByNamesInWorkspace(request.getKerberoses(), workspaceId));
         Credential credential = environmentCredentialOperationService.getCredentialFromRequest(request, workspaceId);
         environment.setCredential(credential);
         environment.setCloudPlatform(credential.cloudPlatform());
@@ -348,12 +347,11 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
                 Set<RDSConfig> rdssToAttach = rdsConfigService.findByNamesInWorkspace(request.getDatabases(), workspaceId);
                 Set<KubernetesConfig> kubesToAttach = kubernetesConfigService.findByNamesInWorkspace(request.getKubernetes(), workspaceId);
                 ValidationResult validationResult = environmentAttachValidator.validate(request, ldapsToAttach, proxiesToAttach, rdssToAttach);
-                Set<KerberosConfig> kerberosConfigsToAttach = kerberosConfigService.findByNamesInWorkspace(request.getKerberoses(), workspaceId);
                 if (validationResult.hasError()) {
                     throw new BadRequestException(validationResult.getFormattedErrors());
                 }
                 Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
-                environment = doAttach(ldapsToAttach, proxiesToAttach, rdssToAttach, kubesToAttach, kerberosConfigsToAttach, environment);
+                environment = doAttach(ldapsToAttach, proxiesToAttach, rdssToAttach, kubesToAttach, environment);
                 return conversionService.convert(environment, DetailedEnvironmentV4Response.class);
             });
         } catch (TransactionExecutionException e) {
@@ -362,7 +360,7 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
     }
 
     private Environment doAttach(Set<LdapConfig> ldapsToAttach, Set<ProxyConfig> proxiesToAttach, Set<RDSConfig> rdssToAttach,
-            Set<KubernetesConfig> kubesToAttach, Set<KerberosConfig> kerberosConfigs, Environment environment) {
+            Set<KubernetesConfig> kubesToAttach, Environment environment) {
         ldapsToAttach.removeAll(environment.getLdapConfigs());
         environment.getLdapConfigs().addAll(ldapsToAttach);
         proxiesToAttach.removeAll(environment.getProxyConfigs());
@@ -371,8 +369,6 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
         environment.getRdsConfigs().addAll(rdssToAttach);
         kubesToAttach.removeAll(environment.getKubernetesConfigs());
         environment.getKubernetesConfigs().addAll(kubesToAttach);
-        kerberosConfigs.removeAll(environment.getKerberosConfigs());
-        environment.getKerberosConfigs().addAll(kerberosConfigs);
         environment = environmentRepository.save(environment);
         return environment;
     }
@@ -384,7 +380,6 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
                 ValidationResult validationResult = validateAndDetachLdaps(request, environment);
                 validationResult = validateAndDetachProxies(request, environment, validationResult);
                 validationResult = validateAndDetachRdss(request, environment, validationResult);
-                validationResult = validateAndDetachKerberosConfigs(request, environment, validationResult);
                 detachKubes(request, environment);
                 if (validationResult.hasError()) {
                     throw new BadRequestException(validationResult.getFormattedErrors());
@@ -431,17 +426,6 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
         Set<KubernetesConfig> kubesToDetach = environment.getKubernetesConfigs().stream()
                 .filter(config -> request.getKubernetes().contains(config.getName())).collect(Collectors.toSet());
         environment.getKubernetesConfigs().removeAll(kubesToDetach);
-    }
-
-    private ValidationResult validateAndDetachKerberosConfigs(EnvironmentDetachV4Request request, Environment environment, ValidationResult validationResult) {
-        Set<KerberosConfig> kerberosConfigsToDetach = environment.getKerberosConfigs().stream()
-                .filter(kerberosConfig -> request.getKerberoses().contains(kerberosConfig.getName())).collect(Collectors.toSet());
-        Map<KerberosConfig, Set<Cluster>> kerberosConfigsToClusters = kerberosConfigsToDetach.stream()
-                .collect(Collectors.toMap(kerberosConfig -> kerberosConfig, kerberosConfig ->
-                        kerberosConfigService.getClustersUsingResourceInEnvironment(kerberosConfig, environment.getId())));
-        validationResult = environmentDetachValidator.validate(environment, kerberosConfigsToClusters).merge(validationResult);
-        environment.getKerberosConfigs().removeAll(kerberosConfigsToDetach);
-        return validationResult;
     }
 
     public DetailedEnvironmentV4Response changeCredential(String environmentName, Long workspaceId, EnvironmentChangeCredentialV4Request request) {

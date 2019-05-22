@@ -9,10 +9,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 
 public class KerberosConfigToKerberosV4RequestTest {
@@ -64,9 +62,6 @@ public class KerberosConfigToKerberosV4RequestTest {
         config.setId(1L);
         config.setName("name");
         config.setDescription("desc");
-        EnvironmentView environmentView = new EnvironmentView();
-        environmentView.setName("env");
-        config.setEnvironments(Sets.newHashSet(environmentView));
         config.setKrb5Conf("krb5conf");
         config.setAdminUrl("adminurl");
         config.setAdmin("admin");

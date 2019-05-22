@@ -21,18 +21,21 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Re
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.LdapDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.RdsDetails;
+import com.sequenceiq.cloudbreak.workspace.model.User;
 
 @Service
 public class DatalakePrerequisiteService {
@@ -58,6 +61,12 @@ public class DatalakePrerequisiteService {
 
     @Inject
     private CloudbreakEventService defaultCloudbreakEventService;
+
+    @Inject
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private UserService userService;
 
     @Inject
     @Named("conversionService")
@@ -127,7 +136,8 @@ public class DatalakePrerequisiteService {
 
     private KerberosConfig createKerberosConfig(Long workspaceId, String environment, DatalakePrerequisiteV4Request datalakePrerequisiteV4Request) {
         KerberosConfig kerberosConfig = prepareKerberosConfig(environment, datalakePrerequisiteV4Request.getKerberos());
-        return kerberosConfigService.createInEnvironment(kerberosConfig, Set.of(environment), workspaceId);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        return kerberosConfigService.create(kerberosConfig, workspaceId, user);
     }
 
     private LdapDetails prepareLdapDetails(LdapConfig ldapConfig) {

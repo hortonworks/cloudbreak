@@ -31,18 +31,22 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Req
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.events.DefaultCloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.structuredevent.event.LdapDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.RdsDetails;
+import com.sequenceiq.cloudbreak.workspace.model.User;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DatalakePrerequisiteServiceTest {
@@ -52,6 +56,10 @@ public class DatalakePrerequisiteServiceTest {
     private static String environmentName = "test-environment";
 
     private static String errorMessage = "Something wrong...";
+
+    private static final User USER = new User();
+
+    private static final CloudbreakUser CLOUDBREAK_USER = new CloudbreakUser("", "", "", "", "");
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
@@ -77,6 +85,12 @@ public class DatalakePrerequisiteServiceTest {
     @Mock
     private ConversionService conversionService;
 
+    @Mock
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Mock
+    private UserService userService;
+
     @InjectMocks
     private final DatalakePrerequisiteService underTest = new DatalakePrerequisiteService();
 
@@ -92,6 +106,8 @@ public class DatalakePrerequisiteServiceTest {
 
         when(conversionService.convert(any(KerberosV4Request.class), eq(KerberosConfig.class))).thenReturn(kerberosConfig());
         when(conversionService.convert(any(KerberosConfig.class), eq(KerberosV4Response.class))).thenReturn(kerberosResponse());
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(CLOUDBREAK_USER);
+        when(userService.getOrCreate(CLOUDBREAK_USER)).thenReturn(USER);
     }
 
     @Test
@@ -125,7 +141,7 @@ public class DatalakePrerequisiteServiceTest {
         doNothing().when(rdsConnectionValidator).validateRdsConnection(any(RDSConfig.class));
         doNothing().when(defaultCloudbreakEventService).fireRdsEvent(any(RdsDetails.class), anyString(), anyString(), anyBoolean());
 
-        when(kerberosConfigService.createInEnvironment(any(KerberosConfig.class), anySet(), anyLong())).thenReturn(kerberosConfig());
+        when(kerberosConfigService.create(any(KerberosConfig.class), anyLong(), any())).thenReturn(kerberosConfig());
         when(ldapConfigService.createInEnvironment(any(LdapConfig.class), anySet(), anyLong())).thenReturn(ldapConfig());
         when(rdsConfigService.createInEnvironment(any(RDSConfig.class), anySet(), anyLong())).thenReturn(rdsConfig());
 

@@ -64,10 +64,6 @@ public class ClusterCreationEnvironmentValidator {
         for (String rdsConfigName : registerDatalakeRequest.getDatabaseNames()) {
             validateEnvironmentAwareResource(rdsConfigService.getByNameForWorkspaceId(rdsConfigName, workspaceId), environmentName, resultBuilder);
         }
-        if (StringUtils.isNoneEmpty(registerDatalakeRequest.getKerberosName())) {
-            validateEnvironmentAwareResource(kerberosConfigService.getByNameForWorkspaceId(registerDatalakeRequest.getKerberosName(), workspaceId),
-                    environmentName, resultBuilder);
-        }
         return resultBuilder.build();
     }
 

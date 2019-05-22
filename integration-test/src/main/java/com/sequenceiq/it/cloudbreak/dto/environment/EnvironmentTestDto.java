@@ -79,11 +79,6 @@ public class EnvironmentTestDto extends DeletableTestDto<EnvironmentV4Request, D
         return this;
     }
 
-    public EnvironmentTestDto withKerberosConfigs(Set<String> kerberos) {
-        getRequest().setKerberoses(kerberos);
-        return this;
-    }
-
     public EnvironmentTestDto withProxyConfigs(Set<String> proxy) {
         getRequest().setProxies(proxy);
         return this;

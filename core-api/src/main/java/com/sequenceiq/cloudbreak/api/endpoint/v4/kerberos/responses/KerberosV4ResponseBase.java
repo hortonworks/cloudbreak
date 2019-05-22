@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -58,9 +55,6 @@ public abstract class KerberosV4ResponseBase implements JsonEntity {
     @Size(max = 1000)
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
-
-    @ApiModelProperty(ModelDescriptions.ENVIRONMENTS)
-    private Set<String> environments = new HashSet<>();
 
     public KerberosType getType() {
         return type;
@@ -156,14 +150,6 @@ public abstract class KerberosV4ResponseBase implements JsonEntity {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public Set<String> getEnvironments() {
-        return environments;
-    }
-
-    public void setEnvironments(Set<String> environments) {
-        this.environments = environments;
     }
 
     public Long getId() {

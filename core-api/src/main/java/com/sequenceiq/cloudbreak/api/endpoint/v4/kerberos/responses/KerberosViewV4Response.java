@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -16,8 +13,6 @@ import io.swagger.annotations.ApiModel;
 @JsonInclude(Include.NON_NULL)
 public class KerberosViewV4Response extends CompactViewV4Response {
 
-    private Set<String> environments = new HashSet<>();
-
     private KerberosType type;
 
     public KerberosType getType() {
@@ -26,14 +21,6 @@ public class KerberosViewV4Response extends CompactViewV4Response {
 
     public void setType(KerberosType type) {
         this.type = type;
-    }
-
-    public Set<String> getEnvironments() {
-        return environments;
-    }
-
-    public void setEnvironments(Set<String> environments) {
-        this.environments = environments;
     }
 
 }

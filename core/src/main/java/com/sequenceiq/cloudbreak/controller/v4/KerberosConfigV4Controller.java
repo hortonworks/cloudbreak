@@ -7,9 +7,10 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.KerberosConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
@@ -19,12 +20,18 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosView
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosViewV4Responses;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
+import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
+import com.sequenceiq.cloudbreak.workspace.model.User;
 
 @Controller
 @Transactional(TxType.NEVER)
 @WorkspaceEntityType(KerberosConfig.class)
 public class KerberosConfigV4Controller extends NotificationController implements KerberosConfigV4Endpoint {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(KerberosConfigV4Controller.class);
 
     @Inject
     private KerberosConfigService kerberosConfigService;
@@ -32,10 +39,15 @@ public class KerberosConfigV4Controller extends NotificationController implement
     @Inject
     private ConverterUtil converterUtil;
 
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
     @Override
     public KerberosViewV4Responses list(Long workspaceId, String environment, Boolean attachGlobal) {
-        Set<KerberosConfig> allInWorkspaceAndEnvironment = kerberosConfigService.findAllInWorkspaceAndEnvironment(workspaceId,
-                environment, attachGlobal);
+        Set<KerberosConfig> allInWorkspaceAndEnvironment = kerberosConfigService.findAllByWorkspaceId(workspaceId);
         return new KerberosViewV4Responses(converterUtil.convertAllAsSet(allInWorkspaceAndEnvironment, KerberosViewV4Response.class));
     }
 
@@ -48,7 +60,8 @@ public class KerberosConfigV4Controller extends NotificationController implement
     @Override
     public KerberosV4Response create(Long workspaceId, @Valid KerberosV4Request request) {
         KerberosConfig newKerberosConfig = converterUtil.convert(request, KerberosConfig.class);
-        KerberosConfig createdKerberosConfig = kerberosConfigService.createInEnvironment(newKerberosConfig, request.getEnvironments(), workspaceId);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        KerberosConfig createdKerberosConfig = kerberosConfigService.create(newKerberosConfig, workspaceId, user);
         return converterUtil.convert(createdKerberosConfig, KerberosV4Response.class);
     }
 
@@ -66,14 +79,12 @@ public class KerberosConfigV4Controller extends NotificationController implement
 
     @Override
     public KerberosV4Response attach(Long workspaceId, String name, EnvironmentNames environmentNames) {
-        KerberosConfig attached = kerberosConfigService.attachToEnvironments(name, environmentNames.getEnvironmentNames(), workspaceId);
-        return converterUtil.convert(attached, KerberosV4Response.class);
+        throw new UnsupportedOperationException("Attaching Kerberos config to environment is not supported anymore!");
     }
 
     @Override
     public KerberosV4Response detach(Long workspaceId, String name, EnvironmentNames environmentNames) {
-        KerberosConfig detached = kerberosConfigService.detachFromEnvironments(name, environmentNames.getEnvironmentNames(), workspaceId);
-        return converterUtil.convert(detached, KerberosV4Response.class);
+        throw new UnsupportedOperationException("Detaching Kerberos config from environment is not supported anymore!");
     }
 
     @Override
@@ -81,4 +92,5 @@ public class KerberosConfigV4Controller extends NotificationController implement
         KerberosConfig kerberosConfig = kerberosConfigService.getByNameForWorkspaceId(name, workspaceId);
         return converterUtil.convert(kerberosConfig, KerberosV4Request.class);
     }
+
 }
