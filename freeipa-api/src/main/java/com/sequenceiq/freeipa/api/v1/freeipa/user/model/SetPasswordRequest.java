@@ -1,22 +1,19 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.user.model;
 
-import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UserModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("GroupV1")
+@ApiModel("SetPasswordV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Group {
+public class SetPasswordRequest {
 
-    @NotNull
-    @ApiModelProperty(value = UserModelDescriptions.GROUP_NAME, required = true)
-    private String name;
+    @ApiModelProperty(value = UserModelDescriptions.USER_PASSWORD)
+    private String password;
 
-    public String getName() {
-        return name;
+    public String getPassword() {
+        return password;
     }
 }

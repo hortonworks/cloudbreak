@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
@@ -24,4 +25,6 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
 
     @Query("SELECT s FROM Stack s WHERE s.environment = :environment")
     Optional<Stack> findByEnvironment(@Param("environment") String environment);
+
+    List<Stack> findByAccountId(@Param("accountId") String accountId);
 }

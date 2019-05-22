@@ -60,88 +60,18 @@ public class FreeIpaClient {
         return invoke("user_add", flags, params, User.class);
     }
 
-    // TODO update password expiration aand unpack response
-    //Request: {
-    //    "id": 0,
-    //    "method": "user_mod/1",
-    //    "params": [
-    //        [
-    //            "dhan"
-    //        ],
-    //        {
-    //            "krbpasswordexpiration": {
-    //                "__datetime__": "20380101000000Z"
-    //            },
-    //            "userpassword": "adminadmin1",
-    //            "version": "2.230"
-    //        }
-    //    ]
-    //}
-    //ipa: INFO: Response: {
-    //    "error": null,
-    //    "id": 0,
-    //    "principal": "admin@IPATEST.LOCAL",
-    //    "result": {
-    //        "result": {
-    //            "gidnumber": [
-    //                "1866200061"
-    //            ],
-    //            "givenname": [
-    //                "David"
-    //            ],
-    //            "has_keytab": true,
-    //            "has_password": true,
-    //            "homedirectory": [
-    //                "/home/dhan"
-    //            ],
-    //            "krbcanonicalname": [
-    //                "dhan@IPATEST.LOCAL"
-    //            ],
-    //            "krbpasswordexpiration": [
-    //                {
-    //                    "__datetime__": "20190520200340Z"
-    //                }
-    //            ],
-    //            "krbprincipalname": [
-    //                "dhan@IPATEST.LOCAL"
-    //            ],
-    //            "loginshell": [
-    //                "/bin/sh"
-    //            ],
-    //            "mail": [
-    //                "dhan@ipatest.local"
-    //            ],
-    //            "memberof_group": [
-    //                "ipausers",
-    //                "grp1"
-    //            ],
-    //            "nsaccountlock": false,
-    //            "sn": [
-    //                "Han"
-    //            ],
-    //            "uid": [
-    //                "dhan"
-    //            ],
-    //            "uidnumber": [
-    //                "1866200061"
-    //            ]
-    //        },
-    //        "summary": "Modified user \"dhan\"",
-    //        "value": "dhan"
-    //    },
-    //    "version": "4.6.4"
-    //}
-    public RPCResponse<Object> userSetPassword(String user, String password) throws FreeIpaClientException {
+    public void userSetPassword(String user, String password) throws FreeIpaClientException {
+        // FreeIPA expires any password that is set by another user. Work around this by
+        // performing a separate API call to set the password expiration into the future
+        userMod(user, "userpassword", password);
+        userMod(user, "setattr", "krbPasswordExpiration=20380101000000Z");
+    }
+
+    public RPCResponse<User> userMod(String user, String key, Object value) throws FreeIpaClientException {
         List<String> flags = List.of(user);
         Map<String, Object> params = Map.of(
-                "userpassword", password,
-                // TODO: figure out password expiration story. for now, set expiration way in the future
-                "setattr", "krbPasswordExpiration=20380101000000Z"
+                key, value
         );
-        // TODO The password policy is applied automatically when the password is changed. We
-        // should change the password policy so that we get reasonable password expirations (i.e., not
-        // force the user to immediately change their passwords in ipa after changing their password
-        // in through the API
         return invoke("user_mod", flags, params, User.class);
     }
 

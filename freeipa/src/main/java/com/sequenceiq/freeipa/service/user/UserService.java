@@ -22,9 +22,9 @@ import com.sequenceiq.freeipa.service.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
-public class UsersyncService {
+public class UserService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UsersyncService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
     @Inject
     private StackService stackService;
@@ -33,7 +33,7 @@ public class UsersyncService {
     private FreeIpaClientFactory freeIpaClientFactory;
 
     public void synchronizeUsers(String accountId, SynchronizeUsersRequest request) throws Exception {
-        LOGGER.info("UsersyncService.synchronizeUsers() called");
+        LOGGER.info("UserService.synchronizeUsers() called");
 
         Stack stack = stackService.getByAccountIdEnvironmentAndName(accountId, request.getEnvironmentName(), request.getName());
 
@@ -73,8 +73,6 @@ public class UsersyncService {
             RPCResponse<com.sequenceiq.freeipa.client.model.User> userAdd = freeIpaClient.userAdd(
                     username, user.getFirstName(), user.getLastName());
 
-            RPCResponse<Object> userSetPassword = freeIpaClient.userSetPassword(username, user.getPassword());
-
             LOGGER.debug("Success: {}", userAdd.getResult());
         }
     }
@@ -104,4 +102,5 @@ public class UsersyncService {
         }
         return mapping;
     }
+
 }
