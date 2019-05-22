@@ -9,6 +9,8 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.CreateDatabaseV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
@@ -37,8 +39,8 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
-    public DatabaseServerV4Response get(String name) {
-        DatabaseServerConfig server = databaseServerConfigService.getByNameInWorkspace(DEFAULT_WORKSPACE, name);
+    public DatabaseServerV4Response get(String environmentId, String name) {
+        DatabaseServerConfig server = databaseServerConfigService.getByNameInWorkspaceAndEnvironment(DEFAULT_WORKSPACE, environmentId, name);
         return converterUtil.convert(server, DatabaseServerV4Response.class);
     }
 
@@ -50,15 +52,17 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
-    public DatabaseServerV4Response delete(String name) {
-        DatabaseServerConfig deleted = databaseServerConfigService.deleteByNameInWorkspace(DEFAULT_WORKSPACE, name);
+    public DatabaseServerV4Response delete(String environmentId, String name) {
+        DatabaseServerConfig deleted =
+                databaseServerConfigService.deleteByNameInWorkspace(DEFAULT_WORKSPACE, environmentId, name);
         //notify(ResourceEvent.DATABASE_SERVER_CONFIG_DELETED);
         return converterUtil.convert(deleted, DatabaseServerV4Response.class);
     }
 
     @Override
-    public DatabaseServerV4Responses deleteMultiple(Set<String> names) {
-        Set<DatabaseServerConfig> deleted = databaseServerConfigService.deleteMultipleByNameInWorkspace(DEFAULT_WORKSPACE, names);
+    public DatabaseServerV4Responses deleteMultiple(String environmentId, Set<String> names) {
+        Set<DatabaseServerConfig> deleted =
+                databaseServerConfigService.deleteMultipleByNameInWorkspace(DEFAULT_WORKSPACE, environmentId, names);
         //notify(ResourceEvent.DATABASE_SERVER_CONFIG_DELETED);
         return new DatabaseServerV4Responses(converterUtil.convertAllAsSet(deleted, DatabaseServerV4Response.class));
     }
@@ -67,11 +71,20 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     public DatabaseServerTestV4Response test(DatabaseServerTestV4Request request) {
         String connectionResult;
         if (request.getExistingDatabaseServerName() != null) {
-            connectionResult = databaseServerConfigService.testConnection(DEFAULT_WORKSPACE, request.getExistingDatabaseServerName());
+            connectionResult = databaseServerConfigService.testConnection(DEFAULT_WORKSPACE,
+                    request.getEnvironmentId(), request.getExistingDatabaseServerName());
         } else {
             DatabaseServerConfig server = converterUtil.convert(request.getDatabaseServer(), DatabaseServerConfig.class);
             connectionResult = databaseServerConfigService.testConnection(server);
         }
         return new DatabaseServerTestV4Response(connectionResult);
+    }
+
+    @Override
+    public CreateDatabaseV4Response createDatabase(CreateDatabaseV4Request request) {
+        String result = databaseServerConfigService.createDatabaseOnServer(DEFAULT_WORKSPACE,
+                request.getEnvironmentId(), request.getExistingDatabaseServerName(), request.getDatabaseName(),
+                request.getType());
+        return new CreateDatabaseV4Response(result);
     }
 }

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.validation;
+package com.sequenceiq.cloudbreak.common.database;
 
 import static java.util.Objects.requireNonNull;
 

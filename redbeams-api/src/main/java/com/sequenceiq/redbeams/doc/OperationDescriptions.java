@@ -24,6 +24,7 @@ public final class OperationDescriptions {
         public static final String DELETE_BY_NAME = "deregister or terminate a database server by name";
         public static final String DELETE_MULTIPLE_BY_NAME = "deregister or terminate multiple database servers by name";
         // public static final String GET_REQUEST_IN_WORKSPACE = "get request in workspace";
+        public static final String CREATE_DATABASE = "create a database on an existing database server";
 
         private DatabaseServerOpDescription() {
         }

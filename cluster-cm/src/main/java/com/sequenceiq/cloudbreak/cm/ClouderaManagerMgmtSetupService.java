@@ -38,7 +38,7 @@ import com.sequenceiq.cloudbreak.cm.database.DatabaseProperties;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.validation.DatabaseCommon;
+import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 
 /**
  * Sets up management services for the given Cloudera Manager server.

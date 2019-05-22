@@ -394,6 +394,7 @@ public class ModelDescriptions {
         public static final String PASSWORD = "Password to use for the jdbc connection";
         public static final String ORACLE = "Oracle specific properties";
         public static final String NAME = "Name of the RDS configuration resource";
+        public static final String DATABASE_NAME = "Name of the database on the database server";
         public static final String STACK_VERSION = "(HDP, HDF)Stack version for the RDS configuration";
         public static final String RDSTYPE = "Type of RDS, aka the service name that will use the RDS like HIVE, DRUID, SUPERSET, RANGER, etc.";
         public static final String CONNECTOR_JAR_URL = "URL that points to the jar of the connection driver(connector)";

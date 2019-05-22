@@ -16,6 +16,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
         "com.sequenceiq.cloudbreak.config",
         "com.sequenceiq.cloudbreak.cache.common",
         "com.sequenceiq.cloudbreak.service.secret",
+        "com.sequenceiq.cloudbreak.common.database",
         "com.sequenceiq.cloudbreak.common.service",
         "com.sequenceiq.cloudbreak.common.dbmigration",
         "com.sequenceiq.cloudbreak.validation",

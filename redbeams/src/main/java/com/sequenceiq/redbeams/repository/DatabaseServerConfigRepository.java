@@ -23,8 +23,10 @@ public interface DatabaseServerConfigRepository extends JpaRepository<DatabaseSe
             + " AND s.resourceStatus = 'USER_MANAGED'")
     Set<DatabaseServerConfig> findAllByWorkspaceIdAndEnvironmentId(@Param("workspaceId")Long workspaceId, @Param("environmentId")String environmentId);
 
-    Optional<DatabaseServerConfig> findByNameAndWorkspaceId(String name, Long workspaceId);
+    Optional<DatabaseServerConfig> findByNameAndWorkspaceIdAndEnvironmentId(String name, Long workspaceId, String environmentId);
 
-    Set<DatabaseServerConfig> findByNameInAndWorkspaceId(Set<String> names, Long workspaceId);
+    Optional<DatabaseServerConfig> findByNameAndEnvironmentId(String name, String  workspaceId);
+
+    Set<DatabaseServerConfig> findByNameInAndWorkspaceIdAndEnvironmentId(Set<String> names, Long workspaceId, String environmentId);
 
 }
