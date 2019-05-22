@@ -48,7 +48,7 @@ public class KubernetesAction {
         kubernetesTestDto.setResponses(
                 (Set<KubernetesV4Response>) client.getCloudbreakClient()
                         .kubernetesV4Endpoint()
-                        .list(workspaceId, null, Boolean.FALSE)
+                        .list(workspaceId)
                         .getResponses());
         logJSON(" get all Kubernetes config response: ", kubernetesTestDto.getResponse());
     }

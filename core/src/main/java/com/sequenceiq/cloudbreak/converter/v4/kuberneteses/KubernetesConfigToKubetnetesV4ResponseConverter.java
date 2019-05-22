@@ -1,14 +1,11 @@
 package com.sequenceiq.cloudbreak.converter.v4.kuberneteses;
 
-import java.util.stream.Collectors;
-
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kubernetes.responses.KubernetesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.KubernetesConfig;
-import com.sequenceiq.cloudbreak.domain.view.CompactView;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 @Component
@@ -22,7 +19,6 @@ public class KubernetesConfigToKubetnetesV4ResponseConverter extends AbstractCon
         json.setDescription(source.getDescription());
         json.setContent(getConversionService().convert(source.getConfigurationSecret(), SecretResponse.class));
         json.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceV4Response.class));
-        json.setEnvironments(source.getEnvironments().stream().map(CompactView::getName).collect(Collectors.toSet()));
         return json;
     }
 }

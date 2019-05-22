@@ -21,7 +21,7 @@ public class KubernetesListAction implements Action<KubernetesTestDto> {
     public KubernetesTestDto action(TestContext testContext, KubernetesTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
         Collection<KubernetesV4Response> responses = cloudbreakClient.getCloudbreakClient()
                 .kubernetesV4Endpoint()
-                .list(cloudbreakClient.getWorkspaceId(), null, Boolean.TRUE)
+                .list(cloudbreakClient.getWorkspaceId())
                 .getResponses();
         testDto.setResponses(responses.stream().collect(Collectors.toSet()));
         Log.logJSON(LOGGER, " Kubernetes listed successfully:\n", testDto.getResponses());
