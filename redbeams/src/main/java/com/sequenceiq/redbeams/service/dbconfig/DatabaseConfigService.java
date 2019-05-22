@@ -37,7 +37,7 @@ public class DatabaseConfigService {
             // prepareCreation(configToSave);
             configToSave.setStatus(ResourceStatus.USER_MANAGED);
             configToSave.setCreationDate(clock.getCurrentTimeMillis());
-            configToSave.setCrn(crnService.createDatabaseCrn());
+            configToSave.setCrn(crnService.createCrn(configToSave));
             return databaseConfigRepository.save(configToSave);
         } catch (AccessDeniedException | DataIntegrityViolationException e) {
             ConstraintViolationException cve = null;
@@ -53,6 +53,5 @@ public class DatabaseConfigService {
             }
             throw e;
         }
-
     }
 }

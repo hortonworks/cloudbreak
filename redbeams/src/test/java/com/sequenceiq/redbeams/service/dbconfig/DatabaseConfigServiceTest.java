@@ -21,16 +21,14 @@ import org.springframework.security.access.AccessDeniedException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.redbeams.TestData;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.repository.DatabaseConfigRepository;
 import com.sequenceiq.redbeams.service.crn.CrnService;
-import com.sequenceiq.redbeams.service.crn.CrnServiceTest;
 
 public class DatabaseConfigServiceTest {
 
     private static final long CURRENT_TIME_MILLIS = 1000L;
-
-    private static final String CRN = "crn";
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -56,7 +54,7 @@ public class DatabaseConfigServiceTest {
     public void testRegister() {
         DatabaseConfig configToRegister = new DatabaseConfig();
         when(clock.getCurrentTimeMillis()).thenReturn(CURRENT_TIME_MILLIS);
-        when(crnService.createDatabaseCrn()).thenReturn(CrnServiceTest.getValidCrn());
+        when(crnService.createCrn(configToRegister)).thenReturn(TestData.getTestCrn("database", "name"));
 
         underTest.register(configToRegister);
 
@@ -72,7 +70,7 @@ public class DatabaseConfigServiceTest {
         thrown.expectMessage("database config already exists with name");
         DatabaseConfig configToRegister = new DatabaseConfig();
         when(clock.getCurrentTimeMillis()).thenReturn(CURRENT_TIME_MILLIS);
-        when(crnService.createDatabaseCrn()).thenReturn(CrnServiceTest.getValidCrn());
+        when(crnService.createCrn(configToRegister)).thenReturn(TestData.getTestCrn("database", "name"));
         when(databaseConfigRepository.save(configToRegister)).thenThrow(getDataIntegrityException());
 
         underTest.register(configToRegister);
@@ -87,7 +85,7 @@ public class DatabaseConfigServiceTest {
         thrown.expect(AccessDeniedException.class);
         DatabaseConfig configToRegister = new DatabaseConfig();
         when(clock.getCurrentTimeMillis()).thenReturn(CURRENT_TIME_MILLIS);
-        when(crnService.createDatabaseCrn()).thenReturn(CrnServiceTest.getValidCrn());
+        when(crnService.createCrn(configToRegister)).thenReturn(TestData.getTestCrn("database", "name"));
         when(databaseConfigRepository.save(configToRegister)).thenThrow(new AccessDeniedException("User has no right to access resource"));
 
         underTest.register(configToRegister);

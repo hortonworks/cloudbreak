@@ -10,7 +10,9 @@ import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.redbeams.TestData;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 
 public class DatabaseServerConfigTest {
@@ -26,6 +28,13 @@ public class DatabaseServerConfigTest {
     public void testGettersAndSetters() {
         config.setId(1L);
         assertEquals(1L, config.getId().longValue());
+
+        config.setAccountId("myaccount");
+        assertEquals("myaccount", config.getAccountId());
+
+        Crn crn = TestData.getTestCrn("databaseServer", "myserver");
+        config.setResourceCrn(crn);
+        assertEquals(crn, config.getResourceCrn());
 
         config.setWorkspaceId(0L);
         assertEquals(0L, config.getWorkspaceId().longValue());

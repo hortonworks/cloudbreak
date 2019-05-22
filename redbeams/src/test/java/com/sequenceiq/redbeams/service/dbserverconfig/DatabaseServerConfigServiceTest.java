@@ -35,12 +35,15 @@ import org.mockito.stubbing.Answer;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.Errors;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.redbeams.TestData;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.repository.DatabaseServerConfigRepository;
+import com.sequenceiq.redbeams.service.crn.CrnService;
 import com.sequenceiq.redbeams.service.validation.DatabaseServerConnectionValidator;
 
 public class DatabaseServerConfigServiceTest {
@@ -59,6 +62,9 @@ public class DatabaseServerConfigServiceTest {
 
     @Mock
     private Clock clock;
+
+    @Mock
+    private CrnService crnService;
 
     private DatabaseServerConfig server;
 
@@ -90,18 +96,28 @@ public class DatabaseServerConfigServiceTest {
     @Test
     public void testCreateSuccess() {
         server.setWorkspaceId(-1L);
+        server.setResourceCrn(null);
+        server.setCreationDate(null);
+        when(clock.getCurrentTimeMillis()).thenReturn(12345L);
+        Crn serverCrn = TestData.getTestCrn("databaseServer", "myserver");
+        when(crnService.createCrn(server)).thenReturn(serverCrn);
         when(repository.save(server)).thenReturn(server);
 
         DatabaseServerConfig createdServer = underTest.create(server, 0L);
 
         assertEquals(server, createdServer);
         assertEquals(0L, createdServer.getWorkspaceId().longValue());
+        assertEquals(12345L, createdServer.getCreationDate().longValue());
+        assertEquals(serverCrn, createdServer.getResourceCrn());
+        assertEquals(serverCrn.getAccountId(), createdServer.getAccountId());
     }
 
     @Test
     public void testCreateAlreadyExists() {
         thrown.expect(BadRequestException.class);
 
+        Crn serverCrn = TestData.getTestCrn("databaseServer", "myserver");
+        when(crnService.createCrn(server)).thenReturn(serverCrn);
         AccessDeniedException e = new AccessDeniedException("no way", mock(ConstraintViolationException.class));
         when(repository.save(server)).thenThrow(e);
 
@@ -112,6 +128,8 @@ public class DatabaseServerConfigServiceTest {
     public void testCreateFailure() {
         thrown.expect(AccessDeniedException.class);
 
+        Crn serverCrn = TestData.getTestCrn("databaseServer", "myserver");
+        when(crnService.createCrn(server)).thenReturn(serverCrn);
         AccessDeniedException e = new AccessDeniedException("no way");
         when(repository.save(server)).thenThrow(e);
 

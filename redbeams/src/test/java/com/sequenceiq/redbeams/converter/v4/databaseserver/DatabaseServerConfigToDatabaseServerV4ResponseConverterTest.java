@@ -15,9 +15,10 @@ import org.mockito.Mock;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
+import com.sequenceiq.redbeams.TestData;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
-import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
 
@@ -36,6 +37,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
     public void testConversion() {
         DatabaseServerConfig server = new DatabaseServerConfig();
         server.setId(1L);
+        server.setResourceCrn(TestData.getTestCrn("databaseServer", "myserver"));
         server.setName("myserver");
         server.setDescription("mine not yours");
         server.setHost("myserver.db.example.com");
@@ -54,6 +56,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         verify(conversionService, times(2)).convert(any(), any());
 
         assertEquals(server.getId(), response.getId());
+        assertEquals(server.getResourceCrn().toString(), response.getCrn());
         assertEquals(server.getName(), response.getName());
         assertEquals(server.getDescription(), response.getDescription());
         assertEquals(server.getHost(), response.getHost());

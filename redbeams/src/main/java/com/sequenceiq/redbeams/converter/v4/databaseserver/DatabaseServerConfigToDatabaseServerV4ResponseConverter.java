@@ -15,6 +15,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter
     public DatabaseServerV4Response convert(DatabaseServerConfig source) {
         DatabaseServerV4Response response = new DatabaseServerV4Response();
         response.setId(source.getId());
+        response.setCrn(source.getResourceCrn().toString());
         response.setName(source.getName());
         response.setDescription(source.getDescription());
         response.setHost(source.getHost());

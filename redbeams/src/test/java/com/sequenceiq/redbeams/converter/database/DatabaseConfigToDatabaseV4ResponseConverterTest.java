@@ -14,14 +14,14 @@ import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.redbeams.TestData;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
-import com.sequenceiq.redbeams.service.crn.CrnServiceTest;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 public class DatabaseConfigToDatabaseV4ResponseConverterTest {
 
-    private static final Crn CRN = CrnServiceTest.getValidCrn();
+    private static final Crn CRN = TestData.getTestCrn("database", "name");
 
     private static final String CONNECTION_DRIVER = "connectionDriver";
 
