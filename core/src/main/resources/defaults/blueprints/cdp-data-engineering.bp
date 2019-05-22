@@ -1,7 +1,7 @@
 {
   "description": "CDP 1.0 Data Engineering template with Spark, Hue, Livy and Zeppelin",
   "blueprint": {
-    "cdhVersion": "6.0.99",
+    "cdhVersion": "7.0.0",
     "displayName": "dataengineering",
     "services": [
       {

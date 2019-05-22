@@ -4,7 +4,7 @@
   },
   "description": "CDP 1.0 Shared Data Experience template with Atlas and Ranger",
   "blueprint": {
-    "cdhVersion": "6.0.99",
+    "cdhVersion": "7.0.0",
     "displayName": "datalake",
     "services": [
       {
