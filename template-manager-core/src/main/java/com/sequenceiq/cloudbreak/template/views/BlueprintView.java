@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 
@@ -73,6 +74,11 @@ public class BlueprintView {
 
     public void setComponents(Set<String> components) {
         this.components = components;
+    }
+
+    @VisibleForTesting
+    public BlueprintTextProcessor getProcessor() {
+        return processor;
     }
 
     @Override

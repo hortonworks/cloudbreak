@@ -5,10 +5,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,22 +30,20 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
-import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
-import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintViewProvider;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigProvider;
 import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsViewProvider;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
+import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
@@ -53,9 +51,9 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceGroupMetadataCollector;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintTextProcessorFactory;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -71,8 +69,6 @@ import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 public class StackToTemplatePreparationObjectConverterTest {
 
     private static final Long TEST_CLUSTER_ID = 1L;
-
-    private static final String CLUSTER_OWNER = "owner";
 
     private static final String TEST_BLUEPRINT_TEXT = "{}";
 
@@ -143,13 +139,10 @@ public class StackToTemplatePreparationObjectConverterTest {
     private BlueprintStackInfo blueprintStackInfo;
 
     @Mock
-    private AmbariBlueprintViewProvider ambariBlueprintViewProvider;
+    private BlueprintViewProvider blueprintViewProvider;
 
     @Mock
     private DatalakeResourcesService datalakeResourcesService;
-
-    @Mock
-    private BlueprintTextProcessorFactory blueprintTextProcessorFactory;
 
     @Before
     public void setUp() throws IOException {
@@ -165,7 +158,6 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(source.getInputs()).thenReturn(stackInputs);
         when(stackInputs.get(StackInputs.class)).thenReturn(null);
         when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(blueprintStackInfo);
-        when(blueprintTextProcessorFactory.createBlueprintTextProcessor(anyString())).thenReturn(new AmbariBlueprintTextProcessor(""));
     }
 
     @Test
@@ -304,15 +296,14 @@ public class StackToTemplatePreparationObjectConverterTest {
     public void testConvertWhenProvidingStackAndBlueprintStackInfoThenExpectedBlueprintViewShouldBeStored() {
         String type = "HDF";
         String version = "2.6";
-        BlueprintView expected = new BlueprintView(TEST_BLUEPRINT_TEXT, version, type,
-                new AmbariBlueprintTextProcessor(TEST_BLUEPRINT_TEXT));
+        BlueprintView expected = mock(BlueprintView.class);
         when(blueprintStackInfo.getType()).thenReturn(type);
         when(blueprintStackInfo.getVersion()).thenReturn(version);
-        when(ambariBlueprintViewProvider.getBlueprintView(blueprint)).thenReturn(expected);
+        when(blueprintViewProvider.getBlueprintView(blueprint)).thenReturn(expected);
 
         TemplatePreparationObject result = underTest.convert(source);
 
-        assertEquals(expected, result.getBlueprintView());
+        assertSame(expected, result.getBlueprintView());
     }
 
     @Test
@@ -365,12 +356,12 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Test
     public void testConvertWhenUnableToGetStackInputsThenCloudbreakServiceExceptionWouldCome() throws IOException {
-        String iOexceptionMessage = "unable to get inputs";
-        IOException invokedException = new IOException(iOexceptionMessage);
+        String ioExceptionMessage = "unable to get inputs";
+        IOException invokedException = new IOException(ioExceptionMessage);
         when(stackInputs.get(StackInputs.class)).thenThrow(invokedException);
 
         expectedException.expect(CloudbreakServiceException.class);
-        expectedException.expectMessage(iOexceptionMessage);
+        expectedException.expectMessage(ioExceptionMessage);
         expectedException.expectCause(is(invokedException));
 
         underTest.convert(source);

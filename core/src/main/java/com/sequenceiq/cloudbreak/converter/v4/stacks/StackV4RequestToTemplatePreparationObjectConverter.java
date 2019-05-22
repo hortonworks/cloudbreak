@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintTextProcessorFactory;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
@@ -118,7 +118,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
     private DatalakeConfigApiConnector datalakeConfigApiConnector;
 
     @Inject
-    private BlueprintTextProcessorFactory blueprintTextProcessorFactory;
+    private BlueprintViewProvider blueprintViewProvider;
 
     @Override
     public TemplatePreparationObject convert(StackV4Request source) {
@@ -136,9 +136,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
             BlueprintStackInfo blueprintStackInfo = stackInfoService.blueprintStackInfo(blueprintText);
             Set<HostgroupView> hostgroupViews = getHostgroupViews(source);
             Gateway gateway = source.getCluster().getGateway() == null ? null : getConversionService().convert(source, Gateway.class);
-            BlueprintView blueprintView = new BlueprintView(blueprint.getBlueprintText(),
-                    blueprintStackInfo.getVersion(), blueprintStackInfo.getType(),
-                    blueprintTextProcessorFactory.createBlueprintTextProcessor(blueprint.getBlueprintText()));
+            BlueprintView blueprintView = blueprintViewProvider.getBlueprintView(blueprint);
             GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, cloudbreakUser.getEmail(),
                     blueprintService.getBlueprintVariant(blueprint));
             String bindDn = null;

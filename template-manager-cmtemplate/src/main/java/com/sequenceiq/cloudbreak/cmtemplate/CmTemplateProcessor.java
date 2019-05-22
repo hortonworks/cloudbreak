@@ -123,7 +123,8 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     @Override
     public Map<String, Set<String>> getComponentsByHostGroup() {
         Map<String, Set<String>> result = new HashMap<>();
-        for (ApiClusterTemplateHostTemplate apiClusterTemplateHostTemplate : cmTemplate.getHostTemplates()) {
+        List<ApiClusterTemplateHostTemplate> hostTemplates = Optional.ofNullable(cmTemplate.getHostTemplates()).orElse(List.of());
+        for (ApiClusterTemplateHostTemplate apiClusterTemplateHostTemplate : hostTemplates) {
             Set<String> componentNames = new HashSet<>(apiClusterTemplateHostTemplate.getRoleConfigGroupsRefNames());
             result.put(apiClusterTemplateHostTemplate.getRefName(), componentNames);
         }
