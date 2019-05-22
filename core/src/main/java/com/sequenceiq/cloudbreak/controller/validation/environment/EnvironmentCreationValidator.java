@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.KubernetesConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
 
 @Component
@@ -37,7 +36,6 @@ public class EnvironmentCreationValidator {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
         validateLdapConfigs(environment, request, resultBuilder);
         validateProxyConfigs(environment, request, resultBuilder);
-        validateRdsConfigs(environment, request, resultBuilder);
         validateKubernetesConfigs(environment, request, resultBuilder);
         environmentRegionValidator.validateRegions(request.getRegions(), cloudRegions, cloudPlatform, resultBuilder);
         environmentRegionValidator.validateLocation(request.getLocation(), request.getRegions(), environment, resultBuilder);
@@ -74,16 +72,6 @@ public class EnvironmentCreationValidator {
             requestedProxyConfigs.removeAll(foundProxyConfigs);
             resultBuilder.error(String.format("The following Proxy config(s) could not be found in the workspace: [%s]",
                     String.join(", ", requestedProxyConfigs)));
-        }
-    }
-
-    private void validateRdsConfigs(Environment subject, EnvironmentV4Request request, ValidationResultBuilder resultBuilder) {
-        if (subject.getRdsConfigs().size() < request.getDatabases().size()) {
-            Set<String> foundRdsConfigs = subject.getRdsConfigs().stream().map(RDSConfig::getName).collect(Collectors.toSet());
-            Set<String> requestedRdsConfigs = new HashSet<>(request.getDatabases());
-            requestedRdsConfigs.removeAll(foundRdsConfigs);
-            resultBuilder.error(String.format("The following RDS config(s) could not be found in the workspace: [%s]",
-                    String.join(", ", requestedRdsConfigs)));
         }
     }
 

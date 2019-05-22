@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.KubernetesConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.view.ClusterApiView;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
@@ -97,10 +96,6 @@ public class Environment implements WorkspaceAwareResource, ArchivableResource {
     private Set<ProxyConfig> proxyConfigs = new HashSet<>();
 
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    @JoinTable(name = "env_rds", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "rdsid"))
-    private Set<RDSConfig> rdsConfigs = new HashSet<>();
-
-    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(name = "env_kubernetes", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "kubernetesid"))
     private Set<KubernetesConfig> kubernetesConfigs = new HashSet<>();
 
@@ -155,7 +150,6 @@ public class Environment implements WorkspaceAwareResource, ArchivableResource {
     @Override
     public void unsetRelationsToEntitiesToBeDeleted() {
         ldapConfigs = null;
-        rdsConfigs = null;
         proxyConfigs = null;
         kubernetesConfigs = null;
         kerberosConfigs = null;
@@ -215,14 +209,6 @@ public class Environment implements WorkspaceAwareResource, ArchivableResource {
 
     public void setProxyConfigs(Set<ProxyConfig> proxyConfigs) {
         this.proxyConfigs = proxyConfigs;
-    }
-
-    public Set<RDSConfig> getRdsConfigs() {
-        return rdsConfigs;
-    }
-
-    public void setRdsConfigs(Set<RDSConfig> rdsConfigs) {
-        this.rdsConfigs = rdsConfigs;
     }
 
     public Set<KubernetesConfig> getKubernetesConfigs() {

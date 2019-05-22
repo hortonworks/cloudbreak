@@ -12,7 +12,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceRe
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.view.CompactView;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 @Component
@@ -41,8 +40,6 @@ public class RDSConfigToDatabaseV4ResponseConverter extends AbstractConversionSe
         }
         json.setType(source.getType());
         json.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceV4Response.class));
-        json.setEnvironments(source.getEnvironments().stream()
-                .map(CompactView::getName).collect(Collectors.toSet()));
         return json;
     }
 }

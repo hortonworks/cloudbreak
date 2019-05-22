@@ -61,13 +61,6 @@ public class EnvironmentCreationValidatorTest {
         proxyConfig.setId(0L);
         proxyConfig.setName("proxy1");
 
-        RDSConfig rdsConfig1 = new RDSConfig();
-        rdsConfig1.setId(0L);
-        rdsConfig1.setName("rds1");
-        RDSConfig rdsConfig2 = new RDSConfig();
-        rdsConfig1.setId(1L);
-        rdsConfig2.setName("rds2");
-
         KerberosConfig kerberosConfig = new KerberosConfig();
         kerberosConfig.setId(1L);
         kerberosConfig.setName("kdc1");
@@ -76,7 +69,6 @@ public class EnvironmentCreationValidatorTest {
         environment.setCredential(credential);
         environment.setLdapConfigs(Set.of(ldapConfig));
         environment.setProxyConfigs(Set.of(proxyConfig));
-        environment.setRdsConfigs(Set.of(rdsConfig1, rdsConfig2));
         environment.setKerberosConfigs(Set.of(kerberosConfig));
 
         Region region1 = new Region();
@@ -114,7 +106,6 @@ public class EnvironmentCreationValidatorTest {
         environment.setCredential(credential);
         environment.setLdapConfigs(Collections.emptySet());
         environment.setProxyConfigs(Collections.emptySet());
-        environment.setRdsConfigs(Collections.emptySet());
         EnvironmentV4Request environmentRequest = new EnvironmentV4Request();
         environmentRequest.setLdaps(Collections.emptySet());
         environmentRequest.setProxies(Collections.emptySet());
@@ -141,7 +132,6 @@ public class EnvironmentCreationValidatorTest {
         environment.setCredential(credential);
         environment.setLdapConfigs(Collections.emptySet());
         environment.setProxyConfigs(Collections.emptySet());
-        environment.setRdsConfigs(Collections.emptySet());
         environment.setRegions(Set.of());
         EnvironmentV4Request environmentRequest = new EnvironmentV4Request();
         environmentRequest.setLdaps(Collections.emptySet());
@@ -175,18 +165,10 @@ public class EnvironmentCreationValidatorTest {
         proxyConfig.setId(0L);
         proxyConfig.setName("proxy1");
 
-        RDSConfig rdsConfig1 = new RDSConfig();
-        rdsConfig1.setId(0L);
-        rdsConfig1.setName("rds1");
-        RDSConfig rdsConfig2 = new RDSConfig();
-        rdsConfig1.setId(1L);
-        rdsConfig2.setName("rds2");
-
         Environment environment = new Environment();
         environment.setCredential(credential);
         environment.setLdapConfigs(Set.of(ldapConfig));
         environment.setProxyConfigs(Set.of(proxyConfig));
-        environment.setRdsConfigs(Set.of(rdsConfig1, rdsConfig2));
         Region region1 = new Region();
         region1.setName("region1");
         Region region2 = new Region();
@@ -235,7 +217,6 @@ public class EnvironmentCreationValidatorTest {
         environment.setCredential(credential);
         environment.setLdapConfigs(Set.of(ldapConfig));
         environment.setProxyConfigs(Set.of(proxyConfig));
-        environment.setRdsConfigs(Set.of(rdsConfig1, rdsConfig2));
         environment.setLocation("region1");
         environment.setLatitude(1.1);
         environment.setLongitude(-1.1);
@@ -271,18 +252,10 @@ public class EnvironmentCreationValidatorTest {
         proxyConfig.setId(0L);
         proxyConfig.setName("proxy1");
 
-        RDSConfig rdsConfig1 = new RDSConfig();
-        rdsConfig1.setId(0L);
-        rdsConfig1.setName("rds1");
-        RDSConfig rdsConfig2 = new RDSConfig();
-        rdsConfig1.setId(1L);
-        rdsConfig2.setName("rds2");
-
         Environment environment = new Environment();
         environment.setCredential(credential);
         environment.setLdapConfigs(Set.of(ldapConfig));
         environment.setProxyConfigs(Set.of(proxyConfig));
-        environment.setRdsConfigs(Set.of(rdsConfig1, rdsConfig2));
         environment.setLocation("region1");
         environment.setLatitude(1.1);
         environment.setLongitude(-1.1);

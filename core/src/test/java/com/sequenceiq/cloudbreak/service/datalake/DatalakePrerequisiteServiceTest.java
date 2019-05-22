@@ -127,10 +127,8 @@ public class DatalakePrerequisiteServiceTest {
 
         when(kerberosConfigService.createInEnvironment(any(KerberosConfig.class), anySet(), anyLong())).thenReturn(kerberosConfig());
         when(ldapConfigService.createInEnvironment(any(LdapConfig.class), anySet(), anyLong())).thenReturn(ldapConfig());
-        when(rdsConfigService.createInEnvironment(any(RDSConfig.class), anySet(), anyLong())).thenReturn(rdsConfig());
 
         underTest.prepare(workspaceId, environmentName, datalakePrerequisiteRequest());
-
     }
 
     private DatalakePrerequisiteV4Request datalakePrerequisiteRequest() {

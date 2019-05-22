@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.environment;
 
-import static com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource.ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource.ENVIRONMENT;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.net.MalformedURLException;
@@ -36,11 +36,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.LocationV4
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.RegisterDatalakeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.controller.validation.environment.ClusterCreationEnvironmentValidator;
@@ -59,19 +61,15 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.environment.BaseNetwork;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.environment.Region;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentRepository;
-import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.KubernetesConfigService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
@@ -85,6 +83,8 @@ import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeConfigApiConnecto
 import com.sequenceiq.cloudbreak.service.sharedservice.ServiceDescriptorDefinitionProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @Service
 public class EnvironmentService extends AbstractArchivistService<Environment> {
@@ -224,7 +224,6 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
         Environment environment = conversionService.convert(request, Environment.class);
         environment.setLdapConfigs(ldapConfigService.findByNamesInWorkspace(request.getLdaps(), workspaceId));
         environment.setProxyConfigs(proxyConfigService.findByNamesInWorkspace(request.getProxies(), workspaceId));
-        environment.setRdsConfigs(rdsConfigService.findByNamesInWorkspace(request.getDatabases(), workspaceId));
         environment.setKubernetesConfigs(kubernetesConfigService.findByNamesInWorkspace(request.getKubernetes(), workspaceId));
         environment.setKerberosConfigs(kerberosConfigService.findByNamesInWorkspace(request.getKerberoses(), workspaceId));
         Credential credential = environmentCredentialOperationService.getCredentialFromRequest(request, workspaceId);
@@ -367,8 +366,6 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
         environment.getLdapConfigs().addAll(ldapsToAttach);
         proxiesToAttach.removeAll(environment.getProxyConfigs());
         environment.getProxyConfigs().addAll(proxiesToAttach);
-        rdssToAttach.removeAll(environment.getRdsConfigs());
-        environment.getRdsConfigs().addAll(rdssToAttach);
         kubesToAttach.removeAll(environment.getKubernetesConfigs());
         environment.getKubernetesConfigs().addAll(kubesToAttach);
         kerberosConfigs.removeAll(environment.getKerberosConfigs());
@@ -383,7 +380,6 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
                 Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
                 ValidationResult validationResult = validateAndDetachLdaps(request, environment);
                 validationResult = validateAndDetachProxies(request, environment, validationResult);
-                validationResult = validateAndDetachRdss(request, environment, validationResult);
                 validationResult = validateAndDetachKerberosConfigs(request, environment, validationResult);
                 detachKubes(request, environment);
                 if (validationResult.hasError()) {
@@ -414,16 +410,6 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
                 .collect(Collectors.toMap(proxy -> proxy, proxy -> proxyConfigService.getClustersUsingResourceInEnvironment(proxy, environment.getId())));
         validationResult = environmentDetachValidator.validate(environment, proxiesToClusters).merge(validationResult);
         environment.getProxyConfigs().removeAll(proxiesToDetach);
-        return validationResult;
-    }
-
-    private ValidationResult validateAndDetachRdss(EnvironmentDetachV4Request request, Environment environment, ValidationResult validationResult) {
-        Set<RDSConfig> rdssToDetach = environment.getRdsConfigs().stream()
-                .filter(rds -> request.getDatabases().contains(rds.getName())).collect(Collectors.toSet());
-        Map<RDSConfig, Set<Cluster>> rdssToClusters = rdssToDetach.stream()
-                .collect(Collectors.toMap(rds -> rds, rds -> rdsConfigService.getClustersUsingResourceInEnvironment(rds, environment.getId())));
-        validationResult = environmentDetachValidator.validate(environment, rdssToClusters).merge(validationResult);
-        environment.getRdsConfigs().removeAll(rdssToDetach);
         return validationResult;
     }
 

@@ -48,7 +48,6 @@ public class ClusterCreationEnvironmentValidator {
         Long workspaceId = stack.getWorkspace().getId();
         validateLdapConfig(workspaceId, clusterRequest, stackEnv, resultBuilder);
         validateProxyConfig(workspaceId, clusterRequest, stackEnv, resultBuilder);
-        validateRdsConfigs(workspaceId, clusterRequest, stackEnv, resultBuilder);
         return resultBuilder.build();
     }
 
@@ -61,9 +60,6 @@ public class ClusterCreationEnvironmentValidator {
         }
         validateEnvironmentAwareResource(ldapConfigService.getByNameForWorkspaceId(registerDatalakeRequest.getLdapName(), workspaceId),
                 environmentName, resultBuilder);
-        for (String rdsConfigName : registerDatalakeRequest.getDatabaseNames()) {
-            validateEnvironmentAwareResource(rdsConfigService.getByNameForWorkspaceId(rdsConfigName, workspaceId), environmentName, resultBuilder);
-        }
         if (StringUtils.isNoneEmpty(registerDatalakeRequest.getKerberosName())) {
             validateEnvironmentAwareResource(kerberosConfigService.getByNameForWorkspaceId(registerDatalakeRequest.getKerberosName(), workspaceId),
                     environmentName, resultBuilder);
@@ -80,14 +76,6 @@ public class ClusterCreationEnvironmentValidator {
     private void validateProxyConfig(Long workspaceId, ClusterV4Request request, EnvironmentView stackEnv, ValidationResultBuilder resultBuilder) {
         if (StringUtils.isNotBlank(request.getProxyName())) {
             validateEnvironmentAwareResource(proxyConfigService.getByNameForWorkspaceId(request.getProxyName(), workspaceId), stackEnv, resultBuilder);
-        }
-    }
-
-    private void validateRdsConfigs(Long workspaceId, ClusterV4Request request, EnvironmentView stackEnv, ValidationResultBuilder resultBuilder) {
-        if (request.getDatabases() != null) {
-            for (String rdsConfigName : request.getDatabases()) {
-                validateEnvironmentAwareResource(rdsConfigService.getByNameForWorkspaceId(rdsConfigName, workspaceId), stackEnv, resultBuilder);
-            }
         }
     }
 
