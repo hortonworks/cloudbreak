@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.getServiceNameBasedOnClusterVariant;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.isKnoxExposed;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,8 +18,8 @@ public class ExposedServiceListValidator implements Validator<List<String>> {
     @Override
     public ValidationResult validate(List<String> subject) {
         List<String> invalidKnoxServices = subject.stream()
-                .filter(es -> !ExposedService.isKnoxExposed(es))
-                .filter(es -> !ExposedService.ALL.getAmbariServiceName().equalsIgnoreCase(es))
+                .filter(es -> !isKnoxExposed(es))
+                .filter(es -> !getServiceNameBasedOnClusterVariant(ExposedService.ALL).equalsIgnoreCase(es))
                 .collect(Collectors.toList());
 
         return ValidationResult.builder()

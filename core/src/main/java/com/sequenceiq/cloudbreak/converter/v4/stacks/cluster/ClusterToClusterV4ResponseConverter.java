@@ -78,9 +78,9 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
         setUptime(source, clusterResponse);
         clusterResponse.setDescription(source.getDescription() == null ? "" : source.getDescription());
         if (blueprintService.isAmbariBlueprint(source.getBlueprint())) {
-            String ambariIp = stackUtil.extractClusterManagerIp(source.getStack());
+            String managerIp = stackUtil.extractClusterManagerIp(source.getStack());
             Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesForTopologies =
-                    serviceEndpointCollector.prepareClusterExposedServices(source, ambariIp);
+                    serviceEndpointCollector.prepareClusterExposedServices(source, managerIp);
             clusterResponse.setExposedServices(clusterExposedServicesForTopologies);
         }
         clusterResponse.setLdap(getConversionService().convert(source.getLdapConfig(), LdapV4Response.class));
