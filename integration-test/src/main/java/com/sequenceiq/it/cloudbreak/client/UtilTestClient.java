@@ -8,17 +8,15 @@ import com.sequenceiq.it.cloudbreak.action.v4.util.DeploymentPreferencesAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.RepoConfigValidationAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.SecurityRulesAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.StackMatrixAction;
-import com.sequenceiq.it.cloudbreak.action.v4.util.SubscriptionAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.TagSpecificationsAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.VersionCheckAction;
+import com.sequenceiq.it.cloudbreak.dto.securityrule.SecurityRulesTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.CloudStorageMatrixTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.DeploymentPreferencesTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.RepoConfigValidationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.StackMatrixTestDto;
-import com.sequenceiq.it.cloudbreak.dto.util.SubscriptionTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.TagSpecificationsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.VersionCheckTestDto;
-import com.sequenceiq.it.cloudbreak.dto.securityrule.SecurityRulesTestDto;
 
 @Service
 public class UtilTestClient {
@@ -41,10 +39,6 @@ public class UtilTestClient {
 
     public Action<StackMatrixTestDto> stackMatrixV4() {
         return new StackMatrixAction();
-    }
-
-    public Action<SubscriptionTestDto> subscriptionV4() {
-        return new SubscriptionAction();
     }
 
     public Action<TagSpecificationsTestDto> tagSpecificationsV4() {

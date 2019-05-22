@@ -81,6 +81,8 @@ cb:
   container.threadpool:
     core.size: 40
     capacity.size: 4000
+  notification:
+    endpoint: http://localhost:3000/notifications
 
   host.discovery.custom.hostname.enabled: false
 
