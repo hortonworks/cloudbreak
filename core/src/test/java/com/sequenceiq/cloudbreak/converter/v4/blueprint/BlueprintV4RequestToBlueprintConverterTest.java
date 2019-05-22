@@ -1,14 +1,18 @@
 package com.sequenceiq.cloudbreak.converter.v4.blueprint;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -22,12 +26,14 @@ import org.mockito.Spy;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
+import com.sequenceiq.cloudbreak.cmtemplate.generator.template.domain.GeneratedCmTemplate;
+import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 
 public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConverterTest<BlueprintV4Request> {
 
@@ -46,6 +52,9 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
     @Mock
     private MissingResourceNameGenerator missingResourceNameGenerator;
 
+    @Mock
+    private CmTemplateGeneratorService clusterTemplateGeneratorService;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -57,18 +66,18 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
     public void testConvertWhereEveryDataFilledButThereIsNoTagsElementInBlueprintJsonThenItShouldBeEmpty() {
         Blueprint result = underTest.convert(getRequest("blueprint.json"));
         assertAllFieldsNotNull(result);
-        Assert.assertEquals("{}", result.getTags().getValue());
-        Assert.assertEquals("HDP", result.getStackType());
-        Assert.assertEquals("2.3", result.getStackVersion());
+        assertEquals("{}", result.getTags().getValue());
+        assertEquals("HDP", result.getStackType());
+        assertEquals("2.3", result.getStackVersion());
     }
 
     @Test
     public void testConvertWhenInputJsonHasTagsFieldButItsEmpty() {
         Blueprint result = underTest.convert(getRequest("blueprint-empty-tags.json"));
         assertAllFieldsNotNull(result);
-        Assert.assertEquals("{}", result.getTags().getValue());
-        Assert.assertEquals("HDP", result.getStackType());
-        Assert.assertEquals("2.3", result.getStackVersion());
+        assertEquals("{}", result.getTags().getValue());
+        assertEquals("HDP", result.getStackType());
+        assertEquals("2.3", result.getStackVersion());
     }
 
     @Test
@@ -76,8 +85,8 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         Blueprint result = underTest.convert(getRequest("blueprint-filled-tags.json"));
         assertAllFieldsNotNull(result);
         Assert.assertTrue(result.getTags().getMap().size() > 1);
-        Assert.assertEquals("HDP", result.getStackType());
-        Assert.assertEquals("2.3", result.getStackVersion());
+        assertEquals("HDP", result.getStackType());
+        assertEquals("2.3", result.getStackVersion());
     }
 
     @Test
@@ -99,9 +108,9 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
 
         Blueprint result = underTest.convert(request);
 
-        Assert.assertEquals(request.getBlueprint(), result.getBlueprintText());
-        Assert.assertEquals("HDP", result.getStackType());
-        Assert.assertEquals("2.3", result.getStackVersion());
+        assertEquals(request.getBlueprint(), result.getBlueprintText());
+        assertEquals("HDP", result.getStackType());
+        assertEquals("2.3", result.getStackVersion());
     }
 
     @Test
@@ -112,9 +121,9 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
 
         Blueprint result = underTest.convert(request);
 
-        Assert.assertEquals(name, result.getName());
-        Assert.assertEquals("HDP", result.getStackType());
-        Assert.assertEquals("2.3", result.getStackVersion());
+        assertEquals(name, result.getName());
+        assertEquals("HDP", result.getStackType());
+        assertEquals("2.3", result.getStackVersion());
     }
 
     @Test
@@ -126,9 +135,9 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
 
         Blueprint result = underTest.convert(request);
 
-        Assert.assertEquals(generatedName, result.getName());
-        Assert.assertEquals("HDP", result.getStackType());
-        Assert.assertEquals("2.3", result.getStackVersion());
+        assertEquals(generatedName, result.getName());
+        assertEquals("HDP", result.getStackType());
+        assertEquals("2.3", result.getStackVersion());
     }
 
     @Test
@@ -186,6 +195,46 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         thrown.expectMessage("Invalid tag(s) in the blueprint: Unable to parse JSON.");
 
         underTest.convert(request);
+    }
+
+    @Test
+    public void testConvertWhenServiceListIsNull() {
+        BlueprintV4Request request = getRequest("blueprint.json");
+        request.setServices(null);
+        Blueprint result = underTest.convert(request);
+        assertAllFieldsNotNull(result);
+        assertEquals("{}", result.getTags().getValue());
+        assertEquals("HDP", result.getStackType());
+        assertEquals("2.3", result.getStackVersion());
+    }
+
+    @Test
+    public void testConvertWhenServiceListIsEmpty() {
+        BlueprintV4Request request = getRequest("blueprint.json");
+        request.setServices(new HashSet<>());
+        Blueprint result = underTest.convert(request);
+        assertAllFieldsNotNull(result);
+        assertEquals("{}", result.getTags().getValue());
+        assertEquals("HDP", result.getStackType());
+        assertEquals("2.3", result.getStackVersion());
+    }
+
+    @Test
+    public void testConvertWithOneService() {
+        BlueprintV4Request request = getRequest("blueprint.json");
+        String blueprint = request.getBlueprint();
+        Set<String> services = Set.of("DATANODE");
+        String platform = "platform";
+        GeneratedCmTemplate generatedCmTemplate = mock(GeneratedCmTemplate.class);
+        when(generatedCmTemplate.getTemplate()).thenReturn(blueprint);
+        when(clusterTemplateGeneratorService.generateTemplateByServices(services, platform)).thenReturn(generatedCmTemplate);
+        request.setServices(services);
+        request.setPlatform(platform);
+
+        Blueprint result = underTest.convert(request);
+
+        assertAllFieldsNotNull(result);
+        assertEquals(blueprint, result.getBlueprintText());
     }
 
     @Test(expected = BadRequestException.class)
