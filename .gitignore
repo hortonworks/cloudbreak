@@ -57,5 +57,5 @@ cloudbreak-log/*.log
 autoscale-log/
 environment-log/
 core/cloudbreak-log/
-
+freeipa-log/
 .deps/

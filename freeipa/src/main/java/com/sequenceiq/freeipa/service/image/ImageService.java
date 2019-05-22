@@ -94,11 +94,11 @@ public class ImageService {
         String catalogUrl = Objects.nonNull(imageSettings.getCatalog()) ? imageSettings.getCatalog() : defaultCatalogUrl;
         String imageOs = Objects.nonNull(imageSettings.getOs()) ? imageSettings.getOs() : defaultOs;
 
-        List<com.sequenceiq.freeipa.api.model.image.Image> images = imageCatalogProvider.getImageCatalog(catalogUrl).getImages();
+        List<com.sequenceiq.freeipa.api.model.image.Image> images = imageCatalogProvider.getImageCatalog(catalogUrl).getImages().getFreeipaImages();
         Optional<? extends com.sequenceiq.freeipa.api.model.image.Image> image = findImage(imageId, imageOs, images, region, platform);
         if (image.isEmpty()) {
             imageCatalogProvider.evictImageCatalogCache(catalogUrl);
-            images = imageCatalogProvider.getImageCatalog(catalogUrl).getImages();
+            images = imageCatalogProvider.getImageCatalog(catalogUrl).getImages().getFreeipaImages();
             image = findImage(imageId, imageOs, images, region, platform);
             if (image.isEmpty()) {
                 throw new RuntimeException(String.format("Could not find any image with id: '%s' in region '%s' with OS '%s'.", imageId, region, imageOs));

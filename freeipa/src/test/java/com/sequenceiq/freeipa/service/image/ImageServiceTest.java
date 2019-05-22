@@ -17,8 +17,6 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -62,7 +60,7 @@ public class ImageServiceTest {
     @Before
     public void setup() throws Exception {
         ImageCatalog imageCatalog = setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, CATALOG_FILE);
-        image = imageCatalog.getImages().get(0);
+        image = imageCatalog.getImages().getFreeipaImages().get(0);
         ReflectionTestUtils.setField(underTest, ImageService.class, "defaultCatalogUrl", DEFAULT_CATALOG_URL, null);
         ReflectionTestUtils.setField(underTest, ImageService.class, "defaultOs", DEFAULT_OS, null);
     }
@@ -120,9 +118,7 @@ public class ImageServiceTest {
 
     private ImageCatalog setupImageCatalogProvider(String catalogUrl, String catalogFile) throws IOException {
         String catalogJson = FileReaderUtils.readFileFromClasspath(catalogFile);
-        JsonNode images = objectMapper.readTree(catalogJson);
-        JsonNode freeIpaImages = images.at("/images/freeipa-images");
-        ImageCatalog catalog = objectMapper.readValue(objectMapper.treeAsTokens(freeIpaImages), new TypeReference<ImageCatalog>() { });
+        ImageCatalog catalog = objectMapper.readValue(catalogJson, ImageCatalog.class);
         when(imageCatalogProvider.getImageCatalog(catalogUrl)).thenReturn(catalog);
         when(imageCatalogProvider.getImageCatalog(DEFAULT_CATALOG_URL)).thenReturn(catalog);
         return catalog;

@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.freeipa.api.model.freeipa.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.converter.CreateFreeIpaRequestToStackConverter;
@@ -77,7 +79,8 @@ public class FreeIpaCreationService {
         String template = templateService.waitGetTemplate(stack, getPlatformTemplateRequest);
         stack.setTemplate(template);
         stackRepository.save(stack);
-        imageService.create(stack, request.getImage());
+        ImageSettingsV4Request image = request.getImage();
+        imageService.create(stack, Objects.nonNull(image) ? image : new ImageSettingsV4Request());
         freeIpaService.create(stack, request.getFreeIpa());
         flowManager.notify(FlowChainTriggers.PROVISION_TRIGGER_EVENT, new StackEvent(FlowChainTriggers.PROVISION_TRIGGER_EVENT, stack.getId()));
     }
