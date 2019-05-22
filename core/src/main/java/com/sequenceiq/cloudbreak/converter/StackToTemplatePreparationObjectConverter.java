@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintViewProvider;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigProvider;
 import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsViewProvider;
@@ -68,7 +68,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     private SharedServiceConfigsViewProvider sharedServiceConfigProvider;
 
     @Inject
-    private AmbariBlueprintViewProvider ambariBlueprintViewProvider;
+    private BlueprintViewProvider blueprintViewProvider;
 
     @Inject
     private DatalakeResourcesService datalakeResourcesService;
@@ -106,7 +106,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withGateway(gateway, gatewaySignKey)
                     .withCustomInputs(stackInputs.getCustomInputs() == null ? new HashMap<>() : stackInputs.getCustomInputs())
                     .withFixInputs(fixInputs)
-                    .withBlueprintView(ambariBlueprintViewProvider.getBlueprintView(cluster.getBlueprint()))
+                    .withBlueprintView(blueprintViewProvider.getBlueprintView(cluster.getBlueprint()))
                     .withStackRepoDetailsHdpVersion(stackRepoDetailsHdpVersion)
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
                     .withGeneralClusterConfigs(generalClusterConfigsProvider.generalClusterConfigs(source, cluster))

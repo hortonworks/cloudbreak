@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter.v2;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -27,7 +28,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
@@ -36,9 +36,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.utils.StackInfoService;
+import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToTemplatePreparationObjectConverter;
@@ -49,11 +49,9 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintTextProcessorFactory;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
@@ -66,6 +64,8 @@ import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProv
 import com.sequenceiq.cloudbreak.template.model.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 public class StackV4RequestToTemplatePreparationObjectConverterTest {
 
@@ -154,7 +154,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     private KerberosConfigService kerberosConfigService;
 
     @Mock
-    private BlueprintTextProcessorFactory blueprintTextProcessorFactory;
+    private BlueprintViewProvider blueprintViewProvider;
 
     @Before
     public void setUp() {
@@ -173,7 +173,6 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(cloudbreakUser.getEmail()).thenReturn("test@hortonworks.com");
         when(workspaceService.get(anyLong(), eq(user))).thenReturn(workspace);
         when(credentialService.getByNameForWorkspace(TEST_CREDENTIAL_NAME, workspace)).thenReturn(credential);
-        when(blueprintTextProcessorFactory.createBlueprintTextProcessor(anyString())).thenReturn(new AmbariBlueprintTextProcessor(""));
     }
 
     @Test
@@ -269,12 +268,12 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         String stackType = "HDP";
         when(blueprintStackInfo.getVersion()).thenReturn(stackVersion);
         when(blueprintStackInfo.getType()).thenReturn(stackType);
-        BlueprintView expected = new BlueprintView(TEST_BLUEPRINT_TEXT, stackVersion, stackType,
-                new AmbariBlueprintTextProcessor(TEST_BLUEPRINT_TEXT));
+        BlueprintView expected = mock(BlueprintView.class);
+        when(blueprintViewProvider.getBlueprintView(blueprint)).thenReturn(expected);
 
         TemplatePreparationObject result = underTest.convert(source);
 
-        assertEquals(expected, result.getBlueprintView());
+        assertSame(expected, result.getBlueprintView());
     }
 
     @Test
