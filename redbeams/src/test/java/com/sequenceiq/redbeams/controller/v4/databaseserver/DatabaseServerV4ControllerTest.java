@@ -82,10 +82,10 @@ public class DatabaseServerV4ControllerTest {
 
     @Test
     public void testGet() {
-        when(service.getByNameInWorkspace(DatabaseServerV4Controller.DEFAULT_WORKSPACE, "myserver")).thenReturn(server);
+        when(service.getByNameInWorkspaceAndEnvironment(DatabaseServerV4Controller.DEFAULT_WORKSPACE, "id", "myserver")).thenReturn(server);
         when(converterUtil.convert(server, DatabaseServerV4Response.class)).thenReturn(response);
 
-        DatabaseServerV4Response response = underTest.get("myserver");
+        DatabaseServerV4Response response = underTest.get("id", "myserver");
 
         assertEquals(1L, response.getId().longValue());
     }
@@ -103,10 +103,10 @@ public class DatabaseServerV4ControllerTest {
 
     @Test
     public void testDelete() {
-        when(service.deleteByNameInWorkspace(DatabaseServerV4Controller.DEFAULT_WORKSPACE, "myserver")).thenReturn(server);
+        when(service.deleteByNameInWorkspace(DatabaseServerV4Controller.DEFAULT_WORKSPACE, "id",  "myserver")).thenReturn(server);
         when(converterUtil.convert(server, DatabaseServerV4Response.class)).thenReturn(response);
 
-        DatabaseServerV4Response response = underTest.delete("myserver");
+        DatabaseServerV4Response response = underTest.delete("id", "myserver");
 
         assertEquals(1L, response.getId().longValue());
     }
@@ -119,21 +119,22 @@ public class DatabaseServerV4ControllerTest {
         Set<DatabaseServerConfig> serverSet = new HashSet<>();
         serverSet.add(server);
         serverSet.add(server2);
-        when(service.deleteMultipleByNameInWorkspace(DatabaseServerV4Controller.DEFAULT_WORKSPACE, nameSet)).thenReturn(serverSet);
+        when(service.deleteMultipleByNameInWorkspace(DatabaseServerV4Controller.DEFAULT_WORKSPACE, "id", nameSet)).thenReturn(serverSet);
         Set<DatabaseServerV4Response> responseSet = new HashSet<>();
         responseSet.add(response);
         responseSet.add(response2);
         when(converterUtil.convertAllAsSet(serverSet, DatabaseServerV4Response.class)).thenReturn(responseSet);
 
-        DatabaseServerV4Responses responses = underTest.deleteMultiple(nameSet);
+        DatabaseServerV4Responses responses = underTest.deleteMultiple("id", nameSet);
 
         assertEquals(2, responses.getResponses().size());
     }
 
     @Test
     public void testTestWithName() {
-        when(service.testConnection(DatabaseServerV4Controller.DEFAULT_WORKSPACE, "myserver")).thenReturn("yeahhh");
+        when(service.testConnection(DatabaseServerV4Controller.DEFAULT_WORKSPACE, "id", "myserver")).thenReturn("yeahhh");
         DatabaseServerTestV4Request testRequest = new DatabaseServerTestV4Request();
+        testRequest.setEnvironmentId("id");
         testRequest.setExistingDatabaseServerName("myserver");
 
         DatabaseServerTestV4Response response = underTest.test(testRequest);

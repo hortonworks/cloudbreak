@@ -21,6 +21,7 @@ public final class ModelDescriptions {
         public static final String CONNECTOR_JAR_URL = "URL that points to the jar of the connection driver(connector)";
         public static final String DATABASE_CONNECTION_TEST_RESULT = "Result of database connection test";
         public static final String DATABASE_REQUEST = "Unsaved database config to be tested for connectivity";
+        public static final String DATABASE_CREATE_RESULT = "Result of database creation";
     }
 
     public static class DatabaseServer {

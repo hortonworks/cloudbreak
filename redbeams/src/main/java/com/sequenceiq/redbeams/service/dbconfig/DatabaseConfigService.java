@@ -9,6 +9,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
@@ -16,6 +17,8 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.repository.DatabaseConfigRepository;
 import com.sequenceiq.redbeams.service.crn.CrnService;
+
+import java.util.List;
 
 @Service
 public class DatabaseConfigService {
@@ -30,6 +33,10 @@ public class DatabaseConfigService {
 
     @Inject
     private CrnService crnService;
+
+    public List<DatabaseConfig> list(String environmentId) {
+        return Lists.newArrayList(databaseConfigRepository.findByEnvironmentId(environmentId));
+    }
 
     public DatabaseConfig register(DatabaseConfig configToSave) {
         try {

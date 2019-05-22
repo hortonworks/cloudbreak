@@ -138,9 +138,9 @@ public class DatabaseServerConfigServiceTest {
 
     @Test
     public void testGetByNameInWorkspaceFound() {
-        when(repository.findByNameAndWorkspaceId(server.getName(), 0L)).thenReturn(Optional.of(server));
+        when(repository.findByNameAndWorkspaceIdAndEnvironmentId(server.getName(), 0L, "id")).thenReturn(Optional.of(server));
 
-        DatabaseServerConfig foundServer = underTest.getByNameInWorkspace(0L, server.getName());
+        DatabaseServerConfig foundServer = underTest.getByNameInWorkspaceAndEnvironment(0L, "id", server.getName());
 
         assertEquals(server, foundServer);
     }
@@ -149,16 +149,16 @@ public class DatabaseServerConfigServiceTest {
     public void testGetByNameInWorkspaceNotFound() {
         thrown.expect(NotFoundException.class);
 
-        when(repository.findByNameAndWorkspaceId(server.getName(), 0L)).thenReturn(Optional.empty());
+        when(repository.findByNameAndWorkspaceIdAndEnvironmentId(server.getName(), 0L, "id")).thenReturn(Optional.empty());
 
-        underTest.getByNameInWorkspace(0L, server.getName());
+        underTest.getByNameInWorkspaceAndEnvironment(0L, "id", server.getName());
     }
 
     @Test
     public void testDeleteByNameInWorkspaceFound() {
-        when(repository.findByNameAndWorkspaceId(server.getName(), 0L)).thenReturn(Optional.of(server));
+        when(repository.findByNameAndWorkspaceIdAndEnvironmentId(server.getName(), 0L, "id")).thenReturn(Optional.of(server));
 
-        DatabaseServerConfig deletedServer = underTest.deleteByNameInWorkspace(0L, server.getName());
+        DatabaseServerConfig deletedServer = underTest.deleteByNameInWorkspace(0L, "id", server.getName());
 
         assertEquals(server, deletedServer);
         assertTrue(deletedServer.isArchived());
@@ -169,10 +169,10 @@ public class DatabaseServerConfigServiceTest {
     public void testDeleteByNameInWorkspaceNotFound() {
         thrown.expect(NotFoundException.class);
 
-        when(repository.findByNameAndWorkspaceId(server.getName(), 0L)).thenReturn(Optional.empty());
+        when(repository.findByNameAndWorkspaceIdAndEnvironmentId(server.getName(), 0L, "id")).thenReturn(Optional.empty());
 
         try {
-            underTest.deleteByNameInWorkspace(0L, server.getName());
+            underTest.deleteByNameInWorkspace(0L, "id", server.getName());
         } finally {
             verify(repository, never()).delete(server);
         }
@@ -186,9 +186,9 @@ public class DatabaseServerConfigServiceTest {
         Set<DatabaseServerConfig> serverSet = new HashSet<>();
         serverSet.add(server);
         serverSet.add(server2);
-        when(repository.findByNameInAndWorkspaceId(nameSet, 0L)).thenReturn(serverSet);
+        when(repository.findByNameInAndWorkspaceIdAndEnvironmentId(nameSet, 0L, "id")).thenReturn(serverSet);
 
-        Set<DatabaseServerConfig> deletedServerSet = underTest.deleteMultipleByNameInWorkspace(0L, nameSet);
+        Set<DatabaseServerConfig> deletedServerSet = underTest.deleteMultipleByNameInWorkspace(0L, "id", nameSet);
 
         assertEquals(2, deletedServerSet.size());
         assertThat(deletedServerSet, everyItem(hasProperty("archived", is(true))));
@@ -215,10 +215,10 @@ public class DatabaseServerConfigServiceTest {
         nameSet.add(server2.getName());
         Set<DatabaseServerConfig> serverSet = new HashSet<>();
         serverSet.add(server);
-        when(repository.findByNameInAndWorkspaceId(nameSet, 0L)).thenReturn(serverSet);
+        when(repository.findByNameInAndWorkspaceIdAndEnvironmentId(nameSet, 0L, "id")).thenReturn(serverSet);
 
         try {
-            underTest.deleteMultipleByNameInWorkspace(0L, nameSet);
+            underTest.deleteMultipleByNameInWorkspace(0L, "id", nameSet);
         } finally {
             verify(repository, never()).delete(server);
             verify(repository, never()).delete(server2);
@@ -227,9 +227,10 @@ public class DatabaseServerConfigServiceTest {
 
     @Test
     public void testTestConnectionSuccess() {
-        when(repository.findByNameAndWorkspaceId(server.getName(), 0L)).thenReturn(Optional.of(server));
+        when(repository.findByNameAndWorkspaceIdAndEnvironmentId(server.getName(), 0L, "id"))
+                .thenReturn(Optional.of(server));
 
-        String result = underTest.testConnection(0L, server.getName());
+        String result = underTest.testConnection(0L, "id", server.getName());
 
         assertEquals("success", result);
         verify(connectionValidator).validate(eq(server), any(Errors.class));
@@ -237,7 +238,8 @@ public class DatabaseServerConfigServiceTest {
 
     @Test
     public void testTestConnectionFailure() {
-        when(repository.findByNameAndWorkspaceId(server.getName(), 0L)).thenReturn(Optional.of(server));
+        when(repository.findByNameAndWorkspaceIdAndEnvironmentId(server.getName(), 0L, "id"))
+                .thenReturn(Optional.of(server));
         doAnswer(new Answer() {
             public Object answer(InvocationOnMock invocation) {
                 Errors errors = invocation.getArgument(1);
@@ -247,10 +249,21 @@ public class DatabaseServerConfigServiceTest {
             }
         }).when(connectionValidator).validate(eq(server), any(Errors.class));
 
-        String result = underTest.testConnection(0L, server.getName());
+        String result = underTest.testConnection(0L, "id", server.getName());
 
         assertTrue(result.contains("epic fail"));
         assertTrue(result.contains("connectorJarUrl: bad jar"));
         verify(connectionValidator).validate(eq(server), any(Errors.class));
+    }
+
+    @Test
+    public void testValidateDatabaseName() {
+        assertThat(underTest.validateDatabaseName("goodname"), is(true));
+        assertThat(underTest.validateDatabaseName("good_name"), is(true));
+        assertThat(underTest.validateDatabaseName("_good_name"), is(true));
+        assertThat(underTest.validateDatabaseName("_good-name"), is(true));
+        assertThat(underTest.validateDatabaseName("bad##name"), is(false));
+        assertThat(underTest.validateDatabaseName("_bad##name"), is(false));
+        assertThat(underTest.validateDatabaseName("-bad_name"), is(false));
     }
 }

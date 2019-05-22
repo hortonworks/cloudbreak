@@ -34,7 +34,8 @@ public class DatabaseV4Controller /*extends NotificationController */ implements
 
     @Override
     public DatabaseV4Responses list(String environment, Boolean attachGlobal) {
-        return new DatabaseV4Responses();
+        return new DatabaseV4Responses(redbeamsConverterUtil.convertAllAsSet(databaseConfigService.list(environment),
+                        DatabaseV4Response.class));
     }
 
     @Override
