@@ -6,7 +6,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -19,6 +21,9 @@ import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 @RunWith(MockitoJUnitRunner.class)
 public class UmsAuthenticationServiceTest {
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
     @Mock
     private GrpcUmsClient grpcUmsClient;
 
@@ -29,18 +34,48 @@ public class UmsAuthenticationServiceTest {
         underTest = new UmsAuthenticationService(grpcUmsClient);
     }
 
-    @Test(expected = UmsAuthenticationException.class)
-    public void testInvalidCrn() {
+    @Test
+    public void testInvalidCrnNull() {
+        thrown.expect(UmsAuthenticationException.class);
+
         try {
-            underTest.getCloudbreakUser("crsdfadsfdsf sadasf3-df81ae585e10", "principal");
+            underTest.getCloudbreakUser(null, "principal");
         } catch (UmsAuthenticationException e) {
-            assertEquals("Invalid CRN has been provided: crsdfadsfdsf sadasf3-df81ae585e10", e.getMessage());
+            assertEquals("Invalid CRN has been provided: null", e.getMessage());
             throw e;
         }
     }
 
-    @Test(expected = UmsAuthenticationException.class)
+    @Test
+    public void testInvalidCrnDueToPattern() {
+        thrown.expect(UmsAuthenticationException.class);
+
+        String crn = "crsdfadsfdsf sadasf3-df81ae585e10";
+        try {
+            underTest.getCloudbreakUser(crn, "principal");
+        } catch (UmsAuthenticationException e) {
+            assertEquals("Invalid CRN has been provided: " + crn, e.getMessage());
+            throw e;
+        }
+    }
+
+    @Test
+    public void testInvalidCrnDueToParse() {
+        thrown.expect(UmsAuthenticationException.class);
+
+        String crn = "crn:altus:cookie:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:qaas/b8a64902-7765-4ddd-a4f3-df81ae585e10";
+        try {
+            underTest.getCloudbreakUser(crn, "principal");
+        } catch (UmsAuthenticationException e) {
+            assertEquals("Invalid CRN has been provided: " + crn, e.getMessage());
+            throw e;
+        }
+    }
+
+    @Test
     public void testInvalidTypeCrn() {
+        thrown.expect(UmsAuthenticationException.class);
+
         String crn = "crn:altus:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:cluster:qaas/b8a64902-7765-4ddd-a4f3-df81ae585e10";
         try {
             underTest.getCloudbreakUser(crn, "principal");

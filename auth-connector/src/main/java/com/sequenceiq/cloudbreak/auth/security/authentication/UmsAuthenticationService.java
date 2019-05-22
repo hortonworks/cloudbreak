@@ -7,6 +7,7 @@ import org.springframework.security.oauth2.provider.authentication.OAuth2Authent
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsAuthenticationException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
@@ -30,8 +31,10 @@ public class UmsAuthenticationService implements AuthenticationService {
 
     public CloudbreakUser getCloudbreakUser(String userCrn, String principal) {
         String requestId = MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString());
-        Crn crn = Crn.fromString(userCrn);
-        if (crn == null) {
+        Crn crn;
+        try {
+            crn = Crn.safeFromString(userCrn);
+        } catch (NullPointerException | CrnParseException e) {
             throw new UmsAuthenticationException(String.format("Invalid CRN has been provided: %s", userCrn));
         }
         CloudbreakUser cloudbreakUser;

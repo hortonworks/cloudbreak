@@ -139,6 +139,12 @@ public class SdxServiceTest {
     }
 
     @Test
+    void listSdxInvalidCrn() {
+        String crn = "crsdfadsfdsf sadasf3-df81ae585e10";
+        Assertions.assertThrows(BadRequestException.class, () -> sdxService.listSdx(crn, "envir"));
+    }
+
+    @Test
     void deleteSdxNotFound() {
         Assertions.assertThrows(BadRequestException.class, () -> sdxService.deleteSdx(CRN, "test-sdx-cluster"), "Can not find sdx cluster");
         verify(sdxClusterRepository, times(1))
