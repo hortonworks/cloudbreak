@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedE
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.EnvironmentNetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.LocationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.ServiceDescriptorV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
@@ -49,11 +48,6 @@ public class EnvironmentToDetailedEnvironmentV4ResponseConverter extends Abstrac
         response.setCloudPlatform(source.getCloudPlatform());
         response.setCredentialName(source.getCredential().getName());
         response.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceV4Response.class));
-        response.setLdaps(
-                source.getLdapConfigs()
-                        .stream()
-                        .map(ldapConfig -> getConversionService().convert(ldapConfig, LdapV4Response.class))
-                        .collect(Collectors.toSet()));
         response.setProxies(
                 source.getProxyConfigs()
                         .stream()

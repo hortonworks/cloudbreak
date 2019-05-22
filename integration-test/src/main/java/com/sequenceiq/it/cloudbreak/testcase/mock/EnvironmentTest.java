@@ -14,7 +14,6 @@ import javax.ws.rs.NotFoundException;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.environment.EnvironmentTestAssertion;
@@ -292,124 +291,6 @@ public class EnvironmentTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is an available environment",
-            when = "an ldap attach request is sent for that environment",
-            then = "the ldap should be attached to the environment")
-    public void testCreateEnvAttachLdap(TestContext testContext) {
-        String env = resourcePropertyProvider().getName();
-        createDefaultLdapConfig(testContext);
-        Set<String> validLdap = new HashSet<>();
-        validLdap.add(testContext.get(LdapTestDto.class).getName());
-        testContext
-                .given(EnvironmentTestDto.class)
-                .withName(env)
-                .when(environmentTestClient.createV4())
-                .given(EnvironmentTestDto.class)
-                .withLdapConfigs(validLdap)
-                .when(environmentTestClient.attachV4())
-                .then(this::checkLdapAttachedToEnv)
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "there is an available environment",
-            when = "an proxy attach request is sent for that environment",
-            then = "the proxy should be attached to the environment")
-    public void testCreateEnvAttachProxy(TestContext testContext) {
-        String env = resourcePropertyProvider().getName();
-        createDefaultProxyConfig(testContext);
-        Set<String> validProxy = new HashSet<>();
-        validProxy.add(testContext.get(ProxyTestDto.class).getName());
-        testContext
-                .given(EnvironmentTestDto.class)
-                .withName(env)
-                .when(environmentTestClient.createV4())
-                .given(EnvironmentTestDto.class)
-                .withProxyConfigs(validProxy)
-                .when(environmentTestClient.attachV4())
-                .then(this::checkProxyAttachedToEnv)
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "there is an available environment with an attached ldap config",
-            when = "an ldap detach request is sent for that environment and ldap config",
-            then = "the ldap config should be detached from the environment")
-    public void testCreateEnvDetachLdap(TestContext testContext) {
-        String env = resourcePropertyProvider().getName();
-        createDefaultLdapConfig(testContext);
-        Set<String> validLdap = new HashSet<>();
-        validLdap.add(testContext.get(LdapTestDto.class).getName());
-        testContext
-                .given(EnvironmentTestDto.class)
-                .withName(env)
-                .when(environmentTestClient.createV4())
-                .when(environmentTestClient.listV4())
-                .given(EnvironmentTestDto.class)
-                .withLdapConfigs(validLdap)
-                .when(environmentTestClient.attachV4())
-                .then(this::checkLdapAttachedToEnv)
-                .when(environmentTestClient.detachV4())
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "there is an available environment with an attached proxy config",
-            when = "an proxy detach request is sent for that environment and proxy config",
-            then = "the proxy config should be detached from the environment")
-    public void testCreateEnvDetachProxy(TestContext testContext) {
-        String env = resourcePropertyProvider().getName();
-        createDefaultProxyConfig(testContext);
-        Set<String> validProxy = new HashSet<>();
-        validProxy.add(testContext.get(ProxyTestDto.class).getName());
-        testContext
-                .given(EnvironmentTestDto.class)
-                .withName(env)
-                .when(environmentTestClient.createV4())
-                .when(environmentTestClient.listV4())
-                .given(EnvironmentTestDto.class)
-                .withProxyConfigs(validProxy)
-                .when(environmentTestClient.attachV4())
-                .then(this::checkProxyAttachedToEnv)
-                .when(environmentTestClient.detachV4())
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "there are two available environments and an ldap config",
-            when = "an ldap attach requests sent for each of the environments",
-            then = "ldap should be attached to both environments")
-    public void testAttachLdapToMoreEnvs(TestContext testContext) {
-        String env1 = resourcePropertyProvider().getName();
-        String env2 = resourcePropertyProvider().getName();
-        createDefaultLdapConfig(testContext);
-        Set<String> validLdap = new HashSet<>();
-        validLdap.add(testContext.get(LdapTestDto.class).getName());
-        attachLdapToEnv(testContext, env1, validLdap);
-        attachLdapToEnv(testContext, env2, validLdap);
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "there are two available environments and an proxy config",
-            when = "an proxy attach requests sent for each of the environments",
-            then = "proxy should be attached to both environments")
-    public void testAttachProxyToMoreEnvs(TestContext testContext) {
-        String env1 = resourcePropertyProvider().getName();
-        String env2 = resourcePropertyProvider().getName();
-        createDefaultProxyConfig(testContext);
-        Set<String> validProxy = new HashSet<>();
-        validProxy.add(testContext.get(ProxyTestDto.class).getName());
-        attachProxyToEnv(testContext, env1, validProxy);
-        attachProxyToEnv(testContext, env2, validProxy);
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "there is an available environment",
             when = "a modifyV4 credential request (with cred name) is sent for the environment",
             then = "the credential should change to the new credential in the environment")
     public void testCreateEnvironmentChangeCredWithCredName(TestContext testContext) {
@@ -480,48 +361,10 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    private void attachLdapToEnv(TestContext testContext, String envName, Set<String> validLdap) {
-        testContext
-                .given(envName, EnvironmentTestDto.class)
-                .withName(envName)
-                .when(environmentTestClient.createV4())
-
-                .given(envName, EnvironmentTestDto.class)
-                .withLdapConfigs(validLdap)
-                .when(environmentTestClient.attachV4())
-                .then(this::checkLdapAttachedToEnv)
-                .validate();
-    }
-
-    private void attachProxyToEnv(TestContext testContext, String envName, Set<String> validLdap) {
-        testContext
-                .given(envName, EnvironmentTestDto.class)
-                .withName(envName)
-                .when(environmentTestClient.createV4())
-
-                .given(envName, EnvironmentTestDto.class)
-                .withProxyConfigs(validLdap)
-                .when(environmentTestClient.attachV4())
-                .then(this::checkProxyAttachedToEnv)
-                .validate();
-    }
-
     private EnvironmentTestDto checkCredentialAttachedToEnv(TestContext testContext, EnvironmentTestDto environment, CloudbreakClient cloudbreakClient) {
         String credentialName = environment.getResponse().getCredentialName();
         if (!credentialName.equals(testContext.get(CredentialTestDto.class).getName())) {
             throw new TestFailException("Credential is not attached to environment");
-        }
-        return environment;
-    }
-
-    private EnvironmentTestDto checkLdapAttachedToEnv(TestContext testContext, EnvironmentTestDto environment, CloudbreakClient cloudbreakClient) {
-        Set<String> ldapConfigs = new HashSet<>();
-        Set<LdapV4Response> ldapV4ResponseSet = environment.getResponse().getLdaps();
-        for (LdapV4Response ldapV4Response : ldapV4ResponseSet) {
-            ldapConfigs.add(ldapV4Response.getName());
-        }
-        if (!ldapConfigs.contains(testContext.get(LdapTestDto.class).getName())) {
-            throw new TestFailException("Ldap is not attached to environment");
         }
         return environment;
     }

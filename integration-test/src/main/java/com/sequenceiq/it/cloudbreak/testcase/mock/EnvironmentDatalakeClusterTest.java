@@ -33,15 +33,9 @@ import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
 public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
-    private static final String FORBIDDEN_KEY = "forbiddenPost";
-
     private static final Set<String> VALID_REGION = new HashSet<>(Collections.singletonList("Europe"));
 
     private static final String VALID_LOCATION = "London";
-
-    private static final String BP_NAME_DL = "HDP 3.1 - Data Lake: Apache Ranger, Apache Hive Metastore";
-
-    private static final String BP_NAME_WL = "Data Science: Apache Spark 2, Apache Zeppelin";
 
     @Inject
     private LdapTestClient ldapTestClient;
@@ -100,7 +94,6 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
                 .when(environmentTestClient.detachV4())
                 .when(environmentTestClient.getV4())
-                .then(EnvironmentClusterTest::checkEnvHasNoLdap)
                 .validate();
     }
 
@@ -254,10 +247,6 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
     private Set<String> getLdapAsList(TestContext testContext) {
         return new HashSet<>(Collections.singletonList(testContext.get(LdapTestDto.class).getName()));
-    }
-
-    private Set<String> getKerberosAsList(TestContext testContext) {
-        return new HashSet<>(Collections.singletonList(testContext.get(KerberosTestDto.class).getName()));
     }
 
     private Collection<InstanceGroupTestDto> setInstanceGroup(TestContext testContext) {

@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.ArchivableResource;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.view.ClusterApiView;
@@ -86,10 +85,6 @@ public class Environment implements WorkspaceAwareResource, ArchivableResource {
     private Long deletionTimestamp = -1L;
 
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    @JoinTable(name = "env_ldap", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "ldapid"))
-    private Set<LdapConfig> ldapConfigs = new HashSet<>();
-
-    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(name = "env_proxy", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "proxyid"))
     private Set<ProxyConfig> proxyConfigs = new HashSet<>();
 
@@ -139,7 +134,6 @@ public class Environment implements WorkspaceAwareResource, ArchivableResource {
 
     @Override
     public void unsetRelationsToEntitiesToBeDeleted() {
-        ldapConfigs = null;
         proxyConfigs = null;
         datalakeResources = null;
     }
@@ -181,14 +175,6 @@ public class Environment implements WorkspaceAwareResource, ArchivableResource {
     public Set<Region> getRegionSet() {
         return JsonUtil.jsonToType(regions.getValue(), new TypeReference<>() {
         });
-    }
-
-    public Set<LdapConfig> getLdapConfigs() {
-        return ldapConfigs;
-    }
-
-    public void setLdapConfigs(Set<LdapConfig> ldapConfigs) {
-        this.ldapConfigs = ldapConfigs;
     }
 
     public Set<ProxyConfig> getProxyConfigs() {

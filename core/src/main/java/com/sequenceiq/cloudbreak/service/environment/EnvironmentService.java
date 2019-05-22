@@ -25,10 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentAttachV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentChangeCredentialV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentDetachV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentEditV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentV4Request;
@@ -40,13 +37,13 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.controller.validation.environment.ClusterCreationEnvironmentValidator;
-import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentAttachValidator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentCreationValidator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentDetachValidator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.EnvironmentRegionValidator;
@@ -55,12 +52,10 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
-import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.environment.BaseNetwork;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.environment.Region;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
@@ -110,9 +105,6 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
 
     @Inject
     private EnvironmentCreationValidator environmentCreationValidator;
-
-    @Inject
-    private EnvironmentAttachValidator environmentAttachValidator;
 
     @Inject
     private EnvironmentRegionValidator environmentRegionValidator;
@@ -221,7 +213,6 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
 
     private Environment initEnvironment(EnvironmentV4Request request, @Nonnull Long workspaceId) {
         Environment environment = conversionService.convert(request, Environment.class);
-        environment.setLdapConfigs(ldapConfigService.findByNamesInWorkspace(request.getLdaps(), workspaceId));
         environment.setProxyConfigs(proxyConfigService.findByNamesInWorkspace(request.getProxies(), workspaceId));
         Credential credential = environmentCredentialOperationService.getCredentialFromRequest(request, workspaceId);
         environment.setCredential(credential);
@@ -334,70 +325,6 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
                         requestedLocation, cloudRegions.locationNames()));
             }
         }
-    }
-
-    public DetailedEnvironmentV4Response attachResources(String environmentName, EnvironmentAttachV4Request request, Long workspaceId) {
-        try {
-            return transactionService.required(() -> {
-                Set<LdapConfig> ldapsToAttach = ldapConfigService.findByNamesInWorkspace(request.getLdaps(), workspaceId);
-                Set<ProxyConfig> proxiesToAttach = proxyConfigService.findByNamesInWorkspace(request.getProxies(), workspaceId);
-                ValidationResult validationResult = environmentAttachValidator.validate(request, ldapsToAttach, proxiesToAttach);
-                if (validationResult.hasError()) {
-                    throw new BadRequestException(validationResult.getFormattedErrors());
-                }
-                Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
-                environment = doAttach(ldapsToAttach, proxiesToAttach, environment);
-                return conversionService.convert(environment, DetailedEnvironmentV4Response.class);
-            });
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
-    }
-
-    private Environment doAttach(Set<LdapConfig> ldapsToAttach, Set<ProxyConfig> proxiesToAttach, Environment environment) {
-        ldapsToAttach.removeAll(environment.getLdapConfigs());
-        environment.getLdapConfigs().addAll(ldapsToAttach);
-        proxiesToAttach.removeAll(environment.getProxyConfigs());
-        environment.getProxyConfigs().addAll(proxiesToAttach);
-        environment = environmentRepository.save(environment);
-        return environment;
-    }
-
-    public DetailedEnvironmentV4Response detachResources(String environmentName, EnvironmentDetachV4Request request, Long workspaceId) {
-        try {
-            return transactionService.required(() -> {
-                Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
-                ValidationResult validationResult = validateAndDetachLdaps(request, environment);
-                validationResult = validateAndDetachProxies(request, environment, validationResult);
-                if (validationResult.hasError()) {
-                    throw new BadRequestException(validationResult.getFormattedErrors());
-                }
-                Environment saved = environmentRepository.save(environment);
-                return conversionService.convert(saved, DetailedEnvironmentV4Response.class);
-            });
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
-    }
-
-    private ValidationResult validateAndDetachLdaps(EnvironmentDetachV4Request request, Environment environment) {
-        Set<LdapConfig> ldapsToDetach = environment.getLdapConfigs().stream()
-                .filter(ldap -> request.getLdaps().contains(ldap.getName())).collect(Collectors.toSet());
-        Map<LdapConfig, Set<Cluster>> ldapsToClusters = ldapsToDetach.stream()
-                .collect(Collectors.toMap(ldap -> ldap, ldap -> ldapConfigService.getClustersUsingResourceInEnvironment(ldap, environment.getId())));
-        ValidationResult validationResult = environmentDetachValidator.validate(environment, ldapsToClusters);
-        environment.getLdapConfigs().removeAll(ldapsToDetach);
-        return validationResult;
-    }
-
-    private ValidationResult validateAndDetachProxies(EnvironmentDetachV4Request request, Environment environment, ValidationResult validationResult) {
-        Set<ProxyConfig> proxiesToDetach = environment.getProxyConfigs().stream()
-                .filter(proxy -> request.getProxies().contains(proxy.getName())).collect(Collectors.toSet());
-        Map<ProxyConfig, Set<Cluster>> proxiesToClusters = proxiesToDetach.stream()
-                .collect(Collectors.toMap(proxy -> proxy, proxy -> proxyConfigService.getClustersUsingResourceInEnvironment(proxy, environment.getId())));
-        validationResult = environmentDetachValidator.validate(environment, proxiesToClusters).merge(validationResult);
-        environment.getProxyConfigs().removeAll(proxiesToDetach);
-        return validationResult;
     }
 
     public DetailedEnvironmentV4Response changeCredential(String environmentName, Long workspaceId, EnvironmentChangeCredentialV4Request request) {

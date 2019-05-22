@@ -1,22 +1,15 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -26,17 +19,16 @@ import org.hibernate.annotations.Where;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
-import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
-import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @Entity
 @Where(clause = "archived = false")
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
-public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource, ArchivableResource {
+public class LdapConfig implements ProvisionEntity, WorkspaceAwareResource, ArchivableResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "ldapconfig_generator")
@@ -96,10 +88,6 @@ public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource, Ar
 
     @ManyToOne
     private Workspace workspace;
-
-    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    @JoinTable(name = "env_ldap", joinColumns = @JoinColumn(name = "ldapid"), inverseJoinColumns = @JoinColumn(name = "envid"))
-    private Set<EnvironmentView> environments = new HashSet<>();
 
     private boolean archived;
 
@@ -306,15 +294,6 @@ public class LdapConfig implements ProvisionEntity, EnvironmentAwareResource, Ar
     @Override
     public void setWorkspace(Workspace workspace) {
         this.workspace = workspace;
-    }
-
-    @Override
-    public Set<EnvironmentView> getEnvironments() {
-        return environments;
-    }
-
-    public void setEnvironments(Set<EnvironmentView> environments) {
-        this.environments = environments;
     }
 
     @Override

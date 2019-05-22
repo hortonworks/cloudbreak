@@ -10,7 +10,12 @@ import javax.ws.rs.BadRequestException;
 
 import org.testng.annotations.Test;
 
+<<<<<<< HEAD
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
+=======
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
+>>>>>>> CB-1516 eliminate relation between Environment and LDAP
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
@@ -93,7 +98,11 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .withProxyConfigs(getProxyAsList(testContext))
                 .when(environmentTestClient.detachV4())
                 .when(environmentTestClient.getV4())
+<<<<<<< HEAD
                 .then(EnvironmentClusterTest::checkEnvHasNoLdap)
+=======
+                .then(EnvironmentClusterTest::checkEnvHasNoRds)
+>>>>>>> CB-1516 eliminate relation between Environment and LDAP
                 .then(EnvironmentClusterTest::checkEnvHasNoProxy)
                 .validate();
     }
@@ -307,10 +316,17 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         return stack;
     }
 
+<<<<<<< HEAD
     static EnvironmentTestDto checkEnvHasNoLdap(TestContext testContext, EnvironmentTestDto environment, CloudbreakClient cloudbreakClient) {
         Set<LdapV4Response> ldapV4ResponseSet = environment.getResponse().getLdaps();
         if (!ldapV4ResponseSet.isEmpty()) {
             throw new TestFailException("Environment has attached ldap");
+=======
+    static EnvironmentTestDto checkEnvHasNoRds(TestContext testContext, EnvironmentTestDto environment, CloudbreakClient cloudbreakClient) {
+        Set<DatabaseV4Response> rdsConfigResponseSet = environment.getResponse().getDatabases();
+        if (!rdsConfigResponseSet.isEmpty()) {
+            throw new TestFailException("Environment has attached rds");
+>>>>>>> CB-1516 eliminate relation between Environment and LDAP
         }
         return environment;
     }
