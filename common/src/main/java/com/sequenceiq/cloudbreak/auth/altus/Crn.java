@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
 /**
@@ -73,6 +72,7 @@ public class Crn {
          * partition name.
          * @param input the input string
          * @return the partition
+         * @throws NullPointerException if 'input' is null
          */
         public static Partition fromString(String input) {
             checkNotNull(input);
@@ -83,12 +83,14 @@ public class Crn {
          * Get a partition from a string. This will never return null.
          * @param input the input string
          * @return the partition
+         * @throws NullPointerException if 'input' is null
+         * @throws CrnParseException if 'input' is not a valid partition name
          */
         public static Partition safeFromString(String input) {
             checkNotNull(input);
             Partition partition = fromString(input);
             if (partition == null) {
-                throw new IllegalArgumentException(String.format(
+                throw new CrnParseException(String.format(
                         "%s is not a valid partition value", input));
             }
             return partition;
@@ -161,6 +163,7 @@ public class Crn {
          * service name.
          * @param input the input string
          * @return the service
+         * @throws NullPointerException if 'input' is null
          */
         public static Service fromString(String input) {
             checkNotNull(input);
@@ -171,12 +174,14 @@ public class Crn {
          * Get a service from a string. This will never return null.
          * @param input the input string
          * @return the service
+         * @throws NullPointerException if 'input' is null
+         * @throws CrnParseException if 'input' is not a valid service name
          */
         public static Service safeFromString(String input) {
             checkNotNull(input);
             Service service = fromString(input);
             if (service == null) {
-                throw new IllegalArgumentException(String.format(
+                throw new CrnParseException(String.format(
                         "%s is not a valid service value", input));
             }
             return service;
@@ -230,6 +235,7 @@ public class Crn {
         SAML_PROVIDER("samlProvider"),
         WORKSPACE("workspace"),
         DATABASE("database"),
+        DATABASE_SERVER("databaseServer"),
         CREDENTIAL("credential"),
         LDAP("ldap"),
         KERBEROS("kerberos");
@@ -257,12 +263,13 @@ public class Crn {
          * Get a resource type from a string. This will never return null.
          * @param input the input string
          * @return the resource type
+         * @throws CrnParseException if 'input' is not a valid resource type
          */
         public static ResourceType fromString(String input) {
             checkNotNull(input);
             ResourceType resourceType = FROM_STRING.get(input);
             if (resourceType == null) {
-                throw new IllegalArgumentException(String.format(
+                throw new CrnParseException(String.format(
                         "%s is not a valid resource type value", input));
             }
             return resourceType;
@@ -359,6 +366,8 @@ public class Crn {
      * match, but cannot be parsed into a CRN for some reason.
      * @param input the input string
      * @return the CRN
+     * @throws NullPointerException if the input string is null
+     * @throws CrnParseException if the input string matches the CRN pattern but cannot be parsed
      */
     public static @Nullable Crn fromString(String input) {
         checkNotNull(input);
@@ -369,9 +378,9 @@ public class Crn {
         String partition = matcher.group(1);
         Partition.safeFromString(partition);
         String region = matcher.group(3);
-        Preconditions.checkState(
-                Region.US_WEST_1.name.equals(region),
-                String.format("%s is not a supported region", region));
+        if (!Region.US_WEST_1.name.equals(region)) {
+            throw new CrnParseException(String.format("%s is not a supported region", region));
+        }
         return new Crn.Builder()
                 .setService(Service.safeFromString(matcher.group(2)))
                 .setAccountId(matcher.group(4))
@@ -385,9 +394,15 @@ public class Crn {
      * returning null.
      * @param input the input string
      * @return the CRN
+     * @throws NullPointerException if the input string is null
+     * @throws CrnParseException if the input string does not match the CRN pattern or cannot be parsed
      */
     public static Crn safeFromString(String input) {
-        return checkNotNull(fromString(input));
+        Crn crn = fromString(input);
+        if (crn == null) {
+            throw new CrnParseException(String.format("%s does not match the CRN pattern", input));
+        }
+        return crn;
     }
 
     /**
@@ -396,12 +411,10 @@ public class Crn {
      * @return whether the input string is a CRN
      */
     public static boolean isCrn(@Nullable String input) {
-        if (input == null) {
-            return false;
-        }
         try {
-            return fromString(input) != null;
-        } catch (Exception e) {
+            safeFromString(input);
+            return true;
+        } catch (NullPointerException | CrnParseException e) {
             return false;
         }
     }

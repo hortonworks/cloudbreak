@@ -1,6 +1,5 @@
 package com.sequenceiq.datalake.service.sdx;
 
-
 import java.util.List;
 import java.util.Optional;
 
@@ -11,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.datalake.api.endpoint.sdx.SdxClusterRequest;
@@ -112,11 +112,11 @@ public class SdxService {
     }
 
     private String getAccountIdFromCrn(String userCrn) {
-        Crn crn = Crn.fromString(userCrn);
-        if (crn != null) {
+        try {
+            Crn crn = Crn.safeFromString(userCrn);
             return crn.getAccountId();
-        } else {
-            throw new BadRequestException("Can not guess account ID from CRN");
+        } catch (NullPointerException | CrnParseException e) {
+            throw new BadRequestException("Can not parse CRN to find account ID: " + userCrn);
         }
     }
 }
