@@ -1,35 +1,18 @@
 package com.sequenceiq.environment.api.v1.environment.model.response;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
-import com.sequenceiq.environment.api.proxy.model.response.ProxyV1Response;
 
 import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "DetailedEnvironmentV1Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
-    @ApiModelProperty(EnvironmentModelDescription.PROXY_CONFIGS_RESPONSE)
-    private Set<ProxyV1Response> proxies = new HashSet<>();
-
-    public void setProxies(Set<ProxyV1Response> proxies) {
-        this.proxies = proxies;
-    }
-
-    public Set<ProxyV1Response> getProxies() {
-        return proxies;
-    }
-
     public static final class DetailedEnvironmentResponseBuilder {
-        private Long id;
+        private String id;
 
         private String name;
 
@@ -38,8 +21,6 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
         private CompactRegionResponse regions;
 
         private String cloudPlatform;
-
-        private Set<ProxyV1Response> proxies = new HashSet<>();
 
         private String credentialName;
 
@@ -56,7 +37,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return new DetailedEnvironmentResponseBuilder();
         }
 
-        public DetailedEnvironmentResponseBuilder withId(Long id) {
+        public DetailedEnvironmentResponseBuilder withId(String id) {
             this.id = id;
             return this;
         }
@@ -78,11 +59,6 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         public DetailedEnvironmentResponseBuilder withCloudPlatform(String cloudPlatform) {
             this.cloudPlatform = cloudPlatform;
-            return this;
-        }
-
-        public DetailedEnvironmentResponseBuilder withProxies(Set<ProxyV1Response> proxies) {
-            this.proxies = proxies;
             return this;
         }
 
@@ -113,7 +89,6 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setDescription(description);
             detailedEnvironmentResponse.setRegions(regions);
             detailedEnvironmentResponse.setCloudPlatform(cloudPlatform);
-            detailedEnvironmentResponse.setProxies(proxies);
             detailedEnvironmentResponse.setCredentialName(credentialName);
             detailedEnvironmentResponse.setLocation(location);
             detailedEnvironmentResponse.setNetwork(network);

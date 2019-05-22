@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(subTypes = {DetailedEnvironmentResponse.class, SimpleEnvironmentResponse.class})
 public abstract class EnvironmentBaseResponse {
     @ApiModelProperty(ModelDescriptions.ID)
-    private Long id;
+    private String id;
 
     @ApiModelProperty(ModelDescriptions.NAME)
     private String name;
@@ -35,11 +35,11 @@ public abstract class EnvironmentBaseResponse {
     @ApiModelProperty(EnvironmentModelDescription.STATUS)
     private EnvironmentStatus environmentStatus;
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

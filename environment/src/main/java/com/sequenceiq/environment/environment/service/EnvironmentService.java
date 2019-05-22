@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.cloudbreak.util.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentDetachRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
@@ -35,9 +36,11 @@ import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
+import com.sequenceiq.environment.network.BaseNetwork;
+import com.sequenceiq.environment.network.NetworkService;
+import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
-import com.sequenceiq.environment.proxy.ProxyConfig;
 
 @Service
 public class EnvironmentService {
@@ -54,14 +57,21 @@ public class EnvironmentService {
 
     private final EnvironmentDtoConverter environmentDtoConverter;
 
-    public EnvironmentService(EnvironmentValidatorService validatorService, EnvironmentRepository environmentRepository,
-            ConversionService conversionService, PlatformParameterService platformParameterService,
-            EnvironmentDtoConverter environmentDtoConverter) {
+    private final NetworkService networkService;
+
+    public EnvironmentService(
+            EnvironmentValidatorService validatorService,
+            EnvironmentRepository environmentRepository,
+            ConversionService conversionService,
+            PlatformParameterService platformParameterService,
+            EnvironmentDtoConverter environmentDtoConverter,
+            NetworkService networkService) {
         this.validatorService = validatorService;
         this.environmentRepository = environmentRepository;
         this.conversionService = conversionService;
         this.platformParameterService = platformParameterService;
         this.environmentDtoConverter = environmentDtoConverter;
+        this.networkService = networkService;
     }
 
     public Environment save(Environment environment) {
@@ -122,7 +132,12 @@ public class EnvironmentService {
             editDto.setLocation(locationDto);
             editRegions(editDto, environment, cloudRegions);
         }
-
+        if (networkChanged(editDto)) {
+            BaseNetwork network = createAndSetNetwork(environment, editDto.getNetworkDto());
+            if (network != null) {
+                environment.setNetwork(network);
+            }
+        }
         Environment savedEnvironment = environmentRepository.save(environment);
         return conversionService.convert(savedEnvironment, DetailedEnvironmentResponse.class);
     }
@@ -137,6 +152,15 @@ public class EnvironmentService {
     private boolean locationAndRegionChanged(EnvironmentEditDto editDto) {
         return !CollectionUtils.isEmpty(editDto.getRegions())
                 && locationChanged(editDto);
+    }
+
+    private boolean networkChanged(EnvironmentEditDto editDto) {
+        return editDto.getNetworkDto() != null;
+    }
+
+    private BaseNetwork createAndSetNetwork(Environment environment, NetworkDto networkDto) {
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
+        return networkService.createNetworkIfPossible(environment, networkDto, cloudPlatform);
     }
 
     private boolean locationChanged(EnvironmentEditDto editDto) {
@@ -210,23 +234,8 @@ public class EnvironmentService {
 
     public DetailedEnvironmentResponse detachResources(String environmentName, String accountId, EnvironmentDetachRequest request) {
         Environment environment = getByNameForAccountId(environmentName, accountId);
-        ValidationResult validationResult = validateAndDetachProxies(request, environment);
-        if (validationResult.hasError()) {
-            throw new BadRequestException(validationResult.getFormattedErrors());
-        }
         Environment saved = environmentRepository.save(environment);
         return conversionService.convert(saved, DetailedEnvironmentResponse.class);
-    }
-
-    private ValidationResult validateAndDetachProxies(EnvironmentDetachRequest request, Environment environment) {
-        Set<ProxyConfig> proxiesToDetach = environment.getProxyConfigs().stream()
-                .filter(proxy -> request.getProxies().contains(proxy.getName())).collect(Collectors.toSet());
-        //TODO Design and implement of the deletion flow between the services
-//        Map<ProxyConfig, Set<Cluster>> proxiesToClusters = proxiesToDetach.stream()
-//                .collect(Collectors.toMap(proxy -> proxy, proxy -> proxyConfigService.getClustersUsingResourceInEnvironment(proxy, environment.getId())));
-//        ValidationResult validationResult = environmentDetachValidator.validate(environment, proxiesToClusters).merge(validationResult);
-        environment.getProxyConfigs().removeAll(proxiesToDetach);
-        return ValidationResult.builder().build();
     }
 
     public Optional<Environment> findById(Long id) {

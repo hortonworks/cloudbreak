@@ -13,16 +13,16 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(value = "EnvironmentNetworkV1Response")
 public class EnvironmentNetworkResponse extends EnvironmentNetworkRequest {
     @ApiModelProperty(ModelDescriptions.ID)
-    private Long id;
+    private String id;
 
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -35,7 +35,7 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkRequest {
     }
 
     public static final class EnvironmentNetworkResponseBuilder {
-        private Long id;
+        private String id;
 
         private String name;
 
@@ -52,7 +52,7 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkRequest {
             return new EnvironmentNetworkResponseBuilder();
         }
 
-        public EnvironmentNetworkResponseBuilder withId(Long id) {
+        public EnvironmentNetworkResponseBuilder withId(String id) {
             this.id = id;
             return this;
         }

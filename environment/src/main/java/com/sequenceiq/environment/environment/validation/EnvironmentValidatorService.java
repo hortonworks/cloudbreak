@@ -17,7 +17,6 @@ import com.sequenceiq.environment.environment.validation.validators.EnvironmentA
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentCreationValidator;
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentDetachValidator;
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentRegionValidator;
-import com.sequenceiq.environment.proxy.ProxyConfig;
 
 @Service
 public class EnvironmentValidatorService {
@@ -42,8 +41,8 @@ public class EnvironmentValidatorService {
         return creationValidator.validate(environment, request, cloudRegions);
     }
 
-    public ValidationResult validateProxyAttach(EnvironmentAttachRequest request, Set<ProxyConfig> proxiesToAttach) {
-        return attachValidator.validate(request, proxiesToAttach);
+    public ValidationResult validateProxyAttach(EnvironmentAttachRequest request) {
+        return attachValidator.validate(request);
     }
 
     public ValidationResult validateDetachForEnvironment(Environment environment, Map<? extends EnvironmentAwareResource, Set<String>> resourcesToClusters) {
