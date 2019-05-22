@@ -23,7 +23,7 @@ public class CmTemplateGeneratorConfigurationResolverTest {
     @Before
     public void setup() {
         ReflectionTestUtils.setField(underTest, "cdhConfigurationsPath", "cloudera-manager-template/cdh");
-        ReflectionTestUtils.setField(underTest, "serviceDefinitionConfigurationPath", "cloudera-manager-template/service-definitions.json");
+        ReflectionTestUtils.setField(underTest, "serviceDefinitionConfigurationPath", "cloudera-manager-template/service-definitions-minimal.json");
         underTest.prepareConfigs();
     }
 
@@ -32,7 +32,7 @@ public class CmTemplateGeneratorConfigurationResolverTest {
         Map<StackVersion, Set<String>> stackVersionSetMap = underTest.cdhConfigurations();
         Set<ServiceConfig> serviceConfigs = underTest.serviceConfigs();
 
-        Assert.assertEquals(1L, stackVersionSetMap.size());
+        Assert.assertEquals(2L, stackVersionSetMap.size());
         Assert.assertEquals(13L, serviceConfigs.size());
     }
 }

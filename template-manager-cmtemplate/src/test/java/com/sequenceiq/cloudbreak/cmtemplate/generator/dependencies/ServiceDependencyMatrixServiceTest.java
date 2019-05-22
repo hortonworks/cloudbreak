@@ -55,7 +55,7 @@ public class ServiceDependencyMatrixServiceTest extends CentralTemplateGenerator
     @Parameters(name = "{index}: testServicesAndDependencies(get {0} with {1} {2}) = dependencies are {3}")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {Set.of("OOZIE"), CDH, CDH_6_1, Set.of("HDFS", "ZOOKEEPER", "YARN")}
+                {Set.of("OOZIE"), CDH, CDH_6_1, Set.of("HIVE", "HDFS", "ZOOKEEPER", "YARN", "SPARK_ON_YARN")}
         });
     }
 }
