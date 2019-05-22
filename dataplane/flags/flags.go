@@ -1062,6 +1062,41 @@ var (
 			Usage: "latitude of the environment's location. must be specified if the location is made-up and not supported on the cloud provider",
 		},
 	}
+	FlNetworkId = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "network-id",
+			Usage: "the ID of the existing network to attach",
+		},
+	}
+	FlSubnetIds = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "subnet-ids",
+			Usage: "a comma separated list of existing subnet IDs",
+		},
+	}
+	FlNetworkCidr = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "network-cidr",
+			Usage: "the cidr of the new network",
+		},
+	}
+	FlSubnetCidrs = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "subnet-cidrs",
+			Usage: "a comma separated list of subnet cidrs",
+		},
+	}
+	FlResourceGroupName = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "resource-group",
+			Usage: "the name of the resource group",
+		},
+	}
 	FlRangerAdminPasswordOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{

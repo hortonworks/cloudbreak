@@ -30,8 +30,17 @@ type EnvironmentNetworkV4Response struct {
 	// Required: true
 	Name *string `json:"name"`
 
+	// Network CIDR of the specified networks
+	NetworkCidr string `json:"networkCidr,omitempty"`
+
+	// The id of the specified network
+	NetworkID string `json:"networkId,omitempty"`
+
+	// Subnet CIDR's of the specified networks
+	// Unique: true
+	SubnetCidrs []string `json:"subnetCidrs"`
+
 	// Subnet ids of the specified networks
-	// Required: true
 	// Unique: true
 	SubnetIds []string `json:"subnetIds"`
 }
@@ -49,6 +58,10 @@ func (m *EnvironmentNetworkV4Response) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateName(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateSubnetCidrs(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -107,10 +120,23 @@ func (m *EnvironmentNetworkV4Response) validateName(formats strfmt.Registry) err
 	return nil
 }
 
+func (m *EnvironmentNetworkV4Response) validateSubnetCidrs(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.SubnetCidrs) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("subnetCidrs", "body", m.SubnetCidrs); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (m *EnvironmentNetworkV4Response) validateSubnetIds(formats strfmt.Registry) error {
 
-	if err := validate.Required("subnetIds", "body", m.SubnetIds); err != nil {
-		return err
+	if swag.IsZero(m.SubnetIds) { // not required
+		return nil
 	}
 
 	if err := validate.UniqueItems("subnetIds", "body", m.SubnetIds); err != nil {

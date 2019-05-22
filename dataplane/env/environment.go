@@ -3,6 +3,7 @@ package env
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/hortonworks/cb-cli/dataplane/cloud"
 	"strings"
 	"time"
 
@@ -148,6 +149,55 @@ func createEnvironmentImpl(c *cli.Context, EnvironmentV1Request *model.Environme
 	environment := resp.Payload
 
 	log.Infof("[createEnvironmentImpl] environment created with name: %s, id: %s", *EnvironmentV1Request.Name, environment.Crn)
+}
+
+func GenerateAwsEnvironmentTemplate(c *cli.Context) error {
+	cloud.SetProviderType(cloud.AWS)
+	template := createEnvironmentWithNetwork(getNetworkMode(c), c)
+	return printTemplate(template)
+}
+
+func GenerateAzureEnvironmentTemplate(c *cli.Context) error {
+	cloud.SetProviderType(cloud.AZURE)
+	template := createEnvironmentWithNetwork(getNetworkMode(c), c)
+	return printTemplate(template)
+}
+
+func getNetworkMode(c *cli.Context) cloud.NetworkMode {
+	switch c.Command.Names()[0] {
+	case "create-new-network":
+		return cloud.NEW_NETWORK_NEW_SUBNET
+	case "use-existing-network":
+		return cloud.EXISTING_NETWORK_EXISTING_SUBNET
+	default:
+		return cloud.NO_NETWORK
+	}
+}
+
+func createEnvironmentWithNetwork(mode cloud.NetworkMode, c *cli.Context) model.EnvironmentV1Request {
+	provider := cloud.GetProvider()
+	template := model.EnvironmentV1Request{
+		Name:           new(string),
+		Description:    new(string),
+		CredentialName: "____",
+		Regions:        make([]string, 0),
+		Location: &model.LocationV1Request{
+			Name:      new(string),
+			Longitude: 0,
+			Latitude:  0,
+		},
+		Network: provider.GenerateDefaultNetworkWithParams(c.String, mode),
+	}
+	if credName := c.String(fl.FlEnvironmentCredentialOptional.Name); len(credName) != 0 {
+		template.CredentialName = credName
+	}
+	if locationName := c.String(fl.FlEnvironmentLocationNameOptional.Name); len(locationName) != 0 {
+		template.Location.Name = &locationName
+	}
+	if regions := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentRegions.Name), ","); len(regions) != 0 {
+		template.Regions = regions
+	}
+	return template
 }
 
 func printTemplate(template model.EnvironmentV1Request) error {

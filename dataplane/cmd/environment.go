@@ -96,6 +96,72 @@ func init() {
 					},
 				},
 			},
+			{
+				Name:  "generate-template",
+				Usage: "creates an environment JSON template",
+				Subcommands: []cli.Command{
+					{
+						Name:  "aws",
+						Usage: "creates an aws specific environment JSON template",
+						Subcommands: []cli.Command{
+							{
+								Name:   "use-existing-network",
+								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlNetworkId, fl.FlSubnetIds).AddAuthenticationFlags().Build(),
+								Usage:  "attach existing vpc and subnets",
+								Before: cf.CheckConfigAndCommandFlags,
+								Action: env.GenerateAwsEnvironmentTemplate,
+								BashComplete: func(c *cli.Context) {
+									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlNetworkId, fl.FlSubnetIds).AddAuthenticationFlags().Build() {
+										fl.PrintFlagCompletion(f)
+									}
+								},
+							},
+							{
+								Name:   "create-new-network",
+								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlNetworkCidr, fl.FlSubnetCidrs).AddAuthenticationFlags().Build(),
+								Usage:  "create new vpc and subnets",
+								Before: cf.CheckConfigAndCommandFlags,
+								Action: env.GenerateAwsEnvironmentTemplate,
+								BashComplete: func(c *cli.Context) {
+									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlNetworkCidr, fl.FlSubnetCidrs).AddAuthenticationFlags().Build() {
+										fl.PrintFlagCompletion(f)
+									}
+								},
+							},
+						},
+					},
+					{
+						Name:  "azure",
+						Usage: "creates an azure specific environment JSON template",
+						Subcommands: []cli.Command{
+							{
+								Name:   "use-existing-network",
+								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlNetworkId, fl.FlSubnetIds, fl.FlResourceGroupName).AddAuthenticationFlags().Build(),
+								Usage:  "attach existing network and subnets",
+								Before: cf.CheckConfigAndCommandFlags,
+								Action: env.GenerateAzureEnvironmentTemplate,
+								BashComplete: func(c *cli.Context) {
+									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlNetworkId, fl.FlSubnetIds, fl.FlResourceGroupName).AddAuthenticationFlags().Build() {
+										fl.PrintFlagCompletion(f)
+									}
+								},
+							},
+							{
+								Name:   "create-new-network",
+								Flags:  fl.NewFlagBuilder().AddFlags(fl.FlNetworkCidr, fl.FlSubnetCidrs).AddAuthenticationFlags().Build(),
+								Usage:  "create new network and subnets",
+								Before: cf.CheckConfigAndCommandFlags,
+								Action: env.GenerateAzureEnvironmentTemplate,
+								BashComplete: func(c *cli.Context) {
+									for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlNetworkCidr, fl.FlSubnetCidrs).AddAuthenticationFlags().Build() {
+										fl.PrintFlagCompletion(f)
+									}
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	})
 }

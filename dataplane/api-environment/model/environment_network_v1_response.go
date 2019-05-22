@@ -30,6 +30,9 @@ type EnvironmentNetworkV1Response struct {
 	// Required: true
 	Name *string `json:"name"`
 
+	// network cidr
+	NetworkCidr string `json:"networkCidr,omitempty"`
+
 	// Subnet ids of the specified networks
 	// Required: true
 	// Unique: true

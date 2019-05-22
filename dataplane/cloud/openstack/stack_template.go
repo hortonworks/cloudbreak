@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	envmodel "github.com/hortonworks/cb-cli/dataplane/api-environment/model"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	"github.com/hortonworks/cb-cli/dataplane/cloud"
 )
@@ -37,6 +38,10 @@ func (p *OpenstackProvider) GenerateDefaultNetwork(mode cloud.NetworkMode) *mode
 			SubnetCIDR: cloud.DEFAULT_SUBNET_CIDR,
 		}
 	}
+}
+
+func (p *OpenstackProvider) GenerateDefaultNetworkWithParams(getFlags func(string) string, mode cloud.NetworkMode) *envmodel.EnvironmentNetworkV1Request {
+	return &envmodel.EnvironmentNetworkV1Request{}
 }
 
 func (p *OpenstackProvider) SetParametersTemplate(request *model.StackV4Request) {

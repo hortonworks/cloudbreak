@@ -23,6 +23,9 @@ type EnvironmentNetworkV1Request struct {
 	// Subnet ids of the specified networks
 	Azure *EnvironmentNetworkAzureV1Params `json:"azure,omitempty"`
 
+	// network cidr
+	NetworkCidr string `json:"networkCidr,omitempty"`
+
 	// Subnet ids of the specified networks
 	// Required: true
 	// Unique: true
