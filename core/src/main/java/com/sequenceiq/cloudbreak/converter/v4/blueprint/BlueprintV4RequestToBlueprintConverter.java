@@ -8,6 +8,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -58,7 +59,7 @@ public class BlueprintV4RequestToBlueprintConverter
             } catch (IOException | CloudbreakApiException e) {
                 throw new BadRequestException(String.format("Cannot download ambari validation from: %s", sourceUrl), e);
             }
-        } else if (!json.getServices().isEmpty() && !Strings.isNullOrEmpty(json.getPlatform())) {
+        } else if (!CollectionUtils.isEmpty(json.getServices()) && !Strings.isNullOrEmpty(json.getPlatform())) {
             GeneratedCmTemplate generatedCmTemplate =
                     clusterTemplateGeneratorService.generateTemplateByServices(json.getServices(), json.getPlatform());
             blueprint.setBlueprintText(generatedCmTemplate.getTemplate());
