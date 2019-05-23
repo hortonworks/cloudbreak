@@ -12,8 +12,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -29,7 +27,6 @@ import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.ArchivableResource;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.view.ClusterApiView;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
@@ -84,10 +81,6 @@ public class Environment implements WorkspaceAwareResource, ArchivableResource {
 
     private Long deletionTimestamp = -1L;
 
-    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    @JoinTable(name = "env_proxy", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "proxyid"))
-    private Set<ProxyConfig> proxyConfigs = new HashSet<>();
-
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "environment_id")
     @Where(clause = "terminated IS NULL")
@@ -134,7 +127,6 @@ public class Environment implements WorkspaceAwareResource, ArchivableResource {
 
     @Override
     public void unsetRelationsToEntitiesToBeDeleted() {
-        proxyConfigs = null;
         datalakeResources = null;
     }
 
@@ -175,14 +167,6 @@ public class Environment implements WorkspaceAwareResource, ArchivableResource {
     public Set<Region> getRegionSet() {
         return JsonUtil.jsonToType(regions.getValue(), new TypeReference<>() {
         });
-    }
-
-    public Set<ProxyConfig> getProxyConfigs() {
-        return proxyConfigs;
-    }
-
-    public void setProxyConfigs(Set<ProxyConfig> proxyConfigs) {
-        this.proxyConfigs = proxyConfigs;
     }
 
     public Set<StackApiView> getStacks() {

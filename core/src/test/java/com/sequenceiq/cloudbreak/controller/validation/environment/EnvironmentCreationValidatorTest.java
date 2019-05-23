@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.environment.network.EnvironmentNetworkValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.environment.Region;
 import com.sequenceiq.cloudbreak.util.EnvironmentUtils;
@@ -50,13 +49,8 @@ public class EnvironmentCreationValidatorTest {
         assertNotNull(environmentRegionValidator);
         Credential credential = new Credential();
 
-        ProxyConfig proxyConfig = new ProxyConfig();
-        proxyConfig.setId(0L);
-        proxyConfig.setName("proxy1");
-
         Environment environment = new Environment();
         environment.setCredential(credential);
-        environment.setProxyConfigs(Set.of(proxyConfig));
 
         Region region1 = new Region();
         region1.setName("region1");
@@ -64,7 +58,6 @@ public class EnvironmentCreationValidatorTest {
         region2.setName("region2");
         environment.setRegions(Set.of(region1, region2));
         EnvironmentV4Request environmentRequest = new EnvironmentV4Request();
-        environmentRequest.setProxies(Set.of("proxy1", "proxy2"));
         environmentRequest.setRegions(Set.of("region1", "region2", "region3"));
         LocationV4Request locationRequest = new LocationV4Request();
         locationRequest.setName("region1");
@@ -84,10 +77,7 @@ public class EnvironmentCreationValidatorTest {
         Credential credential = new Credential();
         Environment environment = new Environment();
         environment.setCredential(credential);
-        environment.setProxyConfigs(Collections.emptySet());
         EnvironmentV4Request environmentRequest = new EnvironmentV4Request();
-        environmentRequest.setLdaps(Collections.emptySet());
-        environmentRequest.setProxies(Collections.emptySet());
         environmentRequest.setRegions(Set.of("region1", "region2", "region3"));
         LocationV4Request locationRequest = new LocationV4Request();
         locationRequest.setName("region1");
@@ -108,11 +98,9 @@ public class EnvironmentCreationValidatorTest {
         Credential credential = new Credential();
         Environment environment = new Environment();
         environment.setCredential(credential);
-        environment.setProxyConfigs(Collections.emptySet());
         environment.setRegions(Set.of());
         EnvironmentV4Request environmentRequest = new EnvironmentV4Request();
-        environmentRequest.setLdaps(Collections.emptySet());
-        environmentRequest.setProxies(Collections.emptySet());
+        environment.setRegions(Set.of());
         environmentRequest.setRegions(Collections.emptySet());
         LocationV4Request locationRequest = new LocationV4Request();
         locationRequest.setName("region1");
@@ -133,13 +121,8 @@ public class EnvironmentCreationValidatorTest {
         // GIVEN
         Credential credential = new Credential();
 
-        ProxyConfig proxyConfig = new ProxyConfig();
-        proxyConfig.setId(0L);
-        proxyConfig.setName("proxy1");
-
         Environment environment = new Environment();
         environment.setCredential(credential);
-        environment.setProxyConfigs(Set.of(proxyConfig));
         Region region1 = new Region();
         region1.setName("region1");
         Region region2 = new Region();
@@ -150,8 +133,6 @@ public class EnvironmentCreationValidatorTest {
         environment.setLongitude(-1.1);
 
         EnvironmentV4Request environmentRequest = new EnvironmentV4Request();
-        environmentRequest.setLdaps(Set.of("ldap1"));
-        environmentRequest.setProxies(Set.of("proxy1"));
         environmentRequest.setRegions(Set.of("region1", "region2"));
         LocationV4Request locationRequest = new LocationV4Request();
         locationRequest.setName("region1");
@@ -168,20 +149,13 @@ public class EnvironmentCreationValidatorTest {
         // GIVEN
         Credential credential = new Credential();
 
-        ProxyConfig proxyConfig = new ProxyConfig();
-        proxyConfig.setId(0L);
-        proxyConfig.setName("proxy1");
-
         Environment environment = new Environment();
         environment.setCredential(credential);
-        environment.setProxyConfigs(Set.of(proxyConfig));
         environment.setLocation("region1");
         environment.setLatitude(1.1);
         environment.setLongitude(-1.1);
 
         EnvironmentV4Request environmentRequest = new EnvironmentV4Request();
-        environmentRequest.setLdaps(Set.of("ldap1"));
-        environmentRequest.setProxies(Set.of("proxy1"));
         environmentRequest.setRegions(Collections.emptySet());
         LocationV4Request locationRequest = new LocationV4Request();
         locationRequest.setName("region1");
@@ -200,21 +174,13 @@ public class EnvironmentCreationValidatorTest {
     public void testValidationWhenNetworkIsNotSupportedForPlatform() {
         // GIVEN
         Credential credential = new Credential();
-
-        ProxyConfig proxyConfig = new ProxyConfig();
-        proxyConfig.setId(0L);
-        proxyConfig.setName("proxy1");
-
         Environment environment = new Environment();
         environment.setCredential(credential);
-        environment.setProxyConfigs(Set.of(proxyConfig));
         environment.setLocation("region1");
         environment.setLatitude(1.1);
         environment.setLongitude(-1.1);
 
         EnvironmentV4Request environmentRequest = new EnvironmentV4Request();
-        environmentRequest.setLdaps(Set.of("ldap1"));
-        environmentRequest.setProxies(Set.of("proxy1"));
         environmentRequest.setRegions(Collections.emptySet());
         LocationV4Request locationRequest = new LocationV4Request();
         locationRequest.setName("region1");

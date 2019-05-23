@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -10,13 +8,6 @@ import javax.ws.rs.BadRequestException;
 
 import org.testng.annotations.Test;
 
-<<<<<<< HEAD
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
-=======
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
->>>>>>> CB-1516 eliminate relation between Environment and LDAP
-import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DatabaseTestClient;
@@ -75,68 +66,15 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "there is an available environment with attached rds, ldap and proxy configs",
-            when = "a cluster is created and deleted in the env and detach environment endpoint is called for the attached resources",
-            then = "all of the three resources should be detached")
-    public void testDetachFromEnvWithDeletedCluster(MockedTestContext testContext) {
-        createEnvWithResources(testContext);
-        testContext
-                .given(ClusterTestDto.class)
-                .withDatabase(testContext.get(DatabaseTestDto.class).getName())
-                .withLdapConfigName(testContext.get(LdapTestDto.class).getName())
-                .withProxyConfigName(testContext.get(ProxyTestDto.class).getName())
-                .given(StackTestDto.class)
-                .withEnvironment(EnvironmentTestDto.class)
-                .when(stackTestClient.createV4())
-                .await(STACK_AVAILABLE)
-                .when(stackTestClient.deleteV4(), RunningParameter.withoutLogError())
-                .await(STACK_DELETED)
-
-                .given(EnvironmentTestDto.class)
-                .withName(testContext.get(EnvironmentTestDto.class).getName())
-                .withLdapConfigs(getLdapAsList(testContext))
-                .withProxyConfigs(getProxyAsList(testContext))
-                .when(environmentTestClient.detachV4())
-                .when(environmentTestClient.getV4())
-<<<<<<< HEAD
-                .then(EnvironmentClusterTest::checkEnvHasNoLdap)
-=======
-                .then(EnvironmentClusterTest::checkEnvHasNoRds)
->>>>>>> CB-1516 eliminate relation between Environment and LDAP
-                .then(EnvironmentClusterTest::checkEnvHasNoProxy)
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "there is an environment with a attached shared resources and a running cluster that is not using these resources",
-            when = "calling detach environment endpoint for the resources and deleting those",
-            then = "all three resources should be be deleted")
-    public void testWlClusterNotAttachResourceDetachDeleteOk(TestContext testContext) {
-        createEnvWithResources(testContext);
-        testContext.given(StackTestDto.class)
-                .withEnvironment(EnvironmentTestDto.class)
-                .when(stackTestClient.createV4())
-                .await(STACK_AVAILABLE)
-
-                .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.detachV4())
-                .given(DatabaseTestDto.class)
-                .when(databaseTestClient.deleteV4())
-                .given(LdapTestDto.class)
-                .when(ldapTestClient.deleteV4())
-                .given(ProxyTestDto.class)
-                .when(proxyTestClient.deleteV4())
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
             given = "there is an environment with a attached shared resources and a running cluster that is using these resources",
             when = "the resource delete endpoints and environment delete endpoints are called",
             then = "non of the operations should succeed")
     public void testCreateWlClusterDeleteFails(MockedTestContext testContext) {
         createEnvWithResources(testContext);
+        createDefaultRdsConfig(testContext);
+        createDefaultLdapConfig(testContext);
+        createDefaultProxyConfig(testContext);
+
         testContext.given(StackTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)
                 .withCluster(
@@ -155,35 +93,6 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .deleteGiven(DatabaseTestDto.class, databaseTestClient.deleteV4(), RunningParameter.key(FORBIDDEN_KEY))
                 .deleteGiven(CredentialTestDto.class, credentialTestClient.deleteV4(), RunningParameter.key(FORBIDDEN_KEY))
                 .deleteGiven(EnvironmentTestDto.class, environmentTestClient.deleteV4(), RunningParameter.key(FORBIDDEN_KEY))
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "there is an environment with a attached shared resources and a running cluster that is using these resources",
-            when = "the detach resources from environment endpoint is called",
-            then = "the resources should not be detached from the environment")
-    public void testCreateWlClusterDetachFails(MockedTestContext testContext) {
-        createEnvWithResources(testContext);
-        testContext
-                .given(ClusterTestDto.class)
-                .given(StackTestDto.class)
-                .withEnvironment(EnvironmentTestDto.class)
-                .withCluster(
-                        setResources(
-                                testContext,
-                                testContext.get(DatabaseTestDto.class).getName(),
-                                testContext.get(LdapTestDto.class).getName(),
-                                testContext.get(ProxyTestDto.class).getName()
-                        )
-                )
-                .when(stackTestClient.createV4())
-                .await(STACK_AVAILABLE)
-                .given(EnvironmentTestDto.class)
-                .withLdapConfigs(getLdapAsList(testContext))
-                .withProxyConfigs(getProxyAsList(testContext))
-                .when(environmentTestClient.detachV4(), RunningParameter.key(FORBIDDEN_KEY))
-                .expect(BadRequestException.class, RunningParameter.key(FORBIDDEN_KEY))
                 .validate();
     }
 
@@ -269,10 +178,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
 
     private void createEnvWithResources(TestContext testContext) {
         testContext.given(EnvironmentTestDto.class)
-                .withLdapConfigs(createDefaultLdapConfig(testContext))
-                .withProxyConfigs(createDefaultProxyConfig(testContext))
                 .when(environmentTestClient.createV4());
-        createDefaultRdsConfig(testContext);
     }
 
     private void checkCredentialAttachedToCluster(TestContext testContext) {
@@ -281,14 +187,6 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .when(stackTestClient.getV4())
                 .then(EnvironmentClusterTest::checkNewCredentialInStack)
                 .validate();
-    }
-
-    private Set<String> getProxyAsList(TestContext testContext) {
-        return new HashSet<>(Collections.singletonList(testContext.get(ProxyTestDto.class).getName()));
-    }
-
-    private Set<String> getLdapAsList(TestContext testContext) {
-        return new HashSet<>(Collections.singletonList(testContext.get(LdapTestDto.class).getName()));
     }
 
     private ClusterTestDto setResources(TestContext testContext, String rdsName, String ldapName, String proxyName) {
@@ -314,29 +212,6 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
             throw new TestFailException("Credential is not attached to cluster");
         }
         return stack;
-    }
-
-<<<<<<< HEAD
-    static EnvironmentTestDto checkEnvHasNoLdap(TestContext testContext, EnvironmentTestDto environment, CloudbreakClient cloudbreakClient) {
-        Set<LdapV4Response> ldapV4ResponseSet = environment.getResponse().getLdaps();
-        if (!ldapV4ResponseSet.isEmpty()) {
-            throw new TestFailException("Environment has attached ldap");
-=======
-    static EnvironmentTestDto checkEnvHasNoRds(TestContext testContext, EnvironmentTestDto environment, CloudbreakClient cloudbreakClient) {
-        Set<DatabaseV4Response> rdsConfigResponseSet = environment.getResponse().getDatabases();
-        if (!rdsConfigResponseSet.isEmpty()) {
-            throw new TestFailException("Environment has attached rds");
->>>>>>> CB-1516 eliminate relation between Environment and LDAP
-        }
-        return environment;
-    }
-
-    private static EnvironmentTestDto checkEnvHasNoProxy(TestContext testContext, EnvironmentTestDto environment, CloudbreakClient cloudbreakClient) {
-        Set<ProxyV4Response> proxyV4ResponseSet = environment.getResponse().getProxies();
-        if (!proxyV4ResponseSet.isEmpty()) {
-            throw new TestFailException("Environment has attached proxy");
-        }
-        return environment;
     }
 
     private static EnvironmentTestDto checkNewCredentialAttachedToEnv(

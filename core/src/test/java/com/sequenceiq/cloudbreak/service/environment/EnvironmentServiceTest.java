@@ -177,7 +177,6 @@ public class EnvironmentServiceTest {
         workspace.setId(WORKSPACE_ID);
         workspace.setName("ws");
         when(rdsConfigService.findByNamesInWorkspace(anySet(), anyLong())).thenReturn(Collections.emptySet());
-        when(proxyConfigService.findByNamesInWorkspace(anySet(), anyLong())).thenReturn(Collections.emptySet());
         when(environmentCreationValidator.validate(any(), any(), any())).thenReturn(ValidationResult.builder().build());
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(new CloudbreakUser("", "", "", "", ""));

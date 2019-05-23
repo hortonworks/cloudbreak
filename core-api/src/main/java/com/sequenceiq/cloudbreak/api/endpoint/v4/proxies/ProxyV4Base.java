@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.proxies;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -48,9 +45,6 @@ public abstract class ProxyV4Base implements JsonEntity {
     @ApiModelProperty(value = ProxyConfigModelDescription.PROTOCOL, required = true)
     private String protocol;
 
-    @ApiModelProperty(ModelDescriptions.ENVIRONMENTS)
-    private Set<String> environments = new HashSet<>();
-
     public String getName() {
         return name;
     }
@@ -89,13 +83,5 @@ public abstract class ProxyV4Base implements JsonEntity {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public Set<String> getEnvironments() {
-        return environments;
-    }
-
-    public void setEnvironments(Set<String> environments) {
-        this.environments = environments == null ? new HashSet<>() : environments;
     }
 }

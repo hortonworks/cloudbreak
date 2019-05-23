@@ -213,7 +213,6 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
 
     private Environment initEnvironment(EnvironmentV4Request request, @Nonnull Long workspaceId) {
         Environment environment = conversionService.convert(request, Environment.class);
-        environment.setProxyConfigs(proxyConfigService.findByNamesInWorkspace(request.getProxies(), workspaceId));
         Credential credential = environmentCredentialOperationService.getCredentialFromRequest(request, workspaceId);
         environment.setCredential(credential);
         environment.setCloudPlatform(credential.cloudPlatform());

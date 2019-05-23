@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedE
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.EnvironmentNetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.LocationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.ServiceDescriptorV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -48,11 +47,6 @@ public class EnvironmentToDetailedEnvironmentV4ResponseConverter extends Abstrac
         response.setCloudPlatform(source.getCloudPlatform());
         response.setCredentialName(source.getCredential().getName());
         response.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceV4Response.class));
-        response.setProxies(
-                source.getProxyConfigs()
-                        .stream()
-                        .map(proxyConfig -> getConversionService().convert(proxyConfig, ProxyV4Response.class))
-                        .collect(Collectors.toSet()));
         response.setWorkloadClusters(
                 source.getStacks()
                         .stream()

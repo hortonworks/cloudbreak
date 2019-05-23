@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.validation.environment;
 
+import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -12,8 +14,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.RegisterDa
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
+import com.sequenceiq.cloudbreak.domain.LdapConfig;
+import com.sequenceiq.cloudbreak.domain.ProxyConfig;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
-import com.sequenceiq.cloudbreak.domain.environment.EnvironmentAwareResource;
 import com.sequenceiq.cloudbreak.domain.environment.Region;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
@@ -22,6 +27,7 @@ import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 
 @Component
 public class ClusterCreationEnvironmentValidator {
@@ -47,8 +53,27 @@ public class ClusterCreationEnvironmentValidator {
         }
         Long workspaceId = stack.getWorkspace().getId();
 
-        validateLdapConfig(clusterRequest.getLdapName(), resultBuilder, workspaceId);
-        validateProxyConfig(workspaceId, clusterRequest, stackEnv, resultBuilder);
+        validateConfigByName(
+                clusterRequest.getLdapName(),
+                workspaceId,
+                resultBuilder,
+                ldapConfigService::getByNameForWorkspaceId,
+                LdapConfig.class.getSimpleName());
+
+        validateConfigByName(
+                clusterRequest.getProxyName(),
+                workspaceId,
+                resultBuilder,
+                proxyConfigService::getByNameForWorkspaceId,
+                ProxyConfig.class.getSimpleName());
+
+        validateConfigByName(
+                clusterRequest.getKerberosName(),
+                workspaceId,
+                resultBuilder,
+                kerberosConfigService::getByNameForWorkspaceId,
+                KerberosConfig.class.getSimpleName());
+        validateRdsConfigNames(clusterRequest.getDatabases(), resultBuilder, workspaceId);
         return resultBuilder.build();
     }
 
@@ -59,43 +84,51 @@ public class ClusterCreationEnvironmentValidator {
             resultBuilder.error("Only one external datalake can be registered to an environment!");
         }
 
-        validateLdapConfig(registerDatalakeRequest.getLdapName(), resultBuilder, workspaceId);
-        //TODO other resources RDS, Kerberos, Proxy
+        validateConfigByName(
+                registerDatalakeRequest.getLdapName(),
+                workspaceId,
+                resultBuilder,
+                ldapConfigService::getByNameForWorkspaceId,
+                LdapConfig.class.getSimpleName());
+
+        validateConfigByName(
+                registerDatalakeRequest.getKerberosName(),
+                workspaceId,
+                resultBuilder,
+                kerberosConfigService::getByNameForWorkspaceId,
+                KerberosConfig.class.getSimpleName());
+
+        validateRdsConfigNames(registerDatalakeRequest.getDatabaseNames(), resultBuilder, workspaceId);
         return resultBuilder.build();
     }
 
-    private void validateLdapConfig(String ldapConfigName, ValidationResultBuilder resultBuilder, Long workspaceId) {
-        try {
-            ldapConfigService.getByNameForWorkspaceId(ldapConfigName, workspaceId);
-        } catch (NotFoundException nfe) {
-            resultBuilder.error(String.format("Stack cannot use %s LdapConfig resource which doesn't exist in the same workspace.", ldapConfigName));
-        }
-    }
+    private void validateConfigByName(
+            String configName, Long workspaceId,
+            ValidationResultBuilder resultBuilder,
+            BiFunction<String, Long, ? extends WorkspaceAwareResource> repositoryCall,
+            String resourceTypeName) {
 
-    private void validateProxyConfig(Long workspaceId, ClusterV4Request request, EnvironmentView stackEnv, ValidationResultBuilder resultBuilder) {
-        if (StringUtils.isNotBlank(request.getProxyName())) {
-            validateEnvironmentAwareResource(proxyConfigService.getByNameForWorkspaceId(request.getProxyName(), workspaceId), stackEnv, resultBuilder);
-        }
-    }
-
-    private <T extends EnvironmentAwareResource> void validateEnvironmentAwareResource(T resource,
-            EnvironmentView stackEnv, ValidationResultBuilder resultBuilder) {
-        if (stackEnv == null) {
-            if (!CollectionUtils.isEmpty(resource.getEnvironments())) {
-                resultBuilder.error(String.format("Stack without environment cannot use %s %s resource which attached to an environment.",
-                        resource.getName(), resource.getClass().getSimpleName()));
+        if (StringUtils.isNoneEmpty(configName)) {
+            try {
+                repositoryCall.apply(configName, workspaceId);
+            } catch (NotFoundException nfe) {
+                resultBuilder.error(String.format("Stack cannot use '%s' %s resource which doesn't exist in the same workspace.", configName, resourceTypeName));
             }
-        } else {
-            validateEnvironmentAwareResource(resource, stackEnv.getName(), resultBuilder);
         }
     }
 
-    private <T extends EnvironmentAwareResource> void validateEnvironmentAwareResource(T resource,
-            String environemntName, ValidationResultBuilder resultBuilder) {
-        if (!CollectionUtils.isEmpty(resource.getEnvironments())
-                && resource.getEnvironments().stream().noneMatch(resEnv -> resEnv.getName().equals(environemntName))) {
-            resultBuilder.error(String.format("Stack cannot use %s %s resource which is not attached to %s environment and not global.",
-                    resource.getName(), resource.getClass().getSimpleName(), environemntName));
+    private void validateRdsConfigNames(Set<String> rdsConfigNames, ValidationResultBuilder resultBuilder, Long workspaceId) {
+        if (!rdsConfigNames.isEmpty()) {
+            Set<String> foundDatabaseNames = rdsConfigService.getByNamesForWorkspaceId(rdsConfigNames, workspaceId).stream()
+                    .map(RDSConfig::getName)
+                    .collect(Collectors.toSet());
+
+            rdsConfigNames
+                    .stream()
+                    .filter(dbName -> !foundDatabaseNames.contains(dbName))
+                    .forEach(dbName -> {
+                        resultBuilder.error(String.format("Stack cannot use '%s' Database resource which doesn't exist in the same workspace.", dbName));
+                    });
         }
     }
 }

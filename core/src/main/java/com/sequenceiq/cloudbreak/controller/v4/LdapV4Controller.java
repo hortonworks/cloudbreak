@@ -8,8 +8,6 @@ import javax.transaction.Transactional.TxType;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.LdapConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapTestV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapV4Request;
@@ -20,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
+import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -78,15 +77,5 @@ public class LdapV4Controller extends NotificationController implements LdapConf
     public LdapV4Request getRequest(Long workspaceId, String name) {
         LdapConfig ldapConfig = ldapConfigService.getByNameForWorkspaceId(name, workspaceId);
         return converterUtil.convert(ldapConfig, LdapV4Request.class);
-    }
-
-    @Override
-    public LdapV4Response attach(Long workspaceId, String name, EnvironmentNames environmentNames) {
-        throw new UnsupportedOperationException("Attaching LDAP config to environment is not supported anymore!");
-    }
-
-    @Override
-    public LdapV4Response detach(Long workspaceId, String name, EnvironmentNames environmentNames) {
-        throw new UnsupportedOperationException("Attaching LDAP config to environment is not supported anymore!");
     }
 }
