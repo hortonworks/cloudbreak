@@ -14,7 +14,7 @@ import com.sequenceiq.datalake.api.endpoint.sdx.SdxClusterResponse;
 import com.sequenceiq.datalake.api.endpoint.sdx.SdxEndpoint;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.SdxService;
-import com.sequenceiq.datalake.util.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.auth.RestRequestThreadLocalService;
 
 @Controller
 public class SdxController implements SdxEndpoint {

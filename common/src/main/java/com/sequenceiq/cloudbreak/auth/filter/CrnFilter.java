@@ -1,4 +1,4 @@
-package com.sequenceiq.datalake.filter;
+package com.sequenceiq.cloudbreak.auth.filter;
 
 import java.io.IOException;
 
@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.sequenceiq.datalake.util.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.auth.RestRequestThreadLocalService;
 
 public class CrnFilter extends OncePerRequestFilter {
 

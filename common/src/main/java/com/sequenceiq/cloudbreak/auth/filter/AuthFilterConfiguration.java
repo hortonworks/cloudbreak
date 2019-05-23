@@ -1,4 +1,4 @@
-package com.sequenceiq.datalake.filter;
+package com.sequenceiq.cloudbreak.auth.filter;
 
 import javax.inject.Inject;
 
@@ -6,11 +6,10 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.sequenceiq.datalake.util.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.auth.RestRequestThreadLocalService;
 
 @Configuration
-public class FilterConfiguration {
-
+public class AuthFilterConfiguration {
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
@@ -19,8 +18,7 @@ public class FilterConfiguration {
         FilterRegistrationBean<CrnFilter> registrationBean = new FilterRegistrationBean<>();
         CrnFilter filter = new CrnFilter(restRequestThreadLocalService);
         registrationBean.setFilter(filter);
-            registrationBean.setOrder(Integer.MAX_VALUE);
+        registrationBean.setOrder(Integer.MAX_VALUE);
         return registrationBean;
     }
-
 }

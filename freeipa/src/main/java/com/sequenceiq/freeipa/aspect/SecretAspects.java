@@ -15,25 +15,24 @@ import com.sequenceiq.cloudbreak.service.secret.service.SecretAspectService;
 @Component
 @Aspect
 public class SecretAspects {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(SecretAspects.class);
 
     @Inject
     private SecretAspectService secretAspectService;
 
-    @Pointcut("execution(public * com.sequenceiq.freeipa.repository..*.save(..)) ")
+    @Pointcut("execution(public * com.sequenceiq.freeipa.**.*Repository.save(..)) ")
     public void onRepositorySave() {
     }
 
-    @Pointcut("execution(public void com.sequenceiq.freeipa.repository..*.delete(..)) ")
+    @Pointcut("execution(public void com.sequenceiq.freeipa.**.*Repository.delete(..)) ")
     public void onRepositoryDelete() {
     }
 
-    @Pointcut("execution(public * com.sequenceiq.freeipa.repository..*.saveAll(..)) ")
+    @Pointcut("execution(public * com.sequenceiq.freeipa.**.*Repository.saveAll(..)) ")
     public void onRepositorySaveAll() {
     }
 
-    @Pointcut("execution(public void com.sequenceiq.freeipa.repository..*.deleteAll(..)) ")
+    @Pointcut("execution(public void com.sequenceiq.freeipa.**.*Repository.deleteAll(..)) ")
     public void onRepositoryDeleteAll() {
     }
 

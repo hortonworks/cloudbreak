@@ -35,3 +35,17 @@ dependencies {
   testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junitJupiterVersion
   testRuntime group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitJupiterVersion
 }
+
+task testJar(type: Jar, dependsOn: testClasses) {
+  baseName = "test-${project.archivesBaseName}"
+  from sourceSets.test.output
+  from sourceSets.main.output
+}
+
+configurations {
+  tests
+}
+
+artifacts {
+  tests testJar
+}

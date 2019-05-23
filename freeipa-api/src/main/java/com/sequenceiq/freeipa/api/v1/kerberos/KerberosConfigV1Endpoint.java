@@ -8,6 +8,7 @@ import static com.sequenceiq.freeipa.api.v1.kerberos.doc.KerberosConfigOperation
 import static com.sequenceiq.freeipa.api.v1.kerberos.doc.KerberosConfigOperationDescription.KERBEROS_CONFIG_V4_DESCRIPTION;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -32,7 +33,7 @@ public interface KerberosConfigV1Endpoint {
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DESCRIBE_FOR_ENVIRONMENT, produces = ContentType.JSON, notes = KERBEROS_CONFIG_NOTES, nickname = "getKerberosConfigForEnvironment")
-    DescribeKerberosConfigResponse describe(@QueryParam("environment") String environmentId);
+    DescribeKerberosConfigResponse describe(@QueryParam("environmentId") @NotEmpty String environmentId);
 
     @POST
     @Path("")
@@ -44,11 +45,11 @@ public interface KerberosConfigV1Endpoint {
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DELETE_BY_ENVIRONMENT, produces = ContentType.JSON, notes = KERBEROS_CONFIG_NOTES, nickname = "deleteKerberosConfigForEnvironment")
-    void delete(@QueryParam("environment") String environmentId);
+    void delete(@QueryParam("environmentId") @NotEmpty String environmentId);
 
     @GET
     @Path("request")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = GET_REQUEST, produces = ContentType.JSON, notes = KERBEROS_CONFIG_NOTES, nickname = "getCreateKerberosRequestForEnvironment")
-    CreateKerberosConfigRequest getRequest(@QueryParam("environment") String environmentId);
+    CreateKerberosConfigRequest getRequest(@QueryParam("environmentId") @NotEmpty String environmentId);
 }

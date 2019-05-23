@@ -122,7 +122,8 @@ public class Crn {
         VALIDATIONPORTAL("validationportal", NON_ADMIN_SERVICE),
         DSADMIN("dsadmin", ADMIN_SERVICE),
         SAMPLE("sample", NON_ADMIN_SERVICE),
-        WORKSPACES("workspaces", NON_ADMIN_SERVICE);
+        WORKSPACES("workspaces", NON_ADMIN_SERVICE),
+        FREEIPA("freeipa", NON_ADMIN_SERVICE);
 
         private static final ImmutableMap<String, Service> FROM_STRING;
         static {
@@ -229,7 +230,9 @@ public class Crn {
         SAML_PROVIDER("samlProvider"),
         WORKSPACE("workspace"),
         DATABASE("database"),
-        CREDENTIAL("credential");
+        CREDENTIAL("credential"),
+        LDAP("ldap"),
+        KERBEROS("kerberos");
 
         private static final ImmutableMap<String, ResourceType> FROM_STRING;
         static {

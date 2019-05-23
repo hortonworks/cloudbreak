@@ -1,4 +1,4 @@
-package com.sequenceiq.datalake.util;
+package com.sequenceiq.cloudbreak.auth;
 
 import org.springframework.stereotype.Service;
 
@@ -18,5 +18,4 @@ public class RestRequestThreadLocalService {
     public void removeUserCrn() {
         USER_CRN.remove();
     }
-
 }
