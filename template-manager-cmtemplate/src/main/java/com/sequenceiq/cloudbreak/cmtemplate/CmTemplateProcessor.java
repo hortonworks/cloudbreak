@@ -2,12 +2,12 @@ package com.sequenceiq.cloudbreak.cmtemplate;
 
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiClusterTemplateClusterSpec;
@@ -34,10 +35,12 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
 import com.cloudera.api.swagger.model.ApiConfigureForKerberosArguments;
 import com.cloudera.api.swagger.model.ApiDataContextRef;
 import com.cloudera.api.swagger.model.ApiProductVersion;
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.ClusterManagerType;
 import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfigurations;
@@ -72,8 +75,7 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
 
     @Override
     public boolean isComponentExistsInHostGroup(String component, String hostGroup) {
-        Set<String> componentsInHostGroup = getComponentsInHostGroup(hostGroup);
-        return componentsInHostGroup.stream().anyMatch(component::equals);
+        return getComponentsInHostGroup(hostGroup).contains(component);
     }
 
     @Override
@@ -82,8 +84,11 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     }
 
     @Override
-    public Set<String> getHostGroupsWithComponent(String components) {
-        throw new NotImplementedException("");
+    public Set<String> getHostGroupsWithComponent(String component) {
+        return getComponentsByHostGroup().entrySet().stream()
+                .filter(e -> e.getValue().contains(component))
+                .map(Map.Entry::getKey)
+                .collect(toSet());
     }
 
     @Override
@@ -102,19 +107,8 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     }
 
     @Override
-    public Set<String> getComponentsInHostGroup(String hostGroup) {
-        Set<String> roleConfigRefNamesInHostTemplate = cmTemplate.getHostTemplates().stream()
-                .filter(hostTemplate -> hostTemplate.getRefName().equals(hostGroup))
-                .map(ApiClusterTemplateHostTemplate::getRoleConfigGroupsRefNames)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
-        return cmTemplate.getServices().stream()
-                .map(ApiClusterTemplateService::getRoleConfigGroups)
-                .filter(Objects::nonNull)
-                .flatMap(Collection::stream)
-                .filter(roleConfigGroup -> roleConfigRefNamesInHostTemplate.contains(roleConfigGroup.getRefName()))
-                .map(ApiClusterTemplateRoleConfigGroup::getRoleType)
-                .collect(Collectors.toSet());
+    public Set<String> getComponentsInHostGroup(String name) {
+        return getComponentsByHostGroup().getOrDefault(name, Set.of());
     }
 
     @Override
@@ -122,15 +116,36 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         throw new NotImplementedException("");
     }
 
-    @Override
-    public Map<String, Set<String>> getComponentsByHostGroup() {
-        Map<String, Set<String>> result = new HashMap<>();
+    public Map<String, Set<ServiceComponent>> getServiceComponentsByHostGroup() {
+        Map<String, ServiceComponent> rolesByRoleRef = mapRoleRefsToServiceComponents();
+
+        Map<String, Set<ServiceComponent>> result = new HashMap<>();
         List<ApiClusterTemplateHostTemplate> hostTemplates = Optional.ofNullable(cmTemplate.getHostTemplates()).orElse(List.of());
         for (ApiClusterTemplateHostTemplate apiClusterTemplateHostTemplate : hostTemplates) {
-            Set<String> componentNames = new HashSet<>(apiClusterTemplateHostTemplate.getRoleConfigGroupsRefNames());
-            result.put(apiClusterTemplateHostTemplate.getRefName(), componentNames);
+            Set<ServiceComponent> components = apiClusterTemplateHostTemplate.getRoleConfigGroupsRefNames().stream()
+                    .map(rolesByRoleRef::get)
+                    .filter(Objects::nonNull)
+                    .collect(toSet());
+            result.put(apiClusterTemplateHostTemplate.getRefName(), components);
         }
         return result;
+    }
+
+    @Override
+    public Map<String, Set<String>> getComponentsByHostGroup() {
+        return getServiceComponentsByHostGroup().entrySet().stream()
+                .collect(toMap(
+                        Map.Entry::getKey,
+                        e -> e.getValue().stream()
+                                .map(ServiceComponent::getComponent)
+                                .collect(toSet())
+                ));
+    }
+
+    public Set<ServiceComponent> getAllComponents() {
+        return getServiceComponentsByHostGroup().entrySet().stream()
+                .flatMap(entry -> entry.getValue().stream())
+                .collect(toSet());
     }
 
     public void addInstantiator(ClouderaManagerRepo clouderaManagerRepoDetails, TemplatePreparationObject templatePreparationObject, String sdxContextName) {
@@ -287,6 +302,17 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
 
     public void setServices(List<ApiClusterTemplateService> services) {
         cmTemplate.setServices(services);
+    }
+
+    @VisibleForTesting
+    Map<String, ServiceComponent> mapRoleRefsToServiceComponents() {
+        return Optional.ofNullable(cmTemplate.getServices()).orElse(List.of()).stream()
+                .filter(service -> service.getRoleConfigGroups() != null)
+                .flatMap(service -> service.getRoleConfigGroups().stream().map(rcg -> Pair.of(service.getServiceType(), rcg)))
+                .collect(toMap(
+                        pair -> pair.getRight().getRefName(),
+                        pair -> ServiceComponent.of(pair.getLeft(), pair.getRight().getRoleType())
+                ));
     }
 
 }

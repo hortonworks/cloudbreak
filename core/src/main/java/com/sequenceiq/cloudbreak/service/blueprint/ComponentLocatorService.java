@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.blueprint;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,7 +52,7 @@ public class ComponentLocatorService {
         BlueprintTextProcessor processor = isAmbariBlueprint(cluster) ? ambariBlueprintProcessorFactory.get(blueprintText)
                 : cmTemplateProcessorFactory.get(blueprintText);
         for (HostGroup hg : hostGroupService.getByCluster(cluster.getId())) {
-            Set<String> hgComponents = processor.getComponentsInHostGroup(hg.getName());
+            Set<String> hgComponents = new HashSet<>(processor.getComponentsInHostGroup(hg.getName()));
             hgComponents.retainAll(componentNames);
             fillList(fqdn, result, hg, hgComponents);
         }
@@ -66,7 +67,7 @@ public class ComponentLocatorService {
             Collection<String> componentNames, Function<InstanceMetaData, String> fqdn) {
         Map<String, List<String>> result = new HashMap<>();
         for (HostGroup hg : hostGroupService.getByCluster(clusterId)) {
-            Set<String> hgComponents = blueprintTextProcessor.getComponentsInHostGroup(hg.getName());
+            Set<String> hgComponents = new HashSet<>(blueprintTextProcessor.getComponentsInHostGroup(hg.getName()));
             hgComponents.retainAll(componentNames);
             fillList(fqdn, result, hg, hgComponents);
         }
