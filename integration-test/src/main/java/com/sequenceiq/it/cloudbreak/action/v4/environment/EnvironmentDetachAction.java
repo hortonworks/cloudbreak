@@ -14,7 +14,6 @@ public class EnvironmentDetachAction implements Action<EnvironmentTestDto> {
         EnvironmentDetachV4Request environmentDetachV4Request = new EnvironmentDetachV4Request();
         environmentDetachV4Request.setLdaps(testDto.getRequest().getLdaps());
         environmentDetachV4Request.setProxies(testDto.getRequest().getProxies());
-        environmentDetachV4Request.setDatabases(testDto.getRequest().getDatabases());
         testDto.setResponse(
                 cloudbreakClient.getCloudbreakClient()
                         .environmentV4Endpoint()

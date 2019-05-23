@@ -41,7 +41,6 @@ public class EnvironmentTest {
 
         assertNull(underTest.getLdapConfigs());
         assertNull(underTest.getProxyConfigs());
-        assertNull(underTest.getRdsConfigs());
         assertEquals(credential, underTest.getCredential());
         assertEquals(workspace, underTest.getWorkspace());
     }

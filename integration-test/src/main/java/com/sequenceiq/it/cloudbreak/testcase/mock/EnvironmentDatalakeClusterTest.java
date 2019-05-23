@@ -78,7 +78,6 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         testContext.given(EnvironmentTestDto.class)
                 .withRegions(VALID_REGION)
                 .withLocation(VALID_LOCATION)
-                .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
                 .when(environmentTestClient.createV4())
                 .given(ClusterTestDto.class).valid()
@@ -97,12 +96,10 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
                 .given(EnvironmentTestDto.class)
                 .withName(testContext.get(EnvironmentTestDto.class).getName())
-                .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
 
                 .when(environmentTestClient.detachV4())
                 .when(environmentTestClient.getV4())
-                .then(EnvironmentClusterTest::checkEnvHasNoRds)
                 .then(EnvironmentClusterTest::checkEnvHasNoLdap)
                 .validate();
     }
@@ -120,7 +117,6 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         testContext.given(EnvironmentTestDto.class)
                 .withRegions(VALID_REGION)
                 .withLocation(VALID_LOCATION)
-                .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
                 .when(environmentTestClient.createV4())
                 .given(ClusterTestDto.class).valid()
@@ -148,7 +144,6 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         String rangerdb = resourcePropertyProvider().getName();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentTestDto.class)
-                .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
                 .when(environmentTestClient.createV4())
                 .validate();
@@ -167,7 +162,6 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         String rangerdb = resourcePropertyProvider().getName();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentTestDto.class)
-                .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
                 .when(environmentTestClient.createV4())
                 .validate();
@@ -194,13 +188,11 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         String rangerdb = resourcePropertyProvider().getName();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentTestDto.class)
-                .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
                 .when(environmentTestClient.createV4())
                 .validate();
         createDatalake(testContext, rdsList);
         testContext.given(EnvironmentTestDto.class)
-                .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
                 .when(environmentTestClient.detachV4(), RunningParameter.key(forbiddenKey))
                 .expect(BadRequestException.class, RunningParameter.key(forbiddenKey))
@@ -218,7 +210,6 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         String rangerdb = resourcePropertyProvider().getName();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentTestDto.class)
-                .withRdsConfigs(rdsList)
                 .withLdapConfigs(getLdapAsList(testContext))
                 .when(environmentTestClient.createV4())
                 .given("placement", PlacementSettingsTestDto.class)

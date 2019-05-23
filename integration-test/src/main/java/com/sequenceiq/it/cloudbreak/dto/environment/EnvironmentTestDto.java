@@ -96,11 +96,6 @@ public class EnvironmentTestDto extends DeletableTestDto<EnvironmentV4Request, D
         return this;
     }
 
-    public EnvironmentTestDto withRdsConfigs(Set<String> rds) {
-        getRequest().setDatabases(rds);
-        return this;
-    }
-
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
         LOGGER.info("Cleaning up resource with name: {}", getName());

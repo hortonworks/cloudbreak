@@ -8,8 +8,6 @@ import javax.transaction.Transactional.TxType;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseTestV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
@@ -20,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -34,7 +33,7 @@ public class DatabaseV4Controller extends NotificationController implements Data
 
     @Override
     public DatabaseV4Responses list(Long workspaceId, String environment, Boolean attachGlobal) {
-        Set<RDSConfig> allInWorkspaceAndEnvironment = databaseService.findAllInWorkspaceAndEnvironment(workspaceId, environment, attachGlobal);
+        Set<RDSConfig> allInWorkspaceAndEnvironment = databaseService.findAllByWorkspaceId(workspaceId);
         return new DatabaseV4Responses(converterUtil.convertAllAsSet(allInWorkspaceAndEnvironment, DatabaseV4Response.class));
     }
 
@@ -46,7 +45,7 @@ public class DatabaseV4Controller extends NotificationController implements Data
 
     @Override
     public DatabaseV4Response create(Long workspaceId, DatabaseV4Request request) {
-        RDSConfig database = databaseService.createInEnvironment(converterUtil.convert(request, RDSConfig.class), request.getEnvironments(), workspaceId);
+        RDSConfig database = databaseService.createForLoggedInUser(converterUtil.convert(request, RDSConfig.class), workspaceId);
         notify(ResourceEvent.RDS_CONFIG_CREATED);
         return converterUtil.convert(database, DatabaseV4Response.class);
     }
@@ -76,15 +75,5 @@ public class DatabaseV4Controller extends NotificationController implements Data
     public DatabaseV4Request getRequest(Long workspaceId, String name) {
         RDSConfig database = databaseService.getByNameForWorkspaceId(name, workspaceId);
         return converterUtil.convert(database, DatabaseV4Request.class);
-    }
-
-    @Override
-    public DatabaseV4Response attach(Long workspaceId, String name, EnvironmentNames environmentNames) {
-        return databaseService.attachToEnvironmentsAndConvert(name, environmentNames.getEnvironmentNames(), workspaceId, DatabaseV4Response.class);
-    }
-
-    @Override
-    public DatabaseV4Response detach(Long workspaceId, String name, EnvironmentNames environmentNames) {
-        return databaseService.detachFromEnvironmentsAndConvert(name, environmentNames.getEnvironmentNames(), workspaceId, DatabaseV4Response.class);
     }
 }

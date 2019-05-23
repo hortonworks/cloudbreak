@@ -36,8 +36,8 @@ import com.sequenceiq.it.cloudbreak.mock.ambari.AmbariClusterRequestResponse;
 import com.sequenceiq.it.cloudbreak.mock.ambari.AmbariGetHostComponentsReponse;
 import com.sequenceiq.it.cloudbreak.mock.ambari.AmbariGetServiceComponentInfoResponse;
 import com.sequenceiq.it.cloudbreak.mock.ambari.EmptyAmbariResponse;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
+import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
 public class RepairTest extends AbstractIntegrationTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(RepairTest.class);
@@ -86,10 +86,10 @@ public class RepairTest extends AbstractIntegrationTest {
             when = "repair the master node on the cluster",
             then = "after the process the master has to be available")
     public void testRepairMasterNodeNoKerberos(MockedTestContext testContext) {
-        String clusterName = resourcePropertyProvider().getName();
         String ambariRdsName = resourcePropertyProvider().getName();
+        String clusterName = resourcePropertyProvider().getName();
         String hostnameKey = resourcePropertyProvider().getName();
-        createEnvWithResources(testContext, ambariRdsName);
+        createEnvWithResources(testContext);
         addAmbariMocks(testContext, clusterName);
         testContext
                 .given(StackTestDto.class)
@@ -139,7 +139,7 @@ public class RepairTest extends AbstractIntegrationTest {
             then = "after the process the master has to be available")
     public void testRepairMasterNodeWithKerberos(MockedTestContext testContext) {
         String ambariRdsName = resourcePropertyProvider().getName();
-        createEnvWithResources(testContext, ambariRdsName);
+        createEnvWithResources(testContext);
         KerberosV4Request kerberosRequest = getKerberosRequest();
         String clusterName = resourcePropertyProvider().getName();
         addAmbariMocks(testContext, clusterName);
@@ -188,9 +188,8 @@ public class RepairTest extends AbstractIntegrationTest {
         stackEntity.then(mockVerification);
     }
 
-    private void createEnvWithResources(MockedTestContext testContext, String ambariRdsName) {
+    private void createEnvWithResources(MockedTestContext testContext) {
         testContext.given(EnvironmentTestDto.class)
-                .withRdsConfigs(createAmbariRdsConfig(testContext, ambariRdsName))
                 .withLdapConfigs(createDefaultLdapConfig(testContext))
                 .withProxyConfigs(createDefaultProxyConfig(testContext))
                 .when(environmentTestClient.createV4());

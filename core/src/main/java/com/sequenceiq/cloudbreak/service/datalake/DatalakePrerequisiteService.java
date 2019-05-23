@@ -124,7 +124,7 @@ public class DatalakePrerequisiteService {
         Set<RDSConfig> rdsConfigSet = new HashSet<>();
         for (DatabaseV4Request rdsConfigRequest : datalakePrerequisiteV4Request.getDatabases()) {
             RDSConfig rdsConfig = prepareRdsConfig(environment, rdsConfigRequest);
-            rdsConfigSet.add(rdsConfigService.createInEnvironment(rdsConfig, Set.of(environment), workspaceId));
+            rdsConfigSet.add(rdsConfigService.createForLoggedInUser(rdsConfig, workspaceId));
         }
         return rdsConfigSet;
     }

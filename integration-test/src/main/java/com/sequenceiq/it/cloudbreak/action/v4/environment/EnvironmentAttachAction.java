@@ -14,8 +14,6 @@ public class EnvironmentAttachAction implements Action<EnvironmentTestDto> {
         EnvironmentAttachV4Request environmentAttachV4Request = new EnvironmentAttachV4Request();
         environmentAttachV4Request.setLdaps(testDto.getRequest().getLdaps());
         environmentAttachV4Request.setProxies(testDto.getRequest().getProxies());
-        environmentAttachV4Request.setDatabases(testDto.getRequest().getDatabases());
-
         testDto.setResponse(
                 cloudbreakClient.getCloudbreakClient()
                         .environmentV4Endpoint()

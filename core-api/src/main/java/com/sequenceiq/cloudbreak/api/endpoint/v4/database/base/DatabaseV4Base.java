@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.database.base;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -40,9 +37,6 @@ public abstract class DatabaseV4Base implements JsonEntity {
 
     @ApiModelProperty(Database.CONNECTOR_JAR_URL)
     private String connectorJarUrl;
-
-    @ApiModelProperty(ModelDescriptions.ENVIRONMENTS)
-    private Set<String> environments = new HashSet<>();
 
     public String getConnectionURL() {
         return connectionURL;
@@ -82,13 +76,5 @@ public abstract class DatabaseV4Base implements JsonEntity {
 
     public void setConnectorJarUrl(String connectorJarUrl) {
         this.connectorJarUrl = connectorJarUrl;
-    }
-
-    public Set<String> getEnvironments() {
-        return environments;
-    }
-
-    public void setEnvironments(Set<String> environments) {
-        this.environments = environments == null ? new HashSet<>() : environments;
     }
 }
