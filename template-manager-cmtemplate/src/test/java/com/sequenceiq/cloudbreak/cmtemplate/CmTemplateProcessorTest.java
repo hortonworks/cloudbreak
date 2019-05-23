@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
@@ -23,6 +26,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
+import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -193,6 +197,129 @@ public class CmTemplateProcessorTest {
         List<ApiClusterTemplateRoleConfigGroupInfo> roleConfigGroups = instantiator.getRoleConfigGroups();
 
         assertNull(roleConfigGroups);
+    }
+
+    @Test
+    public void mapRoleRefsToServiceComponents() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
+        Map<String, ServiceComponent> expected = new HashMap<>();
+        expected.put("hbase-MASTER-BASE", ServiceComponent.of("HBASE", "MASTER"));
+        expected.put("hbase-REGIONSERVER-BASE", ServiceComponent.of("HBASE", "REGIONSERVER"));
+        expected.put("hdfs-BALANCER-BASE", ServiceComponent.of("HDFS", "BALANCER"));
+        expected.put("hdfs-DATANODE-BASE", ServiceComponent.of("HDFS", "DATANODE"));
+        expected.put("hdfs-NAMENODE-BASE", ServiceComponent.of("HDFS", "NAMENODE"));
+        expected.put("hdfs-SECONDARYNAMENODE-BASE", ServiceComponent.of("HDFS", "SECONDARYNAMENODE"));
+        expected.put("hive-GATEWAY-BASE", ServiceComponent.of("HIVE", "GATEWAY"));
+        expected.put("hive-HIVEMETASTORE-BASE", ServiceComponent.of("HIVE", "HIVEMETASTORE"));
+        expected.put("hive-HIVESERVER2-BASE", ServiceComponent.of("HIVE", "HIVESERVER2"));
+        expected.put("impala-CATALOGSERVER-BASE", ServiceComponent.of("IMPALA", "CATALOGSERVER"));
+        expected.put("impala-IMPALAD-BASE", ServiceComponent.of("IMPALA", "IMPALAD"));
+        expected.put("impala-STATESTORE-BASE", ServiceComponent.of("IMPALA", "STATESTORE"));
+        expected.put("kafka-KAFKA_BROKER-BASE", ServiceComponent.of("KAFKA", "KAFKA_BROKER"));
+        expected.put("spark_on_yarn-GATEWAY-BASE", ServiceComponent.of("SPARK_ON_YARN", "GATEWAY"));
+        expected.put("spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE", ServiceComponent.of("SPARK_ON_YARN", "SPARK_YARN_HISTORY_SERVER"));
+        expected.put("yarn-JOBHISTORY-BASE", ServiceComponent.of("YARN", "JOBHISTORY"));
+        expected.put("yarn-NODEMANAGER-BASE", ServiceComponent.of("YARN", "NODEMANAGER"));
+        expected.put("yarn-RESOURCEMANAGER-BASE", ServiceComponent.of("YARN", "RESOURCEMANAGER"));
+        expected.put("zookeeper-SERVER-BASE", ServiceComponent.of("ZOOKEEPER", "SERVER"));
+
+        Map<String, ServiceComponent> actual = underTest.mapRoleRefsToServiceComponents();
+
+        assertSortedEquals(expected, actual);
+    }
+
+    @Test
+    public void testGetAllComponents() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
+        Set<ServiceComponent> expected = Set.of(
+                ServiceComponent.of("HBASE", "MASTER"),
+                ServiceComponent.of("HBASE", "REGIONSERVER"),
+                ServiceComponent.of("HDFS", "BALANCER"),
+                ServiceComponent.of("HDFS", "DATANODE"),
+                ServiceComponent.of("HDFS", "NAMENODE"),
+                ServiceComponent.of("HDFS", "SECONDARYNAMENODE"),
+                ServiceComponent.of("HIVE", "GATEWAY"),
+                ServiceComponent.of("HIVE", "HIVEMETASTORE"),
+                ServiceComponent.of("HIVE", "HIVESERVER2"),
+                ServiceComponent.of("IMPALA", "CATALOGSERVER"),
+                ServiceComponent.of("IMPALA", "IMPALAD"),
+                ServiceComponent.of("IMPALA", "STATESTORE"),
+                ServiceComponent.of("KAFKA", "KAFKA_BROKER"),
+                ServiceComponent.of("SPARK_ON_YARN", "GATEWAY"),
+                ServiceComponent.of("SPARK_ON_YARN", "SPARK_YARN_HISTORY_SERVER"),
+                ServiceComponent.of("YARN", "JOBHISTORY"),
+                ServiceComponent.of("YARN", "NODEMANAGER"),
+                ServiceComponent.of("YARN", "RESOURCEMANAGER"),
+                ServiceComponent.of("ZOOKEEPER", "SERVER")
+        );
+
+        Set<ServiceComponent> actual = underTest.getAllComponents();
+
+        assertSortedEquals(expected, actual);
+    }
+
+    @Test
+    public void testGetServiceComponentsByHostGroup() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
+        Map<String, Set<ServiceComponent>> expected = Map.of(
+                "master", Set.of(
+                        ServiceComponent.of("HBASE", "MASTER"),
+                        ServiceComponent.of("HDFS", "BALANCER"),
+                        ServiceComponent.of("HDFS", "NAMENODE"),
+                        ServiceComponent.of("HDFS", "SECONDARYNAMENODE"),
+                        ServiceComponent.of("HIVE", "GATEWAY"),
+                        ServiceComponent.of("HIVE", "HIVEMETASTORE"),
+                        ServiceComponent.of("HIVE", "HIVESERVER2"),
+                        ServiceComponent.of("IMPALA", "CATALOGSERVER"),
+                        ServiceComponent.of("IMPALA", "STATESTORE"),
+                        ServiceComponent.of("KAFKA", "KAFKA_BROKER"),
+                        ServiceComponent.of("SPARK_ON_YARN", "GATEWAY"),
+                        ServiceComponent.of("SPARK_ON_YARN", "SPARK_YARN_HISTORY_SERVER"),
+                        ServiceComponent.of("YARN", "JOBHISTORY"),
+                        ServiceComponent.of("YARN", "RESOURCEMANAGER"),
+                        ServiceComponent.of("ZOOKEEPER", "SERVER")
+                ),
+                "worker", Set.of(
+                        ServiceComponent.of("HBASE", "REGIONSERVER"),
+                        ServiceComponent.of("HDFS", "DATANODE"),
+                        ServiceComponent.of("HIVE", "GATEWAY"),
+                        ServiceComponent.of("IMPALA", "IMPALAD"),
+                        ServiceComponent.of("SPARK_ON_YARN", "GATEWAY"),
+                        ServiceComponent.of("YARN", "NODEMANAGER")
+                )
+        );
+
+        Map<String, Set<ServiceComponent>> actual = underTest.getServiceComponentsByHostGroup();
+
+        assertEquals(expected.keySet(), actual.keySet());
+        expected.keySet().forEach(k -> assertSortedEquals(expected.get(k), actual.get(k)));
+    }
+
+    @Test
+    public void testGetComponentsInHostGroup() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
+        Set<String> expected = Set.of("REGIONSERVER", "DATANODE", "GATEWAY", "IMPALAD", "NODEMANAGER");
+
+        Set<String> actual = underTest.getComponentsInHostGroup("worker");
+
+        assertSortedEquals(expected, actual);
+    }
+
+    @Test
+    public void testGetHostGroupsWithComponent() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
+        assertEquals(Set.of(), underTest.getHostGroupsWithComponent("FAKE_COMPONENT"));
+        assertEquals(Set.of("master"), underTest.getHostGroupsWithComponent("HIVEMETASTORE"));
+        assertEquals(Set.of("worker"), underTest.getHostGroupsWithComponent("DATANODE"));
+        assertEquals(Set.of("master", "worker"), underTest.getHostGroupsWithComponent("GATEWAY"));
+    }
+
+    private static void assertSortedEquals(Set<?> expected, Set<?> actual) {
+        assertEquals(new TreeSet<>(expected), new TreeSet<>(actual));
+    }
+
+    private static void assertSortedEquals(Map<?, ?> expected, Map<?, ?> actual) {
+        assertEquals(new TreeMap<>(expected), new TreeMap<>(actual));
     }
 
     private String getBlueprintText(String path) {

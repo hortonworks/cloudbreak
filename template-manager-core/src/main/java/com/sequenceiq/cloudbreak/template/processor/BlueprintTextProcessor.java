@@ -32,4 +32,5 @@ public interface BlueprintTextProcessor {
     String asText();
 
     Set<String> getComponentsInHostGroup(String name);
+
 }

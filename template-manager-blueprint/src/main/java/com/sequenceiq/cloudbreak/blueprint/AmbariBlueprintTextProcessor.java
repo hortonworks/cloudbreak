@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.blueprint;
 
+import static java.util.stream.Collectors.toSet;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -12,7 +14,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -27,6 +28,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.ClusterManagerType;
@@ -38,7 +40,6 @@ import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurat
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteSettingsConfigurations;
 import com.sequenceiq.cloudbreak.template.processor.kerberos.KerberosDescriptorService;
 import com.sequenceiq.cloudbreak.template.processor.kerberos.KerberosServiceConfiguration;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 public class AmbariBlueprintTextProcessor implements BlueprintTextProcessor {
 
@@ -208,12 +209,12 @@ public class AmbariBlueprintTextProcessor implements BlueprintTextProcessor {
     }
 
     public Set<String> getAllComponents() {
-        return getComponentsByHostGroup().entrySet()
-                .stream()
+        return getComponentsByHostGroup().entrySet().stream()
                 .flatMap(entry -> entry.getValue().stream())
-                .collect(Collectors.toSet());
+                .collect(toSet());
     }
 
+    @Override
     public Set<String> getComponentsInHostGroup(String hostGroup) {
         Set<String> services = new HashSet<>();
         ArrayNode hostGroupsNode = getArrayFromObjectNodeByPath(blueprint, HOST_GROUPS_NODE);

@@ -19,17 +19,20 @@ public class BlueprintView {
 
     private Set<String> components;
 
-    private BlueprintTextProcessor processor;
+    private final BlueprintTextProcessor processor;
+
+    private final Map<String, Set<String>> componentsByHostGroup;
 
     public BlueprintView(String blueprintText, String version, String type, BlueprintTextProcessor processor) {
         this.blueprintText = blueprintText;
         this.type = type;
         this.version = version;
         this.processor = processor;
-        components = prepareComponents(blueprintText);
+        componentsByHostGroup = processor.getComponentsByHostGroup();
+        components = prepareComponents();
     }
 
-    private Set<String> prepareComponents(String blueprintText) {
+    private Set<String> prepareComponents() {
         Set<String> result = new HashSet<>();
         try {
             Map<String, Set<String>> componentsByHostGroup = processor.getComponentsByHostGroup();
@@ -76,6 +79,10 @@ public class BlueprintView {
         this.components = components;
     }
 
+    public Map<String, Set<String>> getComponentsByHostGroup() {
+        return componentsByHostGroup;
+    }
+
     @VisibleForTesting
     public BlueprintTextProcessor getProcessor() {
         return processor;
@@ -100,5 +107,4 @@ public class BlueprintView {
     public int hashCode() {
         return Objects.hash(blueprintText, version, type, components);
     }
-
 }
