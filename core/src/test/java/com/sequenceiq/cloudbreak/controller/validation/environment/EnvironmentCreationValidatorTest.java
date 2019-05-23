@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.controller.validation.environment.network.Envir
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.environment.Region;
 import com.sequenceiq.cloudbreak.util.EnvironmentUtils;
@@ -60,18 +59,10 @@ public class EnvironmentCreationValidatorTest {
         proxyConfig.setId(0L);
         proxyConfig.setName("proxy1");
 
-        RDSConfig rdsConfig1 = new RDSConfig();
-        rdsConfig1.setId(0L);
-        rdsConfig1.setName("rds1");
-        RDSConfig rdsConfig2 = new RDSConfig();
-        rdsConfig1.setId(1L);
-        rdsConfig2.setName("rds2");
-
         Environment environment = new Environment();
         environment.setCredential(credential);
         environment.setLdapConfigs(Set.of(ldapConfig));
         environment.setProxyConfigs(Set.of(proxyConfig));
-        environment.setRdsConfigs(Set.of(rdsConfig1, rdsConfig2));
 
         Region region1 = new Region();
         region1.setName("region1");
@@ -81,7 +72,6 @@ public class EnvironmentCreationValidatorTest {
         EnvironmentV4Request environmentRequest = new EnvironmentV4Request();
         environmentRequest.setLdaps(Set.of("ldap1", "ldap2"));
         environmentRequest.setProxies(Set.of("proxy1", "proxy2"));
-        environmentRequest.setDatabases(Set.of("rds1", "rds2", "rds3"));
         environmentRequest.setRegions(Set.of("region1", "region2", "region3"));
         LocationV4Request locationRequest = new LocationV4Request();
         locationRequest.setName("region1");
@@ -91,10 +81,9 @@ public class EnvironmentCreationValidatorTest {
         ValidationResult result = environmentCreationValidator.validate(environment, environmentRequest, cloudRegions);
 
         assertEquals(ERROR, result.getState());
-        assertEquals(4L, result.getErrors().size());
+        assertEquals(3L, result.getErrors().size());
         assertTrue(result.getFormattedErrors().contains("[ldap2]"));
         assertTrue(result.getFormattedErrors().contains("[proxy2]"));
-        assertTrue(result.getFormattedErrors().contains("[rds3]"));
         assertTrue(result.getFormattedErrors().contains("[region3]"));
     }
 
@@ -106,11 +95,9 @@ public class EnvironmentCreationValidatorTest {
         environment.setCredential(credential);
         environment.setLdapConfigs(Collections.emptySet());
         environment.setProxyConfigs(Collections.emptySet());
-        environment.setRdsConfigs(Collections.emptySet());
         EnvironmentV4Request environmentRequest = new EnvironmentV4Request();
         environmentRequest.setLdaps(Collections.emptySet());
         environmentRequest.setProxies(Collections.emptySet());
-        environmentRequest.setDatabases(Collections.emptySet());
         environmentRequest.setRegions(Set.of("region1", "region2", "region3"));
         LocationV4Request locationRequest = new LocationV4Request();
         locationRequest.setName("region1");
@@ -133,12 +120,10 @@ public class EnvironmentCreationValidatorTest {
         environment.setCredential(credential);
         environment.setLdapConfigs(Collections.emptySet());
         environment.setProxyConfigs(Collections.emptySet());
-        environment.setRdsConfigs(Collections.emptySet());
         environment.setRegions(Set.of());
         EnvironmentV4Request environmentRequest = new EnvironmentV4Request();
         environmentRequest.setLdaps(Collections.emptySet());
         environmentRequest.setProxies(Collections.emptySet());
-        environmentRequest.setDatabases(Collections.emptySet());
         environmentRequest.setRegions(Collections.emptySet());
         LocationV4Request locationRequest = new LocationV4Request();
         locationRequest.setName("region1");
@@ -167,18 +152,10 @@ public class EnvironmentCreationValidatorTest {
         proxyConfig.setId(0L);
         proxyConfig.setName("proxy1");
 
-        RDSConfig rdsConfig1 = new RDSConfig();
-        rdsConfig1.setId(0L);
-        rdsConfig1.setName("rds1");
-        RDSConfig rdsConfig2 = new RDSConfig();
-        rdsConfig1.setId(1L);
-        rdsConfig2.setName("rds2");
-
         Environment environment = new Environment();
         environment.setCredential(credential);
         environment.setLdapConfigs(Set.of(ldapConfig));
         environment.setProxyConfigs(Set.of(proxyConfig));
-        environment.setRdsConfigs(Set.of(rdsConfig1, rdsConfig2));
         Region region1 = new Region();
         region1.setName("region1");
         Region region2 = new Region();
@@ -191,7 +168,6 @@ public class EnvironmentCreationValidatorTest {
         EnvironmentV4Request environmentRequest = new EnvironmentV4Request();
         environmentRequest.setLdaps(Set.of("ldap1"));
         environmentRequest.setProxies(Set.of("proxy1"));
-        environmentRequest.setDatabases(Set.of("rds1", "rds2"));
         environmentRequest.setRegions(Set.of("region1", "region2"));
         LocationV4Request locationRequest = new LocationV4Request();
         locationRequest.setName("region1");
@@ -216,18 +192,10 @@ public class EnvironmentCreationValidatorTest {
         proxyConfig.setId(0L);
         proxyConfig.setName("proxy1");
 
-        RDSConfig rdsConfig1 = new RDSConfig();
-        rdsConfig1.setId(0L);
-        rdsConfig1.setName("rds1");
-        RDSConfig rdsConfig2 = new RDSConfig();
-        rdsConfig1.setId(1L);
-        rdsConfig2.setName("rds2");
-
         Environment environment = new Environment();
         environment.setCredential(credential);
         environment.setLdapConfigs(Set.of(ldapConfig));
         environment.setProxyConfigs(Set.of(proxyConfig));
-        environment.setRdsConfigs(Set.of(rdsConfig1, rdsConfig2));
         environment.setLocation("region1");
         environment.setLatitude(1.1);
         environment.setLongitude(-1.1);
@@ -235,7 +203,6 @@ public class EnvironmentCreationValidatorTest {
         EnvironmentV4Request environmentRequest = new EnvironmentV4Request();
         environmentRequest.setLdaps(Set.of("ldap1"));
         environmentRequest.setProxies(Set.of("proxy1"));
-        environmentRequest.setDatabases(Set.of("rds1", "rds2"));
         environmentRequest.setRegions(Collections.emptySet());
         LocationV4Request locationRequest = new LocationV4Request();
         locationRequest.setName("region1");
@@ -263,18 +230,10 @@ public class EnvironmentCreationValidatorTest {
         proxyConfig.setId(0L);
         proxyConfig.setName("proxy1");
 
-        RDSConfig rdsConfig1 = new RDSConfig();
-        rdsConfig1.setId(0L);
-        rdsConfig1.setName("rds1");
-        RDSConfig rdsConfig2 = new RDSConfig();
-        rdsConfig1.setId(1L);
-        rdsConfig2.setName("rds2");
-
         Environment environment = new Environment();
         environment.setCredential(credential);
         environment.setLdapConfigs(Set.of(ldapConfig));
         environment.setProxyConfigs(Set.of(proxyConfig));
-        environment.setRdsConfigs(Set.of(rdsConfig1, rdsConfig2));
         environment.setLocation("region1");
         environment.setLatitude(1.1);
         environment.setLongitude(-1.1);
@@ -282,7 +241,6 @@ public class EnvironmentCreationValidatorTest {
         EnvironmentV4Request environmentRequest = new EnvironmentV4Request();
         environmentRequest.setLdaps(Set.of("ldap1"));
         environmentRequest.setProxies(Set.of("proxy1"));
-        environmentRequest.setDatabases(Set.of("rds1", "rds2"));
         environmentRequest.setRegions(Collections.emptySet());
         LocationV4Request locationRequest = new LocationV4Request();
         locationRequest.setName("region1");

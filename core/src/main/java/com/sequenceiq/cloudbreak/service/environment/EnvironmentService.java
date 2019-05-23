@@ -223,7 +223,6 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
         Environment environment = conversionService.convert(request, Environment.class);
         environment.setLdapConfigs(ldapConfigService.findByNamesInWorkspace(request.getLdaps(), workspaceId));
         environment.setProxyConfigs(proxyConfigService.findByNamesInWorkspace(request.getProxies(), workspaceId));
-        environment.setRdsConfigs(rdsConfigService.findByNamesInWorkspace(request.getDatabases(), workspaceId));
         Credential credential = environmentCredentialOperationService.getCredentialFromRequest(request, workspaceId);
         environment.setCredential(credential);
         environment.setCloudPlatform(credential.cloudPlatform());
@@ -342,13 +341,12 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
             return transactionService.required(() -> {
                 Set<LdapConfig> ldapsToAttach = ldapConfigService.findByNamesInWorkspace(request.getLdaps(), workspaceId);
                 Set<ProxyConfig> proxiesToAttach = proxyConfigService.findByNamesInWorkspace(request.getProxies(), workspaceId);
-                Set<RDSConfig> rdssToAttach = rdsConfigService.findByNamesInWorkspace(request.getDatabases(), workspaceId);
-                ValidationResult validationResult = environmentAttachValidator.validate(request, ldapsToAttach, proxiesToAttach, rdssToAttach);
+                ValidationResult validationResult = environmentAttachValidator.validate(request, ldapsToAttach, proxiesToAttach);
                 if (validationResult.hasError()) {
                     throw new BadRequestException(validationResult.getFormattedErrors());
                 }
                 Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
-                environment = doAttach(ldapsToAttach, proxiesToAttach, rdssToAttach, environment);
+                environment = doAttach(ldapsToAttach, proxiesToAttach, environment);
                 return conversionService.convert(environment, DetailedEnvironmentV4Response.class);
             });
         } catch (TransactionExecutionException e) {
@@ -356,13 +354,11 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
         }
     }
 
-    private Environment doAttach(Set<LdapConfig> ldapsToAttach, Set<ProxyConfig> proxiesToAttach, Set<RDSConfig> rdssToAttach, Environment environment) {
+    private Environment doAttach(Set<LdapConfig> ldapsToAttach, Set<ProxyConfig> proxiesToAttach, Environment environment) {
         ldapsToAttach.removeAll(environment.getLdapConfigs());
         environment.getLdapConfigs().addAll(ldapsToAttach);
         proxiesToAttach.removeAll(environment.getProxyConfigs());
         environment.getProxyConfigs().addAll(proxiesToAttach);
-        rdssToAttach.removeAll(environment.getRdsConfigs());
-        environment.getRdsConfigs().addAll(rdssToAttach);
         environment = environmentRepository.save(environment);
         return environment;
     }
@@ -373,7 +369,6 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
                 Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
                 ValidationResult validationResult = validateAndDetachLdaps(request, environment);
                 validationResult = validateAndDetachProxies(request, environment, validationResult);
-                validationResult = validateAndDetachRdss(request, environment, validationResult);
                 if (validationResult.hasError()) {
                     throw new BadRequestException(validationResult.getFormattedErrors());
                 }
@@ -402,16 +397,6 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
                 .collect(Collectors.toMap(proxy -> proxy, proxy -> proxyConfigService.getClustersUsingResourceInEnvironment(proxy, environment.getId())));
         validationResult = environmentDetachValidator.validate(environment, proxiesToClusters).merge(validationResult);
         environment.getProxyConfigs().removeAll(proxiesToDetach);
-        return validationResult;
-    }
-
-    private ValidationResult validateAndDetachRdss(EnvironmentDetachV4Request request, Environment environment, ValidationResult validationResult) {
-        Set<RDSConfig> rdssToDetach = environment.getRdsConfigs().stream()
-                .filter(rds -> request.getDatabases().contains(rds.getName())).collect(Collectors.toSet());
-        Map<RDSConfig, Set<Cluster>> rdssToClusters = rdssToDetach.stream()
-                .collect(Collectors.toMap(rds -> rds, rds -> rdsConfigService.getClustersUsingResourceInEnvironment(rds, environment.getId())));
-        validationResult = environmentDetachValidator.validate(environment, rdssToClusters).merge(validationResult);
-        environment.getRdsConfigs().removeAll(rdssToDetach);
         return validationResult;
     }
 

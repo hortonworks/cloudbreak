@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.rdsconfig;
 
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -13,27 +14,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
+import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
-import com.sequenceiq.cloudbreak.repository.environment.EnvironmentResourceRepository;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.environment.AbstractEnvironmentAwareService;
+import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @Service
-public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig> {
+public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSConfig> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RdsConfigService.class);
 
@@ -49,22 +50,8 @@ public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig>
     @Inject
     private TransactionService transactionService;
 
-    @Override
-    public RDSConfig attachToEnvironments(String resourceName, Set<String> environments, @NotNull Long workspaceId) {
-        try {
-            return transactionService.required(() -> super.attachToEnvironments(resourceName, environments, workspaceId));
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
-    }
-
-    @Override
-    public RDSConfig detachFromEnvironments(String resourceName, Set<String> environments, @NotNull Long workspaceId) {
-        try {
-            return transactionService.required(() -> super.detachFromEnvironments(resourceName, environments, workspaceId));
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
+    public Set<RDSConfig> findByNamesInWorkspace(Set<String> names, @NotNull Long workspaceId) {
+        return CollectionUtils.isEmpty(names) ? new HashSet<>() : rdsConfigRepository.findAllByNameInAndWorkspaceId(names, workspaceId);
     }
 
     public Set<RDSConfig> retrieveRdsConfigsInWorkspace(Workspace workspace) {
@@ -77,6 +64,18 @@ public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig>
 
     public RDSConfig get(Long id) {
         return rdsConfigRepository.findById(id).orElseThrow(notFound("RDS configuration", id));
+    }
+
+    @Override
+    public RDSConfig delete(RDSConfig rdsConfig) {
+        MDCBuilder.buildMdcContext(rdsConfig);
+        LOGGER.debug("Archiving {} with name: {}", resource().getReadableName(), rdsConfig.getName());
+        prepareDeletion(rdsConfig);
+        rdsConfig.setArchived(true);
+        rdsConfig.setDeletionTimestamp(System.currentTimeMillis());
+        rdsConfig.unsetRelationsToEntitiesToBeDeleted();
+        repository().save(rdsConfig);
+        return rdsConfig;
     }
 
     public void delete(Long id) {
@@ -126,16 +125,32 @@ public class RdsConfigService extends AbstractEnvironmentAwareService<RDSConfig>
     }
 
     @Override
-    public EnvironmentResourceRepository<RDSConfig, Long> repository() {
+    public WorkspaceResourceRepository<RDSConfig, Long> repository() {
         return rdsConfigRepository;
     }
 
     @Override
+    protected void prepareDeletion(RDSConfig resource) {
+        Set<Cluster> clustersWithThisProxy = getClustersUsingResource(resource);
+        if (!clustersWithThisProxy.isEmpty()) {
+            String clusters = clustersWithThisProxy
+                    .stream()
+                    .map(Cluster::getName)
+                    .collect(Collectors.joining(", "));
+            throw new BadRequestException(String.format(resource().getReadableName() + " '%s' cannot be deleted"
+                    + " because there are clusters associated with it: [%s].", resource.getName(), clusters));
+        }
+    }
+
+    @Override
+    protected void prepareCreation(RDSConfig resource) {
+
+    }
+
     public Set<Cluster> getClustersUsingResource(RDSConfig rdsConfig) {
         return clusterService.findByRdsConfig(rdsConfig.getId());
     }
 
-    @Override
     public Set<Cluster> getClustersUsingResourceInEnvironment(RDSConfig rdsConfig, Long environmentId) {
         return clusterService.findAllClustersByRdsConfigInEnvironment(rdsConfig, environmentId);
     }

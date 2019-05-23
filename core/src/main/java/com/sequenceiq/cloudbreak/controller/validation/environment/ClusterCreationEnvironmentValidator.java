@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.validation.environment;
 
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -48,7 +47,6 @@ public class ClusterCreationEnvironmentValidator {
         Long workspaceId = stack.getWorkspace().getId();
         validateLdapConfig(workspaceId, clusterRequest, stackEnv, resultBuilder);
         validateProxyConfig(workspaceId, clusterRequest, stackEnv, resultBuilder);
-        validateRdsConfigs(workspaceId, clusterRequest, stackEnv, resultBuilder);
         return resultBuilder.build();
     }
 
@@ -61,9 +59,6 @@ public class ClusterCreationEnvironmentValidator {
         }
         validateEnvironmentAwareResource(ldapConfigService.getByNameForWorkspaceId(registerDatalakeRequest.getLdapName(), workspaceId),
                 environmentName, resultBuilder);
-        for (String rdsConfigName : registerDatalakeRequest.getDatabaseNames()) {
-            validateEnvironmentAwareResource(rdsConfigService.getByNameForWorkspaceId(rdsConfigName, workspaceId), environmentName, resultBuilder);
-        }
         return resultBuilder.build();
     }
 
@@ -76,30 +71,6 @@ public class ClusterCreationEnvironmentValidator {
     private void validateProxyConfig(Long workspaceId, ClusterV4Request request, EnvironmentView stackEnv, ValidationResultBuilder resultBuilder) {
         if (StringUtils.isNotBlank(request.getProxyName())) {
             validateEnvironmentAwareResource(proxyConfigService.getByNameForWorkspaceId(request.getProxyName(), workspaceId), stackEnv, resultBuilder);
-        }
-    }
-
-    private void validateRdsConfigs(Long workspaceId, ClusterV4Request request, EnvironmentView stackEnv, ValidationResultBuilder resultBuilder) {
-        if (request.getDatabases() != null) {
-            for (String rdsConfigName : request.getDatabases()) {
-                validateEnvironmentAwareResource(rdsConfigService.getByNameForWorkspaceId(rdsConfigName, workspaceId), stackEnv, resultBuilder);
-            }
-        }
-    }
-
-    private void validateEnvironments(String resourceName, String resourceType, Set<String> environments, EnvironmentView stackEnv,
-            ValidationResultBuilder resultBuilder) {
-        if (stackEnv == null) {
-            if (!CollectionUtils.isEmpty(environments)) {
-                resultBuilder.error(String.format("Stack without environment cannot use %s %s resource which attached to an environment.",
-                        resourceName, resourceType));
-            }
-        } else {
-            if (!CollectionUtils.isEmpty(environments)
-                    && environments.stream().noneMatch(resEnv -> resEnv.equals(stackEnv.getName()))) {
-                resultBuilder.error(String.format("Stack cannot use %s %s resource which is not attached to %s environment and not global.",
-                        resourceName, resourceType, stackEnv.getName()));
-            }
         }
     }
 

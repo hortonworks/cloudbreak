@@ -12,7 +12,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.Environmen
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
 
 public class EnvironmentAttachValidatorTest {
 
@@ -23,8 +22,7 @@ public class EnvironmentAttachValidatorTest {
         EnvironmentAttachV4Request request = getEnvironmentAttachRequest();
         Set<LdapConfig> ldapsToAttach = getLdapConfigs();
         Set<ProxyConfig> proxiesToAttach = getProxyConfigs();
-        Set<RDSConfig> rdssToAttach = getRdsConfigs();
-        ValidationResult validationResult = environmentAttachValidator.validate(request, ldapsToAttach, proxiesToAttach, rdssToAttach);
+        ValidationResult validationResult = environmentAttachValidator.validate(request, ldapsToAttach, proxiesToAttach);
         assertEquals(2, validationResult.getErrors().size());
         assertTrue(validationResult.getErrors().get(0).contains("ldap-nonexsistent"));
         assertTrue(validationResult.getErrors().get(1).contains("proxy-nonexistent1"));
@@ -39,7 +37,6 @@ public class EnvironmentAttachValidatorTest {
         request.getProxies().add("proxy1");
         request.getProxies().add("proxy-nonexistent1");
         request.getProxies().add("proxy-nonexistent2");
-        request.getDatabases().add("rds1");
         return request;
     }
 
@@ -64,14 +61,4 @@ public class EnvironmentAttachValidatorTest {
         proxiesToAttach.add(proxy1);
         return proxiesToAttach;
     }
-
-    private Set<RDSConfig> getRdsConfigs() {
-        Set<RDSConfig> rdssToAttach = new HashSet<>();
-        RDSConfig rds1 = new RDSConfig();
-        rds1.setName("rds1");
-        rds1.setId(1L);
-        rdssToAttach.add(rds1);
-        return rdssToAttach;
-    }
-
 }

@@ -13,7 +13,6 @@ import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DatalakeResourcesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.EnvironmentNetworkV4Response;
@@ -60,11 +59,6 @@ public class EnvironmentToDetailedEnvironmentV4ResponseConverter extends Abstrac
                         .stream()
                         .map(proxyConfig -> getConversionService().convert(proxyConfig, ProxyV4Response.class))
                         .collect(Collectors.toSet()));
-        response.setDatabases(
-                source.getRdsConfigs()
-                        .stream()
-                        .map(rdsConfig -> getConversionService().convert(rdsConfig, DatabaseV4Response.class))
-                        .collect(Collectors.toSet()));
         response.setWorkloadClusters(
                 source.getStacks()
                         .stream()
@@ -88,6 +82,12 @@ public class EnvironmentToDetailedEnvironmentV4ResponseConverter extends Abstrac
                         .stream()
                         .map(StackViewV4Response::getName)
                         .collect(Collectors.toSet()));
+        setDatalakeResources(source, response);
+        setNetworkIfPossible(response, source);
+        return response;
+    }
+
+    private void setDatalakeResources(Environment source, DetailedEnvironmentV4Response response) {
         Set<String> datalakeResourcesNames = new HashSet<>();
         Set<DatalakeResourcesV4Response> datalakeResourcesResponses = new HashSet<>();
         for (DatalakeResources datalakeResources : source.getDatalakeResources()) {
@@ -116,8 +116,6 @@ public class EnvironmentToDetailedEnvironmentV4ResponseConverter extends Abstrac
         }
         response.setDatalakeResourcesNames(datalakeResourcesNames);
         response.setDatalakeResources(datalakeResourcesResponses);
-        setNetworkIfPossible(response, source);
-        return response;
     }
 
     private void setNetworkIfPossible(DetailedEnvironmentV4Response response, Environment source) {

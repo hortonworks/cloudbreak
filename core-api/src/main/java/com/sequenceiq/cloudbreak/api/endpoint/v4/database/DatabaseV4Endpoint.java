@@ -1,20 +1,19 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.database;
 
+import java.util.Set;
+
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseTestV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseTestV4Response;
@@ -27,8 +26,6 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.DatabaseOpDescription
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-
-import java.util.Set;
 
 @Path("/v4/{workspaceId}/databases")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -84,22 +81,4 @@ public interface DatabaseV4Endpoint {
     @ApiOperation(value = DatabaseOpDescription.POST_CONNECTION_TEST, produces = ContentType.JSON, notes = Notes.DATABASE_NOTES,
             nickname = "testDatabaseConnectionInWorkspace")
     DatabaseTestV4Response test(@PathParam("workspaceId") Long workspaceId, @Valid DatabaseTestV4Request databaseTestV4Request);
-
-    @PUT
-    @Path("{name}/attach")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseOpDescription.ATTACH_TO_ENVIRONMENTS, produces = ContentType.JSON, notes = Notes.DATABASE_NOTES,
-            nickname = "attachDatabaseToEnvironments")
-    DatabaseV4Response attach(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-        @Valid @NotNull EnvironmentNames environmentNames);
-
-    @PUT
-    @Path("{name}/detach")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DatabaseOpDescription.DETACH_FROM_ENVIRONMENTS, produces = ContentType.JSON, notes = Notes.DATABASE_NOTES,
-            nickname = "detachDatabaseFromEnvironments")
-    DatabaseV4Response detach(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-        @Valid @NotNull EnvironmentNames environmentNames);
 }

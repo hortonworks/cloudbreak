@@ -17,9 +17,6 @@ public abstract class EnvironmentV4BaseRequest {
     @ApiModelProperty(EnvironmentRequestModelDescription.LDAP_CONFIGS)
     private Set<String> ldaps = new HashSet<>();
 
-    @ApiModelProperty(EnvironmentRequestModelDescription.RDS_CONFIGS)
-    private Set<String> databases = new HashSet<>();
-
     @ApiModelProperty(EnvironmentRequestModelDescription.KUBERNETES_CONFIGS)
     private Set<String> kubernetes = new HashSet<>();
 
@@ -37,14 +34,6 @@ public abstract class EnvironmentV4BaseRequest {
 
     public void setLdaps(Set<String> ldaps) {
         this.ldaps = ldaps == null ? new HashSet<>() : ldaps;
-    }
-
-    public Set<String> getDatabases() {
-        return databases;
-    }
-
-    public void setDatabases(Set<String> databases) {
-        this.databases = databases == null ? new HashSet<>() : databases;
     }
 
     public Set<String> getKubernetes() {
