@@ -69,6 +69,8 @@ public class SecurityConfig {
 
         private static final String V4_API = API_ROOT_CONTEXT + "/v4/**";
 
+        private static final String DISTROX_API = API_ROOT_CONTEXT + "/v1/distrox/**";
+
         private static final String AUTOSCALE_API = API_ROOT_CONTEXT + "/autoscale/**";
 
         @Inject
@@ -89,6 +91,8 @@ public class SecurityConfig {
             http.addFilterAfter(scimAccountGroupReaderFilter, AbstractPreAuthenticatedProcessingFilter.class)
                     .authorizeRequests()
                     .antMatchers(V4_API)
+                    .access("#oauth2.isOAuth()")
+                    .antMatchers(DISTROX_API)
                     .access("#oauth2.isOAuth()")
                     .antMatchers(AUTOSCALE_API)
                     .access("#oauth2.hasScope('cloudbreak.autoscale')")

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.client;
 
 import javax.ws.rs.client.WebTarget;
 
+import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintUtilV4Endpoint;
@@ -141,6 +142,10 @@ public class CloudbreakUserCrnClient extends AbstractUserCrnServiceClient<Cloudb
 
         public StackV4Endpoint stackV4Endpoint() {
             return getEndpoint(StackV4Endpoint.class);
+        }
+
+        public DistroXV1Endpoint distroXV1Endpoint() {
+            return getEndpoint(DistroXV1Endpoint.class);
         }
     }
 }

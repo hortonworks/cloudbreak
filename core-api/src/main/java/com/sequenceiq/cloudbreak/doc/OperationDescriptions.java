@@ -25,27 +25,13 @@ public class OperationDescriptions {
     }
 
     public static class StackOpDescription {
-        public static final String POST_PRIVATE = "create stack as private resource";
-        public static final String POST_PUBLIC = "create stack as public resource";
-        public static final String GET_PRIVATE = "retrieve private stack";
-        public static final String GET_PUBLIC = "retrieve public and private (owned) stacks";
-        public static final String GET_PRIVATE_BY_NAME = "retrieve a private stack by name";
-        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) stack by name";
         public static final String GET_BY_ID = "retrieve stack by id";
-        public static final String DELETE_PRIVATE_BY_NAME = "delete private stack by name";
-        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private stack by name";
-        public static final String DELETE_BY_ID = "delete stack by id";
-        public static final String GET_STATUS_BY_ID = "retrieve stack status by stack id";
         public static final String GET_STATUS_BY_NAME = "retrieve stack status by stack name";
         public static final String PUT_BY_ID = "update stack by id";
         public static final String PUT_BY_NAME = "update stack by name";
         public static final String GET_BY_AMBARI_ADDRESS = "retrieve stack by ambari address";
         public static final String GET_STACK_CERT = "retrieves the TLS certificate used by the gateway";
-        public static final String VALIDATE = "validate stack";
-        public static final String DELETE_INSTANCE_BY_ID = "delete instance resource from stack";
         public static final String GET_ALL = "retrieve all stacks";
-        public static final String GET_BY_STACK_NAME = "retrieve stack request by stack name";
-        public static final String RETRY_BY_ID = "retry stack and cluster provisioning of failed stack";
         public static final String LIST_BY_WORKSPACE = "list stacks for the given workspace";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get stack by name in workspace";
         public static final String CREATE_IN_WORKSPACE = "create stack in workspace";

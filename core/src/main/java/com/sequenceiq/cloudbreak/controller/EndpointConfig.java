@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.controller.v4.WorkspaceAwareUtilV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.WorkspaceV4Controller;
 import com.sequenceiq.cloudbreak.structuredevent.rest.StructuredEventFilter;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.distrox.v1.distrox.controller.DistroXV1Controller;
 
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.config.SwaggerConfigLocator;
@@ -79,7 +80,8 @@ public class EndpointConfig extends ResourceConfig {
             AutoscaleV4Controller.class,
             ManagementPackV4Controller.class,
             StackV4Controller.class,
-            CloudbreakInfoV4Endpoint.class
+            CloudbreakInfoV4Endpoint.class,
+            DistroXV1Controller.class
     );
 
     private static final String VERSION_UNAVAILABLE = "unspecified";

@@ -75,7 +75,7 @@ public class RestUrlParserTest {
     @Autowired
     private List<RestUrlParser> restUrlParsers;
 
-    private String[] excludes = {};
+    private String[] excludes = {"/v1/distrox"};
 
     @Test
     public void testEventUrlParser() {
