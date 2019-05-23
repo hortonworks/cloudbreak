@@ -3,19 +3,16 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.proxies;
 import java.util.Set;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.requests.ProxyV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Responses;
@@ -67,24 +64,6 @@ public interface ProxyV4Endpoint {
     @ApiOperation(value = ProxyConfigOpDescription.DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
             nickname = "deleteProxyConfigsInWorkspace")
     ProxyV4Responses deleteMultiple(@PathParam("workspaceId") Long workspaceId, Set<String> names);
-
-    @PUT
-    @Path("{name}/attach")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ProxyConfigOpDescription.ATTACH_TO_ENVIRONMENTS, produces = ContentType.JSON, notes = Notes.PROXY_CONFIG_NOTES,
-            nickname = "attachProxyResourceToEnvironments")
-    ProxyV4Response attach(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-        @Valid @NotNull EnvironmentNames environmentNames);
-
-    @PUT
-    @Path("{name}/detach")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ProxyConfigOpDescription.DETACH_FROM_ENVIRONMENTS, produces = ContentType.JSON,
-            notes = Notes.PROXY_CONFIG_NOTES, nickname = "detachProxyResourceFromEnvironments")
-    ProxyV4Response detach(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-        @Valid @NotNull EnvironmentNames environmentNames);
 
     @GET
     @Path("{name}/request")

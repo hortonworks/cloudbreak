@@ -190,8 +190,6 @@ public class RepairTest extends AbstractIntegrationTest {
 
     private void createEnvWithResources(MockedTestContext testContext) {
         testContext.given(EnvironmentTestDto.class)
-                .withLdapConfigs(createDefaultLdapConfig(testContext))
-                .withProxyConfigs(createDefaultProxyConfig(testContext))
                 .when(environmentTestClient.createV4());
     }
 

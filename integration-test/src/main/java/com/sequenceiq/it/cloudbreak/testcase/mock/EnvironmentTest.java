@@ -14,7 +14,6 @@ import javax.ws.rs.NotFoundException;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.environment.EnvironmentTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
@@ -24,22 +23,12 @@ import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
-import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
 public class EnvironmentTest extends AbstractIntegrationTest {
 
     private static final Set<String> INVALID_REGION = new HashSet<>(Collections.singletonList("MockRegion"));
-
-    private static final Set<String> INVALID_PROXY = new HashSet<>(Collections.singletonList("InvalidProxy"));
-
-    private static final Set<String> INVALID_LDAP = new HashSet<>(Collections.singletonList("InvalidLdap"));
-
-    private Set<String> mixedProxy = new HashSet<>();
-
-    private Set<String> mixedLdap = new HashSet<>();
 
     @Inject
     private CredentialTestClient credentialTestClient;
@@ -62,44 +51,6 @@ public class EnvironmentTest extends AbstractIntegrationTest {
     public void testCreateEnvironment(TestContext testContext) {
         testContext
                 .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.createV4())
-                .then(this::checkCredentialAttachedToEnv)
-                .when(environmentTestClient.listV4())
-                .then(this::checkEnvIsListed)
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "there is a running cloudbreak",
-            when = "valid create environment request is sent with attached proxy config in it",
-            then = "environment should be created and the proxy should be attached")
-    public void testCreateEnvironmenWithProxy(TestContext testContext) {
-        createDefaultProxyConfig(testContext);
-        Set<String> validProxy = new HashSet<>();
-        validProxy.add(testContext.get(ProxyTestDto.class).getName());
-        testContext
-                .given(EnvironmentTestDto.class)
-                .withProxyConfigs(validProxy)
-                .when(environmentTestClient.createV4())
-                .then(this::checkCredentialAttachedToEnv)
-                .when(environmentTestClient.listV4())
-                .then(this::checkEnvIsListed)
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "there is a running cloudbreak",
-            when = "valid create environment request is sent with attached ldap config in it",
-            then = "environment should be created and the ldap should be attached")
-    public void testCreateEnvironmenWithLdap(TestContext testContext) {
-        createDefaultLdapConfig(testContext);
-        Set<String> validLdap = new HashSet<>();
-        validLdap.add(testContext.get(LdapTestDto.class).getName());
-        testContext
-                .given(EnvironmentTestDto.class)
-                .withLdapConfigs(validLdap)
                 .when(environmentTestClient.createV4())
                 .then(this::checkCredentialAttachedToEnv)
                 .when(environmentTestClient.listV4())
@@ -154,118 +105,12 @@ public class EnvironmentTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "there is a running cloudbreak",
-            when = "a create environment request with reference to a non-existing proxy is sent",
-            then = "a BadRequestException should be returned")
-    public void testCreateEnvironmentNotExistProxy(TestContext testContext) {
-        String forbiddenKey = resourcePropertyProvider().getName();
-        testContext
-                .init(EnvironmentTestDto.class)
-                .withProxyConfigs(INVALID_PROXY)
-                .when(environmentTestClient.createV4(), RunningParameter.key(forbiddenKey))
-                .expect(BadRequestException.class, RunningParameter.key(forbiddenKey))
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "there is a running cloudbreak",
-            when = "a create environment request with reference to a non-existing ldap is sent",
-            then = "a BadRequestException should be returned")
-    public void testCreateEnvironmentNotExistLdap(TestContext testContext) {
-        String forbiddenKey = resourcePropertyProvider().getName();
-        testContext
-                .init(EnvironmentTestDto.class)
-                .withLdapConfigs(INVALID_LDAP)
-                .when(environmentTestClient.createV4(), RunningParameter.key(forbiddenKey))
-                .expect(BadRequestException.class, RunningParameter.key(forbiddenKey))
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "there is a running cloudbreak",
-            when = "a create environment request with reference to an existing and a non-existing proxy is sent",
-            then = "a BadRequestException should be returned")
-    public void testCreateEnvWithExistingAndNotExistingProxy(TestContext testContext) {
-        String forbiddenKey = resourcePropertyProvider().getName();
-        createDefaultProxyConfig(testContext);
-        mixedProxy.add(testContext.get(ProxyTestDto.class).getName());
-        mixedProxy.add("invalidProxy");
-        testContext
-                .init(EnvironmentTestDto.class)
-                .withProxyConfigs(mixedProxy)
-                .when(environmentTestClient.createV4(), RunningParameter.key(forbiddenKey))
-                .expect(BadRequestException.class, RunningParameter.key(forbiddenKey))
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "there is a running cloudbreak",
-            when = "a create environment request with reference to an existing and a non-existing ldap is sent",
-            then = "a BadRequestException should be returned")
-    public void testCreateEnvWithExistingAndNotExistingLdap(TestContext testContext) {
-        String forbiddenKey = resourcePropertyProvider().getName();
-        createDefaultLdapConfig(testContext);
-        mixedLdap.add(testContext.get(LdapTestDto.class).getName());
-        mixedLdap.add("invalidLdap");
-        testContext
-                .init(EnvironmentTestDto.class)
-                .withLdapConfigs(mixedLdap)
-                .when(environmentTestClient.createV4(), RunningParameter.key(forbiddenKey))
-                .expect(BadRequestException.class, RunningParameter.key(forbiddenKey))
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
             given = "there is an available environment",
             when = "a delete request is sent for the environment",
             then = "the environment should be deleted")
     public void testDeleteEnvironment(TestContext testContext) {
         testContext
                 .init(EnvironmentTestDto.class)
-                .when(environmentTestClient.createV4())
-                .then(this::checkCredentialAttachedToEnv)
-                .when(environmentTestClient.listV4())
-                .then(this::checkEnvIsListed)
-                .when(environmentTestClient.deleteV4())
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "there is an available environment with an attached proxy",
-            when = "a delete request is sent for the environment",
-            then = "the environment should be deleted")
-    public void testDeleteEnvWithProxy(TestContext testContext) {
-        createDefaultProxyConfig(testContext);
-        Set<String> validProxy = new HashSet<>();
-        validProxy.add(testContext.get(ProxyTestDto.class).getName());
-        testContext
-                .init(EnvironmentTestDto.class)
-                .withProxyConfigs(validProxy)
-                .when(environmentTestClient.createV4())
-                .then(this::checkCredentialAttachedToEnv)
-                .when(environmentTestClient.listV4())
-                .then(this::checkEnvIsListed)
-                .when(environmentTestClient.deleteV4())
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "there is an available environment with an attached ldap",
-            when = "a delete request is sent for the environment",
-            then = "the environment should be deleted")
-    public void testDeleteEnvWithLdap(TestContext testContext) {
-        createDefaultLdapConfig(testContext);
-        Set<String> validLdap = new HashSet<>();
-        validLdap.add(testContext.get(LdapTestDto.class).getName());
-        testContext
-                .init(EnvironmentTestDto.class)
-                .withLdapConfigs(validLdap)
                 .when(environmentTestClient.createV4())
                 .then(this::checkCredentialAttachedToEnv)
                 .when(environmentTestClient.listV4())
@@ -365,18 +210,6 @@ public class EnvironmentTest extends AbstractIntegrationTest {
         String credentialName = environment.getResponse().getCredentialName();
         if (!credentialName.equals(testContext.get(CredentialTestDto.class).getName())) {
             throw new TestFailException("Credential is not attached to environment");
-        }
-        return environment;
-    }
-
-    private EnvironmentTestDto checkProxyAttachedToEnv(TestContext testContext, EnvironmentTestDto environment, CloudbreakClient cloudbreakClient) {
-        Set<String> proxyConfigs = new HashSet<>();
-        Set<ProxyV4Response> proxyV4ResponseSet = environment.getResponse().getProxies();
-        for (ProxyV4Response proxyV4Response : proxyV4ResponseSet) {
-            proxyConfigs.add(proxyV4Response.getName());
-        }
-        if (!proxyConfigs.contains(testContext.get(ProxyTestDto.class).getName())) {
-            throw new TestFailException("Proxy is not attached to environment");
         }
         return environment;
     }

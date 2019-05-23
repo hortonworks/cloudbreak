@@ -8,8 +8,6 @@ import javax.transaction.Transactional.TxType;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.EnvironmentNames;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.ProxyV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.requests.ProxyV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
@@ -18,6 +16,7 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
+import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -33,7 +32,7 @@ public class ProxyV4Controller extends NotificationController implements ProxyV4
     @Override
     public ProxyV4Responses list(Long workspaceId, String environment, Boolean attachGlobal) {
         Set<ProxyConfig> allInWorkspaceAndEnvironment = proxyConfigService
-                .findAllInWorkspaceAndEnvironment(workspaceId, environment, attachGlobal);
+                .findAllByWorkspaceId(workspaceId);
         return new ProxyV4Responses(converterUtil.convertAllAsSet(allInWorkspaceAndEnvironment, ProxyV4Response.class));
     }
 
@@ -46,7 +45,7 @@ public class ProxyV4Controller extends NotificationController implements ProxyV4
     @Override
     public ProxyV4Response post(Long workspaceId, ProxyV4Request request) {
         ProxyConfig config = converterUtil.convert(request, ProxyConfig.class);
-        config = proxyConfigService.createInEnvironment(config, request.getEnvironments(), workspaceId);
+        config = proxyConfigService.createForLoggedInUser(config, workspaceId);
         notify(ResourceEvent.PROXY_CONFIG_CREATED);
         return converterUtil.convert(config, ProxyV4Response.class);
     }
@@ -63,18 +62,6 @@ public class ProxyV4Controller extends NotificationController implements ProxyV4
         Set<ProxyConfig> deleted = proxyConfigService.deleteMultipleByNameFromWorkspace(names, workspaceId);
         notify(ResourceEvent.PROXY_CONFIG_DELETED);
         return new ProxyV4Responses(converterUtil.convertAllAsSet(deleted, ProxyV4Response.class));
-    }
-
-    @Override
-    public ProxyV4Response attach(Long workspaceId, String name, EnvironmentNames environmentNames) {
-        return proxyConfigService.attachToEnvironmentsAndConvert(name, environmentNames.getEnvironmentNames(),
-                workspaceId, ProxyV4Response.class);
-    }
-
-    @Override
-    public ProxyV4Response detach(Long workspaceId, String name, EnvironmentNames environmentNames) {
-        return proxyConfigService.detachFromEnvironmentsAndConvert(name, environmentNames.getEnvironmentNames(),
-                workspaceId, ProxyV4Response.class);
     }
 
     @Override

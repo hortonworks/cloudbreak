@@ -125,7 +125,7 @@
           "base" : true
         }
       ],
-      "dependencies": ["ZOOKEEPER", "HDFS", "ISILON"]
+      "dependencies": ["ZOOKEEPER", "HDFS"]
     },
     {
       "name": "YARN",
@@ -151,7 +151,7 @@
           "base" : true
         }
       ],
-      "dependencies": ["ZOOKEEPER", "HDFS", "ISILON"]
+      "dependencies": ["ZOOKEEPER", "HDFS"]
     },
     {
       "name": "SPARK_ON_YARN",
@@ -223,7 +223,7 @@
           "base": true
         }
       ],
-      "dependencies": ["ZOOKEEPER", "HDFS", "ISILON"]
+      "dependencies": ["ZOOKEEPER", "HDFS"]
     },
     {
       "name": "SQOOP",

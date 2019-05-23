@@ -12,11 +12,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.Environmen
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.LocationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
-import com.sequenceiq.it.cloudbreak.dto.DeletableTestDto;
-import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.DeletableTestDto;
+import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 
 @Prototype
@@ -71,16 +71,6 @@ public class EnvironmentTestDto extends DeletableTestDto<EnvironmentV4Request, D
 
     public EnvironmentTestDto withDescription(String description) {
         getRequest().setDescription(description);
-        return this;
-    }
-
-    public EnvironmentTestDto withLdapConfigs(Set<String> ldap) {
-        getRequest().setLdaps(ldap);
-        return this;
-    }
-
-    public EnvironmentTestDto withProxyConfigs(Set<String> proxy) {
-        getRequest().setProxies(proxy);
         return this;
     }
 
