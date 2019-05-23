@@ -4,6 +4,8 @@ import static com.sequenceiq.freeipa.api.v1.ldap.doc.LdapConfigModelDescription.
 import static com.sequenceiq.freeipa.api.v1.ldap.doc.LdapConfigModelDescription.LDAP_CONFIG_NOTES;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -31,20 +33,20 @@ public interface LdapConfigV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LdapConfigOpDescription.GET_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = LDAP_CONFIG_NOTES,
             nickname = "getLdapConfigV1")
-    DescribeLdapConfigResponse get(@QueryParam("environment") String environmentId);
+    DescribeLdapConfigResponse describe(@QueryParam("environmentId") @NotEmpty String environmentId);
 
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LdapConfigOpDescription.CREATE, produces = MediaType.APPLICATION_JSON, notes = LDAP_CONFIG_NOTES, nickname = "createLdapConfigV1")
-    DescribeLdapConfigResponse post(@Valid CreateLdapConfigRequest request);
+    DescribeLdapConfigResponse create(@Valid @NotNull CreateLdapConfigRequest request);
 
     @DELETE
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LdapConfigOpDescription.DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = LDAP_CONFIG_NOTES,
             nickname = "deleteLdapConfigV1")
-    void delete(@QueryParam("environment") String environmentId);
+    void delete(@QueryParam("environmentId") @NotEmpty String environmentId);
 
     @POST
     @Path("test")
@@ -57,5 +59,5 @@ public interface LdapConfigV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LdapConfigOpDescription.GET_REQUEST, produces = MediaType.APPLICATION_JSON, notes = LDAP_CONFIG_NOTES,
             nickname = "getLdapRequestByNameV1")
-    CreateLdapConfigRequest getRequest(@QueryParam("environment") String environmentId);
+    CreateLdapConfigRequest getRequest(@QueryParam("environmentId") @NotEmpty String environmentId);
 }

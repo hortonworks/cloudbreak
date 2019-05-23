@@ -9,11 +9,10 @@ import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 
 @Component
 public class StringToSecretResponseConverter extends AbstractConversionServiceAwareConverter<String, SecretResponse> {
-
     @Inject
     private SecretService secretService;
 
     public SecretResponse convert(String source) {
-        return secretService.convertToExternal(source);
+        return source != null ? secretService.convertToExternal(source) : null;
     }
 }

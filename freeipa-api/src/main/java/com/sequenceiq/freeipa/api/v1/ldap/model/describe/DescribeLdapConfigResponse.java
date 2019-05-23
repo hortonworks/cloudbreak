@@ -16,7 +16,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class DescribeLdapConfigResponse extends LdapConfigBase {
 
     @ApiModelProperty(ModelDescriptions.ID)
-    private Long id;
+    private String id;
 
     @ApiModelProperty(LdapConfigModelDescription.BIND_DN)
     private SecretResponse bindDn;
@@ -25,11 +25,11 @@ public class DescribeLdapConfigResponse extends LdapConfigBase {
     private SecretResponse bindPassword;
 
     @JsonProperty("id")
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

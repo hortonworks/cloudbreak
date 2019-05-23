@@ -82,13 +82,14 @@ dependencies {
   implementation project(':common')
   implementation project(':core-api')
   implementation project(':secret-engine')
+  implementation project(':notification-sender')
+  testCompile project(path: ':secret-engine', configuration: 'tests')
   runtime project(':orchestrator-salt')
   runtime project(':cloud-openstack')
   runtime project(':cloud-gcp')
   runtime project(':cloud-aws')
   runtime project(':cloud-mock')
   runtime project(':cloud-azure')
-
 }
 
 bootRun {

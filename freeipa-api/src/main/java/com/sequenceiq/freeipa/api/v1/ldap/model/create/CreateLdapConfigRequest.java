@@ -12,7 +12,6 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel("CreateLdapConfigV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CreateLdapConfigRequest extends LdapConfigBase {
-
     @NotNull
     @ApiModelProperty(value = LdapConfigModelDescription.BIND_DN, required = true)
     private String bindDn;
@@ -36,5 +35,4 @@ public class CreateLdapConfigRequest extends LdapConfigBase {
     public void setBindPassword(String bindPassword) {
         this.bindPassword = bindPassword;
     }
-
 }

@@ -18,6 +18,8 @@ import com.sequenceiq.freeipa.controller.FreeIpaV1Controller;
 import com.sequenceiq.freeipa.controller.UserV1Controller;
 import com.sequenceiq.freeipa.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.freeipa.controller.mapper.WebApplicaitonExceptionMapper;
+import com.sequenceiq.freeipa.kerberos.v1.KerberosConfigV1Controller;
+import com.sequenceiq.freeipa.ldap.v1.LdapConfigV1Controller;
 
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.config.SwaggerConfigLocator;
@@ -28,7 +30,8 @@ import io.swagger.jaxrs.config.SwaggerContextService;
 public class EndpointConfig extends ResourceConfig {
 
     private static final List<Class<?>> CONTROLLERS = List.of(
-            UserV1Controller.class, ClientTestV1Controller.class, FreeIpaV1Controller.class);
+            UserV1Controller.class, ClientTestV1Controller.class, FreeIpaV1Controller.class, LdapConfigV1Controller.class,
+            KerberosConfigV1Controller.class);
 
     private static final String VERSION_UNAVAILABLE = "unspecified";
 

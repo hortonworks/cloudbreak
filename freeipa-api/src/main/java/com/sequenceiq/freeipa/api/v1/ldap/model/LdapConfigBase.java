@@ -1,8 +1,5 @@
 package com.sequenceiq.freeipa.api.v1.ldap.model;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -19,7 +16,6 @@ import com.sequenceiq.service.api.doc.ModelDescriptions;
 import io.swagger.annotations.ApiModelProperty;
 
 public abstract class LdapConfigBase {
-
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @Size(max = 100, min = 1, message = "The length of the ldap config's name has to be in range of 1 to 100")
@@ -83,8 +79,9 @@ public abstract class LdapConfigBase {
     @JsonDeserialize(using = Base64Deserializer.class)
     private String certificate;
 
-    @ApiModelProperty(ModelDescriptions.ENVIRONMENTS)
-    private Set<String> environments = new HashSet<>();
+    @NotNull
+    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    private String environmentId;
 
     public String getName() {
         return name;
@@ -222,11 +219,11 @@ public abstract class LdapConfigBase {
         this.certificate = certificate;
     }
 
-    public Set<String> getEnvironments() {
-        return environments;
+    public String getEnvironmentId() {
+        return environmentId;
     }
 
-    public void setEnvironments(Set<String> environments) {
-        this.environments = environments == null ? new HashSet<>() : environments;
+    public void setEnvironmentId(String environmentId) {
+        this.environmentId = environmentId;
     }
 }
