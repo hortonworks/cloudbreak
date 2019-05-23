@@ -15,31 +15,29 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
-import com.sequenceiq.freeipa.api.model.freeipa.CreateFreeIpaRequest;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementBase;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
-import com.sequenceiq.freeipa.converter.authentication.StackAuthenticationV4RequestToStackAuthenticationConverter;
-import com.sequenceiq.freeipa.converter.credential.CredentialV4RequestToCredentialConverter;
-import com.sequenceiq.freeipa.converter.instance.InstanceGroupV4RequestToInstanceGroupConverter;
-import com.sequenceiq.freeipa.converter.network.NetworkV4RequestToNetworkConverter;
+import com.sequenceiq.freeipa.converter.authentication.StackAuthenticationRequestToStackAuthenticationConverter;
+import com.sequenceiq.freeipa.converter.credential.CredentialRequestToCredentialConverter;
+import com.sequenceiq.freeipa.converter.instance.InstanceGroupRequestToInstanceGroupConverter;
+import com.sequenceiq.freeipa.converter.network.NetworkRequestToNetworkConverter;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.freeipa.service.CostTaggingService;
 
 @Component
-public class CreateFreeIpaRequestToStackConverter implements Converter<CreateFreeIpaRequest, Stack> {
+public class CreateFreeIpaRequestToStackConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateFreeIpaRequestToStackConverter.class);
 
@@ -47,16 +45,16 @@ public class CreateFreeIpaRequestToStackConverter implements Converter<CreateFre
     private CostTaggingService costTaggingService;
 
     @Inject
-    private StackAuthenticationV4RequestToStackAuthenticationConverter stackAuthenticationConverter;
+    private StackAuthenticationRequestToStackAuthenticationConverter stackAuthenticationConverter;
 
     @Inject
-    private InstanceGroupV4RequestToInstanceGroupConverter instanceGroupConverter;
+    private InstanceGroupRequestToInstanceGroupConverter instanceGroupConverter;
 
     @Inject
-    private NetworkV4RequestToNetworkConverter networkConverter;
+    private NetworkRequestToNetworkConverter networkConverter;
 
     @Inject
-    private CredentialV4RequestToCredentialConverter credentialConverter;
+    private CredentialRequestToCredentialConverter credentialConverter;
 
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
@@ -64,36 +62,30 @@ public class CreateFreeIpaRequestToStackConverter implements Converter<CreateFre
     @Value("${cb.nginx.port:9443}")
     private Integer nginxPort;
 
-    @Override
-    public Stack convert(CreateFreeIpaRequest source) {
+    public Stack convert(CreateFreeIpaRequest source, String owner) {
         Stack stack = new Stack();
         stack.setName(source.getName());
         stack.setCreated(System.currentTimeMillis());
-        stack.setGatewayport(source.getGatewayPort() != null ? source.getGatewayPort() : nginxPort);
+        stack.setGatewayport(nginxPort);
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED));
-        stack.setAvailabilityZone(getAvailabilityZone(Optional.ofNullable(source.getPlacement())));
-        updateCloudPlatformAndRelatedFields(source, stack);
+        stack.setAvailabilityZone(Optional.ofNullable(source.getPlacement()).map(PlacementBase::getAvailabilityZone).orElse(null));
+        updateCloudPlatformAndRelatedFields(source, stack, owner);
         stack.setStackAuthentication(stackAuthenticationConverter.convert(source.getAuthentication()));
         stack.setInstanceGroups(convertInstanceGroups(source, stack));
         if (source.getNetwork() != null) {
-            source.getNetwork().setCloudPlatform(source.getCloudPlatform());
+            source.getNetwork().setCloudPlatform(CloudPlatform.valueOf(source.getCredential().getCloudPlatform()));
             stack.setNetwork(networkConverter.convert(source.getNetwork()));
         }
         stack.setCredential(credentialConverter.convert(source.getCredential()));
-        stack.setOwner(source.getOwner());
+        stack.setOwner(owner);
         return stack;
     }
 
-    private String getAvailabilityZone(Optional<PlacementSettingsV4Request> placement) {
-        return placement.map(PlacementSettingsV4Request::getAvailabilityZone).orElse(null);
-    }
-
-    private void updateCloudPlatformAndRelatedFields(CreateFreeIpaRequest source, Stack stack) {
+    private void updateCloudPlatformAndRelatedFields(CreateFreeIpaRequest source, Stack stack, String owner) {
         String cloudPlatform = source.getCredential().getCloudPlatform();
-        source.setCloudPlatform(CloudPlatform.valueOf(cloudPlatform));
         stack.setRegion(getRegion(source, cloudPlatform));
         stack.setCloudPlatform(cloudPlatform);
-        stack.setTags(getTags(source, cloudPlatform));
+        stack.setTags(getTags(owner, cloudPlatform));
         stack.setPlatformvariant(cloudPlatform);
     }
 
@@ -120,22 +112,18 @@ public class CreateFreeIpaRequestToStackConverter implements Converter<CreateFre
         return source.getPlacement().getRegion();
     }
 
-    private Json getTags(CreateFreeIpaRequest source, String cloudPlatform) {
+    private Json getTags(String owner, String cloudPlatform) {
         try {
-            TagsV4Request tags = source.getTags();
-            if (tags == null) {
-                return new Json(new StackTags(new HashMap<>(), new HashMap<>(), getDefaultTags(source, cloudPlatform)));
-            }
-            return new Json(new StackTags(tags.getUserDefined(), tags.getApplication(), getDefaultTags(source, cloudPlatform)));
+            return new Json(new StackTags(new HashMap<>(), new HashMap<>(), getDefaultTags(owner, cloudPlatform)));
         } catch (Exception ignored) {
             throw new BadRequestException("Failed to convert dynamic tags.");
         }
     }
 
-    private Map<String, String> getDefaultTags(CreateFreeIpaRequest source, String cloudPlatform) {
+    private Map<String, String> getDefaultTags(String owner, String cloudPlatform) {
         Map<String, String> result = new HashMap<>();
         try {
-            result.putAll(costTaggingService.prepareDefaultTags(source.getOwner(), result, cloudPlatform));
+            result.putAll(costTaggingService.prepareDefaultTags(owner, result, cloudPlatform));
         } catch (Exception e) {
             LOGGER.debug("Exception during reading default tags.", e);
         }
@@ -149,8 +137,7 @@ public class CreateFreeIpaRequestToStackConverter implements Converter<CreateFre
         Set<InstanceGroup> convertedSet = new HashSet<>();
         source.getInstanceGroups().stream()
                 .map(ig -> {
-                    ig.setCloudPlatform(source.getCloudPlatform());
-                    return instanceGroupConverter.convert(ig);
+                    return instanceGroupConverter.convert(ig, source.getCredential().getCloudPlatform());
                 })
                 .forEach(ig -> {
                     ig.setStack(stack);

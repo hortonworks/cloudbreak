@@ -1,8 +1,6 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter;
+package com.sequenceiq.cloudbreak.common.mappable;
 
 import java.util.Map;
-
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.Mappable;
 
 public abstract class MappableBase implements Mappable {
 

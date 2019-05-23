@@ -1,6 +1,7 @@
-package com.sequenceiq.freeipa.api.model.credential;
+package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.credential;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 import io.swagger.annotations.ApiModel;
 
@@ -12,7 +13,7 @@ public abstract class CredentialBase {
 
     private String cloudPlatform;
 
-    private Secret secret;
+    private SecretResponse secret;
 
     public String getName() {
         return name;
@@ -30,11 +31,11 @@ public abstract class CredentialBase {
         this.cloudPlatform = cloudPlatform;
     }
 
-    public Secret getSecret() {
+    public SecretResponse getSecret() {
         return secret;
     }
 
-    public void setSecret(Secret secret) {
+    public void setSecret(SecretResponse secret) {
         this.secret = secret;
     }
 }

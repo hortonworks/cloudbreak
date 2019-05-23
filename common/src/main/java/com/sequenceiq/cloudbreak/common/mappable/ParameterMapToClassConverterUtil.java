@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable;
+package com.sequenceiq.cloudbreak.common.mappable;
 
 import java.util.concurrent.Callable;
 
@@ -6,9 +6,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 
 @Component
 public class ParameterMapToClassConverterUtil {
@@ -18,7 +17,7 @@ public class ParameterMapToClassConverterUtil {
     private static final String CONVERT_EXCEPTION_MESSAGE_FORMAT = "Unable to deserialize %s from parameters";
 
     @Inject
-    private ConverterUtil converterUtil;
+    private ConversionService conversionService;
 
     public static <R> R exec(Callable<R> method, Class<R> clazz) {
         try {
@@ -32,7 +31,7 @@ public class ParameterMapToClassConverterUtil {
 
     public <R> R exec(Object object, Class<R> clazz) {
         try {
-            return converterUtil.convert(object, clazz);
+            return conversionService.convert(object, clazz);
         } catch (Exception e) {
             String message = String.format(CONVERT_EXCEPTION_MESSAGE_FORMAT, clazz.getSimpleName());
             LOGGER.error(message, e);

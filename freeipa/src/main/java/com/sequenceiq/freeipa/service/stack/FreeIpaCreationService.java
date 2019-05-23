@@ -11,9 +11,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
-import com.sequenceiq.freeipa.api.model.freeipa.CreateFreeIpaRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.converter.CreateFreeIpaRequestToStackConverter;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
@@ -65,9 +65,9 @@ public class FreeIpaCreationService {
     @Inject
     private FreeIpaService freeIpaService;
 
-    public void launchFreeIpa(CreateFreeIpaRequest request, String environmentName, String accountId) {
-        Stack stack = stackConverter.convert(request);
-        stack.setEnvironment(environmentName);
+    public void launchFreeIpa(CreateFreeIpaRequest request, String accountId) {
+        Stack stack = stackConverter.convert(request, accountId);
+        stack.setEnvironment(request.getEnvironmentId());
         stack.setAccountId(accountId);
         GetPlatformTemplateRequest getPlatformTemplateRequest = templateService.triggerGetTemplate(stack);
 
@@ -79,8 +79,8 @@ public class FreeIpaCreationService {
         String template = templateService.waitGetTemplate(stack, getPlatformTemplateRequest);
         stack.setTemplate(template);
         stackRepository.save(stack);
-        ImageSettingsV4Request image = request.getImage();
-        imageService.create(stack, Objects.nonNull(image) ? image : new ImageSettingsV4Request());
+        ImageSettingsRequest image = request.getImage();
+        imageService.create(stack, Objects.nonNull(image) ? image : new ImageSettingsRequest());
         freeIpaService.create(stack, request.getFreeIpa());
         flowManager.notify(FlowChainTriggers.PROVISION_TRIGGER_EVENT, new StackEvent(FlowChainTriggers.PROVISION_TRIGGER_EVENT, stack.getId()));
     }

@@ -58,5 +58,8 @@ public class FreeIpaModelDescriptions {
     public static class NetworkModelDescription {
         public static final String AWS_PARAMETERS = "provider specific parameters of the specified network";
         public static final String AZURE_PARAMETERS = "provider specific parameters of the specified network";
+        public static final String GCP_PARAMETERS = "provider specific parameters of the specified network";
+        public static final String OPEN_STACK_PARAMETERS = "provider specific parameters of the specified network";
+        public static final String SUBNET_CIDR = "the subnet definition of the network in CIDR format";
     }
 }

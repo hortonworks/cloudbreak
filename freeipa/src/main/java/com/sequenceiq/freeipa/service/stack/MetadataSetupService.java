@@ -58,7 +58,8 @@ public class MetadataSetupService {
             instanceMetaDataEntry.setInstanceName(cloudInstance.getStringParameter(CloudInstance.INSTANCE_NAME));
             if (instanceMetaDataEntry.getInstanceMetadataType() == null) {
                 if (ig != null) {
-                    if (!primaryIgSelected && ig.getInstanceGroupType() == com.sequenceiq.freeipa.api.model.instance.InstanceGroupType.MASTER) {
+                    if (!primaryIgSelected && ig.getInstanceGroupType()
+                            == com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType.MASTER) {
                         primaryIgSelected = true;
                         instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
                     } else {

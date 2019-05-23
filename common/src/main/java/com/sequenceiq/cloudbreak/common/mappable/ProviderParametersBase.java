@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable;
+package com.sequenceiq.cloudbreak.common.mappable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

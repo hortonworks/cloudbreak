@@ -12,12 +12,16 @@ import com.sequenceiq.cloudbreak.common.mappable.MappableBase;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("AwsNetworkV1Parameters")
+@ApiModel("MockNetworkV1Parameters")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class AwsNetworkParameters extends MappableBase {
+public class MockNetworkParameters extends MappableBase {
+
     @ApiModelProperty
     private String vpcId;
+
+    @ApiModelProperty
+    private String internetGatewayId;
 
     @ApiModelProperty
     private String subnetId;
@@ -28,6 +32,14 @@ public class AwsNetworkParameters extends MappableBase {
 
     public void setVpcId(String vpcId) {
         this.vpcId = vpcId;
+    }
+
+    public String getInternetGatewayId() {
+        return internetGatewayId;
+    }
+
+    public void setInternetGatewayId(String internetGatewayId) {
+        this.internetGatewayId = internetGatewayId;
     }
 
     public String getSubnetId() {
@@ -42,6 +54,7 @@ public class AwsNetworkParameters extends MappableBase {
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
         putIfValueNotNull(map, "vpcId", vpcId);
+        putIfValueNotNull(map, "internetGatewayId", internetGatewayId);
         putIfValueNotNull(map, "subnetId", subnetId);
         return map;
     }
@@ -50,12 +63,13 @@ public class AwsNetworkParameters extends MappableBase {
     @JsonIgnore
     @ApiModelProperty(hidden = true)
     public CloudPlatform getCloudPlatform() {
-        return CloudPlatform.AWS;
+        return CloudPlatform.MOCK;
     }
 
     @Override
     public void parse(Map<String, Object> parameters) {
         vpcId = getParameterOrNull(parameters, "vpcId");
+        internetGatewayId = getParameterOrNull(parameters, "internetGatewayId");
         subnetId = getParameterOrNull(parameters, "subnetId");
     }
 }
