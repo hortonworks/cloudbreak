@@ -14,6 +14,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.StackAuthenticationRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.credential.CredentialRequest;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -53,6 +54,11 @@ public class CreateFreeIpaRequest {
     @NotNull
     @ApiModelProperty(value = FreeIpaModelDescriptions.FREEIPA_SERVER_SETTINGS, required = true)
     private FreeIpaServerRequest freeIpa;
+
+    //Until Environment service is ready
+    @NotNull
+    @ApiModelProperty(value = "Credential", required = true)
+    private CredentialRequest credential;
 
     public String getEnvironmentId() {
         return environmentId;
@@ -116,5 +122,13 @@ public class CreateFreeIpaRequest {
 
     public void setFreeIpa(FreeIpaServerRequest freeIpa) {
         this.freeIpa = freeIpa;
+    }
+
+    public CredentialRequest getCredential() {
+        return credential;
+    }
+
+    public void setCredential(CredentialRequest credential) {
+        this.credential = credential;
     }
 }

@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.client;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateIfNotExistsAction;

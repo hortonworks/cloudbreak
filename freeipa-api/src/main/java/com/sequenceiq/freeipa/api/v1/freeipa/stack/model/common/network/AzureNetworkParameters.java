@@ -1,8 +1,13 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network;
 
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.mappable.MappableBase;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -10,7 +15,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel("AzureNetworkV1Parameters")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class AzureNetworkParameters {
+public class AzureNetworkParameters extends MappableBase {
     @ApiModelProperty
     private Boolean noPublicIp;
 
@@ -64,5 +69,32 @@ public class AzureNetworkParameters {
 
     public void setSubnetId(String subnetId) {
         this.subnetId = subnetId;
+    }
+
+    @Override
+    public Map<String, Object> asMap() {
+        Map<String, Object> map = super.asMap();
+        putIfValueNotNull(map, "noPublicIp", noPublicIp);
+        putIfValueNotNull(map, "noFirewallRules", noFirewallRules);
+        putIfValueNotNull(map, "resourceGroupName", resourceGroupName);
+        putIfValueNotNull(map, "networkId", networkId);
+        putIfValueNotNull(map, "subnetId", subnetId);
+        return map;
+    }
+
+    @Override
+    @JsonIgnore
+    @ApiModelProperty(hidden = true)
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.AZURE;
+    }
+
+    @Override
+    public void parse(Map<String, Object> parameters) {
+        noPublicIp = getBoolean(parameters, "noPublicIp");
+        noFirewallRules = getBoolean(parameters, "noFirewallRules");
+        resourceGroupName = getParameterOrNull(parameters, "resourceGroupName");
+        networkId = getParameterOrNull(parameters, "networkId");
+        subnetId = getParameterOrNull(parameters, "subnetId");
     }
 }

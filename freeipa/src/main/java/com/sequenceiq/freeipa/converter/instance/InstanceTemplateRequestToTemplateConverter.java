@@ -9,46 +9,37 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.mappable.ProviderParameterCalculator;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.RootVolumeV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.VolumeRequest;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.service.DefaultRootVolumeSizeProvider;
 
 @Component
-public class InstanceTemplateV4RequestToTemplateConverter implements Converter<InstanceTemplateV4Request, Template> {
+public class InstanceTemplateRequestToTemplateConverter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InstanceTemplateV4RequestToTemplateConverter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InstanceTemplateRequestToTemplateConverter.class);
 
     @Inject
     private MissingResourceNameGenerator missingResourceNameGenerator;
 
     @Inject
-    private ProviderParameterCalculator providerParameterCalculator;
-
-    @Inject
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
 
-    @Override
-    public Template convert(InstanceTemplateV4Request source) {
+    public Template convert(InstanceTemplateRequest source, CloudPlatform cloudPlatform) {
         Template template = new Template();
         template.setName(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE));
         template.setStatus(ResourceStatus.USER_MANAGED);
-        setVolumesProperty(source, Optional.ofNullable(source.getRootVolume()), template);
+        setVolumesProperty(source.getAttachedVolumes(), Optional.empty(), template, cloudPlatform);
         template.setInstanceType(source.getInstanceType() == null ? "" : source.getInstanceType());
-        Map<String, Object> parameters = providerParameterCalculator.get(source).asMap();
-        Optional.ofNullable(parameters).map(toJson()).ifPresent(template::setAttributes);
-        Map<String, Object> secretParameters = providerParameterCalculator.get(source).asSecretMap();
-        Optional.ofNullable(secretParameters).map(toJson()).map(Json::getValue).ifPresent(template::setSecretAttributes);
         return template;
     }
 
@@ -63,8 +54,8 @@ public class InstanceTemplateV4RequestToTemplateConverter implements Converter<I
         };
     }
 
-    private void setVolumesProperty(InstanceTemplateV4Request source, Optional<RootVolumeV4Request> rootVolume, Template template) {
-        Set<VolumeV4Request> attachedVolumes = source.getAttachedVolumes();
+    private void setVolumesProperty(Set<VolumeRequest> attachedVolumes, Optional<RootVolumeV4Request> rootVolume, Template template,
+            CloudPlatform cloudPlatform) {
         if (!attachedVolumes.isEmpty()) {
             attachedVolumes.stream().findFirst().ifPresent(v -> {
                 String volumeType = v.getType();
@@ -80,6 +71,6 @@ public class InstanceTemplateV4RequestToTemplateConverter implements Converter<I
         }
         template.setRootVolumeSize(rootVolume.map(RootVolumeV4Request::getSize).isPresent()
                 ? rootVolume.get().getSize()
-                : defaultRootVolumeSizeProvider.getForPlatform(source.getCloudPlatform().name()));
+                : defaultRootVolumeSizeProvider.getForPlatform(cloudPlatform.name()));
     }
 }

@@ -11,25 +11,25 @@ import javax.inject.Inject;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.freeipa.converter.instance.securityrule.SecurityRuleV4RequestToSecurityRuleConverter;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityGroupRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityRuleRequest;
+import com.sequenceiq.freeipa.converter.instance.securityrule.SecurityRuleRequestToSecurityRuleConverter;
 import com.sequenceiq.freeipa.entity.SecurityGroup;
 import com.sequenceiq.freeipa.entity.SecurityRule;
 
 @Component
-public class SecurityGroupV4RequestToSecurityGroupConverter implements Converter<SecurityGroupV4Request, SecurityGroup> {
+public class SecurityGroupRequestToSecurityGroupConverter implements Converter<SecurityGroupRequest, SecurityGroup> {
 
     @Inject
     private MissingResourceNameGenerator missingResourceNameGenerator;
 
     @Inject
-    private SecurityRuleV4RequestToSecurityRuleConverter securityRuleConverter;
+    private SecurityRuleRequestToSecurityRuleConverter securityRuleConverter;
 
     @Override
-    public SecurityGroup convert(@Nonnull SecurityGroupV4Request source) {
+    public SecurityGroup convert(@Nonnull SecurityGroupRequest source) {
         SecurityGroup entity = new SecurityGroup();
         entity.setName(missingResourceNameGenerator.generateName(APIResourceType.SECURITY_GROUP));
         entity.setSecurityGroupIds(convertSecurityGroupIdsToList(source));
@@ -37,7 +37,7 @@ public class SecurityGroupV4RequestToSecurityGroupConverter implements Converter
         return entity;
     }
 
-    private Set<String> convertSecurityGroupIdsToList(SecurityGroupV4Request source) {
+    private Set<String> convertSecurityGroupIdsToList(SecurityGroupRequest source) {
         Set<String> securityGroupIds = new HashSet<>();
         if (source.getSecurityGroupIds() != null && !source.getSecurityGroupIds().isEmpty()) {
             securityGroupIds.addAll(source.getSecurityGroupIds());
@@ -45,7 +45,7 @@ public class SecurityGroupV4RequestToSecurityGroupConverter implements Converter
         return securityGroupIds;
     }
 
-    private Set<SecurityRule> convertSecurityRules(List<SecurityRuleV4Request> securityRules, SecurityGroup securityGroup) {
+    private Set<SecurityRule> convertSecurityRules(List<SecurityRuleRequest> securityRules, SecurityGroup securityGroup) {
         Set<SecurityRule> convertedSet = securityRules.stream().map(rule -> securityRuleConverter.convert(rule)).collect(Collectors.toSet());
         for (SecurityRule securityRule : convertedSet) {
             securityRule.setSecurityGroup(securityGroup);

@@ -18,10 +18,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.freeipa.api.model.image.Image;
 import com.sequenceiq.freeipa.api.model.image.ImageCatalog;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ImageServiceTest {
@@ -67,7 +67,7 @@ public class ImageServiceTest {
 
     @Test
     public void testGetImageGivenNoInput() {
-        ImageSettingsV4Request is = setupImageSettingsRequest(null, null, null);
+        ImageSettingsRequest is = setupImageSettingsRequest(null, null, null);
         Image image = underTest.getImage(is, DEFAULT_REGION, DEFAULT_PLATFORM);
         assertEquals(DEFAULT_OS, image.getOs());
         assertEquals("Assuming the latest image to be selected", LATEST_DATE_NO_INPUT, image.getDate());
@@ -76,7 +76,7 @@ public class ImageServiceTest {
 
     @Test
     public void testGetImageGivenAllInput() {
-        ImageSettingsV4Request is = setupImageSettingsRequest(EXISTING_ID, CUSTOM_IMAGE_CATALOG_URL, DEFAULT_OS);
+        ImageSettingsRequest is = setupImageSettingsRequest(EXISTING_ID, CUSTOM_IMAGE_CATALOG_URL, DEFAULT_OS);
         Image image = underTest.getImage(is, DEFAULT_REGION, DEFAULT_PLATFORM);
         assertEquals(DEFAULT_OS, image.getOs());
         assertEquals("Assuming the latest image to be selected", LATEST_DATE, image.getDate());
@@ -85,7 +85,7 @@ public class ImageServiceTest {
 
     @Test
     public void testGetImageGivenIdInputFound() {
-        ImageSettingsV4Request is = setupImageSettingsRequest(EXISTING_ID, null, null);
+        ImageSettingsRequest is = setupImageSettingsRequest(EXISTING_ID, null, null);
         Image image = underTest.getImage(is, DEFAULT_REGION, DEFAULT_PLATFORM);
         assertEquals(DEFAULT_OS, image.getOs());
         assertEquals("Assuming the latest image to be selected", LATEST_DATE, image.getDate());
@@ -94,7 +94,7 @@ public class ImageServiceTest {
 
     @Test
     public void testGetImageGivenIdInputNotFound() {
-        ImageSettingsV4Request is = setupImageSettingsRequest(NON_EXISTING_ID, null, null);
+        ImageSettingsRequest is = setupImageSettingsRequest(NON_EXISTING_ID, null, null);
 
         Exception exception = assertThrows(RuntimeException.class, () ->
                 underTest.getImage(is, DEFAULT_REGION, DEFAULT_PLATFORM));
@@ -124,8 +124,8 @@ public class ImageServiceTest {
         return catalog;
     }
 
-    private ImageSettingsV4Request setupImageSettingsRequest(String id, String catalog, String os) {
-        ImageSettingsV4Request is = new ImageSettingsV4Request();
+    private ImageSettingsRequest setupImageSettingsRequest(String id, String catalog, String os) {
+        ImageSettingsRequest is = new ImageSettingsRequest();
         is.setId(id);
         is.setCatalog(catalog);
         is.setOs(os);

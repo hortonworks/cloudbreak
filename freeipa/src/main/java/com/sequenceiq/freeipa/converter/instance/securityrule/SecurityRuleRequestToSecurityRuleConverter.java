@@ -6,12 +6,12 @@ import java.util.regex.Pattern;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityRuleRequest;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.entity.SecurityRule;
 
 @Component
-public class SecurityRuleV4RequestToSecurityRuleConverter implements Converter<SecurityRuleV4Request, SecurityRule> {
+public class SecurityRuleRequestToSecurityRuleConverter implements Converter<SecurityRuleRequest, SecurityRule> {
 
     private static final String PORT_REGEX = "^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])"
             + "(-([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5]))?$";
@@ -21,7 +21,7 @@ public class SecurityRuleV4RequestToSecurityRuleConverter implements Converter<S
     private static final int MAX_RANGE = 65535;
 
     @Override
-    public SecurityRule convert(SecurityRuleV4Request source) {
+    public SecurityRule convert(SecurityRuleRequest source) {
         SecurityRule entity = new SecurityRule();
         entity.setCidr(source.getSubnet());
         List<String> ports = source.getPorts();

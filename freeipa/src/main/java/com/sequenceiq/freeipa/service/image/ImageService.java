@@ -22,10 +22,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.entity.Image;
 import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
@@ -66,7 +66,7 @@ public class ImageService {
     @Value("${freeipa.image.catalog.default.os}")
     private String defaultOs;
 
-    public void create(Stack stack, ImageSettingsV4Request imageRequest) {
+    public void create(Stack stack, ImageSettingsRequest imageRequest) {
         Future<PlatformParameters> platformParametersFuture = executorService.submit(() -> platformParameterService.getPlatformParameters(stack));
         String userData = createUserData(stack, platformParametersFuture);
         String region = stack.getRegion();
@@ -89,7 +89,7 @@ public class ImageService {
         return imageRepository.getByStack(stack);
     }
 
-    public com.sequenceiq.freeipa.api.model.image.Image getImage(ImageSettingsV4Request imageSettings, String region, String platform) {
+    public com.sequenceiq.freeipa.api.model.image.Image getImage(ImageSettingsRequest imageSettings, String region, String platform) {
         String imageId = imageSettings.getId();
         String catalogUrl = Objects.nonNull(imageSettings.getCatalog()) ? imageSettings.getCatalog() : defaultCatalogUrl;
         String imageOs = Objects.nonNull(imageSettings.getOs()) ? imageSettings.getOs() : defaultOs;
