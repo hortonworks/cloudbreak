@@ -23,8 +23,14 @@ $INTEGCB_LOCATION/.deps/bin/docker-compose up -d caas-mock
 echo -e "\n\033[1;96m--- Start cloudbreak\033[0m\n"
 cd $INTEGCB_LOCATION
 ./cbd regenerate
-./cbd start-wait identity commondb vault cloudbreak
+./cbd start-wait identity commondb vault cloudbreak environment periscope freeipa redbeams datalake
 cd ..
+
+docker rm -f cbreak_environment_1
+docker rm -f cbreak_freeipa_1
+docker rm -f cbreak_redbeams_1
+docker rm -f cbreak_datalake_1
+docker rm -f cbreak_periscope_1
 
 if [[ "$CIRCLECI" ]]; then
     echo -e "\n\033[1;96m--- Setting User CRN for test variables:\033[0m\n"
