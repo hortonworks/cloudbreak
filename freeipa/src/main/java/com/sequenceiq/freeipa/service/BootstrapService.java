@@ -29,13 +29,11 @@ import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.freeipa.entity.FreeIpa;
-import com.sequenceiq.freeipa.entity.Image;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.orchestrator.DummyExitCriteriaModel;
 import com.sequenceiq.freeipa.repository.InstanceMetaDataRepository;
 import com.sequenceiq.freeipa.repository.StackRepository;
-import com.sequenceiq.freeipa.service.image.ImageService;
 
 @Service
 public class BootstrapService {
@@ -60,9 +58,6 @@ public class BootstrapService {
     @Inject
     private FreeIpaService freeIpaService;
 
-    @Inject
-    private ImageService imageService;
-
     public void bootstrap(Long stackId) {
         Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataRepository.findAllInStack(stackId);
         Stack stack = stackRepository.findById(stackId).get();
@@ -76,9 +71,8 @@ public class BootstrapService {
                 }).collect(Collectors.toSet());
         BootstrapParams params = new BootstrapParams();
         params.setCloud(stack.getCloudPlatform());
-
-        Image image = imageService.getByStack(stack);
-        params.setOs(image.getOs());
+        //FIXME set from image
+        params.setOs("amazonlinux2");
         try {
             byte[] stateConfigZip = getStateConfigZip();
             hostOrchestrator.bootstrapNewNodes(gatewayConfigs, allNodes, allNodes,
