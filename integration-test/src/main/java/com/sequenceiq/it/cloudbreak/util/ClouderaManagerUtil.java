@@ -24,7 +24,7 @@ public class ClouderaManagerUtil {
 
     private static final String PRODUCT_NAME = "CDH";
 
-    private static final String CDH_VERSION = "6.0.99";
+    private static final String CDH_VERSION = "7.0.0";
 
     private static final String DEFAULT_REPO_BASE_URL = "http://cloudera-build-us-west-1.vpc.cloudera.com/";
 
