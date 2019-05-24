@@ -5,6 +5,8 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.springframework.stereotype.Controller;
 
@@ -172,6 +174,16 @@ public class StackV4Controller extends NotificationController implements StackV4
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         clusterCommonService.put(stack.getId(), updateJson, user, workspace);
+    }
+
+    @Override
+    public Response getClusterHostsInventory(Long workspaceId, String name) {
+        Stack stack = stackService.getByNameInWorkspace(name, workspaceId);
+        String iniStr = clusterCommonService.getHostNamesAsIniString(stack.getCluster());
+        return Response
+                .ok(iniStr, MediaType.APPLICATION_OCTET_STREAM)
+                .header("content-disposition", String.format("attachment; filename = %s-hosts.ini", stack.getName()))
+                .build();
     }
 
 }
