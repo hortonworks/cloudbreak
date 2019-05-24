@@ -36,3 +36,10 @@ cloudera_manager_setup_ldap:
     - template: jinja
 
 {% endif %}
+
+cloudera_manager_set_parcel_validation:
+  file.replace:
+    - name: /opt/cloudera/cm/bin/cm-server
+    - pattern: "CMF_OPTS -server"
+    - repl: "CMF_OPTS -server\"\nCMF_OPTS=\"$CMF_OPTS -Dcom.cloudera.parcel.VALIDATE_PARCELS_HASH=false"
+    - unless: grep "VALIDATE_PARCELS_HASH=false" /opt/cloudera/cm/bin/cm-server
