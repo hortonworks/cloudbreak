@@ -1,4 +1,4 @@
-package com.sequenceiq.redbeams.util;
+package com.sequenceiq.redbeams.api.util;
 
 import java.util.Optional;
 

@@ -8,11 +8,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.Database;
-import com.sequenceiq.cloudbreak.validation.ValidRDSConfigJson;
 
 import io.swagger.annotations.ApiModelProperty;
 
-@ValidRDSConfigJson
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class DatabaseV4Base implements JsonEntity {
 

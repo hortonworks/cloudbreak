@@ -39,7 +39,6 @@ import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvide
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.util.DatabaseCommon;
-import com.sequenceiq.cloudbreak.util.HostAndPortAndDatabaseName;
 
 /**
  * Sets up management services for the given Cloudera Manager server.
@@ -78,6 +77,9 @@ public class ClouderaManagerMgmtSetupService {
 
     @Inject
     private ClouderaManagerLicenseService licenseService;
+
+    @Inject
+    private DatabaseCommon databaseCommon;
 
     /**
      * Sets up the management services using the given Cloudera Manager client.
@@ -232,17 +234,18 @@ public class ClouderaManagerMgmtSetupService {
         String connectionUrl = rdsConfig.getConnectionURL();
 
         // We can safely retrieve these values since they should have passed validation
-        String type = DatabaseCommon.getDatabaseType(connectionUrl).get();
-        HostAndPortAndDatabaseName hostAndPortAndDatabaseName = DatabaseCommon.getHostPortAndDatabaseName(
-                connectionUrl).get();
+        DatabaseCommon.JdbcConnectionUrlFields connectionUrlFields = databaseCommon.parseJdbcConnectionUrl(connectionUrl);
+        String type = connectionUrlFields.getVendorDriverId();
+        String hostAndPort = connectionUrlFields.getHostAndPort();
+        String databaseName = connectionUrlFields.getDatabase().get();
 
         ApiConfigList result = new ApiConfigList();
         result.addItemsItem(makeApiConfig(getDatabaseApiConfigName(prefix, DatabaseProperties.TYPE_PROPERTY),
                 type));
         result.addItemsItem(makeApiConfig(getDatabaseApiConfigName(prefix, DatabaseProperties.HOST_PROPERTY),
-                hostAndPortAndDatabaseName.getHostAndPort()));
+                hostAndPort));
         result.addItemsItem(makeApiConfig(getDatabaseApiConfigName(prefix, DatabaseProperties.NAME_PROPERTY),
-                hostAndPortAndDatabaseName.getDatabaseName()));
+                databaseName));
         result.addItemsItem(makeApiConfig(getDatabaseApiConfigName(prefix, DatabaseProperties.USER_PROPERTY),
                 rdsConfig.getConnectionUserName()));
         result.addItemsItem(makeApiConfig(getDatabaseApiConfigName(prefix, DatabaseProperties.PASSWORD_PROPERTY),

@@ -5,12 +5,10 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseV4Base;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.Database;
-import com.sequenceiq.cloudbreak.validation.externaldatabase.ValidRds;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ValidRds
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DatabaseV4Request extends DatabaseV4Base {

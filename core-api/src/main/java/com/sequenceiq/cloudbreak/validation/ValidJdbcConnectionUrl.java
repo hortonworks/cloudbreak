@@ -10,15 +10,17 @@ import javax.validation.Constraint;
 import javax.validation.Payload;
 
 @Documented
-@Target(ElementType.TYPE)
+@Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = RDSConfigJsonValidator.class)
-public @interface ValidRDSConfigJson {
+@Constraint(validatedBy = JdbcConnectionUrlValidator.class)
+public @interface ValidJdbcConnectionUrl {
 
-    String message() default "Database configuration contains one or more invalid data.";
+    String message() default "";
 
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
+
+    boolean databaseExpected() default true;
 
 }

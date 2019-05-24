@@ -10,7 +10,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
+// import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 import com.sequenceiq.it.cloudbreak.assertion.database.DatabaseTestAssertion;
 import com.sequenceiq.it.cloudbreak.assertion.database.DatabaseTestTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.DatabaseTestClient;
@@ -108,6 +108,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
                 .validate();
     }
 
+    /*
     @Test(dataProvider = INVALID_ATTRIBUTE_PROVIDER)
     public void testCreateDatabaseWithInvalidAttribute(
             TestContext testContext,
@@ -156,6 +157,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
                                 .withKey(generatedKey))
                 .validate();
     }
+    */
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(

@@ -2,9 +2,14 @@ package com.sequenceiq.cloudbreak.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.sequenceiq.cloudbreak.util.DatabaseCommon.JdbcConnectionUrlFields;
+
 import java.util.Optional;
 
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class DatabaseCommonTest {
     private static final String ORACLE_URL = "jdbc:oracle:@test.eu-west-1.rds.amazonaws.com:1521/hivedb";
@@ -27,74 +32,147 @@ public class DatabaseCommonTest {
 
     private static final String POSTGRES_URL = POSTGRES_URL_WITHOUT_DATABASE + "hivedb";
 
+    private static final String POSTGRES_URL_WITH_HYPHENATED_DATABASE_NAME = POSTGRES_URL_WITHOUT_DATABASE + "hive-db-";
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
+    private DatabaseCommon databaseCommon;
+
+    @Before
+    public void setUp() {
+        databaseCommon = new DatabaseCommon();
+    }
+
     @Test
     public void testMariadbParsing() {
-        assertThat(DatabaseCommon.getDatabaseType(MARIADB_URL).isEmpty()).isTrue();
+        JdbcConnectionUrlFields fields = databaseCommon.parseJdbcConnectionUrl(MARIADB_URL);
+        assertThat(fields.getVendorDriverId()).isEqualTo("mariadb");
+        assertThat(fields.getHost()).isEqualTo("test.eu-west-1.rds.amazonaws.com");
+        assertThat(fields.getPort()).isEqualTo(3306);
+        assertThat(fields.getHostAndPort()).isEqualTo("test.eu-west-1.rds.amazonaws.com:3306");
+        assertThat(fields.getDatabase()).isEqualTo(Optional.of("hivedb"));
     }
 
     @Test
     public void testMysqlParsing() {
-        assertThat(DatabaseCommon.getDatabaseType(MYSQL_URL).get()).isEqualTo("mysql");
-        assertHostParsing(MYSQL_URL, "test.eu-west-1.rds.amazonaws.com:3306", "hivedb");
+        JdbcConnectionUrlFields fields = databaseCommon.parseJdbcConnectionUrl(MYSQL_URL);
+        assertThat(fields.getVendorDriverId()).isEqualTo("mysql");
+        assertThat(fields.getHost()).isEqualTo("test.eu-west-1.rds.amazonaws.com");
+        assertThat(fields.getPort()).isEqualTo(3306);
+        assertThat(fields.getHostAndPort()).isEqualTo("test.eu-west-1.rds.amazonaws.com:3306");
+        assertThat(fields.getDatabase()).isEqualTo(Optional.of("hivedb"));
+    }
+
+    @Test
+    public void testMysqlNoDatabaseParsing() {
+        JdbcConnectionUrlFields fields = databaseCommon.parseJdbcConnectionUrl(MYSQL_URL_WITHOUT_DATABASE_AND_SSL);
+        assertThat(fields.getVendorDriverId()).isEqualTo("mysql");
+        assertThat(fields.getHost()).isEqualTo("test.eu-west-1.rds.amazonaws.com");
+        assertThat(fields.getPort()).isEqualTo(3306);
+        assertThat(fields.getHostAndPort()).isEqualTo("test.eu-west-1.rds.amazonaws.com:3306");
+        assertThat(fields.getDatabase().isPresent()).isFalse();
     }
 
     @Test
     public void testOracleParsing() {
-        assertHostParsing(ORACLE_URL, "test.eu-west-1.rds.amazonaws.com:1521", "hivedb");
-        assertThat(DatabaseCommon.getDatabaseType(ORACLE_URL).get()).isEqualTo("oracle");
+        JdbcConnectionUrlFields fields = databaseCommon.parseJdbcConnectionUrl(ORACLE_URL);
+        assertThat(fields.getVendorDriverId()).isEqualTo("oracle");
+        assertThat(fields.getHost()).isEqualTo("test.eu-west-1.rds.amazonaws.com");
+        assertThat(fields.getPort()).isEqualTo(1521);
+        assertThat(fields.getHostAndPort()).isEqualTo("test.eu-west-1.rds.amazonaws.com:1521");
+        assertThat(fields.getDatabase()).isEqualTo(Optional.of("hivedb"));
+    }
+
+    @Test
+    public void testOracleThinParsing() {
+        JdbcConnectionUrlFields fields = databaseCommon.parseJdbcConnectionUrl(ORACLE_THIN_URL);
+        assertThat(fields.getVendorDriverId()).isEqualTo("oracle");
+        assertThat(fields.getHost()).isEqualTo("test.eu-west-1.rds.amazonaws.com");
+        assertThat(fields.getPort()).isEqualTo(1521);
+        assertThat(fields.getHostAndPort()).isEqualTo("test.eu-west-1.rds.amazonaws.com:1521");
+        assertThat(fields.getDatabase()).isEqualTo(Optional.of("hivedb"));
+    }
+
+    @Test
+    public void testOracleThinNoDatabaseParsing() {
+        JdbcConnectionUrlFields fields = databaseCommon.parseJdbcConnectionUrl(ORACLE_THIN_URL_WITHOUT_DATABASE);
+        assertThat(fields.getVendorDriverId()).isEqualTo("oracle");
+        assertThat(fields.getHost()).isEqualTo("test.eu-west-1.rds.amazonaws.com");
+        assertThat(fields.getPort()).isEqualTo(1521);
+        assertThat(fields.getHostAndPort()).isEqualTo("test.eu-west-1.rds.amazonaws.com:1521");
+        assertThat(fields.getDatabase().isPresent()).isFalse();
     }
 
     @Test
     public void testPostgresParsing() {
-        assertHostParsing(POSTGRES_URL, "test.eu-west-1.rds.amazonaws.com:5432", "hivedb");
-        assertThat(DatabaseCommon.getDatabaseType(POSTGRES_URL).get()).isEqualTo("postgresql");
+        JdbcConnectionUrlFields fields = databaseCommon.parseJdbcConnectionUrl(POSTGRES_URL);
+        assertThat(fields.getVendorDriverId()).isEqualTo("postgresql");
+        assertThat(fields.getHost()).isEqualTo("test.eu-west-1.rds.amazonaws.com");
+        assertThat(fields.getPort()).isEqualTo(5432);
+        assertThat(fields.getHostAndPort()).isEqualTo("test.eu-west-1.rds.amazonaws.com:5432");
+        assertThat(fields.getDatabase()).isEqualTo(Optional.of("hivedb"));
     }
 
     @Test
-    public void testMysqlParsingWithoutPort() {
-        assertThat(DatabaseCommon.getHostPortAndDatabaseName(MYSQL_URL_WITHOUT_PORT).isEmpty()).isTrue();
-    }
-
-    private void assertHostParsing(String url, String hostAndPort, String databaseName) {
-        HostAndPortAndDatabaseName mysqlInfo = DatabaseCommon.getHostPortAndDatabaseName(url).get();
-
-        assertThat(mysqlInfo.getHostAndPort()).isEqualTo(hostAndPort);
-        assertThat(mysqlInfo.getDatabaseName()).isEqualTo(databaseName);
+    public void testPostgresNoDatabaseParsing() {
+        JdbcConnectionUrlFields fields = databaseCommon.parseJdbcConnectionUrl(POSTGRES_URL_WITHOUT_DATABASE);
+        assertThat(fields.getVendorDriverId()).isEqualTo("postgresql");
+        assertThat(fields.getHost()).isEqualTo("test.eu-west-1.rds.amazonaws.com");
+        assertThat(fields.getPort()).isEqualTo(5432);
+        assertThat(fields.getHostAndPort()).isEqualTo("test.eu-west-1.rds.amazonaws.com:5432");
+        assertThat(fields.getDatabase().isPresent()).isFalse();
     }
 
     @Test
-    public void testPostgresConnectionURLWithoutDatabase() {
-        String url = DatabaseCommon.getConnectionURL("postgresql", "test.eu-west-1.rds.amazonaws.com", 5432, Optional.empty());
+    public void testPostgresHyphenatedDatabaseParsing() {
+        JdbcConnectionUrlFields fields = databaseCommon.parseJdbcConnectionUrl(POSTGRES_URL_WITH_HYPHENATED_DATABASE_NAME);
+        assertThat(fields.getVendorDriverId()).isEqualTo("postgresql");
+        assertThat(fields.getHost()).isEqualTo("test.eu-west-1.rds.amazonaws.com");
+        assertThat(fields.getPort()).isEqualTo(5432);
+        assertThat(fields.getHostAndPort()).isEqualTo("test.eu-west-1.rds.amazonaws.com:5432");
+        assertThat(fields.getDatabase()).isEqualTo(Optional.of("hive-db-"));
+    }
+
+    @Test
+    public void testPostgresConnectionUrlWithoutDatabase() {
+        String url = databaseCommon.getJdbcConnectionUrl("postgresql", "test.eu-west-1.rds.amazonaws.com", 5432, Optional.empty());
         assertThat(url).isEqualTo(POSTGRES_URL_WITHOUT_DATABASE);
     }
 
     @Test
-    public void testPostgresConnectionURLWithDatabase() {
-        String url = DatabaseCommon.getConnectionURL("postgresql", "test.eu-west-1.rds.amazonaws.com", 5432, Optional.of("hivedb"));
+    public void testPostgresConnectionUrlWithDatabase() {
+        String url = databaseCommon.getJdbcConnectionUrl("postgresql", "test.eu-west-1.rds.amazonaws.com", 5432, Optional.of("hivedb"));
         assertThat(url).isEqualTo(POSTGRES_URL);
     }
 
     @Test
-    public void testMySQLConnectionURLWithoutDatabase() {
-        String url = DatabaseCommon.getConnectionURL("mysql", "test.eu-west-1.rds.amazonaws.com", 3306, Optional.empty());
+    public void testMySQLConnectionUrlWithoutDatabase() {
+        String url = databaseCommon.getJdbcConnectionUrl("mysql", "test.eu-west-1.rds.amazonaws.com", 3306, Optional.empty());
         assertThat(url).isEqualTo(MYSQL_URL_WITHOUT_DATABASE_AND_SSL);
     }
 
     @Test
-    public void testMySQLConnectionURLWithDatabase() {
-        String url = DatabaseCommon.getConnectionURL("mysql", "test.eu-west-1.rds.amazonaws.com", 3306, Optional.of("hivedb"));
+    public void testMySQLConnectionUrlWithDatabase() {
+        String url = databaseCommon.getJdbcConnectionUrl("mysql", "test.eu-west-1.rds.amazonaws.com", 3306, Optional.of("hivedb"));
         assertThat(url).isEqualTo(MYSQL_URL_WITHOUT_SSL);
     }
 
     @Test
-    public void testOracleConnectionURLWithoutDatabase() {
-        String url = DatabaseCommon.getConnectionURL("oracle", "test.eu-west-1.rds.amazonaws.com", 1521, Optional.empty());
+    public void testOracleConnectionUrlWithoutDatabase() {
+        String url = databaseCommon.getJdbcConnectionUrl("oracle", "test.eu-west-1.rds.amazonaws.com", 1521, Optional.empty());
         assertThat(url).isEqualTo(ORACLE_THIN_URL_WITHOUT_DATABASE);
     }
 
     @Test
-    public void testOracleConnectionURLWithDatabase() {
-        String url = DatabaseCommon.getConnectionURL("oracle", "test.eu-west-1.rds.amazonaws.com", 1521, Optional.of("hivedb"));
+    public void testOracleConnectionUrlWithDatabase() {
+        String url = databaseCommon.getJdbcConnectionUrl("oracle", "test.eu-west-1.rds.amazonaws.com", 1521, Optional.of("hivedb"));
         assertThat(url).isEqualTo(ORACLE_THIN_URL);
+    }
+
+    @Test
+    public void testPortCheck() {
+        thrown.expect(IllegalArgumentException.class);
+        new JdbcConnectionUrlFields("postgresql", "test.eu-west-1.rds.amazonaws.com", -1, Optional.empty());
     }
 }
