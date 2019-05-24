@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -71,7 +72,7 @@ public class UserService {
             LOGGER.debug("adding user {}", username);
 
             RPCResponse<com.sequenceiq.freeipa.client.model.User> userAdd = freeIpaClient.userAdd(
-                    username, user.getFirstName(), user.getLastName());
+                    username, user.getFirstName(), user.getLastName(), generateRandomPassword());
 
             LOGGER.debug("Success: {}", userAdd.getResult());
         }
@@ -103,4 +104,7 @@ public class UserService {
         return mapping;
     }
 
+    private String generateRandomPassword() {
+        return UUID.randomUUID().toString();
+    }
 }

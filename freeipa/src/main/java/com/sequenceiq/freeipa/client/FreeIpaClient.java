@@ -51,11 +51,13 @@ public class FreeIpaClient {
         return invoke("user_find", flags, params, type);
     }
 
-    public RPCResponse<User> userAdd(String user, String firstName, String lastName) throws FreeIpaClientException {
+    public RPCResponse<User> userAdd(String user, String firstName, String lastName, String password) throws FreeIpaClientException {
         List<String> flags = List.of(user);
         Map<String, Object> params = Map.of(
                 "givenname", firstName,
-                "sn", lastName
+                "sn", lastName,
+                "userpassword", password,
+                "setattr", "krbPasswordExpiration=20380101000000Z"
         );
         return invoke("user_add", flags, params, User.class);
     }
