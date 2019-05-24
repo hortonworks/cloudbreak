@@ -4,9 +4,11 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.MAINTENANCE_MODE_ENABLED;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -30,17 +32,20 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.HostGroupDecorator;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Service
 public class ClusterCommonService {
@@ -72,6 +77,9 @@ public class ClusterCommonService {
 
     @Inject
     private BlueprintService blueprintService;
+
+    @Inject
+    private HostMetadataService hostMetadataService;
 
     public void put(Long stackId, UpdateClusterV4Request updateJson, User user, Workspace workspace) {
         Stack stack = stackService.getById(stackId);
@@ -206,6 +214,44 @@ public class ClusterCommonService {
                 break;
 
         }
+    }
+
+    /**
+     * Get cluster host details (ips + cluster name) - ini format
+     * @param cluster cluster object that is used to fill the cluster details ini
+     * @return Ini file content in string
+     */
+    public String getHostNamesAsIniString(Cluster cluster) {
+        Long clusterId = cluster.getId();
+        String clusterName = cluster.getName();
+        String serverHost = cluster.getAmbariIp();
+        Set<HostMetadata> agentHostsSet = hostMetadataService.findHostsInCluster(clusterId);
+        if (agentHostsSet.isEmpty()) {
+            throw new NotFoundException(String.format("Not found any agent hosts (yet) for cluster '%s'", cluster.getId()));
+        }
+        String agentHosts = agentHostsSet.stream()
+                .map(HostMetadata::getHostName)
+                .collect(Collectors.joining("\n"));
+
+        List<String> hostGroupHostsStrings = agentHostsSet.stream()
+                .collect(Collectors.groupingBy(p -> p.getHostGroup().getName()))
+                .entrySet().stream()
+                .map(s -> addSectionWithBody(
+                        s.getKey(),
+                        s.getValue().stream().map(HostMetadata::getHostName).collect(Collectors.joining("\n"))))
+                .collect(Collectors.toList());
+
+        return String.join(
+                "\n",
+                addSectionWithBody("cluster", "name=" + clusterName),
+                addSectionWithBody("server", serverHost),
+                String.join("\n", hostGroupHostsStrings),
+                addSectionWithBody("agent", agentHosts)
+        );
+    }
+
+    private String addSectionWithBody(String section, String rawBody) {
+        return String.format("[%s]\n%s\n", section, rawBody);
     }
 
     private void saveAndFireEventOnClusterStatusChange(Cluster cluster, Long stackId, Status status, ResourceEvent event) {
