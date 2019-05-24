@@ -251,7 +251,7 @@ public class ClusterCommonService {
     }
 
     private String addSectionWithBody(String section, String rawBody) {
-        return String.format("[%s]\n%s\n", section, rawBody);
+        return String.format("[%s]%n%s%n", section, rawBody);
     }
 
     private void saveAndFireEventOnClusterStatusChange(Cluster cluster, Long stackId, Status status, ResourceEvent event) {
