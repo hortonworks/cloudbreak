@@ -107,7 +107,7 @@ cb:
 
   aws:
     spotinstances.enabled: true
-    disabled.instance.types: c5d,f1,i3,m5d,p3dn,r5d,z1d
+    disabled.instance.types: c5d,f1,i3,m5d,p3dn,z1d
     hostkey.verify: false
     external.id: provision-ambari
     role.session.name: hadoop-provisioning
