@@ -1,0 +1,123 @@
+{
+  "cluster": {
+    "validateBlueprint": false
+  },
+  "placement": {
+    "region": "eu-west-1",
+    "availabilityZone": "eu-west-1b"
+  },
+  "instanceGroups": [
+    {
+      "name": "master",
+      "template": {
+        "instanceType": "m5.2xlarge",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 100,
+            "type": "standard"
+          }
+        ],
+        "rootVolume": {
+          "size": 50
+        }
+      },
+      "nodeCount": 1,
+      "type": "GATEWAY",
+      "recoveryMode": "MANUAL",
+      "recipeNames": [],
+      "securityGroup": {
+        "securityRules": [
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": [
+              "9443"
+            ],
+            "protocol": "tcp"
+          },
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": [
+              "443"
+            ],
+            "protocol": "tcp"
+          },
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": [
+              "22"
+            ],
+            "protocol": "tcp"
+          }
+        ]
+      }
+    },
+    {
+      "name": "m2",
+      "template": {
+        "instanceType": "m5.xlarge",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 100,
+            "type": "standard"
+          }
+        ],
+        "rootVolume": {
+          "size": 50
+        }
+      },
+      "nodeCount": 1,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": [],
+      "securityGroup": {
+        "securityRules": [
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": [
+              "22"
+            ],
+            "protocol": "tcp"
+          }
+        ]
+      }
+    },
+    {
+      "name": "m3",
+      "template": {
+        "instanceType": "m5.xlarge",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 100,
+            "type": "standard"
+          }
+        ],
+        "rootVolume": {
+          "size": 50
+        },
+        "aws": {
+          "encryption": {
+            "type": "NONE"
+          }
+        }
+      },
+      "nodeCount": 1,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": [],
+      "securityGroup": {
+        "securityRules": [
+          {
+            "subnet": "0.0.0.0/0",
+            "ports": [
+              "22"
+            ],
+            "protocol": "tcp"
+          }
+        ]
+      }
+    }
+  ]
+}

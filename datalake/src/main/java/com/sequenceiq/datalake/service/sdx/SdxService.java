@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.datalake.api.endpoint.sdx.SdxClusterRequest;
@@ -24,12 +23,7 @@ import com.sequenceiq.datalake.repository.SdxClusterRepository;
 @Service
 public class SdxService {
 
-    public static final String SDX_CLUSTER_NAME = "sdx-cluster";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxService.class);
-
-    @Inject
-    private CloudbreakUserCrnClient cloudbreakClient;
 
     @Inject
     private SdxClusterRepository sdxClusterRepository;
