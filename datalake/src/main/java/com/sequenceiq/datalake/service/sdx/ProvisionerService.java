@@ -1,11 +1,8 @@
 package com.sequenceiq.datalake.service.sdx;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.inject.Inject;
 import javax.ws.rs.ClientErrorException;
@@ -13,31 +10,23 @@ import javax.ws.rs.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.RootVolumeV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
@@ -45,8 +34,6 @@ import com.sequenceiq.datalake.repository.SdxClusterRepository;
 
 @Service
 public class ProvisionerService {
-
-    public static final String CLUSTER_DEFINITION = "CDP 1.0 - SDX: Hive Metastore";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProvisionerService.class);
 
@@ -67,6 +54,9 @@ public class ProvisionerService {
 
     @Inject
     private Clock clock;
+
+    @Value("${sdx.cluster.definition}")
+    private String clusterDefinition;
 
     public void startStackDeletion(Long id) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
@@ -167,80 +157,32 @@ public class ProvisionerService {
     }
 
     private StackV4Request setupStackRequestForCloudbreak(SdxCluster sdxCluster) {
-        StackV4Request stackV4Request = new StackV4Request();
-        stackV4Request.setName(sdxCluster.getClusterName());
-        TagsV4Request tags = new TagsV4Request();
+
+        String clusterTemplateJson = FileReaderUtils.readFileFromClasspathQuietly("sdx/" + "cluster-template.json");
         try {
-            tags.setUserDefined(sdxCluster.getTags().get(HashMap.class));
+            StackV4Request stackRequest = JsonUtil.readValue(clusterTemplateJson, StackV4Request.class);
+            stackRequest.setName(sdxCluster.getClusterName());
+            TagsV4Request tags = new TagsV4Request();
+            try {
+                tags.setUserDefined(sdxCluster.getTags().get(HashMap.class));
+            } catch (IOException e) {
+                throw new BadRequestException("can not convert from json to tags");
+            }
+            stackRequest.setTags(tags);
+            EnvironmentSettingsV4Request environment = new EnvironmentSettingsV4Request();
+            environment.setName(sdxCluster.getEnvName());
+            stackRequest.setEnvironment(environment);
+            StackAuthenticationV4Request stackAuthenticationV4Request = new StackAuthenticationV4Request();
+            stackAuthenticationV4Request.setPublicKey(dummySshKey);
+            stackRequest.setAuthentication(stackAuthenticationV4Request);
+            ClusterV4Request cluster = stackRequest.getCluster();
+            cluster.setBlueprintName(clusterDefinition);
+            cluster.setUserName("admin");
+            cluster.setPassword("admin123");
+            return stackRequest;
         } catch (IOException e) {
-            throw new BadRequestException("can not convert from json to tags");
+            LOGGER.error("Can not parse json to stack request");
+            throw new IllegalStateException("Can not parse json to stack request", e);
         }
-        stackV4Request.setTags(tags);
-
-        EnvironmentSettingsV4Request environment = new EnvironmentSettingsV4Request();
-        environment.setName(sdxCluster.getEnvName());
-        stackV4Request.setEnvironment(environment);
-
-        PlacementSettingsV4Request placementSettingsV4Request = new PlacementSettingsV4Request();
-        placementSettingsV4Request.setRegion("eu-west-1");
-        placementSettingsV4Request.setAvailabilityZone("eu-west-1b");
-        stackV4Request.setPlacement(placementSettingsV4Request);
-
-        StackAuthenticationV4Request stackAuthenticationV4Request = new StackAuthenticationV4Request();
-        stackAuthenticationV4Request.setPublicKey(dummySshKey);
-        stackV4Request.setAuthentication(stackAuthenticationV4Request);
-
-        ClusterV4Request clusterV4Request = new ClusterV4Request();
-        clusterV4Request.setBlueprintName(CLUSTER_DEFINITION);
-        clusterV4Request.setUserName("admin");
-        clusterV4Request.setPassword("admin123");
-        clusterV4Request.setValidateBlueprint(false);
-        stackV4Request.setCluster(clusterV4Request);
-
-        ImageSettingsV4Request image = new ImageSettingsV4Request();
-        image.setOs("redhat7");
-        stackV4Request.setImage(image);
-
-        InstanceGroupV4Request masterInstanceGroupV4Request = new InstanceGroupV4Request();
-        masterInstanceGroupV4Request.setName("master");
-
-        InstanceTemplateV4Request template = new InstanceTemplateV4Request();
-        Set<VolumeV4Request> attachedVolumes = new HashSet<>();
-        VolumeV4Request volumeV4Request = new VolumeV4Request();
-        volumeV4Request.setSize(DISK_SIZE);
-        volumeV4Request.setCount(DISK_COUNT);
-        volumeV4Request.setType("standard");
-        attachedVolumes.add(volumeV4Request);
-        template.setAttachedVolumes(attachedVolumes);
-        template.setInstanceType("m5.2xlarge");
-        RootVolumeV4Request rootVolume = new RootVolumeV4Request();
-        rootVolume.setSize(DISK_SIZE);
-        template.setRootVolume(rootVolume);
-
-        masterInstanceGroupV4Request.setTemplate(template);
-        masterInstanceGroupV4Request.setNodeCount(1);
-        masterInstanceGroupV4Request.setType(InstanceGroupType.GATEWAY);
-        masterInstanceGroupV4Request.setRecoveryMode(RecoveryMode.MANUAL);
-
-        SecurityGroupV4Request securityGroup = new SecurityGroupV4Request();
-        ArrayList<SecurityRuleV4Request> securityRules = new ArrayList<>();
-        SecurityRuleV4Request securityRule9443 = new SecurityRuleV4Request();
-        securityRule9443.setSubnet(sdxCluster.getAccessCidr());
-        ArrayList<String> ports = new ArrayList<>();
-        ports.add("443");
-        ports.add("9443");
-        ports.add("22");
-        securityRule9443.setPorts(ports);
-        securityRule9443.setProtocol("tcp");
-        securityRules.add(securityRule9443);
-        securityGroup.setSecurityRules(securityRules);
-
-        masterInstanceGroupV4Request.setSecurityGroup(securityGroup);
-
-        ArrayList<InstanceGroupV4Request> instanceGroups = new ArrayList<>();
-        instanceGroups.add(masterInstanceGroupV4Request);
-        stackV4Request.setInstanceGroups(instanceGroups);
-
-        return stackV4Request;
     }
 }

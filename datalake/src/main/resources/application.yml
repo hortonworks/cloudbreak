@@ -23,6 +23,10 @@ management:
       percentiles:
         "[http.server.requests]": "0.5, 0.95"
 
+sdx:
+  cluster:
+    definition: "CDP 1.0 - SDX: Apache Hive Metastore, Apache Ranger, Apache Atlas"
+
 datalake:
   cert.dir: /certs/
   client.id: datalake
