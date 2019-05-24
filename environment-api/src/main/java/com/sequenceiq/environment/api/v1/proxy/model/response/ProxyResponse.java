@@ -14,7 +14,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class ProxyResponse extends ProxyBase {
 
     @ApiModelProperty(ProxyConfigDescription.PROXY_CONFIG_ID)
-    private Long id;
+    private String id;
 
     @ApiModelProperty(ProxyConfigDescription.USERNAME)
     private SecretResponse userName;
@@ -22,11 +22,11 @@ public class ProxyResponse extends ProxyBase {
     @ApiModelProperty(ProxyConfigDescription.PASSWORD)
     private SecretResponse password;
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

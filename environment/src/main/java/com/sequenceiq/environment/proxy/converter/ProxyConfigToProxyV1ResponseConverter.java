@@ -13,7 +13,7 @@ public class ProxyConfigToProxyV1ResponseConverter extends AbstractConversionSer
     @Override
     public ProxyResponse convert(ProxyConfig source) {
         ProxyResponse response = new ProxyResponse();
-        response.setId(source.getId());
+        response.setId(source.getResourceCrn());
         response.setName(source.getName());
         response.setDescription(source.getDescription());
         response.setProtocol(source.getProtocol());
