@@ -16,6 +16,7 @@ public class CmTemplateComponentConfigProcessor {
 
     public CmTemplateProcessor process(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject template) {
         for (CmTemplateComponentConfigProvider provider : cmTemplateComponentConfigProviderList) {
+            cmTemplateProcessor.extendTemplateWithAdditionalServices(provider.getAdditionalServices(cmTemplateProcessor, template));
             if (provider.isConfigurationNeeded(cmTemplateProcessor, template)) {
                 cmTemplateProcessor.addServiceConfigs(provider.getServiceType(), provider.getRoleTypes(), provider.getServiceConfigs(template));
                 cmTemplateProcessor.addVariables(provider.getServiceConfigVariables(template));

@@ -18,12 +18,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateInstantiator;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroupInfo;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
@@ -314,6 +316,49 @@ public class CmTemplateProcessorTest {
         assertEquals(Set.of("master", "worker"), underTest.getHostGroupsWithComponent("GATEWAY"));
     }
 
+    @Test
+    public void testExtendTemplateWithAdditionalServicesWithNoAdditionalServices() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
+        String originalTemplate = templateToString(underTest.getTemplate());
+
+        underTest.extendTemplateWithAdditionalServices(Map.of());
+
+        String actualTemplate = templateToString(underTest.getTemplate());
+        assertEquals(originalTemplate, actualTemplate);
+    }
+
+    @Test
+    public void testExtendTemplateWithAdditionalServicesWithKnoxService() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
+        ApiClusterTemplateService knox = new ApiClusterTemplateService().serviceType("KNOX").refName("knox");
+        ApiClusterTemplateRoleConfigGroup knoxGateway = new ApiClusterTemplateRoleConfigGroup()
+                .roleType("KNOX_GATEWAY").base(true).refName("knox-KNOX_GATEWAY-BASE");
+        knox.roleConfigGroups(List.of(knoxGateway));
+
+        underTest.extendTemplateWithAdditionalServices(Map.of("master", knox));
+        String actualTemplate = templateToString(underTest.getTemplate());
+
+        CmTemplateProcessor expectedProcessor = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-knox.bp"));
+        String expectedTemplate = templateToString(expectedProcessor.getTemplate());
+        assertEquals(expectedTemplate, actualTemplate);
+    }
+
+    @Test
+    public void testExtendTemplateWithAdditionalServicesWithKnoxServiceAndMultipleGateway() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-multi-gateway.bp"));
+        ApiClusterTemplateService knox = new ApiClusterTemplateService().serviceType("KNOX").refName("knox");
+        ApiClusterTemplateRoleConfigGroup knoxGateway = new ApiClusterTemplateRoleConfigGroup()
+                .roleType("KNOX_GATEWAY").base(true).refName("knox-KNOX_GATEWAY-BASE");
+        knox.roleConfigGroups(List.of(knoxGateway));
+
+        underTest.extendTemplateWithAdditionalServices(Map.of("master", knox, "master2", knox));
+        String actualTemplate = templateToString(underTest.getTemplate());
+
+        CmTemplateProcessor expectedProcessor = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-knox-multi-gateway.bp"));
+        String expectedTemplate = templateToString(expectedProcessor.getTemplate());
+        assertEquals(expectedTemplate, actualTemplate);
+    }
+
     private static void assertSortedEquals(Set<?> expected, Set<?> actual) {
         assertEquals(new TreeSet<>(expected), new TreeSet<>(actual));
     }
@@ -324,5 +369,9 @@ public class CmTemplateProcessorTest {
 
     private String getBlueprintText(String path) {
         return FileReaderUtils.readFileFromClasspathQuietly(path);
+    }
+
+    private String templateToString(ApiClusterTemplate template) {
+        return JsonUtil.writeValueAsStringSilent(template);
     }
 }
