@@ -16,12 +16,13 @@ import (
 )
 
 const (
-	altusAuthHeader   = "x-altus-auth"
-	altusDateHeader   = "x-altus-date"
-	contentTypeHeader = "content-type"
-	signPattern       = "%s\napplication/json\n%s\n%s\ned25519v1"
-	layout            = "Mon, 02 Jan 2006 15:04:05 GMT"
-	authMethod        = "ed25519v1"
+	altusActorCrnHeader = "x-cdp-actor-crn"
+	altusAuthHeader     = "x-altus-auth"
+	altusDateHeader     = "x-altus-date"
+	contentTypeHeader   = "content-type"
+	signPattern         = "%s\napplication/json\n%s\n%s\ned25519v1"
+	layout              = "Mon, 02 Jan 2006 15:04:05 GMT"
+	authMethod          = "ed25519v1"
 )
 
 type metastr struct {
@@ -39,6 +40,21 @@ func GetAPIKeyAuthTransport(address, baseAPIPath, accessKeyID, privateKey string
 	cbTransport.Runtime.DefaultAuthentication = altusAPIKeyAuth(baseAPIPath, accessKeyID, privateKey)
 	cbTransport.Runtime.Transport = utils.LoggedTransportConfig
 	return cbTransport
+}
+
+func GetActorCrnAuthTransport(address, baseAPIPath, actorCrn string) *utils.Transport {
+	address, basePath := utils.CutAndTrimAddress(address)
+	cbTransport := &utils.Transport{client.New(address, basePath+baseAPIPath, []string{"https"})}
+	cbTransport.Runtime.DefaultAuthentication = altusActorCrnAuth(baseAPIPath, actorCrn)
+	cbTransport.Runtime.Transport = utils.LoggedTransportConfig
+	return cbTransport
+}
+
+func altusActorCrnAuth(baseAPIPath, actorCrn string) runtime.ClientAuthInfoWriter {
+	return runtime.ClientAuthInfoWriterFunc(func(r runtime.ClientRequest, _ strfmt.Registry) error {
+		return r.SetHeaderParam(altusActorCrnHeader, actorCrn)
+	})
+
 }
 
 func altusAPIKeyAuth(baseAPIPath, accessKeyID, privateKey string) runtime.ClientAuthInfoWriter {

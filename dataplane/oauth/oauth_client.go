@@ -40,6 +40,14 @@ func NewCloudbreakHTTPClient(address string, apiKeyID, privateKey string) *Cloud
 	return &Cloudbreak{Cloudbreak: apiclient.New(transport, strfmt.Default)}
 }
 
+func NewCloudbreakActorCrnHTTPClient(address string, actorCrn string) *Cloudbreak {
+	u.CheckServerAddress(address)
+	var transport *utils.Transport
+	baseAPIPath := "/cb/api"
+	transport = apikeyauth.GetActorCrnAuthTransport(address, baseAPIPath, actorCrn)
+	return &Cloudbreak{Cloudbreak: apiclient.New(transport, strfmt.Default)}
+}
+
 // NewDataplaneHTTPClientFromContext : Initialize Dataplane client.
 func NewDataplaneHTTPClientFromContext(c *cli.Context) *Dataplane {
 	return NewDataplaneHTTPClient(c.String(fl.FlServerOptional.Name), c.String(fl.FlApiKeyIDOptional.Name), c.String(fl.FlPrivateKeyOptional.Name))
