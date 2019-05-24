@@ -216,7 +216,7 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         setServiceConfigs(service, configMap.values());
     }
 
-    private Map<String, ApiClusterTemplateConfig> mapByName(Collection<ApiClusterTemplateConfig> configs) {
+    public Map<String, ApiClusterTemplateConfig> mapByName(Collection<ApiClusterTemplateConfig> configs) {
         return configs.stream()
                 .collect(toMap(
                         ApiClusterTemplateConfig::getName,
