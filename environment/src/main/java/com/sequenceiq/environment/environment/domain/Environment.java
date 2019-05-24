@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.network.BaseNetwork;
-import com.sequenceiq.environment.proxy.ProxyConfig;
+import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 
 @Entity
 @Table

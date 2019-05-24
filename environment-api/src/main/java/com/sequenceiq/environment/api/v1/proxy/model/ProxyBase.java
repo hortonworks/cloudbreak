@@ -1,10 +1,6 @@
-package com.sequenceiq.environment.api.proxy.model;
-
-import static com.sequenceiq.environment.api.proxy.doc.ProxyConfigDescription.ENVIRONMENTS;
+package com.sequenceiq.environment.api.v1.proxy.model;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -19,7 +15,7 @@ import com.sequenceiq.environment.api.proxy.doc.ProxyConfigDescription;
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class ProxyV1Base implements Serializable {
+public abstract class ProxyBase implements Serializable {
 
     @NotNull
     @ApiModelProperty(value = ProxyConfigDescription.NAME, required = true)
@@ -49,9 +45,6 @@ public abstract class ProxyV1Base implements Serializable {
     @Pattern(regexp = "^http(s)?$")
     @ApiModelProperty(value = ProxyConfigDescription.PROTOCOL, required = true)
     private String protocol;
-
-    @ApiModelProperty(ENVIRONMENTS)
-    private Set<String> environments = new HashSet<>();
 
     public String getName() {
         return name;
@@ -91,13 +84,5 @@ public abstract class ProxyV1Base implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public Set<String> getEnvironments() {
-        return environments;
-    }
-
-    public void setEnvironments(Set<String> environments) {
-        this.environments = environments == null ? new HashSet<>() : environments;
     }
 }

@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.network.dto.NetworkDto;
-import com.sequenceiq.environment.proxy.ProxyConfig;
+import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 
 public class EnvironmentDto implements Payload {
 

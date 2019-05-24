@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.api.proxy.model.response;
+package com.sequenceiq.environment.api.v1.proxy.model.response;
 
 import java.util.Set;
 
@@ -9,12 +9,12 @@ import com.sequenceiq.environment.api.proxy.doc.ProxyConfigDescription;
 import io.swagger.annotations.ApiModel;
 
 @ApiModel(description = ProxyConfigDescription.DESCRIPTION)
-public class ProxyV1Responses extends GeneralCollectionV1Response<ProxyV1Response> {
-    public ProxyV1Responses(Set<ProxyV1Response> responses) {
+public class ProxyResponses extends GeneralCollectionV1Response<ProxyResponse> {
+    public ProxyResponses(Set<ProxyResponse> responses) {
         super(responses);
     }
 
-    public ProxyV1Responses() {
+    public ProxyResponses() {
         super(Sets.newHashSet());
     }
 }

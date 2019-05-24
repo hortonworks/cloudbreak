@@ -43,6 +43,10 @@ public abstract class AbstractEnvironmentAwareService<T extends EnvironmentAware
         return conversionService.convert(attachToEnvironments(resourceName, environments, workspaceId), classToConvert);
     }
 
+    public <C> C attachToEnvironmentsAndConvert(String resourceName, Set<String> environments, @NotNull String accountId, Class<C> classToConvert) {
+        return conversionService.convert(attachToEnvironments(resourceName, environments, accountId), classToConvert);
+    }
+
     public T attachToEnvironments(String resourceName, Set<String> environments, @NotNull Long workspaceId) {
         Set<EnvironmentView> environmentsInWorkspace = environmentViewService.findByNamesInAccount(environments, workspaceId.toString());
         validateEnvironments(environmentsInWorkspace, environments, "attached");
@@ -52,14 +56,36 @@ public abstract class AbstractEnvironmentAwareService<T extends EnvironmentAware
         return repository().save(resource);
     }
 
+    public T attachToEnvironments(String resourceName, Set<String> environments, @NotNull String accountId) {
+        Set<EnvironmentView> environmentsInWorkspace = environmentViewService.findByNamesInAccount(environments, accountId);
+        validateEnvironments(environmentsInWorkspace, environments, "attached");
+        T resource = getByNameForAccountId(resourceName, accountId);
+        resource.getEnvironments().removeAll(environmentsInWorkspace);
+        resource.getEnvironments().addAll(environmentsInWorkspace);
+        return repository().save(resource);
+    }
+
     public <C> C detachFromEnvironmentsAndConvert(String resourceName, Set<String> environments, @NotNull Long workspaceId, Class<C> classToConvert) {
         return conversionService.convert(detachFromEnvironments(resourceName, environments, workspaceId), classToConvert);
+    }
+
+    public <C> C detachFromEnvironmentsAndConvert(String resourceName, Set<String> environments, @NotNull String accountId, Class<C> classToConvert) {
+        return conversionService.convert(detachFromEnvironments(resourceName, environments, accountId), classToConvert);
     }
 
     public T detachFromEnvironments(String resourceName, Set<String> environments, @NotNull Long workspaceId) {
         Set<EnvironmentView> environmentsInWorkspace = environmentViewService.findByNamesInAccount(environments, workspaceId.toString());
         validateEnvironments(environmentsInWorkspace, environments, "detached");
         T resource = getByNameForAccountId(resourceName, workspaceId.toString());
+        checkClustersForDetach(resource, environmentsInWorkspace);
+        resource.getEnvironments().removeAll(environmentsInWorkspace);
+        return repository().save(resource);
+    }
+
+    public T detachFromEnvironments(String resourceName, Set<String> environments, @NotNull String accountId) {
+        Set<EnvironmentView> environmentsInWorkspace = environmentViewService.findByNamesInAccount(environments, accountId);
+        validateEnvironments(environmentsInWorkspace, environments, "detached");
+        T resource = getByNameForAccountId(resourceName, accountId);
         checkClustersForDetach(resource, environmentsInWorkspace);
         resource.getEnvironments().removeAll(environmentsInWorkspace);
         return repository().save(resource);

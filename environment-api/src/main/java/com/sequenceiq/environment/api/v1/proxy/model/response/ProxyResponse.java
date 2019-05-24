@@ -1,9 +1,9 @@
-package com.sequenceiq.environment.api.proxy.model.response;
+package com.sequenceiq.environment.api.v1.proxy.model.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.environment.api.proxy.doc.ProxyConfigDescription;
-import com.sequenceiq.environment.api.proxy.model.ProxyV1Base;
+import com.sequenceiq.environment.api.v1.proxy.model.ProxyBase;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 import io.swagger.annotations.ApiModel;
@@ -11,7 +11,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(description = ProxyConfigDescription.DESCRIPTION)
 @JsonInclude(Include.NON_NULL)
-public class ProxyV1Response extends ProxyV1Base {
+public class ProxyResponse extends ProxyBase {
 
     @ApiModelProperty(ProxyConfigDescription.PROXY_CONFIG_ID)
     private Long id;

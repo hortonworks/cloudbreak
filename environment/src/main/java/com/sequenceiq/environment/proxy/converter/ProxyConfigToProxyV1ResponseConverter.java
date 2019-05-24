@@ -1,21 +1,18 @@
 package com.sequenceiq.environment.proxy.converter;
 
-import java.util.stream.Collectors;
-
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.environment.api.proxy.model.response.ProxyV1Response;
-import com.sequenceiq.environment.environment.domain.CompactView;
-import com.sequenceiq.environment.proxy.ProxyConfig;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
+import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyResponse;
+import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 
 @Component
-public class ProxyConfigToProxyV1ResponseConverter extends AbstractConversionServiceAwareConverter<ProxyConfig, ProxyV1Response> {
+public class ProxyConfigToProxyV1ResponseConverter extends AbstractConversionServiceAwareConverter<ProxyConfig, ProxyResponse> {
 
     @Override
-    public ProxyV1Response convert(ProxyConfig source) {
-        ProxyV1Response response = new ProxyV1Response();
+    public ProxyResponse convert(ProxyConfig source) {
+        ProxyResponse response = new ProxyResponse();
         response.setId(source.getId());
         response.setName(source.getName());
         response.setDescription(source.getDescription());
@@ -24,8 +21,7 @@ public class ProxyConfigToProxyV1ResponseConverter extends AbstractConversionSer
         response.setPassword(getConversionService().convert(source.getPasswordSecret(), SecretResponse.class));
         response.setHost(source.getServerHost());
         response.setPort(source.getServerPort());
-        response.setEnvironments(source.getEnvironments().stream()
-                .map(CompactView::getName).collect(Collectors.toSet()));
+
         return response;
     }
 }

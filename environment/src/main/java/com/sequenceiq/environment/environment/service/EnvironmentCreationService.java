@@ -19,7 +19,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
-import com.sequenceiq.environment.proxy.ProxyConfigService;
+import com.sequenceiq.environment.proxy.service.ProxyConfigService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 
 @Service
@@ -70,7 +70,6 @@ public class EnvironmentCreationService {
     private Environment initializeEnvironment(EnvironmentCreationDto creationDto) {
         Environment environment = environmentDtoConverter.creationDtoToEnvironment(creationDto);
         environment.setResourceCrn(createCrn(creationDto.getAccountId()));
-        environment.setProxyConfigs(proxyConfigService.findByNamesInAccount(creationDto.getProxyNames(), creationDto.getAccountId()));
         Credential credential = environmentResourceService
                 .getCredentialFromRequest(creationDto.getCredential(), creationDto.getAccountId());
         environment.setCredential(credential);

@@ -1,29 +1,20 @@
-package com.sequenceiq.environment.proxy;
+package com.sequenceiq.environment.proxy.domain;
 
 import java.io.Serializable;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Where;
 
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
-import com.sequenceiq.environment.environment.domain.EnvironmentAwareResource;
-import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
@@ -31,7 +22,7 @@ import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 @Entity
 @Where(clause = "archived = false")
 @Table
-public class ProxyConfig implements Serializable, EnvironmentAwareResource, AuthResource {
+public class ProxyConfig implements Serializable, AuthResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "proxyconfig_generator")
@@ -66,10 +57,6 @@ public class ProxyConfig implements Serializable, EnvironmentAwareResource, Auth
 
     @Column(nullable = false)
     private String resourceCrn;
-
-    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    @JoinTable(name = "env_proxy", joinColumns = @JoinColumn(name = "proxyid"), inverseJoinColumns = @JoinColumn(name = "envid"))
-    private Set<EnvironmentView> environments = new HashSet<>();
 
     private boolean archived;
 
@@ -155,15 +142,6 @@ public class ProxyConfig implements Serializable, EnvironmentAwareResource, Auth
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    @Override
-    public Set<EnvironmentView> getEnvironments() {
-        return environments;
-    }
-
-    public void setEnvironments(Set<EnvironmentView> environments) {
-        this.environments = environments;
     }
 
     @Override

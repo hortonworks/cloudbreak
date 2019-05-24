@@ -3,14 +3,14 @@ package com.sequenceiq.environment.proxy.converter;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.environment.api.proxy.model.request.ProxyV1Request;
-import com.sequenceiq.environment.proxy.ProxyConfig;
+import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;
+import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 
 @Component
-public class ProxyV1RequestToProxyConfigConverter extends AbstractConversionServiceAwareConverter<ProxyV1Request, ProxyConfig> {
+public class ProxyV1RequestToProxyConfigConverter extends AbstractConversionServiceAwareConverter<ProxyRequest, ProxyConfig> {
 
     @Override
-    public ProxyConfig convert(ProxyV1Request source) {
+    public ProxyConfig convert(ProxyRequest source) {
         ProxyConfig proxyConfig = new ProxyConfig();
         proxyConfig.setName(source.getName());
         proxyConfig.setPassword(source.getPassword());
