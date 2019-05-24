@@ -30,4 +30,9 @@ public class StackService {
         return stackRepository.findByAccountIdEnvironmentAndName(accountId, environment, name)
                 .orElseThrow(() -> new NotFoundException(String.format("Stack [%s] in environment [%s] not found", name, environment)));
     }
+
+    public Stack getByEnvironmentCrn(String environmentCrn) {
+        return stackRepository.findByEnvironment(environmentCrn)
+                .orElseThrow(() -> new NotFoundException(String.format("Stack by environment [%s] not found", environmentCrn)));
+    }
 }
