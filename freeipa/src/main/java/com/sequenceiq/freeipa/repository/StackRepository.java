@@ -21,4 +21,7 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
             @Param("accountId") String accountId,
             @Param("environment")  String environment,
             @Param("name") String name);
+
+    @Query("SELECT s FROM Stack s WHERE s.environment = :environment")
+    Optional<Stack> findByEnvironment(@Param("environment") String environment);
 }
