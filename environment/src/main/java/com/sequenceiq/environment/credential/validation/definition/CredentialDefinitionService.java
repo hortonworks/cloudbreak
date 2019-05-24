@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
-import com.sequenceiq.environment.definition.MissingParameterException;
 import com.sequenceiq.environment.definition.ResourceDefinitionService;
+import com.sequenceiq.environment.exception.MissingParameterException;
 
 @Service
 public class CredentialDefinitionService {

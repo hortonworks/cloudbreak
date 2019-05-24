@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.definition;
+package com.sequenceiq.environment.exception;
 
 public class MissingParameterException extends RuntimeException {
 
