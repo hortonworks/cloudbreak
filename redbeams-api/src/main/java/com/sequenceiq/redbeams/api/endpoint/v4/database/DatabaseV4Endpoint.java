@@ -55,14 +55,14 @@ public interface DatabaseV4Endpoint {
     DatabaseV4Response register(@Valid DatabaseV4Request request);
 
     @GET
-    @Path("{name}")
+    @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseOpDescription.GET_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_NOTES,
             nickname = "getDatabase")
     DatabaseV4Response get(@PathParam("name") String name);
 
     @DELETE
-    @Path("{name}")
+    @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseOpDescription.DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_NOTES,
             nickname = "deleteDatabase")
@@ -76,14 +76,14 @@ public interface DatabaseV4Endpoint {
     DatabaseV4Responses deleteMultiple(Set<String> names);
 
     @GET
-    @Path("{name}/request")
+    @Path("/{name}/request")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseOpDescription.GET_REQUEST, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_NOTES,
             nickname = "getDatabaseRequestFromName")
     DatabaseV4Request getRequest(@PathParam("name") String name);
 
     @POST
-    @Path("test")
+    @Path("/test")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseOpDescription.POST_CONNECTION_TEST, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_NOTES,
             nickname = "testDatabaseConnection")

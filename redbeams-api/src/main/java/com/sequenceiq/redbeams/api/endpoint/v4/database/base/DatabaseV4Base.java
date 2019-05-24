@@ -11,11 +11,11 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.validation.ValidRDSConfigJson;
 
 import io.swagger.annotations.ApiModelProperty;
 
-@ValidRDSConfigJson
+// TODO add validation
+//@ValidRDSConfigJson
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class DatabaseV4Base implements Serializable {
 

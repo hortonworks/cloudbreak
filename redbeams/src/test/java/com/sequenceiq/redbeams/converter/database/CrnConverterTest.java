@@ -26,6 +26,7 @@ public class CrnConverterTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        underTest.init();
     }
 
     @Test
