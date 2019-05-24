@@ -34,12 +34,19 @@ public interface FreeIpaV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FreeIpaOperationDescriptions.GET_BY_ENVID, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "getFreeIpaByEnvironmentV1")
-    DescribeFreeIpaResponse describe(@QueryParam("environment") String environmentId);
+    DescribeFreeIpaResponse describe(@QueryParam("environment") String environmentCrn);
+
+    @GET
+    @Path("ca.crt")
+    @Produces(MediaType.TEXT_PLAIN)
+    @ApiOperation(value = FreeIpaOperationDescriptions.GET_ROOTCERTIFICATE_BY_ENVID, produces = ContentType.TEXT_PLAIN, notes = FreeIpaNotes.FREEIPA_NOTES,
+            nickname = "getFreeIpaRootCertificateByEnvironmentV1")
+    String getRootCertificate(@QueryParam("environment") String environmentCrn);
 
     @DELETE
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FreeIpaOperationDescriptions.DELETE_BY_ENVID, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "deleteFreeIpaByEnvironmentV1")
-    void delete(@QueryParam("environment") String environmentId);
+    void delete(@QueryParam("environment") String environmentCrn);
 }

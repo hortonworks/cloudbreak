@@ -14,6 +14,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaReq
 import com.sequenceiq.freeipa.service.stack.FreeIpaCreationService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDeletionService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDescribeService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaRootCertificateService;
 
 @ExtendWith(MockitoExtension.class)
 class FreeIpaV1ControllerTest {
@@ -32,6 +33,9 @@ class FreeIpaV1ControllerTest {
     @Mock
     private FreeIpaDescribeService describeService;
 
+    @Mock
+    private FreeIpaRootCertificateService rootCertificateService;
+
     @Test
     void create() {
         CreateFreeIpaRequest freeIpaRequest = new CreateFreeIpaRequest();
@@ -43,6 +47,12 @@ class FreeIpaV1ControllerTest {
     @Test
     void describe() {
         assertNull(underTest.describe(ENVIRONMENT_CRN));
+    }
+
+    @Test
+    void getRootCertificate() throws Exception {
+        underTest.getRootCertificate(ENVIRONMENT_CRN);
+        verify(rootCertificateService, times(1)).getRootCertificate(ENVIRONMENT_CRN);
     }
 
     @Test
