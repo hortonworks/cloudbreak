@@ -1,11 +1,14 @@
 package kubernetes
 
 import (
-	"github.com/hortonworks/cb-cli/dataplane/oauth"
 	"strconv"
 	"time"
 
+	"github.com/hortonworks/cb-cli/dataplane/oauth"
+
 	"encoding/base64"
+
+	"strings"
 
 	log "github.com/Sirupsen/logrus"
 	v4kube "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_kubernetes"
@@ -13,7 +16,6 @@ import (
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/dp-cli-common/utils"
 	"github.com/urfave/cli"
-	"strings"
 )
 
 var kubernetesHeader = []string{"Name", "Description", "Environments"}
@@ -59,10 +61,9 @@ func createKubernetesImpl(client kubernetesClient, workspaceID int64, name strin
 	defer utils.TimeTrack(time.Now(), "create kubernetes config")
 	config := string(configuration)
 	kubernetesRequest := &model.KubernetesV4Request{
-		Name:         &name,
-		Description:  &description,
-		Content:      &config,
-		Environments: environments,
+		Name:        &name,
+		Description: &description,
+		Content:     &config,
 	}
 	var kubernetesResponse *model.KubernetesV4Response
 	log.Infof("[createKubernetesImpl] sending create kubernetes config request")
@@ -137,47 +138,10 @@ func DescribeKubernetes(c *cli.Context) {
 
 	output.Write(append(kubernetesHeader, "ID"), &kubernetesOutDescribe{
 		&kubernetes{
-			Name:         *r.Name,
-			Description:  *r.Description,
-			Environments: r.Environments,
+			Name:        *r.Name,
+			Description: *r.Description,
 		}, strconv.FormatInt(r.ID, 10)})
 
-}
-
-func AttachKubernetesToEnvs(c *cli.Context) {
-	defer utils.TimeTrack(time.Now(), "attach kubernetes to environments")
-
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	kubernetesName := c.String(fl.FlName.Name)
-	environments := utils.DelimitedStringToArray(c.String(fl.FlEnvironments.Name), ",")
-	log.Infof("[AttachKubernetesToEnvs] attach kubernetes config '%s' to environments: %s", kubernetesName, environments)
-
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	attachRequest := v4kube.NewAttachKubernetesResourceToEnvironmentsParams().WithWorkspaceID(workspaceID).WithName(kubernetesName).WithBody(&model.EnvironmentNames{EnvironmentNames: environments})
-	response, err := cbClient.Cloudbreak.V4WorkspaceIDKubernetes.AttachKubernetesResourceToEnvironments(attachRequest)
-	if err != nil {
-		utils.LogErrorAndExit(err)
-	}
-	kubernetes := response.Payload
-	log.Infof("[AttachKubernetesToEnvs] kubernetes config '%s' is now attached to the following environments: %s", *kubernetes.Name, kubernetes.Environments)
-}
-
-func DetachKubernetesFromEnvs(c *cli.Context) {
-	defer utils.TimeTrack(time.Now(), "detach kubernetes from environments")
-
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	kubernetesName := c.String(fl.FlName.Name)
-	environments := utils.DelimitedStringToArray(c.String(fl.FlEnvironments.Name), ",")
-	log.Infof("[DetachKubernetesFromEnvs] detach kubernetes config '%s' from environments: %s", kubernetesName, environments)
-
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	detachRequest := v4kube.NewDetachKubernetesResourceFromEnvironmentsParams().WithWorkspaceID(workspaceID).WithName(kubernetesName).WithBody(&model.EnvironmentNames{EnvironmentNames: environments})
-	response, err := cbClient.Cloudbreak.V4WorkspaceIDKubernetes.DetachKubernetesResourceFromEnvironments(detachRequest)
-	if err != nil {
-		utils.LogErrorAndExit(err)
-	}
-	kubernetes := response.Payload
-	log.Infof("[DetachKubernetesFromEnvs] kubernetes config '%s' is now attached to the following environments: %s", *kubernetes.Name, kubernetes.Environments)
 }
 
 func ListAllKubernetes(c *cli.Context) error {
@@ -199,9 +163,8 @@ func listAllKubernetesImpl(kubernetesClient kubernetesClient, writer func([]stri
 	var tableRows []utils.Row
 	for _, r := range resp.Payload.Responses {
 		row := &kubernetes{
-			Name:         *r.Name,
-			Description:  utils.SafeStringConvert(r.Description),
-			Environments: r.Environments,
+			Name:        *r.Name,
+			Description: utils.SafeStringConvert(r.Description),
 		}
 		tableRows = append(tableRows, row)
 	}

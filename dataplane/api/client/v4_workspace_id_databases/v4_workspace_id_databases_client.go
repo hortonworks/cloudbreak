@@ -25,36 +25,6 @@ type Client struct {
 }
 
 /*
-AttachDatabaseToEnvironments attaches r d s resource to environments
-
-A Database Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
-*/
-func (a *Client) AttachDatabaseToEnvironments(params *AttachDatabaseToEnvironmentsParams) (*AttachDatabaseToEnvironmentsOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewAttachDatabaseToEnvironmentsParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "attachDatabaseToEnvironments",
-		Method:             "PUT",
-		PathPattern:        "/v4/{workspaceId}/databases/{name}/attach",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &AttachDatabaseToEnvironmentsReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*AttachDatabaseToEnvironmentsOK), nil
-
-}
-
-/*
 CreateDatabaseInWorkspace creates r d s config
 
 A Database Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
@@ -141,36 +111,6 @@ func (a *Client) DeleteDatabasesInWorkspace(params *DeleteDatabasesInWorkspacePa
 		return nil, err
 	}
 	return result.(*DeleteDatabasesInWorkspaceOK), nil
-
-}
-
-/*
-DetachDatabaseFromEnvironments detaches r d s resource from environments
-
-A Database Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
-*/
-func (a *Client) DetachDatabaseFromEnvironments(params *DetachDatabaseFromEnvironmentsParams) (*DetachDatabaseFromEnvironmentsOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewDetachDatabaseFromEnvironmentsParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "detachDatabaseFromEnvironments",
-		Method:             "PUT",
-		PathPattern:        "/v4/{workspaceId}/databases/{name}/detach",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &DetachDatabaseFromEnvironmentsReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*DetachDatabaseFromEnvironmentsOK), nil
 
 }
 

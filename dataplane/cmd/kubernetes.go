@@ -61,30 +61,6 @@ func init() {
 				},
 			},
 			{
-				Name:   "attach",
-				Usage:  "attach an Kubernetes to environments",
-				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlEnvironments).AddAuthenticationFlags().AddOutputFlag().Build(),
-				Before: cf.CheckConfigAndCommandFlags,
-				Action: kubernetes.AttachKubernetesToEnvs,
-				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlEnvironments).AddAuthenticationFlags().AddOutputFlag().Build() {
-						fl.PrintFlagCompletion(f)
-					}
-				},
-			},
-			{
-				Name:   "detach",
-				Usage:  "detach an Kubernetes from environments",
-				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlEnvironments).AddOutputFlag().AddAuthenticationFlags().Build(),
-				Before: cf.CheckConfigAndCommandFlags,
-				Action: kubernetes.DetachKubernetesFromEnvs,
-				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlEnvironments).AddOutputFlag().AddAuthenticationFlags().Build() {
-						fl.PrintFlagCompletion(f)
-					}
-				},
-			},
-			{
 				Name:   "list",
 				Usage:  "list the available kubernetes configurations",
 				Flags:  fl.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build(),

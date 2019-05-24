@@ -25,10 +25,6 @@ type KubernetesV4Response struct {
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
 
-	// Environments of the resource
-	// Unique: true
-	Environments []string `json:"environments"`
-
 	// id of the resource
 	ID int64 `json:"id,omitempty"`
 
@@ -52,10 +48,6 @@ func (m *KubernetesV4Response) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateDescription(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateEnvironments(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -102,19 +94,6 @@ func (m *KubernetesV4Response) validateDescription(formats strfmt.Registry) erro
 	}
 
 	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *KubernetesV4Response) validateEnvironments(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Environments) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("environments", "body", m.Environments); err != nil {
 		return err
 	}
 

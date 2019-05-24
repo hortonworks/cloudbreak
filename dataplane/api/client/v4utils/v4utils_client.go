@@ -230,36 +230,6 @@ func (a *Client) RepositoryConfigsValidationV4(params *RepositoryConfigsValidati
 
 }
 
-/*
-SubscribeSubscription retrives subscribe identifier
-
-Accepting client subscriptions to notification events.
-*/
-func (a *Client) SubscribeSubscription(params *SubscribeSubscriptionParams) (*SubscribeSubscriptionOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewSubscribeSubscriptionParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "subscribeSubscription",
-		Method:             "POST",
-		PathPattern:        "/v4/utils/subscribe",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &SubscribeSubscriptionReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*SubscribeSubscriptionOK), nil
-
-}
-
 // SetTransport changes the transport on the client
 func (a *Client) SetTransport(transport runtime.ClientTransport) {
 	a.transport = transport

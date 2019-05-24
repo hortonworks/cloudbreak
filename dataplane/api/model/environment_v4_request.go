@@ -23,18 +23,10 @@ type EnvironmentV4Request struct {
 	// Name of the credential of the environment. If the name is given, the detailed credential is ignored in the request.
 	CredentialName string `json:"credentialName,omitempty"`
 
-	// Name of the RDS configurations to be attached to the environment.
-	// Unique: true
-	Databases []string `json:"databases"`
-
 	// description of the resource
 	// Max Length: 1000
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
-
-	// Name of Kerberos configs to be attached to the environment.
-	// Unique: true
-	Kerberoses []string `json:"kerberoses"`
 
 	// Name of the Kubernetes configurations to be attached to the environment.
 	// Unique: true
@@ -75,15 +67,7 @@ func (m *EnvironmentV4Request) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateDatabases(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validateDescription(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateKerberoses(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -139,19 +123,6 @@ func (m *EnvironmentV4Request) validateCredential(formats strfmt.Registry) error
 	return nil
 }
 
-func (m *EnvironmentV4Request) validateDatabases(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Databases) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("databases", "body", m.Databases); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (m *EnvironmentV4Request) validateDescription(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Description) { // not required
@@ -163,19 +134,6 @@ func (m *EnvironmentV4Request) validateDescription(formats strfmt.Registry) erro
 	}
 
 	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *EnvironmentV4Request) validateKerberoses(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Kerberoses) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("kerberoses", "body", m.Kerberoses); err != nil {
 		return err
 	}
 

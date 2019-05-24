@@ -17,14 +17,6 @@ import (
 // swagger:model EnvironmentAttachV4Request
 type EnvironmentAttachV4Request struct {
 
-	// Name of the RDS configurations to be attached to the environment.
-	// Unique: true
-	Databases []string `json:"databases"`
-
-	// Name of Kerberos configs to be attached to the environment.
-	// Unique: true
-	Kerberoses []string `json:"kerberoses"`
-
 	// Name of the Kubernetes configurations to be attached to the environment.
 	// Unique: true
 	Kubernetes []string `json:"kubernetes"`
@@ -42,14 +34,6 @@ type EnvironmentAttachV4Request struct {
 func (m *EnvironmentAttachV4Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateDatabases(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateKerberoses(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validateKubernetes(formats); err != nil {
 		res = append(res, err)
 	}
@@ -65,32 +49,6 @@ func (m *EnvironmentAttachV4Request) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *EnvironmentAttachV4Request) validateDatabases(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Databases) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("databases", "body", m.Databases); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *EnvironmentAttachV4Request) validateKerberoses(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Kerberoses) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("kerberoses", "body", m.Kerberoses); err != nil {
-		return err
-	}
-
 	return nil
 }
 

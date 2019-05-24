@@ -2,6 +2,10 @@ package kerberos
 
 import (
 	"encoding/base64"
+	"strconv"
+	"strings"
+	"time"
+
 	log "github.com/Sirupsen/logrus"
 	v4krb "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_kerberos"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
@@ -9,9 +13,6 @@ import (
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
 	"github.com/hortonworks/dp-cli-common/utils"
 	"github.com/urfave/cli"
-	"strconv"
-	"strings"
-	"time"
 )
 
 var Header = []string{"Name", "Description", "Type", "Environments", "ID"}
@@ -144,12 +145,9 @@ func CreateFreeIpaKerberos(c *cli.Context) error {
 func CreateKerberosRequest(c *cli.Context) model.KerberosV4Request {
 	kerberosName := c.String(fl.FlName.Name)
 	description := c.String(fl.FlDescriptionOptional.Name)
-	environments := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentsOptional.Name), ",")
-
 	kerberosRequest := &model.KerberosV4Request{
-		Name:         &kerberosName,
-		Description:  &description,
-		Environments: environments,
+		Name:        &kerberosName,
+		Description: &description,
 	}
 
 	return *kerberosRequest
@@ -192,10 +190,9 @@ func ListKerberosImpl(kerberosClient kerberosClient, workspaceID int64, writer f
 	for _, k := range resp.Payload.Responses {
 		row := &kerberosOutDescribe{
 			&kerberos{
-				Name:         *k.Name,
-				Description:  utils.SafeStringConvert(k.Description),
-				Environments: k.Environments,
-				Type:         utils.SafeStringConvert(&k.Type),
+				Name:        *k.Name,
+				Description: utils.SafeStringConvert(k.Description),
+				Type:        utils.SafeStringConvert(&k.Type),
 			},
 			strconv.FormatInt(k.ID, 10)}
 		tableRows = append(tableRows, row)
@@ -221,53 +218,6 @@ func GetKerberosImpl(kerberosClient kerberosClient, workspaceID int64, kerberosN
 	}
 	kerberosResponse := resp.Payload
 	writeResponse(writer, kerberosResponse)
-	log.Infof("[GetKerberosImpl] kerberos config '%s' is now attached to the following environments: %s", kerberosResponse.Name, kerberosResponse.Environments)
-	return nil
-}
-
-func AttachKerberos(c *cli.Context) error {
-	defer utils.TimeTrack(time.Now(), "attach kerberos to environments")
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	kerberosName := c.String(fl.FlName.Name)
-	environments := utils.DelimitedStringToArray(c.String(fl.FlEnvironments.Name), ",")
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	return AttachKerberosImpl(cbClient.Cloudbreak.V4WorkspaceIDKerberos, workspaceID, kerberosName, environments, output.Write)
-}
-
-func AttachKerberosImpl(kerberosClient kerberosClient, workspaceID int64, kerberosName string, environments []string, writer func([]string, utils.Row)) error {
-	log.Infof("[AttachKerberosImpl] attach kerberos config '%s' to environments: %s", kerberosName, environments)
-	attachRequest := v4krb.NewAttachKerberosConfigToEnvironmentsParams().WithWorkspaceID(workspaceID).WithName(kerberosName).WithBody(&model.EnvironmentNames{EnvironmentNames: environments})
-	response, err := kerberosClient.AttachKerberosConfigToEnvironments(attachRequest)
-	if err != nil {
-		utils.LogErrorAndExit(err)
-	}
-	kerberosResponse := response.Payload
-	writeResponse(writer, kerberosResponse)
-	log.Infof("[AttachKerberosImpl] kerberos config '%s' is now attached to the following environments: %s", kerberosResponse.Name, kerberosResponse.Environments)
-	return nil
-}
-
-func DetachKerberos(c *cli.Context) error {
-	defer utils.TimeTrack(time.Now(), "detach kerberos from environments")
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	kerberosName := c.String(fl.FlName.Name)
-	environments := utils.DelimitedStringToArray(c.String(fl.FlEnvironments.Name), ",")
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	return DetachKerberosImpl(cbClient.Cloudbreak.V4WorkspaceIDKerberos, workspaceID, kerberosName, environments, output.Write)
-}
-
-func DetachKerberosImpl(kerberosClient kerberosClient, workspaceID int64, kerberosName string, environments []string, writer func([]string, utils.Row)) error {
-	log.Infof("[DetachKerberosImpl] detach kerberos config '%s' from environments: %s", kerberosName, environments)
-	detachRequest := v4krb.NewDetachKerberosConfigFromEnvironmentsParams().WithWorkspaceID(workspaceID).WithName(kerberosName).WithBody(&model.EnvironmentNames{EnvironmentNames: environments})
-	response, err := kerberosClient.DetachKerberosConfigFromEnvironments(detachRequest)
-	if err != nil {
-		utils.LogErrorAndExit(err)
-	}
-	kerberosResponse := response.Payload
-	writeResponse(writer, kerberosResponse)
-	log.Infof("[DetachKerberosImpl] kerberos config '%s' is now attached to the following environments: %s", kerberosResponse.Name, kerberosResponse.Environments)
 	return nil
 }
 
@@ -295,10 +245,9 @@ func DeleteKerberosImpl(kerberosClient kerberosClient, workspaceID int64, kerber
 func writeResponse(writer func([]string, utils.Row), kerberosResponse *model.KerberosV4Response) {
 	writer(append(Header), &kerberosOutDescribe{
 		&kerberos{
-			Name:         kerberosResponse.Name,
-			Description:  utils.SafeStringConvert(kerberosResponse.Description),
-			Environments: kerberosResponse.Environments,
-			Type:         utils.SafeStringConvert(kerberosResponse.Type),
+			Name:        kerberosResponse.Name,
+			Description: utils.SafeStringConvert(kerberosResponse.Description),
+			Type:        utils.SafeStringConvert(kerberosResponse.Type),
 		},
 		strconv.FormatInt(kerberosResponse.ID, 10)})
 }

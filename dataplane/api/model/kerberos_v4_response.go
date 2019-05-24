@@ -39,10 +39,6 @@ type KerberosV4Response struct {
 	// cluster instances will set this as the domain part of their hostname
 	Domain string `json:"domain,omitempty"`
 
-	// Environments of the resource
-	// Unique: true
-	Environments []string `json:"environments"`
-
 	// id
 	ID int64 `json:"id,omitempty"`
 
@@ -96,10 +92,6 @@ func (m *KerberosV4Response) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateDescriptor(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateEnvironments(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -177,19 +169,6 @@ func (m *KerberosV4Response) validateDescriptor(formats strfmt.Registry) error {
 			}
 			return err
 		}
-	}
-
-	return nil
-}
-
-func (m *KerberosV4Response) validateEnvironments(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Environments) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("environments", "body", m.Environments); err != nil {
-		return err
 	}
 
 	return nil

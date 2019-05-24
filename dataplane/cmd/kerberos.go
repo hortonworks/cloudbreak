@@ -55,30 +55,6 @@ func init() {
 				},
 			},
 			{
-				Name:   "attach",
-				Usage:  "attach a Kerberos to environments",
-				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlEnvironments).AddOutputFlag().AddAuthenticationFlags().Build(),
-				Before: cf.CheckConfigAndCommandFlags,
-				Action: kerberos.AttachKerberos,
-				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlEnvironments).AddOutputFlag().AddAuthenticationFlags().Build() {
-						fl.PrintFlagCompletion(f)
-					}
-				},
-			},
-			{
-				Name:   "detach",
-				Usage:  "detach a Kerberos from environments",
-				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlEnvironments).AddOutputFlag().AddAuthenticationFlags().Build(),
-				Before: cf.CheckConfigAndCommandFlags,
-				Action: kerberos.DetachKerberos,
-				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlEnvironments).AddOutputFlag().AddAuthenticationFlags().Build() {
-						fl.PrintFlagCompletion(f)
-					}
-				},
-			},
-			{
 				Name:   "delete",
 				Usage:  "deletes a Kerberos",
 				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),

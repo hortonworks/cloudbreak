@@ -63,10 +63,6 @@ for the list kubernetes configs by workspace operation typically these are writt
 */
 type ListKubernetesConfigsByWorkspaceParams struct {
 
-	/*AttachGlobal*/
-	AttachGlobal *bool
-	/*Environment*/
-	Environment *string
 	/*WorkspaceID*/
 	WorkspaceID int64
 
@@ -108,28 +104,6 @@ func (o *ListKubernetesConfigsByWorkspaceParams) SetHTTPClient(client *http.Clie
 	o.HTTPClient = client
 }
 
-// WithAttachGlobal adds the attachGlobal to the list kubernetes configs by workspace params
-func (o *ListKubernetesConfigsByWorkspaceParams) WithAttachGlobal(attachGlobal *bool) *ListKubernetesConfigsByWorkspaceParams {
-	o.SetAttachGlobal(attachGlobal)
-	return o
-}
-
-// SetAttachGlobal adds the attachGlobal to the list kubernetes configs by workspace params
-func (o *ListKubernetesConfigsByWorkspaceParams) SetAttachGlobal(attachGlobal *bool) {
-	o.AttachGlobal = attachGlobal
-}
-
-// WithEnvironment adds the environment to the list kubernetes configs by workspace params
-func (o *ListKubernetesConfigsByWorkspaceParams) WithEnvironment(environment *string) *ListKubernetesConfigsByWorkspaceParams {
-	o.SetEnvironment(environment)
-	return o
-}
-
-// SetEnvironment adds the environment to the list kubernetes configs by workspace params
-func (o *ListKubernetesConfigsByWorkspaceParams) SetEnvironment(environment *string) {
-	o.Environment = environment
-}
-
 // WithWorkspaceID adds the workspaceID to the list kubernetes configs by workspace params
 func (o *ListKubernetesConfigsByWorkspaceParams) WithWorkspaceID(workspaceID int64) *ListKubernetesConfigsByWorkspaceParams {
 	o.SetWorkspaceID(workspaceID)
@@ -148,38 +122,6 @@ func (o *ListKubernetesConfigsByWorkspaceParams) WriteToRequest(r runtime.Client
 		return err
 	}
 	var res []error
-
-	if o.AttachGlobal != nil {
-
-		// query param attachGlobal
-		var qrAttachGlobal bool
-		if o.AttachGlobal != nil {
-			qrAttachGlobal = *o.AttachGlobal
-		}
-		qAttachGlobal := swag.FormatBool(qrAttachGlobal)
-		if qAttachGlobal != "" {
-			if err := r.SetQueryParam("attachGlobal", qAttachGlobal); err != nil {
-				return err
-			}
-		}
-
-	}
-
-	if o.Environment != nil {
-
-		// query param environment
-		var qrEnvironment string
-		if o.Environment != nil {
-			qrEnvironment = *o.Environment
-		}
-		qEnvironment := qrEnvironment
-		if qEnvironment != "" {
-			if err := r.SetQueryParam("environment", qEnvironment); err != nil {
-				return err
-			}
-		}
-
-	}
 
 	// path param workspaceId
 	if err := r.SetPathParam("workspaceId", swag.FormatInt64(o.WorkspaceID)); err != nil {

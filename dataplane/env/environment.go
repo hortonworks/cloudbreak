@@ -75,8 +75,6 @@ func CreateEnvironment(c *cli.Context) {
 	regions := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentRegions.Name), ",")
 	ldapConfigs := utils.DelimitedStringToArray(c.String(fl.FlLdapNamesOptional.Name), ",")
 	proxyConfigs := utils.DelimitedStringToArray(c.String(fl.FlProxyNamesOptional.Name), ",")
-	kerberosConfigs := utils.DelimitedStringToArray(c.String(fl.FlKerberosNamesOptional.Name), ",")
-	rdsConfigs := utils.DelimitedStringToArray(c.String(fl.FlRdsNamesOptional.Name), ",")
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	locationName := c.String(fl.FlEnvironmentLocationName.Name)
 	longitude := c.Float64(fl.FlEnvironmentLongitudeOptional.Name)
@@ -89,8 +87,6 @@ func CreateEnvironment(c *cli.Context) {
 		Regions:        regions,
 		Ldaps:          ldapConfigs,
 		Proxies:        proxyConfigs,
-		Kerberoses:     kerberosConfigs,
-		Databases:      rdsConfigs,
 		Location: &model.LocationV4Request{
 			Name:      &locationName,
 			Longitude: longitude,
@@ -164,8 +160,6 @@ func createEnvironmentWithNetwork(c *cli.Context) model.EnvironmentV4Request {
 		Regions:        make([]string, 0),
 		Ldaps:          make([]string, 0),
 		Proxies:        make([]string, 0),
-		Kerberoses:     make([]string, 0),
-		Databases:      make([]string, 0),
 		Kubernetes:     make([]string, 0),
 		Location: &model.LocationV4Request{
 			Name:      new(string),
@@ -330,10 +324,8 @@ func createAttachRequest(c *cli.Context) *v4env.AttachResourcesToEnvironmentPara
 	log.Infof("[AttachResources] attach resources to environment: %s. Ldaps: [%s] Proxies: [%s] Kerberos: [%s] Rds: [%s]",
 		envName, ldapConfigs, proxyConfigs, kerberosConfigs, rdsConfigs)
 	attachBody := &model.EnvironmentAttachV4Request{
-		Ldaps:      ldapConfigs,
-		Proxies:    proxyConfigs,
-		Kerberoses: kerberosConfigs,
-		Databases:  rdsConfigs,
+		Ldaps:   ldapConfigs,
+		Proxies: proxyConfigs,
 	}
 	attachRequest := v4env.NewAttachResourcesToEnvironmentParams().WithWorkspaceID(workspaceID).WithName(envName).WithBody(attachBody)
 	return attachRequest
@@ -366,10 +358,8 @@ func createDetachRequest(c *cli.Context) *v4env.DetachResourcesFromEnvironmentPa
 	log.Infof("[DetachResources] detach resources from environment: %s. Ldaps: [%s] Proxies: [%s] Kerberos: [%s] Rds: [%s]",
 		envName, ldapConfigs, proxyConfigs, kerberosConfigs, rdsConfigs)
 	detachBody := &model.EnvironmentDetachV4Request{
-		Ldaps:      ldapConfigs,
-		Proxies:    proxyConfigs,
-		Kerberoses: kerberosConfigs,
-		Databases:  rdsConfigs,
+		Ldaps:   ldapConfigs,
+		Proxies: proxyConfigs,
 	}
 	attachRequest := v4env.NewDetachResourcesFromEnvironmentParams().WithWorkspaceID(workspaceID).WithName(envName).WithBody(detachBody)
 	return attachRequest
@@ -461,11 +451,10 @@ func convertResponseToJsonOutput(env *model.DetailedEnvironmentV4Response) *envi
 			Longitude:     env.Location.Longitude,
 			Latitude:      env.Location.Latitude,
 		},
-		LdapConfigs:     getLdapConfigNames(env.Ldaps),
-		ProxyConfigs:    getProxyConfigNames(env.Proxies),
-		KerberosConfigs: getKerberosConfigs(env.Kerberoses),
-		RdsConfigs:      getRdsConfigNames(env.Databases),
-		ID:              strconv.FormatInt(env.ID, 10),
+		LdapConfigs:  getLdapConfigNames(env.Ldaps),
+		ProxyConfigs: getProxyConfigNames(env.Proxies),
+		RdsConfigs:   getRdsConfigNames(env.Databases),
+		ID:           strconv.FormatInt(env.ID, 10),
 	}
 	if env.Network != nil {
 		result.Network = *env.Network

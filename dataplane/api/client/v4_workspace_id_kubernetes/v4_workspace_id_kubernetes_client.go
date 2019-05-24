@@ -25,36 +25,6 @@ type Client struct {
 }
 
 /*
-AttachKubernetesResourceToEnvironments attaches kubernetes resource to environemnts
-
-An Kubernetes Configuration describe a configuration to communicate with a Kubernetes cluster.
-*/
-func (a *Client) AttachKubernetesResourceToEnvironments(params *AttachKubernetesResourceToEnvironmentsParams) (*AttachKubernetesResourceToEnvironmentsOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewAttachKubernetesResourceToEnvironmentsParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "attachKubernetesResourceToEnvironments",
-		Method:             "PUT",
-		PathPattern:        "/v4/{workspaceId}/kubernetes/{name}/attach",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &AttachKubernetesResourceToEnvironmentsReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*AttachKubernetesResourceToEnvironmentsOK), nil
-
-}
-
-/*
 CreateKubernetesConfigInWorkspace creates kubernetes config in workspace
 
 An Kubernetes Configuration describe a configuration to communicate with a Kubernetes cluster.
@@ -141,36 +111,6 @@ func (a *Client) DeleteKubernetesConfigsInWorkspace(params *DeleteKubernetesConf
 		return nil, err
 	}
 	return result.(*DeleteKubernetesConfigsInWorkspaceOK), nil
-
-}
-
-/*
-DetachKubernetesResourceFromEnvironments detaches kubernetes resource from environemnts
-
-An Kubernetes Configuration describe a configuration to communicate with a Kubernetes cluster.
-*/
-func (a *Client) DetachKubernetesResourceFromEnvironments(params *DetachKubernetesResourceFromEnvironmentsParams) (*DetachKubernetesResourceFromEnvironmentsOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewDetachKubernetesResourceFromEnvironmentsParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "detachKubernetesResourceFromEnvironments",
-		Method:             "PUT",
-		PathPattern:        "/v4/{workspaceId}/kubernetes/{name}/detach",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &DetachKubernetesResourceFromEnvironmentsReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*DetachKubernetesResourceFromEnvironmentsOK), nil
 
 }
 

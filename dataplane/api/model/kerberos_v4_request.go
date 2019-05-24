@@ -28,10 +28,6 @@ type KerberosV4Request struct {
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
 
-	// Environments of the resource
-	// Unique: true
-	Environments []string `json:"environments"`
-
 	// free ipa
 	FreeIpa *FreeIPAKerberosDescriptor `json:"freeIpa,omitempty"`
 
@@ -56,10 +52,6 @@ func (m *KerberosV4Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateDescription(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateEnvironments(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -128,19 +120,6 @@ func (m *KerberosV4Request) validateDescription(formats strfmt.Registry) error {
 	}
 
 	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *KerberosV4Request) validateEnvironments(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Environments) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("environments", "body", m.Environments); err != nil {
 		return err
 	}
 

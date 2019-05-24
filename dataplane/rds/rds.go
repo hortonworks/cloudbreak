@@ -2,9 +2,12 @@ package rds
 
 import (
 	"fmt"
-	"github.com/hortonworks/cb-cli/dataplane/oauth"
 	"strconv"
 	"time"
+
+	"github.com/hortonworks/cb-cli/dataplane/oauth"
+
+	"strings"
 
 	log "github.com/Sirupsen/logrus"
 	v4db "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_databases"
@@ -13,7 +16,6 @@ import (
 	"github.com/hortonworks/cb-cli/dataplane/types"
 	"github.com/hortonworks/dp-cli-common/utils"
 	"github.com/urfave/cli"
-	"strings"
 )
 
 var rdsHeader = []string{"Name", "Description", "ConnectionURL", "DatabaseEngine", "Type", "Driver", "Environments"}
@@ -170,7 +172,6 @@ func createRdsImpl(client rdsClient, workspaceID int64, name string, description
 		ConnectionURL:      &URL,
 		Type:               &rdsType,
 		ConnectorJarURL:    jarURL,
-		Environments:       environments,
 	}
 	if oracle != nil {
 		rdsRequest.Oracle = oracle
@@ -224,45 +225,8 @@ func DescribeRds(c *cli.Context) {
 			DatabaseEngine: *r.DatabaseEngine,
 			Type:           getEmptyIfNil(r.Type),
 			Driver:         getEmptyIfNil(r.ConnectionDriver),
-			Environments:   r.Environments,
 		}, strconv.FormatInt(r.ID, 10)})
 
-}
-
-func AttachRdsToEnvs(c *cli.Context) {
-	defer utils.TimeTrack(time.Now(), "attach rds to environments")
-
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	rdsName := c.String(fl.FlName.Name)
-	environments := utils.DelimitedStringToArray(c.String(fl.FlEnvironments.Name), ",")
-	log.Infof("[AttachRdsToEnvs] attach rds config '%s' to environments: %s", rdsName, environments)
-
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	attachRequest := v4db.NewAttachDatabaseToEnvironmentsParams().WithWorkspaceID(workspaceID).WithName(rdsName).WithBody(&model.EnvironmentNames{EnvironmentNames: environments})
-	response, err := cbClient.Cloudbreak.V4WorkspaceIDDatabases.AttachDatabaseToEnvironments(attachRequest)
-	if err != nil {
-		utils.LogErrorAndExit(err)
-	}
-	rds := response.Payload
-	log.Infof("[AttachRdsToEnvs] rds config '%s' is now attached to the following environments: %s", *rds.Name, rds.Environments)
-}
-
-func DetachRdsFromEnvs(c *cli.Context) {
-	defer utils.TimeTrack(time.Now(), "detach rds from environments")
-
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	rdsName := c.String(fl.FlName.Name)
-	environments := utils.DelimitedStringToArray(c.String(fl.FlEnvironments.Name), ",")
-	log.Infof("[DetachRdsFromEnvs] detach rds config '%s' from environments: %s", rdsName, environments)
-
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	detachRequest := v4db.NewDetachDatabaseFromEnvironmentsParams().WithWorkspaceID(workspaceID).WithName(rdsName).WithBody(&model.EnvironmentNames{EnvironmentNames: environments})
-	response, err := cbClient.Cloudbreak.V4WorkspaceIDDatabases.DetachDatabaseFromEnvironments(detachRequest)
-	if err != nil {
-		utils.LogErrorAndExit(err)
-	}
-	rds := response.Payload
-	log.Infof("[DetachRdsFromEnvs] rds config '%s' is now attached to the following environments: %s", *rds.Name, rds.Environments)
 }
 
 func ListAllRds(c *cli.Context) error {
@@ -290,7 +254,6 @@ func listAllRdsImpl(rdsClient rdsClient, writer func([]string, []utils.Row), wor
 			DatabaseEngine: *r.DatabaseEngine,
 			Type:           getEmptyIfNil(r.Type),
 			Driver:         getEmptyIfNil(r.ConnectionDriver),
-			Environments:   r.Environments,
 		}
 		tableRows = append(tableRows, row)
 	}
