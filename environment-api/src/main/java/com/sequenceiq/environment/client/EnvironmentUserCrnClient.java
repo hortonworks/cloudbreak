@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
-import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentV1Endpoint;
+import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
 
 class EnvironmentUserCrnClient implements EnvironmentClient {
@@ -42,8 +42,8 @@ class EnvironmentUserCrnClient implements EnvironmentClient {
         return getEndpoint(ProxyEndpoint.class);
     }
 
-    public EnvironmentV1Endpoint environmentV1Endpoint() {
-        return getEndpoint(EnvironmentV1Endpoint.class);
+    public EnvironmentEndpoint environmentV1Endpoint() {
+        return getEndpoint(EnvironmentEndpoint.class);
     }
 
     protected <E> E getEndpoint(Class<E> clazz) {

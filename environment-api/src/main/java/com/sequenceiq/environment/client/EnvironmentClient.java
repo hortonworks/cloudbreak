@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.client;
 
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
-import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentV1Endpoint;
+import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
 
 public interface EnvironmentClient {
@@ -9,5 +9,5 @@ public interface EnvironmentClient {
 
     ProxyEndpoint proxyV1Endpoint();
 
-    EnvironmentV1Endpoint environmentV1Endpoint();
+    EnvironmentEndpoint environmentV1Endpoint();
 }

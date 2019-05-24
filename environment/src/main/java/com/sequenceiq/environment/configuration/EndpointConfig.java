@@ -12,8 +12,8 @@ import org.springframework.util.StringUtils;
 
 import com.sequenceiq.environment.api.EnvironmentApi;
 import com.sequenceiq.environment.credential.controller.CredentialV1Controller;
-import com.sequenceiq.environment.environment.v1.EnvironmentV1Controller;
-import com.sequenceiq.environment.proxy.controller.ProxyController;
+import com.sequenceiq.environment.environment.v1.EnvironmentController;
+import com.sequenceiq.environment.proxy.v1.controller.ProxyController;
 
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.config.SwaggerConfigLocator;
@@ -23,7 +23,7 @@ import io.swagger.jaxrs.config.SwaggerContextService;
 @ApplicationPath(EnvironmentApi.API_ROOT_CONTEXT)
 public class EndpointConfig extends ResourceConfig {
 
-    private static final List<Class<?>> CONTROLLERS = List.of(CredentialV1Controller.class, ProxyController.class, EnvironmentV1Controller.class);
+    private static final List<Class<?>> CONTROLLERS = List.of(CredentialV1Controller.class, ProxyController.class, EnvironmentController.class);
 
     private static final String VERSION_UNAVAILABLE = "unspecified";
 
