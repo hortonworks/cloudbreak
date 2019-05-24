@@ -23,7 +23,7 @@ type CredentialRequest struct {
 	Name string `json:"name,omitempty"`
 
 	// secret
-	Secret *Secret `json:"secret,omitempty"`
+	Secret *SecretResponse `json:"secret,omitempty"`
 }
 
 // Validate validates this credential request

@@ -22,10 +22,10 @@ func init() {
 				Usage:       "creates a new FreeIpa cluster",
 				Description: `basic FreeIpa cluster creation`,
 				Before:      cf.CheckConfigAndCommandFlagsWithoutWorkspace,
-				Flags:       fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentName, fl.FlNameOptional, fl.FlInputJson).AddAuthenticationFlags().Build(),
+				Flags:       fl.NewFlagBuilder().AddFlags(fl.FlNameOptional, fl.FlInputJson).AddAuthenticationFlags().Build(),
 				Action:      freeipa.CreateFreeIpa,
 				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentName, fl.FlNameOptional, fl.FlInputJson).AddAuthenticationFlags().Build() {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlNameOptional, fl.FlInputJson).AddAuthenticationFlags().Build() {
 						fl.PrintFlagCompletion(f)
 					}
 				},
@@ -34,10 +34,10 @@ func init() {
 				Name:   "delete",
 				Usage:  "deletes a FreeIpa cluster",
 				Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,
-				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentName, fl.FlName).AddAuthenticationFlags().Build(),
+				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentName).AddAuthenticationFlags().Build(),
 				Action: freeipa.DeleteFreeIpa,
 				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentName, fl.FlName).AddAuthenticationFlags().Build() {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentName).AddAuthenticationFlags().Build() {
 						fl.PrintFlagCompletion(f)
 					}
 				},

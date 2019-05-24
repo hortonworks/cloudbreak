@@ -11,7 +11,11 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/hortonworks/cb-cli/dataplane/api-freeipa/client/freeipa_environment_name"
+	"github.com/hortonworks/cb-cli/dataplane/api-freeipa/client/v1freeipa"
+	"github.com/hortonworks/cb-cli/dataplane/api-freeipa/client/v1freeipatest"
+	"github.com/hortonworks/cb-cli/dataplane/api-freeipa/client/v1freeipausersync"
+	"github.com/hortonworks/cb-cli/dataplane/api-freeipa/client/v1kerberos"
+	"github.com/hortonworks/cb-cli/dataplane/api-freeipa/client/v1ldaps"
 )
 
 // Default free IP a HTTP client.
@@ -57,7 +61,15 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *FreeIPA {
 	cli := new(FreeIPA)
 	cli.Transport = transport
 
-	cli.FreeipaEnvironmentName = freeipa_environment_name.New(transport, formats)
+	cli.V1freeipa = v1freeipa.New(transport, formats)
+
+	cli.V1freeipatest = v1freeipatest.New(transport, formats)
+
+	cli.V1freeipausersync = v1freeipausersync.New(transport, formats)
+
+	cli.V1kerberos = v1kerberos.New(transport, formats)
+
+	cli.V1ldaps = v1ldaps.New(transport, formats)
 
 	return cli
 }
@@ -103,7 +115,15 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // FreeIPA is a client for free IP a
 type FreeIPA struct {
-	FreeipaEnvironmentName *freeipa_environment_name.Client
+	V1freeipa *v1freeipa.Client
+
+	V1freeipatest *v1freeipatest.Client
+
+	V1freeipausersync *v1freeipausersync.Client
+
+	V1kerberos *v1kerberos.Client
+
+	V1ldaps *v1ldaps.Client
 
 	Transport runtime.ClientTransport
 }
@@ -112,6 +132,14 @@ type FreeIPA struct {
 func (c *FreeIPA) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
 
-	c.FreeipaEnvironmentName.SetTransport(transport)
+	c.V1freeipa.SetTransport(transport)
+
+	c.V1freeipatest.SetTransport(transport)
+
+	c.V1freeipausersync.SetTransport(transport)
+
+	c.V1kerberos.SetTransport(transport)
+
+	c.V1ldaps.SetTransport(transport)
 
 }
