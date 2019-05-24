@@ -17,11 +17,11 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.BlueprintUpdater;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplateProcessor;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @Component
 public class CentralCmTemplateUpdater implements BlueprintUpdater {
@@ -69,12 +69,11 @@ public class CentralCmTemplateUpdater implements BlueprintUpdater {
         return ClusterApi.CLOUDERA_MANAGER;
     }
 
-    private CmTemplateProcessor updateCmTemplateConfiguration(CmTemplateProcessor processor, ClouderaManagerRepo clouderaManagerRepoDetails,
+    private void updateCmTemplateConfiguration(CmTemplateProcessor processor, ClouderaManagerRepo clouderaManagerRepoDetails,
             TemplatePreparationObject source, Map<String, List<Map<String, String>>> hostGroupMappings, String sdxContextName) {
         processor.addInstantiator(clouderaManagerRepoDetails, source, sdxContextName);
         processor.addHosts(hostGroupMappings);
-        processor = cmTemplateComponentConfigProcessor.process(processor, source);
-        return processor;
+        cmTemplateComponentConfigProcessor.process(processor, source);
     }
 
     private void updateCmTemplateRepoDetails(CmTemplateProcessor cmTemplateProcessor, ClouderaManagerRepo clouderaManagerRepoDetails,

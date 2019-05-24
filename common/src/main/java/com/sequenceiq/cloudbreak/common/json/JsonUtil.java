@@ -10,7 +10,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
@@ -82,7 +82,7 @@ public class JsonUtil {
     public static String writeValueAsStringSilent(Object object, boolean ignoreNull) {
         try {
             if (ignoreNull) {
-                MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+                MAPPER.setSerializationInclusion(Include.NON_NULL);
             }
             return MAPPER.writeValueAsString(object);
         } catch (JsonProcessingException e) {

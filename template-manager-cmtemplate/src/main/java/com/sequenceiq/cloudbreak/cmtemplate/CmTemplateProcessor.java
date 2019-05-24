@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -186,6 +187,18 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         }
     }
 
+    public void extendTemplateWithAdditionalServices(Map<String, ApiClusterTemplateService> hostGroupServices) {
+        for (Entry<String, ApiClusterTemplateService> hostGroupService : hostGroupServices.entrySet()) {
+            ApiClusterTemplateService service = hostGroupService.getValue();
+            List<String> serviceRefNames = service.getRoleConfigGroups().stream()
+                    .map(ApiClusterTemplateRoleConfigGroup::getRefName).collect(Collectors.toList());
+            cmTemplate.addServicesItem(service);
+            cmTemplate.getHostTemplates().stream()
+                    .filter(hostTemplate -> hostTemplate.getRefName().equals(hostGroupService.getKey()))
+                    .forEach(ht -> ht.getRoleConfigGroupsRefNames().addAll(serviceRefNames));
+        }
+    }
+
     public void addServiceConfigs(String serviceType, List<String> roleTypes, List<ApiClusterTemplateConfig> configs) {
         getServiceByType(serviceType).ifPresent(service -> mergeServiceConfigs(service, configs));
     }
@@ -203,10 +216,10 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
 
     private Map<String, ApiClusterTemplateConfig> mapByName(Collection<ApiClusterTemplateConfig> configs) {
         return configs.stream()
-                    .collect(toMap(
-                            ApiClusterTemplateConfig::getName,
-                            Function.identity()
-                    ));
+                .collect(toMap(
+                        ApiClusterTemplateConfig::getName,
+                        Function.identity()
+                ));
     }
 
     private void setServiceConfigs(ApiClusterTemplateService service, Collection<ApiClusterTemplateConfig> configs) {
@@ -246,7 +259,7 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                 .anyMatch(rcg -> roleTypes.stream().anyMatch(roleType -> roleType.equalsIgnoreCase(rcg.getRoleType())));
     }
 
-    private Optional<ApiClusterTemplateService> getServiceByType(String serviceType) {
+    public Optional<ApiClusterTemplateService> getServiceByType(String serviceType) {
         for (ApiClusterTemplateService service : cmTemplate.getServices()) {
             if (serviceType.equalsIgnoreCase(service.getServiceType())) {
                 return Optional.of(service);
