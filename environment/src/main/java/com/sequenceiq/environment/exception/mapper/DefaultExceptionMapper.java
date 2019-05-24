@@ -1,11 +1,12 @@
 package com.sequenceiq.environment.exception.mapper;
 
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.Provider;
+
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.api.ExceptionResponse;
 
-@Provider
+@Component
 public class DefaultExceptionMapper extends BaseExceptionMapper<Exception> {
 
     @Override

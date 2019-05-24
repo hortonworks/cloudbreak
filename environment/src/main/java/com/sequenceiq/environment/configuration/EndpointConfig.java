@@ -11,18 +11,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.environment.api.EnvironmentApi;
-import com.sequenceiq.environment.credential.controller.CredentialV1Controller;
+import com.sequenceiq.environment.credential.v1.CredentialV1Controller;
 import com.sequenceiq.environment.environment.v1.EnvironmentV1Controller;
-import com.sequenceiq.environment.exception.mapper.DefaultExceptionMapper;
-import com.sequenceiq.environment.exception.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.environment.proxy.ProxyV1Controller;
 
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.config.SwaggerConfigLocator;
 import io.swagger.jaxrs.config.SwaggerContextService;
 
-@ApplicationPath(EnvironmentApi.API_ROOT_CONTEXT)
 @Configuration
+@ApplicationPath(EnvironmentApi.API_ROOT_CONTEXT)
 public class EndpointConfig extends ResourceConfig {
 
     private static final List<Class<?>> CONTROLLERS = List.of(CredentialV1Controller.class, ProxyV1Controller.class, EnvironmentV1Controller.class);
@@ -70,8 +68,6 @@ public class EndpointConfig extends ResourceConfig {
         for (ExceptionMapper<?> mapper : exceptionMappers) {
             register(mapper);
         }
-        register(WebApplicaitonExceptionMapper.class);
-        register(DefaultExceptionMapper.class);
     }
 
     private void registerEndpoints() {
