@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
+import com.sequenceiq.freeipa.client.model.Ca;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.client.model.User;
 
@@ -156,6 +157,13 @@ public class FreeIpaClient {
                 "user", users
         );
         return invoke("group_add_member", flags, params, Object.class);
+    }
+
+    public String getRootCertificate() throws FreeIpaClientException {
+        List<String> flags = List.of("ipa");
+        Map<String, Object> params = Map.of();
+        RPCResponse<Ca> response = invoke("ca_show", flags, params, Ca.class);
+        return response.getResult().getCertificate();
     }
 
     public <T> RPCResponse<T> invoke(String method, List<String> flags, Map<String, Object> params, Type resultType) throws FreeIpaClientException {

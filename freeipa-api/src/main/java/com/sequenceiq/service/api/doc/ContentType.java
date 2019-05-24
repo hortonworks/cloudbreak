@@ -6,6 +6,8 @@ public class ContentType {
 
     public static final String JSON = "application/json";
 
+    public static final String TEXT_PLAIN = "text/plain";
+
     private ContentType() {
     }
 }
