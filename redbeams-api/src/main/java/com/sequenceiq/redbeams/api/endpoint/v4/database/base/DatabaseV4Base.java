@@ -11,33 +11,40 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.validation.ValidJdbcConnectionUrl;
+import com.sequenceiq.cloudbreak.validation.ValidUrl;
 
 import io.swagger.annotations.ApiModelProperty;
 
-// TODO add validation
-//@ValidRDSConfigJson
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class DatabaseV4Base implements Serializable {
 
     @NotNull
-    @Size(max = 100, min = 5, message = "The length of the database config's name must be between 5 to 100")
+    @Size(max = 100, min = 5, message = "The length of the database's name must be between 5 to 100, inclusive")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
-            message = "The database's name can only contain lowercase alphanumeric characters, and hyphens, and must start with an alphanumeric character")
+            message = "The database's name may only contain lowercase characters, digits, and hyphens, and must start with an alphanumeric character")
     @ApiModelProperty(value = Database.NAME, required = true)
     private String name;
 
-    @Size(max = 1000)
+    @Size(max = 1000000)
     @ApiModelProperty(DESCRIPTION)
     private String description;
 
     @NotNull
+    @ValidJdbcConnectionUrl
     @ApiModelProperty(value = Database.CONNECTION_URL, required = true)
     private String connectionURL;
 
     @NotNull
+    @Size(min = 3, max = 56, message = "The length of the database's type must be between 3 and 56, inclusive")
+    @Pattern(regexp = "(^[a-zA-Z_][-a-zA-Z0-9_]*[a-zA-Z0-9_]$)",
+            message = "The database's type may only contain alphanumeric characters, underscores, and hyphens, and must "
+                + "start with an alphanumeric character or underscore")
     @ApiModelProperty(value = Database.TYPE, required = true)
     private String type;
 
+    @Size(max = 150)
+    @ValidUrl
     @ApiModelProperty(Database.CONNECTOR_JAR_URL)
     private String connectorJarUrl;
 

@@ -13,8 +13,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseV4Request;
+import com.sequenceiq.redbeams.api.util.DatabaseVendorUtil;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
-import com.sequenceiq.redbeams.util.DatabaseVendorUtil;
 
 @Component
 public class DatabaseV4RequestToDatabaseConfigConverter  extends AbstractConversionServiceAwareConverter<DatabaseV4Request, DatabaseConfig> {

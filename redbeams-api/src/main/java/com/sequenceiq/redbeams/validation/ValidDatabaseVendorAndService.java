@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.validation.externaldatabase;
+package com.sequenceiq.redbeams.validation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -10,15 +10,15 @@ import javax.validation.Constraint;
 import javax.validation.Payload;
 
 @Documented
-@Constraint(validatedBy = RdsRequestValidator.class)
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ValidRds {
+@Constraint(validatedBy = DatabaseVendorAndServiceValidator.class)
+public @interface ValidDatabaseVendorAndService {
 
-    String message() default "RdsRequest contains unsupported database and service combination";
+    String message() default "";
 
-    Class<?>[] groups() default { };
+    Class<?>[] groups() default {};
 
-    Class<? extends Payload>[] payload() default { };
+    Class<? extends Payload>[] payload() default {};
 
 }

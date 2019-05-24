@@ -1,20 +1,22 @@
-package com.sequenceiq.cloudbreak.externaldatabase;
+package com.sequenceiq.redbeams.validation;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor.MYSQL;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor.ORACLE11;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor.ORACLE12;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor.POSTGRES;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Answers.RETURNS_DEEP_STUBS;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import javax.validation.ConstraintValidatorContext;
-import javax.validation.ConstraintValidatorContext.ConstraintViolationBuilder;
-import javax.validation.ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,44 +25,38 @@ import org.junit.runners.Parameterized.Parameters;
 import org.mockito.Mock;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
-import com.sequenceiq.cloudbreak.validation.externaldatabase.RdsRequestValidator;
+import com.sequenceiq.cloudbreak.util.DatabaseCommon;
+import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseV4Request;
 
 @RunWith(Parameterized.class)
-public class RdsRequestValidatorTest {
+public class DatabaseVendorAndServiceValidatorTest {
 
-    @Mock
-    private ConstraintValidatorContext constraintValidatorContext;
-
-    @Mock
-    private ConstraintViolationBuilder constraintViolationBuilder;
-
-    @Mock
-    private NodeBuilderCustomizableContext nodeBuilderCustomizableContext;
-
-    private final RdsRequestValidator rdsRequestValidator = new RdsRequestValidator();
+    @Mock(answer = RETURNS_DEEP_STUBS)
+    private ConstraintValidatorContext context;
 
     private final String serviceName;
 
     private final DatabaseVendor databaseVendor;
 
-    private final boolean result;
+    private final boolean expectedResult;
 
-    public RdsRequestValidatorTest(String serviceName, DatabaseVendor databaseVendor, boolean result) {
+    private DatabaseVendorAndServiceValidator underTest;
+
+    public DatabaseVendorAndServiceValidatorTest(String serviceName, DatabaseVendor databaseVendor, boolean expectedResult) {
         this.serviceName = serviceName;
         this.databaseVendor = databaseVendor;
-        this.result = result;
+        this.expectedResult = expectedResult;
     }
 
     @Before
-    public void before() {
+    public void setUp() {
         initMocks(this);
-        when(constraintValidatorContext.buildConstraintViolationWithTemplate(anyString())).thenReturn(constraintViolationBuilder);
-        when(constraintViolationBuilder.addPropertyNode(anyString())).thenReturn(nodeBuilderCustomizableContext);
-        when(nodeBuilderCustomizableContext.addConstraintViolation()).thenReturn(constraintValidatorContext);
+        when(context.buildConstraintViolationWithTemplate(any(String.class)).addConstraintViolation()).thenReturn(context);
+
+        underTest = new DatabaseVendorAndServiceValidator();
     }
 
-    @Parameters(name = "{index}: service: {0} database: {1} should return {2}")
+    @Parameters(name = "{index}: service: {0} database vendor: {1} should return {2}")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][] {
                 { "HIVE",      POSTGRES,    true },
@@ -112,17 +108,17 @@ public class RdsRequestValidatorTest {
     }
 
     @Test
-    public void test() {
-        DatabaseV4Request rdsConfigRequest = rdsConfigRequest(serviceName, databaseVendor);
-        boolean valid = rdsRequestValidator.isValid(rdsConfigRequest, constraintValidatorContext);
-        Assert.assertEquals(result, valid);
-    }
+    public void testIsValid() {
+        DatabaseV4Request request = new DatabaseV4Request();
+        request.setType(serviceName);
+        request.setConnectionURL(new DatabaseCommon().getJdbcConnectionUrl(databaseVendor.jdbcUrlDriverId(),
+            "mydb.example.com",
+            1234,
+            Optional.of(serviceName)));
 
-    private DatabaseV4Request rdsConfigRequest(String serviceName, DatabaseVendor databaseVendor) {
-        DatabaseV4Request rdsConfigRequest = new DatabaseV4Request();
-        rdsConfigRequest.setType(serviceName);
-        rdsConfigRequest.setConnectionURL(String.format("jdbc:%s:dsfdsdfsdfsdfdsf:%s.host.com:5432/%s",
-                databaseVendor.jdbcUrlDriverId(), serviceName, serviceName));
-        return rdsConfigRequest;
+        assertEquals(expectedResult, underTest.isValid(request, context));
+
+        int expectedTimes = expectedResult ? 0 : 1;
+        verify(context, times(expectedTimes)).buildConstraintViolationWithTemplate(any(String.class));
     }
 }

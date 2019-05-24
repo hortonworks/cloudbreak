@@ -6,11 +6,16 @@ import org.springframework.validation.Validator;
 
 import java.util.Optional;
 
+import javax.inject.Inject;
+
 import com.sequenceiq.cloudbreak.util.DatabaseCommon;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 
 @Component
 public class DatabaseServerConnectionValidator extends BaseConnectionValidator implements Validator {
+
+    @Inject
+    private DatabaseCommon databaseCommon;
 
     @Override
     public boolean supports(Class<?> clazz) {
@@ -20,7 +25,7 @@ public class DatabaseServerConnectionValidator extends BaseConnectionValidator i
     @Override
     public void validate(Object target, Errors errors) {
         DatabaseServerConfig server = (DatabaseServerConfig) target;
-        String connectionUrl = DatabaseCommon.getConnectionURL(server.getDatabaseVendor().jdbcUrlDriverId(),
+        String connectionUrl = databaseCommon.getJdbcConnectionUrl(server.getDatabaseVendor().jdbcUrlDriverId(),
             server.getHost(), server.getPort(), Optional.empty());
         validate(server.getConnectorJarUrl(), server.getDatabaseVendor(), connectionUrl, server.getConnectionUserName(),
             server.getConnectionPassword(), errors);
