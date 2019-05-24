@@ -32,20 +32,6 @@
           {
             "refName": "hdfs-NAMENODE-BASE",
             "roleType": "NAMENODE",
-            "configs": [
-              {
-                "name": "autofailover_enabled",
-                "value": "true"
-              },
-              {
-                "name": "dfs_federation_namenode_nameservice",
-                "value": "ns1"
-              },
-              {
-                "name": "dfs_namenode_quorum_journal_name",
-                "value": "ns1"
-              }
-            ],
             "base": true
           },
           {

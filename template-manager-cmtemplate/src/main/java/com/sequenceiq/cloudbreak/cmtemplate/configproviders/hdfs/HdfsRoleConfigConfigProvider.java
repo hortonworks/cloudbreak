@@ -4,7 +4,9 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 import static com.sequenceiq.cloudbreak.template.VolumeUtils.buildSingleVolumePath;
 import static com.sequenceiq.cloudbreak.template.VolumeUtils.buildVolumePathStringZeroVolumeHandled;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
@@ -35,9 +37,18 @@ public class HdfsRoleConfigConfigProvider extends AbstractRoleConfigConfigProvid
                         config(FAILED_VOLUMES_TOLERATED, NUM_FAILED_VOLUMES_TOLERATED.toString())
                 );
             case HdfsRoles.NAMENODE:
-                return List.of(
+                List<ApiClusterTemplateConfig> configs = List.of(
                         config(DFS_NAME_DIRS, buildVolumePathStringZeroVolumeHandled(hostGroupView.getVolumeCount(), "namenode"))
                 );
+                if (isHA(source)) {
+                    configs = new ArrayList<>(configs);
+                    configs.addAll(List.of(
+                            config("autofailover_enabled", "true"),
+                            config("dfs_federation_namenode_nameservice", "ns1"),
+                            config("dfs_namenode_quorum_journal_name", "ns1")
+                    ));
+                }
+                return configs;
             case HdfsRoles.SECONDARYNAMENODE:
                 return List.of(
                         config(DFS_CHECK_DIRS, buildVolumePathStringZeroVolumeHandled(hostGroupView.getVolumeCount(), "namesecondary"))
@@ -59,6 +70,15 @@ public class HdfsRoleConfigConfigProvider extends AbstractRoleConfigConfigProvid
     @Override
     public List<String> getRoleTypes() {
         return List.of(HdfsRoles.NAMENODE, HdfsRoles.DATANODE, HdfsRoles.SECONDARYNAMENODE, HdfsRoles.JOURNALNODE);
+    }
+
+    private boolean isHA(TemplatePreparationObject source) {
+        Set<String> namenodeGroups = source.getBlueprintView().getProcessor()
+                .getHostGroupsWithComponent(HdfsRoles.NAMENODE);
+        return source.getHostgroupViews().stream()
+                .filter(hostGroup -> namenodeGroups.contains(hostGroup.getName()))
+                .mapToInt(HostgroupView::getNodeCount)
+                .sum() > 1;
     }
 
 }
