@@ -15,7 +15,7 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.network.dto.NetworkDto;
-import com.sequenceiq.environment.proxy.ProxyConfig;
+import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 
 @Component
 public class EnvironmentCreationValidator {
