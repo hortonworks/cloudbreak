@@ -16,7 +16,6 @@ else
     branch="rc-$(echo $version | cut -d '.' -f 1,2)"
 fi
 echo -e "\n\033[1;96m--- build latest cbd: $branch for $os\033[0m\n"
-
 rm_flag=""
 if ! [[ "$CIRCLECI" ]]; then
     rm_flag="--rm"
