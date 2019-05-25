@@ -1,0 +1,7 @@
+{
+  "name": "security-group-01",
+  "description": "security group description",
+  "securityGroupIds": ["sg-0cf01d5asdr34534f"],
+  "cloudPlatform": "AWS",
+  "securityRules": null
+}
