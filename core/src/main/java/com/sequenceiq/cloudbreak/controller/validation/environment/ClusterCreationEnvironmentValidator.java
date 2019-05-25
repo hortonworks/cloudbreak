@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.validation.environment;
 
+import static java.util.Optional.ofNullable;
+
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -118,7 +120,7 @@ public class ClusterCreationEnvironmentValidator {
     }
 
     private void validateRdsConfigNames(Set<String> rdsConfigNames, ValidationResultBuilder resultBuilder, Long workspaceId) {
-        if (!rdsConfigNames.isEmpty()) {
+        if (!ofNullable(rdsConfigNames).orElse(Set.of()).isEmpty()) {
             Set<String> foundDatabaseNames = rdsConfigService.getByNamesForWorkspaceId(rdsConfigNames, workspaceId).stream()
                     .map(RDSConfig::getName)
                     .collect(Collectors.toSet());
