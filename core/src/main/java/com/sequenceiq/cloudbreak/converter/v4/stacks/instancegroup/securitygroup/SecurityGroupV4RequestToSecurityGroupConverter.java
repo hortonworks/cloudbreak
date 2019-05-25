@@ -8,16 +8,17 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
-import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 
 @Component
 public class SecurityGroupV4RequestToSecurityGroupConverter extends AbstractConversionServiceAwareConverter<SecurityGroupV4Request, SecurityGroup> {
@@ -47,10 +48,13 @@ public class SecurityGroupV4RequestToSecurityGroupConverter extends AbstractConv
     }
 
     private Set<SecurityRule> convertSecurityRules(List<SecurityRuleV4Request> securityRules, SecurityGroup securityGroup) {
-        Set<SecurityRule> convertedSet = converterUtil.convertAllAsSet(securityRules, SecurityRule.class);
-        for (SecurityRule securityRule : convertedSet) {
-            securityRule.setSecurityGroup(securityGroup);
+        if (!CollectionUtils.isEmpty(securityRules)) {
+            Set<SecurityRule> convertedSet = converterUtil.convertAllAsSet(securityRules, SecurityRule.class);
+            for (SecurityRule securityRule : convertedSet) {
+                securityRule.setSecurityGroup(securityGroup);
+            }
+            return convertedSet;
         }
-        return convertedSet;
+        return Set.of();
     }
 }
