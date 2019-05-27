@@ -64,7 +64,7 @@ public class VaultConfig extends AbstractVaultConfiguration {
     @Value("${vault.port:}")
     private int port;
 
-    @Value("${vault.root.token:salala}")
+    @Value("${vault.root.token:}")
     private String rootToken;
 
     @Value("${vault.ssl.enabled:false}")

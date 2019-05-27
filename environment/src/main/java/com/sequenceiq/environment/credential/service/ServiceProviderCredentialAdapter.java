@@ -27,8 +27,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.service.OperationException;
-import com.sequenceiq.environment.credential.converter.CredentialToCloudCredentialConverter;
-import com.sequenceiq.environment.credential.converter.CredentialToExtendedCloudCredentialConverter;
+import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
+import com.sequenceiq.environment.credential.v1.converter.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 

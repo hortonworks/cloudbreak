@@ -4,6 +4,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
@@ -40,16 +41,17 @@ public class EnvironmentApiConverter {
     }
 
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
-        return EnvironmentCreationDto.EnvironmentCreationDtoBuilder.anEnvironmentCreationDto()
+        EnvironmentCreationDto.EnvironmentCreationDtoBuilder builder = EnvironmentCreationDto.EnvironmentCreationDtoBuilder.anEnvironmentCreationDto()
                 .withAccountId(authenticatedUserService.getAccountId())
                 .withName(request.getName())
                 .withDescription(request.getDescription())
                 .withCloudPlatform(request.getCloudPlatform())
                 .withCredential(request)
                 .withLocation(locationRequestToDto(request.getLocation()))
-                .withNetwork(networkRequestToDto(request.getNetwork()))
-                .withRegions(request.getRegions())
-                .build();
+                .withRegions(request.getRegions());
+
+        NullUtil.ifNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
+        return builder.build();
     }
 
     public LocationDto locationRequestToDto(LocationRequest location) {
@@ -62,22 +64,27 @@ public class EnvironmentApiConverter {
     }
 
     public NetworkDto networkRequestToDto(EnvironmentNetworkRequest network) {
-        AwsParams awsParams = new AwsParams();
-        awsParams.setVpcId(network.getAws().getVpcId());
-        AzureParams azureParams = new AzureParams();
-        azureParams.setNetworkId(network.getAzure().getNetworkId());
-        azureParams.setNoFirewallRules(network.getAzure().getNoFirewallRules());
-        azureParams.setNoPublicIp(network.getAzure().getNoPublicIp());
-        azureParams.setResourceGroupName(network.getAzure().getResourceGroupName());
-        return NetworkDto.NetworkDtoBuilder.aNetworkDto()
+        NetworkDto.NetworkDtoBuilder builder = NetworkDto.NetworkDtoBuilder.aNetworkDto();
+        if (network.getAws() != null) {
+            AwsParams awsParams = new AwsParams();
+            awsParams.setVpcId(network.getAws().getVpcId());
+            builder.withAws(awsParams);
+        }
+        if (network.getAzure() != null) {
+            AzureParams azureParams = new AzureParams();
+            azureParams.setNetworkId(network.getAzure().getNetworkId());
+            azureParams.setNoFirewallRules(network.getAzure().getNoFirewallRules());
+            azureParams.setNoPublicIp(network.getAzure().getNoPublicIp());
+            azureParams.setResourceGroupName(network.getAzure().getResourceGroupName());
+            builder.withAzure(azureParams);
+        }
+        return builder
                 .withSubnetIds(network.getSubnetIds())
-                .withAws(awsParams)
-                .withAzure(azureParams)
                 .build();
     }
 
     public DetailedEnvironmentResponse dtoToDetailedResponse(EnvironmentDto environmentDto) {
-        return DetailedEnvironmentResponse.DetailedEnvironmentResponseBuilder.aDetailedEnvironmentResponse()
+        DetailedEnvironmentResponse.Builder builder = DetailedEnvironmentResponse.Builder.aDetailedEnvironmentResponse()
                 .withId(environmentDto.getResourceCrn())
                 .withName(environmentDto.getName())
                 .withDescription(environmentDto.getDescription())
@@ -85,9 +92,10 @@ public class EnvironmentApiConverter {
                 .withCredentialName(environmentDto.getCredential().getName())
                 .withEnvironmentStatus(convertEnvStatus(environmentDto.getEnvironmentStatus()))
                 .withLocation(locationDtoToResponse(environmentDto.getLocation()))
-                .withNetwork(networkDtoToResponse(environmentDto.getNetwork()))
-                .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()))
-                .build();
+                .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()));
+
+        NullUtil.ifNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
+        return builder.build();
     }
 
     public EnvironmentNetworkResponse networkDtoToResponse(NetworkDto network) {
@@ -115,7 +123,7 @@ public class EnvironmentApiConverter {
                 .build();
     }
 
-    public EnvironmentStatus convertEnvStatus(com.sequenceiq.environment.environment.dto.EnvironmentStatus environmentStatus) {
+    public EnvironmentStatus convertEnvStatus(com.sequenceiq.environment.environment.EnvironmentStatus environmentStatus) {
         switch (environmentStatus) {
             case ARCHIVED:
                 return EnvironmentStatus.ARCHIVED;
@@ -136,12 +144,12 @@ public class EnvironmentApiConverter {
     }
 
     public EnvironmentEditDto initEditDto(EnvironmentEditRequest request) {
-        return EnvironmentEditDto.EnvironmentEditDtoBuilder.anEnvironmentEditDto()
+        EnvironmentEditDto.EnvironmentEditDtoBuilder builder = EnvironmentEditDto.EnvironmentEditDtoBuilder.anEnvironmentEditDto()
                 .withDescription(request.getDescription())
                 .withAccountId(authenticatedUserService.getAccountId())
-                .withLocation(locationRequestToDto(request.getLocation()))
-                .withRegions(request.getRegions())
-                .withNetwork(networkRequestToDto(request.getNetwork()))
-                .build();
+                .withRegions(request.getRegions());
+        NullUtil.ifNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
+        NullUtil.ifNotNull(request.getLocation(), location -> builder.withLocation(locationRequestToDto(location)));
+        return builder.build();
     }
 }

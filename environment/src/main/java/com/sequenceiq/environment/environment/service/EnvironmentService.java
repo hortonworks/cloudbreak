@@ -78,6 +78,10 @@ public class EnvironmentService {
         return environmentRepository.save(environment);
     }
 
+    public boolean isNameOccupied(String name, String accountId) {
+        return environmentRepository.existsWithNameInAccount(name, accountId);
+    }
+
     public DetailedEnvironmentResponse get(String environmentName, String accountId) {
         Environment environment = getByNameForAccountId(environmentName, accountId);
         return conversionService.convert(environment, DetailedEnvironmentResponse.class);

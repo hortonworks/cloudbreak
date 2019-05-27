@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.CloudPlatform;
+import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 
@@ -18,7 +19,7 @@ public class EnvironmentDtoConverter {
     }
 
     public EnvironmentDto environmentToDto(Environment environment) {
-        return EnvironmentDto.EnvironmentDtoBuilder.anEnvironmentDto()
+        EnvironmentDto.EnvironmentDtoBuilder builder = EnvironmentDto.EnvironmentDtoBuilder.anEnvironmentDto()
                 .withName(environment.getName())
                 .withDescription(environment.getDescription())
                 .withAccountId(environment.getAccountId())
@@ -27,10 +28,13 @@ public class EnvironmentDtoConverter {
                 .withCredential(environment.getCredential())
                 .withDeletionTimestamp(environment.getDeletionTimestamp())
                 .withLocationDto(environmentToLocationDto(environment))
-                //TODO: .withEnvironmentStatus(environment.getEnvironmentStatus())
-                .withNetwork(environmentNetworkConverterMap.get(CloudPlatform.valueOf(environment.getCloudPlatform()))
-                        .convertToDto(environment.getNetwork()))
-                .build();
+                .withRegions(environment.getRegions())
+                .withEnvironmentStatus(environment.getStatus());
+        if (environment.getNetwork() != null) {
+            builder.withNetwork(environmentNetworkConverterMap.get(CloudPlatform.valueOf(environment.getCloudPlatform()))
+                    .convertToDto(environment.getNetwork()));
+        }
+        return builder.build();
     }
 
     public Environment creationDtoToEnvironment(EnvironmentCreationDto creationDto) {
@@ -44,6 +48,7 @@ public class EnvironmentDtoConverter {
         environment.setLongitude(creationDto.getLocation().getLongitude());
         environment.setLocation(creationDto.getLocation().getName());
         environment.setLocationDisplayName(creationDto.getLocation().getDisplayName());
+        environment.setStatus(EnvironmentStatus.CREATION_INITIATED);
         return environment;
     }
 

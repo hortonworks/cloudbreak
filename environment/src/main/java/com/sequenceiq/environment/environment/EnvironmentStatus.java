@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.dto;
+package com.sequenceiq.environment.environment;
 
 public enum EnvironmentStatus {
     CREATION_INITIATED,

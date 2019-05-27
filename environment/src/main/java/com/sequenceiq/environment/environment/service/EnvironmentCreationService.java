@@ -59,6 +59,10 @@ public class EnvironmentCreationService {
     }
 
     public EnvironmentDto create(EnvironmentCreationDto creationDto) {
+        if (environmentService.isNameOccupied(creationDto.getName(), creationDto.getAccountId())) {
+            throw new BadRequestException(String.format("Environment with name '%s' already exists in account '%s'.",
+                    creationDto.getName(), creationDto.getAccountId()));
+        }
         Environment environment = initializeEnvironment(creationDto);
         CloudRegions cloudRegions = setLocationAndRegions(creationDto, environment);
         validateCreation(creationDto, environment, cloudRegions);
@@ -73,6 +77,7 @@ public class EnvironmentCreationService {
         Credential credential = environmentResourceService
                 .getCredentialFromRequest(creationDto.getCredential(), creationDto.getAccountId());
         environment.setCredential(credential);
+        environment.setCloudPlatform(credential.getCloudPlatform());
         return environment;
     }
 
