@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
 public class StackCreationActions {
@@ -171,7 +172,7 @@ public class StackCreationActions {
             @Override
             protected void doExecute(StackContext context, LaunchStackResult payload, Map<Object, Object> variables) {
                 Stack stack = stackCreationService.provisioningFinished(context, payload, variables);
-                StackContext newContext = new StackContext(context.getFlowId(), stack, context.getCloudContext(),
+                StackContext newContext = new StackContext(context.getFlowParameters(), stack, context.getCloudContext(),
                         context.getCloudCredential(), context.getCloudStack());
                 sendEvent(newContext);
             }
@@ -191,7 +192,7 @@ public class StackCreationActions {
             @Override
             protected void doExecute(StackContext context, CollectMetadataResult payload, Map<Object, Object> variables) {
                 Stack stack = stackCreationService.setupMetadata(context, payload);
-                StackContext newContext = new StackContext(context.getFlowId(), stack, context.getCloudContext(), context.getCloudCredential(),
+                StackContext newContext = new StackContext(context.getFlowParameters(), stack, context.getCloudContext(), context.getCloudCredential(),
                         context.getCloudStack());
                 sendEvent(newContext);
             }
@@ -210,7 +211,7 @@ public class StackCreationActions {
             @Override
             protected void doExecute(StackContext context, GetTlsInfoResult payload, Map<Object, Object> variables) {
                 Stack stack = stackCreationService.saveTlsInfo(context, payload.getTlsInfo());
-                StackContext newContext = new StackContext(context.getFlowId(), stack, context.getCloudContext(), context.getCloudCredential(),
+                StackContext newContext = new StackContext(context.getFlowParameters(), stack, context.getCloudContext(), context.getCloudCredential(),
                         context.getCloudStack());
                 sendEvent(newContext);
             }
@@ -231,7 +232,7 @@ public class StackCreationActions {
             protected void doExecute(StackContext context, GetSSHFingerprintsResult payload, Map<Object, Object> variables) throws Exception {
                 stackCreationService.setupTls(context);
                 StackWithFingerprintsEvent fingerprintsEvent = new StackWithFingerprintsEvent(payload.getResourceId(), payload.getSshFingerprints());
-                sendEvent(context.getFlowId(), StackCreationEvent.TLS_SETUP_FINISHED_EVENT.event(), fingerprintsEvent);
+                sendEvent(context.getFlowParameters(), StackCreationEvent.TLS_SETUP_FINISHED_EVENT.event(), fingerprintsEvent);
             }
         };
     }
@@ -258,12 +259,12 @@ public class StackCreationActions {
         return new AbstractStackFailureAction<StackCreationState, StackCreationEvent>() {
             @Override
             protected StackFailureContext createFlowContext(
-                String flowId, StateContext<StackCreationState, StackCreationEvent> stateContext, StackFailureEvent payload) {
-                Flow flow = getFlow(flowId);
+                    FlowParameters flowParameters, StateContext<StackCreationState, StackCreationEvent> stateContext, StackFailureEvent payload) {
+                Flow flow = getFlow(flowParameters.getFlowId());
                 StackView stackView = stackService.getViewByIdWithoutAuth(payload.getResourceId());
                 MDCBuilder.buildMdcContext(stackView);
                 flow.setFlowFailed(payload.getException());
-                return new StackFailureContext(flowId, stackView);
+                return new StackFailureContext(flowParameters, stackView);
             }
 
             @Override

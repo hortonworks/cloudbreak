@@ -25,6 +25,7 @@ import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.state.State;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.auth.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
@@ -139,6 +141,9 @@ public class StackImageUpdateActionsTest {
     @Mock
     private StackFailureContext failureContext;
 
+    @Mock
+    private RestRequestThreadLocalService restRequestThreadLocalService;
+
     @InjectMocks
     private final AbstractStackImageUpdateAction<?> checkImageAction = spy(new StackImageUpdateActions().checkImageVersion());
 
@@ -165,7 +170,7 @@ public class StackImageUpdateActionsTest {
     @Before
     public void setUp() throws CloudbreakImageNotFoundException {
         MockitoAnnotations.initMocks(this);
-        when(stateContext.getMessageHeader(HEADERS.FLOW_ID.name())).thenReturn("flowId");
+        when(stateContext.getMessageHeader(HEADERS.FLOW_PARAMETERS.name())).thenReturn(new FlowParameters("flowId", "usercrn"));
         when(stateContext.getExtendedState()).thenReturn(extendedState);
         when(stateContext.getStateMachine()).thenReturn(stateMachine);
         when(stateMachine.getState()).thenReturn(state);

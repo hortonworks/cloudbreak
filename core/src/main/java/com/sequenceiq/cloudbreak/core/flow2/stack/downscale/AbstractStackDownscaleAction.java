@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
+import com.sequenceiq.flow.core.FlowParameters;
 
 public abstract class AbstractStackDownscaleAction<P extends Payload>
         extends AbstractStackAction<StackDownscaleState, StackDownscaleEvent, StackScalingFlowContext, P> {
@@ -56,7 +57,8 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
     }
 
     @Override
-    protected StackScalingFlowContext createFlowContext(String flowId, StateContext<StackDownscaleState, StackDownscaleEvent> stateContext, P payload) {
+    protected StackScalingFlowContext createFlowContext(FlowParameters flowParameters, StateContext<StackDownscaleState, StackDownscaleEvent> stateContext,
+            P payload) {
         Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
@@ -68,7 +70,7 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
         Set<String> instanceIds = extractInstanceIds(payload, variables, stack);
         Integer adjustment = extractAdjustment(payload, variables);
         CloudStack cloudStack = cloudStackConverter.convertForDownscale(stack, instanceIds);
-        return new StackScalingFlowContext(flowId, stack, cloudContext, cloudCredential, cloudStack, instanceGroupName, instanceIds, adjustment);
+        return new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, instanceGroupName, instanceIds, adjustment);
     }
 
     private Integer extractAdjustment(P payload, Map<Object, Object> variables) {

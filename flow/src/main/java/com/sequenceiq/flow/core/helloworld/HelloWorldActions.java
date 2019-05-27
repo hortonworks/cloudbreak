@@ -15,6 +15,7 @@ import org.springframework.statemachine.action.Action;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
+import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
 public class HelloWorldActions {
@@ -23,7 +24,7 @@ public class HelloWorldActions {
         return new AbstractHelloWorldAction<>(Payload.class) {
             @Override
             protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) {
-                sendEvent(context.getFlowId(), HELLO_WORLD_FINISHED_EVENT.event(), payload);
+                sendEvent(context, HELLO_WORLD_FINISHED_EVENT.event(), payload);
             }
         };
     }
@@ -33,7 +34,7 @@ public class HelloWorldActions {
         return new AbstractHelloWorldAction<>(Payload.class) {
             @Override
             protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) {
-                sendEvent(context.getFlowId(), FINALIZE_HELLO_WORLD_EVENT.event(),
+                sendEvent(context, FINALIZE_HELLO_WORLD_EVENT.event(),
                         new HelloWorldFinishPayload(FINALIZE_HELLO_WORLD_EVENT.event(), payload.getResourceId()));
             }
         };
@@ -45,7 +46,7 @@ public class HelloWorldActions {
 
             @Override
             protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) {
-                sendEvent(context.getFlowId(), HELLO_WORLD_FAIL_HANDLED_EVENT.event(), payload);
+                sendEvent(context, HELLO_WORLD_FAIL_HANDLED_EVENT.event(), payload);
             }
         };
     }
@@ -57,8 +58,8 @@ public class HelloWorldActions {
         }
 
         @Override
-        protected CommonContext createFlowContext(String flowId, StateContext<HelloWorldState, HelloWorldEvent> stateContext, P payload) {
-            return new CommonContext(flowId);
+        protected CommonContext createFlowContext(FlowParameters flowParameters, StateContext<HelloWorldState, HelloWorldEvent> stateContext, P payload) {
+            return new CommonContext(flowParameters);
         }
 
         @Override

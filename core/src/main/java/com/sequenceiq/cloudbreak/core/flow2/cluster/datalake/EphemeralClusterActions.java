@@ -32,7 +32,7 @@ public class EphemeralClusterActions {
             protected void doExecute(ClusterViewContext context, EphemeralClusterUpdateTriggerEvent payload, Map<Object, Object> variables) {
                 ephemeralClusterService.updateClusterStarted(context.getStackId());
                 Selectable request = new EphemeralClusterUpdateRequest(context.getStackId());
-                sendEvent(context.getFlowId(), request.selector(), request);
+                sendEvent(context, request.selector(), request);
             }
         };
     }

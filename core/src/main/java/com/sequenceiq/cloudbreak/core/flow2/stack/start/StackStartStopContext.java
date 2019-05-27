@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.flow.core.FlowParameters;
 
 public class StackStartStopContext extends CommonContext {
     private final Stack stack;
@@ -17,9 +18,9 @@ public class StackStartStopContext extends CommonContext {
 
     private final CloudCredential cloudCredential;
 
-    public StackStartStopContext(String flowId, Stack stack, List<InstanceMetaData> instanceMetaData,
+    public StackStartStopContext(FlowParameters flowParameters, Stack stack, List<InstanceMetaData> instanceMetaData,
             CloudContext cloudContext, CloudCredential cloudCredential) {
-        super(flowId);
+        super(flowParameters);
         this.stack = stack;
         this.instanceMetaData = instanceMetaData;
         this.cloudContext = cloudContext;

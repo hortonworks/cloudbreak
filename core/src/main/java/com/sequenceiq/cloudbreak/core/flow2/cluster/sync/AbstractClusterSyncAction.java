@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.flow.core.FlowParameters;
 
 public abstract class AbstractClusterSyncAction<P extends Payload> extends AbstractStackAction<ClusterSyncState, ClusterSyncEvent, ClusterSyncContext, P> {
     @Inject
@@ -22,10 +23,10 @@ public abstract class AbstractClusterSyncAction<P extends Payload> extends Abstr
     }
 
     @Override
-    protected ClusterSyncContext createFlowContext(String flowId, StateContext<ClusterSyncState, ClusterSyncEvent> stateContext, P payload) {
+    protected ClusterSyncContext createFlowContext(FlowParameters flowParameters, StateContext<ClusterSyncState, ClusterSyncEvent> stateContext, P payload) {
         StackView stack = stackService.getViewByIdWithoutAuth(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack.getId().toString(), stack.getName(), "CLUSTER");
-        return new ClusterSyncContext(flowId, stack);
+        return new ClusterSyncContext(flowParameters, stack);
     }
 
     @Override

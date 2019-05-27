@@ -29,6 +29,7 @@ import org.springframework.statemachine.config.builders.StateMachineStateBuilder
 import org.springframework.statemachine.config.builders.StateMachineTransitionBuilder;
 import org.springframework.statemachine.config.common.annotation.ObjectPostProcessor;
 
+import com.sequenceiq.cloudbreak.auth.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
@@ -40,6 +41,10 @@ import reactor.bus.EventBus;
 public class AbstractActionTest {
 
     public static final String FLOW_ID = "flowId";
+
+    public static final String FLOW_TRIGGER_USERCRN = "flowTriggerUserCrn";
+
+    public static final FlowParameters FLOW_PARAMETERS = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USERCRN);
 
     @InjectMocks
     private TestAction underTest;
@@ -55,6 +60,9 @@ public class AbstractActionTest {
 
     @Mock
     private ErrorHandlerAwareReactorEventFactory reactorEventFactory;
+
+    @Mock
+    private RestRequestThreadLocalService restRequestThreadLocalService;
 
     private StateMachine<State, Event> stateMachine;
 
@@ -80,12 +88,12 @@ public class AbstractActionTest {
 
     @Test
     public void testExecute() {
-        stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Collections.singletonMap(Flow2Handler.FLOW_ID, FLOW_ID)));
-        verify(underTest, times(1)).createFlowContext(eq(FLOW_ID), any(StateContext.class), nullable(Payload.class));
+        stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Collections.singletonMap(FlowConstants.FLOW_PARAMETERS, FLOW_PARAMETERS)));
+        verify(underTest, times(1)).createFlowContext(eq(FLOW_PARAMETERS), any(StateContext.class), nullable(Payload.class));
         verify(underTest, times(1)).doExecute(any(CommonContext.class), nullable(Payload.class), any(Map.class));
         verify(underTest, times(0)).sendEvent(any(CommonContext.class));
-        verify(underTest, times(0)).sendEvent(anyString(), anyString(), any());
-        verify(underTest, times(0)).sendEvent(anyString(), any(Selectable.class));
+        verify(underTest, times(0)).sendEvent(eq(FLOW_PARAMETERS), anyString(), any());
+        verify(underTest, times(0)).sendEvent(eq(FLOW_PARAMETERS), anyString(), any(Selectable.class));
         verify(underTest, times(0)).getFailurePayload(any(Payload.class), any(Optional.class), any(RuntimeException.class));
     }
 
@@ -93,11 +101,11 @@ public class AbstractActionTest {
     public void testFailedExecute() {
         RuntimeException exception = new UnsupportedOperationException("");
         Mockito.doThrow(exception).when(underTest).doExecute(any(CommonContext.class), nullable(Payload.class), any());
-        stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Collections.singletonMap(Flow2Handler.FLOW_ID, FLOW_ID)));
-        verify(underTest, times(1)).createFlowContext(eq(FLOW_ID), any(StateContext.class), nullable(Payload.class));
+        stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Collections.singletonMap(FlowConstants.FLOW_PARAMETERS, FLOW_PARAMETERS)));
+        verify(underTest, times(1)).createFlowContext(eq(FLOW_PARAMETERS), any(StateContext.class), nullable(Payload.class));
         verify(underTest, times(1)).doExecute(any(CommonContext.class), nullable(Payload.class), any(Map.class));
         verify(underTest, times(1)).getFailurePayload(nullable(Payload.class), any(Optional.class), eq(exception));
-        verify(underTest, times(1)).sendEvent(eq(FLOW_ID), eq(Event.FAILURE.name()), eq(Collections.emptyMap()));
+        verify(underTest, times(1)).sendEvent(eq(FLOW_PARAMETERS), eq(Event.FAILURE.name()), eq(Collections.emptyMap()));
     }
 
     enum State implements FlowState {
@@ -125,8 +133,8 @@ public class AbstractActionTest {
         }
 
         @Override
-        public CommonContext createFlowContext(String flowId, StateContext<State, Event> stateContext, Payload payload) {
-            return new CommonContext(FLOW_ID);
+        public CommonContext createFlowContext(FlowParameters flowParameters, StateContext<State, Event> stateContext, Payload payload) {
+            return new CommonContext(flowParameters);
         }
 
         @Override

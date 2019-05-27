@@ -52,7 +52,7 @@ public class ClusterCredentialChangeActions {
                     default:
                         throw new UnsupportedOperationException("Ambari credential update request not supported: " + payload.getType());
                 }
-                sendEvent(ctx.getFlowId(), request);
+                sendEvent(ctx, request);
             }
         };
     }

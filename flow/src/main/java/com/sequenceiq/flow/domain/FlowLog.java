@@ -57,6 +57,8 @@ public class FlowLog {
 
     private String resourceType;
 
+    private String flowTriggerUserCrn;
+
     public FlowLog() {
 
     }
@@ -69,11 +71,12 @@ public class FlowLog {
         this.stateStatus = stateStatus;
     }
 
-    public FlowLog(Long resourceId, String flowId, String flowChainId, String nextEvent, String payload,
+    public FlowLog(Long resourceId, String flowId, String flowChainId, String flowTriggerUserCrn, String nextEvent, String payload,
             Class<?> payloadType, String variables, Class<?> flowType, String currentState) {
         this.resourceId = resourceId;
         this.flowId = flowId;
         this.flowChainId = flowChainId;
+        this.flowTriggerUserCrn = flowTriggerUserCrn;
         this.nextEvent = nextEvent;
         this.payload = payload;
         this.payloadType = payloadType;
@@ -208,5 +211,13 @@ public class FlowLog {
 
     public void setResourceType(String resourceType) {
         this.resourceType = resourceType;
+    }
+
+    public String getFlowTriggerUserCrn() {
+        return flowTriggerUserCrn;
+    }
+
+    public void setFlowTriggerUserCrn(String flowTriggerUserCrn) {
+        this.flowTriggerUserCrn = flowTriggerUserCrn;
     }
 }

@@ -55,7 +55,7 @@ public class StackPreTerminationAction extends AbstractStackTerminationAction<Te
             LOGGER.info("Could not trigger stack event on null, {}", payload);
             String statusReason = "Stack or credential not found.";
             StackPreTerminationFailed terminateStackResult = new StackPreTerminationFailed(payload.getResourceId(), new IllegalArgumentException(statusReason));
-            sendEvent(context.getFlowId(), StackTerminationEvent.PRE_TERMINATION_FAILED_EVENT.event(), terminateStackResult);
+            sendEvent(context, StackTerminationEvent.PRE_TERMINATION_FAILED_EVENT.event(), terminateStackResult);
         } else {
             putClusterToDeleteInProgressState(stack);
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DELETE_IN_PROGRESS, "Terminating the cluster and its infrastructure.");

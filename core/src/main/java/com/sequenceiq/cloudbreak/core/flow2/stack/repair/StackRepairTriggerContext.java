@@ -2,13 +2,14 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.repair;
 
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.flow.core.FlowParameters;
 
 public class StackRepairTriggerContext extends CommonContext {
 
     private final Stack stack;
 
-    public StackRepairTriggerContext(String flowId, Stack stack) {
-        super(flowId);
+    public StackRepairTriggerContext(FlowParameters flowParameters, Stack stack) {
+        super(flowParameters);
         this.stack = stack;
     }
 

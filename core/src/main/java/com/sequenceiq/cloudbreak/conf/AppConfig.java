@@ -66,6 +66,8 @@ import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.environment.client.EnvironmentServiceClient;
 import com.sequenceiq.environment.client.EnvironmentServiceClientBuilder;
+import com.sequenceiq.freeipa.api.client.FreeIpaApiUserCrnClient;
+import com.sequenceiq.freeipa.api.client.FreeIpaApiUserCrnClientBuilder;
 
 @Configuration
 @EnableRetry
@@ -143,6 +145,10 @@ public class AppConfig implements ResourceLoaderAware {
     @Inject
     @Named("environmentServerUrl")
     private String environmentServerUrl;
+
+    @Inject
+    @Named("freeIpaServerUrl")
+    private String freeIpaServerUrl;
 
     @Inject
     private List<EnvironmentNetworkConverter> environmentNetworkConverters;
@@ -266,6 +272,15 @@ public class AppConfig implements ResourceLoaderAware {
     @Bean
     public IdentityClient identityClient() {
         return new IdentityClient(identityServerUrl, clientId, new ConfigKey(certificateValidation, restDebug, ignorePreValidation));
+    }
+
+    @Bean
+    public FreeIpaApiUserCrnClient freeIpaApiClient() {
+        return new FreeIpaApiUserCrnClientBuilder(freeIpaServerUrl)
+                .withCertificateValidation(certificateValidation)
+                .withIgnorePreValidation(ignorePreValidation)
+                .withDebug(restDebug)
+                .build();
     }
 
     @Bean

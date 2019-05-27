@@ -57,31 +57,32 @@ public class FlowChains {
         }
     }
 
-    public void triggerNextFlow(String flowChainId) {
+    public void triggerNextFlow(String flowChainId, String flowTriggerUserCrn) {
         Queue<Selectable> queue = flowChainMap.get(flowChainId);
         if (queue != null) {
             Selectable selectable = queue.poll();
             if (selectable != null) {
-                sendEvent(flowChainId, selectable);
+                sendEvent(flowChainId, flowTriggerUserCrn, selectable);
             } else {
                 removeFlowChain(flowChainId);
-                triggerParentFlowChain(flowChainId);
+                triggerParentFlowChain(flowChainId, flowTriggerUserCrn);
             }
-            flowLogService.saveChain(flowChainId, flowChainParentMap.get(flowChainId), queue);
+            flowLogService.saveChain(flowChainId, flowChainParentMap.get(flowChainId), queue, flowTriggerUserCrn);
         }
     }
 
-    protected void sendEvent(String flowChainId, Selectable selectable) {
+    protected void sendEvent(String flowChainId, String flowTriggerUserCrn, Selectable selectable) {
         LOGGER.debug("Triggering event: {}", selectable);
         Map<String, Object> headers = new HashMap<>();
         headers.put(FlowConstants.FLOW_CHAIN_ID, flowChainId);
+        headers.put(FlowConstants.FLOW_TRIGGER_USERCRN, flowTriggerUserCrn);
         eventBus.notify(selectable.selector(), eventFactory.createEvent(headers, selectable));
     }
 
-    private void triggerParentFlowChain(String flowChainId) {
+    private void triggerParentFlowChain(String flowChainId, String flowTriggerUserCrn) {
         String parentFlowChainId = flowChainId != null ? flowChainParentMap.remove(flowChainId) : null;
         if (parentFlowChainId != null) {
-            triggerNextFlow(parentFlowChainId);
+            triggerNextFlow(parentFlowChainId, flowTriggerUserCrn);
         }
     }
 }

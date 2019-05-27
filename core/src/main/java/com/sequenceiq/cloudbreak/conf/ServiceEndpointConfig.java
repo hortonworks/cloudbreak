@@ -35,6 +35,12 @@ public class ServiceEndpointConfig {
     @Value("${cb.environment.serviceid:}")
     private String environmentServiceId;
 
+    @Value("${cb.freeipa.server.url:}")
+    private String freeipaServiceUrl;
+
+    @Value("${cb.freeipa.serviceid:}")
+    private String freeipaServiceId;
+
     @Bean
     public ServiceAddressResolver serviceAddressResolver() {
         return new RetryingServiceAddressResolver(new DNSServiceAddressResolver(), resolvingTimeout);
@@ -53,5 +59,10 @@ public class ServiceEndpointConfig {
     @Bean
     public String environmentServerUrl()  throws ServiceAddressResolvingException {
         return serviceAddressResolver().resolveUrl(environmentServiceUrl, "http", environmentServiceId);
+    }
+
+    @Bean
+    public String freeIpaServerUrl()  throws ServiceAddressResolvingException {
+        return serviceAddressResolver().resolveUrl(freeipaServiceUrl, "http", freeipaServiceId);
     }
 }

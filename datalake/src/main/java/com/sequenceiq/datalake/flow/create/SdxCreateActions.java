@@ -25,6 +25,7 @@ import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.ProvisionerService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.core.FlowEvent;
+import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
 
 @Configuration
@@ -41,14 +42,14 @@ public class SdxCreateActions {
         return new AbstractSdxAction<>(SdxEvent.class) {
 
             @Override
-            protected SdxContext createFlowContext(String flowId, StateContext<FlowState, FlowEvent> stateContext, SdxEvent payload) {
-                return new SdxContext(flowId, payload.getResourceId());
+            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext, SdxEvent payload) {
+                return new SdxContext(flowParameters, payload.getResourceId());
             }
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
                 provisionerService.startStackProvisioning(payload.getResourceId());
-                sendEvent(context.getFlowId(), SDX_STACK_CREATION_IN_PROGRESS_EVENT.event(), payload);
+                sendEvent(context, SDX_STACK_CREATION_IN_PROGRESS_EVENT.event(), payload);
             }
 
             @Override
@@ -63,8 +64,8 @@ public class SdxCreateActions {
         return new AbstractSdxAction<>(SdxEvent.class) {
 
             @Override
-            protected SdxContext createFlowContext(String flowId, StateContext<FlowState, FlowEvent> stateContext, SdxEvent payload) {
-                return new SdxContext(flowId, payload.getResourceId());
+            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext, SdxEvent payload) {
+                return new SdxContext(flowParameters, payload.getResourceId());
             }
 
             @Override
@@ -88,13 +89,14 @@ public class SdxCreateActions {
     public Action<?, ?> finishedAction() {
         return new AbstractSdxAction<>(StackCreationSuccessEvent.class) {
             @Override
-            protected SdxContext createFlowContext(String flowId, StateContext<FlowState, FlowEvent> stateContext, StackCreationSuccessEvent payload) {
-                return new SdxContext(flowId, payload.getResourceId());
+            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    StackCreationSuccessEvent payload) {
+                return new SdxContext(flowParameters, payload.getResourceId());
             }
 
             @Override
             protected void doExecute(SdxContext context, StackCreationSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                sendEvent(context.getFlowId(), SDX_CREATE_FINALIZED_EVENT.event(), payload);
+                sendEvent(context, SDX_CREATE_FINALIZED_EVENT.event(), payload);
             }
 
             @Override
@@ -108,14 +110,15 @@ public class SdxCreateActions {
     public Action<?, ?> failedAction() {
         return new AbstractSdxAction<>(StackCreationFailedEvent.class) {
             @Override
-            protected SdxContext createFlowContext(String flowId, StateContext<FlowState, FlowEvent> stateContext, StackCreationFailedEvent payload) {
-                return new SdxContext(flowId, payload.getResourceId());
+            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    StackCreationFailedEvent payload) {
+                return new SdxContext(flowParameters, payload.getResourceId());
             }
 
             @Override
             protected void doExecute(SdxContext context, StackCreationFailedEvent payload, Map<Object, Object> variables) throws Exception {
                 sdxService.updateSdxStatus(payload.getResourceId(), SdxClusterStatus.PROVISIONING_FAILED);
-                sendEvent(context.getFlowId(), SDX_CREATE_FAILED_HANDLED_EVENT.event(), payload);
+                sendEvent(context, SDX_CREATE_FAILED_HANDLED_EVENT.event(), payload);
             }
 
             @Override

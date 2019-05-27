@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.flow.core.FlowParameters;
 
 public class StackScalingFlowContext extends StackContext {
     private final Set<String> instanceIds;
@@ -19,14 +20,14 @@ public class StackScalingFlowContext extends StackContext {
 
     private final Set<String> hostNames;
 
-    public StackScalingFlowContext(String flowId, Stack stack, CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack,
-            String instanceGroupName, Set<String> instanceIds, Integer adjustment) {
-        this(flowId, stack, cloudContext, cloudCredential, cloudStack, instanceGroupName, instanceIds, adjustment, Collections.emptySet());
+    public StackScalingFlowContext(FlowParameters flowParameters, Stack stack, CloudContext cloudContext, CloudCredential cloudCredential,
+            CloudStack cloudStack, String instanceGroupName, Set<String> instanceIds, Integer adjustment) {
+        this(flowParameters, stack, cloudContext, cloudCredential, cloudStack, instanceGroupName, instanceIds, adjustment, Collections.emptySet());
     }
 
-    public StackScalingFlowContext(String flowId, Stack stack, CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack,
-            String instanceGroupName, Set<String> instanceIds, Integer adjustment, Set<String> hostNames) {
-        super(flowId, stack, cloudContext, cloudCredential, cloudStack);
+    public StackScalingFlowContext(FlowParameters flowParameters, Stack stack, CloudContext cloudContext, CloudCredential cloudCredential,
+            CloudStack cloudStack, String instanceGroupName, Set<String> instanceIds, Integer adjustment, Set<String> hostNames) {
+        super(flowParameters, stack, cloudContext, cloudCredential, cloudStack);
         this.instanceGroupName = instanceGroupName;
         this.instanceIds = instanceIds;
         this.adjustment = adjustment;

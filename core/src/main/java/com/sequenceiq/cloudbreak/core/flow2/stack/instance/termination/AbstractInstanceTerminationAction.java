@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.flow.core.FlowParameters;
 
 abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
         extends AbstractStackAction<InstanceTerminationState, InstanceTerminationEvent, InstanceTerminationContext, P> {
@@ -59,8 +60,8 @@ abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
     }
 
     @Override
-    protected InstanceTerminationContext createFlowContext(String flowId, StateContext<InstanceTerminationState, InstanceTerminationEvent> stateContext,
-            P payload) {
+    protected InstanceTerminationContext createFlowContext(FlowParameters flowParameters,
+            StateContext<InstanceTerminationState, InstanceTerminationEvent> stateContext, P payload) {
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
@@ -79,7 +80,8 @@ abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
             instanceMetaDataList.add(instanceMetaData);
             cloudInstances.add(cloudInstance);
         }
-        return new InstanceTerminationContext(flowId, stack, cloudContext, cloudCredential, cloudStack, cloudResources, cloudInstances, instanceMetaDataList);
+        return new InstanceTerminationContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, cloudResources, cloudInstances,
+                instanceMetaDataList);
     }
 
     @Override

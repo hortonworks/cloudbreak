@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.flow.core.FlowParameters;
 
 abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractStackAction<StackUpscaleState, StackUpscaleEvent, StackScalingFlowContext, P> {
     static final String INSTANCEGROUPNAME = "INSTANCEGROUPNAME";
@@ -50,7 +51,8 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
     }
 
     @Override
-    protected StackScalingFlowContext createFlowContext(String flowId, StateContext<StackUpscaleState, StackUpscaleEvent> stateContext, P payload) {
+    protected StackScalingFlowContext createFlowContext(FlowParameters flowParameters,
+            StateContext<StackUpscaleState, StackUpscaleEvent> stateContext, P payload) {
         Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
@@ -59,8 +61,8 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
                 location, stack.getCreator().getUserId(), stack.getWorkspace().getId().toString());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
-        return new StackScalingFlowContext(flowId, stack, cloudContext, cloudCredential, cloudStack, getInstanceGroupName(variables), Collections.emptySet(),
-                getAdjustment(variables), getHostNames(variables));
+        return new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, getInstanceGroupName(variables),
+                Collections.emptySet(), getAdjustment(variables), getHostNames(variables));
     }
 
     @Override

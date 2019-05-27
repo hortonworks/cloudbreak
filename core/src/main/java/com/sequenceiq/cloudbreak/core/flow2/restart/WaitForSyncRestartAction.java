@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 
 @Component("WaitForSyncRestartAction")
@@ -27,12 +28,12 @@ public class WaitForSyncRestartAction extends DefaultRestartAction {
     private FlowLogService flowLogService;
 
     @Override
-    public void restart(String flowId, String flowChainId, String event, Object payload) {
+    public void restart(FlowParameters flowParameters, String flowChainId, String event, Object payload) {
         Payload stackPayload = (Payload) payload;
         Stack stack = stackService.getByIdWithListsInTransaction(stackPayload.getResourceId());
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.WAIT_FOR_SYNC, stack.getStatusReason());
         try {
-            flowLogService.terminate(stackPayload.getResourceId(), flowId);
+            flowLogService.terminate(stackPayload.getResourceId(), flowParameters.getFlowId());
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }

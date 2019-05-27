@@ -69,7 +69,7 @@ public class StackDownscaleActions {
                 variables.put(INSTANCES, instances);
                 Selectable request = new DownscaleStackCollectResourcesRequest(context.getCloudContext(),
                         context.getCloudCredential(), context.getCloudStack(), resources, instances);
-                sendEvent(context.getFlowId(), request);
+                sendEvent(context, request);
             }
         };
     }
@@ -81,7 +81,7 @@ public class StackDownscaleActions {
             protected void doExecute(StackScalingFlowContext context, DownscaleStackCollectResourcesResult payload, Map<Object, Object> variables) {
                 Selectable request = new DownscaleStackRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(),
                         (List<CloudResource>) variables.get(RESOURCES), (List<CloudInstance>) variables.get(INSTANCES), payload.getResourcesToScale());
-                sendEvent(context.getFlowId(), request);
+                sendEvent(context, request);
             }
         };
     }

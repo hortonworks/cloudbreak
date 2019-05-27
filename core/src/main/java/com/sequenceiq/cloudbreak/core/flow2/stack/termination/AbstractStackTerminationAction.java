@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.flow.core.FlowParameters;
 
 abstract class AbstractStackTerminationAction<P extends Payload>
         extends AbstractStackAction<StackTerminationState, StackTerminationEvent, StackTerminationContext, P> {
@@ -45,7 +46,8 @@ abstract class AbstractStackTerminationAction<P extends Payload>
     }
 
     @Override
-    protected StackTerminationContext createFlowContext(String flowId, StateContext<StackTerminationState, StackTerminationEvent> stateContext, P payload) {
+    protected StackTerminationContext createFlowContext(FlowParameters flowParameters, StateContext<StackTerminationState, StackTerminationEvent> stateContext,
+            P payload) {
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
@@ -54,7 +56,7 @@ abstract class AbstractStackTerminationAction<P extends Payload>
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
-        return new StackTerminationContext(flowId, stack, cloudContext, cloudCredential, cloudStack, resources);
+        return new StackTerminationContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, resources);
     }
 
     @Override

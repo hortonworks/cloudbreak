@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
@@ -57,6 +58,9 @@ public class ReactorFlowManagerTest {
     @Mock
     private StackService stackService;
 
+    @Mock
+    private AuthenticatedUserService authenticatedUserService;
+
     @InjectMocks
     private ReactorFlowManager underTest;
 
@@ -70,7 +74,8 @@ public class ReactorFlowManagerTest {
         stack.setCluster(TestUtil.cluster());
         when(stackService.getByIdWithTransaction(anyLong())).thenReturn(stack);
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
-        when(eventFactory.createEventWithErrHandler(anyObject())).thenReturn(new Event<>(acceptable));
+        when(eventFactory.createEventWithErrHandler(any(), any())).thenReturn(new Event<>(acceptable));
+        when(authenticatedUserService.getUserCrn()).thenReturn("usercrn");
     }
 
     @Test

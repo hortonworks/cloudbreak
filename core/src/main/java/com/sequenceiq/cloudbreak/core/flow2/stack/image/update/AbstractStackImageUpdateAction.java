@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.flow.core.FlowParameters;
 
 abstract class AbstractStackImageUpdateAction<P extends Payload> extends AbstractStackAction<StackImageUpdateState, StackImageUpdateEvent, StackContext, P> {
 
@@ -69,7 +70,8 @@ abstract class AbstractStackImageUpdateAction<P extends Payload> extends Abstrac
     }
 
     @Override
-    protected StackContext createFlowContext(String flowId, StateContext<StackImageUpdateState, StackImageUpdateEvent> stateContext, P payload) {
+    protected StackContext createFlowContext(FlowParameters flowParameters, StateContext<StackImageUpdateState, StackImageUpdateEvent> stateContext,
+            P payload) {
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
@@ -77,7 +79,7 @@ abstract class AbstractStackImageUpdateAction<P extends Payload> extends Abstrac
                 location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
-        return new StackContext(flowId, stack, cloudContext, cloudCredential, cloudStack);
+        return new StackContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack);
     }
 
     @Override

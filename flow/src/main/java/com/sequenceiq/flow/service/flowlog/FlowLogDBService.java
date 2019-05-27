@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
@@ -52,12 +53,12 @@ public class FlowLogDBService implements FlowLogService {
     @Inject
     private TransactionService transactionService;
 
-    public FlowLog save(String flowId, String flowChanId, String key, Payload payload, Map<Object, Object> variables, Class<?> flowType,
+    public FlowLog save(FlowParameters flowParameters, String flowChanId, String key, Payload payload, Map<Object, Object> variables, Class<?> flowType,
             FlowState currentState) {
         String payloadAsString = getSerializedString(payload);
         String variablesJson = getSerializedString(variables);
-        FlowLog flowLog = new FlowLog(payload.getResourceId(), flowId, flowChanId, key, payloadAsString, payload.getClass(), variablesJson, flowType,
-                currentState.toString());
+        FlowLog flowLog = new FlowLog(payload.getResourceId(), flowParameters.getFlowId(), flowChanId, flowParameters.getFlowTriggerUserCrn(), key,
+                payloadAsString, payload.getClass(), variablesJson, flowType, currentState.toString());
         flowLog.setCloudbreakNodeId(nodeConfig.getId());
         return flowLogRepository.save(flowLog);
     }
@@ -107,9 +108,9 @@ public class FlowLogDBService implements FlowLogService {
         });
     }
 
-    public void saveChain(String flowChainId, String parentFlowChainId, Queue<Selectable> chain) {
+    public void saveChain(String flowChainId, String parentFlowChainId, Queue<Selectable> chain, String flowTriggerUserCrn) {
         String chainJson = JsonWriter.objectToJson(chain);
-        FlowChainLog chainLog = new FlowChainLog(flowChainId, parentFlowChainId, chainJson);
+        FlowChainLog chainLog = new FlowChainLog(flowChainId, parentFlowChainId, chainJson, flowTriggerUserCrn);
         flowChainLogService.save(chainLog);
     }
 

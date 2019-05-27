@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.flow.core.FlowParameters;
 
 @Component("DisableOnGCPRestartAction")
 public class DisableOnGCPRestartAction extends FillInMemoryStateStoreRestartAction {
@@ -23,17 +24,17 @@ public class DisableOnGCPRestartAction extends FillInMemoryStateStoreRestartActi
     private FlowLogService flowLogService;
 
     @Override
-    public void restart(String flowId, String flowChainId, String event, Object payload) {
+    public void restart(FlowParameters flowParameters, String flowChainId, String event, Object payload) {
         Payload stackPayload = (Payload) payload;
         Stack stack = stackService.getByIdWithTransaction(stackPayload.getResourceId());
         if (stack.getPlatformVariant().equals(GCP)) {
             try {
-                flowLogService.terminate(stackPayload.getResourceId(), flowId);
+                flowLogService.terminate(stackPayload.getResourceId(), flowParameters.getFlowId());
             } catch (TransactionExecutionException e) {
                 throw new TransactionRuntimeExecutionException(e);
             }
         } else {
-            restart(flowId, flowChainId, event, payload, stack);
+            restart(flowParameters, flowChainId, event, payload, stack);
         }
     }
 }

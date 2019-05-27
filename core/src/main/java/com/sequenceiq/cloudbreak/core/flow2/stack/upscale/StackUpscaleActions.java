@@ -108,7 +108,7 @@ public class StackUpscaleActions {
                     UpscaleStackRequest<UpscaleStackResult> request =
                             new UpscaleStackRequest<>(context.getCloudContext(), context.getCloudCredential(), stack, ResourceLists.transform(list));
                     UpscaleStackResult result = new UpscaleStackResult(request, ResourceStatus.CREATED, list);
-                    sendEvent(context.getFlowId(), result.selector(), result);
+                    sendEvent(context, result.selector(), result);
                 }
             }
 
@@ -208,10 +208,10 @@ public class StackUpscaleActions {
                     CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData);
                     Selectable sshFingerPrintReq = new GetSSHFingerprintsRequest<GetSSHFingerprintsResult>(context.getCloudContext(),
                             context.getCloudCredential(), gatewayInstance);
-                    sendEvent(context.getFlowId(), sshFingerPrintReq);
+                    sendEvent(context, sshFingerPrintReq);
                 } else {
                     BootstrapNewNodesEvent bootstrapPayload = new BootstrapNewNodesEvent(context.getStack().getId(), upscaleCandidateAddresses);
-                    sendEvent(context.getFlowId(), StackUpscaleEvent.BOOTSTRAP_NEW_NODES_EVENT.event(), bootstrapPayload);
+                    sendEvent(context, StackUpscaleEvent.BOOTSTRAP_NEW_NODES_EVENT.event(), bootstrapPayload);
                 }
             }
         };
@@ -225,7 +225,7 @@ public class StackUpscaleActions {
                 stackUpscaleService.setupTls(context);
                 BootstrapNewNodesEvent bootstrapNewNodesEvent =
                         new BootstrapNewNodesEvent(payload.getResourceId(), (Set<String>) variables.get(UPSCALE_CANDIDATE_ADDRESSES));
-                sendEvent(context.getFlowId(), StackCreationEvent.TLS_SETUP_FINISHED_EVENT.event(), bootstrapNewNodesEvent);
+                sendEvent(context, StackCreationEvent.TLS_SETUP_FINISHED_EVENT.event(), bootstrapNewNodesEvent);
             }
         };
     }
@@ -238,7 +238,7 @@ public class StackUpscaleActions {
                 stackUpscaleService.bootstrappingNewNodes(context.getStack());
                 Selectable request = new BootstrapNewNodesRequest(context.getStack().getId(),
                         payload.getUpscaleCandidateAddresses(), context.getHostNames());
-                sendEvent(context.getFlowId(), request);
+                sendEvent(context, request);
             }
         };
     }
@@ -251,7 +251,7 @@ public class StackUpscaleActions {
                 stackUpscaleService.extendingHostMetadata(context.getStack());
                 Selectable request = new ExtendHostMetadataRequest(context.getStack().getId(),
                         payload.getRequest().getUpscaleCandidateAddresses());
-                sendEvent(context.getFlowId(), request);
+                sendEvent(context, request);
             }
         };
     }
@@ -263,7 +263,7 @@ public class StackUpscaleActions {
             protected void doExecute(StackScalingFlowContext context, ExtendHostMetadataResult payload, Map<Object, Object> variables) {
                 Selectable request = new MountDisksOnNewHostsRequest(context.getStack().getId(),
                         payload.getRequest().getUpscaleCandidateAddresses());
-                sendEvent(context.getFlowId(), request);
+                sendEvent(context, request);
             }
         };
     }

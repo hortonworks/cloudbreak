@@ -1,14 +1,21 @@
 package com.sequenceiq.flow.core;
 
 public class CommonContext {
+    private FlowParameters flowParameters;
 
-    private final String flowId;
-
-    public CommonContext(String flowId) {
-        this.flowId = flowId;
+    public CommonContext(FlowParameters flowParameters) {
+        this.flowParameters = flowParameters;
     }
 
     public String getFlowId() {
-        return flowId;
+        return flowParameters.getFlowId();
+    }
+
+    public String getFlowTriggerUserCrn() {
+        return flowParameters.getFlowTriggerUserCrn();
+    }
+
+    public FlowParameters getFlowParameters() {
+        return flowParameters;
     }
 }

@@ -47,6 +47,14 @@ public class AuthenticatedUserService {
         return cbUser.getTenant();
     }
 
+    public String getUserCrn() {
+        CloudbreakUser cbUser = getCbUser();
+        if (cbUser == null) {
+            throw new IllegalStateException("No authentication found in the SecurityContextHolder!");
+        }
+        return cbUser.getUserCrn();
+    }
+
     public String getTokenValue(OAuth2Authentication auth) {
         return ((OAuth2AuthenticationDetails) auth.getDetails()).getTokenValue();
     }

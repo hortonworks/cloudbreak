@@ -37,7 +37,7 @@ public class ClusterDownscaleActions {
                         payload.getPrivateIds(), payload.getDetails());
                 CollectDownscaleCandidatesRequest request = new CollectDownscaleCandidatesRequest(context.getStackId(), payload.getHostGroupName(),
                         payload.getAdjustment(), payload.getPrivateIds(), payload.getDetails());
-                sendEvent(context.getFlowId(), request.selector(), request);
+                sendEvent(context, request.selector(), request);
             }
         };
     }
@@ -49,7 +49,7 @@ public class ClusterDownscaleActions {
             protected void doExecute(ClusterViewContext context, CollectDownscaleCandidatesResult payload, Map<Object, Object> variables) {
                 DecommissionRequest request = new DecommissionRequest(context.getStackId(), payload.getHostGroupName(), payload.getPrivateIds(),
                         payload.getRequest().getDetails());
-                sendEvent(context.getFlowId(), request.selector(), request);
+                sendEvent(context, request.selector(), request);
             }
         };
     }

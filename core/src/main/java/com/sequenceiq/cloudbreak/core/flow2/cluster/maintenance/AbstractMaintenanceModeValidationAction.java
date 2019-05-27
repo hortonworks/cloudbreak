@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.flow.core.FlowParameters;
 
 abstract class AbstractMaintenanceModeValidationAction<P extends Payload> extends
         AbstractStackAction<MaintenanceModeValidationState, MaintenanceModeValidationEvent, StackContext, P> {
@@ -45,7 +46,7 @@ abstract class AbstractMaintenanceModeValidationAction<P extends Payload> extend
     }
 
     @Override
-    protected StackContext createFlowContext(String flowId, StateContext<MaintenanceModeValidationState,
+    protected StackContext createFlowContext(FlowParameters flowParameters, StateContext<MaintenanceModeValidationState,
             MaintenanceModeValidationEvent> stateContext, P payload) {
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
@@ -54,7 +55,7 @@ abstract class AbstractMaintenanceModeValidationAction<P extends Payload> extend
                 location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
-        return new StackContext(flowId, stack, cloudContext, cloudCredential, cloudStack);
+        return new StackContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack);
     }
 
     @Override
