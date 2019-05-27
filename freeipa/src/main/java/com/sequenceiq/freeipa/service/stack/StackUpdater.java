@@ -4,8 +4,8 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.freeipa.api.model.DetailedStackStatus;
+import com.sequenceiq.freeipa.api.model.Status;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;

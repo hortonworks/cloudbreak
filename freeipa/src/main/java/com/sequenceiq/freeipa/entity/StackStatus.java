@@ -14,8 +14,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.freeipa.api.model.DetailedStackStatus;
+import com.sequenceiq.freeipa.api.model.Status;
 
 @Entity
 @Table(name = "stackstatus")

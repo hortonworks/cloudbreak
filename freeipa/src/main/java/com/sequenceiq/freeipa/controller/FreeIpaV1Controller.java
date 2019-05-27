@@ -10,6 +10,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaReq
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.service.stack.FreeIpaCreationService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDeletionService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaDescribeService;
 
 @Controller
 public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
@@ -20,17 +21,19 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     @Inject
     private FreeIpaDeletionService freeIpaDeletionService;
 
+    @Inject
+    private FreeIpaDescribeService freeIpaDescribeService;
+
     @Override
     public DescribeFreeIpaResponse create(@Valid CreateFreeIpaRequest request) {
         // TODO parse account from header
         String accountId = "test_account";
-        freeIpaCreationService.launchFreeIpa(request, accountId);
-        return null;
+        return freeIpaCreationService.launchFreeIpa(request, accountId);
     }
 
     @Override
     public DescribeFreeIpaResponse describe(String environmentId) {
-        return null;
+        return freeIpaDescribeService.describe(environmentId);
     }
 
     @Override

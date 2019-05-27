@@ -51,6 +51,9 @@ dependencies {
   testImplementation group: 'org.mockito',               name: 'mockito-core'
   testImplementation group: 'org.mockito',               name: 'mockito-junit-jupiter'
 
+  // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
+  implementation group: 'net.bytebuddy', name: 'byte-buddy', version: '1.9.12'
+
   constraints {
     implementation     group: 'com.google.code.gson',      name: 'gson',                           version: '2.6.2'
     implementation     group: 'dnsjava',                   name: 'dnsjava',                        version: '2.1.7'
