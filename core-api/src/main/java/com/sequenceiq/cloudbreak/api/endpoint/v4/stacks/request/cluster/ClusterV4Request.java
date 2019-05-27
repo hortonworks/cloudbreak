@@ -54,8 +54,8 @@ public class ClusterV4Request implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.RDSCONFIG_NAMES)
     private Set<String> databases = new HashSet<>();
 
-    @ApiModelProperty(ClusterModelDescription.PROXY_NAME)
-    private String proxyName;
+    @ApiModelProperty(ClusterModelDescription.PROXY_CRN)
+    private String proxyConfigCrn;
 
     @Valid
     @ApiModelProperty(StackModelDescription.CLOUD_STORAGE)
@@ -129,12 +129,12 @@ public class ClusterV4Request implements JsonEntity {
         this.databases = databases;
     }
 
-    public String getProxyName() {
-        return proxyName;
+    public String getProxyConfigCrn() {
+        return proxyConfigCrn;
     }
 
-    public void setProxyName(String proxyName) {
-        this.proxyName = proxyName;
+    public void setProxyConfigCrn(String proxyConfigCrn) {
+        this.proxyConfigCrn = proxyConfigCrn;
     }
 
     public CloudStorageV4Request getCloudStorage() {

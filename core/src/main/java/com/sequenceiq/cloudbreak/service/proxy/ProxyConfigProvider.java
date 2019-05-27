@@ -5,10 +5,12 @@ import static java.util.Collections.singletonMap;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.domain.ProxyConfig;
+import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 
@@ -19,9 +21,13 @@ public class ProxyConfigProvider {
 
     public static final String PROXY_SLS_PATH = "/proxy/proxy.sls";
 
+    @Inject
+    private ProxyConfigDtoService proxyConfigDtoService;
+
     public void decoratePillarWithProxyDataIfNeeded(Map<String, SaltPillarProperties> servicePillar, Cluster cluster) {
-        ProxyConfig proxyConfig = cluster.getProxyConfig();
-        if (proxyConfig != null) {
+        String proxyConfigCrn = cluster.getProxyConfigCrn();
+        if (StringUtils.isNoneEmpty(proxyConfigCrn)) {
+            ProxyConfig proxyConfig = proxyConfigDtoService.getByCrnAndAccountId(proxyConfigCrn, cluster.getWorkspace().getTenant().getName());
             Map<String, Object> proxy = new HashMap<>();
             proxy.put("host", proxyConfig.getServerHost());
             proxy.put("port", proxyConfig.getServerPort());

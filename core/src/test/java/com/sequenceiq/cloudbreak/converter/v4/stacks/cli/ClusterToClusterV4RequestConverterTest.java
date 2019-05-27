@@ -34,7 +34,6 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.cm.ClusterToClouderaMan
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -147,23 +146,21 @@ public class ClusterToClusterV4RequestConverterTest {
 
     @Test
     public void testConvertWhenProxyConfigIsNullThenProxyNameShouldBeNull() {
-        when(cluster.getProxyConfig()).thenReturn(null);
+        when(cluster.getProxyConfigCrn()).thenReturn(null);
 
         ClusterV4Request result = underTest.convert(cluster);
 
-        assertNull(result.getProxyName());
+        assertNull(result.getProxyConfigCrn());
     }
 
     @Test
     public void testConvertWhenProxyConfigNotNullThenProxyConfigNameShouldBePassed() {
         String expected = "proxy name value";
-        ProxyConfig proxyConfig = mock(ProxyConfig.class);
-        when(proxyConfig.getName()).thenReturn(expected);
-        when(cluster.getProxyConfig()).thenReturn(proxyConfig);
+        when(cluster.getProxyConfigCrn()).thenReturn(expected);
 
         ClusterV4Request result = underTest.convert(cluster);
 
-        assertEquals(expected, result.getProxyName());
+        assertEquals(expected, result.getProxyConfigCrn());
     }
 
     @Test

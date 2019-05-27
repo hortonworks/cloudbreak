@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,15 +14,25 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.ProxyConfig;
+import com.sequenceiq.cloudbreak.dto.ProxyConfig.ProxyConfigBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProxyConfigProviderTest {
+
+    @Mock
+    private ProxyConfigDtoService proxyConfigDtoService;
+
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private Workspace workspace;
 
     @InjectMocks
     private ProxyConfigProvider proxyConfigProvider;
@@ -33,6 +45,8 @@ public class ProxyConfigProviderTest {
     public void init() {
         cluster = new Cluster();
         servicePillar = new HashMap<>();
+        cluster.setWorkspace(workspace);
+        when(workspace.getTenant().getName()).thenReturn("tenantId");
     }
 
     @Test
@@ -43,7 +57,7 @@ public class ProxyConfigProviderTest {
 
     @Test
     public void testWithoutAuthProxy() {
-        ProxyConfig proxyConfig = new ProxyConfig();
+        ProxyConfigBuilder proxyConfig = ProxyConfig.builder();
         Map<String, Object> properties = testProxyCore(proxyConfig);
 
         assertTrue(StringUtils.isNotBlank((CharSequence) properties.get("host")));
@@ -55,8 +69,8 @@ public class ProxyConfigProviderTest {
 
     @Test
     public void testWithoutAuthUsernameSetProxy() {
-        ProxyConfig proxyConfig = new ProxyConfig();
-        proxyConfig.setUserName("test");
+        ProxyConfigBuilder proxyConfig = ProxyConfig.builder();
+        proxyConfig.withUserName("test");
         Map<String, Object> properties = testProxyCore(proxyConfig);
         assertFalse(properties.containsKey("user"));
         assertFalse(properties.containsKey("password"));
@@ -64,8 +78,8 @@ public class ProxyConfigProviderTest {
 
     @Test
     public void testWithoutAuthPasswordSetProxy() {
-        ProxyConfig proxyConfig = new ProxyConfig();
-        proxyConfig.setPassword("test");
+        ProxyConfigBuilder proxyConfig = ProxyConfig.builder();
+        proxyConfig.withPassword("test");
         Map<String, Object> properties = testProxyCore(proxyConfig);
         assertFalse(properties.containsKey("user"));
         assertFalse(properties.containsKey("password"));
@@ -73,19 +87,20 @@ public class ProxyConfigProviderTest {
 
     @Test
     public void testWithAuthProxy() {
-        ProxyConfig proxyConfig = new ProxyConfig();
-        proxyConfig.setUserName("user");
-        proxyConfig.setPassword("pass");
+        ProxyConfigBuilder proxyConfig = ProxyConfig.builder();
+        proxyConfig.withUserName("user");
+        proxyConfig.withPassword("pass");
         Map<String, Object> properties = testProxyCore(proxyConfig);
         assertTrue(StringUtils.isNotBlank((CharSequence) properties.get("user")));
         assertTrue(StringUtils.isNotBlank((CharSequence) properties.get("password")));
     }
 
-    private Map<String, Object> testProxyCore(ProxyConfig proxyConfig) {
-        proxyConfig.setServerHost("test");
-        proxyConfig.setServerPort(3128);
-        proxyConfig.setProtocol("http");
-        cluster.setProxyConfig(proxyConfig);
+    private Map<String, Object> testProxyCore(ProxyConfigBuilder proxyConfigBuilder) {
+        proxyConfigBuilder.withServerHost("test");
+        proxyConfigBuilder.withServerPort(3128);
+        proxyConfigBuilder.withProtocol("http");
+        cluster.setProxyConfigCrn("ANY_CRN");
+        when(proxyConfigDtoService.getByCrnAndAccountId(anyString(), anyString())).thenReturn(proxyConfigBuilder.build());
         proxyConfigProvider.decoratePillarWithProxyDataIfNeeded(servicePillar, cluster);
         SaltPillarProperties pillarProperties = servicePillar.get(ProxyConfigProvider.PROXY_KEY);
         assertNotNull(pillarProperties);

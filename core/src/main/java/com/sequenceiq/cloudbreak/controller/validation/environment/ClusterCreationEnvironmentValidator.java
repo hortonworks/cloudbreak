@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.environment.Region;
@@ -27,14 +26,14 @@ import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
-import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
+import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 
 @Component
 public class ClusterCreationEnvironmentValidator {
     @Inject
-    private ProxyConfigService proxyConfigService;
+    private ProxyConfigDtoService proxyConfigDtoService;
 
     @Inject
     private LdapConfigService ldapConfigService;
@@ -63,19 +62,13 @@ public class ClusterCreationEnvironmentValidator {
                 LdapConfig.class.getSimpleName());
 
         validateConfigByName(
-                clusterRequest.getProxyName(),
-                workspaceId,
-                resultBuilder,
-                proxyConfigService::getByNameForWorkspaceId,
-                ProxyConfig.class.getSimpleName());
-
-        validateConfigByName(
                 clusterRequest.getKerberosName(),
                 workspaceId,
                 resultBuilder,
                 kerberosConfigService::getByNameForWorkspaceId,
                 KerberosConfig.class.getSimpleName());
         validateRdsConfigNames(clusterRequest.getDatabases(), resultBuilder, workspaceId);
+        validateProxyConfig(clusterRequest.getProxyConfigCrn(), stack.getWorkspace().getTenant().getName(), resultBuilder);
         return resultBuilder.build();
     }
 
@@ -131,6 +124,16 @@ public class ClusterCreationEnvironmentValidator {
                     .forEach(dbName -> {
                         resultBuilder.error(String.format("Stack cannot use '%s' Database resource which doesn't exist in the same workspace.", dbName));
                     });
+        }
+    }
+
+    private void validateProxyConfig(String resourceCrn, String accountId, ValidationResultBuilder resultBuilder) {
+        if (StringUtils.isNoneEmpty(resourceCrn)) {
+            try {
+                proxyConfigDtoService.getByCrnAndAccountId(resourceCrn, accountId);
+            } catch (NotFoundException nfe) {
+                resultBuilder.error(String.format("Stack cannot use '%s' Proxy Config resource which doesn't exist in the same account.", resourceCrn));
+            }
         }
     }
 }

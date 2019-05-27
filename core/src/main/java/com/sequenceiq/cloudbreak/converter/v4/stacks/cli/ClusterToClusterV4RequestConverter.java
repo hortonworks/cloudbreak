@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
@@ -55,8 +56,8 @@ public class ClusterToClusterV4RequestConverter extends AbstractConversionServic
             clusterRequest.setKerberosName(source.getKerberosConfig().getName());
         }
 
-        if (source.getProxyConfig() != null) {
-            clusterRequest.setProxyName(source.getProxyConfig().getName());
+        if (StringUtils.isNoneEmpty(source.getProxyConfigCrn())) {
+            clusterRequest.setProxyConfigCrn(source.getProxyConfigCrn());
         }
 
         if (source.getGateway() != null) {

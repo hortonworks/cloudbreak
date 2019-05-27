@@ -13,7 +13,6 @@ import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
-import com.sequenceiq.it.cloudbreak.client.ProxyTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
@@ -25,7 +24,6 @@ import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
-import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
@@ -53,9 +51,6 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     @Inject
     private EnvironmentTestClient environmentTestClient;
 
-    @Inject
-    private ProxyTestClient proxyTestClient;
-
     @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
@@ -73,7 +68,6 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         createEnvWithResources(testContext);
         createDefaultRdsConfig(testContext);
         createDefaultLdapConfig(testContext);
-        createDefaultProxyConfig(testContext);
 
         testContext.given(StackTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)
@@ -81,14 +75,12 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                         setResources(
                                 testContext,
                                 testContext.get(DatabaseTestDto.class).getName(),
-                                testContext.get(LdapTestDto.class).getName(),
-                                testContext.get(ProxyTestDto.class).getName()
+                                testContext.get(LdapTestDto.class).getName()
                         )
                 )
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
 
-                .deleteGiven(ProxyTestDto.class, proxyTestClient.deleteV4(), RunningParameter.key(FORBIDDEN_KEY))
                 .deleteGiven(LdapTestDto.class, ldapTestClient.deleteV4(), RunningParameter.key(FORBIDDEN_KEY))
                 .deleteGiven(DatabaseTestDto.class, databaseTestClient.deleteV4(), RunningParameter.key(FORBIDDEN_KEY))
                 .deleteGiven(CredentialTestDto.class, credentialTestClient.deleteV4(), RunningParameter.key(FORBIDDEN_KEY))
@@ -128,7 +120,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .given(StackTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)
                 .withCluster(setResources(testContext, testContext.get(DatabaseTestDto.class).getName(),
-                        null, null))
+                        null))
                 .when(stackTestClient.createV4())
                 .validate();
     }
@@ -189,7 +181,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    private ClusterTestDto setResources(TestContext testContext, String rdsName, String ldapName, String proxyName) {
+    private ClusterTestDto setResources(TestContext testContext, String rdsName, String ldapName) {
         ClusterTestDto cluster = testContext.given(ClusterTestDto.class)
                 .valid();
         if (rdsName != null) {
@@ -199,9 +191,6 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         }
         if (ldapName != null) {
             cluster.withLdapConfigName(ldapName);
-        }
-        if (rdsName != null) {
-            cluster.withProxyConfigName(proxyName);
         }
         return cluster;
     }

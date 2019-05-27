@@ -72,7 +72,7 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentRepository;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
-import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
+import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -106,7 +106,7 @@ public class EnvironmentServiceTest {
     private RdsConfigService rdsConfigService;
 
     @Mock
-    private ProxyConfigService proxyConfigService;
+    private ProxyConfigDtoService proxyConfigDtoService;
 
     @Mock
     private EnvironmentCredentialOperationService environmentCredentialOperationService;

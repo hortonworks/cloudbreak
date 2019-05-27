@@ -37,7 +37,6 @@ import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
-import com.sequenceiq.it.cloudbreak.client.ProxyTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
@@ -48,7 +47,6 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.ActiveDirectoryKerberosDescriptorTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
-import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestCaseDescriptionMissingException;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
@@ -92,9 +90,6 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     @Inject
     private ImageCatalogTestClient imageCatalogTestClient;
-
-    @Inject
-    private ProxyTestClient proxyTestClient;
 
     @Inject
     private BlueprintTestClient blueprintTestClient;
@@ -232,15 +227,6 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
         testContext
                 .given(ImageCatalogTestDto.class)
                 .when(imageCatalogTestClient.createV4());
-    }
-
-    protected Set<String> createDefaultProxyConfig(TestContext testContext) {
-        testContext
-                .given(ProxyTestDto.class)
-                .when(proxyTestClient.createIfNotExistV4());
-        Set<String> validProxy = new HashSet<>();
-        validProxy.add(testContext.get(ProxyTestDto.class).getName());
-        return validProxy;
     }
 
     protected Set<String> createDefaultLdapConfig(TestContext testContext) {

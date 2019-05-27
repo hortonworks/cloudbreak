@@ -40,7 +40,6 @@ import com.sequenceiq.cloudbreak.domain.ClusterAttributes;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
@@ -51,7 +50,6 @@ import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
-import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
@@ -82,9 +80,6 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
 
     @Inject
     private RdsConfigService rdsConfigService;
-
-    @Inject
-    private ProxyConfigService proxyConfigService;
 
     @Inject
     private LdapConfigService ldapConfigService;
@@ -123,7 +118,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         updateDatabases(source, cluster, workspace);
         convertVendorSpecificPart(source, cluster);
         extractClusterManagerAndHdpRepoConfig(cluster, source);
-        cluster.setProxyConfig(getProxyConfig(source.getProxyName(), workspace));
+        cluster.setProxyConfigCrn(source.getProxyConfigCrn());
         cluster.setLdapConfig(getLdap(source.getLdapName(), workspace));
         return cluster;
     }
@@ -247,13 +242,6 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
             }
             cluster.setRdsConfigs(rdsConfigs);
         }
-    }
-
-    private ProxyConfig getProxyConfig(String proxyName, Workspace workspace) {
-        if (StringUtils.isNotBlank(proxyName)) {
-            return proxyConfigService.getByNameForWorkspace(proxyName, workspace);
-        }
-        return null;
     }
 
     private LdapConfig getLdap(String ldapName, Workspace workspace) {
