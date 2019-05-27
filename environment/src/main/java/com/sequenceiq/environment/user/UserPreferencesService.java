@@ -3,8 +3,6 @@ package com.sequenceiq.environment.user;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +15,14 @@ public class UserPreferencesService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserPreferencesService.class);
 
-    @Inject
-    private UserPreferencesRepository userPreferencesRepository;
+    private final UserPreferencesRepository userPreferencesRepository;
 
-    @Inject
-    private AuthenticatedUserService authenticatedUserService;
+    private final AuthenticatedUserService authenticatedUserService;
+
+    public UserPreferencesService(UserPreferencesRepository userPreferencesRepository, AuthenticatedUserService authenticatedUserService) {
+        this.userPreferencesRepository = userPreferencesRepository;
+        this.authenticatedUserService = authenticatedUserService;
+    }
 
     public String getExternalIdForCurrentUser() {
         return getExternalId(authenticatedUserService.getCbUser().getUserCrn());

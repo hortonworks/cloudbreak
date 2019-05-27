@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;

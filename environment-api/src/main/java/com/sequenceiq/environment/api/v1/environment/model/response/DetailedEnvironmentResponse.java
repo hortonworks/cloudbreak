@@ -11,7 +11,7 @@ import io.swagger.annotations.ApiModel;
 @JsonInclude(Include.NON_NULL)
 public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
-    public static final class DetailedEnvironmentResponseBuilder {
+    public static final class Builder {
         private String id;
 
         private String name;
@@ -30,54 +30,54 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private EnvironmentStatus environmentStatus;
 
-        private DetailedEnvironmentResponseBuilder() {
+        private Builder() {
         }
 
-        public static DetailedEnvironmentResponseBuilder aDetailedEnvironmentResponse() {
-            return new DetailedEnvironmentResponseBuilder();
+        public static Builder aDetailedEnvironmentResponse() {
+            return new Builder();
         }
 
-        public DetailedEnvironmentResponseBuilder withId(String id) {
+        public Builder withId(String id) {
             this.id = id;
             return this;
         }
 
-        public DetailedEnvironmentResponseBuilder withName(String name) {
+        public Builder withName(String name) {
             this.name = name;
             return this;
         }
 
-        public DetailedEnvironmentResponseBuilder withDescription(String description) {
+        public Builder withDescription(String description) {
             this.description = description;
             return this;
         }
 
-        public DetailedEnvironmentResponseBuilder withRegions(CompactRegionResponse regions) {
+        public Builder withRegions(CompactRegionResponse regions) {
             this.regions = regions;
             return this;
         }
 
-        public DetailedEnvironmentResponseBuilder withCloudPlatform(String cloudPlatform) {
+        public Builder withCloudPlatform(String cloudPlatform) {
             this.cloudPlatform = cloudPlatform;
             return this;
         }
 
-        public DetailedEnvironmentResponseBuilder withCredentialName(String credentialName) {
+        public Builder withCredentialName(String credentialName) {
             this.credentialName = credentialName;
             return this;
         }
 
-        public DetailedEnvironmentResponseBuilder withLocation(LocationResponse location) {
+        public Builder withLocation(LocationResponse location) {
             this.location = location;
             return this;
         }
 
-        public DetailedEnvironmentResponseBuilder withNetwork(EnvironmentNetworkResponse network) {
+        public Builder withNetwork(EnvironmentNetworkResponse network) {
             this.network = network;
             return this;
         }
 
-        public DetailedEnvironmentResponseBuilder withEnvironmentStatus(EnvironmentStatus environmentStatus) {
+        public Builder withEnvironmentStatus(EnvironmentStatus environmentStatus) {
             this.environmentStatus = environmentStatus;
             return this;
         }

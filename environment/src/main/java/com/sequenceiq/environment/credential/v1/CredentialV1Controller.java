@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.credential.controller;
+package com.sequenceiq.environment.credential.v1;
 
 import java.util.Map;
 import java.util.Set;
@@ -17,7 +17,7 @@ import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequ
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponses;
 import com.sequenceiq.environment.api.v1.credential.model.response.InteractiveCredentialResponse;
-import com.sequenceiq.environment.credential.converter.CredentialToCredentialV1ResponseConverter;
+import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.notification.NotificationController;

@@ -7,6 +7,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -27,6 +29,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.network.domain.BaseNetwork;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 
@@ -85,6 +88,9 @@ public class Environment implements AuthResource {
 
     @Column(nullable = false)
     private String resourceCrn;
+
+    @Enumerated(EnumType.STRING)
+    private EnvironmentStatus status;
 
     public Environment() {
         regions = new Json(new HashSet<Region>());
@@ -229,5 +235,17 @@ public class Environment implements AuthResource {
     @Override
     public void setResourceCrn(String resourceCrn) {
         this.resourceCrn = resourceCrn;
+    }
+
+    public void setRegions(Json regions) {
+        this.regions = regions;
+    }
+
+    public EnvironmentStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(EnvironmentStatus status) {
+        this.status = status;
     }
 }

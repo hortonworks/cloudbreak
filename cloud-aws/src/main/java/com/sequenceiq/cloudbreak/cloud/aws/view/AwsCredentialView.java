@@ -8,6 +8,20 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
 public class AwsCredentialView {
 
+    private static final String AWS = "aws";
+
+    private static final String ROLE_ARN = "roleArn";
+
+    private static final String SECRET_KEY = "secretKey";
+
+    private static final String ACCESS_KEY = "accessKey";
+
+    private static final String KEY_BASED = "keyBased";
+
+    private static final String ROLE_BASED = "roleBased";
+
+    private static final String EXTERNAL_ID = "externalId";
+
     private final CloudCredential cloudCredential;
 
     public AwsCredentialView(CloudCredential cloudCredential) {
@@ -19,53 +33,68 @@ public class AwsCredentialView {
     }
 
     public String getRoleArn() {
-        Map<String, String> roleBased = getRoleBased();
-        if (roleBased == null) {
-            return null;
+        if (cloudCredential.hasParameter(AWS)) {
+            Map<String, String> roleBased = getRoleBased();
+            if (roleBased == null) {
+                return null;
+            }
+            return roleBased.get(ROLE_ARN);
         }
-        return roleBased.get("roleArn");
+        return cloudCredential.getParameter(ROLE_ARN, String.class);
     }
 
     public String getExternalId() {
-        Map<String, String> roleBased = getRoleBased();
-        if (roleBased == null) {
-            return null;
+        if (cloudCredential.hasParameter(AWS)) {
+            Map<String, String> roleBased = getRoleBased();
+            if (roleBased == null) {
+                return null;
+            }
+            return getRoleBased().get(EXTERNAL_ID);
         }
-        return getRoleBased().get("externalId");
+        return cloudCredential.getParameter(EXTERNAL_ID, String.class);
     }
 
     public Boolean isGovernmentCloudEnabled() {
-        Object ev = cloudCredential.getParameter(GOV_CLOUD, Object.class);
-        if (ev instanceof Boolean) {
-            return (Boolean) ev;
-        } else if (ev instanceof String) {
-            return Boolean.parseBoolean((String) ev);
+        Object govCloudEnabled = cloudCredential.getParameter(GOV_CLOUD, Object.class);
+        if (govCloudEnabled instanceof Boolean) {
+            return (Boolean) govCloudEnabled;
+        } else if (govCloudEnabled instanceof String) {
+            return Boolean.parseBoolean((String) govCloudEnabled);
         }
         return false;
     }
 
     public String getAccessKey() {
-        Map<String, String> keyBased = getKeyBased();
-        if (keyBased == null) {
-            return null;
+        if (cloudCredential.hasParameter(AWS)) {
+            Map<String, String> keyBased = getKeyBased();
+            if (keyBased == null) {
+                return null;
+            }
+            return keyBased.get(ACCESS_KEY);
         }
-        return keyBased.get("accessKey");
+        return cloudCredential.getParameter(ACCESS_KEY, String.class);
     }
 
     public String getSecretKey() {
-        return getKeyBased().get("secretKey");
+        if (cloudCredential.hasParameter(AWS)) {
+            Map<String, String> keyBased = getKeyBased();
+            if (keyBased == null) {
+                return null;
+            }
+            return keyBased.get(SECRET_KEY);
+        }
+        return cloudCredential.getParameter(SECRET_KEY, String.class);
     }
 
     public Map<String, String> getKeyBased() {
-        return (Map<String, String>) cloudCredential.getParameter("aws", Map.class).get("keyBased");
+        return (Map<String, String>) cloudCredential.getParameter(AWS, Map.class).get(KEY_BASED);
     }
 
     public Map<String, String> getRoleBased() {
-        return (Map<String, String>) cloudCredential.getParameter("aws", Map.class).get("roleBased");
+        return (Map<String, String>) cloudCredential.getParameter(AWS, Map.class).get(ROLE_BASED);
     }
 
     public Long getId() {
         return cloudCredential.getId();
     }
-
 }

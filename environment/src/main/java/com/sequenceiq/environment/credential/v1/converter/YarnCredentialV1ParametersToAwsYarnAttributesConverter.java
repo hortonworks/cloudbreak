@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.credential.converter;
+package com.sequenceiq.environment.credential.v1.converter;
 
 import org.springframework.stereotype.Component;
 
@@ -6,12 +6,9 @@ import com.sequenceiq.environment.api.v1.credential.model.parameters.yarn.YarnPa
 import com.sequenceiq.environment.credential.attributes.yarn.YarnCredentialAttributes;
 
 @Component
-public class YarnCredentialV1ParametersToAwsYarnAttributesConverter {
+class YarnCredentialV1ParametersToAwsYarnAttributesConverter {
 
     public YarnCredentialAttributes convert(YarnParameters source) {
-        if (source == null) {
-            return null;
-        }
         YarnCredentialAttributes response = new YarnCredentialAttributes();
         response.setAmbariUser(source.getAmbariUser());
         response.setEndpoint(source.getEndpoint());
@@ -19,13 +16,9 @@ public class YarnCredentialV1ParametersToAwsYarnAttributesConverter {
     }
 
     public YarnParameters convert(YarnCredentialAttributes source) {
-        if (source == null) {
-            return null;
-        }
         YarnParameters response = new YarnParameters();
         response.setAmbariUser(source.getAmbariUser());
         response.setEndpoint(source.getEndpoint());
         return response;
     }
-
 }

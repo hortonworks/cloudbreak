@@ -1,6 +1,4 @@
-package com.sequenceiq.environment.credential.converter;
-
-import javax.inject.Inject;
+package com.sequenceiq.environment.credential.v1.converter;
 
 import org.springframework.stereotype.Component;
 
@@ -13,11 +11,15 @@ import com.sequenceiq.environment.credential.domain.Credential;
 @Component
 public class CredentialToExtendedCloudCredentialConverter {
 
-    @Inject
-    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
+    private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
-    @Inject
-    private AuthenticatedUserService authenticatedUserService;
+    private final AuthenticatedUserService authenticatedUserService;
+
+    public CredentialToExtendedCloudCredentialConverter(CredentialToCloudCredentialConverter credentialToCloudCredentialConverter,
+            AuthenticatedUserService authenticatedUserService) {
+        this.credentialToCloudCredentialConverter = credentialToCloudCredentialConverter;
+        this.authenticatedUserService = authenticatedUserService;
+    }
 
     public ExtendedCloudCredential convert(Credential credential) {
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);

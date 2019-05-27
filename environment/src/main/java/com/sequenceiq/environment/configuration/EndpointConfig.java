@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.environment.api.EnvironmentApi;
-import com.sequenceiq.environment.credential.controller.CredentialV1Controller;
+import com.sequenceiq.environment.credential.v1.CredentialV1Controller;
 import com.sequenceiq.environment.environment.v1.EnvironmentController;
 import com.sequenceiq.environment.proxy.v1.controller.ProxyController;
 

@@ -1,4 +1,4 @@
--- // CB-1441 add resource CRN columns to Env's entities
+-- // CB-1157 remove proxy env connection
 -- Migration SQL that makes the change goes here.
 
 DROP TABLE IF EXISTS env_proxy;

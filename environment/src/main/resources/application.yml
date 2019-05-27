@@ -34,7 +34,7 @@ secret:
   engine: "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine"
 
 vault:
-  addr: vault.service.consul
+  addr: localhost
   port: 8200
   ssl.enabled: false
   kv.engine.v2.path: secret

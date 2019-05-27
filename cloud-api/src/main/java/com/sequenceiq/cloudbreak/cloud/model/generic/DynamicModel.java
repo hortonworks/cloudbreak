@@ -8,7 +8,6 @@ import java.util.Map;
  * Generic mode to hold dynamic data, any data stored in the DynamicModel must be threadsafe in that sense that multiple threads might be
  * using it, but of course it is never used concurrently. In other words if you store anything in thread local then it might not be available
  * in a subsequent calls.
- *
  */
 public class DynamicModel {
 
@@ -46,5 +45,9 @@ public class DynamicModel {
 
     public Map<String, Object> getParameters() {
         return Collections.unmodifiableMap(parameters);
+    }
+
+    public boolean hasParameter(String key) {
+        return parameters.containsKey(key);
     }
 }
