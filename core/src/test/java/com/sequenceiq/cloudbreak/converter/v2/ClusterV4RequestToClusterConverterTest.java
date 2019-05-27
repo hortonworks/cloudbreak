@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
@@ -51,9 +52,7 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ClusterV4RequestToC
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
@@ -61,7 +60,6 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
-import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -82,9 +80,6 @@ public class ClusterV4RequestToClusterConverterTest {
 
     @Mock
     private WorkspaceService workspaceService;
-
-    @Mock
-    private ProxyConfigService proxyConfigService;
 
     @Mock
     private LdapConfigService ldapConfigService;
@@ -123,7 +118,7 @@ public class ClusterV4RequestToClusterConverterTest {
         CloudStorageV4Request cloudStorageRequest = mock(CloudStorageV4Request.class);
 
         String rdsConfigName = "rds-name";
-        String proxyName = "proxy-name";
+        String proxyConfigCrn = "proxy-config-resource-crn";
         String ldapName = "ldap-name";
 
         FileSystem fileSystem = new FileSystem();
@@ -131,16 +126,13 @@ public class ClusterV4RequestToClusterConverterTest {
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setName(rdsConfigName);
 
-        ProxyConfig proxyConfig = new ProxyConfig();
-        proxyConfig.setName(proxyName);
-
         LdapConfig ldapConfig = new LdapConfig();
         ldapConfig.setName(ldapName);
 
         ClusterV4Request source = new ClusterV4Request();
         source.setCloudStorage(cloudStorageRequest);
         source.setDatabases(singleton(rdsConfigName));
-        source.setProxyName(proxyName);
+        source.setProxyConfigCrn(proxyConfigCrn);
         source.setLdapName(ldapName);
         source.setAmbari(new AmbariV4Request());
         source.setBlueprintName(BLUEPRINT);
@@ -149,7 +141,6 @@ public class ClusterV4RequestToClusterConverterTest {
         when(cloudStorageValidationUtil.isCloudStorageConfigured(cloudStorageRequest)).thenReturn(true);
         when(conversionService.convert(cloudStorageRequest, FileSystem.class)).thenReturn(fileSystem);
         when(rdsConfigService.findByNamesInWorkspace(singleton(rdsConfigName), workspace.getId())).thenReturn(singleton(rdsConfig));
-        when(proxyConfigService.getByNameForWorkspace(proxyName, workspace)).thenReturn(proxyConfig);
         when(ldapConfigService.getByNameForWorkspace(ldapName, workspace)).thenReturn(ldapConfig);
 
         Cluster actual = underTest.convert(source);
@@ -158,13 +149,12 @@ public class ClusterV4RequestToClusterConverterTest {
         assertThat(actual.getName(), is(source.getName()));
         assertThat(actual.getRdsConfigs().size(), is(1));
         assertThat(actual.getRdsConfigs().stream().findFirst().get().getName(), is(rdsConfigName));
-        assertThat(actual.getProxyConfig().getName(), is(proxyName));
+        assertThat(actual.getProxyConfigCrn(), is(proxyConfigCrn));
         assertThat(actual.getLdapConfig().getName(), is(ldapName));
 
         verify(cloudStorageValidationUtil, times(1)).isCloudStorageConfigured(cloudStorageRequest);
         verify(conversionService, times(1)).convert(cloudStorageRequest, FileSystem.class);
         verify(rdsConfigService, times(1)).findByNamesInWorkspace(singleton(rdsConfigName), workspace.getId());
-        verify(proxyConfigService, times(1)).getByNameForWorkspace(proxyName, workspace);
         verify(ldapConfigService, times(1)).getByNameForWorkspace(ldapName, workspace);
     }
 

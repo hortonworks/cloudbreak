@@ -28,11 +28,10 @@ import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterTest<ClusterV4Request> {
@@ -53,9 +52,6 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     private WorkspaceService workspaceService;
 
     @Mock
-    private RdsConfigService rdsConfigService;
-
-    @Mock
     private BlueprintService blueprintService;
 
     @Mock
@@ -65,7 +61,6 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     public void setUp() {
         Whitebox.setInternalState(underTest, "ambariUserName", "cloudbreak");
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
-        when(blueprintService.isAmbariBlueprint(any())).thenReturn(Boolean.TRUE);
     }
 
     @Test
@@ -81,7 +76,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         Cluster result = underTest.convert(request);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
-                "fileSystem", "rdsConfigs", "ldapConfig", "attributes", "uptime", "kerberosConfig", "ambariSecurityMasterKey", "proxyConfig",
+                "fileSystem", "rdsConfigs", "ldapConfig", "attributes", "uptime", "kerberosConfig", "ambariSecurityMasterKey", "proxyConfigCrn",
                 "extendedBlueprintText", "environment", "variant", "description"));
     }
 
@@ -101,7 +96,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         Cluster result = underTest.convert(request);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
-                "rdsConfigs", "ldapConfig", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfig", "extendedBlueprintText",
+                "rdsConfigs", "ldapConfig", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn", "extendedBlueprintText",
                 "environment", "variant", "description"));
     }
 
@@ -116,7 +111,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         Cluster result = underTest.convert(clusterRequest);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
-                "fileSystem", "rdsConfigs", "ldapConfig", "attributes", "uptime", "kerberosConfig", "ambariSecurityMasterKey", "proxyConfig",
+                "fileSystem", "rdsConfigs", "ldapConfig", "attributes", "uptime", "kerberosConfig", "ambariSecurityMasterKey", "proxyConfigCrn",
                 "extendedBlueprintText", "gateway", "environment", "variant", "description"));
         assertNull(result.getGateway());
     }

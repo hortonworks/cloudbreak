@@ -20,7 +20,6 @@ import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.client.KubernetesTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.client.MpackTestClient;
-import com.sequenceiq.it.cloudbreak.client.ProxyTestClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -36,7 +35,6 @@ import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kubernetes.KubernetesTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.dto.mpack.MPackTestDto;
-import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
@@ -86,9 +84,6 @@ public class AuditTest extends AbstractIntegrationTest {
 
     @Inject
     private StackTestClient stackTestClient;
-
-    @Inject
-    private ProxyTestClient proxyTestClient;
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
@@ -317,26 +312,6 @@ public class AuditTest extends AbstractIntegrationTest {
                 .withResourceType("mpacks")
                 .when(auditTestClient.listV4(), key(mpackName))
                 .then(AuditTestAssertion.listContainsAtLeast(1), key(mpackName))
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "there is a running cloudbreak",
-            when = "a Proxy is created",
-            then = "and audit record must be available in the database")
-    public void createValidProxyThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
-        String proxyName = resourcePropertyProvider().getName();
-        testContext
-                .given(ProxyTestDto.class)
-                .withName(proxyName)
-                .when(proxyTestClient.createV4(), key(proxyName))
-                .select(p -> p.getResponse().getId(), key(proxyName))
-                .given(AuditTestDto.class)
-                .withResourceIdByKey(proxyName)
-                .withResourceType("proxies")
-                .when(auditTestClient.listV4(), key(proxyName))
-                .then(AuditTestAssertion.listContainsAtLeast(1), key(proxyName))
                 .validate();
     }
 

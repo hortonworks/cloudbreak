@@ -59,9 +59,6 @@ public class ClusterDecoratorTest {
     private RdsConnectionValidator rdsConnectionValidator;
 
     @Mock
-    private ClusterProxyDecorator clusterProxyDecorator;
-
-    @Mock
     private SharedServiceConfigProvider sharedServiceConfigProvider;
 
     @Mock
@@ -86,7 +83,6 @@ public class ClusterDecoratorTest {
         blueprint.setBlueprintText(blueprintText);
         when(sharedServiceConfigProvider.configureCluster(any(Cluster.class), any(User.class), any(Workspace.class)))
                 .thenReturn(expectedClusterInstance);
-        when(clusterProxyDecorator.prepareProxyConfig(any(Cluster.class), any())).thenReturn(expectedClusterInstance);
         when(ambariHaComponentFilter.getHaComponents(any())).thenReturn(Collections.emptySet());
         Cluster result = underTest.decorate(expectedClusterInstance, createClusterV4Request(), blueprint, user, new Workspace(), stack);
 

@@ -92,7 +92,7 @@ public class ClusterTestDto extends AbstractCloudbreakTestDto<ClusterV4Request, 
     }
 
     public ClusterTestDto withProxyConfigName(String proxy) {
-        getRequest().setProxyName(proxy);
+        getRequest().setProxyConfigCrn(proxy);
         return this;
     }
 

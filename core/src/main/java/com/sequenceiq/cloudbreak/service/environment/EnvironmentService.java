@@ -70,7 +70,7 @@ import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
-import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigService;
+import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.AmbariDatalakeConfigProvider;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeConfigApiConnector;
@@ -95,7 +95,7 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
     private LdapConfigService ldapConfigService;
 
     @Inject
-    private ProxyConfigService proxyConfigService;
+    private ProxyConfigDtoService proxyConfigDtoService;
 
     @Inject
     private KerberosConfigService kerberosConfigService;

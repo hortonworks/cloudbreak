@@ -54,9 +54,6 @@ public class ClusterDecorator {
     private LdapConfigService ldapConfigService;
 
     @Inject
-    private ClusterProxyDecorator clusterProxyDecorator;
-
-    @Inject
     private SharedServiceConfigProvider sharedServiceConfigProvider;
 
     @Inject
@@ -69,7 +66,6 @@ public class ClusterDecorator {
         prepareClusterManagerVariant(cluster);
         validateBlueprintIfRequired(cluster, request, stack);
         prepareRds(cluster, request, stack);
-        cluster = clusterProxyDecorator.prepareProxyConfig(cluster, request.getProxyName());
         prepareLdap(cluster, request, user, workspace);
         cluster = sharedServiceConfigProvider.configureCluster(cluster, user, workspace);
         return cluster;

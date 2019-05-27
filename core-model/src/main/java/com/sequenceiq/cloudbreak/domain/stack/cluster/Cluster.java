@@ -40,7 +40,6 @@ import javax.persistence.UniqueConstraint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
-import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -49,14 +48,14 @@ import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
-import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
-import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
+import com.sequenceiq.cloudbreak.service.secret.SecretValue;
+import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
+import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
@@ -181,13 +180,12 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     private Secret ambariSecurityMasterKey = Secret.EMPTY;
 
     @ManyToOne
-    private ProxyConfig proxyConfig;
-
-    @ManyToOne
     private Workspace workspace;
 
     @ManyToOne
     private EnvironmentView environment;
+
+    private String proxyConfigCrn;
 
     public EnvironmentView getEnvironment() {
         return environment;
@@ -541,20 +539,20 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         this.ambariSecurityMasterKey = new Secret(ambariSecurityMasterKey);
     }
 
-    public ProxyConfig getProxyConfig() {
-        return proxyConfig;
-    }
-
-    public void setProxyConfig(ProxyConfig proxyConfig) {
-        this.proxyConfig = proxyConfig;
-    }
-
     public String getExtendedBlueprintText() {
         return extendedBlueprintText.getRaw();
     }
 
     public void setExtendedBlueprintText(String extendedBlueprintText) {
         this.extendedBlueprintText = new Secret(extendedBlueprintText);
+    }
+
+    public String getProxyConfigCrn() {
+        return proxyConfigCrn;
+    }
+
+    public void setProxyConfigCrn(String proxyConfigCrn) {
+        this.proxyConfigCrn = proxyConfigCrn;
     }
 
     @Override

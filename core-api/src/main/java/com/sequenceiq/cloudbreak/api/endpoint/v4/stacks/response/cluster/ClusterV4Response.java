@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.proxies.responses.ProxyV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.AmbariV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.customcontainer.CustomContainerV4Response;
@@ -27,9 +26,9 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
-import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -63,8 +62,8 @@ public class ClusterV4Response implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.DATABASES)
     private List<DatabaseV4Response> databases;
 
-    @ApiModelProperty(ClusterModelDescription.PROXY_NAME)
-    private ProxyV4Response proxy;
+    @ApiModelProperty(ClusterModelDescription.PROXY_CRN)
+    private String proxyConfigCrn;
 
     @ApiModelProperty(ClusterModelDescription.FILESYSTEM)
     private CloudStorageV4Response cloudStorage;
@@ -279,12 +278,12 @@ public class ClusterV4Response implements JsonEntity {
         this.databases = databases;
     }
 
-    public ProxyV4Response getProxy() {
-        return proxy;
+    public String getProxyConfigCrn() {
+        return proxyConfigCrn;
     }
 
-    public void setProxy(ProxyV4Response proxy) {
-        this.proxy = proxy;
+    public void setProxyConfigCrn(String proxyConfigCrn) {
+        this.proxyConfigCrn = proxyConfigCrn;
     }
 
     public CustomContainerV4Response getCustomContainers() {
