@@ -68,41 +68,4 @@ RSpec.describe 'Database test cases', :type => :aruba do
     end        
   end
 
-  it "Database - Test - By parameters - Failure" do
-    with_environment 'DEBUG' => '1' do
-      result = cb.database.test.by_params.url(@db_url).db_username(@db_user).db_password(@mock_password).build(false)
-      expect(result.exit_status).to eql 1
-      expect(result.stderr.to_s.downcase).to include("failed")
-    end
-  end
-
-   it "Database - Test - By name - Failure" do
-    with_environment 'DEBUG' => '1' do
-      result = cb.database.test.by_name.name("aaaaa").build(false)
-      expect(result.exit_status).to eql 1
-      expect(result.stderr.to_s.downcase).to include("failed")
-    end
-  end
-
-  it "Database - Test - By parameters - Success" do
-    with_environment 'DEBUG' => '1' do
-      requestBody = MockResponse.requestBodyCreate('testDatabaseConnectionInWorkspace', '{"result": "connected"}', '200')
-      url = ENV['BASE_URL'] + @mock_endpoint_setup
-      MockResponse.post(requestBody, url)
-      result = cb.database.test.by_params.url(@db_url).db_username(@db_user).db_password(@mock_password).build(false)
-      expect(result.exit_status).to eql 0
-      expect(result.stderr.to_s.downcase).not_to include("failed")
-    end
-  end
-
-  it "Database - Test - By Name - Success" do
-    with_environment 'DEBUG' => '1' do
-      requestBody = MockResponse.requestBodyCreate('testDatabaseConnectionInWorkspace', '{"result": "connected"}', '200')
-      url = ENV['BASE_URL'] + @mock_endpoint_setup
-      MockResponse.post(requestBody, url)
-      result = cb.database.test.by_name.name("aaaaa").build(false)
-      expect(result.exit_status).to eql 0
-      expect(result.stderr.to_s.downcase).not_to include("failed")
-    end
-  end
-end  
+end
