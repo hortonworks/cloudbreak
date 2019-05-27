@@ -11,9 +11,9 @@ import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
-import com.sequenceiq.environment.network.converter.EnvironmentNetworkConverter;
+import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
-import com.sequenceiq.environment.network.BaseNetwork;
+import com.sequenceiq.environment.network.domain.BaseNetwork;
 
 @Component
 public class EnvironmentViewToSimpleEnvironmentResponseConverter extends

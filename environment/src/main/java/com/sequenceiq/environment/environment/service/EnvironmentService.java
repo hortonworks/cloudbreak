@@ -36,7 +36,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
-import com.sequenceiq.environment.network.BaseNetwork;
+import com.sequenceiq.environment.network.domain.BaseNetwork;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;

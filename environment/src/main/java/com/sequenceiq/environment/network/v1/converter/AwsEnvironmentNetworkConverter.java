@@ -1,12 +1,12 @@
-package com.sequenceiq.environment.network.converter;
+package com.sequenceiq.environment.network.v1.converter;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
-import com.sequenceiq.environment.network.AwsNetwork;
-import com.sequenceiq.environment.network.BaseNetwork;
+import com.sequenceiq.environment.network.domain.AwsNetwork;
+import com.sequenceiq.environment.network.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 

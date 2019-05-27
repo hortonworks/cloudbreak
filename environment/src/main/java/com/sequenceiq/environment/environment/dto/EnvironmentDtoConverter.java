@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.network.converter.EnvironmentNetworkConverter;
+import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 
 @Component
 public class EnvironmentDtoConverter {

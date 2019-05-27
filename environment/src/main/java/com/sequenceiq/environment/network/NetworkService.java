@@ -6,7 +6,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.network.converter.EnvironmentNetworkConverter;
+import com.sequenceiq.environment.network.domain.BaseNetwork;
+import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.repository.BaseNetworkRepository;
 

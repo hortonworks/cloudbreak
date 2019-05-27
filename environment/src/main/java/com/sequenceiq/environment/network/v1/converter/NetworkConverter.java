@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.network;
+package com.sequenceiq.environment.network.v1.converter;
 
 import org.springframework.stereotype.Component;
 

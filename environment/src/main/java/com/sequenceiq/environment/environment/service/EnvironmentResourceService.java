@@ -12,7 +12,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.CredentialAwa
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.network.BaseNetwork;
+import com.sequenceiq.environment.network.domain.BaseNetwork;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
