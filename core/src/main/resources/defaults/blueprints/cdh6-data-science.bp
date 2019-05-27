@@ -107,28 +107,6 @@
       {
         "refName": "hive",
         "serviceType": "HIVE",
-        "serviceConfigs": [
-          {
-            "name": "hive_metastore_database_password",
-            "variable": "hive-hive_metastore_database_password"
-          },
-          {
-            "name": "hive_metastore_database_port",
-            "variable": "hive-hive_metastore_database_port"
-          },
-          {
-            "name": "hive_metastore_database_host",
-            "variable": "hive-hive_metastore_database_host"
-          },
-          {
-            "name": "hive_metastore_database_type",
-            "variable": "hive-hive_metastore_database_type"
-          },
-          {
-            "name": "hive_metastore_database_name",
-            "variable": "hive-hive_metastore_database_name"
-          }
-        ],
         "roleConfigGroups": [
           {
             "refName": "hive-GATEWAY-BASE",
