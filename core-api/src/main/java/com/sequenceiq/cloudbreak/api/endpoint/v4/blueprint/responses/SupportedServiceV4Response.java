@@ -14,6 +14,8 @@ public class SupportedServiceV4Response implements JsonEntity, Comparable<Suppor
 
     private String displayName;
 
+    private String version;
+
     public String getName() {
         return name;
     }
@@ -28,6 +30,14 @@ public class SupportedServiceV4Response implements JsonEntity, Comparable<Suppor
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     @Override

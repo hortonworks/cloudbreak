@@ -5,17 +5,17 @@ import java.util.Set;
 
 public class ServiceList {
 
-    private Set<String> services = new HashSet<>();
+    private Set<CdhService> services = new HashSet<>();
 
     private String version;
 
     private String stackType;
 
-    public Set<String> getServices() {
+    public Set<CdhService> getServices() {
         return services;
     }
 
-    public void setServices(Set<String> services) {
+    public void setServices(Set<CdhService> services) {
         this.services = services;
     }
 

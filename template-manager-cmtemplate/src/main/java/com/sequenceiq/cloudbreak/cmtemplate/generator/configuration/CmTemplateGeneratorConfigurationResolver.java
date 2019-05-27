@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.configuration.domain.StackVersion;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.configuration.domain.dependencies.ServiceConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.configuration.domain.dependencies.ServiceDependencies;
+import com.sequenceiq.cloudbreak.cmtemplate.generator.configuration.domain.versionmatrix.CdhService;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.configuration.domain.versionmatrix.ServiceList;
 
 @Service
@@ -38,7 +39,7 @@ public class CmTemplateGeneratorConfigurationResolver {
     @Value("${cb.blueprint.cm.services.file:cloudera-manager-template/service-definitions-minimal.json}")
     private String serviceDefinitionConfigurationPath;
 
-    private Map<StackVersion, Set<String>> cdhConfigurationsMap = new HashMap<>();
+    private Map<StackVersion, Set<CdhService>> cdhConfigurationsMap = new HashMap<>();
 
     private Set<ServiceConfig> serviceConfigs = new HashSet<>();
 
@@ -48,7 +49,7 @@ public class CmTemplateGeneratorConfigurationResolver {
         serviceConfigs = readServiceDefinitions();
     }
 
-    public Map<StackVersion, Set<String>> cdhConfigurations() {
+    public Map<StackVersion, Set<CdhService>> cdhConfigurations() {
         return cdhConfigurationsMap;
     }
 
@@ -69,8 +70,8 @@ public class CmTemplateGeneratorConfigurationResolver {
         return serviceConfigs;
     }
 
-    private Map<StackVersion, Set<String>> readAllFilesFromParameterDir() {
-        Map<StackVersion, Set<String>> collectedFiles = new HashMap<>();
+    private Map<StackVersion, Set<CdhService>> readAllFilesFromParameterDir() {
+        Map<StackVersion, Set<CdhService>> collectedFiles = new HashMap<>();
         try {
             List<Resource> files = getFiles(cdhConfigurationsPath);
             for (Resource serviceEntry : files) {

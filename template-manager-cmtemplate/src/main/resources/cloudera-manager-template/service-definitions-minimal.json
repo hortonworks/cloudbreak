@@ -18,6 +18,20 @@
       "dependencies": ["ZOOKEEPER","HDFS", "YARN", "SPARK_ON_YARN", "HIVE"]
     },
     {
+      "name": "LIVY",
+      "displayName": "Livy",
+      "components": [
+      ],
+      "dependencies": ["SPARK_ON_YARN"]
+    },
+    {
+      "name": "ZEPPELIN",
+      "displayName": "Zeppelin",
+      "components": [
+      ],
+      "dependencies": ["SPARK_ON_YARN"]
+    },
+    {
       "name": "HDFS",
       "displayName": "Hdfs",
       "components": [

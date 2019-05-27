@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cmtemplate.generator.dependencies.ServiceDependencyMatrixService;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.dependencies.domain.ServiceDependencyMatrix;
+import com.sequenceiq.cloudbreak.cmtemplate.generator.support.DeclaredVersionService;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.support.SupportedVersionService;
+import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedServices;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedVersions;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.template.GeneratedCmTemplateService;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.template.domain.GeneratedCmTemplate;
@@ -27,6 +29,9 @@ public class CmTemplateGeneratorService {
 
     @Inject
     private GeneratedCmTemplateService generatedCMTemplateService;
+
+    @Inject
+    private DeclaredVersionService declaredVersionService;
 
     public GeneratedCmTemplate generateTemplateByServices(Set<String> services, String platform) {
         String generatedId = UUID.randomUUID().toString();
@@ -66,4 +71,7 @@ public class CmTemplateGeneratorService {
         return supportedVersionService.collectSupportedVersions();
     }
 
+    public SupportedServices getServicesByBlueprint(String blueprintText) {
+        return declaredVersionService.collectDeclaredVersions(blueprintText);
+    }
 }

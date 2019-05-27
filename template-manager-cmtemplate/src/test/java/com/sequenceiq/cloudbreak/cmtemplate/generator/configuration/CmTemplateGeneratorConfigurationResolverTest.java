@@ -13,6 +13,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cmtemplate.generator.configuration.domain.StackVersion;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.configuration.domain.dependencies.ServiceConfig;
+import com.sequenceiq.cloudbreak.cmtemplate.generator.configuration.domain.versionmatrix.CdhService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CmTemplateGeneratorConfigurationResolverTest {
@@ -29,10 +30,10 @@ public class CmTemplateGeneratorConfigurationResolverTest {
 
     @Test
     public void testThatAllFileIsReadableShouldVerifyThatFileCountMatch() {
-        Map<StackVersion, Set<String>> stackVersionSetMap = underTest.cdhConfigurations();
+        Map<StackVersion, Set<CdhService>> stackVersionSetMap = underTest.cdhConfigurations();
         Set<ServiceConfig> serviceConfigs = underTest.serviceConfigs();
 
-        Assert.assertEquals(2L, stackVersionSetMap.size());
-        Assert.assertEquals(13L, serviceConfigs.size());
+        Assert.assertEquals(3L, stackVersionSetMap.size());
+        Assert.assertEquals(15L, serviceConfigs.size());
     }
 }

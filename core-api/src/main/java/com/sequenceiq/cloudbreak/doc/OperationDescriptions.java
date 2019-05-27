@@ -213,6 +213,7 @@ public class OperationDescriptions {
 
     public static class ConnectorOpDescription {
         public static final String GET_DISK_TYPES = "retrive available disk types";
+        public static final String GET_SERVICE_VERSIONS_BY_BLUEPRINT_NAME = "retrive services and versions";
         public static final String GET_REGION_R_BY_TYPE = "retrive regions by type";
         public static final String GET_RECOMMENDATION = "creates a recommendation that advises cloud resources for the given blueprint";
         public static final String GET_TAG_SPECIFICATIONS = "retrive tag specifications";
