@@ -6,21 +6,72 @@
   "blueprint": {
     "cdhVersion": "7.0.0",
     "displayName": "datalake",
+    "hostTemplates": [
+      {
+        "cardinality": 1,
+        "refName": "master",
+        "roleConfigGroupsRefNames": [
+          "atlas-ATLAS_SERVER-BASE",
+          "hbase-GATEWAY-BASE",
+          "hbase-HBASETHRIFTSERVER-BASE",
+          "hbase-REGIONSERVER-BASE",
+          "hbase-MASTER-BASE",
+          "hdfs-DATANODE-BASE",
+          "hdfs-BALANCER-BASE",
+          "hdfs-GATEWAY-BASE",
+          "hdfs-NAMENODE-BASE",
+          "hdfs-NFSGATEWAY-BASE",
+          "hdfs-SECONDARYNAMENODE-BASE",
+          "hive-GATEWAY-BASE",
+          "hive-HIVEMETASTORE-BASE",
+          "hive-HIVESERVER2-BASE",
+          "kafka-GATEWAY-BASE",
+          "kafka-KAFKA_BROKER-BASE",
+          "ranger-RANGER_ADMIN-BASE",
+          "ranger-RANGER_TAGSYNC-BASE",
+          "ranger-RANGER_USERSYNC-BASE",
+          "solr-SOLR_SERVER-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
+          "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+          "yarn-GATEWAY-BASE",
+          "yarn-JOBHISTORY-BASE",
+          "yarn-RESOURCEMANAGER-BASE",
+          "yarn-NODEMANAGER-BASE",
+          "zookeeper-SERVER-BASE"
+        ]
+      }
+    ],
     "services": [
       {
         "refName": "zookeeper",
-        "serviceType": "ZOOKEEPER",
         "roleConfigGroups": [
           {
+            "base": true,
             "refName": "zookeeper-SERVER-BASE",
-            "roleType": "SERVER",
-            "base": true
+            "roleType": "SERVER"
           }
-        ]
+        ],
+        "serviceType": "ZOOKEEPER"
       },
       {
         "refName": "ranger",
-        "serviceType": "RANGER",
+        "roleConfigGroups": [
+          {
+            "base": true,
+            "refName": "ranger-RANGER_USERSYNC-BASE",
+            "roleType": "RANGER_USERSYNC"
+          },
+          {
+            "base": true,
+            "refName": "ranger-RANGER_TAGSYNC-BASE",
+            "roleType": "RANGER_TAGSYNC"
+          },
+          {
+            "base": true,
+            "refName": "ranger-RANGER_ADMIN-BASE",
+            "roleType": "RANGER_ADMIN"
+          }
+        ],
         "serviceConfigs": [
           {
             "name": "hdfs_service",
@@ -47,27 +98,23 @@
             "value": "{{{ general.password }}}"
           }
         ],
-        "roleConfigGroups": [
-          {
-            "refName": "ranger-RANGER_USERSYNC-BASE",
-            "roleType": "RANGER_USERSYNC",
-            "base": true
-          },
-          {
-            "refName": "ranger-RANGER_TAGSYNC-BASE",
-            "roleType": "RANGER_TAGSYNC",
-            "base": true
-          },
-          {
-            "refName": "ranger-RANGER_ADMIN-BASE",
-            "roleType": "RANGER_ADMIN",
-            "base": true
-          }
-        ]
+        "serviceType": "RANGER"
       },
       {
         "refName": "atlas",
-        "serviceType": "ATLAS",
+        "roleConfigGroups": [
+          {
+            "base": true,
+            "configs": [
+              {
+                "name": "atlas_kafka_bootstrap_servers",
+                "value": "{{{format-join host_groups.master format='%s:9092' }}}"
+              }
+            ],
+            "refName": "atlas-ATLAS_SERVER-BASE",
+            "roleType": "ATLAS_SERVER"
+          }
+        ],
         "serviceConfigs": [
           {
             "name": "solr_service",
@@ -86,54 +133,43 @@
             "ref": "hdfs"
           }
         ],
-        "roleConfigGroups": [
-          {
-            "refName": "atlas-ATLAS_SERVER-BASE",
-            "roleType": "ATLAS_SERVER",
-            "configs": [
-              {
-                "name": "atlas_kafka_bootstrap_servers",
-                "value": "{{{format-join host_groups.master format='%s:9092' }}}"
-              }
-            ],
-            "base": true
-          }
-        ]
+        "serviceType": "ATLAS"
       },
       {
         "refName": "yarn",
-        "serviceType": "YARN",
         "roleConfigGroups": [
           {
+            "base": true,
             "refName": "yarn-RESOURCEMANAGER-BASE",
-            "roleType": "RESOURCEMANAGER",
-            "base": true
+            "roleType": "RESOURCEMANAGER"
           },
           {
+            "base": true,
             "refName": "yarn-NODEMANAGER-BASE",
-            "roleType": "NODEMANAGER",
-            "base": true
+            "roleType": "NODEMANAGER"
           },
           {
-            "refName": "yarn-NODEMANAGER",
-            "roleType": "NODEMANAGER",
-            "base": false
-          },
-          {
+            "base": true,
             "refName": "yarn-GATEWAY-BASE",
-            "roleType": "GATEWAY",
-            "base": true
+            "roleType": "GATEWAY"
           },
           {
+            "base": true,
             "refName": "yarn-JOBHISTORY-BASE",
-            "roleType": "JOBHISTORY",
-            "base": true
+            "roleType": "JOBHISTORY"
           }
-        ]
+        ],
+        "serviceType": "YARN"
       },
       {
         "refName": "solr",
-        "serviceType": "SOLR",
+        "roleConfigGroups": [
+          {
+            "base": true,
+            "refName": "solr-SOLR_SERVER-BASE",
+            "roleType": "SOLR_SERVER"
+          }
+        ],
         "serviceConfigs": [
           {
             "name": "hdfs_service",
@@ -144,111 +180,106 @@
             "ref": "zookeeper"
           }
         ],
-        "roleConfigGroups": [
-          {
-            "refName": "solr-SOLR_SERVER-BASE",
-            "roleType": "SOLR_SERVER",
-            "base": true
-          }
-        ]
+        "serviceType": "SOLR"
       },
       {
         "refName": "hbase",
-        "serviceType": "HBASE",
         "roleConfigGroups": [
           {
+            "base": true,
             "refName": "hbase-GATEWAY-BASE",
-            "roleType": "GATEWAY",
-            "base": true
+            "roleType": "GATEWAY"
           },
           {
+            "base": true,
             "refName": "hbase-REGIONSERVER-BASE",
-            "roleType": "REGIONSERVER",
-            "base": true
+            "roleType": "REGIONSERVER"
           },
           {
-            "refName": "hbase-REGIONSERVER",
-            "roleType": "REGIONSERVER",
-            "base": false
-          },
-          {
+            "base": true,
             "refName": "hbase-MASTER-BASE",
-            "roleType": "MASTER",
-            "base": true
+            "roleType": "MASTER"
           },
           {
+            "base": true,
             "refName": "hbase-HBASETHRIFTSERVER-BASE",
-            "roleType": "HBASETHRIFTSERVER",
-            "base": true
+            "roleType": "HBASETHRIFTSERVER"
           }
-        ]
+        ],
+        "serviceType": "HBASE"
       },
       {
         "refName": "hdfs",
-        "serviceType": "HDFS",
         "roleConfigGroups": [
           {
+            "base": true,
             "refName": "hdfs-NAMENODE-BASE",
-            "roleType": "NAMENODE",
-            "base": true
+            "roleType": "NAMENODE"
           },
           {
+            "base": true,
             "refName": "hdfs-SECONDARYNAMENODE-BASE",
-            "roleType": "SECONDARYNAMENODE",
-            "base": true
+            "roleType": "SECONDARYNAMENODE"
           },
           {
+            "base": true,
             "refName": "hdfs-DATANODE-BASE",
-            "roleType": "DATANODE",
-            "base": true
+            "roleType": "DATANODE"
           },
           {
+            "base": true,
             "refName": "hdfs-BALANCER-BASE",
-            "roleType": "BALANCER",
-            "base": true
+            "roleType": "BALANCER"
           },
           {
-            "refName": "hdfs-DATANODE",
-            "roleType": "DATANODE",
-            "base": false
-          },
-          {
+            "base": true,
             "refName": "hdfs-GATEWAY-BASE",
-            "roleType": "GATEWAY",
-            "base": true
+            "roleType": "GATEWAY"
           },
           {
+            "base": true,
             "refName": "hdfs-NFSGATEWAY-BASE",
-            "roleType": "NFSGATEWAY",
-            "base": true
+            "roleType": "NFSGATEWAY"
           }
-        ]
+        ],
+        "serviceType": "HDFS"
       },
       {
         "refName": "spark_on_yarn",
-        "serviceType": "SPARK_ON_YARN",
+        "roleConfigGroups": [
+          {
+            "base": true,
+            "refName": "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+            "roleType": "SPARK_YARN_HISTORY_SERVER"
+          },
+          {
+            "base": true,
+            "refName": "spark_on_yarn-GATEWAY-BASE",
+            "roleType": "GATEWAY"
+          }
+        ],
         "serviceConfigs": [
           {
             "name": "spark-conf/spark-env.sh_service_safety_valve",
             "value": "export HDP_VERSION=Hadoop 3.1.1.6.0.99.0-118"
           }
         ],
-        "roleConfigGroups": [
-          {
-            "refName": "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
-            "roleType": "SPARK_YARN_HISTORY_SERVER",
-            "base": true
-          },
-          {
-            "refName": "spark_on_yarn-GATEWAY-BASE",
-            "roleType": "GATEWAY",
-            "base": true
-          }
-        ]
+        "serviceType": "SPARK_ON_YARN"
       },
       {
         "refName": "kafka",
-        "serviceType": "KAFKA",
+        "roleConfigGroups": [
+          {
+            "base": true,
+            "refName": "kafka-GATEWAY-BASE",
+            "roleType": "GATEWAY"
+          },
+          {
+            "base": true,
+            "refName": "kafka-KAFKA_BROKER-BASE",
+            "roleType": "KAFKA_BROKER"
+          }
+        ],
         "serviceConfigs": [
           {
             "name": "zookeeper_service",
@@ -259,101 +290,34 @@
             "value": "1"
           }
         ],
-        "roleConfigGroups": [
-          {
-            "refName": "kafka-GATEWAY-BASE",
-            "roleType": "GATEWAY",
-            "base": true
-          },
-          {
-            "refName": "kafka-KAFKA_BROKER-BASE",
-            "roleType": "KAFKA_BROKER",
-            "base": true
-          }
-        ]
+        "serviceType": "KAFKA"
       },
       {
         "refName": "hive",
-        "serviceType": "HIVE",
         "roleConfigGroups": [
           {
+            "base": true,
             "refName": "hive-GATEWAY-BASE",
-            "roleType": "GATEWAY",
-            "base": true
+            "roleType": "GATEWAY"
           },
           {
-            "refName": "hive-HIVESERVER2-BASE",
-            "roleType": "HIVESERVER2",
+            "base": true,
             "configs": [
               {
                 "name": "hs2_execution_engine",
                 "value": "spark"
               }
             ],
-            "base": true
+            "refName": "hive-HIVESERVER2-BASE",
+            "roleType": "HIVESERVER2"
           },
           {
+            "base": true,
             "refName": "hive-HIVEMETASTORE-BASE",
-            "roleType": "HIVEMETASTORE",
-            "base": true
+            "roleType": "HIVEMETASTORE"
           }
-        ]
-      }
-    ],
-    "hostTemplates": [
-      {
-        "refName": "master",
-        "cardinality": 1,
-        "roleConfigGroupsRefNames": [
-          "atlas-ATLAS_SERVER-BASE",
-          "hbase-REGIONSERVER-BASE",
-          "hdfs-DATANODE-BASE",
-          "hive-GATEWAY-BASE",
-          "kafka-GATEWAY-BASE",
-          "kafka-KAFKA_BROKER-BASE",
-          "ranger-RANGER_ADMIN-BASE",
-          "solr-SOLR_SERVER-BASE",
-          "spark_on_yarn-GATEWAY-BASE",
-          "yarn-NODEMANAGER"
-        ]
-      },
-      {
-        "refName": "m2",
-        "cardinality": 1,
-        "roleConfigGroupsRefNames": [
-          "hbase-GATEWAY-BASE",
-          "hbase-HBASETHRIFTSERVER-BASE",
-          "hbase-MASTER-BASE",
-          "hdfs-BALANCER-BASE",
-          "hdfs-GATEWAY-BASE",
-          "hdfs-NAMENODE-BASE",
-          "hdfs-NFSGATEWAY-BASE",
-          "hdfs-SECONDARYNAMENODE-BASE",
-          "hive-GATEWAY-BASE",
-          "hive-HIVEMETASTORE-BASE",
-          "hive-HIVESERVER2-BASE",
-          "kafka-GATEWAY-BASE",
-          "spark_on_yarn-GATEWAY-BASE",
-          "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
-          "yarn-GATEWAY-BASE",
-          "yarn-JOBHISTORY-BASE",
-          "yarn-RESOURCEMANAGER-BASE",
-          "zookeeper-SERVER-BASE"
-        ]
-      },
-      {
-        "refName": "m3",
-        "cardinality": 1,
-        "roleConfigGroupsRefNames": [
-          "hbase-REGIONSERVER",
-          "hdfs-DATANODE",
-          "hive-GATEWAY-BASE",
-          "kafka-GATEWAY-BASE",
-          "ranger-RANGER_TAGSYNC-BASE",
-          "ranger-RANGER_USERSYNC-BASE",
-          "spark_on_yarn-GATEWAY-BASE",
-          "yarn-NODEMANAGER-BASE"
-        ]
+        ],
+        "serviceType": "HIVE"
       }
     ]
   }
