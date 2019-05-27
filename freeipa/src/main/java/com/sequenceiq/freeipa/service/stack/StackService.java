@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.stack;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -34,7 +35,16 @@ public class StackService {
     }
 
     public Stack getByEnvironmentCrn(String environmentCrn) {
-        return stackRepository.findByEnvironment(environmentCrn)
+        return stackRepository.findByEnvironmentNotTerminated(environmentCrn)
+                .orElseThrow(() -> new NotFoundException(String.format("Stack by environment [%s] not found", environmentCrn)));
+    }
+
+    public Optional<Stack> findByEnvironmentCrn(String environmentCrn) {
+        return stackRepository.findByEnvironmentNotTerminated(environmentCrn);
+    }
+
+    public Stack getByEnvironmentCrnWithLists(String environmentCrn) {
+        return stackRepository.findByEnvironmentWithListNotTerminated(environmentCrn)
                 .orElseThrow(() -> new NotFoundException(String.format("Stack by environment [%s] not found", environmentCrn)));
     }
 

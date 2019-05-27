@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupRequest;
+import com.sequenceiq.freeipa.converter.instance.template.InstanceTemplateRequestToTemplateConverter;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 

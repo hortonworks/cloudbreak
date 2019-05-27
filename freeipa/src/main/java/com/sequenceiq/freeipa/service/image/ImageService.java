@@ -66,7 +66,7 @@ public class ImageService {
     @Value("${freeipa.image.catalog.default.os}")
     private String defaultOs;
 
-    public void create(Stack stack, ImageSettingsRequest imageRequest) {
+    public Image create(Stack stack, ImageSettingsRequest imageRequest) {
         Future<PlatformParameters> platformParametersFuture = executorService.submit(() -> platformParameterService.getPlatformParameters(stack));
         String userData = createUserData(stack, platformParametersFuture);
         String region = stack.getRegion();
@@ -82,7 +82,7 @@ public class ImageService {
         image.setUserdata(userData);
         image.setImageName(imageName);
         image.setImageCatalogUrl(catalogUrl);
-        imageRepository.save(image);
+        return imageRepository.save(image);
     }
 
     public Image getByStack(Stack stack) {

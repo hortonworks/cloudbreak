@@ -10,19 +10,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
-import com.sequenceiq.freeipa.converter.CreateFreeIpaRequestToStackConverter;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
+import com.sequenceiq.freeipa.converter.stack.CreateFreeIpaRequestToStackConverter;
+import com.sequenceiq.freeipa.converter.stack.StackToDescribeFreeIpaResponseConverter;
+import com.sequenceiq.freeipa.entity.FreeIpa;
+import com.sequenceiq.freeipa.entity.Image;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
-import com.sequenceiq.freeipa.repository.StackRepository;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.FreeIpaService;
@@ -45,7 +49,7 @@ public class FreeIpaCreationService {
     private TlsSecurityService tlsSecurityService;
 
     @Inject
-    private StackRepository stackRepository;
+    private StackService stackService;
 
     @Inject
     private CreateFreeIpaRequestToStackConverter stackConverter;
@@ -65,7 +69,11 @@ public class FreeIpaCreationService {
     @Inject
     private FreeIpaService freeIpaService;
 
-    public void launchFreeIpa(CreateFreeIpaRequest request, String accountId) {
+    @Inject
+    private StackToDescribeFreeIpaResponseConverter stackToDescribeFreeIpaResponseConverter;
+
+    public DescribeFreeIpaResponse launchFreeIpa(CreateFreeIpaRequest request, String accountId) {
+        checkIfAlreadyExistsInEnvironment(request);
         Stack stack = stackConverter.convert(request, accountId);
         stack.setEnvironment(request.getEnvironmentId());
         stack.setAccountId(accountId);
@@ -78,11 +86,18 @@ public class FreeIpaCreationService {
 
         String template = templateService.waitGetTemplate(stack, getPlatformTemplateRequest);
         stack.setTemplate(template);
-        stackRepository.save(stack);
-        ImageSettingsRequest image = request.getImage();
-        imageService.create(stack, Objects.nonNull(image) ? image : new ImageSettingsRequest());
-        freeIpaService.create(stack, request.getFreeIpa());
+        stackService.save(stack);
+        ImageSettingsRequest imageSettingsRequest = request.getImage();
+        Image image = imageService.create(stack, Objects.nonNull(imageSettingsRequest) ? imageSettingsRequest : new ImageSettingsRequest());
+        FreeIpa freeIpa = freeIpaService.create(stack, request.getFreeIpa());
         flowManager.notify(FlowChainTriggers.PROVISION_TRIGGER_EVENT, new StackEvent(FlowChainTriggers.PROVISION_TRIGGER_EVENT, stack.getId()));
+        return stackToDescribeFreeIpaResponseConverter.convert(stack, image, freeIpa);
+    }
+
+    private void checkIfAlreadyExistsInEnvironment(CreateFreeIpaRequest request) {
+        stackService.findByEnvironmentCrn(request.getEnvironmentId()).ifPresent(stack -> {
+            throw new BadRequestException("FreeIPA already exists in environment");
+        });
     }
 
     private void fillInstanceMetadata(Stack stack) {

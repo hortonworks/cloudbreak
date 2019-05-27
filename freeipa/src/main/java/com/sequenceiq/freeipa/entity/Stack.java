@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.entity;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
+import static com.sequenceiq.freeipa.api.model.Status.DELETE_COMPLETED;
+import static com.sequenceiq.freeipa.api.model.Status.DELETE_IN_PROGRESS;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.converter;
+package com.sequenceiq.freeipa.converter.freeipa;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;

@@ -21,6 +21,19 @@ public class FreeIpaModelDescriptions {
         public static final String NODE_COUNT = "number of nodes";
         public static final String TEMPLATE = "instancegroup related template";
         public static final String SECURITYGROUP = "instancegroup related securitygroup";
+        public static final String STATUS = "status of the instance";
+        public static final String INSTANCE_TYPE = "type of the instance";
+    }
+
+    public static class InstanceMetaDataModelDescription {
+        public static final String PRIVATE_IP = "private ip of the insctance";
+        public static final String PUBLIC_IP = "public ip of the instance";
+        public static final String INSTANCE_ID = "id of the instance";
+        public static final String DISCOVERY_FQDN = "the fully qualified domain name of the node in the service discovery cluster";
+    }
+
+    public static class HostMetadataModelDescription {
+        public static final String STATE = "state of the host";
     }
 
     public static class TemplateModelDescription {

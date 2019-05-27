@@ -10,8 +10,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 
 @Entity
 public class InstanceMetaData {

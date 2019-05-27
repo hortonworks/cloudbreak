@@ -4,21 +4,18 @@ import static org.apache.commons.codec.binary.Base64.decodeBase64;
 
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
-import java.util.Optional;
 
 import javax.inject.Inject;
-import javax.ws.rs.NotFoundException;
 
 import org.springframework.stereotype.Component;
 
 import com.google.common.io.BaseEncoding;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
@@ -122,13 +119,4 @@ public class TlsSecurityService {
                     new String(decodeBase64(clientCertB64)), new String(decodeBase64(clientKeyB64)));
         }
     }
-
-    public CertificateV4Response getCertificates(Long stackId) {
-        SecurityConfig securityConfig = Optional.ofNullable(securityConfigRepository.findOneByStackId(stackId))
-                .orElseThrow(() -> new NotFoundException("Security config doesn't exist."));
-        String serverCert = Optional.ofNullable(instanceMetaDataRepository.getServerCertByStackId(stackId))
-                .orElseThrow(() -> new NotFoundException("Server certificate was not found."));
-        return new CertificateV4Response(serverCert, securityConfig.getClientKey(), securityConfig.getClientCert());
-    }
-
 }

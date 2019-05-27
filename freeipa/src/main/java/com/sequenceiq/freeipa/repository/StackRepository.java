@@ -27,4 +27,11 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
     Optional<Stack> findByEnvironment(@Param("environment") String environment);
 
     List<Stack> findByAccountId(@Param("accountId") String accountId);
+
+    @Query("SELECT s FROM Stack s WHERE s.environment = :environment AND s.terminated is null")
+    Optional<Stack> findByEnvironmentNotTerminated(@Param("environment") String environment);
+
+    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig "
+            + "LEFT JOIN FETCH ig.instanceMetaData WHERE s.environment = :environment AND s.terminated is null")
+    Optional<Stack> findByEnvironmentWithListNotTerminated(@Param("environment") String environment);
 }

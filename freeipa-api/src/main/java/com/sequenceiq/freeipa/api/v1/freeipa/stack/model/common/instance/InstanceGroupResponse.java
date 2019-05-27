@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -23,6 +26,8 @@ public class InstanceGroupResponse extends InstanceGroupBase {
     @ApiModelProperty(InstanceGroupModelDescription.SECURITYGROUP)
     private SecurityGroupResponse securityGroup;
 
+    private Set<InstanceMetaDataResponse> metaData = new HashSet<>();
+
     public InstanceTemplateResponse getInstanceTemplate() {
         return instanceTemplate;
     }
@@ -37,5 +42,13 @@ public class InstanceGroupResponse extends InstanceGroupBase {
 
     public void setSecurityGroup(SecurityGroupResponse securityGroup) {
         this.securityGroup = securityGroup;
+    }
+
+    public Set<InstanceMetaDataResponse> getMetaData() {
+        return metaData;
+    }
+
+    public void setMetaData(Set<InstanceMetaDataResponse> metaData) {
+        this.metaData = metaData;
     }
 }

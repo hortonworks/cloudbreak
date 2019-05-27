@@ -27,14 +27,14 @@ public class InstanceMetaDataService {
         for (Group group : groups) {
             InstanceGroup instanceGroup = getInstanceGroup(instanceGroups, group.getName());
             List<InstanceMetaData> existingInGroup = instanceMetaDataRepository.findAllByInstanceGroupAndInstanceStatus(instanceGroup,
-                    com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED);
+                    com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.REQUESTED);
             for (CloudInstance cloudInstance : group.getInstances()) {
                 InstanceTemplate instanceTemplate = cloudInstance.getTemplate();
                 boolean exists = existingInGroup.stream().anyMatch(i -> i.getPrivateId().equals(instanceTemplate.getPrivateId()));
                 if (InstanceStatus.CREATE_REQUESTED == instanceTemplate.getStatus() && !exists) {
                     InstanceMetaData instanceMetaData = new InstanceMetaData();
                     instanceMetaData.setPrivateId(instanceTemplate.getPrivateId());
-                    instanceMetaData.setInstanceStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED);
+                    instanceMetaData.setInstanceStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.REQUESTED);
                     instanceMetaData.setInstanceGroup(instanceGroup);
                     instanceMetaDataRepository.save(instanceMetaData);
                 }

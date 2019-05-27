@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.service.stack.FreeIpaCreationService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDeletionService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaDescribeService;
 
 @ExtendWith(MockitoExtension.class)
 class FreeIpaV1ControllerTest {
@@ -27,6 +28,9 @@ class FreeIpaV1ControllerTest {
 
     @Mock
     private FreeIpaCreationService creationService;
+
+    @Mock
+    private FreeIpaDescribeService describeService;
 
     @Test
     void create() {

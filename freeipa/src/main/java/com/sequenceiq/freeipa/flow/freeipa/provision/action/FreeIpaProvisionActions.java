@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.freeipa.api.model.DetailedStackStatus;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionState;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesRequest;

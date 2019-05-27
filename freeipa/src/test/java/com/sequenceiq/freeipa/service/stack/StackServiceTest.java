@@ -95,14 +95,14 @@ class StackServiceTest {
 
     @Test
     void getByEnvironmentCrnNotFound() {
-        when(stackRepository.findByEnvironment(ENVIRONMENT_CRN)).thenReturn(Optional.empty());
+        when(stackRepository.findByEnvironmentNotTerminated(ENVIRONMENT_CRN)).thenReturn(Optional.empty());
         NotFoundException notFoundException = assertThrows(NotFoundException.class, () -> underTest.getByEnvironmentCrn(ENVIRONMENT_CRN));
         assertEquals("Stack by environment [" + ENVIRONMENT_CRN + "] not found", notFoundException.getMessage());
     }
 
     @Test
     void getByEnvironmentCrn() {
-        when(stackRepository.findByEnvironment(ENVIRONMENT_CRN)).thenReturn(Optional.of(stack));
+        when(stackRepository.findByEnvironmentNotTerminated(ENVIRONMENT_CRN)).thenReturn(Optional.of(stack));
         Stack stackByEnvironmentCrn = underTest.getByEnvironmentCrn(ENVIRONMENT_CRN);
         assertEquals(stack, stackByEnvironmentCrn);
     }
