@@ -1,10 +1,8 @@
-package com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain;
+package com.sequenceiq.cloudbreak.cmtemplate.generator.configuration.domain.versionmatrix;
 
-public class SupportedService {
+public class CdhService {
 
     private String name;
-
-    private String displayName;
 
     private String version;
 
@@ -14,14 +12,6 @@ public class SupportedService {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
     }
 
     public String getVersion() {

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.generator.configuration.domain;
 
+import java.util.Objects;
+
 public class StackVersion {
 
     private String stackType;
@@ -20,5 +22,22 @@ public class StackVersion {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        StackVersion that = (StackVersion) o;
+        return Objects.equals(stackType, that.stackType) && Objects.equals(version, that.version);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(stackType, version);
     }
 }

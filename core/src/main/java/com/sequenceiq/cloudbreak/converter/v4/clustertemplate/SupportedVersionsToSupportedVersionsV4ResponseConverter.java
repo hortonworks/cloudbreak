@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedVe
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 
 @Component
-public class SupportedVersionsToSupportedVersionsV4Response
+public class SupportedVersionsToSupportedVersionsV4ResponseConverter
         extends AbstractConversionServiceAwareConverter<SupportedVersions, SupportedVersionsV4Response> {
 
     @Override
@@ -31,7 +31,7 @@ public class SupportedVersionsToSupportedVersionsV4Response
                 SupportedServiceV4Response supportedServiceV4Response = new SupportedServiceV4Response();
                 supportedServiceV4Response.setName(service.getName());
                 supportedServiceV4Response.setDisplayName(service.getDisplayName());
-
+                supportedServiceV4Response.setVersion(service.getVersion());
                 services.add(supportedServiceV4Response);
             }
             supportedVersionV4Response.setServices(services);

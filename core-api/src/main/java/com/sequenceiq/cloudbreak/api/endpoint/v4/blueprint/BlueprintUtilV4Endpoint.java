@@ -12,6 +12,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintServicesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.GeneratedCmTemplateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.RecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.ServiceDependencyMatrixV4Response;
@@ -60,4 +61,13 @@ public interface BlueprintUtilV4Endpoint {
             @QueryParam("blueprintName") String blueprintName, @QueryParam("credentialName") String credentialName,
             @QueryParam("region") String region, @QueryParam("platformVariant") String platformVariant,
             @QueryParam("availabilityZone") String availabilityZone);
+
+    @GET
+    @Path("service_versions")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ConnectorOpDescription.GET_SERVICE_VERSIONS_BY_BLUEPRINT_NAME, produces = JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getServiceVersionsByBlueprintName")
+    BlueprintServicesV4Response getServicesByBlueprint(@PathParam("workspaceId") Long workspaceId,
+        @QueryParam("blueprintName") String blueprintName);
+
 }
