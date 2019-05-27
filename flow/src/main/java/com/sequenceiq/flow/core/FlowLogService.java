@@ -13,7 +13,7 @@ import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 
 public interface FlowLogService {
-    FlowLog save(String flowId, String flowChanId, String key, Payload payload, Map<Object, Object> variables, Class<?> flowType,
+    FlowLog save(FlowParameters flowParameters, String flowChanId, String key, Payload payload, Map<Object, Object> variables, Class<?> flowType,
             FlowState currentState);
 
     Iterable<FlowLog> saveAll(Iterable<FlowLog> entities);
@@ -24,7 +24,7 @@ public interface FlowLogService {
 
     FlowLog terminate(Long stackId, String flowId) throws TransactionService.TransactionExecutionException;
 
-    void saveChain(String flowChainId, String parentFlowChainId, Queue<Selectable> chain);
+    void saveChain(String flowChainId, String parentFlowChainId, Queue<Selectable> chain, String flowTriggerUserCrn);
 
     void updateLastFlowLogStatus(FlowLog lastFlowLog, boolean failureEvent);
 

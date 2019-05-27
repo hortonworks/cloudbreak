@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.flow.core.FlowParameters;
 
 public abstract class AbstractStackCreationAction<P extends Payload> extends AbstractStackAction<StackCreationState, StackCreationEvent, StackContext, P> {
     @Inject
@@ -41,7 +42,7 @@ public abstract class AbstractStackCreationAction<P extends Payload> extends Abs
     }
 
     @Override
-    protected StackContext createFlowContext(String flowId, StateContext<StackCreationState, StackCreationEvent> stateContext, P payload) {
+    protected StackContext createFlowContext(FlowParameters flowParameters, StateContext<StackCreationState, StackCreationEvent> stateContext, P payload) {
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
@@ -49,7 +50,7 @@ public abstract class AbstractStackCreationAction<P extends Payload> extends Abs
                 location, stack.getCreator().getUserId(), stack.getCreator().getUserName(), stack.getWorkspace().getId());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
-        return new StackContext(flowId, stack, cloudContext, cloudCredential, cloudStack);
+        return new StackContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack);
     }
 
     @Override

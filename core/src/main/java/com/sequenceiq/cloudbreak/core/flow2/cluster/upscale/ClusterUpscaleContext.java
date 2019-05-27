@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.upscale;
 
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.flow.core.FlowParameters;
 
 public class ClusterUpscaleContext extends ClusterViewContext {
     private final String hostGroupName;
@@ -12,8 +13,9 @@ public class ClusterUpscaleContext extends ClusterViewContext {
 
     private final String primaryGatewayHostName;
 
-    public ClusterUpscaleContext(String flowId, StackView stack, String hostGroupName, Integer adjustment, Boolean singlePrimaryGateway, String hostName) {
-        super(flowId, stack);
+    public ClusterUpscaleContext(FlowParameters flowParameters, StackView stack, String hostGroupName, Integer adjustment, Boolean singlePrimaryGateway,
+            String hostName) {
+        super(flowParameters, stack);
         this.hostGroupName = hostGroupName;
         this.adjustment = adjustment;
         this.singlePrimaryGateway = singlePrimaryGateway;

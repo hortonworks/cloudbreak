@@ -1,5 +1,6 @@
 package com.sequenceiq.flow.reactor;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -25,8 +26,9 @@ public class ErrorHandlerAwareReactorEventFactory {
     }
 
     public <P> Event<P> createEventWithErrHandler(Map<String, Object> headers, P payLoad) {
-        headers.put(MDCBuilder.MDC_CONTEXT_ID, MDCBuilder.getMdcContextMap());
-        return new Event<>(new Headers(headers), payLoad, errorHandler);
+        Map<String, Object> extendedHeaders = new HashMap<>(headers);
+        extendedHeaders.put(MDCBuilder.MDC_CONTEXT_ID, MDCBuilder.getMdcContextMap());
+        return new Event<>(new Headers(extendedHeaders), payLoad, errorHandler);
     }
 
     public <P> Event<P> createEvent(P payLoad) {
@@ -34,7 +36,8 @@ public class ErrorHandlerAwareReactorEventFactory {
     }
 
     public <P> Event<P> createEvent(Map<String, Object> headers, P payLoad) {
-        headers.put(MDCBuilder.MDC_CONTEXT_ID, MDCBuilder.getMdcContextMap());
-        return new Event<>(new Headers(headers), payLoad);
+        Map<String, Object> extendedHeaders = new HashMap<>(headers);
+        extendedHeaders.put(MDCBuilder.MDC_CONTEXT_ID, MDCBuilder.getMdcContextMap());
+        return new Event<>(new Headers(extendedHeaders), payLoad);
     }
 }

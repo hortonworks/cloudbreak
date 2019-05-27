@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
 public class StackStopActions {
@@ -122,7 +123,8 @@ public class StackStopActions {
         }
 
         @Override
-        protected StackStartStopContext createFlowContext(String flowId, StateContext<StackStopState, StackStopEvent> stateContext, P payload) {
+        protected StackStartStopContext createFlowContext(FlowParameters flowParameters, StateContext<StackStopState, StackStopEvent> stateContext,
+                P payload) {
             Long stackId = payload.getResourceId();
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             MDCBuilder.buildMdcContext(stack);
@@ -131,7 +133,7 @@ public class StackStopActions {
             CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                     location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
             CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-            return new StackStartStopContext(flowId, stack, instances, cloudContext, cloudCredential);
+            return new StackStartStopContext(flowParameters, stack, instances, cloudContext, cloudCredential);
         }
 
         @Override

@@ -9,6 +9,10 @@ public class FlowConstants {
 
     public static final String FLOW_CANCEL = "FLOWCANCEL";
 
+    public static final String FLOW_TRIGGER_USERCRN = "FLOW_TRIGGER_USERCRN";
+
+    public static final String FLOW_PARAMETERS = "FLOW_PARAMETERS";
+
     private FlowConstants() {
     }
 }

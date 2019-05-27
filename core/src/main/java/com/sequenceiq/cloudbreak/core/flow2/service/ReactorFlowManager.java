@@ -26,7 +26,9 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
@@ -85,6 +87,9 @@ public class ReactorFlowManager {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private AuthenticatedUserService authenticatedUserService;
 
     public void triggerProvisioning(Long stackId) {
         String selector = FlowChainTriggers.FULL_PROVISION_TRIGGER_EVENT;
@@ -164,7 +169,7 @@ public class ReactorFlowManager {
 
     public void triggerClusterUpgrade(Long stackId) {
         String selector = FlowChainTriggers.CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
-        reactor.notify(selector, eventFactory.createEventWithErrHandler(new StackEvent(selector, stackId)));
+        reactor.notify(selector, eventFactory.createEventWithErrHandler(createEventParameters(), new StackEvent(selector, stackId)));
     }
 
     public void triggerClusterCredentialReplace(Long stackId, String userName, String password) {
@@ -258,7 +263,7 @@ public class ReactorFlowManager {
 
     public void cancelRunningFlows(Long stackId) {
         StackEvent cancelEvent = new StackEvent(Flow2Handler.FLOW_CANCEL, stackId);
-        reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(cancelEvent));
+        reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(createEventParameters(), cancelEvent));
     }
 
     private void notify(String selector, Acceptable acceptable) {
@@ -270,7 +275,8 @@ public class ReactorFlowManager {
     }
 
     private void notify(String selector, Acceptable acceptable, Function<Long, Stack> getStackFn) {
-        Event<Acceptable> event = eventFactory.createEventWithErrHandler(acceptable);
+
+        Event<Acceptable> event = eventFactory.createEventWithErrHandler(createEventParameters(), acceptable);
 
         Stack stack = getStackFn.apply(event.getData().getResourceId());
         Optional.ofNullable(stack).map(Stack::getCluster).map(Cluster::getStatus).ifPresent(isTriggerAllowedInMaintenance(selector));
@@ -288,6 +294,10 @@ public class ReactorFlowManager {
             throw new CloudbreakApiException(e.getMessage());
         }
 
+    }
+
+    private Map<String, Object> createEventParameters() {
+        return Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, authenticatedUserService.getUserCrn());
     }
 
     private Consumer<Status> isTriggerAllowedInMaintenance(String selector) {

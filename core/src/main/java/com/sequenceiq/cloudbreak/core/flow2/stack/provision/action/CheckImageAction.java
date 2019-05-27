@@ -84,7 +84,7 @@ public class CheckImageAction extends AbstractStackCreationAction<StackEvent> {
     }
 
     private void repeat(StackContext context) {
-        timer.submit(aLong -> sendEvent(context.getFlowId(), new StackEvent(getRepeatEvent().event(),
+        timer.submit(aLong -> sendEvent(context, new StackEvent(getRepeatEvent().event(),
                 context.getStack().getId())), REPEAT_TIME, TimeUnit.MILLISECONDS);
     }
 

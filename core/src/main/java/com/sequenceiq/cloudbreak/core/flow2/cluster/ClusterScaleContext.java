@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster;
 
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.flow.core.FlowParameters;
 
 public class ClusterScaleContext extends CommonContext {
 
@@ -9,8 +10,8 @@ public class ClusterScaleContext extends CommonContext {
 
     private final String hostGroupName;
 
-    public ClusterScaleContext(String flowId, Stack stack, String hostGroupName) {
-        super(flowId);
+    public ClusterScaleContext(FlowParameters flowParameters, Stack stack, String hostGroupName) {
+        super(flowParameters);
         this.stack = stack;
         this.hostGroupName = hostGroupName;
     }

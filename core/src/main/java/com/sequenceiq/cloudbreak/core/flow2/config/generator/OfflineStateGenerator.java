@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
+import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleFlowConfig;
@@ -526,7 +527,7 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        protected CommonContext createFlowContext(String flowId, StateContext<FlowState, FlowEvent> stateContext, Payload payload) {
+        protected CommonContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext, Payload payload) {
             return null;
         }
 

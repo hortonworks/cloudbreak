@@ -62,7 +62,7 @@ public class StackImageUpdateActions {
                 }
                 StatedImage newImage = getStackImageUpdateService().getNewImageIfVersionsMatch(context.getStack(), payload.getNewImageId(),
                         payload.getImageCatalogName(), payload.getImageCatalogUrl());
-                sendEvent(context.getFlowId(), new ImageUpdateEvent(StackImageUpdateEvent.CHECK_IMAGE_VERESIONS_FINISHED_EVENT.event(),
+                sendEvent(context, new ImageUpdateEvent(StackImageUpdateEvent.CHECK_IMAGE_VERESIONS_FINISHED_EVENT.event(),
                         context.getStack().getId(), newImage));
             }
         };
@@ -77,7 +77,7 @@ public class StackImageUpdateActions {
                 if (checkResult.getStatus() == EventStatus.FAILED) {
                     throw new OperationException(checkResult.getMessage());
                 }
-                sendEvent(context.getFlowId(), new ImageUpdateEvent(StackImageUpdateEvent.CHECK_PACKAGE_VERSIONS_FINISHED_EVENT.event(),
+                sendEvent(context, new ImageUpdateEvent(StackImageUpdateEvent.CHECK_PACKAGE_VERSIONS_FINISHED_EVENT.event(),
                         context.getStack().getId(), payload.getImage()));
             }
         };
@@ -95,7 +95,7 @@ public class StackImageUpdateActions {
                     throw new CloudbreakServiceException(e.getMessage(), e);
                 }
                 getStackImageUpdateService().storeNewImageComponent(context.getStack(), payload.getImage());
-                sendEvent(context.getFlowId(), new StackEvent(StackImageUpdateEvent.UPDATE_IMAGE_FINESHED_EVENT.event(), context.getStack().getId()));
+                sendEvent(context, new StackEvent(StackImageUpdateEvent.UPDATE_IMAGE_FINESHED_EVENT.event(), context.getStack().getId()));
             }
         };
     }
@@ -111,7 +111,7 @@ public class StackImageUpdateActions {
                     Image image = getImageService().getImage(context.getCloudContext().getId());
                     PrepareImageRequest<Selectable> request =
                             new PrepareImageRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudStack, image);
-                    sendEvent(context.getFlowId(), request);
+                    sendEvent(context, request);
                 } catch (CloudbreakImageNotFoundException e) {
                     throw new CloudbreakServiceException(e);
                 }
@@ -130,7 +130,7 @@ public class StackImageUpdateActions {
                         resources.stream().map(resource -> getResourceToCloudResourceConverter().convert(resource)).collect(Collectors.toList());
                 UpdateImageRequest<Selectable> request =
                         new UpdateImageRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudStack, cloudResources);
-                sendEvent(context.getFlowId(), request);
+                sendEvent(context, request);
             }
         };
     }
@@ -142,7 +142,7 @@ public class StackImageUpdateActions {
             protected void doExecute(StackContext context, CloudPlatformResult payload, Map<Object, Object> variables) {
                 getFlowMessageService().fireEventAndLog(context.getStack().getId(), Msg.STACK_IMAGE_UPDATE_FINISHED, Status.AVAILABLE.name());
                 getStackUpdater().updateStackStatus(context.getStack().getId(), DetailedStackStatus.AVAILABLE);
-                sendEvent(context.getFlowId(), new StackEvent(STACK_IMAGE_UPDATE_FINISHED_EVENT.event(), context.getStack().getId()));
+                sendEvent(context, new StackEvent(STACK_IMAGE_UPDATE_FINISHED_EVENT.event(), context.getStack().getId()));
             }
         };
     }
@@ -180,7 +180,7 @@ public class StackImageUpdateActions {
                 flowMessageService.fireEventAndLog(context.getStackView().getId(), Msg.STACK_IMAGE_UPDATE_FAILED, Status.UPDATE_FAILED.name(),
                         payload.getException().getMessage());
                 stackUpdater.updateStackStatus(context.getStackView().getId(), DetailedStackStatus.AVAILABLE);
-                sendEvent(context.getFlowId(), new StackEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILE_HANDLED_EVENT.event(),
+                sendEvent(context, new StackEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILE_HANDLED_EVENT.event(),
                         context.getStackView().getId()));
             }
         };

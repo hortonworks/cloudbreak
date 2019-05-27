@@ -57,6 +57,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.UpscaleCheckHostMeta
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UpscaleCheckHostMetadataResult;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
 public class ClusterUpscaleActions {
@@ -140,10 +141,10 @@ public class ClusterUpscaleActions {
                 if (context.isSinglePrimaryGateway()) {
                     clusterUpscaleFlowService.ambariRepairSingleMasterStarted(context.getStackId());
                     AmbariRepairSingleMasterStartResult result = new AmbariRepairSingleMasterStartResult(context.getStackId(), context.getHostGroupName());
-                    sendEvent(context.getFlowId(), result.selector(), result);
+                    sendEvent(context, result.selector(), result);
                 } else {
                     UpscaleClusterRequest request = new UpscaleClusterRequest(context.getStackId(), context.getHostGroupName());
-                    sendEvent(context.getFlowId(), request.selector(), request);
+                    sendEvent(context, request.selector(), request);
                 }
             }
         };
@@ -176,7 +177,7 @@ public class ClusterUpscaleActions {
                 variables.put(INSTALLED_COMPONENTS, components);
                 AmbariStopComponentsRequest request =
                         new AmbariStopComponentsRequest(context.getStackId(), context.getHostGroupName(), context.getPrimaryGatewayHostName(), components);
-                sendEvent(context.getFlowId(), request.selector(), request);
+                sendEvent(context, request.selector(), request);
             }
         };
     }
@@ -226,10 +227,10 @@ public class ClusterUpscaleActions {
                         new RegenerateKerberosKeytabsRequest(context.getStackId(), context.getHostGroupName(), context.getPrimaryGatewayHostName());
                 if (isKerberosSecured(variables)) {
                     clusterUpscaleFlowService.regenerateKeytabs(context.getStackId());
-                    sendEvent(context.getFlowId(), request.selector(), request);
+                    sendEvent(context, request.selector(), request);
                 } else {
                     RegenerateKerberosKeytabsResult result = new RegenerateKerberosKeytabsResult(request);
-                    sendEvent(context.getFlowId(), result.selector(), result);
+                    sendEvent(context, result.selector(), result);
                 }
             }
         };
@@ -246,7 +247,7 @@ public class ClusterUpscaleActions {
                 EnsureClusterComponentsAreStoppedRequest request =
                         new EnsureClusterComponentsAreStoppedRequest(context.getStackId(), context.getHostGroupName(), context.getPrimaryGatewayHostName(),
                                 components);
-                sendEvent(context.getFlowId(), request.selector(), request);
+                sendEvent(context, request.selector(), request);
             }
         };
     }
@@ -260,7 +261,7 @@ public class ClusterUpscaleActions {
                 Map<String, String> components = getInstalledComponents(variables);
                 AmbariInitComponentsRequest request =
                         new AmbariInitComponentsRequest(context.getStackId(), context.getHostGroupName(), context.getPrimaryGatewayHostName(), components);
-                sendEvent(context.getFlowId(), request.selector(), request);
+                sendEvent(context, request.selector(), request);
             }
         };
     }
@@ -275,7 +276,7 @@ public class ClusterUpscaleActions {
                 Map<String, String> components = getInstalledComponents(variables);
                 AmbariInstallComponentsRequest request =
                         new AmbariInstallComponentsRequest(context.getStackId(), context.getHostGroupName(), context.getPrimaryGatewayHostName(), components);
-                sendEvent(context.getFlowId(), request.selector(), request);
+                sendEvent(context, request.selector(), request);
             }
         };
     }
@@ -294,7 +295,7 @@ public class ClusterUpscaleActions {
                         context.getPrimaryGatewayHostName(),
                         components
                 );
-                sendEvent(context.getFlowId(), request.selector(), request);
+                sendEvent(context, request.selector(), request);
             }
         };
     }
@@ -308,10 +309,10 @@ public class ClusterUpscaleActions {
                 AmbariRestartAllRequest request = new AmbariRestartAllRequest(context.getStackId(), context.getHostGroupName());
                 if (isKerberosSecured(variables) && !isSingleNodeCluster(variables)) {
                     clusterUpscaleFlowService.restartAllClusterComponents(context.getStackId());
-                    sendEvent(context.getFlowId(), request.selector(), request);
+                    sendEvent(context, request.selector(), request);
                 } else {
                     AmbariRestartAllResult result = new AmbariRestartAllResult(request);
-                    sendEvent(context.getFlowId(), result.selector(), result);
+                    sendEvent(context, result.selector(), result);
                 }
             }
         };
@@ -359,7 +360,7 @@ public class ClusterUpscaleActions {
             protected void doExecute(ClusterUpscaleContext context, UpscalePostRecipesResult payload, Map<Object, Object> variables) {
                 clusterUpscaleFlowService.clusterUpscaleFinished(context.getStack(), payload.getHostGroupName());
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL, context.getStack());
-                sendEvent(context.getFlowId(), FINALIZED_EVENT.event(), payload);
+                sendEvent(context, FINALIZED_EVENT.event(), payload);
             }
 
             @Override
@@ -377,7 +378,7 @@ public class ClusterUpscaleActions {
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 clusterUpscaleFlowService.clusterUpscaleFailed(context.getStackView().getId(), payload.getException());
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED, context.getStackView());
-                sendEvent(context.getFlowId(), FAIL_HANDLED_EVENT.event(), payload);
+                sendEvent(context, FAIL_HANDLED_EVENT.event(), payload);
             }
         };
     }
@@ -411,12 +412,12 @@ public class ClusterUpscaleActions {
         }
 
         @Override
-        protected ClusterUpscaleContext createFlowContext(String flowId, StateContext<ClusterUpscaleState, ClusterUpscaleEvent> stateContext, P payload) {
+        protected ClusterUpscaleContext createFlowContext(FlowParameters flowParameters, StateContext<ClusterUpscaleState,
+                ClusterUpscaleEvent> stateContext, P payload) {
             Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
             StackView stack = stackService.getViewByIdWithoutAuth(payload.getResourceId());
             MDCBuilder.buildMdcContext(stack.getId().toString(), stack.getName(), "CLUSTER");
-            return new ClusterUpscaleContext(
-                    flowId, stack, getHostgroupName(variables), getAdjustment(variables),
+            return new ClusterUpscaleContext(flowParameters, stack, getHostgroupName(variables), getAdjustment(variables),
                     isSinglePrimaryGateway(variables), getPrimaryGatewayHostName(variables));
         }
 

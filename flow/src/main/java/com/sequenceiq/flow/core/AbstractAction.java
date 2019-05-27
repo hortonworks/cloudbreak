@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.auth.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -46,6 +47,9 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     @Inject
     private ErrorHandlerAwareReactorEventFactory reactorEventFactory;
 
+    @Inject
+    private RestRequestThreadLocalService restRequestThreadLocalService;
+
     private final Class<P> payloadClass;
 
     private List<PayloadConverter<P>> payloadConverters;
@@ -64,14 +68,17 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
 
     @Override
     public void execute(StateContext<S, E> context) {
-        String flowId = (String) context.getMessageHeader(MessageFactory.HEADERS.FLOW_ID.name());
-        MDCBuilder.addFlowIdToMdcContext(flowId);
+        FlowParameters flowParameters = (FlowParameters) context.getMessageHeader(MessageFactory.HEADERS.FLOW_PARAMETERS.name());
+        if (flowParameters.getFlowTriggerUserCrn() != null) {
+            restRequestThreadLocalService.setUserCrn(flowParameters.getFlowTriggerUserCrn());
+        }
+        MDCBuilder.addFlowIdToMdcContext(flowParameters.getFlowId());
         P payload = convertPayload(context.getMessageHeader(MessageFactory.HEADERS.DATA.name()));
         C flowContext = null;
         try {
             Map<Object, Object> variables = context.getExtendedState().getVariables();
             prepareExecution(payload, variables);
-            flowContext = createFlowContext(flowId, context, payload);
+            flowContext = createFlowContext(flowParameters, context, payload);
             Object flowStartTime = variables.get(FLOW_START_TIME);
             if (flowStartTime != null) {
                 Object execTime = variables.get(FLOW_START_EXEC_TIME);
@@ -90,10 +97,12 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
         } catch (Exception ex) {
             LOGGER.error("Error during execution of " + getClass().getName(), ex);
             if (failureEvent != null) {
-                sendEvent(flowId, failureEvent.event(), getFailurePayload(payload, Optional.ofNullable(flowContext), ex));
+                sendEvent(flowParameters, failureEvent.event(), getFailurePayload(payload, Optional.ofNullable(flowContext), ex));
             } else {
                 LOGGER.error("Missing error handling for " + getClass().getName());
             }
+        } finally {
+            restRequestThreadLocalService.removeUserCrn();
         }
     }
 
@@ -114,18 +123,23 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
 
     protected void sendEvent(C context) {
         Selectable payload = createRequest(context);
-        sendEvent(context.getFlowId(), payload.selector(), payload);
+        sendEvent(context, payload.selector(), payload);
     }
 
-    protected void sendEvent(String flowId, Selectable payload) {
-        sendEvent(flowId, payload.selector(), payload);
+    protected void sendEvent(CommonContext context, Selectable payload) {
+        sendEvent(context, payload.selector(), payload);
     }
 
-    protected void sendEvent(String flowId, String selector, Object payload) {
+    protected void sendEvent(CommonContext context, String selector, Object payload) {
+        sendEvent(context.getFlowParameters(), selector, payload);
+    }
+
+    protected void sendEvent(FlowParameters flowParameters, String selector, Object payload) {
         LOGGER.debug("Triggering event: {}, payload: {}", selector, payload);
         Map<String, Object> headers = new HashMap<>();
-        headers.put(FlowConstants.FLOW_ID, flowId);
-        String flowChainId = runningFlows.getFlowChainId(flowId);
+        headers.put(FlowConstants.FLOW_ID, flowParameters.getFlowId());
+        headers.put(FlowConstants.FLOW_TRIGGER_USERCRN, flowParameters.getFlowTriggerUserCrn());
+        String flowChainId = runningFlows.getFlowChainId(flowParameters.getFlowId());
         if (flowChainId != null) {
             headers.put(FlowConstants.FLOW_CHAIN_ID, flowChainId);
         }
@@ -143,7 +157,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
         throw new UnsupportedOperationException("Context based request creation is not supported by default");
     }
 
-    protected abstract C createFlowContext(String flowId, StateContext<S, E> stateContext, P payload);
+    protected abstract C createFlowContext(FlowParameters flowParameters, StateContext<S, E> stateContext, P payload);
 
     protected abstract void doExecute(C context, P payload, Map<Object, Object> variables) throws Exception;
 

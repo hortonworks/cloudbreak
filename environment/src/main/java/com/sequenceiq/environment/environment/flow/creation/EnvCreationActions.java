@@ -24,6 +24,7 @@ import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationSta
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
+import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
 public class EnvCreationActions {
@@ -44,7 +45,7 @@ public class EnvCreationActions {
                 EnvironmentDto envDto = new EnvironmentDto();
                 envDto.setId(payload.getResourceId());
                 LOGGER.info("NETWORK_CREATION_STARTED_STATE");
-                sendEvent(context.getFlowId(), CREATE_NETWORK_EVENT.selector(), envDto);
+                sendEvent(context, CREATE_NETWORK_EVENT.selector(), envDto);
             }
         };
     }
@@ -57,7 +58,7 @@ public class EnvCreationActions {
                 EnvironmentDto envDto = new EnvironmentDto();
                 envDto.setId(payload.getResourceId());
                 LOGGER.info("RDBMS_CREATION_STARTED_STATE");
-                sendEvent(context.getFlowId(), CREATE_RDBMS_EVENT.selector(), envDto);
+                sendEvent(context, CREATE_RDBMS_EVENT.selector(), envDto);
             }
         };
     }
@@ -70,7 +71,7 @@ public class EnvCreationActions {
                 EnvironmentDto envDto = new EnvironmentDto();
                 envDto.setId(payload.getResourceId());
                 LOGGER.info("FREEIPA_CREATION_STARTED_STATE");
-                sendEvent(context.getFlowId(), CREATE_FREEIPA_EVENT.selector(), envDto);
+                sendEvent(context, CREATE_FREEIPA_EVENT.selector(), envDto);
             }
         };
     }
@@ -87,7 +88,7 @@ public class EnvCreationActions {
                             environmentService.save(environment);
                         });
                 LOGGER.info("ENV_CREATION_FINISHED_STATE");
-                sendEvent(context.getFlowId(), FINALIZE_ENV_CREATION_EVENT.event(), payload);
+                sendEvent(context, FINALIZE_ENV_CREATION_EVENT.event(), payload);
             }
         };
     }
@@ -104,7 +105,7 @@ public class EnvCreationActions {
                             environmentService.save(environment);
                         });
                 LOGGER.info("ENV_CREATION_FAILED_STATE");
-                sendEvent(context.getFlowId(), HANDLED_FAILED_ENV_CREATION_EVENT.event(), payload);
+                sendEvent(context, HANDLED_FAILED_ENV_CREATION_EVENT.event(), payload);
             }
         };
     }
@@ -116,8 +117,9 @@ public class EnvCreationActions {
         }
 
         @Override
-        protected CommonContext createFlowContext(String flowId, StateContext<EnvCreationState, EnvCreationStateSelectors> stateContext, P payload) {
-            return new CommonContext(flowId);
+        protected CommonContext createFlowContext(FlowParameters flowParameters, StateContext<EnvCreationState, EnvCreationStateSelectors> stateContext,
+                P payload) {
+            return new CommonContext(flowParameters);
         }
 
         @Override

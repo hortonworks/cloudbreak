@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -21,10 +22,10 @@ public class StackStopRestartAction extends DefaultRestartAction {
     private StackUpdater stackUpdater;
 
     @Override
-    public void restart(String flowId, String flowChainId, String event, Object payload) {
+    public void restart(FlowParameters flowParameters, String flowChainId, String event, Object payload) {
         Payload stackPayload = (Payload) payload;
         Stack stack = stackService.getByIdWithListsInTransaction(stackPayload.getResourceId());
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOP_REQUESTED, stack.getStatusReason());
-        super.restart(flowId, flowChainId, event, payload);
+        super.restart(flowParameters, flowChainId, event, payload);
     }
 }

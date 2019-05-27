@@ -18,7 +18,7 @@ public class StackTerminationAction extends AbstractStackTerminationAction<Termi
     @Override
     protected void doExecute(StackTerminationContext context, TerminationEvent payload, Map<Object, Object> variables) {
         TerminateStackRequest<?> terminateRequest = createRequest(context);
-        sendEvent(context.getFlowId(), terminateRequest.selector(), terminateRequest);
+        sendEvent(context, terminateRequest.selector(), terminateRequest);
     }
 
     @Override

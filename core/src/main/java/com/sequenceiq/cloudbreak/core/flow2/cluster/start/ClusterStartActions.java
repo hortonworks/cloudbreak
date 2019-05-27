@@ -51,7 +51,7 @@ public class ClusterStartActions {
         return new AbstractClusterAction<>(ClusterStartResult.class) {
             @Override
             protected void doExecute(ClusterViewContext context, ClusterStartResult payload, Map<Object, Object> variables) {
-                sendEvent(context.getFlowId(), new ClusterStartPollingRequest(context.getStackId(), payload.getRequestId()));
+                sendEvent(context, new ClusterStartPollingRequest(context.getStackId(), payload.getRequestId()));
             }
         };
     }

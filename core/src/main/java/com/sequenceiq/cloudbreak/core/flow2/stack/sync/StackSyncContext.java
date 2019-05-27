@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.flow.core.FlowParameters;
 
 public class StackSyncContext extends CommonContext {
 
@@ -20,9 +21,9 @@ public class StackSyncContext extends CommonContext {
 
     private final Boolean statusUpdateEnabled;
 
-    public StackSyncContext(String flowId, Stack stack, List<InstanceMetaData> instanceMetaData, CloudContext cloudContext, CloudCredential cloudCredential,
-            Boolean statusUpdateEnabled) {
-        super(flowId);
+    public StackSyncContext(FlowParameters flowParameters, Stack stack, List<InstanceMetaData> instanceMetaData, CloudContext cloudContext,
+            CloudCredential cloudCredential, Boolean statusUpdateEnabled) {
+        super(flowParameters);
         this.stack = stack;
         this.instanceMetaData = instanceMetaData;
         this.cloudContext = cloudContext;

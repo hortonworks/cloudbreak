@@ -9,6 +9,7 @@ import org.springframework.statemachine.StateContext;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.flow.core.FlowEvent;
+import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -25,10 +26,10 @@ public abstract class AbstractClusterAction<P extends Payload> extends AbstractS
     }
 
     @Override
-    protected ClusterViewContext createFlowContext(String flowId, StateContext<FlowState, FlowEvent> clusterContext, P payload) {
+    protected ClusterViewContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> clusterContext, P payload) {
         StackView stack = stackService.getViewByIdWithoutAuth(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack.getId().toString(), stack.getName(), "CLUSTER");
-        return new ClusterViewContext(flowId, stack);
+        return new ClusterViewContext(flowParameters, stack);
     }
 
     @Override

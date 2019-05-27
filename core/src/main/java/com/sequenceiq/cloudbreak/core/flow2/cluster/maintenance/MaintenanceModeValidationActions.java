@@ -44,7 +44,7 @@ public class MaintenanceModeValidationActions {
                 String stackRepo = maintenanceModeValidationService.fetchStackRepository(context.getStack().getId());
                 putWarnings(variables, new ArrayList<>());
                 variables.put(STACK_REPO, stackRepo);
-                sendEvent(context.getFlowId(), new StackEvent(FETCH_STACK_REPO_INFO_FINISHED_EVENT.event(),
+                sendEvent(context, new StackEvent(FETCH_STACK_REPO_INFO_FINISHED_EVENT.event(),
                         context.getStack().getId()));
             }
         };
@@ -60,7 +60,7 @@ public class MaintenanceModeValidationActions {
                 String stackRepo = (String) variables.get(STACK_REPO);
                 warnings.addAll(maintenanceModeValidationService.validateStackRepository(
                         context.getStack().getCluster().getId(), stackRepo));
-                sendEvent(context.getFlowId(), new StackEvent(VALIDATE_STACK_REPO_INFO_FINISHED_EVENT.event(),
+                sendEvent(context, new StackEvent(VALIDATE_STACK_REPO_INFO_FINISHED_EVENT.event(),
                         context.getStack().getId()));
                 putWarnings(variables, warnings);
             }
@@ -75,7 +75,7 @@ public class MaintenanceModeValidationActions {
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 List<Warning> warnings = getWarnings(variables);
                 warnings.addAll(maintenanceModeValidationService.validateAmbariRepository(context.getStack().getCluster().getId()));
-                sendEvent(context.getFlowId(), new StackEvent(VALIDATE_AMBARI_REPO_INFO_FINISHED_EVENT.event(),
+                sendEvent(context, new StackEvent(VALIDATE_AMBARI_REPO_INFO_FINISHED_EVENT.event(),
                         context.getStack().getId()));
                 putWarnings(variables, warnings);
             }
@@ -89,7 +89,7 @@ public class MaintenanceModeValidationActions {
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 List<Warning> warnings = getWarnings(variables);
                 warnings.addAll(maintenanceModeValidationService.validateImageCatalog(context.getStack()));
-                sendEvent(context.getFlowId(), new StackEvent(VALIDATE_IMAGE_COMPATIBILITY_FINISHED_EVENT.event(),
+                sendEvent(context, new StackEvent(VALIDATE_IMAGE_COMPATIBILITY_FINISHED_EVENT.event(),
                         context.getStack().getId()));
                 putWarnings(variables, warnings);
             }
@@ -103,7 +103,7 @@ public class MaintenanceModeValidationActions {
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 List<Warning> warnings = getWarnings(variables);
                 maintenanceModeValidationService.handleValidationSuccess(context.getStack().getId(), warnings);
-                sendEvent(context.getFlowId(), new StackEvent(VALIDATION_FLOW_FINISHED_EVENT.event(), context.getStack().getId()));
+                sendEvent(context, new StackEvent(VALIDATION_FLOW_FINISHED_EVENT.event(), context.getStack().getId()));
             }
         };
     }
@@ -116,7 +116,7 @@ public class MaintenanceModeValidationActions {
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 maintenanceModeValidationService.handleValidationFailure(context.getStackView().getId(),
                         payload.getException());
-                sendEvent(context.getFlowId(), VALIDATION_FAIL_HANDLED_EVENT.event(), payload);
+                sendEvent(context, VALIDATION_FAIL_HANDLED_EVENT.event(), payload);
             }
         };
     }

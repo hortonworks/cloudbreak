@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDe
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionResult;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.StackRepairService;
+import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
 public class ManualStackRepairTriggerActions {
@@ -96,10 +97,10 @@ public class ManualStackRepairTriggerActions {
 
         @Override
         protected StackRepairTriggerContext createFlowContext(
-                String flowId, StateContext<ManualStackRepairTriggerState, ManualStackRepairTriggerEvent> stateContext, P payload) {
+                FlowParameters flowParameters, StateContext<ManualStackRepairTriggerState, ManualStackRepairTriggerEvent> stateContext, P payload) {
             Long stackId = payload.getResourceId();
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-            return new StackRepairTriggerContext(flowId, stack);
+            return new StackRepairTriggerContext(flowParameters, stack);
         }
 
         @Override

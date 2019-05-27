@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.flow.core.FlowParameters;
 
 public class InstanceTerminationContext extends CommonContext {
 
@@ -29,9 +30,9 @@ public class InstanceTerminationContext extends CommonContext {
 
     private final List<InstanceMetaData> instanceMetaDataList;
 
-    public InstanceTerminationContext(String flowId, Stack stack, CloudContext cloudContext, CloudCredential cloudCredential,
+    public InstanceTerminationContext(FlowParameters flowParameters, Stack stack, CloudContext cloudContext, CloudCredential cloudCredential,
             CloudStack cloudStack, Collection<CloudResource> cloudResources, List<CloudInstance> cloudInstances, List<InstanceMetaData> instanceMetaDataList) {
-        super(flowId);
+        super(flowParameters);
         this.stack = stack;
         this.cloudContext = cloudContext;
         this.cloudCredential = cloudCredential;

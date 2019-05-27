@@ -33,7 +33,7 @@ public class ChangePrimaryGatewayActions {
             protected void doExecute(ClusterViewContext context, ChangePrimaryGatewayTriggerEvent payload, Map<Object, Object> variables) {
                 changePrimaryGatewayService.changePrimaryGatewayStarted(context.getStackId());
                 Selectable request = new ChangePrimaryGatewayRequest(context.getStackId());
-                sendEvent(context.getFlowId(), request.selector(), request);
+                sendEvent(context, request.selector(), request);
             }
         };
     }

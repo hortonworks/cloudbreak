@@ -14,6 +14,7 @@ import com.cedarsoftware.util.io.JsonReader;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.core.Flow2Handler;
+import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.FlowChainLog;
 
@@ -36,10 +37,11 @@ public class FlowChainHandler implements Consumer<Event<? extends Payload>> {
     public void accept(Event<? extends Payload> event) {
         String key = (String) event.getKey();
         String parentFlowChainId = getFlowChainId(event);
+        String flowTriggerUserCrn = getFlowTriggerUserCrn(event);
         FlowEventChainFactory<Payload> flowEventChainFactory = flowChainConfigMap.get(key);
         String flowChainId = UUID.randomUUID().toString();
         flowChains.putFlowChain(flowChainId, parentFlowChainId, flowEventChainFactory.createFlowTriggerEventQueue(event.getData()));
-        flowChains.triggerNextFlow(flowChainId);
+        flowChains.triggerNextFlow(flowChainId, flowTriggerUserCrn);
     }
 
     public void restoreFlowChain(String flowChainId) {
@@ -55,5 +57,9 @@ public class FlowChainHandler implements Consumer<Event<? extends Payload>> {
 
     private String getFlowChainId(Event<?> event) {
         return event.getHeaders().get(Flow2Handler.FLOW_CHAIN_ID);
+    }
+
+    private String getFlowTriggerUserCrn(Event<?> event) {
+        return event.getHeaders().get(FlowConstants.FLOW_TRIGGER_USERCRN);
     }
 }

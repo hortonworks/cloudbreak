@@ -219,6 +219,7 @@ dependencies {
   compile project(':common')
   compile project(':workspace-authorization')
   compile project(':environment-api')
+  compile project(':freeipa-api')
 
   runtime project(':orchestrator-salt')
   runtime project(':orchestrator-salt')

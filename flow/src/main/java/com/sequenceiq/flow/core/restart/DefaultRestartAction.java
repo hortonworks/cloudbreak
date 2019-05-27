@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.core.FlowConstants;
+import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
@@ -23,9 +24,12 @@ public class DefaultRestartAction implements RestartAction {
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
     @Override
-    public void restart(String flowId, String flowChainId, String event, Object payload) {
+    public void restart(FlowParameters flowParameters, String flowChainId, String event, Object payload) {
         Map<String, Object> headers = new HashMap<>();
-        headers.put(FlowConstants.FLOW_ID, flowId);
+        headers.put(FlowConstants.FLOW_ID, flowParameters.getFlowId());
+        if (flowParameters.getFlowTriggerUserCrn() != null) {
+            headers.put(FlowConstants.FLOW_TRIGGER_USERCRN, flowParameters.getFlowTriggerUserCrn());
+        }
         if (flowChainId != null) {
             headers.put(FlowConstants.FLOW_CHAIN_ID, flowChainId);
         }

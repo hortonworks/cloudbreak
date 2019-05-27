@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
+import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
 public class StackSyncActions {
@@ -123,7 +124,8 @@ public class StackSyncActions {
         }
 
         @Override
-        protected StackSyncContext createFlowContext(String flowId, StateContext<StackSyncState, StackSyncEvent> stateContext, P payload) {
+        protected StackSyncContext createFlowContext(FlowParameters flowParameters, StateContext<StackSyncState, StackSyncEvent> stateContext,
+                P payload) {
             Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
             Long stackId = payload.getResourceId();
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
@@ -132,7 +134,7 @@ public class StackSyncActions {
             CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                     location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
             CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-            return new StackSyncContext(flowId, stack, stack.getNotTerminatedInstanceMetaDataList(), cloudContext, cloudCredential,
+            return new StackSyncContext(flowParameters, stack, stack.getNotTerminatedInstanceMetaDataList(), cloudContext, cloudCredential,
                     isStatusUpdateEnabled(variables));
         }
 

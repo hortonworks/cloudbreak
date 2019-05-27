@@ -27,14 +27,17 @@ public class FlowChainLog {
     @Column(length = Integer.MAX_VALUE, columnDefinition = "TEXT", nullable = false)
     private String chain;
 
+    private String flowTriggerUserCrn;
+
     public FlowChainLog() {
 
     }
 
-    public FlowChainLog(String flowChainId, String parentFlowChainId, String chain) {
+    public FlowChainLog(String flowChainId, String parentFlowChainId, String chain, String flowTriggerUserCrn) {
         this.flowChainId = flowChainId;
         this.parentFlowChainId = parentFlowChainId;
         this.chain = chain;
+        this.flowTriggerUserCrn = flowTriggerUserCrn;
     }
 
     public Long getId() {
@@ -75,5 +78,13 @@ public class FlowChainLog {
 
     public void setChain(String chain) {
         this.chain = chain;
+    }
+
+    public String getFlowTriggerUserCrn() {
+        return flowTriggerUserCrn;
+    }
+
+    public void setFlowTriggerUserCrn(String flowTriggerUserCrn) {
+        this.flowTriggerUserCrn = flowTriggerUserCrn;
     }
 }

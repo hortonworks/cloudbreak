@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.Flow;
+import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.freeipa.converter.cloud.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -134,7 +135,7 @@ public class StackProvisionActions {
             @Override
             protected void doExecute(StackContext context, LaunchStackResult payload, Map<Object, Object> variables) {
                 Stack stack = stackProvisionService.provisioningFinished(context, payload, variables);
-                StackContext newContext = new StackContext(context.getFlowId(), stack, context.getCloudContext(),
+                StackContext newContext = new StackContext(context.getFlowParameters(), stack, context.getCloudContext(),
                         context.getCloudCredential(), context.getCloudStack());
                 sendEvent(newContext);
             }
@@ -155,8 +156,8 @@ public class StackProvisionActions {
             @Override
             protected void doExecute(StackContext context, CollectMetadataResult payload, Map<Object, Object> variables) {
                 Stack stack = stackProvisionService.setupMetadata(context, payload);
-                StackContext newContext = new StackContext(context.getFlowId(), stack, context.getCloudContext(), context.getCloudCredential(),
-                        context.getCloudStack());
+                StackContext newContext = new StackContext(context.getFlowParameters(), stack, context.getCloudContext(),
+                        context.getCloudCredential(), context.getCloudStack());
                 sendEvent(newContext);
             }
 
@@ -174,7 +175,7 @@ public class StackProvisionActions {
             @Override
             protected void doExecute(StackContext context, GetTlsInfoResult payload, Map<Object, Object> variables) {
                 stackProvisionService.saveTlsInfo(context, payload.getTlsInfo());
-                sendEvent(context.getFlowId(), new StackEvent(StackProvisionEvent.SETUP_TLS_EVENT.event(), context.getStack().getId()));
+                sendEvent(context, new StackEvent(StackProvisionEvent.SETUP_TLS_EVENT.event(), context.getStack().getId()));
             }
         };
     }
@@ -185,7 +186,7 @@ public class StackProvisionActions {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
                 stackProvisionService.setupTls(context);
-                sendEvent(context.getFlowId(), new StackEvent(StackProvisionEvent.TLS_SETUP_FINISHED_EVENT.event(), context.getStack().getId()));
+                sendEvent(context, new StackEvent(StackProvisionEvent.TLS_SETUP_FINISHED_EVENT.event(), context.getStack().getId()));
             }
         };
     }
@@ -211,12 +212,12 @@ public class StackProvisionActions {
         return new AbstractStackFailureAction<StackProvisionState, StackProvisionEvent>() {
             @Override
             protected StackFailureContext createFlowContext(
-                String flowId, StateContext<StackProvisionState, StackProvisionEvent> stateContext, StackFailureEvent payload) {
-                Flow flow = getFlow(flowId);
+                    FlowParameters flowParameters, StateContext<StackProvisionState, StackProvisionEvent> stateContext, StackFailureEvent payload) {
+                Flow flow = getFlow(flowParameters.getFlowId());
                 Stack stack = stackService.getStackById(payload.getResourceId());
                 MDCBuilder.buildMdcContext(stack);
                 flow.setFlowFailed(payload.getException());
-                return new StackFailureContext(flowId, stack);
+                return new StackFailureContext(flowParameters, stack);
             }
 
             @Override

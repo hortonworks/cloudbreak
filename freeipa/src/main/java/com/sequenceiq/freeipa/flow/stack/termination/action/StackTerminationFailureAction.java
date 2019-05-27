@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackFailureAction;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
@@ -32,13 +33,13 @@ public class StackTerminationFailureAction extends AbstractStackFailureAction<St
     private StackService stackService;
 
     @Override
-    protected StackFailureContext createFlowContext(
-        String flowId, StateContext<StackTerminationState, StackTerminationEvent> stateContext, StackFailureEvent payload) {
-        Flow flow = getFlow(flowId);
+    protected StackFailureContext createFlowContext(FlowParameters flowParameters, StateContext<StackTerminationState, StackTerminationEvent> stateContext,
+            StackFailureEvent payload) {
+        Flow flow = getFlow(flowParameters.getFlowId());
         Stack stack = stackService.getStackById(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         flow.setFlowFailed(payload.getException());
-        return new StackFailureContext(flowId, stack);
+        return new StackFailureContext(flowParameters, stack);
     }
 
     @Override

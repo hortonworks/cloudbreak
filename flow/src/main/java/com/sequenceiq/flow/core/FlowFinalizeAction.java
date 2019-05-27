@@ -16,13 +16,13 @@ public final class FlowFinalizeAction extends AbstractAction<FlowState, FlowEven
     }
 
     @Override
-    protected CommonContext createFlowContext(String flowId, StateContext<FlowState, FlowEvent> stateContext, Payload payload) {
-        return new CommonContext(flowId);
+    protected CommonContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext, Payload payload) {
+        return new CommonContext(flowParameters);
     }
 
     @Override
     protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) {
-        sendEvent(context.getFlowId(), FlowConstants.FLOW_FINAL, payload);
+        sendEvent(context, FlowConstants.FLOW_FINAL, payload);
     }
 
     @Override
