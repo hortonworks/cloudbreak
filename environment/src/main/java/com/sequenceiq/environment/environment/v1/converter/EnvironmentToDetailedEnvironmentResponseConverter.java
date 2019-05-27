@@ -12,8 +12,8 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
 import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.network.BaseNetwork;
-import com.sequenceiq.environment.network.converter.EnvironmentNetworkConverter;
+import com.sequenceiq.environment.network.domain.BaseNetwork;
+import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 
 @Component
 public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractConversionServiceAwareConverter<Environment, DetailedEnvironmentResponse> {
