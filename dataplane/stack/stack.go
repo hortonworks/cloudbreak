@@ -111,7 +111,7 @@ func assembleStackRequest(c *cli.Context) *model.StackV4Request {
 	ambariUser := c.String(fl.FlAmbariUserOptional.Name)
 	ambariPassword := c.String(fl.FlAmbariPasswordOptional.Name)
 	if len(ambariUser) != 0 || len(ambariPassword) != 0 {
-		if req.Cluster != nil && req.Cluster.Ambari != nil {
+		if req.Cluster != nil {
 			if len(ambariUser) != 0 {
 				req.Cluster.UserName = &ambariUser
 			}
@@ -119,7 +119,7 @@ func assembleStackRequest(c *cli.Context) *model.StackV4Request {
 				req.Cluster.Password = &ambariPassword
 			}
 		} else {
-			commonutils.LogErrorMessageAndExit("Missing clusterRequest.ambariRequest node in JSON")
+			commonutils.LogErrorMessageAndExit("Missing cluster node in JSON")
 		}
 	}
 	return &req
