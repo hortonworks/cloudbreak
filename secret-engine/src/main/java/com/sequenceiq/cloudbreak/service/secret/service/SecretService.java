@@ -16,6 +16,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.metrics.type.MetricType;
 import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.service.secret.conf.VaultConfig;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV1Engine;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine;
+import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
 
 @Service
 @ConditionalOnBean({VaultKvV2Engine.class, VaultKvV1Engine.class, VaultConfig.class})
@@ -98,6 +100,22 @@ public class SecretService {
         metricService.submit(MetricType.VAULT_READ, duration);
         LOGGER.debug("Secret read took {} ms", duration);
         return "null".equals(response) ? null : response;
+    }
+
+    /**
+     * Fetches the secret from Secret's store. If the secret is not found then null is returned.
+     * If the secret is null then null is returned.
+     *
+     * @param secretResponse SecretResponse that refers to a Secret in the Secret engine
+     * @return Secret content or null if the secret secret is not found.
+     */
+    public String getByResponse(SecretResponse secretResponse) {
+        if (secretResponse == null) {
+            return null;
+        }
+        VaultSecret vaultSecret = new VaultSecret(secretResponse.getEnginePath(), VaultKvV2Engine.class.getCanonicalName(), secretResponse.getSecretPath());
+        String secretAsJson = new Gson().toJson(vaultSecret);
+        return get(secretAsJson);
     }
 
     private Optional<SecretEngine> getFirstEngineStream(String secret) {
