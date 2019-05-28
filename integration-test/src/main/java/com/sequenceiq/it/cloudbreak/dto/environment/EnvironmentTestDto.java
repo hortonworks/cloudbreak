@@ -16,7 +16,6 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.DeletableTestDto;
-import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 
 @Prototype
@@ -48,24 +47,13 @@ public class EnvironmentTestDto extends DeletableTestDto<EnvironmentV4Request, D
     @Override
     public EnvironmentTestDto valid() {
         return getCloudProvider().environment(withName(resourceProperyProvider().getName())
-                .withDescription(resourceProperyProvider().getDescription("environment"))
-                .withCredentialName(getTestContext().get(CredentialTestDto.class).getName()));
+                .withDescription(resourceProperyProvider().getDescription("environment")));
+
     }
 
     public EnvironmentTestDto withName(String name) {
         getRequest().setName(name);
         setName(name);
-        return this;
-    }
-
-    public EnvironmentTestDto withCredential(String key) {
-        CredentialTestDto credentialTestDto = getTestContext().get(key);
-        getRequest().setCredential(credentialTestDto.getRequest());
-        return this;
-    }
-
-    public EnvironmentTestDto withCredentialName(String name) {
-        getRequest().setCredentialName(name);
         return this;
     }
 
@@ -137,9 +125,5 @@ public class EnvironmentTestDto extends DeletableTestDto<EnvironmentV4Request, D
     @Override
     public int order() {
         return 600;
-    }
-
-    public String getCredentialName() {
-        return getRequest().getCredentialName();
     }
 }

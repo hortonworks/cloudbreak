@@ -7,7 +7,6 @@ import java.io.IOException;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.CloudbreakTest;
-import com.sequenceiq.it.cloudbreak.Credential;
 import com.sequenceiq.it.cloudbreak.Entity;
 import com.sequenceiq.it.cloudbreak.Region;
 import com.sequenceiq.it.cloudbreak.log.Log;
@@ -26,12 +25,6 @@ public class RegionV4Action {
         CloudbreakClient client;
         client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
-
-        Credential credential = Credential.getTestContextCredential().apply(integrationTestContext);
-
-        if (credential != null && regionEntity.getPlatformResourceRequest().getCredentialName() == null) {
-            regionEntity.getPlatformResourceRequest().setCredentialName(credential.getName());
-        }
 
         Log.log(" get region to " + regionEntity.getPlatformResourceRequest().getCredentialName() + " credential. ");
 
