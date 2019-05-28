@@ -17,13 +17,13 @@ public class CredentialCreateAction implements Action<CredentialTestDto, Cloudbr
 
     @Override
     public CredentialTestDto action(TestContext testContext, CredentialTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
-        Log.logJSON(LOGGER, " Credential create request:\n", testDto.getRequest());
-        testDto.setResponse(
-                cloudbreakClient.getCloudbreakClient()
-                        .credentialV4Endpoint()
-                        .post(cloudbreakClient.getWorkspaceId(), testDto.getRequest()));
-        Log.logJSON(LOGGER, " Credential created successfully:\n", testDto.getResponse());
-        Log.log(LOGGER, format(" ID: %s", testDto.getResponse().getId()));
+        LOGGER.info(" Credential create request: {}", testDto.getRequest());
+//        testDto.setResponse(
+//                cloudbreakClient.getCloudbreakClient()
+//                        .credentialV4Endpoint()
+//                        .post(cloudbreakClient.getWorkspaceId(), testDto.getRequest()));
+//        Log.logJSON(LOGGER, " Credential created successfully:\n", testDto.getResponse());
+//        Log.log(LOGGER, format(" ID: %s", testDto.getResponse().getId()));
 
         return testDto;
     }

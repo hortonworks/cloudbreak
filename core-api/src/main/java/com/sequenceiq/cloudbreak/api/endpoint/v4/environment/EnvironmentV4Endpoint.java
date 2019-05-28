@@ -14,7 +14,6 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.DatalakePrerequisiteV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentAttachV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentChangeCredentialV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentDetachV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentEditV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentV4Request;
@@ -86,14 +85,6 @@ public interface EnvironmentV4Endpoint {
             nickname = "detachResourcesFromEnvironment")
     DetailedEnvironmentV4Response detach(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName,
             @Valid EnvironmentDetachV4Request request);
-
-    @PUT
-    @Path("/{name}/change_credential")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = EnvironmentOpDescription.CHANGE_CREDENTIAL, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
-            nickname = "changeCredentialInEnvironment")
-    DetailedEnvironmentV4Response changeCredential(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName,
-        @Valid EnvironmentChangeCredentialV4Request request);
 
     @PUT
     @Path("/{name}/register_datalake")

@@ -8,8 +8,6 @@ import javax.ws.rs.BadRequestException;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
@@ -20,12 +18,10 @@ import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.EnvironmentSettingsV4TestDto;
-import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
-import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
 public class EnvironmentClusterTest extends AbstractIntegrationTest {
@@ -33,8 +29,6 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     private static final String NEW_CREDENTIAL_KEY = "newCred";
 
     private static final String FORBIDDEN_KEY = "forbiddenPost";
-
-    private static final String CD_NAME = "Data Science: Apache Spark 2, Apache Zeppelin";
 
     @Inject
     private LdapTestClient ldapTestClient;
@@ -46,15 +40,11 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
     private DatabaseTestClient databaseTestClient;
 
     @Inject
-    private CredentialTestClient credentialTestClient;
-
-    @Inject
     private EnvironmentTestClient environmentTestClient;
 
     @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
-        createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
     }
@@ -83,7 +73,6 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
 
                 .deleteGiven(LdapTestDto.class, ldapTestClient.deleteV4(), RunningParameter.key(FORBIDDEN_KEY))
                 .deleteGiven(DatabaseTestDto.class, databaseTestClient.deleteV4(), RunningParameter.key(FORBIDDEN_KEY))
-                .deleteGiven(CredentialTestDto.class, credentialTestClient.deleteV4(), RunningParameter.key(FORBIDDEN_KEY))
                 .deleteGiven(EnvironmentTestDto.class, environmentTestClient.deleteV4(), RunningParameter.key(FORBIDDEN_KEY))
                 .validate();
     }
@@ -127,29 +116,6 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "there is an environment with a cluster in it",
-            when = "a change credential request is sent for the environment",
-            then = "the credential of the cluster should be changed too")
-    public void testWlClusterChangeCred(MockedTestContext testContext) {
-        testContext
-                .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.createV4())
-                .given(StackTestDto.class)
-                .withEnvironment(EnvironmentTestDto.class)
-                .when(stackTestClient.createV4())
-                .await(STACK_AVAILABLE)
-                .given(NEW_CREDENTIAL_KEY, CredentialTestDto.class)
-                .given(EnvironmentTestDto.class)
-                .withName(testContext.get(EnvironmentTestDto.class).getName())
-                .withCredentialName(null)
-                .withCredential(NEW_CREDENTIAL_KEY)
-                .when(environmentTestClient.changeCredential())
-                .then(EnvironmentClusterTest::checkNewCredentialAttachedToEnv);
-        checkCredentialAttachedToCluster(testContext);
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
             given = "there is an available environment",
             when = "create cluster request is sent with missing environment settings",
             then = "a BadRequestException should be returned")
@@ -173,14 +139,6 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .when(environmentTestClient.createV4());
     }
 
-    private void checkCredentialAttachedToCluster(TestContext testContext) {
-        testContext.given(StackTestDto.class)
-                .withName(testContext.get(StackTestDto.class).getName())
-                .when(stackTestClient.getV4())
-                .then(EnvironmentClusterTest::checkNewCredentialInStack)
-                .validate();
-    }
-
     private ClusterTestDto setResources(TestContext testContext, String rdsName, String ldapName) {
         ClusterTestDto cluster = testContext.given(ClusterTestDto.class)
                 .valid();
@@ -193,24 +151,5 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
             cluster.withLdapConfigName(ldapName);
         }
         return cluster;
-    }
-
-    private static StackTestDto checkNewCredentialInStack(TestContext testContext, StackTestDto stack, CloudbreakClient cloudbreakClient) {
-        String credentialName = stack.getResponse().getEnvironment().getCredential().getName();
-        if (!credentialName.equals(testContext.get(NEW_CREDENTIAL_KEY).getName())) {
-            throw new TestFailException("Credential is not attached to cluster");
-        }
-        return stack;
-    }
-
-    private static EnvironmentTestDto checkNewCredentialAttachedToEnv(
-            TestContext testContext,
-            EnvironmentTestDto environment, CloudbreakClient cloudbreakClient) {
-
-        String credentialName = environment.getResponse().getCredentialName();
-        if (!credentialName.equals(testContext.get(NEW_CREDENTIAL_KEY).getName())) {
-            throw new TestFailException("Credential is not attached to environment");
-        }
-        return environment;
     }
 }
