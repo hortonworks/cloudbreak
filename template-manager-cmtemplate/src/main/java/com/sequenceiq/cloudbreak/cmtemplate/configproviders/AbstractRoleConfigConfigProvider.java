@@ -52,7 +52,7 @@ public abstract class AbstractRoleConfigConfigProvider implements CmTemplateComp
                     for (String roleType : getRoleTypes()) {
                         Optional<String> roleRefOpt = findRoleRef(cmTemplate.getTemplate(), hostTemplate, roleType);
                         if (roleRefOpt.isPresent()) {
-                            result.addAll(getVariables(roleType, hostGroupView, templatePreparationObject));
+                            result.addAll(getRoleConfigVariable(roleType, hostGroupView, templatePreparationObject));
                         }
                     }
                 }
@@ -97,7 +97,7 @@ public abstract class AbstractRoleConfigConfigProvider implements CmTemplateComp
 
     protected abstract List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source);
 
-    protected List<ApiClusterTemplateVariable> getVariables(String roleType, HostgroupView hostgroupView, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateVariable> getRoleConfigVariable(String roleType, HostgroupView hostgroupView, TemplatePreparationObject source) {
         return List.of();
     }
 
