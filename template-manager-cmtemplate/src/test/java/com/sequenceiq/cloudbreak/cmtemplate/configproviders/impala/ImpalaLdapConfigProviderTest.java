@@ -3,6 +3,9 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.impala;
 import static com.sequenceiq.cloudbreak.TestUtil.kerberosConfigFreeipa;
 import static com.sequenceiq.cloudbreak.TestUtil.kerberosConfigMit;
 import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigTestUtil.getConfigNameToValueMap;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigTestUtil.getConfigNameToVariableNameMap;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigTestUtil.getVariableNameToValueMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -11,7 +14,6 @@ import static org.mockito.Mockito.when;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -255,20 +257,6 @@ public class ImpalaLdapConfigProviderTest {
 
         boolean result = underTest.isConfigurationNeeded(templateProcessor, tpo);
         assertThat(result).isFalse();
-    }
-
-    private Map<String, String> getConfigNameToValueMap(List<ApiClusterTemplateConfig> configs) {
-        return configs.stream().filter(config -> config.getValue() != null)
-                .collect(Collectors.toMap(ApiClusterTemplateConfig::getName, ApiClusterTemplateConfig::getValue));
-    }
-
-    private Map<String, String> getConfigNameToVariableNameMap(List<ApiClusterTemplateConfig> configs) {
-        return configs.stream().filter(config -> config.getVariable() != null)
-                .collect(Collectors.toMap(ApiClusterTemplateConfig::getName, ApiClusterTemplateConfig::getVariable));
-    }
-
-    private Map<String, String> getVariableNameToValueMap(List<ApiClusterTemplateVariable> variables) {
-        return variables.stream().collect(Collectors.toMap(ApiClusterTemplateVariable::getName, ApiClusterTemplateVariable::getValue));
     }
 
 }
