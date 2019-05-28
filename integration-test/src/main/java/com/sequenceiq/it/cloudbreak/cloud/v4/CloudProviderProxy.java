@@ -18,7 +18,6 @@ import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
-import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
@@ -103,11 +102,6 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public CloudPlatform getCloudPlatform() {
         return delegate.getCloudPlatform();
-    }
-
-    @Override
-    public CredentialTestDto credential(CredentialTestDto credential) {
-        return delegate.credential(credential);
     }
 
     @Override

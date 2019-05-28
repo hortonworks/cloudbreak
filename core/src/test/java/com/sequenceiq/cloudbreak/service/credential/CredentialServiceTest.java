@@ -12,7 +12,6 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -39,7 +38,6 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Topology;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -53,6 +51,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
@@ -60,7 +59,6 @@ import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CredentialServiceTest {
@@ -80,8 +78,6 @@ public class CredentialServiceTest {
     private static final String USER_ID = "some@user.id";
 
     private static final String TEST_CLOUD_PLATFORM = "AWS";
-
-    private static final String CLOUD_PLATFORM_VALIDATION_EXCEPTION_MESSAGE = format("There is no such cloud platform as '%s'", PLATFORM);
 
     private static final String AUTHORIZE_GRANT_FLOW_CODE = "testcode";
 
@@ -122,9 +118,6 @@ public class CredentialServiceTest {
 
     @Mock
     private CloudbreakUser cloudbreakUser;
-
-    @Mock
-    private CredentialValidator credentialValidator;
 
     @Mock
     private EnvironmentViewService environmentViewService;
@@ -200,7 +193,6 @@ public class CredentialServiceTest {
     public void testUpdateByWorkspaceIdWhenCredentialCloudPlatformIsNotValidThenNoUnnecessaryCallsAreHappen() {
         String message = "Invalid credential";
         when(testCredential.cloudPlatform()).thenReturn("");
-        doThrow(new BadRequestException(message)).when(credentialValidator).validateCredentialCloudPlatform("");
 
         thrown.expect(BadRequestException.class);
         thrown.expectMessage(message);
@@ -237,7 +229,6 @@ public class CredentialServiceTest {
         Credential original = mock(Credential.class);
         when(original.cloudPlatform()).thenReturn("AWS");
         when(testCredential.cloudPlatform()).thenReturn("GCP");
-        doNothing().when(credentialValidator).validateCredentialCloudPlatform(anyString());
         when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, WORKSPACE_ID, CLOUD_PLATFORMS))
                 .thenReturn(Optional.of(original));
 
@@ -260,7 +251,6 @@ public class CredentialServiceTest {
         Credential original = mock(Credential.class);
         when(original.cloudPlatform()).thenReturn(TEST_CLOUD_PLATFORM);
         when(testCredential.cloudPlatform()).thenReturn(TEST_CLOUD_PLATFORM);
-        doNothing().when(credentialValidator).validateCredentialCloudPlatform(anyString());
         when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, WORKSPACE_ID, CLOUD_PLATFORMS))
                 .thenReturn(Optional.of(original));
         when(credentialAdapter.verify(testCredential, WORKSPACE_ID, USER_ID)).thenReturn(testCredential);
@@ -288,15 +278,12 @@ public class CredentialServiceTest {
         String message = "Invalid credential";
         when(testCredential.cloudPlatform()).thenReturn(invalidCloudPlatformValue);
         when(workspaceService.get(WORKSPACE_ID, user)).thenReturn(workspace);
-        doThrow(new BadRequestException(message)).when(credentialValidator).validateCredentialCloudPlatform(invalidCloudPlatformValue);
 
         thrown.expect(BadRequestException.class);
         thrown.expectMessage(message);
 
         underTest.create(testCredential, WORKSPACE_ID, user);
 
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(anyString());
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(invalidCloudPlatformValue);
         verify(credentialAdapter, times(0)).verify(any(Credential.class), anyLong(), anyString());
         verify(notificationSender, times(0)).send(any());
         verify(messagesService, times(0)).getMessage(anyString());
@@ -315,8 +302,6 @@ public class CredentialServiceTest {
 
         assertEquals(expected, result);
 
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(anyString());
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(TEST_CLOUD_PLATFORM);
         verify(credentialAdapter, times(1)).verify(any(Credential.class), anyLong(), anyString());
         verify(credentialAdapter, times(1)).verify(testCredential, WORKSPACE_ID, USER_ID);
         verify(notificationSender, times(1)).send(any());
@@ -329,15 +314,12 @@ public class CredentialServiceTest {
         String message = "Invalid credential";
         when(testCredential.cloudPlatform()).thenReturn(invalidCloudPlatformValue);
         when(workspaceService.get(WORKSPACE_ID, user)).thenReturn(workspace);
-        doThrow(new BadRequestException(message)).when(credentialValidator).validateCredentialCloudPlatform(invalidCloudPlatformValue);
 
         thrown.expect(BadRequestException.class);
         thrown.expectMessage(message);
 
         underTest.createWithRetry(testCredential, WORKSPACE_ID, user);
 
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(anyString());
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(invalidCloudPlatformValue);
         verify(credentialAdapter, times(0)).verify(any(Credential.class), anyLong(), anyString());
         verify(notificationSender, times(0)).send(any());
         verify(messagesService, times(0)).getMessage(anyString());
@@ -354,8 +336,6 @@ public class CredentialServiceTest {
 
         underTest.createWithRetry(testCredential, WORKSPACE_ID, user);
 
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(anyString());
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(TEST_CLOUD_PLATFORM);
         verify(credentialAdapter, times(1)).verify(any(Credential.class), anyLong(), anyString());
         verify(credentialAdapter, times(1)).verify(testCredential, WORKSPACE_ID, USER_ID);
         verify(notificationSender, times(1)).send(any());
@@ -494,14 +474,11 @@ public class CredentialServiceTest {
     @Test
     public void testGetPrerequisitesBothCredentialValidatorAndCredentialPrerequisiteServiceIsCalled() {
         CredentialPrerequisitesResponse expected = mock(CredentialPrerequisitesResponse.class);
-        doNothing().when(credentialValidator).validateCredentialCloudPlatform(PLATFORM);
         when(credentialPrerequisiteService.getPrerequisites(user, workspace, PLATFORM, "")).thenReturn(expected);
 
         CredentialPrerequisitesResponse result = underTest.getPrerequisites(workspace.getId(), PLATFORM, "");
 
         assertEquals("The result CredentialPrerequisites object is not the expected one!", expected, result);
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(anyString());
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(PLATFORM);
         verify(credentialPrerequisiteService, times(1)).getPrerequisites(user, workspace, PLATFORM, "");
     }
 
@@ -509,26 +486,12 @@ public class CredentialServiceTest {
     public void testGetPrerequisitesBothCredentialValidatorAndCredentialPrerequisiteServiceIsCalledAndDeploymentAddressIsNotEmpty() {
         CredentialPrerequisitesResponse expected = mock(CredentialPrerequisitesResponse.class);
         String deploymentAddress = "https://MYDEPLOYMENT_ADDRESS";
-        doNothing().when(credentialValidator).validateCredentialCloudPlatform(PLATFORM);
         when(credentialPrerequisiteService.getPrerequisites(user, workspace, PLATFORM, deploymentAddress)).thenReturn(expected);
 
         CredentialPrerequisitesResponse result = underTest.getPrerequisites(workspace.getId(), PLATFORM, deploymentAddress);
 
         assertEquals("The result CredentialPrerequisites object is not the expected one!", expected, result);
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(anyString());
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(PLATFORM);
         verify(credentialPrerequisiteService, times(1)).getPrerequisites(user, workspace, PLATFORM, deploymentAddress);
-    }
-
-    @Test
-    public void testGetPrerequisitesWhenCredentialValidationFailsThenItsExceptionIsNotCaught() {
-        doThrow(new BadRequestException(CLOUD_PLATFORM_VALIDATION_EXCEPTION_MESSAGE)).when(credentialValidator)
-                .validateCredentialCloudPlatform(PLATFORM);
-
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage(CLOUD_PLATFORM_VALIDATION_EXCEPTION_MESSAGE);
-
-        underTest.getPrerequisites(workspace.getId(), PLATFORM, "");
     }
 
     @Test
@@ -542,33 +505,13 @@ public class CredentialServiceTest {
         when(workspaceService.get(WORKSPACE_ID, user)).thenReturn(workspace);
         when(testCredential.cloudPlatform()).thenReturn(PLATFORM);
         when(testCredential.getAttributes()).thenReturn(format("{\"%s\":\"%s\"}", "deploymentAddress", "https://MY_DEPLOYMENT_ADDRESS"));
-        doNothing().when(credentialValidator).validateCredentialCloudPlatform(PLATFORM);
         when(credentialAdapter.initCodeGrantFlow(testCredential, WORKSPACE_ID, USER_ID)).thenReturn(created);
 
         String result = underTest.initCodeGrantFlow(WORKSPACE_ID, testCredential, user);
 
         assertEquals(expected, result);
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(anyString());
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(PLATFORM);
         verify(credentialAdapter, times(1)).initCodeGrantFlow(any(Credential.class), anyLong(), anyString());
         verify(credentialAdapter, times(1)).initCodeGrantFlow(testCredential, WORKSPACE_ID, USER_ID);
-    }
-
-    @Test
-    public void testInitCodeGrantFlowWhenCredentialCloudPlatformValidationFailsThenItsExceptionComesThrough() {
-        doThrow(new BadRequestException(CLOUD_PLATFORM_VALIDATION_EXCEPTION_MESSAGE)).when(credentialValidator)
-                .validateCredentialCloudPlatform(PLATFORM);
-        when(testCredential.cloudPlatform()).thenReturn(PLATFORM);
-        when(workspaceService.get(WORKSPACE_ID, user)).thenReturn(workspace);
-
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage(CLOUD_PLATFORM_VALIDATION_EXCEPTION_MESSAGE);
-
-        underTest.initCodeGrantFlow(WORKSPACE_ID, testCredential, user);
-
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(anyString());
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(PLATFORM);
-        verify(credentialAdapter, times(0)).initCodeGrantFlow(any(Credential.class), anyLong(), anyString());
     }
 
     @Test
@@ -581,8 +524,6 @@ public class CredentialServiceTest {
 
         underTest.initCodeGrantFlow(WORKSPACE_ID, testCredential);
 
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(anyString());
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(PLATFORM);
         verify(credentialAdapter, times(0)).initCodeGrantFlow(any(Credential.class), anyLong(), anyString());
     }
 
@@ -595,7 +536,6 @@ public class CredentialServiceTest {
         when(workspaceService.get(WORKSPACE_ID, user)).thenReturn(workspace);
         when(testCredential.cloudPlatform()).thenReturn(PLATFORM);
         when(testCredential.getAttributes()).thenReturn(format("{\"%s\":\"%s\"}", "deploymentAddress", "https://MY_DEPLOYMENT_ADDRESS"));
-        doNothing().when(credentialValidator).validateCredentialCloudPlatform(PLATFORM);
         when(credentialAdapter.initCodeGrantFlow(testCredential, WORKSPACE_ID, USER_ID)).thenReturn(created);
 
         thrown.expect(CloudbreakServiceException.class);
@@ -603,8 +543,6 @@ public class CredentialServiceTest {
 
         underTest.initCodeGrantFlow(WORKSPACE_ID, testCredential);
 
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(anyString());
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(PLATFORM);
         verify(credentialAdapter, times(1)).initCodeGrantFlow(any(Credential.class), anyLong(), anyString());
         verify(credentialAdapter, times(1)).initCodeGrantFlow(testCredential, WORKSPACE_ID, USER_ID);
     }
@@ -701,22 +639,6 @@ public class CredentialServiceTest {
     }
 
     @Test
-    public void testAuthorizeCodeGrantFlowWhenCloudPlatformIsNotEnabledThenExceptionComes() {
-        doThrow(new BadRequestException(CLOUD_PLATFORM_VALIDATION_EXCEPTION_MESSAGE)).when(credentialValidator).validateCredentialCloudPlatform(PLATFORM);
-
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage(CLOUD_PLATFORM_VALIDATION_EXCEPTION_MESSAGE);
-
-        underTest.authorizeCodeGrantFlow(AUTHORIZE_GRANT_FLOW_CODE, AUTHORIZE_GRANT_FLOW_STATE, WORKSPACE_ID, PLATFORM);
-
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(anyString());
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(PLATFORM);
-        verify(credentialRepository, times(0)).findActiveForWorkspaceFilterByPlatforms(anyLong(), anySet());
-        verify(credentialAdapter, times(0)).verify(any(Credential.class), anyLong(), anyString());
-        verify(secretService, times(0)).delete(anyString());
-    }
-
-    @Test
     public void testAuthorizeCodeGrantFlowWhenThereIsNoCredentialsAtAllGivenFromWorkspaceIdAndCloudPlatformThenNotFoundExceptionComes() {
         when(credentialRepository.findActiveForWorkspaceFilterByPlatforms(WORKSPACE_ID, List.of(PLATFORM))).thenReturn(Collections.emptySet());
 
@@ -725,8 +647,6 @@ public class CredentialServiceTest {
 
         underTest.authorizeCodeGrantFlow(AUTHORIZE_GRANT_FLOW_CODE, AUTHORIZE_GRANT_FLOW_STATE, WORKSPACE_ID, PLATFORM);
 
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(anyString());
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(PLATFORM);
         verify(credentialRepository, times(1)).findActiveForWorkspaceFilterByPlatforms(anyLong(), anySet());
         verify(credentialRepository, times(1)).findActiveForWorkspaceFilterByPlatforms(WORKSPACE_ID, Set.of(PLATFORM));
         verify(credentialAdapter, times(0)).verify(any(Credential.class), anyLong(), anyString());
@@ -749,8 +669,6 @@ public class CredentialServiceTest {
         Credential result = underTest.authorizeCodeGrantFlow(AUTHORIZE_GRANT_FLOW_CODE, AUTHORIZE_GRANT_FLOW_STATE, WORKSPACE_ID, PLATFORM);
 
         assertEquals(expectedCredential, result);
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(anyString());
-        verify(credentialValidator, times(1)).validateCredentialCloudPlatform(PLATFORM);
         verify(credentialRepository, times(1)).findActiveForWorkspaceFilterByPlatforms(anyLong(), anyList());
         verify(credentialRepository, times(1)).findActiveForWorkspaceFilterByPlatforms(WORKSPACE_ID, List.of(PLATFORM));
         verify(credentialAdapter, times(1)).verify(any(Credential.class), anyLong(), anyString());
