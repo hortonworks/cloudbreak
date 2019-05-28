@@ -12,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.ConversionService;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.environment.EnvironmentSettingsV4Response;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
@@ -43,14 +42,10 @@ public class EnvironmentViewToEnvironmentSettingsV4ResponseConverterTest {
         when(source.getCredential()).thenReturn(credential);
         when(source.getName()).thenReturn(ENVIRONMENT);
 
-        CredentialV4Response credentialV4Response = new CredentialV4Response();
-        when(conversionService.convert(credential, CredentialV4Response.class)).thenReturn(credentialV4Response);
-
         EnvironmentSettingsV4Response result = underTest.convert(source);
 
         assertNotNull(result);
         assertEquals(ENVIRONMENT, result.getName());
-        assertEquals(credentialV4Response, result.getCredential());
     }
 
 }

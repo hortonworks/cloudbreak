@@ -69,7 +69,6 @@ public class RepairTest extends AbstractIntegrationTest {
     public void beforeMethod(Object[] data) {
         TestContext testContext = (TestContext) data[0];
         createDefaultUser(testContext);
-        createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
     }

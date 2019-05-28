@@ -7,11 +7,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
@@ -23,7 +21,6 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
-import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
@@ -49,13 +46,9 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
     @Inject
     private EnvironmentTestClient environmentTestClient;
 
-    @Inject
-    private CredentialTestClient credentialTestClient;
-
     @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
-        createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
     }
@@ -118,7 +111,6 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .when(stackTestClient.createV4())
                 .deleteGiven(LdapTestDto.class, ldapTestClient.deleteV4(), RunningParameter.key(forbiddenKey))
                 .deleteGiven(DatabaseTestDto.class, databaseTestClient.deleteV4(), RunningParameter.key(forbiddenKey))
-                .deleteGiven(CredentialTestDto.class, credentialTestClient.deleteV4(), RunningParameter.key(forbiddenKey))
                 .deleteGiven(EnvironmentTestDto.class, environmentTestClient.deleteV4(), RunningParameter.key(forbiddenKey))
                 .validate();
     }
@@ -137,31 +129,6 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .validate();
         createDatalake(testContext, rdsList);
         createDatalake(testContext, rdsList);
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "Create datalake cluster in one environment and change credential in environment",
-            when = "call create cluster and change credential",
-            then = "the credential change will not work")
-    public void testDatalakeChangeCredentialFails(TestContext testContext) {
-        String forbiddenKey = resourcePropertyProvider().getName();
-        String hivedb = resourcePropertyProvider().getName();
-        String rangerdb = resourcePropertyProvider().getName();
-        Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
-        testContext.given(EnvironmentTestDto.class)
-                .when(environmentTestClient.createV4())
-                .validate();
-        createDatalake(testContext, rdsList);
-        testContext
-                .given("newCred", CredentialTestDto.class).withDescription("Change credential")
-                .given(EnvironmentTestDto.class)
-                .withName(testContext.get(EnvironmentTestDto.class).getName())
-                .withCredentialName(null)
-                .withCredential("newCred")
-                .when(environmentTestClient.changeCredential(), RunningParameter.key(forbiddenKey))
-                .expect(BadRequestException.class, RunningParameter.key(forbiddenKey))
-                .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)

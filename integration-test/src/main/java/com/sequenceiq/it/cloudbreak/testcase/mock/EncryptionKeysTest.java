@@ -11,19 +11,14 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.client.ConnectorTestClient;
-import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.connector.PlatformEncryptionKeysTestDto;
-import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
 public class EncryptionKeysTest extends AbstractIntegrationTest {
-
-    @Inject
-    private CredentialTestClient credentialTestClient;
 
     @Inject
     private ConnectorTestClient connectorTestClient;
@@ -41,9 +36,6 @@ public class EncryptionKeysTest extends AbstractIntegrationTest {
     public void getPlatformEncryptionKeysWithMockCredentialThenReturnWithPlatformRelatedKeys(MockedTestContext testContext) {
         String credentialName = resourcePropertyProvider().getName();
         testContext
-                .given(CredentialTestDto.class)
-                .withName(credentialName)
-                .when(credentialTestClient.createV4(), key(credentialName))
                 .given(PlatformEncryptionKeysTestDto.class)
                 .withCredentialName(credentialName)
                 .when(connectorTestClient.encryptionKeys(), key(credentialName))
