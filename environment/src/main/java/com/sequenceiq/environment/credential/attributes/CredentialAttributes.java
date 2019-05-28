@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.credential.attributes;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.credential.attributes.aws.AwsCredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.azure.AzureCredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.cumulus.CumulusYarnCredentialAttributes;
@@ -8,6 +9,7 @@ import com.sequenceiq.environment.credential.attributes.mock.MockCredentialAttri
 import com.sequenceiq.environment.credential.attributes.openstack.OpenStackCredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.yarn.YarnCredentialAttributes;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CredentialAttributes {
 
     private AwsCredentialAttributes aws;
