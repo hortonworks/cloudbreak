@@ -1,16 +1,17 @@
 package com.sequenceiq.environment.environment.v1;
 
+import java.util.Set;
+
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.environment.api.WelcomeResponse;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
-import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAttachRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
-import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentDetachRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -20,7 +21,6 @@ import com.sequenceiq.environment.configuration.security.ThreadLocalUserCrnProvi
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
-import com.sequenceiq.environment.environment.service.EnvironmentAttachService;
 import com.sequenceiq.environment.environment.service.EnvironmentCreationService;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentViewService;
@@ -37,19 +37,19 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final EnvironmentViewService environmentViewService;
 
-    private final EnvironmentAttachService environmentAttachService;
-
     private final ThreadLocalUserCrnProvider threadLocalUserCrnProvider;
+
+    private final AuthenticatedUserService authenticatedUserService;
 
     public EnvironmentController(EnvironmentApiConverter environmentApiConverter, EnvironmentService environmentService,
             EnvironmentCreationService environmentCreationService, EnvironmentViewService environmentViewService,
-            EnvironmentAttachService environmentAttachService, ThreadLocalUserCrnProvider threadLocalUserCrnProvider) {
+            ThreadLocalUserCrnProvider threadLocalUserCrnProvider, AuthenticatedUserService authenticatedUserService) {
         this.environmentApiConverter = environmentApiConverter;
         this.environmentService = environmentService;
         this.environmentCreationService = environmentCreationService;
         this.environmentViewService = environmentViewService;
-        this.environmentAttachService = environmentAttachService;
         this.threadLocalUserCrnProvider = threadLocalUserCrnProvider;
+        this.authenticatedUserService = authenticatedUserService;
     }
 
     @Override
@@ -79,6 +79,12 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
+    public SimpleEnvironmentResponses deleteMultiple(Set<String> environmentNames) {
+        String accountId = authenticatedUserService.getAccountId();
+        return environmentService.deleteMultiple(environmentNames, accountId);
+    }
+
+    @Override
     public DetailedEnvironmentResponse edit(String environmentName, @NotNull EnvironmentEditRequest request) {
         EnvironmentEditDto editDto = environmentApiConverter.initEditDto(request);
         return environmentService.edit(environmentName, editDto);
@@ -88,17 +94,6 @@ public class EnvironmentController implements EnvironmentEndpoint {
     public SimpleEnvironmentResponses list() {
         String accountId = threadLocalUserCrnProvider.getAccountId();
         return new SimpleEnvironmentResponses(environmentViewService.listByAccountId(accountId));
-    }
-
-    @Override
-    public DetailedEnvironmentResponse attach(String environmentName, @Valid EnvironmentAttachRequest request) {
-        return environmentAttachService.attachResources(environmentName, request);
-    }
-
-    @Override
-    public DetailedEnvironmentResponse detach(String environmentName, @Valid EnvironmentDetachRequest request) {
-        String accountId = threadLocalUserCrnProvider.getAccountId();
-        return environmentService.detachResources(environmentName, accountId, request);
     }
 
     @Override

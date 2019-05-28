@@ -29,6 +29,7 @@ import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentDetachRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
@@ -119,6 +120,17 @@ public class EnvironmentService {
         LOGGER.debug("Deleting environment with name: {}", resource.getName());
         environmentRepository.delete(resource);
         return resource;
+    }
+
+    public SimpleEnvironmentResponses deleteMultiple(Set<String> environmentNames, String accountId) {
+        Set<SimpleEnvironmentResponse> responses = new HashSet<>();
+        for (String environmentName : environmentNames) {
+            Environment environment = getByNameForAccountId(environmentName, accountId);
+            LOGGER.debug(String.format("Starting to archive environment [name: %s]", environment.getName()));
+            delete(environment);
+            responses.add(conversionService.convert(environment, SimpleEnvironmentResponse.class));
+        }
+        return new SimpleEnvironmentResponses(responses);
     }
 
     public DetailedEnvironmentResponse edit(String environmentName, EnvironmentEditDto editDto) {
