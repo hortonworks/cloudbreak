@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.termination.action;
 
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -11,12 +12,16 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.termination.StackTerminationContext;
 import com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent;
+import com.sequenceiq.freeipa.service.config.AbstractConfigRegister;
 
 @Component("StackTerminationFinishedAction")
 public class StackTerminationFinishedAction extends AbstractStackTerminationAction<TerminateStackResult> {
 
     @Inject
     private StackTerminationService stackTerminationService;
+
+    @Inject
+    private Set<AbstractConfigRegister> configRegisters;
 
     public StackTerminationFinishedAction() {
         super(TerminateStackResult.class);
@@ -25,6 +30,7 @@ public class StackTerminationFinishedAction extends AbstractStackTerminationActi
     @Override
     protected void doExecute(StackTerminationContext context, TerminateStackResult payload, Map<Object, Object> variables) {
         stackTerminationService.finishStackTermination(context, payload);
+        configRegisters.forEach(configProvider -> configProvider.delete(context.getStack()));
         sendEvent(context);
     }
 

@@ -13,8 +13,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true, value = "type")
 public abstract class KerberosDescriptorBase {
-    @ApiModelProperty(KerberosConfigModelDescription.KERBEROS_ADMIN)
-    private String admin;
 
     @ApiModelProperty(value = KerberosConfigModelDescription.KERBEROS_PASSWORD, required = true)
     @Size(max = 50, min = 5, message = "The length of the Kerberos password has to be in range of 5 to 50")
@@ -81,14 +79,6 @@ public abstract class KerberosDescriptorBase {
 
     public void setTcpAllowed(Boolean tcpAllowed) {
         this.tcpAllowed = tcpAllowed;
-    }
-
-    public String getAdmin() {
-        return admin;
-    }
-
-    public void setAdmin(String admin) {
-        this.admin = admin;
     }
 
     public String getPrincipal() {

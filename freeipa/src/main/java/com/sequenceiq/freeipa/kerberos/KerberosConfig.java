@@ -47,11 +47,6 @@ public class KerberosConfig implements ArchivableResource, AuthResource {
     @Enumerated(EnumType.STRING)
     private KerberosType type;
 
-    @Column(name = "kerberosadmin")
-    @Convert(converter = SecretToString.class)
-    @SecretValue
-    private Secret admin = Secret.EMPTY;
-
     @Column(name = "kerberospassword")
     @Convert(converter = SecretToString.class)
     @SecretValue
@@ -177,18 +172,6 @@ public class KerberosConfig implements ArchivableResource, AuthResource {
 
     public void setType(KerberosType type) {
         this.type = type;
-    }
-
-    public String getAdmin() {
-        return admin.getRaw();
-    }
-
-    public String getAdminSecret() {
-        return admin.getSecret();
-    }
-
-    public void setAdmin(String admin) {
-        this.admin = new Secret(admin);
     }
 
     public String getPassword() {
