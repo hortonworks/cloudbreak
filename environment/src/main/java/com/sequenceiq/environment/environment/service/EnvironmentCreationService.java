@@ -49,11 +49,11 @@ public class EnvironmentCreationService {
     }
 
     // TODO: trigger creation properly
-    public void triggerCreationFlow() {
+    public void triggerCreationFlow(long envId, String envName) {
         EnvCreationEvent envCreationEvent = EnvCreationEvent.EnvCreationEventBuilder.anEnvCreationEvent()
                 .withSelector(START_NETWORK_CREATION_EVENT.selector())
-                .withResourceId(1L)
-                .withResourceName("hello")
+                .withResourceId(envId)
+                .withResourceName(envName)
                 .build();
         eventSender.sendEvent(envCreationEvent);
     }

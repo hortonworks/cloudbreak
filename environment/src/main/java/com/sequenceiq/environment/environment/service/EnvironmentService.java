@@ -101,10 +101,7 @@ public class EnvironmentService {
 
     public Environment getByNameForAccountId(String name, String accountId) {
         Optional<Environment> object = environmentRepository.findByNameAndAccountId(name, accountId);
-        if (object.isEmpty()) {
-            throw new NotFoundException(String.format("No environment found with name '%s'", name));
-        }
-        MDCBuilder.buildMdcContext(object.get());
+        MDCBuilder.buildMdcContext(object.orElseThrow(() -> new NotFoundException(String.format("No environment found with name '%s'", name))));
         return object.get();
     }
 

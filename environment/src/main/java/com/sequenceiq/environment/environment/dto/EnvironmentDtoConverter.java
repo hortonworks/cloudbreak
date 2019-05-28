@@ -29,6 +29,7 @@ public class EnvironmentDtoConverter {
                 .withDeletionTimestamp(environment.getDeletionTimestamp())
                 .withLocationDto(environmentToLocationDto(environment))
                 .withRegions(environment.getRegions())
+                .withId(environment.getId())
                 .withEnvironmentStatus(environment.getStatus());
         if (environment.getNetwork() != null) {
             builder.withNetwork(environmentNetworkConverterMap.get(CloudPlatform.valueOf(environment.getCloudPlatform()))
