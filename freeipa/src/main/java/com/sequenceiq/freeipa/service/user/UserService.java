@@ -12,8 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.CreateUsersRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.Group;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUsersRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUsersResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.User;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
@@ -33,10 +36,20 @@ public class UserService {
     @Inject
     private FreeIpaClientFactory freeIpaClientFactory;
 
-    public void synchronizeUsers(String accountId, SynchronizeUsersRequest request) throws Exception {
+    public SynchronizeUsersResponse synchronizeUsers(SynchronizeUsersRequest request) {
+        return new SynchronizeUsersResponse(UUID.randomUUID().toString(), SynchronizationStatus.FAILED,
+                null, null);
+    }
+
+    public SynchronizeUsersResponse getSynchronizeUsersStatus(String syncId) {
+        return new SynchronizeUsersResponse(syncId, SynchronizationStatus.FAILED,
+                null, null);
+    }
+
+    public void createUsers(CreateUsersRequest request) throws Exception {
         LOGGER.info("UserService.synchronizeUsers() called");
 
-        Stack stack = stackService.getByAccountIdEnvironmentAndName(accountId, request.getEnvironmentName(), request.getName());
+        Stack stack = stackService.getByEnvironmentCrn(request.getEnvironmentId());
 
         FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
 
