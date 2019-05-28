@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.api.v1.platformresource.model;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -8,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlatformVmtypesResponse implements Serializable {
 
-    private Map<String, VirtualMachinesResponse> vmTypes;
+    private Map<String, VirtualMachinesResponse> vmTypes = new HashMap<>();
 
     public PlatformVmtypesResponse() {
     }

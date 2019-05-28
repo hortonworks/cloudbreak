@@ -2,6 +2,8 @@ package com.sequenceiq.environment.api.v1.environment.endpoint;
 
 import static com.sequenceiq.environment.api.doc.environment.EnvironmentDescription.ENVIRONMENT_NOTES;
 
+import java.util.Set;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
@@ -16,9 +18,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.environment.api.WelcomeResponse;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentOpDescription;
-import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAttachRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
-import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentDetachRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -56,6 +56,13 @@ public interface EnvironmentEndpoint {
     @ApiOperation(value = EnvironmentOpDescription.DELETE, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironmentV1")
     SimpleEnvironmentResponse delete(@PathParam("name") String environmentName);
 
+    @DELETE
+    @Path("")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON,
+            notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironments")
+    SimpleEnvironmentResponses deleteMultiple(Set<String> names);
+
     @PUT
     @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -66,20 +73,6 @@ public interface EnvironmentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.LIST, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES, nickname = "listEnvironmentV1")
     SimpleEnvironmentResponses list();
-
-    @PUT
-    @Path("/{name}/attach")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = EnvironmentOpDescription.ATTACH_RESOURCES, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
-            nickname = "attachResourcesToEnvironmentV1")
-    DetailedEnvironmentResponse attach(@PathParam("name") String environmentName, @Valid EnvironmentAttachRequest request);
-
-    @PUT
-    @Path("/{name}/detach")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = EnvironmentOpDescription.DETACH_RESOURCES, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
-            nickname = "detachResourcesFromEnvironmentV1")
-    DetailedEnvironmentResponse detach(@PathParam("name") String environmentName, @Valid EnvironmentDetachRequest request);
 
     @PUT
     @Path("/{name}/change_credential")

@@ -7,6 +7,7 @@ public class EnvironmentOpDescription {
     public static final String DETACH_RESOURCES = "Detach resources from an environment.";
     public static final String LIST = "List all environments";
     public static final String DELETE = "Delete an environment. Only possible if no cluster is running in the environment.";
+    public static final String DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE = "Delete multiple environment. Only possible if no cluster is running in the environments.";
     public static final String CHANGE_CREDENTIAL = "Changes the credential of the environment and the clusters in the environment.";
     public static final String REGISTER_EXTERNAL_DATALAKE = "Register external datalake";
     public static final String EDIT = "Edit and environment. Location, regions and description can be changed.";
