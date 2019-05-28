@@ -55,14 +55,13 @@ public class DatabaseV4Controller /*extends NotificationController */ implements
     }
 
     @Override
-    public DatabaseV4Response delete(String name) {
-        // TODO special care for registered databases: we should not delete the db, only delete the entry from redbeams db.
-        return new DatabaseV4Response();
+    public DatabaseV4Response delete(String environmentCrn, String name) {
+        return redbeamsConverterUtil.convert(databaseConfigService.delete(name, environmentCrn), DatabaseV4Response.class);
     }
 
     @Override
-    public DatabaseV4Responses deleteMultiple(Set<String> names) {
-        return new DatabaseV4Responses();
+    public DatabaseV4Responses deleteMultiple(String environmentCrn, Set<String> names) {
+        return new DatabaseV4Responses(redbeamsConverterUtil.convertAllAsSet(databaseConfigService.delete(names, environmentCrn), DatabaseV4Response.class));
     }
 
     @Override
