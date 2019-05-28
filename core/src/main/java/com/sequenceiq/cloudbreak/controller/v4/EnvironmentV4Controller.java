@@ -11,7 +11,6 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.EnvironmentV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.DatalakePrerequisiteV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentAttachV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentChangeCredentialV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentDetachV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentEditV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentV4Request;
@@ -66,11 +65,6 @@ public class EnvironmentV4Controller implements EnvironmentV4Endpoint {
     @Override
     public DetailedEnvironmentV4Response detach(Long workspaceId, String environmentName, @Valid EnvironmentDetachV4Request request) {
         throw new UnsupportedOperationException("Detaching resource from an environment is not supported anymore!");
-    }
-
-    @Override
-    public DetailedEnvironmentV4Response changeCredential(Long workspaceId, String environmentName, @Valid EnvironmentChangeCredentialV4Request request) {
-        return environmentService.changeCredential(environmentName, workspaceId, request);
     }
 
     @Override

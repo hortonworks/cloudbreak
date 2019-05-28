@@ -8,13 +8,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.dto.AccessConfigTestDto;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.CloudbreakTest;
-import com.sequenceiq.it.cloudbreak.Credential;
 import com.sequenceiq.it.cloudbreak.Entity;
 import com.sequenceiq.it.cloudbreak.PlatformResourceParameters;
 import com.sequenceiq.it.cloudbreak.Region;
+import com.sequenceiq.it.cloudbreak.dto.AccessConfigTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
 public class AccessConfigV4Action {
@@ -28,13 +27,6 @@ public class AccessConfigV4Action {
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
 
         PlatformResourceParameters request = new PlatformResourceParameters();
-
-        Credential credential = Credential.getTestContextCredential().apply(integrationTestContext);
-        if (credential != null && accessConfig.getRequest().getCredentialName() == null) {
-            accessConfig.getRequest().setCredentialName(credential.getResponse().getName());
-            request.setCredentialName(credential.getResponse().getName());
-        }
-
         Region region = Region.getTestContextRegion().apply(integrationTestContext);
         if (region != null && accessConfig.getRequest().getRegion() == null) {
             accessConfig.getRequest().setRegion(region.getRegionV4Response().getDefaultRegion());

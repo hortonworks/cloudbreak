@@ -8,14 +8,12 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.client.ConnectorTestClient;
-import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.connector.PlatformNetworksTestDto;
-import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
 public class NetworksTest extends AbstractIntegrationTest {
@@ -23,29 +21,9 @@ public class NetworksTest extends AbstractIntegrationTest {
     @Inject
     private ConnectorTestClient connectorTestClient;
 
-    @Inject
-    private CredentialTestClient credentialTestClient;
-
     @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "a valid MOCK credential",
-            when = "list networks",
-            then = "getting back a network list")
-    public void testGetPlatformNetworksByCredentialName(MockedTestContext testContext) {
-        String credentialName = resourcePropertyProvider().getName();
-        testContext
-                .given(CredentialTestDto.class)
-                .withName(credentialName)
-                .when(credentialTestClient.createV4())
-                .given(PlatformNetworksTestDto.class)
-                .withCredentialName(credentialName)
-                .when(connectorTestClient.networks())
-                .validate();
     }
 
     @Test(dataProvider = "contextWithCredentialNameAndException")
