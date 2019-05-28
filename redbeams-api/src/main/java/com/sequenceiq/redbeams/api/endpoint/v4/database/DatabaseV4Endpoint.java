@@ -66,14 +66,14 @@ public interface DatabaseV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseOpDescription.DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_NOTES,
             nickname = "deleteDatabase")
-    DatabaseV4Response delete(@PathParam("name") String name);
+    DatabaseV4Response delete(@QueryParam("environmentCrn") String environmentCrn, @PathParam("name") String name);
 
     @DELETE
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseOpDescription.DELETE_MULTIPLE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_NOTES,
             nickname = "deleteDatabases")
-    DatabaseV4Responses deleteMultiple(Set<String> names);
+    DatabaseV4Responses deleteMultiple(@QueryParam("environmentCrn") String environmentCrn, Set<String> names);
 
     @GET
     @Path("/{name}/request")

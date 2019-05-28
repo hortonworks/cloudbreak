@@ -12,17 +12,21 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Where;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.redbeams.converter.CrnConverter;
+import com.sequenceiq.cloudbreak.common.archive.ArchivableResource;
+import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
+import com.sequenceiq.redbeams.converter.CrnConverter;
 
 @Entity
+@Where(clause = "archived = false")
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name", "deletionTimestamp", "environment_id"}))
-public class DatabaseConfig {
+public class DatabaseConfig implements ArchivableResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "databaseconfig_generator")
@@ -129,6 +133,10 @@ public class DatabaseConfig {
         return status;
     }
 
+    public boolean isUserManaged() {
+        return status == ResourceStatus.USER_MANAGED;
+    }
+
     public String getType() {
         return type;
     }
@@ -207,6 +215,10 @@ public class DatabaseConfig {
 
     public void setArchived(boolean archived) {
         this.archived = archived;
+    }
+
+    @Override
+    public void unsetRelationsToEntitiesToBeDeleted() {
     }
 
     public void setDeletionTimestamp(Long deletionTimestamp) {

@@ -121,8 +121,8 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
     public Set<DatabaseServerConfig> deleteMultipleByNameInWorkspace(Long workspaceId, String environmentId, Set<String> names) {
         Set<DatabaseServerConfig> resources = getByNamesInWorkspaceAndEnvironmentId(workspaceId, environmentId, names);
         return resources.stream()
-            .map(r -> delete(r))
-            .collect(Collectors.toSet());
+                .map(this::delete)
+                .collect(Collectors.toSet());
     }
 
     Set<DatabaseServerConfig> getByNamesInWorkspaceAndEnvironmentId(Long workspaceId, String environmentId,

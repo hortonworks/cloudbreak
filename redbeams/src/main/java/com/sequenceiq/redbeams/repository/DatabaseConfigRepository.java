@@ -1,22 +1,29 @@
 package com.sequenceiq.redbeams.repository;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
 import javax.transaction.Transactional;
 
-import com.sequenceiq.cloudbreak.workspace.repository.DisabledBaseRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByReturnValue;
 import com.sequenceiq.cloudbreak.workspace.resource.ResourceAction;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 
-import java.util.List;
-
 @EntityType(entityClass = DatabaseConfig.class)
 @Transactional(Transactional.TxType.REQUIRED)
-public interface DatabaseConfigRepository extends DisabledBaseRepository<DatabaseConfig, Long> {
+public interface DatabaseConfigRepository extends JpaRepository<DatabaseConfig, Long> {
 
+    // TODO check if checkPermission still works
     @CheckPermissionsByReturnValue(action = ResourceAction.READ)
-    DatabaseConfig findByEnvironmentIdAndName(String environmentId, String name);
+    Optional<DatabaseConfig> findByEnvironmentIdAndName(String environmentId, String name);
 
     @CheckPermissionsByReturnValue(action = ResourceAction.READ)
     List<DatabaseConfig> findByEnvironmentId(String environmentId);
+
+    @CheckPermissionsByReturnValue(action = ResourceAction.READ)
+    Set<DatabaseConfig> findAllByEnvironmentIdAndNameIn(String environmentId, Set<String> names);
 }
