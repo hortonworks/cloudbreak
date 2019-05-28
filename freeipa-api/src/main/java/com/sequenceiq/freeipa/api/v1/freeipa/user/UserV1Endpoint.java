@@ -6,14 +6,17 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UsersyncOperationDescriptions;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UserNotes;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UserOperationDescriptions;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.CreateUsersRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.CreateUsersResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SetPasswordRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SetPasswordResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUsersRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUsersResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUsersStatus;
 import com.sequenceiq.service.api.doc.ContentType;
 
 import io.swagger.annotations.Api;
@@ -26,18 +29,24 @@ public interface UserV1Endpoint {
     @POST
     @Path("sync")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UsersyncOperationDescriptions.SYNC, produces = ContentType.JSON, nickname = "synchronizeUsersV1")
+    @ApiOperation(value = UserOperationDescriptions.SYNC, notes = UserNotes.USER_NOTES, produces = ContentType.JSON, nickname = "synchronizeUsersV1")
     SynchronizeUsersResponse synchronizeUsers(SynchronizeUsersRequest request);
 
     @GET
     @Path("sync")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get status of latest synchronization", produces = ContentType.JSON, nickname = "getSyncUsersStatusV1")
-    SynchronizeUsersStatus getStatus();
+    @ApiOperation(value = UserOperationDescriptions.SYNC_STATUS, notes = UserNotes.USER_NOTES, produces = ContentType.JSON, nickname = "getSyncUsersStatusV1")
+    SynchronizeUsersResponse getStatus(@QueryParam("id") String syncId);
 
     @POST
     @Path("/{username}/password")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UsersyncOperationDescriptions.SET_PASSWORD, produces = ContentType.JSON, nickname = "setPasswordV1")
+    @ApiOperation(value = UserOperationDescriptions.SET_PASSWORD, notes = UserNotes.USER_NOTES, produces = ContentType.JSON, nickname = "setPasswordV1")
     SetPasswordResponse setPassword(@PathParam("username") String username, SetPasswordRequest request);
+
+    @POST
+    @Path("create")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UserOperationDescriptions.CREATE, notes = UserNotes.USER_NOTES, produces = ContentType.JSON, nickname = "createUsersV1")
+    CreateUsersResponse createUsers(CreateUsersRequest request);
 }

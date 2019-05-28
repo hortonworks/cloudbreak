@@ -19,6 +19,6 @@ public interface ClientTestV1Endpoint {
     @GET
     @Path("{id}/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Creates FreeIPA instance", produces = ContentType.JSON, nickname = "userShowV1")
+    @ApiOperation(value = "Retrieves user information", produces = ContentType.JSON, nickname = "userShowV1")
     String userShow(@PathParam("id") Long id, @PathParam("name") String name);
 }

@@ -7,11 +7,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.CreateUsersRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.CreateUsersResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SetPasswordRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SetPasswordResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUsersRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUsersResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUsersStatus;
 import com.sequenceiq.freeipa.service.user.PasswordService;
 import com.sequenceiq.freeipa.service.user.UserService;
 
@@ -28,31 +29,30 @@ public class UserV1Controller implements UserV1Endpoint {
 
     @Override
     public SynchronizeUsersResponse synchronizeUsers(SynchronizeUsersRequest request) {
-        LOGGER.info("synchronizeUsers() request = {}", request);
-
-        String accountId = "test_account";
-        try {
-            userService.synchronizeUsers(accountId, request);
-        } catch (Exception e) {
-            LOGGER.error("Failed to synchronizeUsers()", e);
-            throw new RuntimeException(e);
-        }
-
-        return new SynchronizeUsersResponse("Hello synchronizeUsers()!");
+        return userService.synchronizeUsers(request);
     }
 
     @Override
-    public SynchronizeUsersStatus getStatus() {
-        LOGGER.info("getStatus()");
-        return new SynchronizeUsersStatus("Hello getStatus()!");
+    public SynchronizeUsersResponse getStatus(String syncId) {
+        return userService.getSynchronizeUsersStatus(syncId);
     }
 
     @Override
     public SetPasswordResponse setPassword(String username, SetPasswordRequest request) {
-        LOGGER.info("setPassword() requested for user {}", username);
+        LOGGER.debug("setPassword() requested for user {}", username);
 
-        String accountId = "test_account";
+        return passwordService.setPassword(username, request.getPassword());
+    }
 
-        return passwordService.setPassword(accountId, username, request.getPassword());
+    @Override
+    public CreateUsersResponse createUsers(CreateUsersRequest request) {
+        try {
+            userService.createUsers(request);
+        } catch (Exception e) {
+            LOGGER.error("Failed to create users", e);
+            throw new RuntimeException(e);
+        }
+
+        return new CreateUsersResponse("Hello createUsers()!");
     }
 }

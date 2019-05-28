@@ -6,12 +6,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.swagger.annotations.ApiModel;
 
-@ApiModel("SynchronizeUsersV1Status")
+@ApiModel("CreateUsersV1Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SynchronizeUsersStatus {
+public class CreateUsersResponse {
     private final String value;
 
-    public SynchronizeUsersStatus(String value) {
+    public CreateUsersResponse(String value) {
         this.value = requireNonNull(value);
     }
 
