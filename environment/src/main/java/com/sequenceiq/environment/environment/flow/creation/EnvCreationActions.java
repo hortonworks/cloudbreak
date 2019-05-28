@@ -17,6 +17,7 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors;
@@ -41,7 +42,7 @@ public class EnvCreationActions {
             @Override
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
                 EnvironmentDto envDto = new EnvironmentDto();
-                envDto.setId(1L);
+                envDto.setId(payload.getResourceId());
                 LOGGER.info("NETWORK_CREATION_STARTED_STATE");
                 sendEvent(context.getFlowId(), CREATE_NETWORK_EVENT.selector(), envDto);
             }
@@ -54,7 +55,7 @@ public class EnvCreationActions {
             @Override
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
                 EnvironmentDto envDto = new EnvironmentDto();
-                envDto.setId(1L);
+                envDto.setId(payload.getResourceId());
                 LOGGER.info("RDBMS_CREATION_STARTED_STATE");
                 sendEvent(context.getFlowId(), CREATE_RDBMS_EVENT.selector(), envDto);
             }
@@ -67,7 +68,7 @@ public class EnvCreationActions {
             @Override
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
                 EnvironmentDto envDto = new EnvironmentDto();
-                envDto.setId(1L);
+                envDto.setId(payload.getResourceId());
                 LOGGER.info("FREEIPA_CREATION_STARTED_STATE");
                 sendEvent(context.getFlowId(), CREATE_FREEIPA_EVENT.selector(), envDto);
             }
@@ -79,6 +80,12 @@ public class EnvCreationActions {
         return new AbstractVpcCreateAction<>(Payload.class) {
             @Override
             protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) {
+                environmentService
+                        .findById(payload.getResourceId())
+                        .ifPresent(environment -> {
+                            environment.setStatus(EnvironmentStatus.AVAILABLE);
+                            environmentService.save(environment);
+                        });
                 LOGGER.info("ENV_CREATION_FINISHED_STATE");
                 sendEvent(context.getFlowId(), FINALIZE_ENV_CREATION_EVENT.event(), payload);
             }
@@ -90,6 +97,12 @@ public class EnvCreationActions {
         return new AbstractVpcCreateAction<>(Payload.class) {
             @Override
             protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) {
+                environmentService
+                        .findById(payload.getResourceId())
+                        .ifPresent(environment -> {
+                            environment.setStatus(EnvironmentStatus.CORRUPTED);
+                            environmentService.save(environment);
+                        });
                 LOGGER.info("ENV_CREATION_FAILED_STATE");
                 sendEvent(context.getFlowId(), HANDLED_FAILED_ENV_CREATION_EVENT.event(), payload);
             }

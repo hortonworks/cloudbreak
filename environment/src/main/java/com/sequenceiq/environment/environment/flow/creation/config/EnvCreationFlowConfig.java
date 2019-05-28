@@ -1,17 +1,17 @@
 package com.sequenceiq.environment.environment.flow.creation.config;
 
-import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.FREEIPA_CREATION_STARTED_STATE;
-import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.RDBMS_CREATION_STARTED_STATE;
-import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINISH_ENV_CREATION_EVENT;
-import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.HANDLED_FAILED_ENV_CREATION_EVENT;
-import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINALIZE_ENV_CREATION_EVENT;
-import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_FREEIPA_CREATION_EVENT;
-import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_NETWORK_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.ENV_CREATION_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.ENV_CREATION_FINISHED_STATE;
-import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.NETWORK_CREATION_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.FINAL_STATE;
+import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.FREEIPA_CREATION_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.INIT_STATE;
+import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.NETWORK_CREATION_STARTED_STATE;
+import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.RDBMS_CREATION_STARTED_STATE;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINALIZE_ENV_CREATION_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINISH_ENV_CREATION_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.HANDLED_FAILED_ENV_CREATION_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_FREEIPA_CREATION_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_NETWORK_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_RDBMS_CREATION_EVENT;
 
 import java.util.List;
