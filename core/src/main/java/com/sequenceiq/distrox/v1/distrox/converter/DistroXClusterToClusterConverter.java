@@ -8,8 +8,10 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
+import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -36,6 +38,12 @@ public class DistroXClusterToClusterConverter {
     @Inject
     private GatewayV1ToGatewayV4Converter gatewayConverter;
 
+    @Inject
+    private ProxyConfigDtoService proxyConfigDtoService;
+
+    @Inject
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
+
     public ClusterV4Request convert(DistroXClusterV1Request source) {
 
         Workspace workspace = workspaceService.getForCurrentUser();
@@ -50,7 +58,7 @@ public class DistroXClusterToClusterConverter {
         response.setBlueprintName(source.getBlueprintName());
         response.setUserName(source.getUserName());
         response.setPassword(source.getPassword());
-        response.setProxyName(source.getProxy());
+        response.setProxyConfigCrn(getProxyCrnByName(source));
         response.setCm(ifNotNullF(source.getCm(), cmConverter::convert));
         response.setCloudStorage(ifNotNullF(source.getCloudStorage(), cloudStorageConverter::convert));
         response.setValidateBlueprint(false);
@@ -58,5 +66,12 @@ public class DistroXClusterToClusterConverter {
         response.setCustomContainer(null);
         response.setCustomQueue(null);
         return response;
+    }
+
+    private String getProxyCrnByName(DistroXClusterV1Request source) {
+        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        //TODO use the dedicated endpoint when name and crn will be break down on the API level
+        return proxyConfigDtoService.get(source.getProxy(), accountId, userCrn).getCrn();
     }
 }

@@ -24,10 +24,12 @@ import com.sequenceiq.cloudbreak.domain.environment.Region;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 
 @Component
@@ -44,7 +46,7 @@ public class ClusterCreationEnvironmentValidator {
     @Inject
     private KerberosConfigService kerberosConfigService;
 
-    public ValidationResult validate(ClusterV4Request clusterRequest, Stack stack) {
+    public ValidationResult validate(ClusterV4Request clusterRequest, Stack stack, User user) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
         EnvironmentView stackEnv = stack.getEnvironment();
         if (stackEnv != null && !CollectionUtils.isEmpty(stackEnv.getRegionSet())
@@ -68,7 +70,7 @@ public class ClusterCreationEnvironmentValidator {
                 kerberosConfigService::getByNameForWorkspaceId,
                 KerberosConfig.class.getSimpleName());
         validateRdsConfigNames(clusterRequest.getDatabases(), resultBuilder, workspaceId);
-        validateProxyConfig(clusterRequest.getProxyConfigCrn(), stack.getWorkspace().getTenant().getName(), resultBuilder);
+        validateProxyConfig(clusterRequest.getProxyConfigCrn(), stack.getWorkspace().getTenant().getName(), resultBuilder, user.getUserCrn());
         return resultBuilder.build();
     }
 
@@ -127,12 +129,12 @@ public class ClusterCreationEnvironmentValidator {
         }
     }
 
-    private void validateProxyConfig(String resourceCrn, String accountId, ValidationResultBuilder resultBuilder) {
+    private void validateProxyConfig(String resourceCrn, String accountId, ValidationResultBuilder resultBuilder, String userCrn) {
         if (StringUtils.isNoneEmpty(resourceCrn)) {
             try {
-                proxyConfigDtoService.getByCrnAndAccountId(resourceCrn, accountId);
-            } catch (NotFoundException nfe) {
-                resultBuilder.error(String.format("Stack cannot use '%s' Proxy Config resource which doesn't exist in the same account.", resourceCrn));
+                proxyConfigDtoService.get(resourceCrn, accountId, userCrn);
+            } catch (CloudbreakServiceException ex) {
+                resultBuilder.error(String.format("The specified '%s' Proxy config resource couldn't be used: %s.", resourceCrn, ex.getMessage()));
             }
         }
     }

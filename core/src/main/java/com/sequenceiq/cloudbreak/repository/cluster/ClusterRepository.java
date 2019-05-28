@@ -12,18 +12,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.LdapConfig;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
+import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByReturnValue;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByWorkspaceId;
 import com.sequenceiq.cloudbreak.workspace.repository.check.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.workspace.repository.check.WorkspaceResourceType;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.dto.ProxyConfig;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @DisableHasPermission
 @Transactional(TxType.REQUIRED)
@@ -60,17 +59,6 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
 
     @CheckPermissionsByReturnValue
     Set<Cluster> findByLdapConfigAndStatusNot(LdapConfig ldapConfig, Status status);
-
-    @CheckPermissionsByReturnValue
-    @Query("SELECT c FROM Cluster c WHERE c.environment.id = :environmentId AND c.ldapConfig = :ldapConfig AND c.status != 'DELETE_COMPLETED'")
-    Set<Cluster> findByLdapConfigAndEnvironment(@Param("ldapConfig") LdapConfig ldapConfig, @Param("environmentId") Long environmentId);
-
-    @CheckPermissionsByReturnValue
-    Set<Cluster> findByProxyConfigAndStatusNot(ProxyConfig proxyConfig, Status status);
-
-    @CheckPermissionsByReturnValue
-    @Query("SELECT c FROM Cluster c WHERE c.environment.id = :environmentId AND c.proxyConfig = :proxyConfig AND c.status != 'DELETE_COMPLETED'")
-    Set<Cluster> findByProxyConfigAndEnvironment(@Param("proxyConfig") ProxyConfig proxyConfig, @Param("environmentId") Long environmentId);
 
     @CheckPermissionsByReturnValue
     @Query("SELECT c FROM Cluster c INNER JOIN c.rdsConfigs rc WHERE rc.id= :id AND c.status != 'DELETE_COMPLETED'")

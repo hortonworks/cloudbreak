@@ -19,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig.ProxyConfigBuilder;
@@ -34,6 +35,9 @@ public class ProxyConfigProviderTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private Workspace workspace;
 
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private Stack stack;
+
     @InjectMocks
     private ProxyConfigProvider proxyConfigProvider;
 
@@ -46,7 +50,9 @@ public class ProxyConfigProviderTest {
         cluster = new Cluster();
         servicePillar = new HashMap<>();
         cluster.setWorkspace(workspace);
+        cluster.setStack(stack);
         when(workspace.getTenant().getName()).thenReturn("tenantId");
+        when(stack.getCreator().getUserCrn()).thenReturn("aUserCrn");
     }
 
     @Test
@@ -100,7 +106,7 @@ public class ProxyConfigProviderTest {
         proxyConfigBuilder.withServerPort(3128);
         proxyConfigBuilder.withProtocol("http");
         cluster.setProxyConfigCrn("ANY_CRN");
-        when(proxyConfigDtoService.getByCrnAndAccountId(anyString(), anyString())).thenReturn(proxyConfigBuilder.build());
+        when(proxyConfigDtoService.get(anyString(), anyString(), anyString())).thenReturn(proxyConfigBuilder.build());
         proxyConfigProvider.decoratePillarWithProxyDataIfNeeded(servicePillar, cluster);
         SaltPillarProperties pillarProperties = servicePillar.get(ProxyConfigProvider.PROXY_KEY);
         assertNotNull(pillarProperties);
