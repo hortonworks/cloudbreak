@@ -6,7 +6,7 @@ import javax.ws.rs.client.WebTarget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractUserCrnServiceClient {
+public abstract class AbstractUserCrnServiceClient<T extends AbstractUserCrnServiceEndpoint> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractUserCrnServiceClient.class);
 
     private final Client client;
@@ -23,5 +23,5 @@ public abstract class AbstractUserCrnServiceClient {
         return webTarget;
     }
 
-    public abstract <T extends AbstractUserCrnServiceEndpoint> T withCrn(String crn);
+    public abstract T withCrn(String crn);
 }

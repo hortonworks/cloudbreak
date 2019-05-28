@@ -15,7 +15,7 @@ import com.sequenceiq.periscope.api.endpoint.v1.ConfigurationEndpoint;
 import com.sequenceiq.periscope.api.endpoint.v1.HistoryEndpoint;
 import com.sequenceiq.periscope.api.endpoint.v1.PolicyEndpoint;
 
-public class AutoscaleUserCrnClient extends AbstractUserCrnServiceClient {
+public class AutoscaleUserCrnClient extends AbstractUserCrnServiceClient<AutoscaleUserCrnClient.AutoscaleEndpoint> {
 
     private final Logger logger = LoggerFactory.getLogger(AutoscaleUserCrnClient.class);
 

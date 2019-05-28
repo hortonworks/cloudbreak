@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.WorkspaceAwareUtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.WorkspaceV4Endpoint;
 
-public class CloudbreakUserCrnClient extends AbstractUserCrnServiceClient {
+public class CloudbreakUserCrnClient extends AbstractUserCrnServiceClient<CloudbreakUserCrnClient.CloudbreakEndpoint> {
     public CloudbreakUserCrnClient(String serviceAddress, ConfigKey configKey, String apiRoot) {
         super(serviceAddress, configKey, apiRoot);
     }
