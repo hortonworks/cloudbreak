@@ -12,10 +12,22 @@ public class PlatformRecommendation {
 
     private DiskTypes diskTypes;
 
-    public PlatformRecommendation(Map<String, VmType> recommendations, Set<VmType> virtualMachines, DiskTypes diskTypes) {
+    private Map<String, InstanceCount> instanceCounts;
+
+    private GatewayRecommendation gatewayRecommendation;
+
+    public PlatformRecommendation(
+            Map<String, VmType> recommendations,
+            Set<VmType> virtualMachines,
+            DiskTypes diskTypes,
+            Map<String, InstanceCount> instanceCounts,
+            GatewayRecommendation gatewayRecommendation
+    ) {
         this.recommendations = recommendations;
         this.virtualMachines = virtualMachines;
         this.diskTypes = diskTypes;
+        this.instanceCounts = instanceCounts;
+        this.gatewayRecommendation = gatewayRecommendation;
     }
 
     public Map<String, VmType> getRecommendations() {
@@ -40,5 +52,13 @@ public class PlatformRecommendation {
 
     public void setDiskTypes(DiskTypes diskTypes) {
         this.diskTypes = diskTypes;
+    }
+
+    public Map<String, InstanceCount> getInstanceCounts() {
+        return instanceCounts;
+    }
+
+    public GatewayRecommendation getGatewayRecommendation() {
+        return gatewayRecommendation;
     }
 }

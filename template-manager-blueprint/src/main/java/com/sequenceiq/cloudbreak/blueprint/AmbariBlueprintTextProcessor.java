@@ -13,13 +13,18 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import javax.annotation.Nonnull;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -28,6 +33,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.sequenceiq.cloudbreak.cloud.model.GatewayRecommendation;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
@@ -67,9 +74,21 @@ public class AmbariBlueprintTextProcessor implements BlueprintTextProcessor {
 
     private static final String NAME_NODE = "name";
 
+    private static final String CARDINALITY_NODE = "cardinality";
+
     private static final String ROLE_CONFIG_GROUPS = "roleConfigGroups";
 
     private static final String ROLE_TYPE = "roleType";
+
+    private static final String AMBARI_SERVER = "AMBARI_SERVER";
+
+    private static final Pattern INTERVAL_PATTERN = Pattern.compile("(\\d+)-(\\d+)");
+
+    private static final Pattern MINIMUM_PATTERN = Pattern.compile("(\\d+)\\+");
+
+    private static final Pattern NUMBER_PATTERN = Pattern.compile("(\\d+)");
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AmbariBlueprintTextProcessor.class);
 
     private ObjectNode blueprint;
 
@@ -700,17 +719,7 @@ public class AmbariBlueprintTextProcessor implements BlueprintTextProcessor {
 
     @Override
     public BlueprintTextProcessor addComponentToHostgroups(String component, Collection<String> hostGroupNames) {
-        ArrayNode hostGroupsNode = getArrayFromObjectNodeByPath(blueprint, HOST_GROUPS_NODE);
-        Iterator<JsonNode> hostGroups = hostGroupsNode.elements();
-        while (hostGroups.hasNext()) {
-            JsonNode hostGroupNode = hostGroups.next();
-            String hostGroupName = hostGroupNode.path(NAME_NODE).textValue();
-            if (hostGroupNames.contains(hostGroupName) && !componentExistsInHostgroup(component, hostGroupNode)) {
-                ArrayNode components = getArrayFromJsonNodeByPath(hostGroupNode, COMPONENTS_NODE);
-                components.addPOJO(new ComponentElement(component));
-            }
-        }
-        return this;
+        return addComponentToHostgroups(component, hostGroupNames::contains);
     }
 
     @Override
@@ -726,6 +735,62 @@ public class AmbariBlueprintTextProcessor implements BlueprintTextProcessor {
             }
         }
         return this;
+    }
+
+    @Override
+    public Map<String, InstanceCount> getCardinalityByHostGroup() {
+        Map<String, InstanceCount> result = new TreeMap<>();
+        ArrayNode hostGroupsNode = getArrayFromObjectNodeByPath(blueprint, HOST_GROUPS_NODE);
+        Iterator<JsonNode> hostGroups = hostGroupsNode.elements();
+        while (hostGroups.hasNext()) {
+            JsonNode hostGroupNode = hostGroups.next();
+            String hostGroupName = hostGroupNode.path(NAME_NODE).textValue();
+            String cardinality = hostGroupNode.path(CARDINALITY_NODE).textValue();
+            parseCardinality(hostGroupName, cardinality).ifPresent(count -> result.put(hostGroupName, count));
+        }
+        return result;
+    }
+
+    @Override
+    public GatewayRecommendation recommendGateway() {
+        Set<String> ambariServerHosts = getHostGroupsWithComponent(AMBARI_SERVER);
+        if (!ambariServerHosts.isEmpty()) {
+            return new GatewayRecommendation(ambariServerHosts);
+        }
+
+        return new GatewayRecommendation(Set.of());
+    }
+
+    private Optional<InstanceCount> parseCardinality(String hostGroup, String cardinality) {
+        if (StringUtils.isBlank(cardinality)) {
+            return Optional.empty();
+        }
+
+        try {
+            Matcher matcher = INTERVAL_PATTERN.matcher(cardinality);
+            if (matcher.matches()) {
+                int minimumCount = Integer.parseInt(matcher.group(1));
+                int maximumCount = Integer.parseInt(matcher.group(2));
+                return Optional.of(InstanceCount.of(minimumCount, maximumCount));
+            }
+
+            matcher = MINIMUM_PATTERN.matcher(cardinality);
+            if (matcher.matches()) {
+                int minimumCount = Integer.parseInt(matcher.group(1));
+                return Optional.of(InstanceCount.atLeast(minimumCount));
+            }
+
+            matcher = NUMBER_PATTERN.matcher(cardinality);
+            if (matcher.matches()) {
+                int count = Integer.parseInt(matcher.group(1));
+                return Optional.of(InstanceCount.exactly(count));
+            }
+
+            LOGGER.info("Failed to match cardinality {} of host group {}", cardinality, hostGroup);
+            return Optional.empty();
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
     }
 
     public AmbariBlueprintTextProcessor setSecurityType(String type) {

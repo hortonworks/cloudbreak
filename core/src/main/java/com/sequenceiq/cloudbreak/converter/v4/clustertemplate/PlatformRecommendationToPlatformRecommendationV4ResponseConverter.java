@@ -5,12 +5,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.RecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.DiskV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.GatewayRecommendationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.InstanceCountV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VmTypeV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
@@ -42,6 +45,17 @@ public class PlatformRecommendationToPlatformRecommendationV4ResponseConverter
                 }
             }
         }
-        return new RecommendationV4Response(result, vmTypes, diskResponses);
+
+        Map<String, InstanceCountV4Response> instanceCounts = new TreeMap<>();
+        source.getInstanceCounts().forEach((hostGroupName, instanceCount) ->
+                instanceCounts.put(hostGroupName, new InstanceCountV4Response(
+                        instanceCount.getMinimumCount(),
+                        instanceCount.getMaximumCount()
+                ))
+        );
+
+        GatewayRecommendationV4Response gateway = new GatewayRecommendationV4Response(source.getGatewayRecommendation().getHostGroups());
+
+        return new RecommendationV4Response(result, vmTypes, diskResponses, instanceCounts, gateway);
     }
 }

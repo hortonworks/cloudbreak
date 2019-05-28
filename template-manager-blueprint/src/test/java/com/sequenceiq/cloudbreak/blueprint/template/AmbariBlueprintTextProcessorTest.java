@@ -22,11 +22,13 @@ import org.junit.rules.ExpectedException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.cloud.model.GatewayRecommendation;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.processor.configuration.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 public class AmbariBlueprintTextProcessorTest {
 
@@ -450,6 +452,29 @@ public class AmbariBlueprintTextProcessorTest {
         assertEquals(11L, result.size());
         assertEquals("true", result.get("hive-site").get("hive.exec.compress.output"));
         assertEquals("0.7", result.get("mapred-site").get("mapreduce.job.reduce.slowstart.completedmaps"));
+    }
+
+    @Test
+    public void getCardinalityByHostGroup() throws IOException {
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-cardinality.bp");
+        AmbariBlueprintTextProcessor subject = underTest.get(testBlueprint);
+
+        Map<String, InstanceCount> expected = Map.of(
+                "master", InstanceCount.exactly(2),
+                "worker", InstanceCount.atLeast(3),
+                "compute", InstanceCount.ZERO_OR_MORE,
+                "gateway", InstanceCount.of(0, 1)
+        );
+        assertEquals(expected, subject.getCardinalityByHostGroup());
+    }
+
+    @Test
+    public void recommendGateway() throws IOException {
+        AmbariBlueprintTextProcessor subject = underTest.get(FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-gateway.bp"));
+        assertEquals(new GatewayRecommendation(Set.of("master")), subject.recommendGateway());
+
+        subject = underTest.get(FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-cardinality.bp"));
+        assertEquals(new GatewayRecommendation(Set.of()), subject.recommendGateway());
     }
 
     private boolean isComponentExistsInHostgroup(String component, JsonNode hostGroupNode) {
