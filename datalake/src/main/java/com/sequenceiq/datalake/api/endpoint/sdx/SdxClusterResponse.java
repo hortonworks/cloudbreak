@@ -4,13 +4,24 @@ import com.sequenceiq.datalake.entity.SdxClusterStatus;
 
 public class SdxClusterResponse {
 
+    private String sdxCrn;
+
     private String sdxName;
 
     private SdxClusterStatus status;
 
-    public SdxClusterResponse(String sdxName, SdxClusterStatus status) {
+    public SdxClusterResponse(String sdxCrn, String sdxName, SdxClusterStatus status) {
+        this.sdxCrn = sdxCrn;
         this.sdxName = sdxName;
         this.status = status;
+    }
+
+    public String getSdxCrn() {
+        return sdxCrn;
+    }
+
+    public void setSdxCrn(String sdxCrn) {
+        this.sdxCrn = sdxCrn;
     }
 
     public SdxClusterStatus getStatus() {

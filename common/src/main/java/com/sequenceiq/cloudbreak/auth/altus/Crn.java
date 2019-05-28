@@ -215,6 +215,7 @@ public class Crn {
     public enum ResourceType {
         ACCESS_KEY("accesskey"),
         CLUSTER("cluster"),
+        SDX_CLUSTER("sdxcluster"),
         DIRECTOR("director"),
         ENVIRONMENT("environment"),
         JOB("job"),

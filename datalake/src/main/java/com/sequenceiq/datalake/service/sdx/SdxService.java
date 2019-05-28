@@ -3,7 +3,9 @@ package com.sequenceiq.datalake.service.sdx;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -60,6 +62,7 @@ public class SdxService {
 
     public SdxCluster createSdx(final String userCrn, final String sdxName, final SdxClusterRequest sdxClusterRequest) {
         SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setCrn(createCrn(getAccountIdFromCrn(userCrn)));
         sdxCluster.setClusterName(sdxName);
         sdxCluster.setAccountId(getAccountIdFromCrn(userCrn));
         sdxCluster.setClusterShape(sdxClusterRequest.getClusterShape());
@@ -109,6 +112,16 @@ public class SdxService {
             LOGGER.info("Can not find sdx cluster");
             throw new BadRequestException("Can not find sdx cluster");
         });
+    }
+
+    public String createCrn(@Nonnull String accountId) {
+        return Crn.builder()
+                .setService(Crn.Service.SDX)
+                .setAccountId(accountId)
+                .setResourceType(Crn.ResourceType.SDX_CLUSTER)
+                .setResource(UUID.randomUUID().toString())
+                .build()
+                .toString();
     }
 
     private String getAccountIdFromCrn(String userCrn) {
