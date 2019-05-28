@@ -28,6 +28,8 @@ public class SdxCluster {
     @NotNull
     private String accountId;
 
+    private String crn;
+
     @NotNull
     private String clusterName;
 
@@ -62,6 +64,14 @@ public class SdxCluster {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getCrn() {
+        return crn;
+    }
+
+    public void setCrn(String crn) {
+        this.crn = crn;
     }
 
     public String getAccountId() {
