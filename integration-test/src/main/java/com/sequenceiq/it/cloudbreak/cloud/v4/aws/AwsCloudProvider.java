@@ -4,19 +4,15 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.AwsCredentialV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.KeyBasedCredentialParameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.parameters.aws.RoleBasedCredentialParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AwsStackV4Parameters;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
-import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 
 @Component
@@ -86,21 +82,6 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public CredentialTestDto credential(CredentialTestDto credential) {
-        String credentialType = awsProperties.getCredential().getType();
-        AwsCredentialV4Parameters parameters;
-        if (KEY_BASED_CREDENTIAL.equalsIgnoreCase(credentialType)) {
-            parameters = awsCredentialDetailsKey();
-        } else {
-            parameters = awsCredentialDetailsArn();
-        }
-        return credential
-                .withDescription(commonCloudProperties().getDefaultCredentialDescription())
-                .withCloudPlatform(CloudPlatform.AWS.name())
-                .withAwsParameters(parameters);
-    }
-
-    @Override
     public String region() {
         return awsProperties.getRegion();
     }
@@ -125,25 +106,5 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     public String getBlueprintName() {
         return awsProperties.getDefaultBlueprintName();
-    }
-
-    public AwsCredentialV4Parameters awsCredentialDetailsArn() {
-        AwsCredentialV4Parameters parameters = new AwsCredentialV4Parameters();
-        RoleBasedCredentialParameters roleBasedCredentialParameters = new RoleBasedCredentialParameters();
-        String roleArn = awsProperties.getCredential().getRoleArn();
-        roleBasedCredentialParameters.setRoleArn(roleArn);
-        parameters.setRoleBased(roleBasedCredentialParameters);
-        return parameters;
-    }
-
-    public AwsCredentialV4Parameters awsCredentialDetailsKey() {
-        AwsCredentialV4Parameters parameters = new AwsCredentialV4Parameters();
-        KeyBasedCredentialParameters keyBasedCredentialParameters = new KeyBasedCredentialParameters();
-        String accessKeyId = awsProperties.getCredential().getAccessKeyId();
-        keyBasedCredentialParameters.setAccessKey(accessKeyId);
-        String secretKey = awsProperties.getCredential().getSecretKey();
-        keyBasedCredentialParameters.setSecretKey(secretKey);
-        parameters.setKeyBased(keyBasedCredentialParameters);
-        return parameters;
     }
 }
