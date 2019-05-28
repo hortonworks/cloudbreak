@@ -439,19 +439,26 @@ public class ClusterHostServiceRunner {
         }
         gateway.put("kerberos", cluster.getKerberosConfig() != null);
 
-        List<String> serviceNames = blueprintService.isAmbariBlueprint(cluster.getBlueprint()) ? ExposedService.getAllServiceNameForAmbari()
-                : ExposedService.getAllServiceNameForCM();
+        boolean ambariBlueprint = blueprintService.isAmbariBlueprint(cluster.getBlueprint());
+        List<String> serviceNames = ambariBlueprint ? ExposedService.getAllServiceNameForAmbari() : ExposedService.getAllServiceNameForCM();
         Map<String, List<String>> serviceLocation = componentLocator.getComponentLocation(cluster, serviceNames);
         List<String> rangerLocations = serviceLocation.get(ExposedService.RANGER.getCmServiceName());
-        if (rangerLocations != null && !rangerLocations.isEmpty()) {
+        if (!CollectionUtils.isEmpty(rangerLocations)) {
             serviceLocation.put(ExposedService.RANGER.getCmServiceName(), getSingleRangerFqdn(gatewayConfig.getHostname(), rangerLocations));
+        }
+        if (!ambariBlueprint) {
+            serviceLocation.put(ExposedService.CLOUDERA_MANAGER.getCmServiceName(), asList(gatewayConfig.getHostname()));
         }
         gateway.put("location", serviceLocation);
         servicePillar.put("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
     }
 
     private List<String> getSingleRangerFqdn(String primaryGatewayFqdn, List<String> rangerLocations) {
-        return rangerLocations.contains(primaryGatewayFqdn) ? List.of(primaryGatewayFqdn) : List.of(rangerLocations.iterator().next());
+        return rangerLocations.contains(primaryGatewayFqdn) ? asList(primaryGatewayFqdn) : asList(rangerLocations.iterator().next());
+    }
+
+    private List<String> asList(String value) {
+        return List.of(value);
     }
 
     private List<Map<String, Object>> getTopologies(Gateway clusterGateway) throws IOException {
