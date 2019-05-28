@@ -7,7 +7,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnv
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 
 @Prototype
 public class EnvironmentSettingsV4TestDto extends AbstractCloudbreakTestDto<EnvironmentSettingsV4Request, DetailedEnvironmentV4Response,
@@ -38,12 +37,7 @@ public class EnvironmentSettingsV4TestDto extends AbstractCloudbreakTestDto<Envi
 
     @Override
     public EnvironmentSettingsV4TestDto valid() {
-        CredentialTestDto credentialTestDto = getTestContext().get(CredentialTestDto.class);
-        if (credentialTestDto == null) {
-            throw new IllegalArgumentException("Credential is mandatory for EnvironmentSettings");
-        }
-        return withName(resourceProperyProvider().getName())
-                .withCredentialName(credentialTestDto.getName());
+        return withName(resourceProperyProvider().getName());
     }
 
     public EnvironmentSettingsV4TestDto withName(String name) {

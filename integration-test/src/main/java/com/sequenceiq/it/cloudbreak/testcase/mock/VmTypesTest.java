@@ -9,15 +9,12 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.client.ConnectorTestClient;
-import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.connector.PlatformRegionTestDto;
-import com.sequenceiq.it.cloudbreak.dto.connector.PlatformVmTypesTestDto;
-import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
 public class VmTypesTest extends AbstractIntegrationTest {
@@ -25,29 +22,9 @@ public class VmTypesTest extends AbstractIntegrationTest {
     @Inject
     private ConnectorTestClient connectorTestClient;
 
-    @Inject
-    private CredentialTestClient credentialTestClient;
-
     @BeforeMethod
     public void beforeMethod(Object[] data) {
         createDefaultUser((TestContext) data[0]);
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "a credential with random name",
-            when = "retrive platform VMs by the credential name",
-            then = "list of platform VMs")
-    public void testGetPlatformVmtypesByCredentialName(MockedTestContext testContext) {
-        String credentialName = resourcePropertyProvider().getName();
-        testContext
-                .given(CredentialTestDto.class)
-                .withName(credentialName)
-                .when(credentialTestClient.createV4())
-                .given(PlatformVmTypesTestDto.class)
-                .withCredentialName(credentialName)
-                .when(connectorTestClient.vmTypes())
-                .validate();
     }
 
     @Test(dataProvider = "contextWithCredentialNameAndException")

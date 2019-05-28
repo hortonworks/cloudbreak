@@ -7,7 +7,6 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.log.Log;
 
 public class CredentialGetAction implements Action<CredentialTestDto, CloudbreakClient> {
 
@@ -15,13 +14,13 @@ public class CredentialGetAction implements Action<CredentialTestDto, Cloudbreak
 
     @Override
     public CredentialTestDto action(TestContext testContext, CredentialTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
-        Log.log(LOGGER, String.format(" Name: %s", testDto.getRequest().getName()));
-        Log.logJSON(LOGGER, " Credential get request:\n", testDto.getRequest());
-        testDto.setResponse(
-                cloudbreakClient.getCloudbreakClient()
-                        .credentialV4Endpoint()
-                        .get(cloudbreakClient.getWorkspaceId(), testDto.getName()));
-        Log.logJSON(LOGGER, " Credential get successfully:\n", testDto.getResponse());
+        LOGGER.info(String.format(" Name: %s", testDto.getRequest().getName()));
+//        Log.logJSON(LOGGER, " Credential get request:\n", testDto.getRequest());
+//        testDto.setResponse(
+//                cloudbreakClient.getCloudbreakClient()
+//                        .credentialV4Endpoint()
+//                        .get(cloudbreakClient.getWorkspaceId(), testDto.getName()));
+//        Log.logJSON(LOGGER, " Credential get successfully:\n", testDto.getResponse());
         return testDto;
     }
 }

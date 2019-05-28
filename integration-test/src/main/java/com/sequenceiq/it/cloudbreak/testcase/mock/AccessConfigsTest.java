@@ -8,39 +8,17 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.client.ConnectorTestClient;
-import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.dto.connector.PlatformAccessConfigsTestDto;
-import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
 public class AccessConfigsTest extends AbstractIntegrationTest {
 
     @Inject
     private ConnectorTestClient connectorTestClient;
-
-    @Inject
-    private CredentialTestClient credentialTestClient;
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "a valid MOCK credential",
-            when = "calling get access config",
-            then = "valid access config should be returned for MOCK")
-    public void testGetAccessConfigsByCredentialName(MockedTestContext testContext) {
-        String credentialName = resourcePropertyProvider().getName();
-        testContext
-                .given(CredentialTestDto.class)
-                .withName(credentialName)
-                .when(credentialTestClient.createV4(), RunningParameter.key(credentialName))
-                .given(PlatformAccessConfigsTestDto.class)
-                .withCredentialName(credentialName)
-                .when(connectorTestClient.accessConfigs(), RunningParameter.key(credentialName))
-                .validate();
-    }
 
     @Test(dataProvider = "contextWithCredentialNameAndException")
     public void testGetAccessConfigsByCredentialNameWhenCredentialIsInvalid(

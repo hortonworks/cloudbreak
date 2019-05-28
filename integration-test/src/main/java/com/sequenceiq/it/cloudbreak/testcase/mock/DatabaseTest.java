@@ -45,7 +45,6 @@ public class DatabaseTest extends AbstractIntegrationTest {
     @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
-        createDefaultCredential(testContext);
         createDefaultEnvironment(testContext);
     }
 

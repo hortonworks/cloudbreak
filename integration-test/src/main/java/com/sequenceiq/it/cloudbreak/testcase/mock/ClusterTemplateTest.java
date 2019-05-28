@@ -57,7 +57,6 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
     @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
-        createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
     }
