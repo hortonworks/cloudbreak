@@ -7,7 +7,6 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.log.Log;
 
 public class CredentialModifyAction implements Action<CredentialTestDto, CloudbreakClient> {
 
@@ -15,13 +14,13 @@ public class CredentialModifyAction implements Action<CredentialTestDto, Cloudbr
 
     @Override
     public CredentialTestDto action(TestContext testContext, CredentialTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
-        Log.logJSON(LOGGER, " Credential modifyV4 request:\n", testDto.getRequest());
-        testDto.setResponse(
-                cloudbreakClient.getCloudbreakClient()
-                        .credentialV4Endpoint()
-                        .put(cloudbreakClient.getWorkspaceId(), testDto.getRequest()));
-        Log.logJSON(LOGGER, " Credential modified successfully:\n", testDto.getResponse());
-        Log.log(LOGGER, String.format(" ID: %s", testDto.getResponse().getId()));
+//        Log.logJSON(LOGGER, " Credential modifyV4 request:\n", testDto.getRequest());
+//        testDto.setResponse(
+//                cloudbreakClient.getCloudbreakClient()
+//                        .credentialV4Endpoint()
+//                        .put(cloudbreakClient.getWorkspaceId(), testDto.getRequest()));
+//        Log.logJSON(LOGGER, " Credential modified successfully:\n", testDto.getResponse());
+//        Log.log(LOGGER, String.format(" ID: %s", testDto.getResponse().getId()));
 
         return testDto;
     }
