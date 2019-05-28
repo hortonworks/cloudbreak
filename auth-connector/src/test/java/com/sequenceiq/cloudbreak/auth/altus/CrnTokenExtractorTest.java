@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.springframework.security.core.Authentication;
 
 import com.google.common.collect.Iterators;
+import com.sequenceiq.cloudbreak.auth.security.token.CrnTokenExtractor;
 
 public class CrnTokenExtractorTest {
 

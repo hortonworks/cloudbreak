@@ -9,7 +9,7 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import org.glassfish.jersey.client.proxy.WebResourceFactory;
 
-import com.sequenceiq.cloudbreak.auth.altus.CrnTokenExtractor;
+import com.sequenceiq.cloudbreak.auth.security.token.CrnTokenExtractor;
 
 public abstract class AbstractUserCrnServiceEndpoint {
     private static final Form EMPTY_FORM = new Form();

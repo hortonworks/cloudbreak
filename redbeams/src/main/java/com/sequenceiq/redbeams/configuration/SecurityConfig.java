@@ -17,7 +17,7 @@ import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecur
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
-import com.sequenceiq.cloudbreak.auth.altus.CrnTokenExtractor;
+import com.sequenceiq.cloudbreak.auth.security.token.CrnTokenExtractor;
 import com.sequenceiq.cloudbreak.auth.security.ScimAccountGroupReaderFilter;
 import com.sequenceiq.redbeams.service.security.TenantBasedPermissionEvaluator;
 
