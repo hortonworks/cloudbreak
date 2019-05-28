@@ -6,12 +6,14 @@ import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 
 public class DisabledAuthenticationService implements AuthenticationService {
 
+    private final DisabledAuthCbUserProvider disabledAuthCbUserProvider;
+
+    public DisabledAuthenticationService(DisabledAuthCbUserProvider disabledAuthCbUserProvider) {
+        this.disabledAuthCbUserProvider = disabledAuthCbUserProvider;
+    }
+
     @Override
     public CloudbreakUser getCloudbreakUser(OAuth2Authentication auth) {
-        return new CloudbreakUser("disabledAuthenticationUserId",
-                "disabledAuthenticationUserCrn",
-                "disabledAuthenticationUsername",
-                "disabledAuth@cloudera.com",
-                "cloudera");
+        return disabledAuthCbUserProvider.getCloudbreakUser();
     }
 }

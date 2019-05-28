@@ -3,7 +3,6 @@ package com.sequenceiq.environment.environment.v1;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
@@ -15,6 +14,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
+import com.sequenceiq.environment.configuration.security.ThreadLocalUserCrnProvider;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
@@ -27,22 +27,22 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 @Component
 public class EnvironmentApiConverter {
 
-    private final AuthenticatedUserService authenticatedUserService;
+    private final ThreadLocalUserCrnProvider threadLocalUserCrnProvider;
 
     private final RegionConverter regionConverter;
 
     private final ConversionService conversionService;
 
-    public EnvironmentApiConverter(AuthenticatedUserService authenticatedUserService, RegionConverter regionConverter,
+    public EnvironmentApiConverter(ThreadLocalUserCrnProvider threadLocalUserCrnProvider, RegionConverter regionConverter,
             ConversionService conversionService) {
-        this.authenticatedUserService = authenticatedUserService;
+        this.threadLocalUserCrnProvider = threadLocalUserCrnProvider;
         this.regionConverter = regionConverter;
         this.conversionService = conversionService;
     }
 
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
         EnvironmentCreationDto.EnvironmentCreationDtoBuilder builder = EnvironmentCreationDto.EnvironmentCreationDtoBuilder.anEnvironmentCreationDto()
-                .withAccountId(authenticatedUserService.getAccountId())
+                .withAccountId(threadLocalUserCrnProvider.getAccountId())
                 .withName(request.getName())
                 .withDescription(request.getDescription())
                 .withCloudPlatform(request.getCloudPlatform())
@@ -146,7 +146,7 @@ public class EnvironmentApiConverter {
     public EnvironmentEditDto initEditDto(EnvironmentEditRequest request) {
         EnvironmentEditDto.EnvironmentEditDtoBuilder builder = EnvironmentEditDto.EnvironmentEditDtoBuilder.anEnvironmentEditDto()
                 .withDescription(request.getDescription())
-                .withAccountId(authenticatedUserService.getAccountId())
+                .withAccountId(threadLocalUserCrnProvider.getAccountId())
                 .withRegions(request.getRegions());
         NullUtil.ifNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
         NullUtil.ifNotNull(request.getLocation(), location -> builder.withLocation(locationRequestToDto(location)));

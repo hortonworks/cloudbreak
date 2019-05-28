@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.auth.security.authentication.DisabledAuthenticationService;
 
 @Configuration
 public class CommonRemoteTokenConfig {
@@ -17,7 +16,7 @@ public class CommonRemoteTokenConfig {
     private GrpcUmsClient umsClient;
 
     @Bean
-    @ConditionalOnMissingBean({DisabledAuthenticationService.class, ResourceServerTokenServices.class})
+    @ConditionalOnMissingBean(ResourceServerTokenServices.class)
     public ResourceServerTokenServices remoteTokenServices() {
         return new CommonCachedRemoteTokenService(umsClient);
     }

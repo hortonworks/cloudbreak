@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.auth.altus;
+package com.sequenceiq.cloudbreak.auth.security.token;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -6,6 +6,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.provider.authentication.BearerTokenExtractor;
 import org.springframework.security.oauth2.provider.authentication.TokenExtractor;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
+
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 
 public class CrnTokenExtractor implements TokenExtractor {
 

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.auth.security.authentication;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -14,8 +15,14 @@ public class AuthenticationModeConfiguration {
 
     @Bean
     @ConditionalOnProperty(name = CB_AUTHENTICATION_DISABLED, havingValue = "true")
-    public AuthenticationService disabledAuthenticationService() {
-        return new DisabledAuthenticationService();
+    public DisabledAuthCbUserProvider disabledAuthCbUserProvider() {
+        return new DisabledAuthCbUserProvider();
+    }
+
+    @Bean
+    @ConditionalOnBean(DisabledAuthCbUserProvider.class)
+    public AuthenticationService disabledAuthenticationService(DisabledAuthCbUserProvider disabledAuthCbUserProvider) {
+        return new DisabledAuthenticationService(disabledAuthCbUserProvider);
     }
 
     @Bean
