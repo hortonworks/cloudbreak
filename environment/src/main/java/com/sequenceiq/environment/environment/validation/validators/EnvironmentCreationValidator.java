@@ -1,9 +1,6 @@
 package com.sequenceiq.environment.environment.validation.validators;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
@@ -15,7 +12,6 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.network.dto.NetworkDto;
-import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 
 @Component
 public class EnvironmentCreationValidator {
@@ -33,21 +29,10 @@ public class EnvironmentCreationValidator {
     public ValidationResult validate(Environment environment, EnvironmentCreationDto creationDto, CloudRegions cloudRegions) {
         String cloudPlatform = environment.getCloudPlatform();
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        validateProxyConfigs(environment, creationDto, resultBuilder);
         environmentRegionValidator.validateRegions(creationDto.getRegions(), cloudRegions, cloudPlatform, resultBuilder);
         environmentRegionValidator.validateLocation(creationDto.getLocation(), creationDto.getRegions(), environment, resultBuilder);
         validateNetwork(creationDto, cloudPlatform, resultBuilder);
         return resultBuilder.build();
-    }
-
-    private void validateProxyConfigs(Environment subject, EnvironmentCreationDto request, ValidationResultBuilder resultBuilder) {
-        if (subject.getProxyConfigs().size() < request.getProxyNames().size()) {
-            Set<String> foundProxyConfigs = subject.getProxyConfigs().stream().map(ProxyConfig::getName).collect(Collectors.toSet());
-            Set<String> requestedProxyConfigs = new HashSet<>(request.getProxyNames());
-            requestedProxyConfigs.removeAll(foundProxyConfigs);
-            resultBuilder.error(String.format("The following Proxy config(s) could not be found in the workspace: [%s]",
-                    String.join(", ", requestedProxyConfigs)));
-        }
     }
 
     private void validateNetwork(EnvironmentCreationDto request, String cloudPlatform, ValidationResultBuilder resultBuilder) {
