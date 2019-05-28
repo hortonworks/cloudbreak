@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.api.v1.kerberos.doc;
 
 public class KerberosConfigModelDescription {
-    public static final String KERBEROS_ADMIN = "kerberos admin user";
     public static final String KERBEROS_PASSWORD = "kerberos admin password";
     public static final String KERBEROS_URL = "kerberos KDC server URL";
     public static final String KERBEROS_ADMIN_URL = "kerberos admin server URL";

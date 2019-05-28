@@ -30,6 +30,10 @@ public class KerberosConfigService extends AbstractArchivistService<KerberosConf
 
     public KerberosConfig createKerberosConfig(KerberosConfig kerberosConfig) {
         String accountId = userCrnService.getCurrentAccountId();
+        return createKerberosConfig(kerberosConfig, accountId);
+    }
+
+    public KerberosConfig createKerberosConfig(KerberosConfig kerberosConfig, String accountId) {
         kerberosConfig.setAccountId(accountId);
         kerberosConfig.setResourceCrn(createCrn(kerberosConfig.getAccountId()));
         checkIfExists(kerberosConfig);
@@ -44,6 +48,10 @@ public class KerberosConfigService extends AbstractArchivistService<KerberosConf
 
     public void delete(String environmentId) {
         String accountId = userCrnService.getCurrentAccountId();
+        delete(environmentId, accountId);
+    }
+
+    public void delete(String environmentId, String accountId) {
         Optional<KerberosConfig> kerberosConfig = kerberosConfigRepository.findByAccountIdAndEnvironmentId(accountId, environmentId);
         kerberosConfig.ifPresentOrElse(this::delete, () -> {
             throw notFound("KerberosConfig for environment", environmentId).get();

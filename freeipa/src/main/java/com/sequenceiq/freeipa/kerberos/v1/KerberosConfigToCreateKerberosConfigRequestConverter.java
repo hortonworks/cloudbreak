@@ -79,7 +79,6 @@ public class KerberosConfigToCreateKerberosConfigRequestConverter {
     }
 
     private void fillRequestWithCommonFields(KerberosDescriptorBase target, KerberosConfig source) {
-        target.setAdmin(getFakeSecretIfNotNull(source.getAdmin(), FAKE_ADMIN_POSTFIX));
         target.setDomain(source.getDomain());
         target.setNameServers(source.getNameServers());
         target.setPassword(getFakeSecretIfNotNull(source.getPassword(), FAKE_PASSWORD_POSTFIX));

@@ -59,9 +59,6 @@ public class DescribeKerberosConfigResponse {
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
 
-    @ApiModelProperty(KerberosConfigModelDescription.KERBEROS_ADMIN)
-    private SecretResponse admin;
-
     @ApiModelProperty(KerberosConfigModelDescription.KERBEROS_PASSWORD)
     private SecretResponse password;
 
@@ -184,14 +181,6 @@ public class DescribeKerberosConfigResponse {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public SecretResponse getAdmin() {
-        return admin;
-    }
-
-    public void setAdmin(SecretResponse admin) {
-        this.admin = admin;
     }
 
     public SecretResponse getPassword() {

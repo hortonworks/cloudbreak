@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.provision.action;
 
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -24,6 +25,7 @@ import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.StackFailureContext;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.action.AbstractStackProvisionAction;
+import com.sequenceiq.freeipa.service.config.AbstractConfigRegister;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
 @Configuration
@@ -85,9 +87,13 @@ public class FreeIpaProvisionActions {
     public Action<?, ?> provisionFinished() {
         return new AbstractStackProvisionAction<>(InstallFreeIpaServicesSuccess.class) {
 
+            @Inject
+            private Set<AbstractConfigRegister> configRegisters;
+
             @Override
             protected void doExecute(StackContext context, InstallFreeIpaServicesSuccess payload, Map<Object, Object> variables) {
                 stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.PROVISIONED);
+                configRegisters.forEach(configProvider -> configProvider.register(context.getStack().getId()));
                 sendEvent(context);
             }
 

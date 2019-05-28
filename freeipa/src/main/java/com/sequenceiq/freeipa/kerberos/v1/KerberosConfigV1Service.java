@@ -52,7 +52,6 @@ public class KerberosConfigV1Service {
         describeKerberosConfigResponse.setLdapUrl(source.getLdapUrl());
         describeKerberosConfigResponse.setContainerDn(source.getContainerDn());
         describeKerberosConfigResponse.setTcpAllowed(source.isTcpAllowed());
-        describeKerberosConfigResponse.setAdmin(stringToSecretResponseConverter.convert(source.getAdminSecret()));
         describeKerberosConfigResponse.setPassword(stringToSecretResponseConverter.convert(source.getPasswordSecret()));
         describeKerberosConfigResponse.setPrincipal(stringToSecretResponseConverter.convert(source.getPrincipalSecret()));
         describeKerberosConfigResponse.setDescriptor(stringToSecretResponseConverter.convert(source.getDescriptorSecret()));
