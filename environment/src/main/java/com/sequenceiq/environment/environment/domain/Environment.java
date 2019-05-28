@@ -9,13 +9,10 @@ import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
@@ -31,7 +28,6 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.network.domain.BaseNetwork;
-import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 
 @Entity
 @Table
@@ -75,10 +71,6 @@ public class Environment implements AuthResource {
     private boolean archived;
 
     private Long deletionTimestamp = -1L;
-
-    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    @JoinTable(name = "env_proxy", joinColumns = @JoinColumn(name = "envid"), inverseJoinColumns = @JoinColumn(name = "proxyid"))
-    private Set<ProxyConfig> proxyConfigs = new HashSet<>();
 
     @OneToOne(mappedBy = "environment", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private BaseNetwork network;
@@ -124,10 +116,6 @@ public class Environment implements AuthResource {
 
     public void setArchived(boolean archived) {
         this.archived = archived;
-    }
-
-    public void unsetRelationsToEntitiesToBeDeleted() {
-        proxyConfigs = null;
     }
 
     public String getDescription() {
@@ -217,14 +205,6 @@ public class Environment implements AuthResource {
 
     public void setNetwork(BaseNetwork network) {
         this.network = network;
-    }
-
-    public Set<ProxyConfig> getProxyConfigs() {
-        return proxyConfigs;
-    }
-
-    public void setProxyConfigs(Set<ProxyConfig> proxyConfigs) {
-        this.proxyConfigs = proxyConfigs;
     }
 
     @Override
