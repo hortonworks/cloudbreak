@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4ViewResponse;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
 
@@ -53,32 +52,12 @@ public class CleanupService {
                 .filter(recipe -> recipe.getName().startsWith("it-"))
                 .forEach(recipe -> deleteRecipe(workspaceId, cloudbreakClient, recipe.getId()));
 
-        cloudbreakClient.credentialV4Endpoint()
-                .list(workspaceId)
-                .getResponses()
-                .stream()
-                .filter(c -> "AZURE".equals(c.getCloudPlatform()) ? c.getName().startsWith("its") : c.getName().startsWith("its-"))
-                .forEach(credential -> deleteCredential(workspaceId, cloudbreakClient, credential.getId()));
-
         cloudbreakClient.databaseV4Endpoint()
                 .list(workspaceId, null, Boolean.FALSE)
                 .getResponses()
                 .stream()
                 .filter(rds -> rds.getName().startsWith("it-"))
                 .forEach(rds -> deleteRdsConfigs(workspaceId, cloudbreakClient, rds.getId()));
-    }
-
-    public void deleteCredential(Long workspaceId, CloudbreakEndpoint cloudbreakClient, Long credentialId) {
-        if (credentialId != null) {
-            Optional<CredentialV4Response> response = cloudbreakClient.credentialV4Endpoint().list(workspaceId)
-                    .getResponses()
-                    .stream()
-                    .filter(credential -> credential.getId().equals(credentialId))
-                    .findFirst();
-            if (response.isPresent()) {
-                cloudbreakClient.credentialV4Endpoint().delete(workspaceId, response.get().getName());
-            }
-        }
     }
 
     public void deleteBlueprint(Long workspaceId, CloudbreakEndpoint cloudbreakClient, Long blueprintId) {

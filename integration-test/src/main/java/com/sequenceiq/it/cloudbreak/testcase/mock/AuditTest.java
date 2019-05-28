@@ -12,7 +12,6 @@ import com.sequenceiq.it.cloudbreak.assertion.audit.AuditTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.AuditTestClient;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.ClusterTemplateTestClient;
-import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
@@ -27,7 +26,6 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.audit.AuditTestDto;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
-import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
@@ -62,9 +60,6 @@ public class AuditTest extends AbstractIntegrationTest {
     private ClusterTemplateTestClient clusterTemplateTestClient;
 
     @Inject
-    private CredentialTestClient credentialTestClient;
-
-    @Inject
     private RecipeTestClient recipeTestClient;
 
     @Inject
@@ -91,7 +86,6 @@ public class AuditTest extends AbstractIntegrationTest {
     @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
-        createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
     }
@@ -179,26 +173,6 @@ public class AuditTest extends AbstractIntegrationTest {
                 .withResourceType("cluster_templates")
                 .when(auditTestClient.listV4(), key(clusterTemplateName))
                 .then(AuditTestAssertion.listContainsAtLeast(1), key(clusterTemplateName))
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "there is a running cloudbreak",
-            when = "a Credential is created",
-            then = "and audit record must be available in the database")
-    public void createValidCredentialThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
-        String credentialName = resourcePropertyProvider().getName();
-        testContext
-                .given(CredentialTestDto.class)
-                .withName(credentialName)
-                .when(credentialTestClient.createV4(), key(credentialName))
-                .select(c -> c.getResponse().getId(), key(credentialName))
-                .given(AuditTestDto.class)
-                .withResourceIdByKey(credentialName)
-                .withResourceType("credentials")
-                .when(auditTestClient.listV4(), key(credentialName))
-                .then(AuditTestAssertion.listContainsAtLeast(1), key(credentialName))
                 .validate();
     }
 

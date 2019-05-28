@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentChangeCredentialV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentEditV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentV4Request;
@@ -58,7 +57,6 @@ import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.environment.Region;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
-import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.repository.environment.EnvironmentRepository;
 import com.sequenceiq.cloudbreak.service.AbstractArchivistService;
@@ -99,9 +97,6 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
 
     @Inject
     private KerberosConfigService kerberosConfigService;
-
-    @Inject
-    private EnvironmentCredentialOperationService environmentCredentialOperationService;
 
     @Inject
     private EnvironmentCreationValidator environmentCreationValidator;
@@ -213,9 +208,6 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
 
     private Environment initEnvironment(EnvironmentV4Request request, @Nonnull Long workspaceId) {
         Environment environment = conversionService.convert(request, Environment.class);
-        Credential credential = environmentCredentialOperationService.getCredentialFromRequest(request, workspaceId);
-        environment.setCredential(credential);
-        environment.setCloudPlatform(credential.cloudPlatform());
         return environment;
     }
 
@@ -323,32 +315,6 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
                 throw new BadRequestException(String.format("No location found with name %s in the location list. The supported locations are: [%s]",
                         requestedLocation, cloudRegions.locationNames()));
             }
-        }
-    }
-
-    public DetailedEnvironmentV4Response changeCredential(String environmentName, Long workspaceId, EnvironmentChangeCredentialV4Request request) {
-        try {
-            return transactionService.required(() -> {
-                Environment environment = getByNameForWorkspaceId(environmentName, workspaceId);
-                Credential credential = environmentCredentialOperationService.validatePlatformAndGetCredential(request, environment, workspaceId);
-                Set<StackApiView> stacksCannotBeChanged = environment.getStacks().stream()
-                        .filter(stackApiView -> !stackApiViewService.canChangeCredential(stackApiView))
-                        .collect(Collectors.toSet());
-                if (stacksCannotBeChanged.isEmpty()) {
-                    environment.setCredential(credential);
-                    environment.getStacks().forEach(stackApiView -> {
-                        stackApiView.setCredential(credential);
-                        stackApiViewService.save(stackApiView);
-                    });
-                    return conversionService.convert(environmentRepository.save(environment), DetailedEnvironmentV4Response.class);
-                } else {
-                    throw new BadRequestException(String.format("Credential cannot be changed due to clusters with ongoing operation "
-                            + "or not being in AVAILABLE state. Clusters: [%s].", stacksCannotBeChanged.stream()
-                            .map(StackApiView::getName).collect(Collectors.joining(", "))));
-                }
-            });
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
         }
     }
 

@@ -26,7 +26,6 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.CredentialV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
@@ -125,8 +124,6 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         }
         putBlueprintToContextIfExist(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakEndpoint.class)
                 .blueprintV4Endpoint(), blueprintName, workspaceId);
-        putCredentialToContext(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakEndpoint.class)
-                .credentialV4Endpoint(), cloudProvider, credentialName, workspaceId);
         putStackToContextIfExist(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakEndpoint.class)
                 .stackV4Endpoint(), workspaceId, stackName);
         if (StringUtils.hasLength(instanceGroups)) {
@@ -180,19 +177,6 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         }
     }
 
-    private void putCredentialToContext(CredentialV4Endpoint endpoint, String cloudProvider, String credentialName, Long workspaceId) {
-        if (StringUtils.isEmpty(credentialName)) {
-            String defaultCredentialName = itProps.getCredentialName(cloudProvider);
-            if (!"__ignored__".equals(defaultCredentialName)) {
-                credentialName = defaultCredentialName;
-            }
-        }
-        if (StringUtils.hasLength(credentialName)) {
-            Long resourceId = endpoint.get(workspaceId, credentialName).getId();
-            itContext.putContextParam(CloudbreakITContextConstants.CREDENTIAL_ID, resourceId);
-        }
-    }
-
     private List<HostGroup> createHostGroups(Iterable<String[]> hostGroupStrings) {
         List<HostGroup> hostGroups = new ArrayList<>();
         for (String[] hostGroupStr : hostGroupStrings) {
@@ -225,8 +209,6 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
                 }
             }
 
-            cleanUpService.deleteCredential(workspaceId, cloudbreakClient,
-                    itContext.getCleanUpParameter(CloudbreakITContextConstants.CREDENTIAL_ID, Long.class));
             cleanUpService.deleteBlueprint(workspaceId, cloudbreakClient,
                     itContext.getCleanUpParameter(CloudbreakITContextConstants.BLUEPRINT_ID, Long.class));
             cleanUpService.deleteRdsConfigs(workspaceId, cloudbreakClient,
