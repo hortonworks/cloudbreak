@@ -10,7 +10,6 @@ import org.testng.annotations.Test;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
-import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
@@ -20,7 +19,6 @@ import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
-import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
@@ -49,9 +47,6 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     private BlueprintTestClient blueprintTestClient;
 
     @Inject
-    private CredentialTestClient credentialTestClient;
-
-    @Inject
     private RecipeTestClient recipeTestClient;
 
     @Inject
@@ -67,15 +62,6 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .when(stackTestClient.getV4(), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
-                .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    public void testCreateACredentialAndGetOtherUser(TestContext testContext) {
-        testContext
-                .given(CredentialTestDto.class)
-                .when(credentialTestClient.getV4(), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
                 .validate();
     }

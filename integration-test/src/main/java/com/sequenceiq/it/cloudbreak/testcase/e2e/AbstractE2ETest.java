@@ -23,7 +23,6 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
     @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
-        createDefaultCredential(testContext);
         createDefaultEnvironment(testContext);
         initializeDefaultBlueprints(testContext);
     }

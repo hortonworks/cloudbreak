@@ -30,17 +30,23 @@ import org.testng.annotations.DataProvider;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.actor.Actor;
-import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
+import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.DatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
+import com.sequenceiq.it.cloudbreak.context.Description;
+import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
+import com.sequenceiq.it.cloudbreak.context.PurgeGarbageService;
+import com.sequenceiq.it.cloudbreak.context.SparklessTestContext;
+import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
+import com.sequenceiq.it.cloudbreak.context.TestCaseDescription.TestCaseDescriptionBuilder;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
-import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
@@ -48,14 +54,6 @@ import com.sequenceiq.it.cloudbreak.dto.kerberos.ActiveDirectoryKerberosDescript
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestCaseDescriptionMissingException;
-import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
-import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
-import com.sequenceiq.it.cloudbreak.context.Description;
-import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.context.PurgeGarbageService;
-import com.sequenceiq.it.cloudbreak.context.SparklessTestContext;
-import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
-import com.sequenceiq.it.cloudbreak.context.TestCaseDescription.TestCaseDescriptionBuilder;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
@@ -81,9 +79,6 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     @Inject
     private LongStringGeneratorUtil longStringGeneratorUtil;
-
-    @Inject
-    private CredentialTestClient credentialTestClient;
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
@@ -133,7 +128,6 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
-        createDefaultCredential(testContext);
         createDefaultEnvironment(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
@@ -216,11 +210,6 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
     protected void createDefaultEnvironment(TestContext testContext) {
         testContext.given(EnvironmentTestDto.class)
                 .when(environmentTestClient.createV4());
-    }
-
-    protected void createDefaultCredential(TestContext testContext) {
-        testContext.given(CredentialTestDto.class)
-                .when(credentialTestClient.createV4());
     }
 
     protected void createDefaultImageCatalog(TestContext testContext) {

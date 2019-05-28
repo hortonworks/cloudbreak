@@ -8,13 +8,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.sequenceiq.it.IntegrationTestContext;
-import com.sequenceiq.it.cloudbreak.dto.RecommendationTestDto;
-import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.CloudbreakTest;
-import com.sequenceiq.it.cloudbreak.Credential;
 import com.sequenceiq.it.cloudbreak.Entity;
 import com.sequenceiq.it.cloudbreak.Region;
+import com.sequenceiq.it.cloudbreak.dto.RecommendationTestDto;
+import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
 public class RecommendationV4Action {
@@ -31,11 +30,6 @@ public class RecommendationV4Action {
                 BlueprintTestDto.class);
         if (blueprint != null && blueprint.getResponse() != null) {
             recommendationEntity.withAvailabilityZone(blueprint.getResponse().getName());
-        }
-
-        Credential credential = Credential.getTestContextCredential().apply(integrationTestContext);
-        if (credential != null) {
-            recommendationEntity.withCredentialName(credential.getResponse().getName());
         }
 
         Region region = Region.getTestContextRegion().apply(integrationTestContext);
