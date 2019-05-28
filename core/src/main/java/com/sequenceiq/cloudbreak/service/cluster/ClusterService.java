@@ -86,7 +86,6 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
@@ -1166,18 +1165,6 @@ public class ClusterService {
 
     public Set<Cluster> findByLdapConfig(LdapConfig ldapConfig) {
         return repository.findByLdapConfigAndStatusNot(ldapConfig, Status.DELETE_COMPLETED);
-    }
-
-    public Set<Cluster> findAllClustersByLdapConfigInEnvironment(LdapConfig ldapConfig, Long environmentId) {
-        return repository.findByLdapConfigAndEnvironment(ldapConfig, environmentId);
-    }
-
-    public Set<Cluster> findByProxyConfig(ProxyConfig proxyConfig) {
-        return repository.findByProxyConfigAndStatusNot(proxyConfig, Status.DELETE_COMPLETED);
-    }
-
-    public Set<Cluster> findAllClustersByProxyConfigInEnvironment(ProxyConfig proxyConfig, Long environmentId) {
-        return repository.findByProxyConfigAndEnvironment(proxyConfig, environmentId);
     }
 
     public Set<Cluster> findByRdsConfig(Long rdsConfigId) {

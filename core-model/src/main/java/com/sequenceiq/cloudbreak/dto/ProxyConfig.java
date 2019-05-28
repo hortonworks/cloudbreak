@@ -21,8 +21,11 @@ public class ProxyConfig implements Serializable {
 
     private final String accountId;
 
+    private final String userCrn;
+
     //CHECKSTYLE:OFF
-    private ProxyConfig(String crn, String name, String serverHost, Integer serverPort, String protocol, String userName, String password, String accountId) {
+    private ProxyConfig(String crn, String name, String serverHost, Integer serverPort, String protocol, String userName, String password, String accountId,
+            String userCrn) {
         this.crn = crn;
         this.name = name;
         this.serverHost = serverHost;
@@ -31,6 +34,7 @@ public class ProxyConfig implements Serializable {
         this.userName = userName;
         this.password = password;
         this.accountId = accountId;
+        this.userCrn = userCrn;
     }
     //CHECKSTYLE:ON
 
@@ -70,6 +74,10 @@ public class ProxyConfig implements Serializable {
         return accountId;
     }
 
+    public String getUserCrn() {
+        return userCrn;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -104,6 +112,8 @@ public class ProxyConfig implements Serializable {
         private String password;
 
         private String accountId;
+
+        private String userCrn;
 
         private ProxyConfigBuilder() {
         }
@@ -148,8 +158,13 @@ public class ProxyConfig implements Serializable {
             return this;
         }
 
+        public ProxyConfigBuilder withUserCrn(String userCrn) {
+            this.userCrn = userCrn;
+            return this;
+        }
+
         public ProxyConfig build() {
-            return new ProxyConfig(crn, name, serverHost, serverPort, protocol, userName, password, accountId);
+            return new ProxyConfig(crn, name, serverHost, serverPort, protocol, userName, password, accountId, userCrn);
         }
     }
 }

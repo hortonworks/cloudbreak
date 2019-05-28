@@ -1,6 +1,6 @@
 -- // CB-1568 modify cluster to refer to a proxy crn instead of local entity
 -- Migration SQL that makes the change goes here.
-ALTER TABLE cluster ADD COLUMN IF NOT EXISTS proxyconfigcrn varchar(255) NOT NULL;
+ALTER TABLE cluster ADD COLUMN IF NOT EXISTS proxyconfigcrn varchar(255);
 
 ALTER TABLE cluster DROP COLUMN IF EXISTS proxyconfig_id;
 
