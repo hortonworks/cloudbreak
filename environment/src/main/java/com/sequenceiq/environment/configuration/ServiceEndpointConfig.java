@@ -46,5 +46,4 @@ public class ServiceEndpointConfig {
     public String cloudbreakUrl(ServiceAddressResolver serviceAddressResolver) {
         return serviceAddressResolver.resolveUrl(cloudbreakUrl, "http", cloudbreakServiceId);
     }
-
 }

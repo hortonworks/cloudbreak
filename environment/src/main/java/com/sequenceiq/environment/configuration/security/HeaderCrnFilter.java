@@ -14,6 +14,8 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 
 public class HeaderCrnFilter extends OncePerRequestFilter {
 
+    private static final String INFO_SERVLET_PATH = "/info";
+
     private final ThreadLocalUserCrnProvider threadLocalUserCrnProvider;
 
     public HeaderCrnFilter(ThreadLocalUserCrnProvider threadLocalUserCrnProvider) {
@@ -24,11 +26,17 @@ public class HeaderCrnFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         String userCrn = request.getHeader("x-cdp-actor-crn");
-        if (!Crn.isCrn(userCrn)) {
-            throw new AccessDeniedException("Provided user CRN is invalid!");
+        if (isNotInfoEndpoint(request)) {
+            if (!Crn.isCrn(userCrn)) {
+                throw new AccessDeniedException("Provided user CRN is invalid!");
+            }
         }
         threadLocalUserCrnProvider.setUserCrn(userCrn);
         filterChain.doFilter(request, response);
         threadLocalUserCrnProvider.removeUserCrn();
+    }
+
+    private boolean isNotInfoEndpoint(HttpServletRequest request) {
+        return !request.getServletPath().equalsIgnoreCase(INFO_SERVLET_PATH);
     }
 }

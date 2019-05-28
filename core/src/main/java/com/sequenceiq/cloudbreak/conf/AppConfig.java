@@ -44,13 +44,13 @@ import org.springframework.web.filter.GenericFilterBean;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.auth.uaa.IdentityClient;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
 import com.sequenceiq.cloudbreak.controller.validation.environment.network.EnvironmentNetworkValidator;
@@ -64,6 +64,8 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.environment.client.EnvironmentServiceClient;
+import com.sequenceiq.environment.client.EnvironmentServiceClientBuilder;
 
 @Configuration
 @EnableRetry
@@ -137,6 +139,10 @@ public class AppConfig implements ResourceLoaderAware {
     @Inject
     @Named("identityServerUrl")
     private String identityServerUrl;
+
+    @Inject
+    @Named("environmentServerUrl")
+    private String environmentServerUrl;
 
     @Inject
     private List<EnvironmentNetworkConverter> environmentNetworkConverters;
@@ -265,6 +271,15 @@ public class AppConfig implements ResourceLoaderAware {
     @Bean
     public Client restClient() {
         return RestClientUtil.get(new ConfigKey(certificateValidation, restDebug, ignorePreValidation));
+    }
+
+    @Bean
+    public EnvironmentServiceClient environmentServiceClient() {
+        return new EnvironmentServiceClientBuilder(environmentServerUrl)
+                .withCertificateValidation(certificateValidation)
+                .withIgnorePreValidation(ignorePreValidation)
+                .withDebug(restDebug)
+                .build();
     }
 
     @Bean

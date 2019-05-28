@@ -29,6 +29,12 @@ public class ServiceEndpointConfig {
     @Value("${cb.identity.serviceid:}")
     private String identityServiceId;
 
+    @Value("${cb.environment.server.url:}")
+    private String environmentServiceUrl;
+
+    @Value("${cb.environment.serviceid:}")
+    private String environmentServiceId;
+
     @Bean
     public ServiceAddressResolver serviceAddressResolver() {
         return new RetryingServiceAddressResolver(new DNSServiceAddressResolver(), resolvingTimeout);
@@ -42,5 +48,10 @@ public class ServiceEndpointConfig {
     @Bean
     public String identityServerUrl()  throws ServiceAddressResolvingException {
         return serviceAddressResolver().resolveUrl(identityServiceUrl, "http", identityServiceId);
+    }
+
+    @Bean
+    public String environmentServerUrl()  throws ServiceAddressResolvingException {
+        return serviceAddressResolver().resolveUrl(environmentServiceUrl, "http", environmentServiceId);
     }
 }
