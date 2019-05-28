@@ -20,14 +20,6 @@ type EnvironmentAttachV4Request struct {
 	// Name of the Kubernetes configurations to be attached to the environment.
 	// Unique: true
 	Kubernetes []string `json:"kubernetes"`
-
-	// Name of the LDAP configurations to be attached to the environment.
-	// Unique: true
-	Ldaps []string `json:"ldaps"`
-
-	// Name of the proxy configurations to be attached to the environment.
-	// Unique: true
-	Proxies []string `json:"proxies"`
 }
 
 // Validate validates this environment attach v4 request
@@ -35,14 +27,6 @@ func (m *EnvironmentAttachV4Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateKubernetes(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateLdaps(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateProxies(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -59,32 +43,6 @@ func (m *EnvironmentAttachV4Request) validateKubernetes(formats strfmt.Registry)
 	}
 
 	if err := validate.UniqueItems("kubernetes", "body", m.Kubernetes); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *EnvironmentAttachV4Request) validateLdaps(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Ldaps) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("ldaps", "body", m.Ldaps); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *EnvironmentAttachV4Request) validateProxies(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Proxies) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("proxies", "body", m.Proxies); err != nil {
 		return err
 	}
 

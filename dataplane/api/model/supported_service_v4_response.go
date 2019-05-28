@@ -20,6 +20,9 @@ type SupportedServiceV4Response struct {
 
 	// name
 	Name string `json:"name,omitempty"`
+
+	// version
+	Version string `json:"version,omitempty"`
 }
 
 // Validate validates this supported service v4 response

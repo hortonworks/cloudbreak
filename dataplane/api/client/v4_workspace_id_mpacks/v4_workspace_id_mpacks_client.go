@@ -27,7 +27,7 @@ type Client struct {
 /*
 CreateManagementPackInWorkspace creates management pack in workspace
 
-An Apache Ambari Management Pack (Mpack) can bundle multiple service definitions, stack definitions, stack add-on service definitions, view definitions services so that releasing these artifacts don���t enforce an Apache Ambari release.
+An Apache Ambari Management Pack (Mpack) can bundle multiple service definitions, stack definitions, stack add-on service definitions, view definitions services so that releasing these artifacts don’t enforce an Apache Ambari release.
 */
 func (a *Client) CreateManagementPackInWorkspace(params *CreateManagementPackInWorkspaceParams) (*CreateManagementPackInWorkspaceOK, error) {
 	// TODO: Validate the params before sending
@@ -57,7 +57,7 @@ func (a *Client) CreateManagementPackInWorkspace(params *CreateManagementPackInW
 /*
 DeleteManagementPackInWorkspace deletes management pack by name in workspace
 
-An Apache Ambari Management Pack (Mpack) can bundle multiple service definitions, stack definitions, stack add-on service definitions, view definitions services so that releasing these artifacts don���t enforce an Apache Ambari release.
+An Apache Ambari Management Pack (Mpack) can bundle multiple service definitions, stack definitions, stack add-on service definitions, view definitions services so that releasing these artifacts don’t enforce an Apache Ambari release.
 */
 func (a *Client) DeleteManagementPackInWorkspace(params *DeleteManagementPackInWorkspaceParams) (*DeleteManagementPackInWorkspaceOK, error) {
 	// TODO: Validate the params before sending
@@ -87,7 +87,7 @@ func (a *Client) DeleteManagementPackInWorkspace(params *DeleteManagementPackInW
 /*
 DeleteManagementPacksInWorkspace deletes multiple management packs by name in workspace
 
-An Apache Ambari Management Pack (Mpack) can bundle multiple service definitions, stack definitions, stack add-on service definitions, view definitions services so that releasing these artifacts don���t enforce an Apache Ambari release.
+An Apache Ambari Management Pack (Mpack) can bundle multiple service definitions, stack definitions, stack add-on service definitions, view definitions services so that releasing these artifacts don’t enforce an Apache Ambari release.
 */
 func (a *Client) DeleteManagementPacksInWorkspace(params *DeleteManagementPacksInWorkspaceParams) (*DeleteManagementPacksInWorkspaceOK, error) {
 	// TODO: Validate the params before sending
@@ -117,7 +117,7 @@ func (a *Client) DeleteManagementPacksInWorkspace(params *DeleteManagementPacksI
 /*
 GetManagementPackInWorkspace gets management pack by name in workspace
 
-An Apache Ambari Management Pack (Mpack) can bundle multiple service definitions, stack definitions, stack add-on service definitions, view definitions services so that releasing these artifacts don���t enforce an Apache Ambari release.
+An Apache Ambari Management Pack (Mpack) can bundle multiple service definitions, stack definitions, stack add-on service definitions, view definitions services so that releasing these artifacts don’t enforce an Apache Ambari release.
 */
 func (a *Client) GetManagementPackInWorkspace(params *GetManagementPackInWorkspaceParams) (*GetManagementPackInWorkspaceOK, error) {
 	// TODO: Validate the params before sending
@@ -147,7 +147,7 @@ func (a *Client) GetManagementPackInWorkspace(params *GetManagementPackInWorkspa
 /*
 ListManagementPacksByWorkspace lists management packs for the given workspace
 
-An Apache Ambari Management Pack (Mpack) can bundle multiple service definitions, stack definitions, stack add-on service definitions, view definitions services so that releasing these artifacts don���t enforce an Apache Ambari release.
+An Apache Ambari Management Pack (Mpack) can bundle multiple service definitions, stack definitions, stack add-on service definitions, view definitions services so that releasing these artifacts don’t enforce an Apache Ambari release.
 */
 func (a *Client) ListManagementPacksByWorkspace(params *ListManagementPacksByWorkspaceParams) (*ListManagementPacksByWorkspaceOK, error) {
 	// TODO: Validate the params before sending

@@ -32,10 +32,6 @@ type EnvironmentV4Request struct {
 	// Unique: true
 	Kubernetes []string `json:"kubernetes"`
 
-	// Name of the LDAP configurations to be attached to the environment.
-	// Unique: true
-	Ldaps []string `json:"ldaps"`
-
 	// Location of the environment.
 	// Required: true
 	Location *LocationV4Request `json:"location"`
@@ -49,10 +45,6 @@ type EnvironmentV4Request struct {
 
 	// Network related specifics of the environment.
 	Network *EnvironmentNetworkV4Request `json:"network,omitempty"`
-
-	// Name of the proxy configurations to be attached to the environment.
-	// Unique: true
-	Proxies []string `json:"proxies"`
 
 	// Regions of the environment.
 	// Unique: true
@@ -75,10 +67,6 @@ func (m *EnvironmentV4Request) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateLdaps(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validateLocation(formats); err != nil {
 		res = append(res, err)
 	}
@@ -88,10 +76,6 @@ func (m *EnvironmentV4Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateNetwork(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateProxies(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -153,19 +137,6 @@ func (m *EnvironmentV4Request) validateKubernetes(formats strfmt.Registry) error
 	return nil
 }
 
-func (m *EnvironmentV4Request) validateLdaps(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Ldaps) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("ldaps", "body", m.Ldaps); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (m *EnvironmentV4Request) validateLocation(formats strfmt.Registry) error {
 
 	if err := validate.Required("location", "body", m.Location); err != nil {
@@ -218,19 +189,6 @@ func (m *EnvironmentV4Request) validateNetwork(formats strfmt.Registry) error {
 			}
 			return err
 		}
-	}
-
-	return nil
-}
-
-func (m *EnvironmentV4Request) validateProxies(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Proxies) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("proxies", "body", m.Proxies); err != nil {
-		return err
 	}
 
 	return nil

@@ -131,34 +131,6 @@ func init() {
 				},
 			},
 			{
-				Name:  "attach",
-				Usage: "attach resources to an environment (LDAP, RDS or Proxy)",
-				Flags: fl.NewFlagBuilder().AddFlags(fl.FlName,
-					fl.FlLdapNamesOptional, fl.FlProxyNamesOptional, fl.FlKerberosNamesOptional, fl.FlRdsNamesOptional).AddOutputFlag().AddAuthenticationFlags().Build(),
-				Before: cf.CheckConfigAndCommandFlags,
-				Action: env.AttachResources,
-				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlLdapNamesOptional, fl.FlProxyNamesOptional,
-						fl.FlKerberosNamesOptional, fl.FlRdsNamesOptional).AddOutputFlag().AddAuthenticationFlags().Build() {
-						fl.PrintFlagCompletion(f)
-					}
-				},
-			},
-			{
-				Name:  "detach",
-				Usage: "detach resources from an environment (LDAP, RDS or Proxy)",
-				Flags: fl.NewFlagBuilder().AddFlags(fl.FlName,
-					fl.FlLdapNamesOptional, fl.FlProxyNamesOptional, fl.FlKerberosNamesOptional, fl.FlRdsNamesOptional).AddOutputFlag().AddAuthenticationFlags().Build(),
-				Before: cf.CheckConfigAndCommandFlags,
-				Action: env.DetachResources,
-				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlLdapNamesOptional, fl.FlProxyNamesOptional,
-						fl.FlKerberosNamesOptional, fl.FlRdsNamesOptional).AddOutputFlag().AddAuthenticationFlags().Build() {
-						fl.PrintFlagCompletion(f)
-					}
-				},
-			},
-			{
 				Name:   "change-cred",
 				Usage:  "change the credential of an environment. also changes the credential of the clusters in the environment.",
 				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlCredential).AddOutputFlag().AddAuthenticationFlags().Build(),

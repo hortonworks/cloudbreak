@@ -73,8 +73,6 @@ func CreateEnvironment(c *cli.Context) {
 	description := c.String(fl.FlDescriptionOptional.Name)
 	credentialName := c.String(fl.FlEnvironmentCredential.Name)
 	regions := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentRegions.Name), ",")
-	ldapConfigs := utils.DelimitedStringToArray(c.String(fl.FlLdapNamesOptional.Name), ",")
-	proxyConfigs := utils.DelimitedStringToArray(c.String(fl.FlProxyNamesOptional.Name), ",")
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 	locationName := c.String(fl.FlEnvironmentLocationName.Name)
 	longitude := c.Float64(fl.FlEnvironmentLongitudeOptional.Name)
@@ -85,8 +83,6 @@ func CreateEnvironment(c *cli.Context) {
 		Description:    &description,
 		CredentialName: credentialName,
 		Regions:        regions,
-		Ldaps:          ldapConfigs,
-		Proxies:        proxyConfigs,
 		Location: &model.LocationV4Request{
 			Name:      &locationName,
 			Longitude: longitude,
@@ -158,8 +154,6 @@ func createEnvironmentWithNetwork(c *cli.Context) model.EnvironmentV4Request {
 		Description:    new(string),
 		CredentialName: "____",
 		Regions:        make([]string, 0),
-		Ldaps:          make([]string, 0),
-		Proxies:        make([]string, 0),
 		Kubernetes:     make([]string, 0),
 		Location: &model.LocationV4Request{
 			Name:      new(string),
@@ -308,73 +302,6 @@ func DeleteEnvironment(c *cli.Context) {
 	}
 }
 
-func AttachResources(c *cli.Context) {
-	defer utils.TimeTrack(time.Now(), "attach resources to an environment")
-	attachRequest := createAttachRequest(c)
-	sendAttachRequest(c, attachRequest)
-}
-
-func createAttachRequest(c *cli.Context) *v4env.AttachResourcesToEnvironmentParams {
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	envName := c.String(fl.FlName.Name)
-	ldapConfigs := utils.DelimitedStringToArray(c.String(fl.FlLdapNamesOptional.Name), ",")
-	proxyConfigs := utils.DelimitedStringToArray(c.String(fl.FlProxyNamesOptional.Name), ",")
-	kerberosConfigs := utils.DelimitedStringToArray(c.String(fl.FlKerberosNamesOptional.Name), ",")
-	rdsConfigs := utils.DelimitedStringToArray(c.String(fl.FlRdsNamesOptional.Name), ",")
-	log.Infof("[AttachResources] attach resources to environment: %s. Ldaps: [%s] Proxies: [%s] Kerberos: [%s] Rds: [%s]",
-		envName, ldapConfigs, proxyConfigs, kerberosConfigs, rdsConfigs)
-	attachBody := &model.EnvironmentAttachV4Request{
-		Ldaps:   ldapConfigs,
-		Proxies: proxyConfigs,
-	}
-	attachRequest := v4env.NewAttachResourcesToEnvironmentParams().WithWorkspaceID(workspaceID).WithName(envName).WithBody(attachBody)
-	return attachRequest
-}
-
-func sendAttachRequest(c *cli.Context, attachRequest *v4env.AttachResourcesToEnvironmentParams) {
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	var environment *model.DetailedEnvironmentV4Response
-	resp, err := cbClient.Cloudbreak.V4WorkspaceIDEnvironments.AttachResourcesToEnvironment(attachRequest)
-	if err != nil {
-		utils.LogErrorAndExit(err)
-	}
-	environment = resp.Payload
-	log.Infof("[AttachResources] resources attached to environment with name: %s, id: %d", environment.Name, environment.ID)
-}
-
-func DetachResources(c *cli.Context) {
-	defer utils.TimeTrack(time.Now(), "detach resources from an environment")
-	detachRequest := createDetachRequest(c)
-	sendDetachRequest(c, detachRequest)
-}
-
-func createDetachRequest(c *cli.Context) *v4env.DetachResourcesFromEnvironmentParams {
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	envName := c.String(fl.FlName.Name)
-	ldapConfigs := utils.DelimitedStringToArray(c.String(fl.FlLdapNamesOptional.Name), ",")
-	proxyConfigs := utils.DelimitedStringToArray(c.String(fl.FlProxyNamesOptional.Name), ",")
-	kerberosConfigs := utils.DelimitedStringToArray(c.String(fl.FlKerberosNamesOptional.Name), ",")
-	rdsConfigs := utils.DelimitedStringToArray(c.String(fl.FlRdsNamesOptional.Name), ",")
-	log.Infof("[DetachResources] detach resources from environment: %s. Ldaps: [%s] Proxies: [%s] Kerberos: [%s] Rds: [%s]",
-		envName, ldapConfigs, proxyConfigs, kerberosConfigs, rdsConfigs)
-	detachBody := &model.EnvironmentDetachV4Request{
-		Ldaps:   ldapConfigs,
-		Proxies: proxyConfigs,
-	}
-	attachRequest := v4env.NewDetachResourcesFromEnvironmentParams().WithWorkspaceID(workspaceID).WithName(envName).WithBody(detachBody)
-	return attachRequest
-}
-
-func sendDetachRequest(c *cli.Context, detachRequest *v4env.DetachResourcesFromEnvironmentParams) {
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-	resp, err := cbClient.Cloudbreak.V4WorkspaceIDEnvironments.DetachResourcesFromEnvironment(detachRequest)
-	if err != nil {
-		utils.LogErrorAndExit(err)
-	}
-	environment := resp.Payload
-	log.Infof("[DetachResources] resources detached to environment with name: %s, id: %d", environment.Name, environment.ID)
-}
-
 func ChangeCredential(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "change credential of environment")
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
@@ -451,10 +378,7 @@ func convertResponseToJsonOutput(env *model.DetailedEnvironmentV4Response) *envi
 			Longitude:     env.Location.Longitude,
 			Latitude:      env.Location.Latitude,
 		},
-		LdapConfigs:  getLdapConfigNames(env.Ldaps),
-		ProxyConfigs: getProxyConfigNames(env.Proxies),
-		RdsConfigs:   getRdsConfigNames(env.Databases),
-		ID:           strconv.FormatInt(env.ID, 10),
+		ID: strconv.FormatInt(env.ID, 10),
 	}
 	if env.Network != nil {
 		result.Network = *env.Network

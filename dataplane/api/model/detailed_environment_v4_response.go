@@ -25,10 +25,6 @@ type DetailedEnvironmentV4Response struct {
 	// Name of the credential of the environment.
 	CredentialName string `json:"credentialName,omitempty"`
 
-	// RDS configurations in the environment.
-	// Unique: true
-	Databases []*DatabaseV4Response `json:"databases"`
-
 	// Names of the datalake clusters created in the environment.
 	// Unique: true
 	DatalakeClusterNames []string `json:"datalakeClusterNames"`
@@ -51,14 +47,6 @@ type DetailedEnvironmentV4Response struct {
 	// id of the resource
 	ID int64 `json:"id,omitempty"`
 
-	// Kubernetes configurations in the environment.
-	// Unique: true
-	Kubernetes []*KubernetesV4Response `json:"kubernetes"`
-
-	// LDAP configurations in the environment.
-	// Unique: true
-	Ldaps []*LdapV4Response `json:"ldaps"`
-
 	// Location of the environment.
 	Location *LocationV4Response `json:"location,omitempty"`
 
@@ -67,10 +55,6 @@ type DetailedEnvironmentV4Response struct {
 
 	// Network related specifics of the environment.
 	Network *EnvironmentNetworkV4Response `json:"network,omitempty"`
-
-	// Proxy configurations in the environment.
-	// Unique: true
-	Proxies []*ProxyV4Response `json:"proxies"`
 
 	// Regions of the environment.
 	Regions *CompactRegionV4Response `json:"regions,omitempty"`
@@ -91,10 +75,6 @@ type DetailedEnvironmentV4Response struct {
 func (m *DetailedEnvironmentV4Response) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateDatabases(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validateDatalakeClusterNames(formats); err != nil {
 		res = append(res, err)
 	}
@@ -111,23 +91,11 @@ func (m *DetailedEnvironmentV4Response) Validate(formats strfmt.Registry) error 
 		res = append(res, err)
 	}
 
-	if err := m.validateKubernetes(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateLdaps(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validateLocation(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateNetwork(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateProxies(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -150,35 +118,6 @@ func (m *DetailedEnvironmentV4Response) Validate(formats strfmt.Registry) error 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *DetailedEnvironmentV4Response) validateDatabases(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Databases) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("databases", "body", m.Databases); err != nil {
-		return err
-	}
-
-	for i := 0; i < len(m.Databases); i++ {
-		if swag.IsZero(m.Databases[i]) { // not required
-			continue
-		}
-
-		if m.Databases[i] != nil {
-			if err := m.Databases[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("databases" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
-	}
-
 	return nil
 }
 
@@ -266,64 +205,6 @@ func (m *DetailedEnvironmentV4Response) validateDatalakeResourcesNames(formats s
 	return nil
 }
 
-func (m *DetailedEnvironmentV4Response) validateKubernetes(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Kubernetes) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("kubernetes", "body", m.Kubernetes); err != nil {
-		return err
-	}
-
-	for i := 0; i < len(m.Kubernetes); i++ {
-		if swag.IsZero(m.Kubernetes[i]) { // not required
-			continue
-		}
-
-		if m.Kubernetes[i] != nil {
-			if err := m.Kubernetes[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("kubernetes" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
-	}
-
-	return nil
-}
-
-func (m *DetailedEnvironmentV4Response) validateLdaps(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Ldaps) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("ldaps", "body", m.Ldaps); err != nil {
-		return err
-	}
-
-	for i := 0; i < len(m.Ldaps); i++ {
-		if swag.IsZero(m.Ldaps[i]) { // not required
-			continue
-		}
-
-		if m.Ldaps[i] != nil {
-			if err := m.Ldaps[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("ldaps" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
-	}
-
-	return nil
-}
-
 func (m *DetailedEnvironmentV4Response) validateLocation(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Location) { // not required
@@ -355,35 +236,6 @@ func (m *DetailedEnvironmentV4Response) validateNetwork(formats strfmt.Registry)
 			}
 			return err
 		}
-	}
-
-	return nil
-}
-
-func (m *DetailedEnvironmentV4Response) validateProxies(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Proxies) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("proxies", "body", m.Proxies); err != nil {
-		return err
-	}
-
-	for i := 0; i < len(m.Proxies); i++ {
-		if swag.IsZero(m.Proxies[i]) { // not required
-			continue
-		}
-
-		if m.Proxies[i] != nil {
-			if err := m.Proxies[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("proxies" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
 	}
 
 	return nil

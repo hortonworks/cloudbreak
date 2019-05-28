@@ -22,10 +22,6 @@ type ProxyV4Request struct {
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
 
-	// Environments of the resource
-	// Unique: true
-	Environments []string `json:"environments"`
-
 	// host or IP address of proxy server
 	// Required: true
 	// Max Length: 255
@@ -66,10 +62,6 @@ func (m *ProxyV4Request) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateEnvironments(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validateHost(formats); err != nil {
 		res = append(res, err)
 	}
@@ -103,19 +95,6 @@ func (m *ProxyV4Request) validateDescription(formats strfmt.Registry) error {
 	}
 
 	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *ProxyV4Request) validateEnvironments(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Environments) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("environments", "body", m.Environments); err != nil {
 		return err
 	}
 
