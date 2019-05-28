@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -18,9 +20,12 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
+import com.sequenceiq.cloudbreak.cloud.model.GatewayRecommendation;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
@@ -28,7 +33,6 @@ import com.sequenceiq.cloudbreak.cloud.model.VmRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
-import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -105,7 +109,53 @@ public class CloudResourceAdvisor {
         } else {
             componentsByHostGroup.keySet().forEach(hg -> vmTypesByHostGroup.put(hg, null));
         }
-        return new PlatformRecommendation(vmTypesByHostGroup, availableVmTypes, diskTypes);
+
+        Map<String, InstanceCount> instanceCounts = recommendInstanceCounts(blueprintTextProcessor);
+
+        GatewayRecommendation gateway = recommendGateway(blueprintTextProcessor);
+
+        return new PlatformRecommendation(vmTypesByHostGroup, availableVmTypes, diskTypes, instanceCounts, gateway);
+    }
+
+    private GatewayRecommendation recommendGateway(BlueprintTextProcessor blueprintTextProcessor) {
+        GatewayRecommendation recommendation = blueprintTextProcessor.recommendGateway();
+
+        if (recommendation.getHostGroups().isEmpty()) {
+            Set<String> gatewayGroups = blueprintTextProcessor.getComponentsByHostGroup().keySet().stream()
+                    .filter(this::fallbackGatewayFilter)
+                    .collect(Collectors.toSet());
+            if (!gatewayGroups.isEmpty()) {
+                recommendation = new GatewayRecommendation(gatewayGroups);
+            }
+        }
+
+        return recommendation;
+    }
+
+    /**
+     * Logic from UI.
+     */
+    private boolean fallbackGatewayFilter(String hostGroupName) {
+        String lowerName = hostGroupName.toLowerCase();
+        return lowerName.contains("master")
+                || lowerName.contains("services");
+    }
+
+    private Map<String, InstanceCount> recommendInstanceCounts(BlueprintTextProcessor blueprintProcessor) {
+        Map<String, InstanceCount> cardinality = new TreeMap<>(blueprintProcessor.getCardinalityByHostGroup());
+        for (String hostGroup : blueprintProcessor.getComponentsByHostGroup().keySet()) {
+            cardinality.computeIfAbsent(hostGroup, this::fallbackInstanceCountRecommendation);
+        }
+        return cardinality;
+    }
+
+    /**
+     * Logic from UI.
+     */
+    private InstanceCount fallbackInstanceCountRecommendation(String hostGroup) {
+        return hostGroup.contains("compute")
+                ? InstanceCount.ZERO_OR_MORE
+                : InstanceCount.ONE_OR_MORE;
     }
 
     private Blueprint getBlueprint(String blueprintName, Long workspaceId) {
@@ -176,4 +226,5 @@ public class CloudResourceAdvisor {
         vmMetaDataProps.put("recommendedvolumeSizeGB", recommendation.getVolumeSizeGB());
         vmMetaDataProps.put("recommendedRootVolumeSize", defaultRootVolumeSizeProvider.getForPlatform(cloudPlatform));
     }
+
 }

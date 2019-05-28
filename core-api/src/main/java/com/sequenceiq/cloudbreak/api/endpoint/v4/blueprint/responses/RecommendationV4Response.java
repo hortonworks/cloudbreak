@@ -8,6 +8,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.DiskV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.GatewayRecommendationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.InstanceCountV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.VmTypeV4Response;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -20,13 +22,25 @@ public class RecommendationV4Response implements JsonEntity {
 
     private Set<DiskV4Response> diskResponses;
 
+    private Map<String, InstanceCountV4Response> instanceCounts;
+
+    private GatewayRecommendationV4Response gatewayRecommendation;
+
     public RecommendationV4Response() {
     }
 
-    public RecommendationV4Response(Map<String, VmTypeV4Response> recommendations, Set<VmTypeV4Response> virtualMachines, Set<DiskV4Response> diskResponses) {
+    public RecommendationV4Response(
+            Map<String, VmTypeV4Response> recommendations,
+            Set<VmTypeV4Response> virtualMachines,
+            Set<DiskV4Response> diskResponses,
+            Map<String, InstanceCountV4Response> instanceCounts,
+            GatewayRecommendationV4Response gatewayRecommendation
+    ) {
         this.recommendations = recommendations;
         this.virtualMachines = virtualMachines;
         this.diskResponses = diskResponses;
+        this.instanceCounts = instanceCounts;
+        this.gatewayRecommendation = gatewayRecommendation;
     }
 
     public Map<String, VmTypeV4Response> getRecommendations() {
@@ -51,5 +65,13 @@ public class RecommendationV4Response implements JsonEntity {
 
     public void setDiskResponses(Set<DiskV4Response> diskResponses) {
         this.diskResponses = diskResponses;
+    }
+
+    public Map<String, InstanceCountV4Response> getInstanceCounts() {
+        return instanceCounts;
+    }
+
+    public GatewayRecommendationV4Response getGatewayRecommendation() {
+        return gatewayRecommendation;
     }
 }

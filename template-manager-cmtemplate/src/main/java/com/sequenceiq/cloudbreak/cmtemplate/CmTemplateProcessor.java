@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.cmtemplate;
 
+import static com.sequenceiq.cloudbreak.cloud.model.InstanceCount.atLeast;
+import static com.sequenceiq.cloudbreak.cloud.model.InstanceCount.exactly;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,6 +18,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -41,6 +45,8 @@ import com.cloudera.api.swagger.model.ApiDataContextRef;
 import com.cloudera.api.swagger.model.ApiProductVersion;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cloud.model.GatewayRecommendation;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -122,6 +128,25 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         throw new NotImplementedException("");
     }
 
+    @Override
+    public Map<String, InstanceCount> getCardinalityByHostGroup() {
+        Map<String, InstanceCount> result = new TreeMap<>();
+        for (ApiClusterTemplateHostTemplate group : Optional.ofNullable(cmTemplate.getHostTemplates()).orElse(List.of())) {
+            recommendInstanceCount(group.getRefName(), group.getCardinality())
+                    .ifPresent(recommendedCount -> result.put(group.getRefName(), recommendedCount));
+        }
+        return result;
+    }
+
+    /**
+     * Crude instance count recommendation based on cardinality.
+     */
+    private Optional<InstanceCount> recommendInstanceCount(String hostGroup, BigDecimal cardinality) {
+        return Optional.ofNullable(cardinality).map(BigDecimal::intValue).map(count ->
+                hostGroup.startsWith("master") || hostGroup.startsWith("gateway") ? exactly(count) : atLeast(count)
+        );
+    }
+
     public Map<String, Set<ServiceComponent>> getServiceComponentsByHostGroup() {
         Map<String, ServiceComponent> rolesByRoleRef = mapRoleRefsToServiceComponents();
 
@@ -146,6 +171,26 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                                 .map(ServiceComponent::getComponent)
                                 .collect(toSet())
                 ));
+    }
+
+    @Override
+    public GatewayRecommendation recommendGateway() {
+        Map<String, InstanceCount> instanceCounts = getCardinalityByHostGroup();
+
+        for (String group : List.of("gateway", "master")) {
+            InstanceCount count = instanceCounts.get(group);
+            if (InstanceCount.EXACTLY_ONE.equals(count)) {
+                return new GatewayRecommendation(Set.of(group));
+            }
+        }
+
+        return instanceCounts.entrySet().stream()
+                .filter(e -> e.getValue().getMinimumCount() <= 1)
+                .map(Map.Entry::getKey)
+                .sorted()
+                .findFirst()
+                .map(hostGroup -> new GatewayRecommendation(Set.of(hostGroup)))
+                .orElseGet(() -> new GatewayRecommendation(Set.of()));
     }
 
     public Set<ServiceComponent> getAllComponents() {
