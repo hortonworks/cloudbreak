@@ -2,8 +2,6 @@ package com.sequenceiq.environment.environment.v1.converter;
 
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -12,17 +10,26 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.v1.EnvironmentApiConverter;
 import com.sequenceiq.environment.network.domain.BaseNetwork;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 
 @Component
 public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractConversionServiceAwareConverter<Environment, DetailedEnvironmentResponse> {
 
-    @Inject
-    private RegionConverter regionConverter;
+    private final RegionConverter regionConverter;
 
-    @Inject
-    private Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap;
+    private final EnvironmentApiConverter environmentApiConverter;
+
+    private final Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap;
+
+    public EnvironmentToDetailedEnvironmentResponseConverter(RegionConverter regionConverter,
+            EnvironmentApiConverter environmentApiConverter,
+            Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap) {
+        this.regionConverter = regionConverter;
+        this.environmentApiConverter = environmentApiConverter;
+        this.environmentNetworkConverterMap = environmentNetworkConverterMap;
+    }
 
     @Override
     public DetailedEnvironmentResponse convert(Environment source) {
@@ -34,6 +41,7 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
         response.setCloudPlatform(source.getCloudPlatform());
         response.setCredentialName(source.getCredential().getName());
         response.setLocation(getConversionService().convert(source, LocationResponse.class));
+        response.setEnvironmentStatus(environmentApiConverter.convertEnvStatus(source.getStatus()));
         setNetworkIfPossible(response, source);
         return response;
     }
