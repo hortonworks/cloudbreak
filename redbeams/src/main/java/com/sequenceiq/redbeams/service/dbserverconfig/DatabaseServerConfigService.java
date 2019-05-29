@@ -11,6 +11,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.MapBindingResult;
@@ -18,6 +19,7 @@ import org.springframework.validation.FieldError;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -27,7 +29,7 @@ import com.sequenceiq.redbeams.repository.DatabaseServerConfigRepository;
 import com.sequenceiq.redbeams.service.validation.DatabaseServerConnectionValidator;
 
 @Service
-public class DatabaseServerConfigService {
+public class DatabaseServerConfigService extends AbstractArchivistService<DatabaseServerConfig> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseServerConfigService.class);
 
@@ -76,12 +78,9 @@ public class DatabaseServerConfigService {
         return delete(resource);
     }
 
-    DatabaseServerConfig delete(DatabaseServerConfig resource) {
-        LOGGER.debug("Deleting {} with name: {}", resource().getReadableName(), resource.getName());
-        MDCBuilder.buildMdcContext(resource);
-        // prepareDeletion(resource);
-        repository.delete(resource);
-        return resource;
+    @Override
+    public JpaRepository repository() {
+        return repository;
     }
 
     public Set<DatabaseServerConfig> deleteMultipleByNameInWorkspace(Long workspaceId, Set<String> names) {

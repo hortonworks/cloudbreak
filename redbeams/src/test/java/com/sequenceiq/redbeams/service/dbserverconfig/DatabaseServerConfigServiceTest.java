@@ -1,6 +1,11 @@
 package com.sequenceiq.redbeams.service.dbserverconfig;
 
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.core.Every.everyItem;
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
@@ -11,14 +16,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
-import com.sequenceiq.redbeams.repository.DatabaseServerConfigRepository;
-import com.sequenceiq.redbeams.service.validation.DatabaseServerConnectionValidator;
-
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -34,6 +35,14 @@ import org.mockito.stubbing.Answer;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.Errors;
 
+import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
+import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
+import com.sequenceiq.redbeams.repository.DatabaseServerConfigRepository;
+import com.sequenceiq.redbeams.service.validation.DatabaseServerConnectionValidator;
+
 public class DatabaseServerConfigServiceTest {
 
     @Rule
@@ -47,6 +56,9 @@ public class DatabaseServerConfigServiceTest {
 
     @Mock
     private DatabaseServerConnectionValidator connectionValidator;
+
+    @Mock
+    private Clock clock;
 
     private DatabaseServerConfig server;
 
@@ -131,7 +143,8 @@ public class DatabaseServerConfigServiceTest {
         DatabaseServerConfig deletedServer = underTest.deleteByNameInWorkspace(0L, server.getName());
 
         assertEquals(server, deletedServer);
-        verify(repository).delete(server);
+        assertTrue(deletedServer.isArchived());
+        verify(repository, never()).delete(server);
     }
 
     @Test
@@ -160,8 +173,19 @@ public class DatabaseServerConfigServiceTest {
         Set<DatabaseServerConfig> deletedServerSet = underTest.deleteMultipleByNameInWorkspace(0L, nameSet);
 
         assertEquals(2, deletedServerSet.size());
-        verify(repository).delete(server);
-        verify(repository).delete(server2);
+        assertThat(deletedServerSet, everyItem(hasProperty("archived", is(true))));
+    }
+
+    @Test
+    public void isSubclassOfArchivist() {
+        List<Class> superclasses = new ArrayList<>();
+        Class currentParentClass = underTest.getClass().getSuperclass();
+        do {
+            superclasses.add(currentParentClass);
+            currentParentClass = currentParentClass.getSuperclass();
+        } while (!currentParentClass.equals(Object.class));
+
+        assertThat(superclasses, hasItem(AbstractArchivistService.class));
     }
 
     @Test
