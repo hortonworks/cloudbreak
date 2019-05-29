@@ -8,7 +8,7 @@ import javax.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.cloudbreak.auth.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.auth.ThreadBaseUserCrnProvider;
 import com.sequenceiq.datalake.api.endpoint.sdx.RedeploySdxClusterRequest;
 import com.sequenceiq.datalake.api.endpoint.sdx.SdxClusterRequest;
 import com.sequenceiq.datalake.api.endpoint.sdx.SdxClusterResponse;
@@ -20,14 +20,14 @@ import com.sequenceiq.datalake.service.sdx.SdxService;
 public class SdxController implements SdxEndpoint {
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private ThreadBaseUserCrnProvider threadBaseUserCrnProvider;
 
     @Inject
     private SdxService sdxService;
 
     @Override
     public SdxClusterResponse create(String sdxName, @Valid SdxClusterRequest createSdxClusterRequest) {
-        String userCrn = restRequestThreadLocalService.getUserCrn();
+        String userCrn = threadBaseUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.createSdx(userCrn, sdxName, createSdxClusterRequest);
         SdxClusterResponse sdxClusterResponse = new SdxClusterResponse(sdxCluster.getCrn(), sdxCluster.getClusterName(), sdxCluster.getStatus());
         sdxClusterResponse.setSdxName(sdxCluster.getClusterName());
@@ -37,7 +37,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     public void delete(String sdxName) {
-        String userCrn = restRequestThreadLocalService.getUserCrn();
+        String userCrn = threadBaseUserCrnProvider.getUserCrn();
         sdxService.deleteSdx(userCrn, sdxName);
     }
 
@@ -48,14 +48,14 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     public SdxClusterResponse get(String sdxName) {
-        String userCrn = restRequestThreadLocalService.getUserCrn();
+        String userCrn = threadBaseUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByAccountIdAndSdxName(userCrn, sdxName);
         return new SdxClusterResponse(sdxCluster.getCrn(), sdxCluster.getClusterName(), sdxCluster.getStatus());
     }
 
     @Override
     public List<SdxClusterResponse> list(String envName) {
-        String userCrn = restRequestThreadLocalService.getUserCrn();
+        String userCrn = threadBaseUserCrnProvider.getUserCrn();
         List<SdxCluster> sdxClusters = sdxService.listSdx(userCrn, envName);
         return sdxClusters.stream()
                 .map(c -> new SdxClusterResponse(c.getCrn(), c.getClusterName(), c.getStatus()))

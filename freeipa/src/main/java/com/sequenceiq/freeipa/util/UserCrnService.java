@@ -4,17 +4,17 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.auth.ThreadBaseUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 
 @Component
 public class UserCrnService {
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private ThreadBaseUserCrnProvider threadBaseUserCrnProvider;
 
     public String getCurrentAccountId() {
-        String userCrn = restRequestThreadLocalService.getUserCrn();
+        String userCrn = threadBaseUserCrnProvider.getUserCrn();
         Crn crn = Crn.fromString(userCrn);
         if (crn != null) {
             return crn.getAccountId();

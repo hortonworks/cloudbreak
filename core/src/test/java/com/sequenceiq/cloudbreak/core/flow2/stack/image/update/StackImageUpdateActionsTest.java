@@ -25,7 +25,7 @@ import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.state.State;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.auth.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.auth.ThreadBaseUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
@@ -142,7 +142,7 @@ public class StackImageUpdateActionsTest {
     private StackFailureContext failureContext;
 
     @Mock
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private ThreadBaseUserCrnProvider threadBaseUserCrnProvider;
 
     @InjectMocks
     private final AbstractStackImageUpdateAction<?> checkImageAction = spy(new StackImageUpdateActions().checkImageVersion());

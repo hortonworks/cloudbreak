@@ -66,6 +66,7 @@ import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.environment.client.EnvironmentServiceClient;
 import com.sequenceiq.environment.client.EnvironmentServiceClientBuilder;
+import com.sequenceiq.freeipa.api.client.FreeIpaApiClientParams;
 import com.sequenceiq.freeipa.api.client.FreeIpaApiUserCrnClient;
 import com.sequenceiq.freeipa.api.client.FreeIpaApiUserCrnClientBuilder;
 
@@ -281,6 +282,11 @@ public class AppConfig implements ResourceLoaderAware {
                 .withIgnorePreValidation(ignorePreValidation)
                 .withDebug(restDebug)
                 .build();
+    }
+
+    @Bean
+    public FreeIpaApiClientParams freeIpaApiClientParams() {
+        return new FreeIpaApiClientParams(restDebug, certificateValidation, ignorePreValidation, freeIpaServerUrl);
     }
 
     @Bean
