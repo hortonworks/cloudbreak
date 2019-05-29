@@ -9,11 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.KerberosType;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.entity.FreeIpa;
-import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.kerberos.KerberosConfig;
@@ -34,9 +32,7 @@ public class KerberosConfigRegisterService extends AbstractConfigRegister {
         FreeIpa freeIpa = getFreeIpaService().findByStackId(stackId);
         Stack stack = getStackWithInstanceMetadata(stackId);
         KerberosConfig kerberosConfig = new KerberosConfig();
-        InstanceGroup masterGroup =
-                stack.getInstanceGroups().stream().filter(instanceGroup -> InstanceGroupType.MASTER == instanceGroup.getInstanceGroupType()).findFirst().get();
-        InstanceMetaData master = masterGroup.getNotDeletedInstanceMetaDataSet().stream().findFirst().get();
+        InstanceMetaData master = getMasterInstance(stack);
         kerberosConfig.setAdminUrl(master.getDiscoveryFQDN());
         kerberosConfig.setDomain(freeIpa.getDomain());
         kerberosConfig.setEnvironmentId(stack.getEnvironment());
