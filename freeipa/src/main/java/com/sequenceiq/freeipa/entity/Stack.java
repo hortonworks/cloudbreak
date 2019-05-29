@@ -20,11 +20,14 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Where;
+
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"accountid", "environment", "name"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"accountid", "environment", "terminated"}))
+@Where(clause = "terminated = -1")
 public class Stack {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "stack_generator")
@@ -60,7 +63,7 @@ public class Stack {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private StackAuthentication stackAuthentication;
 
-    private Long terminated;
+    private Long terminated = -1L;
 
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")

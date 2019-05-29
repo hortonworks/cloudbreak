@@ -95,9 +95,9 @@ public class FreeIpaCreationService {
     }
 
     private void checkIfAlreadyExistsInEnvironment(CreateFreeIpaRequest request) {
-        stackService.findByEnvironmentCrn(request.getEnvironmentId()).ifPresent(stack -> {
+        if (!stackService.findAllByEnvironmentCrn(request.getEnvironmentId()).isEmpty()) {
             throw new BadRequestException("FreeIPA already exists in environment");
-        });
+        }
     }
 
     private void fillInstanceMetadata(Stack stack) {
