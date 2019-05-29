@@ -1,0 +1,157 @@
+{
+  "cdhVersion": "6.1.0",
+  "displayName": "simple_template",
+  "cmVersion": "6.1.0",
+  "repositories": [
+    "https://archive.cloudera.com/cdh6/{latest_supported}/parcels/"
+  ],
+  "products": [
+    {
+      "version": "6.1.0-1.cdh6.1.0.p0.770702",
+      "product": "CDH"
+    }
+  ],
+  "services": [
+    {
+      "refName": "zookeeper",
+      "serviceType": "ZOOKEEPER",
+      "serviceConfigs": [
+        {
+          "name": "service_config_name",
+          "value": "service_config_value"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "zookeeper-SERVER-BASE",
+          "roleType": "SERVER",
+          "configs": [
+            {
+              "name": "role_config_name",
+              "value": "role_config_value"
+            }
+          ],
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "hdfs",
+      "serviceType": "HDFS",
+      "serviceConfigs": [
+        {
+          "name": "service_config_name",
+          "value": "service_config_value"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "hdfs-NAMENODE-BASE",
+          "roleType": "NAMENODE",
+          "configs": [
+            {
+              "name": "role_config_name",
+              "value": "role_config_value"
+            }
+          ],
+          "base": true
+        },
+        {
+          "refName": "hdfs-DATANODE-BASE",
+          "roleType": "DATANODE",
+          "configs": [
+            {
+              "name": "role_config_name",
+              "value": "role_config_value"
+            }
+          ],
+          "base": true
+        },
+        {
+          "refName": "hdfs-JOURNALNODE-BASE",
+          "roleType": "JOURNALNODE",
+          "configs": [
+            {
+              "name": "role_config_name",
+              "value": "role_config_value"
+            }
+          ],
+          "base": true
+        },
+        {
+          "refName": "hdfs-FAILOVERCONTROLLER-BASE",
+          "roleType": "FAILOVERCONTROLLER",
+          "configs": [
+            {
+              "name": "role_config_name",
+              "value": "role_config_value"
+            }
+          ],
+          "base": true
+        },
+        {
+          "refName": "hdfs-BALANCER-BASE",
+          "roleType": "BALANCER",
+          "configs": [
+            {
+              "name": "role_config_name",
+              "value": "role_config_value"
+            }
+          ],
+          "base": true
+        }
+      ]
+    }
+  ],
+  "hostTemplates": [
+    {
+      "refName": "master",
+      "cardinality": 2,
+      "roleConfigGroupsRefNames": [
+        "hdfs-NAMENODE-BASE"
+      ]
+    },
+    {
+      "refName": "quorum",
+      "cardinality": 3,
+      "roleConfigGroupsRefNames": [
+        "zookeeper-SERVER-BASE"
+      ]
+    },
+    {
+      "refName": "gateway",
+      "cardinality": 1,
+      "roleConfigGroupsRefNames": [
+        "hdfs-BALANCER-BASE"
+      ]
+    },
+    {
+      "refName": "worker",
+      "cardinality": 3,
+      "roleConfigGroupsRefNames": [
+        "hdfs-DATANODE-BASE"
+      ]
+    }
+  ],
+  "instantiator": {
+    "clusterName": "testcluster",
+    "hosts": [
+      {
+        "hostName": "host3",
+        "hostTemplateRefName": "worker"
+      },
+      {
+        "hostName": "host4",
+        "hostTemplateRefName": "worker"
+      },
+      {
+        "hostName": "host1",
+        "hostTemplateRefName": "master"
+      },
+      {
+        "hostName": "host2",
+        "hostTemplateRefName": "master"
+      }
+    ]
+  }
+}
