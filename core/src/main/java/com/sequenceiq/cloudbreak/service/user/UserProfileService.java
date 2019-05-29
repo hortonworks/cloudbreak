@@ -26,10 +26,10 @@ import com.sequenceiq.cloudbreak.repository.UserProfileRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 
 @Service
 public class UserProfileService {
@@ -66,12 +66,17 @@ public class UserProfileService {
     public UserProfile getOrCreate(User user) {
         UserProfile userProfile = getSilently(user).orElse(null);
         if (userProfile == null) {
-            userProfile = new UserProfile();
-            userProfile.setUserName(user.getUserName());
-            addUiProperties(userProfile);
-            userProfile.setUser(user);
-            userProfile.setDefaultCredentials(Collections.emptySet());
-            userProfile = userProfileRepository.save(userProfile);
+            synchronized (UserProfileService.class) {
+                userProfile = getSilently(user).orElse(null);
+                if (userProfile == null) {
+                    userProfile = new UserProfile();
+                    userProfile.setUserName(user.getUserName());
+                    addUiProperties(userProfile);
+                    userProfile.setUser(user);
+                    userProfile.setDefaultCredentials(Collections.emptySet());
+                    userProfile = userProfileRepository.save(userProfile);
+                }
+            }
         } else if (userProfile.getUserName() == null && user.getUserName() != null) {
             userProfile.setUserName(user.getUserName());
             userProfile = userProfileRepository.save(userProfile);
