@@ -16,12 +16,11 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
-import com.sequenceiq.freeipa.kerberos.KerberosConfigService;
 import com.sequenceiq.freeipa.util.UserCrnService;
 
 @Service
 public class LdapConfigService extends AbstractArchivistService<LdapConfig> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(KerberosConfigService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LdapConfigService.class);
 
     @Inject
     private LdapConfigRepository ldapConfigRepository;
@@ -34,6 +33,10 @@ public class LdapConfigService extends AbstractArchivistService<LdapConfig> {
 
     public LdapConfig createLdapConfig(LdapConfig ldapConfig) {
         String accountId = userCrnService.getCurrentAccountId();
+        return createLdapConfig(ldapConfig, accountId);
+    }
+
+    public LdapConfig createLdapConfig(LdapConfig ldapConfig, String accountId) {
         ldapConfig.setAccountId(accountId);
         ldapConfig.setResourceCrn(createCrn(ldapConfig.getAccountId()));
         checkIfExists(ldapConfig);
@@ -48,6 +51,10 @@ public class LdapConfigService extends AbstractArchivistService<LdapConfig> {
 
     public void delete(String environmentId) {
         String accountId = userCrnService.getCurrentAccountId();
+        delete(environmentId, accountId);
+    }
+
+    public void delete(String environmentId, String accountId) {
         Optional<LdapConfig> ldapConfig = ldapConfigRepository.findByAccountIdAndEnvironmentId(accountId, environmentId);
         ldapConfig.ifPresentOrElse(this::delete, () -> {
             throw notFound("LdapConfig for environment", environmentId).get();
