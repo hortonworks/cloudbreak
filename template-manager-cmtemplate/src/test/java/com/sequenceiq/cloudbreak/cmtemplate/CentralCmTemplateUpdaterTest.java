@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static java.util.stream.Collectors.toSet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -21,11 +22,14 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
+import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
+import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreConfigProvider;
+import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplateProcessor;
@@ -50,6 +54,9 @@ public class CentralCmTemplateUpdaterTest {
 
     @Spy
     private CmTemplateComponentConfigProcessor cmTemplateComponentConfigProcessor;
+
+    @Spy
+    private CmTemplateConfigInjectors cmTemplateConfigInjectors;
 
     @Mock
     private TemplatePreparationObject templatePreparationObject;
@@ -78,6 +85,7 @@ public class CentralCmTemplateUpdaterTest {
         clouderaManagerRepo = new ClouderaManagerRepo();
         clouderaManagerRepo.setVersion("6.1.0");
         ReflectionTestUtils.setField(cmTemplateComponentConfigProcessor, "cmTemplateComponentConfigProviderList", cmTemplateComponentConfigProviders);
+        ReflectionTestUtils.setField(cmTemplateConfigInjectors, "injectors", List.of());
     }
 
     private static Set<HostgroupView> toHostgroupViews(Map<String, List<Map<String, String>>> hostgroupMappings) {
@@ -95,6 +103,27 @@ public class CentralCmTemplateUpdaterTest {
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager.bp"));
         ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null, null);
         Assert.assertEquals(new CmTemplateProcessor(getBlueprintText("output/clouderamanager.bp")).getTemplate(), generated);
+    }
+
+    @Test
+    public void configsAreInjected() {
+        List<ApiClusterTemplateConfig> serviceConfigs = List.of(config("service_config_name", "service_config_value"));
+        List<ApiClusterTemplateConfig> roleConfigs = List.of(config("role_config_name", "role_config_value"));
+        ReflectionTestUtils.setField(cmTemplateConfigInjectors, "injectors", List.of(new CmTemplateConfigInjector() {
+            @Override
+            public List<ApiClusterTemplateConfig> getServiceConfigs(ApiClusterTemplateService service, TemplatePreparationObject source) {
+                return serviceConfigs;
+            }
+
+            @Override
+            public List<ApiClusterTemplateConfig> getRoleConfigs(
+                    ApiClusterTemplateRoleConfigGroup roleConfigGroup, ApiClusterTemplateService service, TemplatePreparationObject source) {
+                return roleConfigs;
+            }
+        }));
+        when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/namenode-ha.bp"));
+        ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null, null);
+        Assert.assertEquals(new CmTemplateProcessor(getBlueprintText("output/namenode-ha-injected.bp")).getTemplate(), generated);
     }
 
     @Test

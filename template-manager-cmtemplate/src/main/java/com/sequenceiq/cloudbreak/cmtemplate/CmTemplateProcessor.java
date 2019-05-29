@@ -205,14 +205,18 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         getServiceByType(serviceType).ifPresent(service -> mergeServiceConfigs(service, configs));
     }
 
-    private void mergeServiceConfigs(ApiClusterTemplateService service, List<ApiClusterTemplateConfig> configs) {
+    public void mergeServiceConfigs(ApiClusterTemplateService service, List<ApiClusterTemplateConfig> newConfigs) {
+        if (newConfigs.isEmpty()) {
+            return;
+        }
+
         if (ofNullable(service.getServiceConfigs()).orElse(List.of()).isEmpty()) {
-            setServiceConfigs(service, configs);
+            setServiceConfigs(service, newConfigs);
             return;
         }
 
         Map<String, ApiClusterTemplateConfig> configMap = mapByName(service.getServiceConfigs());
-        configs.forEach(config -> configMap.putIfAbsent(config.getName(), config));
+        newConfigs.forEach(config -> configMap.putIfAbsent(config.getName(), config));
         setServiceConfigs(service, configMap.values());
     }
 
@@ -241,7 +245,11 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         }
     }
 
-    private void mergeRoleConfigs(ApiClusterTemplateRoleConfigGroup configGroup, List<ApiClusterTemplateConfig> newConfigs) {
+    public void mergeRoleConfigs(ApiClusterTemplateRoleConfigGroup configGroup, List<ApiClusterTemplateConfig> newConfigs) {
+        if (newConfigs.isEmpty()) {
+            return;
+        }
+
         if (ofNullable(configGroup.getConfigs()).orElse(List.of()).isEmpty()) {
             setRoleConfigs(configGroup, newConfigs);
             return;

@@ -12,6 +12,8 @@ public class HdfsRoles {
 
     public static final String JOURNALNODE = "JOURNALNODE";
 
+    public static final String BALANCER = "BALANCER";
+
     private HdfsRoles() { }
 
 }

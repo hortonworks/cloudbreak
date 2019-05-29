@@ -37,6 +37,9 @@ public class CentralCmTemplateUpdater implements BlueprintUpdater {
     @Inject
     private CmTemplateComponentConfigProcessor cmTemplateComponentConfigProcessor;
 
+    @Inject
+    private CmTemplateConfigInjectors cmTemplateConfigInjectors;
+
     public ApiClusterTemplate getCmTemplate(TemplatePreparationObject source, Map<String, List<Map<String, String>>> hostGroupMappings,
             ClouderaManagerRepo clouderaManagerRepoDetails, List<ClouderaManagerProduct> clouderaManagerProductDetails, String sdxContextName) {
         try {
@@ -74,6 +77,7 @@ public class CentralCmTemplateUpdater implements BlueprintUpdater {
         processor.addInstantiator(clouderaManagerRepoDetails, source, sdxContextName);
         processor.addHosts(hostGroupMappings);
         cmTemplateComponentConfigProcessor.process(processor, source);
+        cmTemplateConfigInjectors.process(processor, source);
     }
 
     private void updateCmTemplateRepoDetails(CmTemplateProcessor cmTemplateProcessor, ClouderaManagerRepo clouderaManagerRepoDetails,
