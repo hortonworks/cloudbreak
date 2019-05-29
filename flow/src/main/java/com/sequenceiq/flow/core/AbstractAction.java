@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.auth.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.auth.ThreadBaseUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -48,7 +48,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     private ErrorHandlerAwareReactorEventFactory reactorEventFactory;
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private ThreadBaseUserCrnProvider threadBaseUserCrnProvider;
 
     private final Class<P> payloadClass;
 
@@ -70,7 +70,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     public void execute(StateContext<S, E> context) {
         FlowParameters flowParameters = (FlowParameters) context.getMessageHeader(MessageFactory.HEADERS.FLOW_PARAMETERS.name());
         if (flowParameters.getFlowTriggerUserCrn() != null) {
-            restRequestThreadLocalService.setUserCrn(flowParameters.getFlowTriggerUserCrn());
+            threadBaseUserCrnProvider.setUserCrn(flowParameters.getFlowTriggerUserCrn());
         }
         MDCBuilder.addFlowIdToMdcContext(flowParameters.getFlowId());
         P payload = convertPayload(context.getMessageHeader(MessageFactory.HEADERS.DATA.name()));
@@ -102,7 +102,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
                 LOGGER.error("Missing error handling for " + getClass().getName());
             }
         } finally {
-            restRequestThreadLocalService.removeUserCrn();
+            threadBaseUserCrnProvider.removeUserCrn();
         }
     }
 

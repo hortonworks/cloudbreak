@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.auth;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RestRequestThreadLocalService {
+public class ThreadBaseUserCrnProvider {
 
     private static final ThreadLocal<String> USER_CRN = new ThreadLocal<>();
 
