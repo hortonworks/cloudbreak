@@ -8,7 +8,7 @@ require (
 	github.com/go-openapi/swag v0.18.0
 	github.com/go-openapi/validate v0.18.0
 	github.com/golang/protobuf v1.3.0 // indirect
-	github.com/hortonworks/dp-cli-common/apikeyauth v0.0.7
+	github.com/hortonworks/dp-cli-common/apikeyauth v0.0.9
 	github.com/hortonworks/dp-cli-common/utils v0.0.2
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/mattn/go-runewidth v0.0.4 // indirect

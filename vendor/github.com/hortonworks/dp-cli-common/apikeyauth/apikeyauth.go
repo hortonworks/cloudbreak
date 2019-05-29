@@ -44,7 +44,7 @@ func GetAPIKeyAuthTransport(address, baseAPIPath, accessKeyID, privateKey string
 
 func GetActorCrnAuthTransport(address, baseAPIPath, actorCrn string) *utils.Transport {
 	address, basePath := utils.CutAndTrimAddress(address)
-	cbTransport := &utils.Transport{client.New(address, basePath+baseAPIPath, []string{"https"})}
+	cbTransport := &utils.Transport{client.New(address, basePath+baseAPIPath, []string{"http"})}
 	cbTransport.Runtime.DefaultAuthentication = altusActorCrnAuth(baseAPIPath, actorCrn)
 	cbTransport.Runtime.Transport = utils.LoggedTransportConfig
 	return cbTransport

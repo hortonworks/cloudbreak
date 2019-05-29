@@ -39,7 +39,7 @@ github.com/go-openapi/strfmt
 github.com/go-openapi/swag
 # github.com/go-openapi/validate v0.18.0
 github.com/go-openapi/validate
-# github.com/hortonworks/dp-cli-common/apikeyauth v0.0.7
+# github.com/hortonworks/dp-cli-common/apikeyauth v0.0.9
 github.com/hortonworks/dp-cli-common/apikeyauth
 # github.com/hortonworks/dp-cli-common/utils v0.0.2
 github.com/hortonworks/dp-cli-common/utils
