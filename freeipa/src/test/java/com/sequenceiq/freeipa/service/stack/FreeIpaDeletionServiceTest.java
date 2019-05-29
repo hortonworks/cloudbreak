@@ -9,6 +9,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -70,11 +72,11 @@ class FreeIpaDeletionServiceTest {
 
     @Test
     void deleteByCrn() {
-        when(stackService.getByEnvironmentCrn(eq(ENVIRONMENT_CRN))).thenReturn(stack);
+        when(stackService.findAllByEnvironmentCrn(eq(ENVIRONMENT_CRN))).thenReturn(Collections.singletonList(stack));
 
         underTest.delete(ENVIRONMENT_CRN);
 
-        verify(stackService, times(1)).getByEnvironmentCrn(eq(ENVIRONMENT_CRN));
+        verify(stackService, times(1)).findAllByEnvironmentCrn(eq(ENVIRONMENT_CRN));
 
         ArgumentCaptor<TerminationEvent> terminationEventArgumentCaptor = ArgumentCaptor.forClass(TerminationEvent.class);
         verify(flowManager, times(1)).notify(eq(TERMINATION_EVENT.event()), terminationEventArgumentCaptor.capture());

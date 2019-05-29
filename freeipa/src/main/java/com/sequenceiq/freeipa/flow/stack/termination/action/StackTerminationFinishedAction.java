@@ -29,8 +29,8 @@ public class StackTerminationFinishedAction extends AbstractStackTerminationActi
 
     @Override
     protected void doExecute(StackTerminationContext context, TerminateStackResult payload, Map<Object, Object> variables) {
-        stackTerminationService.finishStackTermination(context, payload);
         configRegisters.forEach(configProvider -> configProvider.delete(context.getStack()));
+        stackTerminationService.finishStackTermination(context, payload);
         sendEvent(context);
     }
 
