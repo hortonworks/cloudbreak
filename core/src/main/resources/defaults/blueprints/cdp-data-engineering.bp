@@ -145,11 +145,6 @@
         ],
         "roleConfigGroups": [
           {
-            "refName": "zeppelin-GATEWAY-BASE",
-            "roleType": "GATEWAY",
-            "base": true
-          },
-          {
             "refName": "zeppelin-ZEPPELIN_SERVER-BASE",
             "roleType": "ZEPPELIN_SERVER",
             "base": true
@@ -213,7 +208,6 @@
           "hive-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",
           "livy-GATEWAY-BASE",
-          "zeppelin-GATEWAY-BASE",
           "yarn-NODEMANAGER-WORKER"
         ]
       },
