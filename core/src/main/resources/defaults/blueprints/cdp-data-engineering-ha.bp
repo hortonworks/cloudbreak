@@ -177,11 +177,6 @@
         ],
         "roleConfigGroups": [
           {
-            "refName": "zeppelin-GATEWAY-BASE",
-            "roleType": "GATEWAY",
-            "base": true
-          },
-          {
             "refName": "zeppelin-ZEPPELIN_SERVER-BASE",
             "roleType": "ZEPPELIN_SERVER",
             "base": true
@@ -198,7 +193,6 @@
           "livy-LIVY_SERVER-BASE",
           "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
           "yarn-JOBHISTORY-BASE",
-          "zeppelin-GATEWAY-BASE",
           "zeppelin-ZEPPELIN_SERVER-BASE"
         ]
       },
