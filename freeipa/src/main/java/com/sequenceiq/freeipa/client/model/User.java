@@ -17,6 +17,9 @@ public class User {
     @JsonDeserialize(using = ListFlatteningDeserializer.class)
     private String uid;
 
+    @JsonDeserialize(using = ListFlatteningDeserializer.class)
+    private String givenname;
+
     @JsonProperty(value = "memberof_group")
     private List<String> memberOfGroup;
 
@@ -44,6 +47,14 @@ public class User {
         this.uid = uid;
     }
 
+    public String getGivenname() {
+        return givenname;
+    }
+
+    public void setGivenname(String givenname) {
+        this.givenname = givenname;
+    }
+
     public List<String> getMemberOfGroup() {
         return memberOfGroup;
     }
@@ -58,6 +69,7 @@ public class User {
                 + "dn='" + dn + '\''
                 + ", sn='" + sn + '\''
                 + ", uid='" + uid + '\''
+                + ", givenname='" + givenname + '\''
                 + ", memberOfGroup=" + memberOfGroup
                 + '}';
     }

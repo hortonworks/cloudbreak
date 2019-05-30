@@ -18,8 +18,10 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
+import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsConfig;
 
+import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
 @Component
@@ -29,6 +31,9 @@ public class GrpcUmsClient {
 
     @Inject
     private UmsConfig umsConfig;
+
+    @Inject
+    private UmsClientConfig umsClientConfig;
 
     /**
      * Retrieves user details from UMS.
@@ -41,11 +46,28 @@ public class GrpcUmsClient {
     @Cacheable(cacheNames = "umsUserCache")
     public User getUserDetails(String actorCrn, String userCrn, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            UmsClient client = new UmsClient(channelWrapper.getChannel(), actorCrn);
+            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.debug("Getting user information for {} using request ID {}", userCrn, requestId);
             User user = client.getUser(requestId.orElse(UUID.randomUUID().toString()), userCrn);
             LOGGER.debug("User information retrieved for userCrn: {}", user.getCrn());
             return user;
+        }
+    }
+
+    /**
+     * Retrieves user list from UMS.
+     *
+     * @param accountId the account Id
+     * @param requestId an optional request Id
+     * @return the user associated with this user CRN
+     */
+    public List<User> listUsers(String actorCrn, String accountId, Optional<String> requestId) {
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            LOGGER.debug("Listing user information for account {} using request ID {}", accountId, requestId);
+            List<User> users = client.listUsers(requestId.orElse(UUID.randomUUID().toString()), accountId);
+            LOGGER.debug("{} Users found for account {}", users.size(), accountId);
+            return users;
         }
     }
 
@@ -60,11 +82,38 @@ public class GrpcUmsClient {
     @Cacheable(cacheNames = "umsMachineUserCache")
     public MachineUser getMachineUserDetails(String actorCrn, String userCrn, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            UmsClient client = new UmsClient(channelWrapper.getChannel(), actorCrn);
+            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.debug("Getting machineuser information for {} using request ID {}", userCrn, requestId);
             MachineUser machineUser = client.getMachineUser(requestId.orElse(UUID.randomUUID().toString()), userCrn);
             LOGGER.debug("MachineUser information retrieved for userCrn: {}", machineUser.getCrn());
             return machineUser;
+        }
+    }
+
+    /**
+     * Retrieves machine user list from UMS.
+     *
+     * @param accountId the account Id
+     * @param requestId an optional request Id
+     * @return the user associated with this user CRN
+     */
+    public List<MachineUser> listMachineUsers(String actorCrn, String accountId, Optional<String> requestId) {
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            LOGGER.debug("Listing machine user information for account {} using request ID {}", accountId, requestId);
+            List<MachineUser> users = client.listMachineUsers(requestId.orElse(UUID.randomUUID().toString()), accountId);
+            LOGGER.debug("{} Users found for account {}", users.size(), accountId);
+            return users;
+        }
+    }
+
+    public List<String> getGroupsForUser(String actorCrn, String userCrn, String environmentCrn, Optional<String> requestId) {
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            LOGGER.debug("Listing groups for user {} in environment {}", userCrn, environmentCrn);
+            List<String> groups = client.getGroupsForUser(requestId.orElse(UUID.randomUUID().toString()), userCrn, environmentCrn);
+            LOGGER.debug("Found groups {}", groups);
+            return groups;
         }
     }
 
@@ -79,7 +128,7 @@ public class GrpcUmsClient {
     @Cacheable(cacheNames = "umsAccountCache")
     public Account getAccountDetails(String actorCrn, String userCrn, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            UmsClient client = new UmsClient(channelWrapper.getChannel(), actorCrn);
+            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.debug("Getting account information for {} using request ID {}", userCrn, requestId);
             return client.getAccount(requestId.orElse(UUID.randomUUID().toString()), userCrn);
         }
@@ -88,7 +137,7 @@ public class GrpcUmsClient {
     @CacheEvict(cacheNames = {"umsUserRightsCache", "umsUserRoleAssigmentsCache", "umsResourceAssigneesCache"}, key = "#userCrn")
     public void assignResourceRole(String userCrn, String resourceCrn, String resourceRoleCrn, String requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            UmsClient client = new UmsClient(channelWrapper.getChannel(), userCrn);
+            UmsClient client = makeClient(channelWrapper.getChannel(), userCrn);
             LOGGER.info("Assigning {} role for resource {} to user {}", resourceRoleCrn, resourceCrn, userCrn);
             client.assignResourceRole(requestId, userCrn, resourceCrn, resourceRoleCrn);
             LOGGER.info("Assigned {} role for resource {} to user {}", resourceRoleCrn, resourceCrn, userCrn);
@@ -98,7 +147,7 @@ public class GrpcUmsClient {
     @CacheEvict(cacheNames = {"umsUserRightsCache", "umsUserRoleAssigmentsCache", "umsResourceAssigneesCache"}, key = "#userCrn")
     public void unassignResourceRole(String userCrn, String resourceCrn, String resourceRoleCrn, String requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            UmsClient client = new UmsClient(channelWrapper.getChannel(), userCrn);
+            UmsClient client = makeClient(channelWrapper.getChannel(), userCrn);
             LOGGER.info("Unassigning {} role for resource {} from user {}", resourceRoleCrn, resourceCrn, userCrn);
             client.unassignResourceRole(requestId, userCrn, resourceCrn, resourceRoleCrn);
             LOGGER.info("Unassigned {} role for resource {} from user {}", resourceRoleCrn, resourceCrn, userCrn);
@@ -108,7 +157,7 @@ public class GrpcUmsClient {
     @Cacheable(cacheNames = "umsUserRoleAssigmentsCache")
     public List<UserManagementProto.ResourceAssignment> listResourceRoleAssigments(String userCrn, String requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            UmsClient client = new UmsClient(channelWrapper.getChannel(), userCrn);
+            UmsClient client = makeClient(channelWrapper.getChannel(), userCrn);
             return client.listAssigmentsOfUser(requestId, userCrn);
         }
     }
@@ -130,7 +179,7 @@ public class GrpcUmsClient {
     @Cacheable(cacheNames = "umsResourceAssigneesCache")
     public List<UserManagementProto.ResourceAssignee> listAssigneesOfResource(String userCrn, String resourceCrn, String requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            UmsClient client = new UmsClient(channelWrapper.getChannel(), userCrn);
+            UmsClient client = makeClient(channelWrapper.getChannel(), userCrn);
             return client.listResourceAssigneesForResource(requestId, resourceCrn);
         }
     }
@@ -138,7 +187,7 @@ public class GrpcUmsClient {
     @CacheEvict(cacheNames = {"umsUserRightsCache", "umsUserRoleAssigmentsCache", "umsResourceAssigneesCache"}, key = "#userCrn")
     public void notifyResourceDeleted(String userCrn, String resourceCrn, String requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            UmsClient client = new UmsClient(channelWrapper.getChannel(), userCrn);
+            UmsClient client = makeClient(channelWrapper.getChannel(), userCrn);
             client.notifyResourceDeleted(requestId, resourceCrn);
         }
     }
@@ -149,5 +198,9 @@ public class GrpcUmsClient {
                         .usePlaintext()
                         .maxInboundMessageSize(DEFAULT_MAX_MESSAGE_SIZE)
                         .build());
+    }
+
+    private UmsClient makeClient(ManagedChannel channel, String accountId) {
+        return new UmsClient(channel, accountId, umsClientConfig);
     }
 }
