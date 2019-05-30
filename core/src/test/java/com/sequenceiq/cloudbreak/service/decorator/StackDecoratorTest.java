@@ -32,16 +32,17 @@ import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.cloud.model.SpecialParameters;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
@@ -65,7 +66,7 @@ public class StackDecoratorTest {
     private StackDecorator underTest;
 
     @Mock
-    private CredentialService credentialService;
+    private CredentialClientService credentialClientService;
 
     @Mock
     private NetworkService networkService;
@@ -149,7 +150,7 @@ public class StackDecoratorTest {
         String credentialName = "credentialName";
         MockitoAnnotations.initMocks(this);
         subject = new Stack();
-        subject.setCredential(mock(Credential.class));
+        subject.setCredentialCrn("aCredentialCRN");
         subject.setInstanceGroups(createInstanceGroups(GATEWAY));
         when(cloudParameterCache.getPlatformParameters()).thenReturn(platformParametersMap);
         when(platformParametersMap.get(any(Platform.class))).thenReturn(pps);
@@ -167,11 +168,7 @@ public class StackDecoratorTest {
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCredentialName(credentialName);
         when(environmentClientService.get(anyString())).thenReturn(environmentResponse);
-        Credential credential = new Credential();
-        credential.setName(credentialName);
-        credential.setCloudPlatform("AWS");
-        credential.setId(CREDENTIAL_ID);
-        when(credentialService.getByNameForWorkspace(credentialName, workspace)).thenReturn(credential);
+        when(credentialClientService.get(anyString())).thenReturn(Credential.builder().cloudPlatform(CloudPlatform.MOCK.name()).build());
     }
 
     @Test

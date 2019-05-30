@@ -40,7 +40,7 @@ public class OpenStackPlatformResourcesTest {
 
     @Test
     public void testVirtualMachines() {
-        CloudCredential cloudCredential = new CloudCredential(0L, "name");
+        CloudCredential cloudCredential = new CloudCredential("crn", "name");
         OSClient osClient = mock(OSClient.class);
         String regionName = "region1";
         Set<String> regionsFromOpenStack = Sets.newHashSet(regionName);
@@ -63,7 +63,7 @@ public class OpenStackPlatformResourcesTest {
 
     @Test
     public void testVirtualMachinesWhenTypesEmpty() {
-        CloudCredential cloudCredential = new CloudCredential(0L, "name");
+        CloudCredential cloudCredential = new CloudCredential("crn", "name");
         OSClient osClient = mock(OSClient.class);
         String regionName = "region1";
         Set<String> regionsFromOpenStack = Sets.newHashSet(regionName);

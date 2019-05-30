@@ -112,7 +112,7 @@ public abstract class AwsComponentTest {
     protected AuthenticatedContext getAuthenticatedContext() {
         Location location = location(region("region"), availabilityZone("availabilityZone"));
         CloudContext cloudContext = new CloudContext(1L, "cloudContextName", AWS, "variant", location, "owner@company.com", 5L);
-        CloudCredential cloudCredential = new CloudCredential(3L, "credentialName");
+        CloudCredential cloudCredential = new CloudCredential("crn", "credentialName");
         return new AuthenticatedContext(cloudContext, cloudCredential);
     }
 

@@ -78,7 +78,7 @@ public class AwsImageUpdateServiceTest {
         Location location = Location.location(Region.region("region"));
         CloudContext cloudContext = new CloudContext(1L, "cloudContext", "AWS", "variant",
                 location, USER_ID, WORKSPACE_ID);
-        CloudCredential cc = new CloudCredential(1L, "cc");
+        CloudCredential cc = new CloudCredential("crn", "cc");
         ac = new AuthenticatedContext(cloudContext, cc);
         when(stack.getImage()).thenReturn(image);
         when(image.getImageName()).thenReturn("imageName");

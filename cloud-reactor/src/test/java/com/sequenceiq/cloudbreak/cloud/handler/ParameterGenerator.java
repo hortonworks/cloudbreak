@@ -56,7 +56,7 @@ public class ParameterGenerator {
     }
 
     public CloudCredential createCloudCredential() {
-        CloudCredential c = new CloudCredential(1L, "opencred");
+        CloudCredential c = new CloudCredential("crn", "opencred");
         c.putParameter("userName", "userName");
         c.putParameter("password", "password");
         c.putParameter("tenantName", "tenantName");

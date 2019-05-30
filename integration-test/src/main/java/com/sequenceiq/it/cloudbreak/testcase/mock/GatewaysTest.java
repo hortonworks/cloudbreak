@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotFoundException;
+import javax.ws.rs.InternalServerErrorException;
 
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -62,7 +62,7 @@ public class GatewaysTest extends AbstractIntegrationTest {
                 {
                         getBean(MockedTestContext.class),
                         "andNowForSomethingCompletelyDifferent",
-                        NotFoundException.class,
+                        InternalServerErrorException.class,
                         new TestCaseDescription.TestCaseDescriptionBuilder()
                                 .given("Testing database with unsupported database type")
                                 .when("calling gateways endpoint with a credential which not related to that account for getting cloud gateways")

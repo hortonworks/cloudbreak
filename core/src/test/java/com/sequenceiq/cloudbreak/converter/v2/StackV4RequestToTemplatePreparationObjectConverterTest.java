@@ -43,7 +43,7 @@ import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -53,7 +53,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService
 import com.sequenceiq.cloudbreak.service.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
@@ -99,7 +99,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     private BlueprintService blueprintService;
 
     @Mock
-    private CredentialService credentialService;
+    private CredentialClientService credentialClientService;
 
     @Mock
     private FileSystemConfigurationProvider fileSystemConfigurationProvider;
@@ -168,7 +168,6 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        credential.setName(TEST_CREDENTIAL_NAME);
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
         when(source.getEnvironmentCrn()).thenReturn("envCrn");
         when(environment.getCredentialName()).thenReturn(TEST_CREDENTIAL_NAME);
@@ -182,10 +181,10 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(userService.getOrCreate(eq(cloudbreakUser))).thenReturn(user);
         when(cloudbreakUser.getEmail()).thenReturn("test@hortonworks.com");
         when(workspaceService.get(anyLong(), eq(user))).thenReturn(workspace);
-        when(credentialService.getByNameForWorkspace(TEST_CREDENTIAL_NAME, workspace)).thenReturn(credential);
-        when(credential.getName()).thenReturn(TEST_CREDENTIAL_NAME);
         when(environmentResponse.getCredentialName()).thenReturn(TEST_CREDENTIAL_NAME);
         when(environmentClientService.get(anyString())).thenReturn(environmentResponse);
+        when(credentialClientService.get(TEST_CREDENTIAL_NAME)).thenReturn(credential);
+        when(credential.getName()).thenReturn(TEST_CREDENTIAL_NAME);
     }
 
     @Test
@@ -316,11 +315,10 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         BaseFileSystemConfigurationsView expected = mock(BaseFileSystemConfigurationsView.class);
         CloudStorageV4Request cloudStorageRequest = new CloudStorageV4Request();
         FileSystem fileSystem = new FileSystem();
-        String account = "testAccount";
         when(cloudStorageValidationUtil.isCloudStorageConfigured(cloudStorageRequest)).thenReturn(true);
         when(cluster.getCloudStorage()).thenReturn(cloudStorageRequest);
         when(conversionService.convert(cloudStorageRequest, FileSystem.class)).thenReturn(fileSystem);
-        when(fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source, credential)).thenReturn(expected);
+        when(fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source, credential.getAttributes())).thenReturn(expected);
 
         TemplatePreparationObject result = underTest.convert(source);
 

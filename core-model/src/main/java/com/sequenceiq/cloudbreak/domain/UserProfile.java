@@ -1,27 +1,23 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import java.util.Set;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
+import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
+import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.TenantAwareResource;
 import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
-import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = "user_id"))
@@ -44,9 +40,6 @@ public class UserProfile implements TenantAwareResource {
 
     @OneToOne
     private User user;
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    private Set<Credential> defaultCredentials;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private ShowTerminatedClustersPreferences showTerminatedClustersPreferences;
@@ -93,14 +86,6 @@ public class UserProfile implements TenantAwareResource {
 
     public void setUser(User user) {
         this.user = user;
-    }
-
-    public Set<Credential> getDefaultCredentials() {
-        return defaultCredentials;
-    }
-
-    public void setDefaultCredentials(Set<Credential> defaultCredentials) {
-        this.defaultCredentials = defaultCredentials;
     }
 
     public ShowTerminatedClustersPreferences getShowTerminatedClustersPreferences() {

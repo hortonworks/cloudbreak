@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import static com.sequenceiq.cloudbreak.workspace.resource.ResourceAction.READ;
 import static com.sequenceiq.cloudbreak.repository.snippets.ShowTerminatedClustersSnippets.SHOW_TERMINATED_CLUSTERS_IF_REQUESTED;
+import static com.sequenceiq.cloudbreak.workspace.resource.ResourceAction.READ;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +13,10 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
@@ -23,11 +27,6 @@ import com.sequenceiq.cloudbreak.workspace.repository.check.DisableCheckPermissi
 import com.sequenceiq.cloudbreak.workspace.repository.check.WorkspaceResourceType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @DisableHasPermission
 @EntityType(entityClass = Stack.class)
@@ -160,23 +159,8 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
     Set<AutoscaleStack> findAliveOnesWithAmbari();
 
-    @DisableCheckPermissions
-    Long countByCredential(Credential credential);
-
-    @DisableCheckPermissions
-    Set<Stack> findByCredential(Credential credential);
-
-    @DisableCheckPermissions
-    Long countByNetwork(Network network);
-
     @CheckPermissionsByReturnValue
     Set<Stack> findByNetwork(Network network);
-
-    @DisableCheckPermissions
-    @Query("SELECT COUNT(s) FROM Stack s WHERE (s.workspace = null OR s.creator = null) "
-            + "AND s.terminated = null "
-            + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
-    Long countStacksWithNoWorkspaceOrCreator();
 
     @CheckPermissionsByWorkspaceId
     @Query("SELECT s.name FROM Stack s WHERE s.workspace.id = :workspaceId AND s.environmentCrn = :environmentCrn "
