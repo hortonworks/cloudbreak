@@ -341,6 +341,11 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public Set<Stack> findAllAliveWithInstanceGroups() {
+            return null;
+        }
+
+        @Override
         public Set<Stack> findAllAliveWithNoWorkspaceOrUser() {
             return null;
         }

@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.startup.MissingVolumeTemplatesMigrator;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
@@ -91,6 +92,9 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     @Inject
     private GovCloudFlagMigrator govCloudFlagMigrator;
 
+    @Inject
+    private MissingVolumeTemplatesMigrator missingVolumeTemplatesMigrator;
+
     private final List<Status> syncRequiredStates = Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC, START_IN_PROGRESS, STOP_IN_PROGRESS);
 
     @Override
@@ -105,6 +109,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
             triggerSyncs(stacksToSync, clustersToSync);
             cloudbreakFlowLogService.purgeTerminatedStacksFlowLogs();
             govCloudFlagMigrator.run();
+            missingVolumeTemplatesMigrator.run();
         } catch (Exception e) {
             LOGGER.error("Clean up or the migration operations failed. Shutting down the node. ", e);
             ConfigurableApplicationContext applicationContext = (ConfigurableApplicationContext) event.getApplicationContext();
