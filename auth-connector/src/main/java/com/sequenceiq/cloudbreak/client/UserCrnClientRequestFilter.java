@@ -8,16 +8,16 @@ import javax.ws.rs.client.ClientRequestFilter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBaseUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.token.CrnTokenExtractor;
 
 @Component
 public class UserCrnClientRequestFilter implements ClientRequestFilter {
     @Inject
-    private ThreadBaseUserCrnProvider threadBaseUserCrnProvider;
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Override
     public void filter(ClientRequestContext requestContext) throws IOException {
-        requestContext.getHeaders().putSingle(CrnTokenExtractor.CRN_HEADER, threadBaseUserCrnProvider.getUserCrn());
+        requestContext.getHeaders().putSingle(CrnTokenExtractor.CRN_HEADER, threadBasedUserCrnProvider.getUserCrn());
     }
 }

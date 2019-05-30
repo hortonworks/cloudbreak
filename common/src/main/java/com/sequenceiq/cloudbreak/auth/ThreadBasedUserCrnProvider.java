@@ -1,12 +1,11 @@
-package com.sequenceiq.environment.configuration.security;
+package com.sequenceiq.cloudbreak.auth;
 
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 
 @Service
-public class ThreadLocalUserCrnProvider {
+public class ThreadBasedUserCrnProvider {
 
     private static final ThreadLocal<String> USER_CRN = new ThreadLocal<>();
 
@@ -20,15 +19,15 @@ public class ThreadLocalUserCrnProvider {
             Crn crn = Crn.fromString(userCrn);
             return crn.getAccountId();
         } else {
-            throw new AccessDeniedException("CRN is not set!");
+            throw new IllegalStateException("Crn is not set!");
         }
     }
 
-    void setUserCrn(String userCrn) {
+    public void setUserCrn(String userCrn) {
         USER_CRN.set(userCrn);
     }
 
-    void removeUserCrn() {
+    public void removeUserCrn() {
         USER_CRN.remove();
     }
 }

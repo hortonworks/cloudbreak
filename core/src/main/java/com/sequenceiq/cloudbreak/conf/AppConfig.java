@@ -64,6 +64,7 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.environment.client.EnvironmentApiClientParams;
 import com.sequenceiq.environment.client.EnvironmentServiceClient;
 import com.sequenceiq.environment.client.EnvironmentServiceClientBuilder;
 import com.sequenceiq.freeipa.api.client.FreeIpaApiClientParams;
@@ -287,6 +288,11 @@ public class AppConfig implements ResourceLoaderAware {
     @Bean
     public FreeIpaApiClientParams freeIpaApiClientParams() {
         return new FreeIpaApiClientParams(restDebug, certificateValidation, ignorePreValidation, freeIpaServerUrl);
+    }
+
+    @Bean
+    public EnvironmentApiClientParams environmentApiClientParams() {
+        return new EnvironmentApiClientParams(restDebug, certificateValidation, ignorePreValidation, environmentServerUrl);
     }
 
     @Bean

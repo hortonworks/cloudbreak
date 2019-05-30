@@ -9,21 +9,21 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBaseUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 
 public class CrnFilter extends OncePerRequestFilter {
 
-    private final ThreadBaseUserCrnProvider threadBaseUserCrnProvider;
+    private final ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
-    public CrnFilter(ThreadBaseUserCrnProvider threadBaseUserCrnProvider) {
-        this.threadBaseUserCrnProvider = threadBaseUserCrnProvider;
+    public CrnFilter(ThreadBasedUserCrnProvider threadBasedUserCrnProvider) {
+        this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String userCrn = request.getHeader("x-cdp-actor-crn");
-        threadBaseUserCrnProvider.setUserCrn(userCrn);
+        threadBasedUserCrnProvider.setUserCrn(userCrn);
         filterChain.doFilter(request, response);
-        threadBaseUserCrnProvider.removeUserCrn();
+        threadBasedUserCrnProvider.removeUserCrn();
     }
 }

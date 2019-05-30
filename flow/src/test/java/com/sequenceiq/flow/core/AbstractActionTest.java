@@ -29,7 +29,7 @@ import org.springframework.statemachine.config.builders.StateMachineStateBuilder
 import org.springframework.statemachine.config.builders.StateMachineTransitionBuilder;
 import org.springframework.statemachine.config.common.annotation.ObjectPostProcessor;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBaseUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
@@ -62,7 +62,7 @@ public class AbstractActionTest {
     private ErrorHandlerAwareReactorEventFactory reactorEventFactory;
 
     @Mock
-    private ThreadBaseUserCrnProvider threadBaseUserCrnProvider;
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     private StateMachine<State, Event> stateMachine;
 

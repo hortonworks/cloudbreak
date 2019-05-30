@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.environment.configuration.security.ThreadLocalUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 
 @Service
 public class UserPreferencesService {
@@ -17,15 +17,15 @@ public class UserPreferencesService {
 
     private final UserPreferencesRepository userPreferencesRepository;
 
-    private final ThreadLocalUserCrnProvider threadLocalUserCrnProvider;
+    private final ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
-    public UserPreferencesService(UserPreferencesRepository userPreferencesRepository, ThreadLocalUserCrnProvider threadLocalUserCrnProvider) {
+    public UserPreferencesService(UserPreferencesRepository userPreferencesRepository, ThreadBasedUserCrnProvider threadBasedUserCrnProvider) {
         this.userPreferencesRepository = userPreferencesRepository;
-        this.threadLocalUserCrnProvider = threadLocalUserCrnProvider;
+        this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
     }
 
     public String getExternalIdForCurrentUser() {
-        return getExternalId(threadLocalUserCrnProvider.getUserCrn());
+        return getExternalId(threadBasedUserCrnProvider.getUserCrn());
     }
 
     public String getExternalId(String userCrn) {
