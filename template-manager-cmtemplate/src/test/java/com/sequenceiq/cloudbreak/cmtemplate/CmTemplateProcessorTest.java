@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.configVar;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -181,6 +183,7 @@ public class CmTemplateProcessorTest {
 
         assertEquals(2, refNames.size());
         assertTrue(refNames.containsAll(List.of("yarn-NODEMANAGER-BASE", "hdfs-DATANODE-BASE")));
+        assertEquals("cluster", instantiator.getClusterName());
     }
 
     @Test
@@ -199,6 +202,21 @@ public class CmTemplateProcessorTest {
         List<ApiClusterTemplateRoleConfigGroupInfo> roleConfigGroups = instantiator.getRoleConfigGroups();
 
         assertNull(roleConfigGroups);
+    }
+
+    @Test
+    public void addInstantiatorKeepsCustomClusterName() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-custom_cluster_name.bp"));
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setClusterName("cluster");
+        TemplatePreparationObject templatePreparationObject = new TemplatePreparationObject.Builder()
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .build();
+
+        underTest.addInstantiator(null, templatePreparationObject, null);
+
+        ApiClusterTemplateInstantiator instantiator = underTest.getTemplate().getInstantiator();
+        assertEquals("kusztom", instantiator.getClusterName());
     }
 
     @Test
@@ -357,6 +375,21 @@ public class CmTemplateProcessorTest {
         CmTemplateProcessor expectedProcessor = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-knox-multi-gateway.bp"));
         String expectedTemplate = templateToString(expectedProcessor.getTemplate());
         assertEquals(expectedTemplate, actualTemplate);
+    }
+
+    @Test
+    public void danglingVariablesAreRemoved() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-variables.bp"));
+
+        underTest.removeDanglingVariableReferences();
+
+        Optional<ApiClusterTemplateService> zookeeper = underTest.getServiceByType("ZOOKEEPER");
+        assertTrue(zookeeper.isPresent());
+        assertNull(zookeeper.get().getServiceConfigs());
+
+        Optional<ApiClusterTemplateService> impala = underTest.getServiceByType("IMPALA");
+        assertTrue(impala.isPresent());
+        assertEquals(List.of(configVar("other_service_config", "variable_with_value")), impala.get().getServiceConfigs());
     }
 
     private static void assertSortedEquals(Set<?> expected, Set<?> actual) {
