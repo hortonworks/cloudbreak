@@ -182,6 +182,7 @@
     "hostTemplates": [
       {
         "refName": "master",
+        "cardinality": 1,
         "roleConfigGroupsRefNames": [
           "hdfs-BALANCER-BASE",
           "hdfs-NAMENODE-BASE",
@@ -203,6 +204,7 @@
       },
       {
         "refName": "worker",
+        "cardinality": 1,
         "roleConfigGroupsRefNames": [
           "hdfs-DATANODE-BASE",
           "hive-GATEWAY-BASE",
@@ -213,6 +215,7 @@
       },
       {
         "refName": "compute",
+        "cardinality": 0,
         "roleConfigGroupsRefNames": [
           "hive-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",

@@ -187,6 +187,7 @@
     "hostTemplates": [
       {
         "refName": "gateway",
+        "cardinality": 1,
         "roleConfigGroupsRefNames": [
           "hdfs-BALANCER-BASE",
           "hive-GATEWAY-BASE",
@@ -198,6 +199,7 @@
       },
       {
         "refName": "master",
+        "cardinality": 2,
         "roleConfigGroupsRefNames": [
           "hdfs-FAILOVERCONTROLLER-BASE",
           "hdfs-NAMENODE-BASE",
@@ -211,6 +213,7 @@
       },
       {
         "refName": "worker",
+        "cardinality": 3,
         "roleConfigGroupsRefNames": [
           "hdfs-DATANODE-BASE",
           "hive-GATEWAY-BASE",
@@ -221,6 +224,7 @@
       },
       {
         "refName": "compute",
+        "cardinality": 0,
         "roleConfigGroupsRefNames": [
           "hive-GATEWAY-BASE",
           "livy-GATEWAY-BASE",
@@ -230,6 +234,7 @@
       },
       {
         "refName": "quorum",
+        "cardinality": 3,
         "roleConfigGroupsRefNames": [
           "hdfs-JOURNALNODE-BASE",
           "zookeeper-SERVER-BASE"
