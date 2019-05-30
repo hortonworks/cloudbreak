@@ -12,7 +12,6 @@ import java.util.function.Predicate;
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackValidationV4Request;
@@ -25,16 +24,16 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -53,7 +52,7 @@ public class StackValidationV4RequestToStackValidationConverter extends Abstract
     private NetworkService networkService;
 
     @Inject
-    private CredentialService credentialService;
+    private CredentialClientService credentialClientService;
 
     @Inject
     private EnvironmentClientService environmentClientService;
@@ -92,7 +91,7 @@ public class StackValidationV4RequestToStackValidationConverter extends Abstract
         );
         DetailedEnvironmentResponse environment = environmentClientService.get(stackValidation.getEnvironmentCrn());
         formatAccessDeniedMessage(
-                () -> validateCredential(stackValidationRequest, stackValidation, workspace, environment.getCredentialName()),
+                () -> validateCredential(stackValidation, environment.getCredentialName()),
                 "credential", environment.getCredentialName()
         );
         formatAccessDeniedMessage(
@@ -113,19 +112,9 @@ public class StackValidationV4RequestToStackValidationConverter extends Abstract
         }
     }
 
-    private void validateEnvironment(StackValidationV4Request stackValidationRequest, StackValidation stackValidation, Workspace workspace,
-            DetailedEnvironmentResponse environment) {
-        if (!StringUtils.isEmpty(stackValidationRequest.getEnvironmentCrn())) {
-            stackValidation.setEnvironmentCrn(environment.getId());
-            Credential credential = credentialService.getByNameForWorkspace(environment.getCredentialName(), workspace);
-            stackValidation.setCredential(credential);
-        }
-    }
-
-    private void validateCredential(StackValidationV4Request stackValidationRequest,
-            StackValidation stackValidation, Workspace workspace, String credentialName) {
+    private void validateCredential(StackValidation stackValidation, String credentialName) {
         if (credentialName != null) {
-            Credential credential = credentialService.getByNameForWorkspace(credentialName, workspace);
+            Credential credential = credentialClientService.get(credentialName);
             stackValidation.setCredential(credential);
         } else if (stackValidation.getCredential() == null) {
             throw new BadRequestException("Credential is not configured for the validation request!");

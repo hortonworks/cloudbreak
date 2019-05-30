@@ -80,7 +80,7 @@ public class TerminationService {
                         throw e.getCause();
                     }
                 }
-                stack.setCredential(null);
+                stack.setCredentialCrn(null);
                 stack.setName(terminatedName);
                 stack.setTerminated(clock.getCurrentTimeMillis());
                 terminateInstanceGroups(stack);

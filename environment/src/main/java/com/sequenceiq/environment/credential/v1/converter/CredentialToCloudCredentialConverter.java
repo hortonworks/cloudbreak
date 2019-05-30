@@ -15,8 +15,6 @@ import com.sequenceiq.environment.credential.domain.Credential;
 @Component
 public class CredentialToCloudCredentialConverter {
 
-    private static final String CREDENTIAL_ID = "id";
-
     public CloudCredential convert(Credential credential) {
         if (credential == null) {
             return null;
@@ -27,9 +25,8 @@ public class CredentialToCloudCredentialConverter {
         } else {
             fields = new Json(credential.getAttributes()).getMap();
         }
-        fields.put(CREDENTIAL_ID, credential.getId());
         fields.put(GOV_CLOUD, credential.getGovCloud());
-        return new CloudCredential(credential.getId(), credential.getName(), fields);
+        return new CloudCredential(credential.getResourceCrn(), credential.getName(), fields);
     }
 
 }

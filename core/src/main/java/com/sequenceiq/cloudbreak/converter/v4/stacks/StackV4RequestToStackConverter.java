@@ -49,7 +49,6 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -59,11 +58,12 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.EnvironmentClientService;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -87,7 +87,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     private WorkspaceService workspaceService;
 
     @Inject
-    private CredentialService credentialService;
+    private CredentialClientService credentialClientService;
 
     @Inject
     private EnvironmentClientService environmentClientService;
@@ -181,7 +181,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
 
     private void convertAsStack(StackV4Request source, Stack stack, Workspace workspace, DetailedEnvironmentResponse environment) {
         validateStackAuthentication(source);
-        updateEnvironment(source, stack, workspace, environment);
+        updateEnvironment(stack, environment);
         stack.setName(source.getName());
         stack.setAvailabilityZone(getAvailabilityZone(Optional.ofNullable(source.getPlacement())));
         stack.setOrchestrator(getOrchestrator());
@@ -222,7 +222,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
 
     private void convertAsStackTemplate(StackV4Request source, Stack stack, Workspace workspace, DetailedEnvironmentResponse environment) {
         if (source.getEnvironmentCrn() != null) {
-            updateEnvironment(source, stack, workspace, environment);
+            updateEnvironment(stack, environment);
             updateCloudPlatformAndRelatedFields(source, stack, workspace, environment);
             stack.setAvailabilityZone(source.getPlacement().getAvailabilityZone());
         }
@@ -312,9 +312,9 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         }
     }
 
-    private void updateEnvironment(StackV4Request source, Stack stack, Workspace workspace, DetailedEnvironmentResponse environment) {
-        Credential credential = credentialService.getByNameForWorkspace(environment.getCredentialName(), workspace);
-        stack.setCredential(credential);
+    private void updateEnvironment(Stack stack, DetailedEnvironmentResponse environment) {
+        Credential credential = credentialClientService.get(environment.getCredentialName());
+        stack.setCredentialCrn(credential.getCrn());
     }
 
     private Set<InstanceGroup> convertInstanceGroups(StackV4Request source, Stack stack) {

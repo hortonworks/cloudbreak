@@ -48,17 +48,17 @@ import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.AwsEnvironmentNetworkConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -100,7 +100,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
     private WorkspaceService workspaceService;
 
     @Mock
-    private CredentialService credentialService;
+    private CredentialClientService credentialClientService;
 
     @Mock
     private ProviderParameterCalculator providerParameterCalculator;
@@ -144,8 +144,9 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         environmentResponse.setCloudPlatform("AWS");
         when(environmentClientService.get(anyString())).thenReturn(environmentResponse);
 
-        credential = new Credential();
-        credential.setCloudPlatform("AWS");
+        credential = Credential.builder()
+                .cloudPlatform("AWS")
+                .build();
     }
 
     @Test
@@ -155,7 +156,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         StackV4Request request = getRequest("stack.json");
 
         given(defaultCostTaggingService.prepareDefaultTags(any(CloudbreakUser.class), anyMap(), anyString())).willReturn(new HashMap<>());
-        given(credentialService.getByNameForWorkspace(anyString(), any(Workspace.class))).willReturn(credential);
+        given(credentialClientService.get(anyString())).willReturn(credential);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
         given(conversionService.convert(any(ClusterV4Request.class), eq(Cluster.class))).willReturn(new Cluster());
         // WHEN
@@ -163,7 +164,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         // THEN
         assertAllFieldsNotNull(
                 stack,
-                Arrays.asList("description", "cluster", "credential", "gatewayPort", "network", "securityConfig",
+                Arrays.asList("description", "cluster", "credentialCrn", "gatewayPort", "network", "securityConfig",
                         "version", "created", "platformVariant", "cloudPlatform",
                         "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "parameters", "creator",
                         "environmentCrn", "terminated", "datalakeResourceId", "type", "inputs", "failurePolicy"));
@@ -180,7 +181,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
 
         Map<String, String> defaultTags = Map.of(CB_USER_NAME.key(), "test", CB_VERSION.key(), "test", OWNER.key(), "test", CB_CREATION_TIMESTAMP.key(), "test");
         given(defaultCostTaggingService.prepareDefaultTags(any(CloudbreakUser.class), anyMap(), anyString())).willReturn(defaultTags);
-        given(credentialService.getByNameForWorkspace(anyString(), any(Workspace.class))).willReturn(credential);
+        given(credentialClientService.get(anyString())).willReturn(credential);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
         given(conversionService.convert(any(ClusterV4Request.class), eq(Cluster.class))).willReturn(new Cluster());
         // WHEN
@@ -188,7 +189,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         // THEN
         assertAllFieldsNotNull(
                 stack,
-                Arrays.asList("description", "cluster", "credential", "gatewayPort", "network", "securityConfig",
+                Arrays.asList("description", "cluster", "credentialCrn", "gatewayPort", "network", "securityConfig",
                         "version", "created", "platformVariant", "cloudPlatform",
                         "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "parameters", "creator",
                         "environmentCrn", "terminated", "datalakeResourceId", "type", "inputs", "failurePolicy"));
@@ -233,11 +234,12 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
     @Test
     public void testConvertSharedServicePreparateWhenSharedServiceIsNullThenDatalakeNameShouldNotBeSet() {
         StackV4Request request = getRequest("stack.json");
+        request.setCloudPlatform(CloudPlatform.MOCK);
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
         when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
 
         //GIVEN
-        given(credentialService.getByNameForWorkspace(anyString(), any(Workspace.class))).willReturn(credential);
+        given(credentialClientService.get(anyString())).willReturn(credential);
         given(conversionService.convert(any(InstanceGroupV4Request.class), eq(InstanceGroup.class))).willReturn(instanceGroup);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
         given(conversionService.convert(any(ClusterV4Request.class), eq(Cluster.class))).willReturn(new Cluster());
@@ -255,7 +257,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         StackV4Request request = getRequest("stack-with-shared-service.json");
 
         //GIVEN
-        given(credentialService.getByNameForWorkspace(anyString(), any(Workspace.class))).willReturn(credential);
+        given(credentialClientService.get(anyString())).willReturn(credential);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
         given(conversionService.convert(any(ClusterV4Request.class), eq(Cluster.class))).willReturn(new Cluster());
         DatalakeResources datalakeResources = new DatalakeResources();

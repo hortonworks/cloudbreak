@@ -29,5 +29,4 @@ public class CredentialRequest extends CredentialBase {
     public void setAzure(AzureCredentialRequestParameters azure) {
         this.azure = azure;
     }
-
 }

@@ -37,9 +37,11 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.service.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -144,6 +146,9 @@ public class StackStartActions {
         @Inject
         private CredentialToCloudCredentialConverter credentialConverter;
 
+        @Inject
+        private CredentialClientService credentialClientService;
+
         protected AbstractStackStartAction(Class<P> payloadClass) {
             super(payloadClass);
         }
@@ -158,7 +163,8 @@ public class StackStartActions {
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
             CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                     location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
-            CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
+            Credential credential = credentialClientService.get(stack.getCredentialCrn());
+            CloudCredential cloudCredential = credentialConverter.convert(credential);
             return new StackStartStopContext(flowParameters, stack, instances, cloudContext, cloudCredential);
         }
 

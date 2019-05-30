@@ -42,7 +42,7 @@ public class UnhealthyInstancesFinalizer {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(),
                 stack.getPlatformVariant(), location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
+        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredentialCrn());
         List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(candidateUnhealthyInstances);
 
         List<CloudVmInstanceStatus> cloudVmInstanceStatuses = instanceStateQuery.getCloudVmInstanceStatuses(

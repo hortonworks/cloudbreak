@@ -134,5 +134,4 @@ public abstract class CredentialBase implements Serializable {
     public void setYarn(YarnParameters yarn) {
         this.yarn = yarn;
     }
-
 }

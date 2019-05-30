@@ -9,6 +9,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -50,10 +51,12 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceGroupMetadataCollector;
+import com.sequenceiq.cloudbreak.service.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -112,7 +115,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     private SharedServiceConfigsViewProvider sharedServiceConfigProvider;
 
     @Mock
-    private Stack source;
+    private Stack stackMock;
 
     @Mock
     private Cluster cluster;
@@ -144,20 +147,28 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Mock
     private DatalakeResourcesService datalakeResourcesService;
 
+    @Mock
+    private CredentialClientService credentialClientService;
+
     @Before
     public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
         when(clusterService.getById(any(Long.class))).thenReturn(cluster);
-        when(source.getCluster()).thenReturn(sourceCluster);
+        when(stackMock.getCluster()).thenReturn(sourceCluster);
         when(sourceCluster.getId()).thenReturn(TEST_CLUSTER_ID);
         when(cluster.getId()).thenReturn(TEST_CLUSTER_ID);
         when(clusterComponentConfigProvider.getHDPRepo(TEST_CLUSTER_ID)).thenReturn(stackRepoDetails);
-        when(instanceGroupMetadataCollector.collectMetadata(source)).thenReturn(groupInstances);
+        when(instanceGroupMetadataCollector.collectMetadata(stackMock)).thenReturn(groupInstances);
         when(cluster.getBlueprint()).thenReturn(blueprint);
         when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
-        when(source.getInputs()).thenReturn(stackInputs);
+        when(stackMock.getInputs()).thenReturn(stackInputs);
         when(stackInputs.get(StackInputs.class)).thenReturn(null);
         when(stackInfoService.blueprintStackInfo(TEST_BLUEPRINT_TEXT)).thenReturn(blueprintStackInfo);
+        Credential credential = Credential.builder()
+                .crn("aCredentialCRN")
+                .attributes(new Json(""))
+                .build();
+        when(credentialClientService.get(anyString())).thenReturn(credential);
     }
 
     @Test
@@ -166,7 +177,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(gateway.getSignKey()).thenReturn(null);
         when(cluster.getGateway()).thenReturn(gateway);
 
-        TemplatePreparationObject result = underTest.convert(source);
+        TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertNotNull(result.getGatewayView());
     }
@@ -175,7 +186,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     public void testConvertWhenClusterDoesNotGivesAGatewayThenNullShouldBeStored() {
         when(cluster.getGateway()).thenReturn(null);
 
-        TemplatePreparationObject result = underTest.convert(source);
+        TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertNull(result.getGatewayView());
     }
@@ -187,13 +198,14 @@ public class StackToTemplatePreparationObjectConverterTest {
         BaseFileSystemConfigurationsView expected = mock(BaseFileSystemConfigurationsView.class);
         when(sourceCluster.getFileSystem()).thenReturn(sourceFileSystem);
         when(cluster.getFileSystem()).thenReturn(clusterServiceFileSystem);
-        when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, source)).thenReturn(expected);
+        when(stackMock.getCredentialCrn()).thenReturn("aCredentialCRN");
+        when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, stackMock, new Json(""))).thenReturn(expected);
 
-        TemplatePreparationObject result = underTest.convert(source);
+        TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertTrue(result.getFileSystemConfigurationView().isPresent());
         assertEquals(expected, result.getFileSystemConfigurationView().get());
-        verify(fileSystemConfigurationProvider, times(1)).fileSystemConfiguration(clusterServiceFileSystem, source);
+        verify(fileSystemConfigurationProvider, times(1)).fileSystemConfiguration(clusterServiceFileSystem, stackMock, new Json(""));
     }
 
     @Test
@@ -202,12 +214,12 @@ public class StackToTemplatePreparationObjectConverterTest {
         BaseFileSystemConfigurationsView expected = mock(BaseFileSystemConfigurationsView.class);
         when(sourceCluster.getFileSystem()).thenReturn(null);
         when(cluster.getFileSystem()).thenReturn(clusterServiceFileSystem);
-        when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, source)).thenReturn(expected);
+        when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, stackMock, new Json(""))).thenReturn(expected);
 
-        TemplatePreparationObject result = underTest.convert(source);
+        TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertFalse(result.getFileSystemConfigurationView().isPresent());
-        verify(fileSystemConfigurationProvider, times(0)).fileSystemConfiguration(clusterServiceFileSystem, source);
+        verify(fileSystemConfigurationProvider, times(0)).fileSystemConfiguration(clusterServiceFileSystem, stackMock, new Json(""));
     }
 
     @Test
@@ -219,13 +231,14 @@ public class StackToTemplatePreparationObjectConverterTest {
         FileSystem clusterServiceFileSystem = new FileSystem();
         when(sourceCluster.getFileSystem()).thenReturn(sourceFileSystem);
         when(cluster.getFileSystem()).thenReturn(clusterServiceFileSystem);
-        when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, source)).thenThrow(invokedException);
+        when(stackMock.getCredentialCrn()).thenReturn("aCredentialCRN");
+        when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, stackMock, new Json(""))).thenThrow(invokedException);
 
         expectedException.expect(CloudbreakServiceException.class);
         expectedException.expectMessage(iOExceptionMessage);
         expectedException.expectCause(is(invokedException));
 
-        underTest.convert(source);
+        underTest.convert(stackMock);
     }
 
     @Test
@@ -235,7 +248,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         ldapConfig.setBindDn("admin<>");
         when(cluster.getLdapConfig()).thenReturn(ldapConfig);
 
-        TemplatePreparationObject result = underTest.convert(source);
+        TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertTrue(result.getLdapConfig().isPresent());
     }
@@ -244,7 +257,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     public void testConvertWhenClusterFromClusterServiceHasNoLdapConfigThenTheOptionalShouldBeEmpty() {
         when(cluster.getLdapConfig()).thenReturn(null);
 
-        TemplatePreparationObject result = underTest.convert(source);
+        TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertFalse(result.getLdapConfig().isPresent());
     }
@@ -255,7 +268,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(clusterComponentConfigProvider.getHDPRepo(TEST_CLUSTER_ID)).thenReturn(stackRepoDetails);
         when(stackRepoDetails.getHdpVersion()).thenReturn(hdpVersion);
 
-        TemplatePreparationObject result = underTest.convert(source);
+        TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertTrue(result.getStackRepoDetailsHdpVersion().isPresent());
         assertEquals(hdpVersion, result.getStackRepoDetailsHdpVersion().get());
@@ -265,7 +278,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     public void testConvertWhenHdpRepoNullThenEmptyVersionShouldBeSet() {
         when(clusterComponentConfigProvider.getHDPRepo(TEST_CLUSTER_ID)).thenReturn(null);
 
-        TemplatePreparationObject result = underTest.convert(source);
+        TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertFalse(result.getStackRepoDetailsHdpVersion().isPresent());
     }
@@ -276,7 +289,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         Set<HostGroup> hostGroups = new LinkedHashSet<>();
         when(hdfConfigProvider.createHdfConfig(hostGroups, groupInstances, TEST_BLUEPRINT_TEXT)).thenReturn(expected);
 
-        TemplatePreparationObject result = underTest.convert(source);
+        TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertTrue(result.getHdfConfigs().isPresent());
         assertEquals(expected, result.getHdfConfigs().get());
@@ -287,7 +300,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         Set<HostGroup> hostGroups = new LinkedHashSet<>();
         when(hdfConfigProvider.createHdfConfig(hostGroups, groupInstances, TEST_BLUEPRINT_TEXT)).thenReturn(null);
 
-        TemplatePreparationObject result = underTest.convert(source);
+        TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertFalse(result.getHdfConfigs().isPresent());
     }
@@ -301,7 +314,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(blueprintStackInfo.getVersion()).thenReturn(version);
         when(blueprintViewProvider.getBlueprintView(blueprint)).thenReturn(expected);
 
-        TemplatePreparationObject result = underTest.convert(source);
+        TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertSame(expected, result.getBlueprintView());
     }
@@ -309,9 +322,9 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Test
     public void testConvertWhenGeneralClusterConfigsProvidedThenThisShouldBeStored() {
         GeneralClusterConfigs expected = mock(GeneralClusterConfigs.class);
-        when(generalClusterConfigsProvider.generalClusterConfigs(source, cluster)).thenReturn(expected);
+        when(generalClusterConfigsProvider.generalClusterConfigs(stackMock, cluster)).thenReturn(expected);
 
-        TemplatePreparationObject result = underTest.convert(source);
+        TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertEquals(expected, result.getGeneralClusterConfigs());
     }
@@ -321,11 +334,11 @@ public class StackToTemplatePreparationObjectConverterTest {
         // just in case adding one to avoid matching with the class variable
         Optional<DatalakeResources> datalakeResources = Optional.of(new DatalakeResources());
         SharedServiceConfigsView expected = new SharedServiceConfigsView();
-        when(sharedServiceConfigProvider.createSharedServiceConfigs(source, datalakeResources)).thenReturn(expected);
-        when(source.getDatalakeResourceId()).thenReturn(1L);
+        when(sharedServiceConfigProvider.createSharedServiceConfigs(stackMock, datalakeResources)).thenReturn(expected);
+        when(stackMock.getDatalakeResourceId()).thenReturn(1L);
         when(datalakeResourcesService.findById(anyLong())).thenReturn(datalakeResources);
 
-        TemplatePreparationObject result = underTest.convert(source);
+        TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertTrue(result.getSharedServiceConfigs().isPresent());
         assertEquals(expected, result.getSharedServiceConfigs().get());
@@ -338,7 +351,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(this.stackInputs.get(StackInputs.class)).thenReturn(stackInputs);
         when(stackInputs.getCustomInputs()).thenReturn(customInputs);
 
-        TemplatePreparationObject result = underTest.convert(source);
+        TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertEquals(customInputs, result.getCustomInputs());
     }
@@ -349,7 +362,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(this.stackInputs.get(StackInputs.class)).thenReturn(stackInputs);
         when(stackInputs.getCustomInputs()).thenReturn(null);
 
-        TemplatePreparationObject result = underTest.convert(source);
+        TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertTrue(result.getCustomInputs().isEmpty());
     }
@@ -364,7 +377,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         expectedException.expectMessage(ioExceptionMessage);
         expectedException.expectCause(is(invokedException));
 
-        underTest.convert(source);
+        underTest.convert(stackMock);
     }
 
 }
