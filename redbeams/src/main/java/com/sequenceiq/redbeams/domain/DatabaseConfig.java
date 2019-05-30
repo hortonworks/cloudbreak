@@ -29,9 +29,12 @@ public class DatabaseConfig {
     @SequenceGenerator(name = "databaseconfig_generator", sequenceName = "databaseconfig_id_seq", allocationSize = 1)
     private Long id;
 
-    @Convert(converter = CrnConverter.class)
     @Column(nullable = false)
-    private Crn crn;
+    private String accountId;
+
+    @Convert(converter = CrnConverter.class)
+    @Column(name = "crn", nullable = false)
+    private Crn resourceCrn;
 
     @Column(nullable = false)
     private String name;
@@ -82,8 +85,12 @@ public class DatabaseConfig {
         return id;
     }
 
-    public Crn getCrn() {
-        return crn;
+    public String getAccountId() {
+        return accountId;
+    }
+
+    public Crn getResourceCrn() {
+        return resourceCrn;
     }
 
     public String getName() {
@@ -146,8 +153,12 @@ public class DatabaseConfig {
         this.id = id;
     }
 
-    public void setCrn(Crn crn) {
-        this.crn = crn;
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
+    }
+
+    public void setResourceCrn(Crn resourceCrn) {
+        this.resourceCrn = resourceCrn;
     }
 
     public void setName(String name) {

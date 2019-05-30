@@ -54,7 +54,7 @@ public class DatabaseConfigToDatabaseV4ResponseConverterTest {
     public void testConvert() {
         DatabaseConfig databaseConfig = new DatabaseConfig();
         databaseConfig.setName(NAME);
-        databaseConfig.setCrn(CRN);
+        databaseConfig.setResourceCrn(CRN);
         databaseConfig.setDescription(DESCRIPTION);
         databaseConfig.setCreationDate(CREATION_DATE);
 //        databaseConfig.setStatus(ResourceStatus.USER_MANAGED);

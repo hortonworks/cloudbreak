@@ -1,7 +1,6 @@
 package com.sequenceiq.redbeams.service.dbconfig;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -19,6 +18,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.redbeams.TestData;
@@ -53,15 +53,21 @@ public class DatabaseConfigServiceTest {
     @Test
     public void testRegister() {
         DatabaseConfig configToRegister = new DatabaseConfig();
+        configToRegister.setResourceCrn(null);
+        configToRegister.setCreationDate(null);
         when(clock.getCurrentTimeMillis()).thenReturn(CURRENT_TIME_MILLIS);
-        when(crnService.createCrn(configToRegister)).thenReturn(TestData.getTestCrn("database", "name"));
+        Crn dbCrn = TestData.getTestCrn("database", "name");
+        when(crnService.createCrn(configToRegister)).thenReturn(dbCrn);
+        when(databaseConfigRepository.save(configToRegister)).thenReturn(configToRegister);
 
-        underTest.register(configToRegister);
+        DatabaseConfig createdConfig = underTest.register(configToRegister);
 
+        assertEquals(configToRegister, createdConfig);
         verify(databaseConfigRepository).save(configToRegister);
-        assertEquals(CURRENT_TIME_MILLIS, configToRegister.getCreationDate().longValue());
-        assertEquals(ResourceStatus.USER_MANAGED, configToRegister.getStatus());
-        assertNotNull(configToRegister.getCrn());
+        assertEquals(CURRENT_TIME_MILLIS, createdConfig.getCreationDate().longValue());
+        assertEquals(ResourceStatus.USER_MANAGED, createdConfig.getStatus());
+        assertEquals(dbCrn, createdConfig.getResourceCrn());
+        assertEquals(dbCrn.getAccountId(), createdConfig.getAccountId());
     }
 
     @Test
