@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.auth.altus;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc;
@@ -9,11 +10,15 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc.UserMa
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
+import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsAuthenticationException;
 
 import io.grpc.ManagedChannel;
@@ -28,6 +33,8 @@ public class UmsClient {
 
     private final String actorCrn;
 
+    private final UmsClientConfig umsClientConfig;
+
     /**
      * Constructor.
      *
@@ -35,9 +42,11 @@ public class UmsClient {
      * @param actorCrn the actor CRN.
      */
     UmsClient(ManagedChannel channel,
-            String actorCrn) {
+            String actorCrn,
+            UmsClientConfig umsClientConfig) {
         this.channel = checkNotNull(channel);
         this.actorCrn = checkNotNull(actorCrn);
+        this.umsClientConfig = checkNotNull(umsClientConfig);
     }
 
     /**
@@ -79,6 +88,32 @@ public class UmsClient {
         return users.get(0);
     }
 
+    /**
+     * Wraps calls to ListUsers with an Account ID.
+     *
+     * @param requestId the request ID for the request
+     * @param accountId the account ID
+     * @return the list of users
+     */
+    public List<User> listUsers(String requestId, String accountId) {
+        checkNotNull(requestId);
+        checkNotNull(accountId);
+
+        List<User> users = new ArrayList<>();
+
+        ListUsersRequest.Builder requestBuilder = ListUsersRequest.newBuilder()
+                .setAccountId(accountId)
+                .setPageSize(umsClientConfig.getListUsersPageSize());
+
+        ListUsersResponse response;
+        do {
+            response = newStub(requestId).listUsers(requestBuilder.build());
+            users.addAll(response.getUserList());
+            requestBuilder.setPageToken(response.getNextPageToken());
+        } while (response.hasNextPageToken());
+        return users;
+    }
+
     public MachineUser getMachineUser(String requestId, String userCrn) {
         checkNotNull(requestId);
         checkNotNull(userCrn);
@@ -91,6 +126,32 @@ public class UmsClient {
         ).getMachineUserList();
         checkSingleUserResponse(machineUsers, crn.getResource());
         return machineUsers.get(0);
+    }
+
+    /**
+     * Wraps calls to ListMachineUsers with an Account ID.
+     *
+     * @param requestId the request ID for the request
+     * @param accountId the account ID
+     * @return the list of machine users
+     */
+    public List<MachineUser> listMachineUsers(String requestId, String accountId) {
+        checkNotNull(requestId);
+        checkNotNull(accountId);
+
+        List<MachineUser> machineUsers = new ArrayList<>();
+
+        ListMachineUsersRequest.Builder requestBuilder = ListMachineUsersRequest.newBuilder()
+                .setAccountId(accountId)
+                .setPageSize(umsClientConfig.getListMachineUsersPageSize());
+
+        ListMachineUsersResponse response;
+        do {
+            response = newStub(requestId).listMachineUsers(requestBuilder.build());
+            machineUsers.addAll(response.getMachineUserList());
+            requestBuilder.setPageToken(response.getNextPageToken());
+        } while (response.hasNextPageToken());
+        return machineUsers;
     }
 
     private <T> void checkSingleUserResponse(List<T> users, String crnResource) {
@@ -160,6 +221,19 @@ public class UmsClient {
                         .build()
         ).getAccount();
     }
+
+    public List<String> getGroupsForUser(String requestId, String actorCrn, String resourceCrn) {
+        if (resourceCrn == null) {
+            resourceCrn = "*";
+        }
+        return newStub(requestId).getRights(
+                GetRightsRequest.newBuilder()
+                        .setActorCrn(actorCrn)
+                        .setResourceCrn(resourceCrn)
+                        .build()
+        ).getGroupCrnList();
+    }
+
 
     /**
      * Creates a new stub with the appropriate metadata injecting interceptors.

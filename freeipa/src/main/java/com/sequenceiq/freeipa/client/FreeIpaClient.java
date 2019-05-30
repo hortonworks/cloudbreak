@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.sequenceiq.freeipa.client.model.Ca;
+import com.sequenceiq.freeipa.client.model.Group;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.client.model.User;
 
@@ -35,24 +36,25 @@ public class FreeIpaClient {
         this.apiVersion = apiVersion;
     }
 
-    public RPCResponse<User> userShow(String user) throws FreeIpaClientException {
+    public User userShow(String user) throws FreeIpaClientException {
         List<String> flags = List.of(user);
         Map<String, Object> params = Map.of();
-        return invoke("user_show", flags, params, User.class);
+        return (User) invoke("user_show", flags, params, User.class).getResult();
     }
 
-    public RPCResponse<Set<User>> userFindAll() throws FreeIpaClientException {
+    public Set<User> userFindAll() throws FreeIpaClientException {
         List<String> flags = List.of();
         Map<String, Object> params = Map.of(
                 "sizelimit", 0,
-                "timelimit", 0
+                "timelimit", 0,
+                "all", true
         );
         ParameterizedType type = TypeUtils
                 .parameterize(Set.class, User.class);
-        return invoke("user_find", flags, params, type);
+        return (Set<User>) invoke("user_find", flags, params, type).getResult();
     }
 
-    public RPCResponse<User> userAdd(String user, String firstName, String lastName, String password) throws FreeIpaClientException {
+    public User userAdd(String user, String firstName, String lastName, String password) throws FreeIpaClientException {
         List<String> flags = List.of(user);
         Map<String, Object> params = Map.of(
                 "givenname", firstName,
@@ -60,7 +62,7 @@ public class FreeIpaClient {
                 "userpassword", password,
                 "setattr", "krbPasswordExpiration=20380101000000Z"
         );
-        return invoke("user_add", flags, params, User.class);
+        return (User) invoke("user_add", flags, params, User.class).getResult();
     }
 
     public void userSetPassword(String user, String password) throws FreeIpaClientException {
@@ -70,49 +72,18 @@ public class FreeIpaClient {
         userMod(user, "setattr", "krbPasswordExpiration=20380101000000Z");
     }
 
-    public RPCResponse<User> userMod(String user, String key, Object value) throws FreeIpaClientException {
+    public User userMod(String user, String key, Object value) throws FreeIpaClientException {
         List<String> flags = List.of(user);
         Map<String, Object> params = Map.of(
                 key, value
         );
-        return invoke("user_mod", flags, params, User.class);
+        return (User) invoke("user_mod", flags, params, User.class).getResult();
     }
 
-    // TODO unpack response into something meaningful
-    //ipa: INFO: Response: {
-    //    "error": null,
-    //    "id": 0,
-    //    "principal": "admin@IPATEST.LOCAL",
-    //    "result": {
-    //        "result": {
-    //            "cn": [
-    //                "testgrp1"
-    //            ],
-    //            "dn": "cn=testgrp1,cn=groups,cn=accounts,dc=ipatest,dc=local",
-    //            "gidnumber": [
-    //                "790600009"
-    //            ],
-    //            "ipauniqueid": [
-    //                "a5e6ca24-774f-11e9-abeb-02864e36b814"
-    //            ],
-    //            "objectclass": [
-    //                "top",
-    //                "groupofnames",
-    //                "nestedgroup",
-    //                "ipausergroup",
-    //                "ipaobject",
-    //                "posixgroup"
-    //            ]
-    //        },
-    //        "summary": "Added group \"testgrp1\"",
-    //        "value": "testgrp1"
-    //    },
-    //    "version": "4.6.4"
-    //}
-    public RPCResponse<Object> groupAdd(String group) throws FreeIpaClientException {
+    public Group groupAdd(String group) throws FreeIpaClientException {
         List<String> flags = List.of(group);
         Map<String, Object> params = Map.of();
-        return invoke("group_add", flags, params, Object.class);
+        return (Group) invoke("group_add", flags, params, Group.class).getResult();
     }
 
     // TODO unpack response into something meaningful
@@ -157,6 +128,18 @@ public class FreeIpaClient {
                 "user", users
         );
         return invoke("group_add_member", flags, params, Object.class);
+    }
+
+    public Set<Group> groupFindAll() throws FreeIpaClientException {
+        List<String> flags = List.of();
+        Map<String, Object> params = Map.of(
+                "sizelimit", 0,
+                "timelimit", 0,
+                "all", true
+        );
+        ParameterizedType type = TypeUtils
+                .parameterize(Set.class, Group.class);
+        return (Set<Group>) invoke("group_find", flags, params, type).getResult();
     }
 
     public String getRootCertificate() throws FreeIpaClientException {

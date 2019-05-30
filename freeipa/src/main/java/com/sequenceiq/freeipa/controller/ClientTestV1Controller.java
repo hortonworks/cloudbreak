@@ -8,7 +8,6 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.test.ClientTestV1Endpoint;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
-import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.service.FreeIpaClientFactory;
 
@@ -31,8 +30,7 @@ public class ClientTestV1Controller implements ClientTestV1Endpoint {
         }
 
         try {
-            RPCResponse<User> userShow = freeIpaClient.userShow(name);
-            User user = userShow.getResult();
+            User user = freeIpaClient.userShow(name);
             LOGGER.info("Groups: {}", user.getMemberOfGroup());
             LOGGER.info("Success: {}", user);
         } catch (Exception e) {

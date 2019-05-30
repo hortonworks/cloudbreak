@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.user.model;
 
+import java.util.Objects;
 import java.util.Set;
 
 import javax.validation.constraints.NotNull;
@@ -33,15 +34,61 @@ public class User {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getFirstName() {
         return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
     public String getLastName() {
         return lastName;
     }
 
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
     public Set<String> getGroups() {
         return groups;
+    }
+
+    public void setGroups(Set<String> groups) {
+        this.groups = groups;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        User other = (User) o;
+        return Objects.equals(this.name, other.name)
+                && Objects.equals(this.firstName, other.firstName)
+                && Objects.equals(this.lastName, other.lastName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, firstName, lastName);
+    }
+
+    @Override
+    public String toString() {
+        return "User{"
+                + "name='" + name + '\''
+                + ", firstName='" + firstName + '\''
+                + ", lastName='" + lastName + '\''
+                + ", groups=" + groups
+                + '}';
     }
 }
