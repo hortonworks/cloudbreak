@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -44,7 +45,9 @@ public class DatabaseConfigService {
             // prepareCreation(configToSave);
             configToSave.setStatus(ResourceStatus.USER_MANAGED);
             configToSave.setCreationDate(clock.getCurrentTimeMillis());
-            configToSave.setCrn(crnService.createCrn(configToSave));
+            Crn crn = crnService.createCrn(configToSave);
+            configToSave.setResourceCrn(crn);
+            configToSave.setAccountId(crn.getAccountId());
             return databaseConfigRepository.save(configToSave);
         } catch (AccessDeniedException | DataIntegrityViolationException e) {
             ConstraintViolationException cve = null;

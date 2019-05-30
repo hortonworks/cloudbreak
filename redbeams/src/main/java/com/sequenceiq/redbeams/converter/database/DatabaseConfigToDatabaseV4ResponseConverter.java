@@ -14,7 +14,7 @@ public class DatabaseConfigToDatabaseV4ResponseConverter extends AbstractConvers
     public DatabaseV4Response convert(DatabaseConfig source) {
         DatabaseV4Response json = new DatabaseV4Response();
         json.setName(source.getName());
-        json.setCrn(source.getCrn().toString());
+        json.setCrn(source.getResourceCrn().toString());
         json.setDescription(source.getDescription());
         json.setConnectionURL(source.getConnectionURL());
         json.setDatabaseEngine(source.getDatabaseVendor().name());
