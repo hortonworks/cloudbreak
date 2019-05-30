@@ -53,7 +53,7 @@ abstract class AbstractStackTerminationAction<P extends Payload>
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                 location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
+        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredentialCrn());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
         return new StackTerminationContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, resources);

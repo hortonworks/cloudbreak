@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.domain;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
+
 public class PlatformResourceRequest {
 
     private Credential credential;

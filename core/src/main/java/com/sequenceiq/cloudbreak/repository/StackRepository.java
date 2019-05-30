@@ -14,7 +14,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -160,23 +159,8 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
     Set<AutoscaleStack> findAliveOnesWithAmbari();
 
-    @DisableCheckPermissions
-    Long countByCredential(Credential credential);
-
-    @DisableCheckPermissions
-    Set<Stack> findByCredential(Credential credential);
-
-    @DisableCheckPermissions
-    Long countByNetwork(Network network);
-
     @CheckPermissionsByReturnValue
     Set<Stack> findByNetwork(Network network);
-
-    @DisableCheckPermissions
-    @Query("SELECT COUNT(s) FROM Stack s WHERE (s.workspace = null OR s.creator = null) "
-            + "AND s.terminated = null "
-            + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
-    Long countStacksWithNoWorkspaceOrCreator();
 
     @CheckPermissionsByWorkspaceId
     @Query("SELECT s.name FROM Stack s WHERE s.workspace.id = :workspaceId AND s.environmentCrn = :environmentCrn "

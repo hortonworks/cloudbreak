@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,20 +18,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.requests.UserProfileV4Request;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.repository.UserProfileRepository;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
 
 public class UserProfileServiceTest {
 
     private static final String USERNAME = "test@hortonworks.com";
-
-    @Mock
-    private CredentialService credentialService;
 
     @Mock
     private UserProfileRepository userProfileRepository;
@@ -95,38 +88,6 @@ public class UserProfileServiceTest {
         assertEquals(USERNAME, returnedUserProfile.getUserName());
     }
 
-    @Test
-    public void testAddDefaultCredentials() {
-        User user = new User();
-        UserProfile userProfile = new UserProfile();
-        userProfile.setUser(new User());
-        Workspace workspace = createWorkspace(1L);
-        UserProfileV4Request userProfileV4Request = createUserProfileRequest(null, 1L);
-
-        when(userProfileRepository.save(any(UserProfile.class))).thenReturn(userProfile);
-        when(credentialService.get(anyLong(), any())).thenReturn(createCredential(1L, null, workspace));
-
-        userProfileService.put(userProfileV4Request, user, workspace);
-        assertEquals(1, userProfile.getDefaultCredentials().size());
-
-        userProfileService.put(userProfileV4Request, user, workspace);
-        assertEquals(1, userProfile.getDefaultCredentials().size());
-
-        workspace = createWorkspace(2L);
-        userProfileV4Request = createUserProfileRequest("cred", null);
-
-        when(credentialService.getByNameForWorkspace(anyString(), any())).thenReturn(createCredential(2L, "cred", workspace));
-
-        userProfileService.put(userProfileV4Request, user, workspace);
-        assertEquals(2, userProfile.getDefaultCredentials().size());
-    }
-
-    public void testGetShowTerminatedClustersPreferences() {
-        User user = new User();
-        when(userService.getOrCreate(any())).thenReturn(user);
-
-    }
-
     private UserProfileV4Request createUserProfileRequest(String credentialName, Long credentialId) {
         UserProfileV4Request request = new UserProfileV4Request();
         request.setCredentialId(credentialId);
@@ -134,17 +95,4 @@ public class UserProfileServiceTest {
         return request;
     }
 
-    private Credential createCredential(Long id, String name, Workspace workspace) {
-        Credential credential = new Credential();
-        credential.setId(id);
-        credential.setName(name);
-        credential.setWorkspace(workspace);
-        return credential;
-    }
-
-    private Workspace createWorkspace(Long id) {
-        Workspace workspace = new Workspace();
-        workspace.setId(id);
-        return workspace;
-    }
 }

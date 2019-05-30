@@ -93,6 +93,8 @@ class GcpAttachedDiskResourceBuilderTest {
 
     private long privateId;
 
+    private String privateCrn;
+
     private AuthenticatedContext auth;
 
     private Group group;
@@ -117,8 +119,9 @@ class GcpAttachedDiskResourceBuilderTest {
 
     @BeforeEach
     void setUp() throws Exception {
+        privateCrn = "crn";
         CloudContext cloudContext = new CloudContext(privateId, "testname", "GCP", USER_ID, WORKSPACE_ID);
-        CloudCredential cloudCredential = new CloudCredential(privateId, "credentialname");
+        CloudCredential cloudCredential = new CloudCredential(privateCrn, "credentialname");
         cloudCredential.putParameter("projectId", "projectId");
 
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));

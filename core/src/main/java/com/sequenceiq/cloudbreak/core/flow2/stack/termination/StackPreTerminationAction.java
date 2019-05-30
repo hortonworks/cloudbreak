@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -51,7 +52,7 @@ public class StackPreTerminationAction extends AbstractStackTerminationAction<Te
     @Override
     protected void doExecute(StackTerminationContext context, TerminationEvent payload, Map<Object, Object> variables) {
         Stack stack = context.getStack();
-        if (stack == null || stack.getCredential() == null) {
+        if (stack == null || StringUtils.isEmpty(stack.getCredentialCrn())) {
             LOGGER.info("Could not trigger stack event on null, {}", payload);
             String statusReason = "Stack or credential not found.";
             StackPreTerminationFailed terminateStackResult = new StackPreTerminationFailed(payload.getResourceId(), new IllegalArgumentException(statusReason));

@@ -17,9 +17,9 @@ public class ExtendedCloudCredential extends CloudCredential {
 
     private final Long workspaceId;
 
-    public ExtendedCloudCredential(Long id, String cloudPlatform, String name, String description,
+    public ExtendedCloudCredential(String credentialCrn, String cloudPlatform, String name, String description,
             CloudbreakUser cloudbreakUser, String userId, Long workspaceId) {
-        super(id, name);
+        super(credentialCrn, name);
         this.cloudPlatform = cloudPlatform;
         this.description = description;
         this.cloudbreakUser = cloudbreakUser;
