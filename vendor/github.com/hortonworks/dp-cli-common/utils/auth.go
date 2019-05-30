@@ -10,10 +10,10 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/ernesto-jimenez/httplogger"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/client"
+	log "github.com/sirupsen/logrus"
 )
 
 // This is nearly identical with http.DefaultTransport

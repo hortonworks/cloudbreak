@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	cli "github.com/urfave/cli"
 )
 

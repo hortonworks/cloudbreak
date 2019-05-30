@@ -11,7 +11,7 @@ import (
 
 	"strconv"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 var r *rand.Rand

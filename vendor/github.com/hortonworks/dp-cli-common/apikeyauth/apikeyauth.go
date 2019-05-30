@@ -7,11 +7,11 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 	"github.com/hortonworks/dp-cli-common/utils"
+	log "github.com/sirupsen/logrus"
 	ed "golang.org/x/crypto/ed25519"
 )
 

@@ -3,7 +3,7 @@ package utils
 import (
 	"time"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 func TimeTrack(start time.Time, name string) {
