@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.api.model;
+package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common;
 
 public enum DetailedStackStatus {
     UNKNOWN(null),
@@ -15,7 +15,7 @@ public enum DetailedStackStatus {
     BOOTSTRAPPING_MACHINES(Status.UPDATE_IN_PROGRESS),
     COLLECTING_HOST_METADATA(Status.UPDATE_IN_PROGRESS),
     MOUNTING_DISKS(Status.UPDATE_IN_PROGRESS),
-    STARTING_AMBARI_SERVICES(Status.UPDATE_IN_PROGRESS),
+    STARTING_FREEIPA_SERVICES(Status.UPDATE_IN_PROGRESS),
     // Start statuses
     START_REQUESTED(Status.START_REQUESTED),
     START_IN_PROGRESS(Status.START_IN_PROGRESS),

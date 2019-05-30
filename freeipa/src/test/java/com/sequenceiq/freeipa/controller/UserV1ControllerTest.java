@@ -16,9 +16,12 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SetPasswordRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUsersRequest;
 import com.sequenceiq.freeipa.service.user.PasswordService;
 import com.sequenceiq.freeipa.service.user.UserService;
+import com.sequenceiq.freeipa.util.CrnService;
 
 @ExtendWith(MockitoExtension.class)
 public class UserV1ControllerTest {
+
+    private static final String ACCOUNT_ID = "accountId";
 
     @InjectMocks
     private UserV1Controller underTest;
@@ -28,6 +31,9 @@ public class UserV1ControllerTest {
 
     @Mock
     private PasswordService passwordService;
+
+    @Mock
+    private CrnService crnService;
 
     @Test
     void synchronizeUsers() {
@@ -61,10 +67,11 @@ public class UserV1ControllerTest {
 
     @Test
     void createUsers() throws Exception {
+        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
         CreateUsersRequest request = mock(CreateUsersRequest.class);
 
         underTest.createUsers(request);
 
-        verify(userService, times(1)).createUsers(request);
+        verify(userService, times(1)).createUsers(request, ACCOUNT_ID);
     }
 }

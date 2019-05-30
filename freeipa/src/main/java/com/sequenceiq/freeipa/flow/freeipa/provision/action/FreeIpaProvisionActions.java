@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.freeipa.api.model.DetailedStackStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionState;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesRequest;
@@ -39,7 +39,7 @@ public class FreeIpaProvisionActions {
         return new AbstractStackProvisionAction<>(StackEvent.class) {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
-                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.BOOTSTRAPPING_MACHINES);
+                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.BOOTSTRAPPING_MACHINES, "Bootstrapping machines");
                 sendEvent(context);
             }
 
@@ -55,7 +55,7 @@ public class FreeIpaProvisionActions {
         return new AbstractStackProvisionAction<>(BootstrapMachinesSuccess.class) {
             @Override
             protected void doExecute(StackContext context, BootstrapMachinesSuccess payload, Map<Object, Object> variables) {
-                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.COLLECTING_HOST_METADATA);
+                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.COLLECTING_HOST_METADATA, "Collecting host metadata");
                 sendEvent(context);
             }
 
@@ -72,7 +72,7 @@ public class FreeIpaProvisionActions {
 
             @Override
             protected void doExecute(StackContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) {
-                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.STARTING_AMBARI_SERVICES);
+                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.STARTING_FREEIPA_SERVICES, "Starting FreeIPA services");
                 sendEvent(context);
             }
 
@@ -92,7 +92,7 @@ public class FreeIpaProvisionActions {
 
             @Override
             protected void doExecute(StackContext context, InstallFreeIpaServicesSuccess payload, Map<Object, Object> variables) {
-                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.PROVISIONED);
+                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.PROVISIONED, "FreeIPA installation finished");
                 configRegisters.forEach(configProvider -> configProvider.register(context.getStack().getId()));
                 sendEvent(context);
             }

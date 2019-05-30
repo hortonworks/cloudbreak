@@ -9,11 +9,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.StackAuthenticationResponse;
+import com.sequenceiq.service.api.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -23,12 +25,15 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DescribeFreeIpaResponse {
     @NotNull
-    @ApiModelProperty(value = FreeIpaModelDescriptions.ENVIRONMENT_ID, required = true)
-    private String environmentId;
+    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    private String environmentCrn;
 
     @NotNull
     @ApiModelProperty(value = FreeIpaModelDescriptions.FREEIPA_NAME, required = true)
     private String name;
+
+    @NotNull
+    private String crn;
 
     @NotNull
     @ApiModelProperty(FreeIpaModelDescriptions.PLACEMENT_SETTINGS)
@@ -54,12 +59,24 @@ public class DescribeFreeIpaResponse {
     @ApiModelProperty(value = FreeIpaModelDescriptions.FREEIPA_SERVER_SETTINGS, required = true)
     private FreeIpaServerResponse freeIpa;
 
-    public String getEnvironmentId() {
-        return environmentId;
+    private Status status;
+
+    private String statusReason;
+
+    public String getEnvironmentCrn() {
+        return environmentCrn;
     }
 
-    public void setEnvironmentId(String environmentId) {
-        this.environmentId = environmentId;
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
+    }
+
+    public String getCrn() {
+        return crn;
+    }
+
+    public void setCrn(String crn) {
+        this.crn = crn;
     }
 
     public String getName() {
@@ -116,5 +133,21 @@ public class DescribeFreeIpaResponse {
 
     public void setFreeIpa(FreeIpaServerResponse freeIpa) {
         this.freeIpa = freeIpa;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
     }
 }

@@ -144,7 +144,7 @@ public class LdapConfigV1ServiceTest {
         CreateLdapConfigRequest createLdapConfigRequest = new CreateLdapConfigRequest();
         createLdapConfigRequest.setName(LDAPNAME);
         createLdapConfigRequest.setDescription(LDAPDESC);
-        createLdapConfigRequest.setEnvironmentId(ENVID);
+        createLdapConfigRequest.setEnvironmentCrn(ENVID);
         createLdapConfigRequest.setProtocol(LDAP_PROTOCOL);
         createLdapConfigRequest.setHost(HOST);
         createLdapConfigRequest.setPort(PORT);
@@ -168,7 +168,7 @@ public class LdapConfigV1ServiceTest {
     private void checkResponse(DescribeLdapConfigResponse response) {
         Assert.assertEquals(LDAPNAME, response.getName());
         Assert.assertEquals(LDAPDESC, response.getDescription());
-        Assert.assertEquals(ENVID, response.getEnvironmentId());
+        Assert.assertEquals(ENVID, response.getEnvironmentCrn());
         Assert.assertEquals(LDAP_PROTOCOL, response.getProtocol());
         Assert.assertEquals(HOST, response.getHost());
         Assert.assertEquals(PORT, response.getPort());
@@ -214,7 +214,7 @@ public class LdapConfigV1ServiceTest {
     private void checkCreateRequest(CreateLdapConfigRequest createLdapConfigRequest) {
         Assert.assertEquals(LDAPNAME, createLdapConfigRequest.getName());
         Assert.assertEquals(LDAPDESC, createLdapConfigRequest.getDescription());
-        Assert.assertEquals(ENVID, createLdapConfigRequest.getEnvironmentId());
+        Assert.assertEquals(ENVID, createLdapConfigRequest.getEnvironmentCrn());
         Assert.assertEquals(LDAP_PROTOCOL, createLdapConfigRequest.getProtocol());
         Assert.assertEquals(HOST, createLdapConfigRequest.getHost());
         Assert.assertEquals(PORT, createLdapConfigRequest.getPort());

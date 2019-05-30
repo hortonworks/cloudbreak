@@ -14,7 +14,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.freeipa.util.UserCrnService;
+import com.sequenceiq.freeipa.util.CrnService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class KerberosConfigServiceTest {
@@ -29,7 +29,7 @@ public class KerberosConfigServiceTest {
     private KerberosConfigRepository kerberosConfigRepository;
 
     @Mock
-    private UserCrnService userCrnService;
+    private CrnService crnService;
 
     @InjectMocks
     private KerberosConfigService underTest;
@@ -39,7 +39,7 @@ public class KerberosConfigServiceTest {
         // GIVEN
         KerberosConfig kerberosConfig = new KerberosConfig();
         kerberosConfig.setEnvironmentId(ENVIRONMENT_ID);
-        Mockito.when(userCrnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
         Mockito.when(kerberosConfigRepository.save(kerberosConfig)).thenReturn(kerberosConfig);
         // WHEN
         underTest.createKerberosConfig(kerberosConfig);
@@ -52,7 +52,7 @@ public class KerberosConfigServiceTest {
         // GIVEN
         KerberosConfig kerberosConfig = new KerberosConfig();
         kerberosConfig.setEnvironmentId(ENVIRONMENT_ID);
-        Mockito.when(userCrnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
         Mockito.when(kerberosConfigRepository.findByAccountIdAndEnvironmentId(ACCOUNT_ID, ENVIRONMENT_ID)).thenReturn(Optional.of(new KerberosConfig()));
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("environment is already exists");
@@ -65,7 +65,7 @@ public class KerberosConfigServiceTest {
     public void testGet() {
         // GIVEN
         KerberosConfig expectedKerberosConfig = new KerberosConfig();
-        Mockito.when(userCrnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
         Mockito.when(kerberosConfigRepository.findByAccountIdAndEnvironmentId(ACCOUNT_ID, ENVIRONMENT_ID)).thenReturn(Optional.of(expectedKerberosConfig));
         // WHEN
         KerberosConfig actualResult = underTest.get(ENVIRONMENT_ID);
@@ -76,7 +76,7 @@ public class KerberosConfigServiceTest {
     @Test
     public void testGetNotFound() {
         // GIVEN
-        Mockito.when(userCrnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
         thrown.expect(NotFoundException.class);
         thrown.expectMessage("KerberosConfig for environment");
         // WHEN
@@ -88,7 +88,7 @@ public class KerberosConfigServiceTest {
     public void testDelete() {
         // GIVEN
         KerberosConfig expectedKerberosConfig = new KerberosConfig();
-        Mockito.when(userCrnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
         Mockito.when(kerberosConfigRepository.findByAccountIdAndEnvironmentId(ACCOUNT_ID, ENVIRONMENT_ID)).thenReturn(Optional.of(expectedKerberosConfig));
         // WHEN
         underTest.delete(ENVIRONMENT_ID);
@@ -99,7 +99,7 @@ public class KerberosConfigServiceTest {
     @Test
     public void testDeleteNotFound() {
         // GIVEN
-        Mockito.when(userCrnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
         thrown.expect(NotFoundException.class);
         thrown.expectMessage("KerberosConfig for environment");
         // WHEN

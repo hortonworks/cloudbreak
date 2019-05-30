@@ -16,7 +16,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.user.event.SetPasswordRequest;
 import com.sequenceiq.freeipa.flow.freeipa.user.event.SetPasswordResult;
 import com.sequenceiq.freeipa.service.stack.StackService;
-import com.sequenceiq.freeipa.util.UserCrnService;
+import com.sequenceiq.freeipa.util.CrnService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -33,10 +33,10 @@ public class PasswordService {
     private EventBus eventBus;
 
     @Inject
-    private UserCrnService userCrnService;
+    private CrnService crnService;
 
     public SetPasswordResponse setPassword(String username, String password) {
-        String accountId = userCrnService.getCurrentAccountId();
+        String accountId = crnService.getCurrentAccountId();
 
         LOGGER.debug("setting password for user {} in account {}", username, accountId);
 

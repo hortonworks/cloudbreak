@@ -17,7 +17,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class CreateUsersRequest {
     @NotNull
     @ApiModelProperty(value = FreeIpaModelDescriptions.ENVIRONMENT_ID, required = true)
-    private String environmentId;
+    private String environmentCrn;
 
     @ApiModelProperty(value = UserModelDescriptions.USERCREATE_GROUPS)
     private Set<Group> groups = new HashSet<>();
@@ -25,8 +25,12 @@ public class CreateUsersRequest {
     @ApiModelProperty(value = UserModelDescriptions.USERCREATE_USERS)
     private Set<User> users = new HashSet<>();
 
-    public String getEnvironmentId() {
-        return environmentId;
+    public String getEnvironmentCrn() {
+        return environmentCrn;
+    }
+
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 
     public Set<Group> getGroups() {

@@ -39,7 +39,7 @@ public class PlatformParameterService {
         LOGGER.debug("Get platform parameters for: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getCloudPlatform(), stack.getCloudPlatform(),
-                location, stack.getOwner(), "0");
+                location, stack.getOwner(), stack.getAccountId());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         PlatformParameterRequest parameterRequest = new PlatformParameterRequest(cloudContext, cloudCredential);
         eventBus.notify(parameterRequest.selector(), new Event<>(parameterRequest));

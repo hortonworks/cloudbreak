@@ -54,29 +54,11 @@ class FreeIpaDeletionServiceTest {
 
     @Test
     void delete() {
-        when(stackService.getByAccountIdEnvironmentAndName(eq(ACCOUNT_ID), eq(ENVIRONMENT_CRN), eq(STACK_NAME))).thenReturn(stack);
+        when(stackService.findAllByEnvironmentCrnAndAccountId(eq(ENVIRONMENT_CRN), eq(ACCOUNT_ID))).thenReturn(Collections.singletonList(stack));
 
-        underTest.delete(ACCOUNT_ID, ENVIRONMENT_CRN, STACK_NAME);
+        underTest.delete(ENVIRONMENT_CRN, ACCOUNT_ID);
 
-        verify(stackService, times(1)).getByAccountIdEnvironmentAndName(eq(ACCOUNT_ID), eq(ENVIRONMENT_CRN), eq(STACK_NAME));
-
-        ArgumentCaptor<TerminationEvent> terminationEventArgumentCaptor = ArgumentCaptor.forClass(TerminationEvent.class);
-        verify(flowManager, times(1)).notify(eq(TERMINATION_EVENT.event()), terminationEventArgumentCaptor.capture());
-
-        assertAll(
-                () -> assertEquals(TERMINATION_EVENT.event(), terminationEventArgumentCaptor.getValue().selector()),
-                () -> assertEquals(STACK_ID, terminationEventArgumentCaptor.getValue().getResourceId()),
-                () -> assertFalse(terminationEventArgumentCaptor.getValue().getForced())
-        );
-    }
-
-    @Test
-    void deleteByCrn() {
-        when(stackService.findAllByEnvironmentCrn(eq(ENVIRONMENT_CRN))).thenReturn(Collections.singletonList(stack));
-
-        underTest.delete(ENVIRONMENT_CRN);
-
-        verify(stackService, times(1)).findAllByEnvironmentCrn(eq(ENVIRONMENT_CRN));
+        verify(stackService, times(1)).findAllByEnvironmentCrnAndAccountId(eq(ENVIRONMENT_CRN), eq(ACCOUNT_ID));
 
         ArgumentCaptor<TerminationEvent> terminationEventArgumentCaptor = ArgumentCaptor.forClass(TerminationEvent.class);
         verify(flowManager, times(1)).notify(eq(TERMINATION_EVENT.event()), terminationEventArgumentCaptor.capture());

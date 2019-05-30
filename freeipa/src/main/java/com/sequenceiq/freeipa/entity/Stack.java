@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.entity;
 
-import static com.sequenceiq.freeipa.api.model.Status.DELETE_COMPLETED;
-import static com.sequenceiq.freeipa.api.model.Status.DELETE_IN_PROGRESS;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_IN_PROGRESS;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -33,6 +33,9 @@ public class Stack {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "stack_generator")
     @SequenceGenerator(name = "stack_generator", sequenceName = "stack_id_seq", allocationSize = 1)
     private Long id;
+
+    @Column(nullable = false)
+    private String resourceCrn;
 
     private String name;
 
@@ -88,6 +91,14 @@ public class Stack {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getResourceCrn() {
+        return resourceCrn;
+    }
+
+    public void setResourceCrn(String resourceCrn) {
+        this.resourceCrn = resourceCrn;
     }
 
     public String getName() {

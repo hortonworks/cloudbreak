@@ -239,7 +239,8 @@ public class Crn {
         DATABASE_SERVER("databaseServer"),
         CREDENTIAL("credential"),
         LDAP("ldap"),
-        KERBEROS("kerberos");
+        KERBEROS("kerberos"),
+        FREEIPA("freeipa");
 
         private static final ImmutableMap<String, ResourceType> FROM_STRING;
         static {

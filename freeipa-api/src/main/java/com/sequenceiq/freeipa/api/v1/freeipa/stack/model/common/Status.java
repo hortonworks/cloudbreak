@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.api.model;
+package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common;
 
 import java.util.Arrays;
 

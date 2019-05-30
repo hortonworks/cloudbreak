@@ -4,7 +4,6 @@ import static com.sequenceiq.freeipa.controller.exception.NotFoundException.notF
 import static java.lang.String.format;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -16,7 +15,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
-import com.sequenceiq.freeipa.util.UserCrnService;
+import com.sequenceiq.freeipa.util.CrnService;
 
 @Service
 public class KerberosConfigService extends AbstractArchivistService<KerberosConfig> {
@@ -26,28 +25,28 @@ public class KerberosConfigService extends AbstractArchivistService<KerberosConf
     private KerberosConfigRepository kerberosConfigRepository;
 
     @Inject
-    private UserCrnService userCrnService;
+    private CrnService crnService;
 
     public KerberosConfig createKerberosConfig(KerberosConfig kerberosConfig) {
-        String accountId = userCrnService.getCurrentAccountId();
+        String accountId = crnService.getCurrentAccountId();
         return createKerberosConfig(kerberosConfig, accountId);
     }
 
     public KerberosConfig createKerberosConfig(KerberosConfig kerberosConfig, String accountId) {
         kerberosConfig.setAccountId(accountId);
-        kerberosConfig.setResourceCrn(createCrn(kerberosConfig.getAccountId()));
+        kerberosConfig.setResourceCrn(crnService.createCrn(kerberosConfig.getAccountId(), Crn.ResourceType.KERBEROS));
         checkIfExists(kerberosConfig);
         return kerberosConfigRepository.save(kerberosConfig);
     }
 
     public KerberosConfig get(String environmentId) {
-        String accountId = userCrnService.getCurrentAccountId();
+        String accountId = crnService.getCurrentAccountId();
         return kerberosConfigRepository.findByAccountIdAndEnvironmentId(accountId, environmentId)
                 .orElseThrow(notFound("KerberosConfig for environment", environmentId));
     }
 
     public void delete(String environmentId) {
-        String accountId = userCrnService.getCurrentAccountId();
+        String accountId = crnService.getCurrentAccountId();
         delete(environmentId, accountId);
     }
 
@@ -71,14 +70,5 @@ public class KerberosConfigService extends AbstractArchivistService<KerberosConf
                     LOGGER.info(message);
                     throw new BadRequestException(message);
                 });
-    }
-
-    private String createCrn(String accountId) {
-        return Crn.builder()
-                .setService(Crn.Service.FREEIPA)
-                .setAccountId(accountId)
-                .setResourceType(Crn.ResourceType.KERBEROS)
-                .setResource(UUID.randomUUID().toString())
-                .build().toString();
     }
 }

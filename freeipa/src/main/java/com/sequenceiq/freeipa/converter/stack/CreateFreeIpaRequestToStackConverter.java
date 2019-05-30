@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.freeipa.api.model.DetailedStackStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementBase;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
@@ -62,14 +62,16 @@ public class CreateFreeIpaRequestToStackConverter {
     @Value("${cb.nginx.port:9443}")
     private Integer nginxPort;
 
-    public Stack convert(CreateFreeIpaRequest source, String owner) {
+    public Stack convert(CreateFreeIpaRequest source, String accountId) {
         Stack stack = new Stack();
+        stack.setEnvironment(source.getEnvironmentCrn());
+        stack.setAccountId(accountId);
         stack.setName(source.getName());
         stack.setCreated(System.currentTimeMillis());
         stack.setGatewayport(nginxPort);
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED));
         stack.setAvailabilityZone(Optional.ofNullable(source.getPlacement()).map(PlacementBase::getAvailabilityZone).orElse(null));
-        updateCloudPlatformAndRelatedFields(source, stack, owner);
+        updateCloudPlatformAndRelatedFields(source, stack, accountId);
         stack.setStackAuthentication(stackAuthenticationConverter.convert(source.getAuthentication()));
         stack.setInstanceGroups(convertInstanceGroups(source, stack));
         if (source.getNetwork() != null) {
@@ -77,7 +79,7 @@ public class CreateFreeIpaRequestToStackConverter {
             stack.setNetwork(networkConverter.convert(source.getNetwork()));
         }
         stack.setCredential(credentialConverter.convert(source.getCredential()));
-        stack.setOwner(owner);
+        stack.setOwner(accountId);
         return stack;
     }
 

@@ -3,7 +3,9 @@ package com.sequenceiq.freeipa.controller;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,11 +17,14 @@ import com.sequenceiq.freeipa.service.stack.FreeIpaCreationService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDeletionService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDescribeService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaRootCertificateService;
+import com.sequenceiq.freeipa.util.CrnService;
 
 @ExtendWith(MockitoExtension.class)
 class FreeIpaV1ControllerTest {
 
     private static final String ENVIRONMENT_CRN = "test:environment:crn";
+
+    private static final String ACCOUNT_ID = "accountId";
 
     @InjectMocks
     private FreeIpaV1Controller underTest;
@@ -36,12 +41,20 @@ class FreeIpaV1ControllerTest {
     @Mock
     private FreeIpaRootCertificateService rootCertificateService;
 
+    @Mock
+    private CrnService crnService;
+
+    @BeforeEach
+    public void init() {
+        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+    }
+
     @Test
     void create() {
         CreateFreeIpaRequest freeIpaRequest = new CreateFreeIpaRequest();
         assertNull(underTest.create(freeIpaRequest));
 
-        verify(creationService, times(1)).launchFreeIpa(freeIpaRequest, "test_account");
+        verify(creationService, times(1)).launchFreeIpa(freeIpaRequest, ACCOUNT_ID);
     }
 
     @Test
@@ -52,13 +65,13 @@ class FreeIpaV1ControllerTest {
     @Test
     void getRootCertificate() throws Exception {
         underTest.getRootCertificate(ENVIRONMENT_CRN);
-        verify(rootCertificateService, times(1)).getRootCertificate(ENVIRONMENT_CRN);
+        verify(rootCertificateService, times(1)).getRootCertificate(ENVIRONMENT_CRN, ACCOUNT_ID);
     }
 
     @Test
     void delete() {
         underTest.delete(ENVIRONMENT_CRN);
 
-        verify(deletionService, times(1)).delete(ENVIRONMENT_CRN);
+        verify(deletionService, times(1)).delete(ENVIRONMENT_CRN, ACCOUNT_ID);
     }
 }

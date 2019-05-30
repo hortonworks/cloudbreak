@@ -21,8 +21,8 @@ public class FreeIpaRootCertificateService {
     @Inject
     private StackService stackService;
 
-    public String getRootCertificate(String environmentCrn) throws Exception {
-        Stack stack = stackService.getByEnvironmentCrn(environmentCrn);
+    public String getRootCertificate(String environmentCrn, String accountId) throws Exception {
+        Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         FreeIpaClient client = freeIpaClientFactory.getFreeIpaClientForStack(stack);
 
         return convertToPemFormat(client.getRootCertificate());

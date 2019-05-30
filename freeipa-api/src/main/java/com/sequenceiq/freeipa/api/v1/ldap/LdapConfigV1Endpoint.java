@@ -33,7 +33,7 @@ public interface LdapConfigV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LdapConfigOpDescription.GET_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = LDAP_CONFIG_NOTES,
             nickname = "getLdapConfigV1")
-    DescribeLdapConfigResponse describe(@QueryParam("environmentId") @NotEmpty String environmentId);
+    DescribeLdapConfigResponse describe(@QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 
     @POST
     @Path("")
@@ -46,7 +46,7 @@ public interface LdapConfigV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LdapConfigOpDescription.DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = LDAP_CONFIG_NOTES,
             nickname = "deleteLdapConfigV1")
-    void delete(@QueryParam("environmentId") @NotEmpty String environmentId);
+    void delete(@QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 
     @POST
     @Path("test")
@@ -59,5 +59,5 @@ public interface LdapConfigV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LdapConfigOpDescription.GET_REQUEST, produces = MediaType.APPLICATION_JSON, notes = LDAP_CONFIG_NOTES,
             nickname = "getLdapRequestByNameV1")
-    CreateLdapConfigRequest getRequest(@QueryParam("environmentId") @NotEmpty String environmentId);
+    CreateLdapConfigRequest getRequest(@QueryParam("environmentCrn") @NotEmpty String environmentCrn);
 }
