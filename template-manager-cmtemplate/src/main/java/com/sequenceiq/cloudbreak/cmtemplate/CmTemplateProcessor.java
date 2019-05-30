@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,6 +23,8 @@ import javax.annotation.Nonnull;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiClusterTemplateClusterSpec;
@@ -48,6 +51,8 @@ import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfi
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
 
 public class CmTemplateProcessor implements BlueprintTextProcessor {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CmTemplateProcessor.class);
 
     private final ApiClusterTemplate cmTemplate;
 
@@ -150,9 +155,8 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     }
 
     public void addInstantiator(ClouderaManagerRepo clouderaManagerRepoDetails, TemplatePreparationObject templatePreparationObject, String sdxContextName) {
-        ApiClusterTemplateInstantiator instantiator = cmTemplate.getInstantiator();
-        if (instantiator == null) {
-            instantiator = new ApiClusterTemplateInstantiator();
+        ApiClusterTemplateInstantiator instantiator = ofNullable(cmTemplate.getInstantiator()).orElseGet(ApiClusterTemplateInstantiator::new);
+        if (instantiator.getClusterName() == null) {
             instantiator.setClusterName(templatePreparationObject.getGeneralClusterConfigs().getClusterName());
         }
         if (Objects.nonNull(clouderaManagerRepoDetails)
@@ -163,8 +167,8 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                 && templatePreparationObject.getKerberosConfig().isPresent()) {
             instantiator.setEnableKerberos(new ApiConfigureForKerberosArguments());
         }
-        for (ApiClusterTemplateService service : cmTemplate.getServices()) {
-            List<String> nonBaseRefs = ofNullable(service.getRoleConfigGroups()).orElse(new ArrayList<>())
+        for (ApiClusterTemplateService service : ofNullable(cmTemplate.getServices()).orElse(List.of())) {
+            List<String> nonBaseRefs = ofNullable(service.getRoleConfigGroups()).orElse(List.of())
                     .stream()
                     .filter(rcg -> rcg.getBase() == null || !rcg.getBase())
                     .map(ApiClusterTemplateRoleConfigGroup::getRefName)
@@ -338,4 +342,41 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                 ));
     }
 
+    public void removeDanglingVariableReferences() {
+        if (cmTemplate.getServices() != null) {
+            Set<String> existingVariables = cmTemplate.getInstantiator() != null && cmTemplate.getInstantiator().getVariables() != null
+                    ? cmTemplate.getInstantiator().getVariables().stream()
+                            .map(ApiClusterTemplateVariable::getName)
+                            .collect(toSet())
+                    : Set.of();
+
+            for (ApiClusterTemplateService s : cmTemplate.getServices()) {
+                s.setServiceConfigs(removeDanglingVariableReferences(s.getServiceConfigs(), existingVariables, s.getRefName()));
+                if (s.getRoleConfigGroups() != null) {
+                    for (ApiClusterTemplateRoleConfigGroup rcg : s.getRoleConfigGroups()) {
+                        rcg.setConfigs(removeDanglingVariableReferences(rcg.getConfigs(), existingVariables, rcg.getRefName()));
+                    }
+                }
+            }
+        }
+    }
+
+    private List<ApiClusterTemplateConfig> removeDanglingVariableReferences(
+            List<ApiClusterTemplateConfig> configs, Set<String> existingVariables, String refName
+    ) {
+        if (configs != null) {
+            for (Iterator<ApiClusterTemplateConfig> iter = configs.iterator(); iter.hasNext();) {
+                ApiClusterTemplateConfig config = iter.next();
+                String variable = config.getVariable();
+                if (variable != null && !existingVariables.contains(variable)) {
+                    LOGGER.info("Removed dangling variable reference '{}': '{}' from section {}", config.getName(), variable, refName);
+                    iter.remove();
+                }
+            }
+            if (configs.isEmpty()) {
+                return null;
+            }
+        }
+        return configs;
+    }
 }

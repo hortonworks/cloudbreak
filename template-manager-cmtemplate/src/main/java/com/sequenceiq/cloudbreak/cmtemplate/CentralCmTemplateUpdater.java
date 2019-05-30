@@ -44,6 +44,7 @@ public class CentralCmTemplateUpdater implements BlueprintUpdater {
             ClouderaManagerRepo clouderaManagerRepoDetails, List<ClouderaManagerProduct> clouderaManagerProductDetails, String sdxContextName) {
         try {
             CmTemplateProcessor processor = getCmTemplateProcessor(source);
+            processor.removeDanglingVariableReferences();
             updateCmTemplateRepoDetails(processor, clouderaManagerRepoDetails, clouderaManagerProductDetails);
             updateCmTemplateConfiguration(processor, clouderaManagerRepoDetails, source, hostGroupMappings, sdxContextName);
             return processor.getTemplate();

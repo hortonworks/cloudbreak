@@ -106,6 +106,13 @@ public class CentralCmTemplateUpdaterTest {
     }
 
     @Test
+    public void danglingVariableReferencesAreRemoved() {
+        when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-variables.bp"));
+        ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null, null);
+        Assert.assertEquals(new CmTemplateProcessor(getBlueprintText("output/clouderamanager-variables.bp")).getTemplate(), generated);
+    }
+
+    @Test
     public void configsAreInjected() {
         List<ApiClusterTemplateConfig> serviceConfigs = List.of(config("service_config_name", "service_config_value"));
         List<ApiClusterTemplateConfig> roleConfigs = List.of(config("role_config_name", "role_config_value"));
