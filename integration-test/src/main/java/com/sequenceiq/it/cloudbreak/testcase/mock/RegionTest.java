@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotFoundException;
+import javax.ws.rs.InternalServerErrorException;
 
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -65,7 +65,7 @@ public class RegionTest extends AbstractIntegrationTest {
                 {
                         getBean(MockedTestContext.class),
                         "andNowForSomethingCompletelyDifferent",
-                        NotFoundException.class,
+                        InternalServerErrorException.class,
                         new TestCaseDescription.TestCaseDescriptionBuilder()
                                 .given("a MOCK credential name which does not belongs to that workspace")
                                 .when("calling get region on provider side")

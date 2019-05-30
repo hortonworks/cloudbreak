@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterComponentRepository;
@@ -58,7 +59,7 @@ import com.sequenceiq.cloudbreak.service.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteService;
+import com.sequenceiq.cloudbreak.service.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -121,10 +122,10 @@ public class StackCreatorService {
     private BlueprintService blueprintService;
 
     @Inject
-    private CredentialPrerequisiteService credentialPrerequisiteService;
+    private DatalakeResourcesService datalakeResourcesService;
 
     @Inject
-    private DatalakeResourcesService datalakeResourcesService;
+    private CredentialClientService credentialClientService;
 
     @Inject
     @Qualifier("cloudbreakListeningScheduledExecutorService")
@@ -171,7 +172,8 @@ public class StackCreatorService {
             savedStack = transactionService.required(() -> {
                 Stack stack = stackDecorator.decorate(stackStub, stackRequest, user, workspace);
 
-                CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stackStub.getCredential());
+                Credential credential = credentialClientService.get(stack.getCredentialCrn());
+                CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
 
                 ParametersValidationRequest parametersValidationRequest = parametersValidator.triggerValidate(stackRequest.getCloudPlatform().name(),
                         cloudCredential, stack.getParameters(), stack.getCreator().getUserId(), stack.getWorkspace().getId());
@@ -182,7 +184,7 @@ public class StackCreatorService {
 
                 measure(() -> {
                     for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-                        templateValidator.validateTemplateRequest(stack.getCredential(), instanceGroup.getTemplate(), stack.getRegion(),
+                        templateValidator.validateTemplateRequest(credential, instanceGroup.getTemplate(), stack.getRegion(),
                                 stack.getAvailabilityZone(), stack.getPlatformVariant());
                     }
                 }, LOGGER, "Stack's instance templates have been validated in {} ms for stack {}", stackName);
@@ -284,7 +286,7 @@ public class StackCreatorService {
     }
 
     private Stack prepareSharedServiceIfNeed(Stack stack) {
-        if (credentialPrerequisiteService.isCumulusCredential(stack.getCredential().getAttributes()) || stack.getDatalakeResourceId() != null) {
+        if (stack.getDatalakeResourceId() != null) {
             return sharedServiceConfigProvider.prepareDatalakeConfigs(stack);
         }
         return stack;
