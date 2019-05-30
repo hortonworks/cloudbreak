@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBaseUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.flow.core.FlowConstants;
 
 import reactor.bus.Event;
@@ -21,7 +21,7 @@ public class FlowParametersAspects {
     private static final Logger LOGGER = LoggerFactory.getLogger(FlowParametersAspects.class);
 
     @Inject
-    private ThreadBaseUserCrnProvider threadBaseUserCrnProvider;
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Pointcut("execution(public * reactor.fn.Consumer+.accept(..)) && within(com.sequenceiq..*)")
     public void interceptReactorConsumersAcceptMethod() {
@@ -34,7 +34,7 @@ public class FlowParametersAspects {
             Event<?> event = (Event<?>) proceedingJoinPoint.getArgs()[0];
             flowTriggerUserCrn = event.getHeaders().get(FlowConstants.FLOW_TRIGGER_USERCRN);
             if (flowTriggerUserCrn != null) {
-                threadBaseUserCrnProvider.setUserCrn(flowTriggerUserCrn);
+                threadBasedUserCrnProvider.setUserCrn(flowTriggerUserCrn);
                 LOGGER.debug("A Reactor event handler's 'accept' method has been intercepted: {}, FlowTriggerUserCrn set to threadlocal.",
                         proceedingJoinPoint.toShortString());
             }
@@ -43,7 +43,7 @@ public class FlowParametersAspects {
             if (flowTriggerUserCrn != null) {
                 LOGGER.debug("FlowTriggerUserCrn remove from threadlocal on {}.",
                         proceedingJoinPoint.toShortString());
-                threadBaseUserCrnProvider.removeUserCrn();
+                threadBasedUserCrnProvider.removeUserCrn();
             }
         }
     }

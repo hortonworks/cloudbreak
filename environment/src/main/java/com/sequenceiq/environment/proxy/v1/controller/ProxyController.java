@@ -11,11 +11,11 @@ import javax.transaction.Transactional.TxType;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
 import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;
 import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyResponse;
 import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyResponses;
-import com.sequenceiq.environment.configuration.security.ThreadLocalUserCrnProvider;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.environment.proxy.service.ProxyConfigService;
 import com.sequenceiq.environment.proxy.v1.converter.ProxyConfigToProxyRequestConverter;
@@ -36,37 +36,37 @@ public class ProxyController extends NotificationController implements ProxyEndp
 
     private final ProxyRequestToProxyConfigConverter proxyRequestToProxyConfigConverter;
 
-    private final ThreadLocalUserCrnProvider threadLocalUserCrnProvider;
+    private final ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     public ProxyController(ProxyConfigService proxyConfigService,
             ProxyConfigToProxyRequestConverter proxyConfigToProxyRequestConverter,
             ProxyConfigToProxyResponseConverter proxyConfigToProxyResponseConverter,
             ProxyRequestToProxyConfigConverter proxyRequestToProxyConfigConverter,
-            ThreadLocalUserCrnProvider threadLocalUserCrnProvider) {
+            ThreadBasedUserCrnProvider threadBasedUserCrnProvider) {
         this.proxyConfigService = proxyConfigService;
         this.proxyConfigToProxyRequestConverter = proxyConfigToProxyRequestConverter;
         this.proxyConfigToProxyResponseConverter = proxyConfigToProxyResponseConverter;
         this.proxyRequestToProxyConfigConverter = proxyRequestToProxyConfigConverter;
-        this.threadLocalUserCrnProvider = threadLocalUserCrnProvider;
+        this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
     }
 
     @Override
     public ProxyResponses list() {
-        String accountId = threadLocalUserCrnProvider.getAccountId();
+        String accountId = threadBasedUserCrnProvider.getAccountId();
         Set<ProxyConfig> listInAccount = proxyConfigService.listInAccount(accountId);
         return new ProxyResponses(new HashSet<>(proxyConfigToProxyResponseConverter.convert(listInAccount)));
     }
 
     @Override
     public ProxyResponse get(String name) {
-        String accountId = threadLocalUserCrnProvider.getAccountId();
+        String accountId = threadBasedUserCrnProvider.getAccountId();
         ProxyConfig config = proxyConfigService.getByNameForAccountId(name, accountId);
         return proxyConfigToProxyResponseConverter.convert(config);
     }
 
     @Override
     public ProxyResponse post(ProxyRequest request) {
-        String accountId = threadLocalUserCrnProvider.getAccountId();
+        String accountId = threadBasedUserCrnProvider.getAccountId();
         ProxyConfig proxyConfig = proxyRequestToProxyConfigConverter.convert(request);
         notify(ResourceEvent.PROXY_CONFIG_CREATED);
         return proxyConfigToProxyResponseConverter
@@ -76,13 +76,13 @@ public class ProxyController extends NotificationController implements ProxyEndp
     @Override
     public ProxyResponse delete(String name) {
         notify(ResourceEvent.PROXY_CONFIG_DELETED);
-        return proxyConfigToProxyResponseConverter.convert(proxyConfigService.deleteInAccount(name, threadLocalUserCrnProvider.getAccountId()));
+        return proxyConfigToProxyResponseConverter.convert(proxyConfigService.deleteInAccount(name, threadBasedUserCrnProvider.getAccountId()));
     }
 
     @Override
     public ProxyResponses deleteMultiple(Set<String> names) {
         notify(ResourceEvent.PROXY_CONFIG_DELETED);
-        Set<ProxyConfig> responses = proxyConfigService.deleteMultipleInAccount(names, threadLocalUserCrnProvider.getAccountId());
+        Set<ProxyConfig> responses = proxyConfigService.deleteMultipleInAccount(names, threadBasedUserCrnProvider.getAccountId());
         return new ProxyResponses(responses
                 .stream()
                 .map(p -> proxyConfigToProxyResponseConverter.convert(p))

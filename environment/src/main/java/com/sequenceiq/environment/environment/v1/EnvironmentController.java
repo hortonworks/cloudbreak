@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.environment.api.WelcomeResponse;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
@@ -17,7 +18,6 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRe
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
-import com.sequenceiq.environment.configuration.security.ThreadLocalUserCrnProvider;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
@@ -37,24 +37,24 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final EnvironmentViewService environmentViewService;
 
-    private final ThreadLocalUserCrnProvider threadLocalUserCrnProvider;
+    private final ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     private final AuthenticatedUserService authenticatedUserService;
 
     public EnvironmentController(EnvironmentApiConverter environmentApiConverter, EnvironmentService environmentService,
             EnvironmentCreationService environmentCreationService, EnvironmentViewService environmentViewService,
-            ThreadLocalUserCrnProvider threadLocalUserCrnProvider, AuthenticatedUserService authenticatedUserService) {
+            ThreadBasedUserCrnProvider threadBasedUserCrnProvider, AuthenticatedUserService authenticatedUserService) {
         this.environmentApiConverter = environmentApiConverter;
         this.environmentService = environmentService;
         this.environmentCreationService = environmentCreationService;
         this.environmentViewService = environmentViewService;
-        this.threadLocalUserCrnProvider = threadLocalUserCrnProvider;
+        this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
         this.authenticatedUserService = authenticatedUserService;
     }
 
     @Override
     public WelcomeResponse welcome() {
-        String accountId = threadLocalUserCrnProvider.getAccountId();
+        String accountId = threadBasedUserCrnProvider.getAccountId();
         return new WelcomeResponse(accountId);
     }
 
@@ -68,13 +68,13 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     public DetailedEnvironmentResponse get(String environmentName) {
-        String accountId = threadLocalUserCrnProvider.getAccountId();
+        String accountId = threadBasedUserCrnProvider.getAccountId();
         return environmentService.get(environmentName, accountId);
     }
 
     @Override
     public SimpleEnvironmentResponse delete(String environmentName) {
-        String accountId = threadLocalUserCrnProvider.getAccountId();
+        String accountId = threadBasedUserCrnProvider.getAccountId();
         return environmentService.delete(environmentName, accountId);
     }
 
@@ -92,7 +92,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     public SimpleEnvironmentResponses list() {
-        String accountId = threadLocalUserCrnProvider.getAccountId();
+        String accountId = threadBasedUserCrnProvider.getAccountId();
         return new SimpleEnvironmentResponses(environmentViewService.listByAccountId(accountId));
     }
 

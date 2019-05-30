@@ -6,19 +6,22 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBaseUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 
 @Configuration
 public class AuthFilterConfiguration {
+
+    private static final int ORDER = 0;
+
     @Inject
-    private ThreadBaseUserCrnProvider threadBaseUserCrnProvider;
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Bean
     public FilterRegistrationBean<CrnFilter> crnFilterRegistrationBean() {
         FilterRegistrationBean<CrnFilter> registrationBean = new FilterRegistrationBean<>();
-        CrnFilter filter = new CrnFilter(threadBaseUserCrnProvider);
+        CrnFilter filter = new CrnFilter(threadBasedUserCrnProvider);
         registrationBean.setFilter(filter);
-        registrationBean.setOrder(Integer.MAX_VALUE);
+        registrationBean.setOrder(ORDER);
         return registrationBean;
     }
 }
