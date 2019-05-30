@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
@@ -20,7 +19,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
@@ -39,7 +38,7 @@ public class DependecyDeletionService {
     private NetworkService networkService;
 
     @Inject
-    private CredentialService credentialService;
+    private CredentialClientService credentialClientService;
 
     @Inject
     private BlueprintService blueprintService;
@@ -63,7 +62,6 @@ public class DependecyDeletionService {
 
     public void deleteDependencies(Stack stack) {
         deleteNetwork(stack.getNetwork());
-        deleteCredential(stack.getCredential());
 
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             deleteSecurityGroup(instanceGroup.getSecurityGroup());
@@ -86,16 +84,6 @@ public class DependecyDeletionService {
             }
         } catch (Exception ex) {
             LOGGER.debug("Could not delete network {} which is associated with the stack: {}", network, ex.getMessage());
-        }
-    }
-
-    private void deleteCredential(Credential credential) {
-        try {
-            if (credential != null) {
-                credentialService.archiveCredential(credential);
-            }
-        } catch (Exception ex) {
-            LOGGER.debug("Could not delete credential {} which is associated with the stack: {}", credential, ex.getMessage());
         }
     }
 

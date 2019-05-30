@@ -21,7 +21,7 @@ public class AwsCachingConfig extends AbstractCacheDefinition {
     public Object generateKey(Object target, Method method, Object... params) {
         if (params.length == 1) {
             AwsCredentialView param = (AwsCredentialView) params[0];
-            return param.getId() != null ? param.getId() : SimpleKey.EMPTY;
+            return param.getCredentialCrn() != null ? param.getCredentialCrn() : SimpleKey.EMPTY;
         }
         return SimpleKey.EMPTY;
     }

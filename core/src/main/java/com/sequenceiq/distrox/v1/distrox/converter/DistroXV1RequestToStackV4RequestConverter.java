@@ -80,8 +80,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
     public DistroXV1Request convert(StackV4Request source) {
         DistroXV1Request request = new DistroXV1Request();
         request.setName(source.getName());
-
-        request.setEnvironment(environmentConverter.convert(source.getEnvironment()));
+        request.setEnvironmentCrn(source.getEnvironmentCrn());
         request.setAuthentication(getIfNotNull(source.getAuthentication(), authenticationConverter::convert));
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source.getCluster(), clusterConverter::convert));

@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 
 public class GovCloudFlagUtilTest {
@@ -33,7 +33,7 @@ public class GovCloudFlagUtilTest {
     @Test
     public void testDifferentObject() {
         assertFalse(GovCloudFlagUtil.extractGovCloudFlag(new User()));
-        assertFalse(GovCloudFlagUtil.extractGovCloudFlag(new Credential()));
+        assertFalse(GovCloudFlagUtil.extractGovCloudFlag(Credential.builder().build()));
     }
 
 }
