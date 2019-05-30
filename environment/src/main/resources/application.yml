@@ -1,4 +1,4 @@
-server.servlet.context-path: "/env"
+server.servlet.context-path: "/environmentservice"
 
 server.port: 8088
 

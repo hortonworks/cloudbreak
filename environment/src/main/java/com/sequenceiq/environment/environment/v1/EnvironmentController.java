@@ -6,6 +6,7 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -39,8 +40,6 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
-    private final AuthenticatedUserService authenticatedUserService;
-
     public EnvironmentController(EnvironmentApiConverter environmentApiConverter, EnvironmentService environmentService,
             EnvironmentCreationService environmentCreationService, EnvironmentViewService environmentViewService,
             ThreadBasedUserCrnProvider threadBasedUserCrnProvider, AuthenticatedUserService authenticatedUserService) {
@@ -49,7 +48,6 @@ public class EnvironmentController implements EnvironmentEndpoint {
         this.environmentCreationService = environmentCreationService;
         this.environmentViewService = environmentViewService;
         this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
-        this.authenticatedUserService = authenticatedUserService;
     }
 
     @Override
@@ -80,7 +78,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     public SimpleEnvironmentResponses deleteMultiple(Set<String> environmentNames) {
-        String accountId = authenticatedUserService.getAccountId();
+        String accountId = threadBasedUserCrnProvider.getAccountId();
         return environmentService.deleteMultiple(environmentNames, accountId);
     }
 
@@ -98,7 +96,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     public DetailedEnvironmentResponse changeCredential(String environmentName, @Valid EnvironmentChangeCredentialRequest request) {
-        // TODO implement
-        return null;
+        throw new NotImplementedException("changing credential is not supported yet");
     }
+
 }

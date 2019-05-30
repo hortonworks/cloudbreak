@@ -40,6 +40,7 @@ public interface EnvironmentEndpoint {
     WelcomeResponse welcome();
 
     @POST
+    @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.CREATE, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES, nickname = "createEnvironmentV1")
     DetailedEnvironmentResponse post(@Valid EnvironmentRequest request);
@@ -59,8 +60,8 @@ public interface EnvironmentEndpoint {
     @DELETE
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = EnvironmentOpDescription.DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON,
-            notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironments")
+    @ApiOperation(value = EnvironmentOpDescription.DELETE_MULTIPLE_BY_NAME, produces = MediaType.APPLICATION_JSON,
+            notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironments", httpMethod = "DELETE")
     SimpleEnvironmentResponses deleteMultiple(Set<String> names);
 
     @PUT
@@ -70,6 +71,7 @@ public interface EnvironmentEndpoint {
     DetailedEnvironmentResponse edit(@PathParam("name") String environmentName, @NotNull EnvironmentEditRequest request);
 
     @GET
+    @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.LIST, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES, nickname = "listEnvironmentV1")
     SimpleEnvironmentResponses list();
@@ -80,4 +82,5 @@ public interface EnvironmentEndpoint {
     @ApiOperation(value = EnvironmentOpDescription.CHANGE_CREDENTIAL, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "changeCredentialInEnvironmentV1")
     DetailedEnvironmentResponse changeCredential(@PathParam("name") String environmentName, @Valid EnvironmentChangeCredentialRequest request);
+
 }
