@@ -26,8 +26,10 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.service.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -52,6 +54,9 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
     @Inject
     private StackScalingService stackScalingService;
 
+    @Inject
+    private CredentialClientService credentialClientService;
+
     protected AbstractStackDownscaleAction(Class<P> payloadClass) {
         super(payloadClass);
     }
@@ -65,7 +70,8 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                 location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
+        Credential credential = credentialClientService.get(stack.getCredentialCrn());
+        CloudCredential cloudCredential = credentialConverter.convert(credential);
         String instanceGroupName = extractInstanceGroupName(payload, variables);
         Set<String> instanceIds = extractInstanceIds(payload, variables, stack);
         Integer adjustment = extractAdjustment(payload, variables);

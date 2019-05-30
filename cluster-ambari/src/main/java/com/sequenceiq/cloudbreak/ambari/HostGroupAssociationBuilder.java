@@ -10,8 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.domain.Topology;
-import com.sequenceiq.cloudbreak.domain.TopologyRecord;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -78,18 +76,6 @@ public class HostGroupAssociationBuilder {
     }
 
     private Map<String, String> getTopologyMapping(HostGroup hg) {
-        Map<String, String> result = new HashMap<>();
-        LOGGER.debug("Computing hypervisor - rack mapping based on topology");
-        Topology topology = hg.getCluster().getStack().getCredential().getTopology();
-        if (topology == null) {
-            return result;
-        }
-        List<TopologyRecord> records = topology.getRecords();
-        if (records != null) {
-            for (TopologyRecord t : records) {
-                result.put(t.getHypervisor(), t.getRack());
-            }
-        }
-        return result;
+        return  new HashMap<>();
     }
 }

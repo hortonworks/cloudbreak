@@ -59,7 +59,7 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                 location, stack.getCreator().getUserId(), stack.getWorkspace().getId().toString());
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
+        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredentialCrn());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         return new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, getInstanceGroupName(variables),
                 Collections.emptySet(), getAdjustment(variables), getHostNames(variables));

@@ -94,7 +94,7 @@ public class AwsCredentialView {
         return (Map<String, String>) cloudCredential.getParameter(AWS, Map.class).get(ROLE_BASED);
     }
 
-    public Long getId() {
+    public String getCredentialCrn() {
         return cloudCredential.getId();
     }
 }

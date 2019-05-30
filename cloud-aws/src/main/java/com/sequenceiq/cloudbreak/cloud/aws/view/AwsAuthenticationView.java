@@ -26,7 +26,7 @@ public class AwsAuthenticationView {
         return cloudCredential.getParameter("secretKey", String.class);
     }
 
-    public Long getId() {
+    public String getCredentialCrn() {
         return cloudCredential.getId();
     }
 

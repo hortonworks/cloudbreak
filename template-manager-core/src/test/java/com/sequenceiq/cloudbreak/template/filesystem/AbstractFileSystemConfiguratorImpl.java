@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.sequenceiq.cloudbreak.common.type.ExecutionType;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
-import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigurationsView;
 
@@ -14,12 +14,12 @@ public class AbstractFileSystemConfiguratorImpl extends AbstractFileSystemConfig
     @Override
     protected List<FileSystemScriptConfig> getScriptConfigs(Credential credential) {
 
-        if (credential.getId() == 1L) {
+        if ("crn1".equals(credential.getCrn())) {
             return Collections.singletonList(new FileSystemScriptConfig("file-system-config.script",
                     RecipeType.POST_AMBARI_START,
                     ExecutionType.ALL_NODES,
                     Collections.emptyMap()));
-        } else if (credential.getId() == 2L) {
+        } else if ("crn2".equals(credential.getCrn())) {
             return Collections.singletonList(new FileSystemScriptConfig("file-system-config-not-found",
                     RecipeType.POST_AMBARI_START,
                     ExecutionType.ALL_NODES,

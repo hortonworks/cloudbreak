@@ -75,7 +75,7 @@ public class ServiceProviderConnectorAdapter {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                 location, stack.getCreator().getUserId(), stack.getWorkspace().getId().toString());
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
+        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredentialCrn());
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
         List<CloudInstance> instances = new ArrayList<>();
         InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
@@ -109,7 +109,7 @@ public class ServiceProviderConnectorAdapter {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                 location, stack.getCreator().getUserId(), stack.getWorkspace().getId().toString());
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
+        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredentialCrn());
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         TerminateStackRequest<TerminateStackResult> terminateRequest = new TerminateStackRequest<>(cloudContext, cloudStack, cloudCredential, resources);
@@ -144,7 +144,7 @@ public class ServiceProviderConnectorAdapter {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                 location, stack.getCreator().getUserId(), stack.getWorkspace().getId().toString());
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
+        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredentialCrn());
         GetPlatformTemplateRequest getPlatformTemplateRequest = new GetPlatformTemplateRequest(cloudContext, cloudCredential);
         eventBus.notify(getPlatformTemplateRequest.selector(), eventFactory.createEvent(getPlatformTemplateRequest));
         return getPlatformTemplateRequest;
@@ -173,7 +173,7 @@ public class ServiceProviderConnectorAdapter {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                 location, stack.getCreator().getUserId(), stack.getWorkspace().getId().toString());
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
+        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredentialCrn());
         PlatformParameterRequest parameterRequest = new PlatformParameterRequest(cloudContext, cloudCredential);
         eventBus.notify(parameterRequest.selector(), eventFactory.createEvent(parameterRequest));
         try {
@@ -195,7 +195,7 @@ public class ServiceProviderConnectorAdapter {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                 location, stack.getCreator().getUserId(), stack.getWorkspace().getId().toString());
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
+        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredentialCrn());
         CheckPlatformVariantRequest checkPlatformVariantRequest = new CheckPlatformVariantRequest(cloudContext, cloudCredential);
         eventBus.notify(checkPlatformVariantRequest.selector(), eventFactory.createEvent(checkPlatformVariantRequest));
         try {
