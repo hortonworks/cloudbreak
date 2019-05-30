@@ -141,7 +141,7 @@ upload-tagged: prepare-release
 		-e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) \
 		anigeo/awscli s3 cp release/ $(S3_TARGET) --recursive --include "$(NAME)_$(VERSION)_*.tgz"
 
-release: upload-release
+release: deps upload-release
 	gh-release checksums sha256
 	gh-release create hortonworks/$(NAME) $(VERSION) $(GIT_BRANCH) v$(VERSION)
 
