@@ -94,7 +94,7 @@ public class SaltOrchestratorTest {
 
     @Before
     public void setUp() throws Exception {
-        gatewayConfig = new GatewayConfig("1.1.1.1", "10.0.0.1", "172.16.252.43", "10-0-0-1", 9443, "servercert", "clientcert", "clientkey",
+        gatewayConfig = new GatewayConfig("1.1.1.1", "10.0.0.1", "172.16.252.43", "10-0-0-1", 9443, "instanceid", "servercert", "clientcert", "clientkey",
                 "saltpasswd", "saltbootpassword", "signkey", false, true, "privatekey", "publickey");
         targets = new HashSet<>();
         targets.add(new Node("10.0.0.1", "1.1.1.1", "10-0-0-1.example.com", "hg"));

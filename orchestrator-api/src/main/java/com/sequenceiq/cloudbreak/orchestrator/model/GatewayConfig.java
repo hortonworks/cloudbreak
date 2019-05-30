@@ -19,6 +19,8 @@ public class GatewayConfig {
 
     private final Integer gatewayPort;
 
+    private final String instanceId;
+
     private final String saltPassword;
 
     private final String saltBootPassword;
@@ -34,19 +36,20 @@ public class GatewayConfig {
     private final String saltSignPublicKey;
 
     public GatewayConfig(String connectionAddress, String publicAddress, String privateAddress,
-            Integer gatewayPort, Boolean knoxGatewayEnabled) {
+            Integer gatewayPort, String instanceId, Boolean knoxGatewayEnabled) {
         this(connectionAddress, publicAddress, privateAddress, null, gatewayPort,
-                null, null, null, null, null, null, knoxGatewayEnabled, true, null, null);
+                instanceId, null, null, null, null, null, null, knoxGatewayEnabled, true, null, null);
     }
 
     public GatewayConfig(String connectionAddress, String publicAddress, String privateAddress, String hostname,
-            Integer gatewayPort, String serverCert, String clientCert, String clientKey, String saltPassword, String saltBootPassword,
+            Integer gatewayPort, String instanceId, String serverCert, String clientCert, String clientKey, String saltPassword, String saltBootPassword,
             String signatureKey, Boolean knoxGatewayEnabled, boolean primary, String saltSignPrivateKey, String saltSignPublicKey) {
         this.connectionAddress = connectionAddress;
         this.publicAddress = publicAddress;
         this.privateAddress = privateAddress;
         this.hostname = hostname;
         this.gatewayPort = gatewayPort;
+        this.instanceId = instanceId;
         this.serverCert = serverCert;
         this.clientCert = clientCert;
         this.clientKey = clientKey;
@@ -77,6 +80,10 @@ public class GatewayConfig {
 
     public String getGatewayUrl() {
         return String.format("https://%s:%d", connectionAddress, gatewayPort);
+    }
+
+    public String getInstanceId() {
+        return instanceId;
     }
 
     public String getServerCert() {
@@ -127,6 +134,7 @@ public class GatewayConfig {
         sb.append(", privateAddress='").append(privateAddress).append('\'');
         sb.append(", hostname='").append(hostname).append('\'');
         sb.append(", gatewayPort=").append(gatewayPort);
+        sb.append(", instanceId=").append(instanceId);
         sb.append(", knoxGatewayEnabled=").append(knoxGatewayEnabled);
         sb.append(", primary=").append(primary);
         sb.append('}');

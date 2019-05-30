@@ -103,7 +103,7 @@ public class TlsSecurityService {
         SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
         String saltSignPrivateKeyB64 = saltSecurityConfig.getSaltSignPrivateKey();
         return new GatewayConfig(connectionIp, gatewayInstance.getPublicIpWrapper(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(),
-                gatewayPort, conf.getServerCert(), conf.getClientCert(), conf.getClientKey(),
+                gatewayPort, gatewayInstance.getInstanceId(), conf.getServerCert(), conf.getClientCert(), conf.getClientKey(),
                 saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(), saltClientConfig.getSignatureKeyPem(),
                 knoxGatewayEnabled, InstanceMetadataType.GATEWAY_PRIMARY.equals(gatewayInstance.getInstanceMetadataType()),
                 new String(decodeBase64(saltSignPrivateKeyB64)), new String(decodeBase64(saltSecurityConfig.getSaltSignPublicKey())));

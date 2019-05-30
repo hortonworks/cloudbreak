@@ -57,7 +57,7 @@ public class PreTerminationStateExecutorTest {
         cluster = spy(new Cluster());
         stack.setCluster(cluster);
         when(hostOrchestratorResolver.get(anyString())).thenReturn(hostOrchestrator);
-        when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(new GatewayConfig("a", "a", "a", 1, false));
+        when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(new GatewayConfig("a", "a", "a", 1, "a", false));
     }
 
     @Test
