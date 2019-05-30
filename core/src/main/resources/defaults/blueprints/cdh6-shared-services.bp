@@ -90,6 +90,7 @@
     "hostTemplates": [
       {
         "refName": "master",
+        "cardinality": 1,
         "roleConfigGroupsRefNames": [
           "hdfs-BALANCER-BASE",
           "hdfs-NAMENODE-BASE",
