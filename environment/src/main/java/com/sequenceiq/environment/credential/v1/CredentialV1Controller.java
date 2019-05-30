@@ -18,6 +18,7 @@ import com.sequenceiq.environment.api.v1.credential.model.response.CredentialRes
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponses;
 import com.sequenceiq.environment.api.v1.credential.model.response.InteractiveCredentialResponse;
 import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.credential.service.CredentialDeleteService;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.notification.NotificationController;
@@ -32,13 +33,17 @@ public class CredentialV1Controller extends NotificationController implements Cr
 
     private final ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
+    private final CredentialDeleteService credentialDeleteService;
+
     public CredentialV1Controller(
             CredentialService credentialService,
             CredentialToCredentialV1ResponseConverter credentialConverter,
-            ThreadBasedUserCrnProvider threadBasedUserCrnProvider) {
+            ThreadBasedUserCrnProvider threadBasedUserCrnProvider,
+            CredentialDeleteService credentialDeleteService) {
         this.credentialService = credentialService;
         this.credentialConverter = credentialConverter;
         this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
+        this.credentialDeleteService = credentialDeleteService;
     }
 
     @Override
@@ -47,7 +52,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
         return new CredentialResponses(
                 credentialService.listAvailablesByAccountId(accountId)
                         .stream()
-                        .map(c -> credentialConverter.convert(c))
+                        .map(credentialConverter::convert)
                         .collect(Collectors.toSet()));
     }
 
@@ -68,20 +73,17 @@ public class CredentialV1Controller extends NotificationController implements Cr
     @Override
     public CredentialResponse delete(String name) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
-        Credential credential = credentialService.deleteByNameFromWorkspace(name, accountId);
+        Credential deleted = credentialDeleteService.delete(name, accountId);
         notify(ResourceEvent.CREDENTIAL_DELETED);
-        return credentialConverter.convert(credential);
+        return credentialConverter.convert(deleted);
     }
 
     @Override
     public CredentialResponses deleteMultiple(Set<String> names) {
-        // TODO: implement
-        Set<Credential> credentials = Set.of();
+        String accountId = threadBasedUserCrnProvider.getAccountId();
+        Set<Credential> credentials = credentialDeleteService.deleteMultiple(names, accountId);
         notify(ResourceEvent.CREDENTIAL_DELETED);
-        return new CredentialResponses(credentials
-                .stream()
-                .map(c -> credentialConverter.convert(c))
-                .collect(Collectors.toSet()));
+        return new CredentialResponses(credentials.stream().map(credentialConverter::convert).collect(Collectors.toSet()));
     }
 
     @Override
@@ -125,4 +127,5 @@ public class CredentialV1Controller extends NotificationController implements Cr
         notify(ResourceEvent.CREDENTIAL_CREATED);
         return credentialConverter.convert(credential);
     }
+
 }

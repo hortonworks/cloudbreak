@@ -2,23 +2,18 @@ package com.sequenceiq.environment.credential.service;
 
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
-import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
 import static com.sequenceiq.environment.TempConstants.TEMP_USER_ID;
 
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -28,27 +23,23 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakNotification;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.exception.CredentialOperationException;
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
 import com.sequenceiq.environment.credential.validation.CredentialValidator;
-import com.sequenceiq.environment.environment.domain.EnvironmentView;
-import com.sequenceiq.environment.environment.service.EnvironmentViewService;
-import com.sequenceiq.notification.Notification;
 import com.sequenceiq.notification.NotificationSender;
 import com.sequenceiq.notification.ResourceEvent;
 
 @Service
-public class CredentialService {
+public class CredentialService extends AbstractCredentialService {
 
-    static final String DEPLOYMENT_ADDRESS_ATTRIBUTE_NOT_FOUND = "The 'deploymentAddress' parameter needs to be specified in the interactive login request!";
+    private static final String DEPLOYMENT_ADDRESS_ATTRIBUTE_NOT_FOUND = "The 'deploymentAddress' parameter needs to be specified in the interactive login "
+            + "request!";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
 
@@ -66,19 +57,14 @@ public class CredentialService {
     private ServiceProviderCredentialAdapter credentialAdapter;
 
     @Inject
-    private NotificationSender notificationSender;
-
-    @Inject
-    private CloudbreakMessagesService messagesService;
-
-    @Inject
     private CredentialPrerequisiteService credentialPrerequisiteService;
 
     @Inject
-    private EnvironmentViewService environmentViewService;
-
-    @Inject
     private SecretService secretService;
+
+    protected CredentialService(NotificationSender notificationSender, CloudbreakMessagesService messagesService) {
+        super(notificationSender, messagesService);
+    }
 
     public Set<Credential> listAvailablesByAccountId(String accountId) {
         return repository.findAllByAccountId(accountId, ENABLED_PLATFORMS);
@@ -125,22 +111,6 @@ public class CredentialService {
         Credential created = repository.save(credentialAdapter.verify(credential, accountId));
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_CREATED);
         return created;
-    }
-
-    public Credential delete(String name, String accountId) {
-        Credential credential = repository.findByNameAndAccountId(name, accountId, ENABLED_PLATFORMS)
-                .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
-        return delete(credential);
-    }
-
-    public Credential deleteByNameFromWorkspace(String name, String accountId) {
-        return delete(name, accountId);
-    }
-
-    public Credential archiveCredential(Credential credential) {
-        credential.setName(generateArchiveName(credential.getName()));
-        credential.setArchived(true);
-        return repository.save(credential);
     }
 
     public CredentialPrerequisitesResponse getPrerequisites(String accountId, String cloudPlatform, String deploymentAddress) {
@@ -192,39 +162,6 @@ public class CredentialService {
         if (StringUtils.isEmpty(deploymentAddress)) {
             throw new BadRequestException(DEPLOYMENT_ADDRESS_ATTRIBUTE_NOT_FOUND);
         }
-    }
-
-    private Credential delete(Credential credential) {
-        checkCredentialIsDeletable(credential);
-        Credential archived = archiveCredential(credential);
-        sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_DELETED);
-        return archived;
-    }
-
-    private void checkCredentialIsDeletable(Credential credential) {
-        LOGGER.debug("Checking whether the desired credential is able to delete or not.");
-        if (credential == null) {
-            throw new NotFoundException("Credential not found.");
-        }
-        checkEnvironmentsForDeletion(credential);
-    }
-
-    private void checkEnvironmentsForDeletion(Credential credential) {
-        Set<EnvironmentView> environments = environmentViewService.findAllByCredentialId(credential.getId());
-        if (!environments.isEmpty()) {
-            String environmentList = environments.stream().map(EnvironmentView::getName).collect(Collectors.joining(", "));
-            String message = "Credential '%s' cannot be deleted because the following environments are using it: [%s].";
-            throw new BadRequestException(String.format(message, credential.getName(), environmentList));
-        }
-    }
-
-    private void sendCredentialNotification(Credential credential, ResourceEvent resourceEvent) {
-        CloudbreakNotification notification = new CloudbreakNotification();
-        notification.setEventType(resourceEvent.name());
-        notification.setEventTimestamp(new Date().getTime());
-        notification.setEventMessage(messagesService.getMessage(resourceEvent.getMessage()));
-        notification.setCloud(credential.getCloudPlatform());
-        notificationSender.send(new Notification<>(notification), Collections.emptyList(), RestClientUtil.get());
     }
 
     private void putToCredentialAttributes(Credential credential, Map<String, Object> attributesToAdd) {
