@@ -104,6 +104,11 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     List<Stack> findAllAlive();
 
     @CheckPermissionsByReturnValue
+    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig "
+            + "WHERE s.terminated = null AND (s.type is not 'TEMPLATE' OR s.type is null)")
+    Set<Stack> findAllAliveWithInstanceGroups();
+
+    @CheckPermissionsByReturnValue
     @Query("SELECT s FROM Stack s WHERE s.terminated = null AND "
             + "(s.workspace = null OR s.creator = null) AND (s.type is not 'TEMPLATE' OR s.type is null)")
     Set<Stack> findAllAliveWithNoWorkspaceOrUser();

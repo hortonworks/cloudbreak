@@ -604,6 +604,10 @@ public class StackService {
         return stackRepository.findAllAlive();
     }
 
+    public Set<Stack> getAllAliveWithInstanceGroups() {
+        return stackRepository.findAllAliveWithInstanceGroups();
+    }
+
     public List<Stack> getByStatuses(List<Status> statuses) {
         return stackRepository.findByStatuses(statuses);
     }
