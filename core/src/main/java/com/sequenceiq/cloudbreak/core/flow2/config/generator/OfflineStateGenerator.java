@@ -55,7 +55,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleConfig;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -371,27 +370,7 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Long countByCredential(Credential credential) {
-            return null;
-        }
-
-        @Override
-        public Set<Stack> findByCredential(Credential credential) {
-            return null;
-        }
-
-        @Override
-        public Long countByNetwork(Network network) {
-            return null;
-        }
-
-        @Override
         public Set<Stack> findByNetwork(Network network) {
-            return null;
-        }
-
-        @Override
-        public Long countStacksWithNoWorkspaceOrCreator() {
             return null;
         }
 

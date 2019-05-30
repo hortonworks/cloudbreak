@@ -89,6 +89,8 @@ public class GcpInstanceResourceBuilderTest {
 
     private long privateId;
 
+    private String privateCrn;
+
     private String instanceId;
 
     private String name;
@@ -133,6 +135,7 @@ public class GcpInstanceResourceBuilderTest {
     @Before
     public void setUp() {
         privateId = 0L;
+        privateCrn = "crn";
         name = "master";
         flavor = "m1.medium";
         instanceId = "SOME_ID";
@@ -144,7 +147,7 @@ public class GcpInstanceResourceBuilderTest {
         Map<InstanceGroupType, String> userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");
         image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>());
         CloudContext cloudContext = new CloudContext(privateId, "testname", "GCP", USER_ID, WORKSPACE_ID);
-        CloudCredential cloudCredential = new CloudCredential(privateId, "credentialname");
+        CloudCredential cloudCredential = new CloudCredential(privateCrn, "credentialname");
         cloudCredential.putParameter("projectId", "projectId");
         String projectId = GcpStackUtil.getProjectId(cloudCredential);
         String serviceAccountId = GcpStackUtil.getServiceAccountId(cloudCredential);

@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService
 import com.sequenceiq.cloudbreak.service.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
@@ -73,9 +72,6 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
 
     @Inject
     private DatalakeResourcesService datalakeResourcesService;
-
-    @Inject
-    private CredentialService credentialService;
 
     @Inject
     private EnvironmentClientService environmentClientService;
@@ -134,6 +130,7 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
     }
 
     private void validateEncryptionKey(StackV4Request stackRequest, ValidationResultBuilder validationBuilder, Long workspaceId) {
+        DetailedEnvironmentResponse environment = environmentClientService.get(stackRequest.getEnvironmentCrn());
         stackRequest.getInstanceGroups().stream()
                 .filter(request -> isEncryptionTypeSetUp(request.getTemplate()))
                 .filter(request -> {
@@ -141,7 +138,6 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
                     return EncryptionType.CUSTOM.equals(valueForTypeKey);
                 })
                 .forEach(request -> {
-                    DetailedEnvironmentResponse environment = environmentClientService.get(stackRequest.getEnvironmentCrn());
                     checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(request, environment.getCredentialName(),
                             stackRequest.getPlacement().getRegion(), validationBuilder, workspaceId);
                 });

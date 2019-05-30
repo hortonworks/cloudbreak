@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeScript;
-import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 public abstract class AbstractFileSystemConfigurator<T extends BaseFileSystemConfigurationsView> implements FileSystemConfigurator<T> {

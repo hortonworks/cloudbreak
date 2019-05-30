@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -40,6 +41,9 @@ public class ClusterTemplateV4RequestToClusterTemplateConverter extends Abstract
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private CredentialClientService credentialClientService;
 
     @Override
     public ClusterTemplate convert(ClusterTemplateV4Request source) {
@@ -69,6 +73,6 @@ public class ClusterTemplateV4RequestToClusterTemplateConverter extends Abstract
     }
 
     private String getCloudPlatform(ClusterTemplateV4Request source, Stack stack) {
-        return source.getCloudPlatform() != null ? source.getCloudPlatform() : stack.getCredential().cloudPlatform();
+        return source.getCloudPlatform() != null ? source.getCloudPlatform() : credentialClientService.get(stack.getCredentialCrn()).cloudPlatform();
     }
 }

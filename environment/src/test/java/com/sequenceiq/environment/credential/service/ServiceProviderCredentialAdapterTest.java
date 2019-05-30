@@ -1,7 +1,6 @@
-package com.sequenceiq.cloudbreak.service.stack.connector.adapter;
+package com.sequenceiq.environment.credential.service;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -10,6 +9,9 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
+import javax.ws.rs.BadRequestException;
+
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -23,20 +25,18 @@ import com.sequenceiq.cloudbreak.cloud.event.credential.InitCodeGrantFlowRequest
 import com.sequenceiq.cloudbreak.cloud.event.credential.InitCodeGrantFlowResponse;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.service.OperationException;
-import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteService;
+import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
+import com.sequenceiq.environment.credential.v1.converter.CredentialToExtendedCloudCredentialConverter;
+import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
 
 public class ServiceProviderCredentialAdapterTest {
 
-    private static final Long WORKSPACE_ID = 1L;
+    private static final String ACCOUNT_ID = "anAccountID";
 
     private static final String USER_ID = "1";
 
@@ -89,7 +89,7 @@ public class ServiceProviderCredentialAdapterTest {
         MockitoAnnotations.initMocks(this);
         when(credential.getId()).thenReturn(CREDENTIAL_ID);
         when(credential.getName()).thenReturn(CREDENTIAL_NAME);
-        when(credential.cloudPlatform()).thenReturn(CLOUD_PLATFORM);
+//        when(credential.cloudPlatform()).thenReturn(CLOUD_PLATFORM);
         when(initCodeGrantFlowResponse.getStatus()).thenReturn(EventStatus.OK);
         when(initCodeGrantFlowRequest.await()).thenReturn(initCodeGrantFlowResponse);
         when(credentialConverter.convert(credential)).thenReturn(convertedCredential);
@@ -104,7 +104,7 @@ public class ServiceProviderCredentialAdapterTest {
         thrown.expect(OperationException.class);
         thrown.expectMessage("Error while executing initialization of authorization code grant based credential creation:");
 
-        underTest.initCodeGrantFlow(credential, WORKSPACE_ID, USER_ID);
+        underTest.initCodeGrantFlow(credential, ACCOUNT_ID, USER_ID);
     }
 
     @Test
@@ -116,7 +116,7 @@ public class ServiceProviderCredentialAdapterTest {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage(String.format("Authorization code grant based credential creation couldn't be initialized: %s", exceptionFromResponse));
 
-        underTest.initCodeGrantFlow(credential, WORKSPACE_ID, USER_ID);
+        underTest.initCodeGrantFlow(credential, ACCOUNT_ID, USER_ID);
     }
 
     @Test
@@ -134,15 +134,15 @@ public class ServiceProviderCredentialAdapterTest {
         when(credentialConverter.convert(credential)).thenReturn(convertedCredential);
         when(convertedCredential.getParameters()).thenReturn(Map.of(expectedAdditionalAttributeKey, expectedAdditionalAttributeValue));
 
-        Credential result = underTest.initCodeGrantFlow(credential, WORKSPACE_ID, USER_ID);
+        Credential result = underTest.initCodeGrantFlow(credential, ACCOUNT_ID, USER_ID);
 
-        assertNotEquals(initialCredentialAttriute, result.getAttributes());
+        Assert.assertNotEquals(initialCredentialAttriute, result.getAttributes());
         var attributeMap = new Json(result.getAttributes()).getMap();
         assertTrue(attributeMap.containsKey(initialAttributeKey));
         assertTrue(attributeMap.containsKey(expectedAdditionalAttributeKey));
         assertEquals(expectedAdditionalAttributeValue, attributeMap.get(expectedAdditionalAttributeKey));
         assertEquals(initialAttributeValue, attributeMap.get(initialAttributeKey));
-        assertEquals(credential, result);
+        Assert.assertEquals(credential, result);
     }
 
 }
