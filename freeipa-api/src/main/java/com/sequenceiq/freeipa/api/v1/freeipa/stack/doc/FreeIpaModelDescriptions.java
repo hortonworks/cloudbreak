@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.doc;
 
 public class FreeIpaModelDescriptions {
-    public static final String ENVIRONMENT_ID = "environment of the freeipa stack";
     public static final String FREEIPA_NAME = "name of the freeipa stack";
     public static final String REGION = "region of the freeipa stack";
     public static final String AVAILABILITY_ZONE = "availability zone of the freeipa stack";
