@@ -126,7 +126,7 @@ public class AwsPlatformResourcesTest {
         thrown.expectMessage("Could not get instance profile roles because the user does not have enough permission.");
 
         CloudAccessConfigs cloudAccessConfigs =
-                underTest.accessConfigs(new CloudCredential(1L, "aws-credential"), region("eu-central-1"), new HashMap<>());
+                underTest.accessConfigs(new CloudCredential("crn", "aws-credential"), region("eu-central-1"), new HashMap<>());
 
         Assert.assertEquals(0L, cloudAccessConfigs.getCloudAccessConfigs().size());
     }
@@ -144,7 +144,7 @@ public class AwsPlatformResourcesTest {
         thrown.expectMessage("Could not get instance profile roles from Amazon: Amazon problem.");
 
         CloudAccessConfigs cloudAccessConfigs =
-                underTest.accessConfigs(new CloudCredential(1L, "aws-credential"), region("eu-central-1"), Collections.emptyMap());
+                underTest.accessConfigs(new CloudCredential("crn", "aws-credential"), region("eu-central-1"), Collections.emptyMap());
 
         Assert.assertEquals(0L, cloudAccessConfigs.getCloudAccessConfigs().size());
     }
@@ -160,7 +160,7 @@ public class AwsPlatformResourcesTest {
         thrown.expectMessage("Could not get instance profile roles from Amazon: BadRequestException problem.");
 
         CloudAccessConfigs cloudAccessConfigs =
-                underTest.accessConfigs(new CloudCredential(1L, "aws-credential"), region("eu-central-1"), Collections.emptyMap());
+                underTest.accessConfigs(new CloudCredential("crn", "aws-credential"), region("eu-central-1"), Collections.emptyMap());
 
         Assert.assertEquals(0L, cloudAccessConfigs.getCloudAccessConfigs().size());
     }
@@ -181,7 +181,7 @@ public class AwsPlatformResourcesTest {
         when(amazonCFClient.listInstanceProfiles()).thenReturn(listInstanceProfilesResult);
 
         CloudAccessConfigs cloudAccessConfigs =
-                underTest.accessConfigs(new CloudCredential(1L, "aws-credential"), region("eu-central-1"), Collections.emptyMap());
+                underTest.accessConfigs(new CloudCredential("crn", "aws-credential"), region("eu-central-1"), Collections.emptyMap());
 
         Assert.assertEquals(4L, cloudAccessConfigs.getCloudAccessConfigs().size());
     }
@@ -217,7 +217,7 @@ public class AwsPlatformResourcesTest {
         when(awskmsClient.listAliases(any(ListAliasesRequest.class))).thenReturn(describeAliasResult);
 
         CloudEncryptionKeys cloudEncryptionKeys =
-                underTest.encryptionKeys(new CloudCredential(1L, "aws-credential"), region("London"), new HashMap<>());
+                underTest.encryptionKeys(new CloudCredential("crn", "aws-credential"), region("London"), new HashMap<>());
 
         Assert.assertEquals(4L, cloudEncryptionKeys.getCloudEncryptionKeys().size());
     }
@@ -226,7 +226,7 @@ public class AwsPlatformResourcesTest {
     public void testVirtualMachinesDisabledTypesEmpty() {
         ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.emptyList());
 
-        CloudVmTypes result = underTest.virtualMachines(new CloudCredential(1L, "aws-credential"), region("eu-central-1"), Collections.emptyMap());
+        CloudVmTypes result = underTest.virtualMachines(new CloudCredential("crn", "aws-credential"), region("eu-central-1"), Collections.emptyMap());
 
         Assert.assertEquals("m5.2xlarge", result.getCloudVmResponses().get("eu-central-1a").iterator().next().value());
     }
@@ -235,7 +235,7 @@ public class AwsPlatformResourcesTest {
     public void testVirtualMachinesDisabledTypesContainsEmpty() {
         ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.singletonList(""));
 
-        CloudVmTypes result = underTest.virtualMachines(new CloudCredential(1L, "aws-credential"), region("eu-central-1"), Collections.emptyMap());
+        CloudVmTypes result = underTest.virtualMachines(new CloudCredential("crn", "aws-credential"), region("eu-central-1"), Collections.emptyMap());
 
         Assert.assertEquals("m5.2xlarge", result.getCloudVmResponses().get("eu-central-1a").iterator().next().value());
     }
@@ -244,7 +244,7 @@ public class AwsPlatformResourcesTest {
     public void testVirtualMachinesOkStartWith() {
         ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.singletonList("m5"));
 
-        CloudVmTypes result = underTest.virtualMachines(new CloudCredential(1L, "aws-credential"), region("eu-central-1"), Collections.emptyMap());
+        CloudVmTypes result = underTest.virtualMachines(new CloudCredential("crn", "aws-credential"), region("eu-central-1"), Collections.emptyMap());
 
         Assert.assertTrue(result.getCloudVmResponses().get("eu-central-1a").isEmpty());
     }
@@ -253,7 +253,7 @@ public class AwsPlatformResourcesTest {
     public void testVirtualMachinesOkFullMatch() {
         ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.singletonList("m5.2xlarge"));
 
-        CloudVmTypes result = underTest.virtualMachines(new CloudCredential(1L, "aws-credential"), region("eu-central-1"), Collections.emptyMap());
+        CloudVmTypes result = underTest.virtualMachines(new CloudCredential("crn", "aws-credential"), region("eu-central-1"), Collections.emptyMap());
 
         Assert.assertTrue(result.getCloudVmResponses().get("eu-central-1a").isEmpty());
     }

@@ -16,7 +16,7 @@ import org.junit.rules.ExpectedException;
 import com.sequenceiq.cloudbreak.common.type.ExecutionType;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeScript;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
-import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigurationsView;
 
 public class AbstractFileSystemConfiguratorTest {
@@ -28,8 +28,7 @@ public class AbstractFileSystemConfiguratorTest {
 
     @Test
     public void testGetScripts() {
-        Credential credential = new Credential();
-        credential.setId(0L);
+        Credential credential = Credential.builder().crn("crn0").build();
         AdlsFileSystemConfigurationsView adlsFileSystemConfigurationsView = new AdlsFileSystemConfigurationsView(adlsFileSystem(), new HashSet<>(), false);
         List<RecipeScript> actual = underTest.getScripts(credential, adlsFileSystemConfigurationsView);
 
@@ -39,8 +38,7 @@ public class AbstractFileSystemConfiguratorTest {
 
     @Test
     public void testGetScriptsWhenNoReplace() {
-        Credential credential = new Credential();
-        credential.setId(1L);
+        Credential credential = Credential.builder().crn("crn1").build();
         AdlsFileSystemConfigurationsView adlsFileSystemConfigurationsView = new AdlsFileSystemConfigurationsView(adlsFileSystem(), new HashSet<>(), false);
         List<RecipeScript> actual = underTest.getScripts(credential, adlsFileSystemConfigurationsView);
 
@@ -50,8 +48,7 @@ public class AbstractFileSystemConfiguratorTest {
 
     @Test
     public void testGetScriptsWhenFileNotFound() {
-        Credential credential = new Credential();
-        credential.setId(2L);
+        Credential credential = Credential.builder().crn("crn2").build();
         AdlsFileSystemConfigurationsView adlsFileSystemConfigurationsView = new AdlsFileSystemConfigurationsView(adlsFileSystem(), new HashSet<>(), false);
 
         thrown.expectMessage("Filesystem configuration scripts cannot be read.");

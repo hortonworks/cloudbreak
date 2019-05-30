@@ -34,10 +34,10 @@ import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintTextProcessorFactory;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.ClusterManagerType;
 
@@ -61,11 +61,11 @@ public class CloudResourceAdvisor {
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
 
     @Inject
-    private CredentialService credentialService;
+    private CredentialClientService credentialClientService;
 
     public PlatformRecommendation createForBlueprint(Long workspaceId, String blueprintName, String credentialName,
             String region, String platformVariant, String availabilityZone) {
-        Credential credential = credentialService.getByNameForWorkspaceId(credentialName, workspaceId);
+        Credential credential = credentialClientService.get(credentialName);
         String cloudPlatform = credential.cloudPlatform();
         Map<String, VmType> vmTypesByHostGroup = new HashMap<>();
         Map<String, Boolean> hostGroupContainsMasterComp = new HashMap<>();

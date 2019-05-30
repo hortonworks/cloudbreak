@@ -27,8 +27,8 @@ public class CredentialToCloudCredentialConverter implements Converter<Credentia
         } else {
             fields = new Json(credential.getAttributes()).getMap();
         }
-        fields.put(CREDENTIAL_ID, credential.getId());
-        return new CloudCredential(credential.getId(), credential.getName(), fields);
+        // TODO: credential crn
+        return new CloudCredential("crn", credential.getName(), fields);
     }
 
 }

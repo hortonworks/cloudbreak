@@ -51,7 +51,7 @@ public class UnhealthyInstancesFinalizerTest {
         Stack stack = TestUtil.stack(Status.AVAILABLE, TestUtil.awsCredential());
 
         CloudCredential cloudCredential = mock(CloudCredential.class);
-        when(credentialConverter.convert(stack.getCredential())).thenReturn(cloudCredential);
+        when(credentialConverter.convert(stack.getCredentialCrn())).thenReturn(cloudCredential);
 
         String instanceId1 = "i-0f1e0605506aaaaaa";
         String instanceId2 = "i-0f1e0605506bbbbbb";
@@ -82,7 +82,7 @@ public class UnhealthyInstancesFinalizerTest {
         Stack stack = TestUtil.stack(Status.AVAILABLE, TestUtil.awsCredential());
 
         CloudCredential cloudCredential = mock(CloudCredential.class);
-        when(credentialConverter.convert(stack.getCredential())).thenReturn(cloudCredential);
+        when(credentialConverter.convert(stack.getCredentialCrn())).thenReturn(cloudCredential);
 
         String instanceId1 = "i-0f1e0605506aaaaaa";
         String instanceId2 = "i-0f1e0605506bbbbbb";

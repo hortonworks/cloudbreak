@@ -52,7 +52,6 @@ import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -106,8 +105,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     @Column(name = "value", columnDefinition = "TEXT", length = 100000)
     private Map<String, String> parameters;
 
-    @OneToOne
-    private Credential credential;
+    private String credentialCrn;
 
     @Column(columnDefinition = "TEXT")
     private String platformVariant;
@@ -228,12 +226,12 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
         this.cluster = cluster;
     }
 
-    public Credential getCredential() {
-        return credential;
+    public String getCredentialCrn() {
+        return credentialCrn;
     }
 
-    public void setCredential(Credential credential) {
-        this.credential = credential;
+    public void setCredentialCrn(String credentialCrn) {
+        this.credentialCrn = credentialCrn;
     }
 
     public StackStatus getStackStatus() {

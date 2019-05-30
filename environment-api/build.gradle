@@ -8,7 +8,6 @@ repositories {
 
 dependencies {
   implementation project(':structuredevent-model')
-  implementation project(':secret-engine')
   implementation project(':common')
   implementation project(':cloud-api')
   implementation project(':auth-connector')

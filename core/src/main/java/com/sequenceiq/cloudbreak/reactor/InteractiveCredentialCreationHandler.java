@@ -9,18 +9,16 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveCredentialCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.mapper.DuplicatedKeyValueExceptionMapper;
 import com.sequenceiq.cloudbreak.converter.spi.ExtendedCloudCredentialToCredentialConverter;
-import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.notification.Notification;
 import com.sequenceiq.cloudbreak.notification.NotificationSender;
+import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
+import com.sequenceiq.cloudbreak.service.credential.CredentialClientService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 
 import reactor.bus.Event;
 
@@ -28,7 +26,7 @@ import reactor.bus.Event;
 public class InteractiveCredentialCreationHandler implements EventHandler<InteractiveCredentialCreationRequest> {
 
     @Inject
-    private CredentialService credentialService;
+    private CredentialClientService credentialClientService;
 
     @Inject
     private NotificationSender notificationSender;
@@ -49,10 +47,11 @@ public class InteractiveCredentialCreationHandler implements EventHandler<Intera
         InteractiveCredentialCreationRequest interactiveCredentialCreationRequest = interactiveCredentialCreationRequestEvent.getData();
 
         ExtendedCloudCredential extendedCloudCredential = interactiveCredentialCreationRequest.getExtendedCloudCredential();
-        Credential credential = extendedCloudCredentialToCredentialConverter.convert(extendedCloudCredential);
-        User user = userService.getOrCreate(extendedCloudCredential.getCloudbreakUser());
+//        Credential credential = extendedCloudCredentialToCredentialConverter.convert(extendedCloudCredential);
+//        User user = userService.getOrCreate(extendedCloudCredential.getCloudbreakUser());
         try {
-            credentialService.initCodeGrantFlow(extendedCloudCredential.getWorkspaceId(), credential, user);
+            //TODO this logic needs to be in the Environment MS
+//            credentialService.initCodeGrantFlow(extendedCloudCredential.getWorkspaceId(), credential, user);
             sendNotification(extendedCloudCredential, extendedCloudCredential.getName(), "CREDENTIAL_APP_CREATED");
         } catch (DuplicateKeyValueException e) {
             sendNotification(extendedCloudCredential, DuplicatedKeyValueExceptionMapper.errorMessage(e), "CREDENTIAL_CREATE_FAILED");
