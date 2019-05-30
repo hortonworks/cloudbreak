@@ -3,13 +3,13 @@ package tenant
 import (
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/go-openapi/swag"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
 	"github.com/hortonworks/cb-cli/dataplane/oauthapi/client/tenants"
 	"github.com/hortonworks/cb-cli/dataplane/oauthapi/model"
 	"github.com/hortonworks/dp-cli-common/utils"
+	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
 

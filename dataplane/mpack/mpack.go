@@ -5,11 +5,11 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	v4mpack "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_mpacks"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/dp-cli-common/utils"
+	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
 

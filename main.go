@@ -6,7 +6,6 @@ import (
 	"os"
 	"sort"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cmd"
 	cb "github.com/hortonworks/cb-cli/dataplane/cmd"
 	"github.com/hortonworks/cb-cli/dataplane/common"
@@ -14,6 +13,7 @@ import (
 	"github.com/hortonworks/cb-cli/help"
 	"github.com/hortonworks/cb-cli/plugin"
 	"github.com/hortonworks/dp-cli-common/utils"
+	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 	"golang.org/x/crypto/ssh/terminal"
 )

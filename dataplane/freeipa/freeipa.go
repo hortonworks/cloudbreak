@@ -6,13 +6,13 @@ import (
 	"os"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/dataplane/api-freeipa/client/v1freeipa"
 	freeIpaModel "github.com/hortonworks/cb-cli/dataplane/api-freeipa/model"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
 	"github.com/hortonworks/dp-cli-common/utils"
 	commonutils "github.com/hortonworks/dp-cli-common/utils"
+	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
 

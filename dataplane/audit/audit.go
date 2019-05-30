@@ -6,11 +6,11 @@ import (
 
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
 
-	log "github.com/Sirupsen/logrus"
 	v4audit "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_audits"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/dp-cli-common/utils"
+	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 )

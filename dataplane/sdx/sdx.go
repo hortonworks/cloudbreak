@@ -3,13 +3,13 @@ package sdx
 import (
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/dataplane/api-sdx/client/sdx"
 	sdxModel "github.com/hortonworks/cb-cli/dataplane/api-sdx/model"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
 	"github.com/hortonworks/dp-cli-common/utils"
 	commonutils "github.com/hortonworks/dp-cli-common/utils"
+	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
 

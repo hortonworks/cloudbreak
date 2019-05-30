@@ -8,7 +8,6 @@ import (
 
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/go-openapi/swag"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/cb-cli/dataplane/oauthapi/client/oidc"
@@ -17,6 +16,7 @@ import (
 	"github.com/hortonworks/cb-cli/dataplane/oauthapi/model"
 	"github.com/hortonworks/cb-cli/dataplane/role"
 	"github.com/hortonworks/dp-cli-common/utils"
+	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
 

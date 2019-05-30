@@ -13,11 +13,11 @@ import (
 	"strconv"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
 	v4ldap "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_ldaps"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/dp-cli-common/utils"
+	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 	"golang.org/x/text/encoding/unicode"
 	ldaputils "gopkg.in/ldap.v2"

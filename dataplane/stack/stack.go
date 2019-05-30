@@ -14,11 +14,11 @@ import (
 	"github.com/hortonworks/cb-cli/dataplane/common"
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
 
-	log "github.com/Sirupsen/logrus"
 	v4stack "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_stacks"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/cb-cli/dataplane/types"
+	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
 

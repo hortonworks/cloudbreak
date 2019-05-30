@@ -3,13 +3,13 @@ package maintenancemode
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Sirupsen/logrus"
 	v4maint "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_stacks"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	"github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
 	"github.com/hortonworks/cb-cli/dataplane/types"
 	"github.com/hortonworks/dp-cli-common/utils"
+	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
 
