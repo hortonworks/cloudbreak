@@ -17,7 +17,6 @@ import javax.persistence.Table;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
-import com.sequenceiq.cloudbreak.domain.Credential;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -35,8 +34,7 @@ public class StackApiView extends CompactView {
     @Column(columnDefinition = "TEXT")
     private String platformVariant;
 
-    @OneToOne
-    private Credential credential;
+    private String credentialCrn;
 
     @OneToOne
     private StackStatusView stackStatus;
@@ -88,12 +86,12 @@ public class StackApiView extends CompactView {
         this.platformVariant = platformVariant;
     }
 
-    public Credential getCredential() {
-        return credential;
+    public String getCredentialCrn() {
+        return credentialCrn;
     }
 
-    public void setCredential(Credential credential) {
-        this.credential = credential;
+    public void setCredentialCrn(String credentialCrn) {
+        this.credentialCrn = credentialCrn;
     }
 
     public StackStatusView getStackStatus() {

@@ -16,6 +16,8 @@ import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
+import com.sequenceiq.cloudbreak.service.credential.CredentialClientService;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
@@ -46,11 +48,15 @@ public class ServiceProviderSetupAdapter {
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
 
+    @Inject
+    private CredentialClientService credentialClientService;
+
     public ImageStatusResult checkImage(Stack stack) throws Exception {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                 location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
+        Credential credential = credentialClientService.get(stack.getCredentialCrn());
+        CloudCredential cloudCredential = credentialConverter.convert(credential);
         Image image = imageService.getImage(stack.getId());
         CheckImageRequest<CheckImageResult> checkImageRequest =
                 new CheckImageRequest<>(cloudContext, cloudCredential, cloudStackConverter.convert(stack), image);

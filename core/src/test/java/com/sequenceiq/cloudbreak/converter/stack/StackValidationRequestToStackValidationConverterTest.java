@@ -28,13 +28,13 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackValidationV4RequestToStackValidationConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -59,7 +59,7 @@ public class StackValidationRequestToStackValidationConverterTest {
     private NetworkService networkService;
 
     @Mock
-    private CredentialService credentialService;
+    private CredentialClientService credentialClientService;
 
     @Mock
     private ConversionService conversionService;
@@ -94,7 +94,7 @@ public class StackValidationRequestToStackValidationConverterTest {
 
     private final Workspace workspace = TestUtil.workspace(1L, "myWorkspace");
 
-    private final Credential credential = TestUtil.gcpCredential();
+    private final Credential credential = TestUtil.awsCredential();
 
     @Before
     public void init() {
@@ -105,8 +105,7 @@ public class StackValidationRequestToStackValidationConverterTest {
         environment = new DetailedEnvironmentResponse();
         environment.setCredentialName(credential.getName());
         when(environmentClientService.get(anyString())).thenReturn(environment);
-        when(credentialService.getByNameForWorkspace(anyString(), any(Workspace.class)))
-                .thenReturn(credential);
+        when(credentialClientService.get(anyString())).thenReturn(credential);
     }
 
     @Test
@@ -125,10 +124,8 @@ public class StackValidationRequestToStackValidationConverterTest {
         validationRequest.setNetworkId(442L);
         validationRequest.setBlueprintName(BP_NAME);
 
-        when(credentialService.getByNameForWorkspace(credential.getName(), workspace)).thenReturn(credential);
-
         Map<Platform, PlatformParameters> platformParametersMap = new HashMap<>();
-        platformParametersMap.put(Platform.platform("GCP"), parameters);
+        platformParametersMap.put(Platform.platform("AWS"), parameters);
         when(cloudParameterCache.getPlatformParameters()).thenReturn(platformParametersMap);
         when(networkService.get(any())).thenReturn(TestUtil.network());
 

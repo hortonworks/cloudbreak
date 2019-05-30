@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.CloudResourceAdvisor;
 
@@ -34,14 +34,14 @@ public class PlatformParameterService {
     private CloudResourceAdvisor cloudResourceAdvisor;
 
     @Inject
-    private CredentialService credentialService;
+    private CredentialClientService credentialClientService;
 
     public PlatformResourceRequest getPlatformResourceRequest(Long workspaceId, String credentialName, String region, String platformVariant,
             String availabilityZone) {
         PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
 
         if (!Strings.isNullOrEmpty(credentialName)) {
-            platformResourceRequest.setCredential(credentialService.getByNameForWorkspaceId(credentialName, workspaceId));
+            platformResourceRequest.setCredential(credentialClientService.get(credentialName));
         } else {
             throw new BadRequestException("The credentialId or the credentialName must be specified in the request");
         }

@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.cluster.KerberosConfigProvider;
-import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -48,9 +47,6 @@ public class SharedServiceConfigProvider {
 
     @Inject
     private DatalakeResourcesService datalakeResourcesService;
-
-    @Inject
-    private CredentialPrerequisiteService credentialPrerequisiteService;
 
     @Inject
     private DatalakeConfigApiConnector datalakeConfigApiConnector;
@@ -80,9 +76,6 @@ public class SharedServiceConfigProvider {
             if (publicStack.getDatalakeResourceId() != null || (!CollectionUtils.isEmpty(datalakeResources) && datalakeResources.size() == 1)) {
                 Long datalakeResourceId = getDatalakeResourceIdFromEnvOrStack(publicStack, datalakeResources);
                 datalakeResource = datalakeResourcesService.findById(datalakeResourceId);
-                if (credentialPrerequisiteService.isCumulusCredential(publicStack.getCredential().getAttributes())) {
-                    connector = credentialPrerequisiteService.createCumulusDatalakeConnector(publicStack.getCredential().getAttributes());
-                }
             }
             Long datalakeStackId = getDatalakeStackId(publicStack, datalakeResource);
             if (datalakeStackId != null) {
@@ -93,7 +86,7 @@ public class SharedServiceConfigProvider {
                             ambariDatalakeConfigProvider.collectAndStoreDatalakeResources(datalakeStack, datalakeStack.getCluster(), connector));
                 }
             }
-            if (decorateStackWithConfigs(publicStack, connector, datalakeResource)) {
+            if (connector != null && decorateStackWithConfigs(publicStack, connector, datalakeResource)) {
                 return stackService.save(publicStack);
             }
             return publicStack;

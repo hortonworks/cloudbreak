@@ -10,13 +10,12 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
-import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
-import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.blueprint.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.blueprint.nifi.HdfConfigProvider;
 import com.sequenceiq.cloudbreak.blueprint.sharedservice.SharedServiceConfigsViewProvider;
+import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -25,9 +24,12 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceGroupMetadataCollector;
+import com.sequenceiq.cloudbreak.service.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
@@ -72,6 +74,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
 
     @Inject
     private DatalakeResourcesService datalakeResourcesService;
+
+    @Inject
+    private CredentialClientService credentialClientService;
 
     @Override
     public TemplatePreparationObject convert(Stack source) {
@@ -129,8 +134,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
 
     private BaseFileSystemConfigurationsView getFileSystemConfigurationView(Stack source, FileSystem fileSystem) throws IOException {
         BaseFileSystemConfigurationsView fileSystemConfigurationView = null;
+        Credential credentialResponse = credentialClientService.get(source.getCredentialCrn());
         if (source.getCluster().getFileSystem() != null) {
-            fileSystemConfigurationView = fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source);
+            fileSystemConfigurationView = fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source, credentialResponse.getAttributes());
         }
         return fileSystemConfigurationView;
     }

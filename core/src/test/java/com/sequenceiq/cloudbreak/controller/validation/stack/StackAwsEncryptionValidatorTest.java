@@ -39,12 +39,11 @@ import com.sequenceiq.cloudbreak.common.type.EncryptionType;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.template.InstanceTemplateV4RequestValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -100,9 +99,6 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     private PlatformParameterService platformParameterService;
 
     @Mock
-    private CredentialService credentialService;
-
-    @Mock
     private EnvironmentClientService environmentClientService;
 
     @InjectMocks
@@ -125,6 +121,7 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         when(subject.getCluster()).thenReturn(clusterRequest);
         String credentialName = "someCred";
         when(clusterRequest.getBlueprintName()).thenReturn("dummy");
+        when(credential.cloudPlatform()).thenReturn("AWS");
         when(platformParameterService.getPlatformResourceRequest(anyLong(), anyString(), eq(null), eq(null), eq(null)))
                 .thenReturn(platformResourceRequest);
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
