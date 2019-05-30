@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
@@ -32,6 +33,7 @@ import com.sequenceiq.freeipa.service.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.FreeIpaService;
 import com.sequenceiq.freeipa.service.TlsSecurityService;
 import com.sequenceiq.freeipa.service.image.ImageService;
+import com.sequenceiq.freeipa.util.CrnService;
 
 @Service
 public class FreeIpaCreationService {
@@ -72,11 +74,13 @@ public class FreeIpaCreationService {
     @Inject
     private StackToDescribeFreeIpaResponseConverter stackToDescribeFreeIpaResponseConverter;
 
+    @Inject
+    private CrnService crnService;
+
     public DescribeFreeIpaResponse launchFreeIpa(CreateFreeIpaRequest request, String accountId) {
-        checkIfAlreadyExistsInEnvironment(request);
+        checkIfAlreadyExistsInEnvironment(request, accountId);
         Stack stack = stackConverter.convert(request, accountId);
-        stack.setEnvironment(request.getEnvironmentId());
-        stack.setAccountId(accountId);
+        stack.setResourceCrn(crnService.createCrn(accountId, Crn.ResourceType.FREEIPA));
         GetPlatformTemplateRequest getPlatformTemplateRequest = templateService.triggerGetTemplate(stack);
 
         SecurityConfig securityConfig = tlsSecurityService.generateSecurityKeys();
@@ -94,8 +98,8 @@ public class FreeIpaCreationService {
         return stackToDescribeFreeIpaResponseConverter.convert(stack, image, freeIpa);
     }
 
-    private void checkIfAlreadyExistsInEnvironment(CreateFreeIpaRequest request) {
-        if (!stackService.findAllByEnvironmentCrn(request.getEnvironmentId()).isEmpty()) {
+    private void checkIfAlreadyExistsInEnvironment(CreateFreeIpaRequest request, String accountId) {
+        if (!stackService.findAllByEnvironmentCrnAndAccountId(request.getEnvironmentCrn(), accountId).isEmpty()) {
             throw new BadRequestException("FreeIPA already exists in environment");
         }
     }

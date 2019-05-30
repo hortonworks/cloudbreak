@@ -22,13 +22,8 @@ public class FreeIpaDeletionService {
     @Inject
     private FreeIpaFlowManager flowManager;
 
-    public void delete(String accountId, String environment, String name) {
-        Stack stack = stackService.getByAccountIdEnvironmentAndName(accountId, environment, name);
-        flowManager.notify(TERMINATION_EVENT.event(), new TerminationEvent(TERMINATION_EVENT.event(), stack.getId(), false));
-    }
-
-    public void delete(String environmentCrn) {
-        List<Stack> stacks = stackService.findAllByEnvironmentCrn(environmentCrn);
+    public void delete(String environmentCrn, String accountId) {
+        List<Stack> stacks = stackService.findAllByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         if (stacks.isEmpty()) {
             throw new NotFoundException("No FreeIpa found in environment");
         }

@@ -19,13 +19,13 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class DescribeKerberosConfigResponse {
-    private String id;
+    private String crn;
 
     private String name;
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
-    private String environmentId;
+    private String environmentCrn;
 
     @ApiModelProperty(KerberosConfigModelDescription.KERBEROS_URL)
     private String url;
@@ -71,12 +71,12 @@ public class DescribeKerberosConfigResponse {
     @ApiModelProperty(KerberosConfigModelDescription.KRB_5_CONF)
     private SecretResponse krb5Conf;
 
-    public String getEnvironmentId() {
-        return environmentId;
+    public String getEnvironmentCrn() {
+        return environmentCrn;
     }
 
-    public void setEnvironmentId(String environmentId) {
-        this.environmentId = environmentId;
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 
     public KerberosType getType() {
@@ -175,12 +175,12 @@ public class DescribeKerberosConfigResponse {
         this.description = description;
     }
 
-    public String getId() {
-        return id;
+    public String getCrn() {
+        return crn;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setCrn(String crn) {
+        this.crn = crn;
     }
 
     public SecretResponse getPassword() {

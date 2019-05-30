@@ -33,17 +33,17 @@ public class StackService {
                 .orElseThrow(() -> new NotFoundException(String.format("Stack [%s] in environment [%s] not found", name, environment)));
     }
 
-    public Stack getByEnvironmentCrn(String environmentCrn) {
-        return stackRepository.findByEnvironment(environmentCrn)
+    public Stack getByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
+        return stackRepository.findByEnvironmentAndAccountId(environmentCrn, accountId)
                 .orElseThrow(() -> new NotFoundException(String.format("Stack by environment [%s] not found", environmentCrn)));
     }
 
-    public List<Stack> findAllByEnvironmentCrn(String environmentCrn) {
-        return stackRepository.findAllByEnvironment(environmentCrn);
+    public List<Stack> findAllByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
+        return stackRepository.findAllByEnvironmentAndAccountId(environmentCrn, accountId);
     }
 
-    public Stack getByEnvironmentCrnWithLists(String environmentCrn) {
-        return stackRepository.findByEnvironmentWithList(environmentCrn)
+    public Stack getByEnvironmentCrnAndAccountIdWithLists(String environmentCrn, String accountId) {
+        return stackRepository.findByEnvironmentAndAccountIdWithList(environmentCrn, accountId)
                 .orElseThrow(() -> new NotFoundException(String.format("Stack by environment [%s] not found", environmentCrn)));
     }
 

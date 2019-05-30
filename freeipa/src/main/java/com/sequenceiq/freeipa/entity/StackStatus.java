@@ -14,8 +14,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import com.sequenceiq.freeipa.api.model.DetailedStackStatus;
-import com.sequenceiq.freeipa.api.model.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 
 @Entity
 @Table(name = "stackstatus")

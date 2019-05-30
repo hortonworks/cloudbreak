@@ -43,7 +43,7 @@ public class CreateKerberosConfigRequest {
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
-    private String environmentId;
+    private String environmentCrn;
 
     public ActiveDirectoryKerberosDescriptor getActiveDirectory() {
         return activeDirectory;
@@ -85,11 +85,11 @@ public class CreateKerberosConfigRequest {
         this.name = name;
     }
 
-    public String getEnvironmentId() {
-        return environmentId;
+    public String getEnvironmentCrn() {
+        return environmentCrn;
     }
 
-    public void setEnvironmentId(String environmentId) {
-        this.environmentId = environmentId;
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 }

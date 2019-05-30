@@ -14,7 +14,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.freeipa.util.UserCrnService;
+import com.sequenceiq.freeipa.util.CrnService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LdapConfigServiceTest {
@@ -29,7 +29,7 @@ public class LdapConfigServiceTest {
     private LdapConfigRepository ldapConfigRepository;
 
     @Mock
-    private UserCrnService userCrnService;
+    private CrnService crnService;
 
     @Mock
     private LdapConfigValidator ldapConfigValidator;
@@ -42,7 +42,7 @@ public class LdapConfigServiceTest {
         // GIVEN
         LdapConfig ldapConfig = new LdapConfig();
         ldapConfig.setEnvironmentId(ENVIRONMENT_ID);
-        Mockito.when(userCrnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
         Mockito.when(ldapConfigRepository.save(ldapConfig)).thenReturn(ldapConfig);
         // WHEN
         underTest.createLdapConfig(ldapConfig);
@@ -55,7 +55,7 @@ public class LdapConfigServiceTest {
         // GIVEN
         LdapConfig ldapConfig = new LdapConfig();
         ldapConfig.setEnvironmentId(ENVIRONMENT_ID);
-        Mockito.when(userCrnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
         Mockito.when(ldapConfigRepository.findByAccountIdAndEnvironmentId(ACCOUNT_ID, ENVIRONMENT_ID)).thenReturn(Optional.of(new LdapConfig()));
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("environment is already exists");
@@ -68,7 +68,7 @@ public class LdapConfigServiceTest {
     public void testGet() {
         // GIVEN
         LdapConfig expectedLdapConfig = new LdapConfig();
-        Mockito.when(userCrnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
         Mockito.when(ldapConfigRepository.findByAccountIdAndEnvironmentId(ACCOUNT_ID, ENVIRONMENT_ID)).thenReturn(Optional.of(expectedLdapConfig));
         // WHEN
         LdapConfig actualResult = underTest.get(ENVIRONMENT_ID);
@@ -79,7 +79,7 @@ public class LdapConfigServiceTest {
     @Test
     public void testGetNotFound() {
         // GIVEN
-        Mockito.when(userCrnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
         thrown.expect(NotFoundException.class);
         thrown.expectMessage("LdapConfig for environment");
         // WHEN
@@ -91,7 +91,7 @@ public class LdapConfigServiceTest {
     public void testDelete() {
         // GIVEN
         LdapConfig ldapConfig = new LdapConfig();
-        Mockito.when(userCrnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
         Mockito.when(ldapConfigRepository.findByAccountIdAndEnvironmentId(ACCOUNT_ID, ENVIRONMENT_ID)).thenReturn(Optional.of(ldapConfig));
         // WHEN
         underTest.delete(ENVIRONMENT_ID);
@@ -102,7 +102,7 @@ public class LdapConfigServiceTest {
     @Test
     public void testDeleteNotFound() {
         // GIVEN
-        Mockito.when(userCrnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
         thrown.expect(NotFoundException.class);
         thrown.expectMessage("LdapConfig for environment");
         // WHEN
@@ -114,7 +114,7 @@ public class LdapConfigServiceTest {
     public void testTestConnectionWithEnvironmentId() {
         // GIVEN
         LdapConfig ldapConfig = new LdapConfig();
-        Mockito.when(userCrnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
         Mockito.when(ldapConfigRepository.findByAccountIdAndEnvironmentId(ACCOUNT_ID, ENVIRONMENT_ID)).thenReturn(Optional.of(ldapConfig));
         // WHEN
         String actualResult = underTest.testConnection(ENVIRONMENT_ID, null);

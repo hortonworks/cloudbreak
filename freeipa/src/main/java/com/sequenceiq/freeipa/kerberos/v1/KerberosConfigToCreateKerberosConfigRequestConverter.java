@@ -30,7 +30,7 @@ public class KerberosConfigToCreateKerberosConfigRequestConverter {
         CreateKerberosConfigRequest request = new CreateKerberosConfigRequest();
         request.setName(source.getName());
         request.setDescription(source.getDescription());
-        request.setEnvironmentId(source.getEnvironmentId());
+        request.setEnvironmentCrn(source.getEnvironmentId());
         switch (source.getType()) {
             case ACTIVE_DIRECTORY:
                 request.setActiveDirectory(getActiveDirectory(source));

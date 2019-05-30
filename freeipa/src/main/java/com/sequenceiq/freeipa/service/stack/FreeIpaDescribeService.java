@@ -27,8 +27,8 @@ public class FreeIpaDescribeService {
     @Inject
     private StackToDescribeFreeIpaResponseConverter stackToDescribeFreeIpaResponseConverter;
 
-    public DescribeFreeIpaResponse describe(String environmentCrn) {
-        Stack stack = stackService.getByEnvironmentCrnWithLists(environmentCrn);
+    public DescribeFreeIpaResponse describe(String environmentCrn, String accountId) {
+        Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(environmentCrn, accountId);
         Image image = imageService.getByStack(stack);
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
         return stackToDescribeFreeIpaResponseConverter.convert(stack, image, freeIpa);

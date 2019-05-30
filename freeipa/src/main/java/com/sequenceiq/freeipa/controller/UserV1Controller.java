@@ -15,6 +15,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUsersRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUsersResponse;
 import com.sequenceiq.freeipa.service.user.PasswordService;
 import com.sequenceiq.freeipa.service.user.UserService;
+import com.sequenceiq.freeipa.util.CrnService;
 
 @Controller
 public class UserV1Controller implements UserV1Endpoint {
@@ -26,6 +27,9 @@ public class UserV1Controller implements UserV1Endpoint {
 
     @Inject
     private PasswordService passwordService;
+
+    @Inject
+    private CrnService crnService;
 
     @Override
     public SynchronizeUsersResponse synchronizeUsers(SynchronizeUsersRequest request) {
@@ -47,7 +51,8 @@ public class UserV1Controller implements UserV1Endpoint {
     @Override
     public CreateUsersResponse createUsers(CreateUsersRequest request) {
         try {
-            userService.createUsers(request);
+            String accountId = crnService.getCurrentAccountId();
+            userService.createUsers(request, accountId);
         } catch (Exception e) {
             LOGGER.error("Failed to create users", e);
             throw new RuntimeException(e);

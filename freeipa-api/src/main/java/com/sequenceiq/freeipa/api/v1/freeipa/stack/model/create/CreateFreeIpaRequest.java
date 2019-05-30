@@ -15,6 +15,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkR
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.StackAuthenticationRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.credential.CredentialRequest;
+import com.sequenceiq.service.api.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -24,8 +25,8 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CreateFreeIpaRequest {
     @NotNull
-    @ApiModelProperty(value = FreeIpaModelDescriptions.ENVIRONMENT_ID, required = true)
-    private String environmentId;
+    @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
+    private String environmentCrn;
 
     @NotNull
     @ApiModelProperty(value = FreeIpaModelDescriptions.FREEIPA_NAME, required = true)
@@ -60,12 +61,12 @@ public class CreateFreeIpaRequest {
     @ApiModelProperty(value = "Credential", required = true)
     private CredentialRequest credential;
 
-    public String getEnvironmentId() {
-        return environmentId;
+    public String getEnvironmentCrn() {
+        return environmentCrn;
     }
 
-    public void setEnvironmentId(String environmentId) {
-        this.environmentId = environmentId;
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 
     public String getName() {

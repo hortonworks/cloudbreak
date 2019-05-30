@@ -13,18 +13,18 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TestLdapConfigRequest {
     @ApiModelProperty(ModelDescriptions.ENVIRONMENT_CRN)
-    private String environmentId;
+    private String environmentCrn;
 
     @Valid
     @ApiModelProperty(LdapConfigModelDescription.VALIDATION_REQUEST)
     private MinimalLdapConfigRequest ldap;
 
-    public String getEnvironmentId() {
-        return environmentId;
+    public String getEnvironmentCrn() {
+        return environmentCrn;
     }
 
-    public void setEnvironmentId(String environmentId) {
-        this.environmentId = environmentId;
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 
     public MinimalLdapConfigRequest getLdap() {

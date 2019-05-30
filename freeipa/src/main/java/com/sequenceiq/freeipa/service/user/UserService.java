@@ -46,10 +46,10 @@ public class UserService {
                 null, null);
     }
 
-    public void createUsers(CreateUsersRequest request) throws Exception {
+    public void createUsers(CreateUsersRequest request, String accountId) throws Exception {
         LOGGER.info("UserService.synchronizeUsers() called");
 
-        Stack stack = stackService.getByEnvironmentCrn(request.getEnvironmentId());
+        Stack stack = stackService.getByEnvironmentCrnAndAccountId(request.getEnvironmentCrn(), accountId);
 
         FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
 

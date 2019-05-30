@@ -20,16 +20,16 @@ public interface StackRepository extends JpaRepository<Stack, Long> {
     @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId and s.environment = :environment and s.name = :name")
     Optional<Stack> findByAccountIdEnvironmentAndName(
             @Param("accountId") String accountId,
-            @Param("environment")  String environment,
+            @Param("environment") String environment,
             @Param("name") String name);
 
-    List<Stack> findByAccountId(@Param("accountId") String accountId);
+    List<Stack> findByAccountId(String accountId);
 
-    Optional<Stack> findByEnvironment(@Param("environment") String environment);
+    Optional<Stack> findByEnvironmentAndAccountId(String environment, String accountId);
 
-    List<Stack> findAllByEnvironment(@Param("environment") String environment);
+    List<Stack> findAllByEnvironmentAndAccountId(String environment, String accountId);
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig "
-            + "LEFT JOIN FETCH ig.instanceMetaData WHERE s.environment = :environment")
-    Optional<Stack> findByEnvironmentWithList(@Param("environment") String environment);
+            + "LEFT JOIN FETCH ig.instanceMetaData WHERE s.environment = :environment AND s.accountId = :accountId")
+    Optional<Stack> findByEnvironmentAndAccountIdWithList(@Param("environment") String environment, @Param("accountId") String accountId);
 }
