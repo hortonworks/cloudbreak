@@ -56,6 +56,10 @@ public class SdxCluster {
     @Enumerated(EnumType.STRING)
     private SdxClusterStatus status;
 
+    private String stackRequest;
+
+    private String stackRequestToCloudbreak;
+
     private Long deleted;
 
     public Long getId() {
@@ -152,5 +156,21 @@ public class SdxCluster {
 
     public void setDeleted(Long deleted) {
         this.deleted = deleted;
+    }
+
+    public String getStackRequest() {
+        return stackRequest;
+    }
+
+    public void setStackRequest(String stackRequest) {
+        this.stackRequest = stackRequest;
+    }
+
+    public String getStackRequestToCloudbreak() {
+        return stackRequestToCloudbreak;
+    }
+
+    public void setStackRequestToCloudbreak(String stackRequestToCloudbreak) {
+        this.stackRequestToCloudbreak = stackRequestToCloudbreak;
     }
 }

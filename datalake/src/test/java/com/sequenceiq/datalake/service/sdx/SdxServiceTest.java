@@ -92,7 +92,7 @@ public class SdxServiceTest {
         sdxClusterRequest.setTags(tags);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Collections.singletonList(new SdxCluster()));
         Assertions.assertThrows(BadRequestException.class,
-                () -> sdxService.createSdx(CRN, "test-sdx-cluster", sdxClusterRequest), "SDX cluster exists for environment name");
+                () -> sdxService.createSdx(CRN, "test-sdx-cluster", sdxClusterRequest, null), "SDX cluster exists for environment name");
     }
 
     @Test
@@ -112,7 +112,7 @@ public class SdxServiceTest {
             return sdxWithId;
         });
         String sdxName = "test-sdx-cluster";
-        SdxCluster createdSdxCluster = sdxService.createSdx(CRN, sdxName, sdxClusterRequest);
+        SdxCluster createdSdxCluster = sdxService.createSdx(CRN, sdxName, sdxClusterRequest, null);
         Assertions.assertEquals(id, createdSdxCluster.getId());
         final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());

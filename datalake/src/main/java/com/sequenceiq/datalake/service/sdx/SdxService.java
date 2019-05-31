@@ -11,9 +11,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.datalake.api.endpoint.sdx.SdxClusterRequest;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
@@ -60,7 +63,7 @@ public class SdxService {
         }, () -> LOGGER.info("Can not update sdx {} to {} status", id, sdxClusterStatus));
     }
 
-    public SdxCluster createSdx(final String userCrn, final String sdxName, final SdxClusterRequest sdxClusterRequest) {
+    public SdxCluster createSdx(final String userCrn, final String sdxName, final SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request) {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setCrn(createCrn(getAccountIdFromCrn(userCrn)));
         sdxCluster.setClusterName(sdxName);
@@ -69,6 +72,14 @@ public class SdxService {
         sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
         sdxCluster.setAccessCidr(sdxClusterRequest.getAccessCidr());
         sdxCluster.setClusterShape(sdxClusterRequest.getClusterShape());
+        try {
+            if (stackV4Request != null) {
+                sdxCluster.setStackRequest(JsonUtil.writeValueAsString(stackV4Request));
+            }
+        } catch (JsonProcessingException e) {
+            LOGGER.info("Can not parse stack request");
+            throw new BadRequestException("Can not parse stack request", e);
+        }
         try {
             sdxCluster.setTags(new Json(sdxClusterRequest.getTags()));
         } catch (IllegalArgumentException e) {
