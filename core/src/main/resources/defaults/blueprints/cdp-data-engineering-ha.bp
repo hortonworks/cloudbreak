@@ -80,12 +80,6 @@
           {
             "refName": "hms-HIVEMETASTORE-BASE",
             "roleType": "HIVEMETASTORE",
-            "configs": [
-              {
-                "name": "metastore_canary_health_enabled",
-                "value": "false"
-              }
-            ],
             "base": true
           }
         ]
