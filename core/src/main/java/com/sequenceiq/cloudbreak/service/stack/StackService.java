@@ -248,18 +248,18 @@ public class StackService {
         }
     }
 
-    @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
+    @PreAuthorize("hasRole('AUTOSCALE')")
     public Long getWorkspaceId(Long stackId) {
         return stackRepository.findWorkspaceIdById(stackId);
     }
 
-    @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
+    @PreAuthorize("hasRole('AUTOSCALE')")
     public Tenant getTenant(Long stackId) {
         Workspace workspace = stackRepository.findWorkspaceById(stackId).orElseThrow(notFound("workspace", stackId));
         return workspace.getTenant();
     }
 
-    @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
+    @PreAuthorize("hasRole('AUTOSCALE')")
     public Set<AutoscaleStackV4Response> getAllForAutoscale() {
         try {
             return transactionService.required(() -> {

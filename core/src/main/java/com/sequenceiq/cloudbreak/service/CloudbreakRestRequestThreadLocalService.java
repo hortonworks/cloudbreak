@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
@@ -39,7 +38,6 @@ public class CloudbreakRestRequestThreadLocalService implements RestRequestThrea
         CLOUDBREAK_USER.remove();
     }
 
-    @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
     public void setCloudbreakUserByUsernameAndTenant(String userId, String tenant) {
         CLOUDBREAK_USER.set(new CloudbreakUser(userId, "", "", "", tenant));
     }

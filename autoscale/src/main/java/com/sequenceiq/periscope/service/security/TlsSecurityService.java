@@ -7,18 +7,18 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
-import com.sequenceiq.cloudbreak.client.CloudbreakIdentityClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.model.TlsConfiguration;
 import com.sequenceiq.periscope.repository.SecurityConfigRepository;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 
 @Service
 public class TlsSecurityService {
 
     @Inject
-    private CloudbreakIdentityClient cloudbreakClient;
+    private CloudbreakInternalCrnClient internalCrnClient;
 
     @Inject
     private SecurityConfigRepository securityConfigRepository;
@@ -27,7 +27,7 @@ public class TlsSecurityService {
     private SecretService secretService;
 
     public SecurityConfig prepareSecurityConfig(Long stackId) {
-        CertificateV4Response response = cloudbreakClient.autoscaleEndpoint().getCertificate(stackId);
+        CertificateV4Response response = internalCrnClient.withInternalCrn().autoscaleEndpoint().getCertificate(stackId);
         return new SecurityConfig(response.getClientKeyPath(), response.getClientCertPath(), response.getServerCert());
     }
 

@@ -41,7 +41,6 @@ dependencies {
   compile group: 'com.google.code.findbugs',      name: 'annotations',                    version: '3.0.1'
   compile group: 'org.springframework.boot',      name: 'spring-boot-starter-security',   version: springBootVersion
   compile group: 'com.google.guava',              name: 'guava',                          version: guavaVersion
-  compile group: 'org.springframework.security.oauth', name: 'spring-security-oauth2',    version: springOauthVersion
   compile group: 'org.springframework',           name: 'spring-aspects',                 version: springFrameworkVersion
   compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
   compile group: 'commons-validator',             name: 'commons-validator',              version: apacheCommonsValidatorVersion

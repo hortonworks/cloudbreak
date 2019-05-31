@@ -2,14 +2,14 @@ package com.sequenceiq.cloudbreak.auth.security.authentication;
 
 import java.util.Optional;
 
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
+import org.springframework.security.core.Authentication;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsAuthenticationException;
+import com.sequenceiq.cloudbreak.auth.security.CrnUser;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -23,10 +23,12 @@ public class UmsAuthenticationService implements AuthenticationService {
     }
 
     @Override
-    public CloudbreakUser getCloudbreakUser(OAuth2Authentication auth) {
-        String userCrn = ((OAuth2AuthenticationDetails) auth.getDetails()).getTokenValue();
-        String principal = (String) auth.getPrincipal();
-        return getCloudbreakUser(userCrn, principal);
+    public CloudbreakUser getCloudbreakUser(Authentication auth) {
+        if (auth.getPrincipal() instanceof CrnUser) {
+            CrnUser crnuser = (CrnUser) auth.getPrincipal();
+            return getCloudbreakUser(crnuser.getUserCrn(), null);
+        }
+        return null;
     }
 
     public CloudbreakUser getCloudbreakUser(String userCrn, String principal) {

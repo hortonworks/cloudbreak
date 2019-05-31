@@ -11,15 +11,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
-import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
-import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
-import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecurityExpressionHandler;
-import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
 import com.sequenceiq.cloudbreak.auth.security.ScimAccountGroupReaderFilter;
@@ -56,27 +53,17 @@ public class SecurityConfig {
 
         @Override
         protected MethodSecurityExpressionHandler createExpressionHandler() {
-            OAuth2MethodSecurityExpressionHandler expressionHandler = new OAuth2MethodSecurityExpressionHandler();
+            DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
             expressionHandler.setPermissionEvaluator(tenantBasedPermissionEvaluator);
             return expressionHandler;
         }
     }
 
     @Configuration
-    @EnableResourceServer
-    protected static class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
+    protected static class ResourceServerConfiguration extends WebSecurityConfigurerAdapter {
 
         @Inject
         private ScimAccountGroupReaderFilter scimAccountGroupReaderFilter;
-
-        @Inject
-        private ResourceServerTokenServices resourceServerTokenServices;
-
-        @Override
-        public void configure(ResourceServerSecurityConfigurer resources) {
-            resources.resourceId("periscope");
-            resources.tokenServices(resourceServerTokenServices);
-        }
 
         @Override
         public void configure(HttpSecurity http) throws Exception {

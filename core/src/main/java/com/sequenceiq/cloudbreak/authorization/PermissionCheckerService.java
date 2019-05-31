@@ -20,9 +20,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByReturnValue;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByTarget;
@@ -32,8 +33,6 @@ import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByWo
 import com.sequenceiq.cloudbreak.workspace.repository.check.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.workspace.repository.check.WorkspaceResourceType;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Service
 public class PermissionCheckerService {
@@ -67,11 +66,6 @@ public class PermissionCheckerService {
         MethodSignature methodSignature = (MethodSignature) proceedingJoinPoint.getSignature();
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null) {
-            return permissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature);
-        }
-
-        OAuth2Authentication oAuth = auth instanceof OAuth2Authentication ? (OAuth2Authentication) auth : null;
-        if (oAuth != null && oAuth.getUserAuthentication() == null && oAuth.getOAuth2Request().getScope().contains(SpecialScopes.AUTO_SCALE.getScope())) {
             return permissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature);
         }
 

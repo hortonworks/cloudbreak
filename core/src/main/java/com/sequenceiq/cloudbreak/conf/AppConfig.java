@@ -45,7 +45,6 @@ import org.springframework.web.filter.GenericFilterBean;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.auth.uaa.IdentityClient;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.blueprint.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
@@ -131,10 +130,6 @@ public class AppConfig implements ResourceLoaderAware {
 
     @Inject
     private ConfigurableEnvironment environment;
-
-    @Inject
-    @Named("identityServerUrl")
-    private String identityServerUrl;
 
     @Inject
     @Named("environmentServerUrl")
@@ -242,11 +237,6 @@ public class AppConfig implements ResourceLoaderAware {
         executor.setTaskDecorator(new MDCCleanerTaskDecorator());
         executor.initialize();
         return executor;
-    }
-
-    @Bean
-    public IdentityClient identityClient() {
-        return new IdentityClient(identityServerUrl, clientId, new ConfigKey(certificateValidation, restDebug, ignorePreValidation));
     }
 
     @Bean
