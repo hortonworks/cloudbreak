@@ -33,6 +33,7 @@ base:
     - match: grain
     - gateway.init
     - gateway.ldap
+    - gateway.settings
 
   'roles:kerberized':
     - match: grain
@@ -58,6 +59,7 @@ base:
     - cloudera-manager.database
     - gateway.init
     - gateway.ldap
+    - gateway.settings
 
   'roles:ambari_server*':
     - match: grain
@@ -67,6 +69,7 @@ base:
     - grafana.repo
     - gateway.init
     - gateway.ldap
+    - gateway.settings
     - jdbc.connectors
 
   'roles:knox_gateway':
