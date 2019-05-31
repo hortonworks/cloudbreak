@@ -12,6 +12,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Where;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
@@ -39,6 +41,7 @@ public class ClusterApiView extends CompactView {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    @Where(clause = "archived = false")
     @ManyToOne
     private EnvironmentView environment;
 

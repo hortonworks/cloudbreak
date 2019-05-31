@@ -37,6 +37,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Where;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
@@ -182,6 +184,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @ManyToOne
     private Workspace workspace;
 
+    @Where(clause = "archived = false")
     @ManyToOne
     private EnvironmentView environment;
 

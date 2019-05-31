@@ -14,6 +14,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Where;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
@@ -57,6 +59,7 @@ public class StackApiView extends CompactView {
     @JoinColumn(name = "createdBy")
     private UserView userView;
 
+    @Where(clause = "archived = false")
     @ManyToOne
     private EnvironmentView environment;
 
