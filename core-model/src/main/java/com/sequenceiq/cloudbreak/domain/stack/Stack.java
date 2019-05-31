@@ -43,6 +43,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.Where;
+
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
@@ -176,6 +178,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     @JoinColumn(name = "createdBy")
     private User creator;
 
+    @Where(clause = "archived = false")
     @ManyToOne
     private EnvironmentView environment;
 
