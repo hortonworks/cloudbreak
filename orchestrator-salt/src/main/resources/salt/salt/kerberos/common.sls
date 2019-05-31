@@ -41,3 +41,15 @@ install_kerberos:
   file.managed:
     - source: salt://kerberos/config/krb5.conf-existing
     - template: jinja
+
+{%- if "manager_server" in grains.get('roles', []) %}
+
+add_default_realm_to_cm:
+  file.append:
+    - name: /etc/cloudera-scm-server/cm.settings
+    - makedirs: True
+    - template: jinja
+    - source: salt://kerberos/config/cm-krb.j2
+    - unless: grep "SECURITY_REALM" /etc/cloudera-scm-server/cm.settings
+
+{%- endif %}

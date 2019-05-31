@@ -1,0 +1,3 @@
+# Kerberos settings
+setsettings KRB_AUTH_ENABLE true
+setsettings SECURITY_REALM {{ salt['pillar.get']('kerberos:realm')|upper }}
