@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
@@ -36,10 +37,6 @@ import com.sequenceiq.datalake.repository.SdxClusterRepository;
 public class ProvisionerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProvisionerService.class);
-
-    private static final int DISK_SIZE = 100;
-
-    private static final int DISK_COUNT = 2;
 
     private String dummySshKey = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kc"
             + "UEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpj"
@@ -109,6 +106,7 @@ public class ProvisionerService {
 
             LOGGER.info("Call cloudbreak with stackrequest");
             try {
+                sdxCluster.setStackRequestToCloudbreak(JsonUtil.writeValueAsString(stackV4Request));
                 StackV4Response stackV4Response = cloudbreakClient.withCrn(sdxCluster.getInitiatorUserCrn())
                         .stackV4Endpoint()
                         .post(0L, stackV4Request);
@@ -118,7 +116,10 @@ public class ProvisionerService {
                 LOGGER.info("Sdx cluster updated");
             } catch (ClientErrorException e) {
                 LOGGER.info("Can not start provisioning", e);
-                throw new RuntimeException("Can not start provisioning, client error happened");
+                throw new RuntimeException("Can not start provisioning, client error happened", e);
+            } catch (JsonProcessingException e) {
+                LOGGER.info("Can not write stackrequest to json");
+                throw new RuntimeException("Can not write stackrequest to json", e);
             }
         }, () -> {
             throw new BadRequestException("Can not find SDX cluster by ID: " + id);
@@ -158,7 +159,12 @@ public class ProvisionerService {
 
     private StackV4Request setupStackRequestForCloudbreak(SdxCluster sdxCluster) {
 
-        String clusterTemplateJson = FileReaderUtils.readFileFromClasspathQuietly("sdx/" + "cluster-template.json");
+        String clusterTemplateJson;
+        if (sdxCluster.getStackRequest() == null) {
+            clusterTemplateJson = FileReaderUtils.readFileFromClasspathQuietly("sdx/" + "cluster-template.json");
+        } else {
+            clusterTemplateJson = sdxCluster.getStackRequest();
+        }
         try {
             StackV4Request stackRequest = JsonUtil.readValue(clusterTemplateJson, StackV4Request.class);
             stackRequest.setName(sdxCluster.getClusterName());
@@ -172,17 +178,33 @@ public class ProvisionerService {
             EnvironmentSettingsV4Request environment = new EnvironmentSettingsV4Request();
             environment.setName(sdxCluster.getEnvName());
             stackRequest.setEnvironment(environment);
-            StackAuthenticationV4Request stackAuthenticationV4Request = new StackAuthenticationV4Request();
-            stackAuthenticationV4Request.setPublicKey(dummySshKey);
-            stackRequest.setAuthentication(stackAuthenticationV4Request);
-            ClusterV4Request cluster = stackRequest.getCluster();
-            cluster.setBlueprintName(clusterDefinition);
-            cluster.setUserName("admin");
-            cluster.setPassword("admin123");
+            setupAuthentication(stackRequest);
+            setupClusterRequest(stackRequest);
             return stackRequest;
         } catch (IOException e) {
             LOGGER.error("Can not parse json to stack request");
             throw new IllegalStateException("Can not parse json to stack request", e);
+        }
+    }
+
+    private void setupAuthentication(StackV4Request stackRequest) {
+        if (stackRequest.getAuthentication() == null) {
+            StackAuthenticationV4Request stackAuthenticationV4Request = new StackAuthenticationV4Request();
+            stackAuthenticationV4Request.setPublicKey(dummySshKey);
+            stackRequest.setAuthentication(stackAuthenticationV4Request);
+        }
+    }
+
+    private void setupClusterRequest(StackV4Request stackRequest) {
+        ClusterV4Request cluster = stackRequest.getCluster();
+        if (cluster != null && cluster.getBlueprintName() == null) {
+            cluster.setBlueprintName(clusterDefinition);
+        }
+        if (cluster != null && cluster.getUserName() == null) {
+            cluster.setUserName("admin");
+        }
+        if (cluster != null && cluster.getPassword() == null) {
+            cluster.setPassword("admin123");
         }
     }
 }
