@@ -2,7 +2,7 @@
   "tags": {
     "shared_services_ready": true
   },
-  "description": "CDP 1.0 Shared Data Experience template with Atlas and Ranger",
+  "description": "CDP 1.0 Shared Data Experience template with Atlas, HMS, Ranger and other services they are dependent on",
   "blueprint": {
     "cdhVersion": "7.0.0",
     "displayName": "datalake",
@@ -22,22 +22,22 @@
           "hdfs-NAMENODE-BASE",
           "hdfs-NFSGATEWAY-BASE",
           "hdfs-SECONDARYNAMENODE-BASE",
-          "hive-GATEWAY-BASE",
           "hive-HIVEMETASTORE-BASE",
-          "hive-HIVESERVER2-BASE",
           "kafka-GATEWAY-BASE",
           "kafka-KAFKA_BROKER-BASE",
+          "knox-KNOX_GATEWAY-BASE",
           "ranger-RANGER_ADMIN-BASE",
           "ranger-RANGER_TAGSYNC-BASE",
           "ranger-RANGER_USERSYNC-BASE",
           "solr-SOLR_SERVER-BASE",
-          "spark_on_yarn-GATEWAY-BASE",
-          "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
-          "yarn-GATEWAY-BASE",
-          "yarn-JOBHISTORY-BASE",
-          "yarn-RESOURCEMANAGER-BASE",
-          "yarn-NODEMANAGER-BASE",
           "zookeeper-SERVER-BASE"
+        ]
+      },
+      {
+        "cardinality": 1,
+        "refName": "idbroker",
+        "roleConfigGroupsRefNames": [
+          "knox-IDBROKER-BASE"
         ]
       }
     ],
@@ -136,32 +136,6 @@
         "serviceType": "ATLAS"
       },
       {
-        "refName": "yarn",
-        "roleConfigGroups": [
-          {
-            "base": true,
-            "refName": "yarn-RESOURCEMANAGER-BASE",
-            "roleType": "RESOURCEMANAGER"
-          },
-          {
-            "base": true,
-            "refName": "yarn-NODEMANAGER-BASE",
-            "roleType": "NODEMANAGER"
-          },
-          {
-            "base": true,
-            "refName": "yarn-GATEWAY-BASE",
-            "roleType": "GATEWAY"
-          },
-          {
-            "base": true,
-            "refName": "yarn-JOBHISTORY-BASE",
-            "roleType": "JOBHISTORY"
-          }
-        ],
-        "serviceType": "YARN"
-      },
-      {
         "refName": "solr",
         "roleConfigGroups": [
           {
@@ -245,28 +219,6 @@
         "serviceType": "HDFS"
       },
       {
-        "refName": "spark_on_yarn",
-        "roleConfigGroups": [
-          {
-            "base": true,
-            "refName": "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
-            "roleType": "SPARK_YARN_HISTORY_SERVER"
-          },
-          {
-            "base": true,
-            "refName": "spark_on_yarn-GATEWAY-BASE",
-            "roleType": "GATEWAY"
-          }
-        ],
-        "serviceConfigs": [
-          {
-            "name": "spark-conf/spark-env.sh_service_safety_valve",
-            "value": "export HDP_VERSION=Hadoop 3.1.1.6.0.99.0-118"
-          }
-        ],
-        "serviceType": "SPARK_ON_YARN"
-      },
-      {
         "refName": "kafka",
         "roleConfigGroups": [
           {
@@ -293,24 +245,36 @@
         "serviceType": "KAFKA"
       },
       {
-        "refName": "hive",
+        "serviceType": "KNOX",
+        "refName": "knox",
         "roleConfigGroups": [
           {
             "base": true,
-            "refName": "hive-GATEWAY-BASE",
-            "roleType": "GATEWAY"
+            "refName": "knox-KNOX_GATEWAY-BASE",
+            "roleType": "KNOX_GATEWAY",
+            "configs": [
+              {
+                "name": "gateway_master_secret",
+                "value": "{{{ general.password }}}"
+              }
+            ]
           },
           {
             "base": true,
             "configs": [
               {
-                "name": "hs2_execution_engine",
-                "value": "spark"
+                "name": "idbroker_master_secret",
+                "value": "{{{ general.password }}}"
               }
             ],
-            "refName": "hive-HIVESERVER2-BASE",
-            "roleType": "HIVESERVER2"
-          },
+            "refName": "knox-IDBROKER-BASE",
+            "roleType": "IDBROKER"
+          }
+        ]
+      },
+      {
+        "refName": "hive",
+        "roleConfigGroups": [
           {
             "base": true,
             "refName": "hive-HIVEMETASTORE-BASE",
