@@ -1,7 +1,4 @@
 # These are Knox-specific configs
-{%- if "kerberized" in grains.get('roles', []) %}
-setsettings KRB_AUTH_ENABLE true
-{%- endif %}
 setsettings PROXYUSER_KNOX_GROUPS *
 setsettings PROXYUSER_KNOX_HOSTS *
 setsettings PROXYUSER_KNOX_PRINCIPAL knox
