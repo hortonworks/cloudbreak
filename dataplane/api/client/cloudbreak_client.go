@@ -12,6 +12,7 @@ import (
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/hortonworks/cb-cli/dataplane/api/client/autoscale"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v1distrox"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_audits"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_blueprints"
@@ -82,6 +83,8 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Cloudbreak
 	cli.Transport = transport
 
 	cli.Autoscale = autoscale.New(transport, formats)
+
+	cli.V1distrox = v1distrox.New(transport, formats)
 
 	cli.V4WorkspaceID = v4_workspace_id.New(transport, formats)
 
@@ -177,6 +180,8 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 type Cloudbreak struct {
 	Autoscale *autoscale.Client
 
+	V1distrox *v1distrox.Client
+
 	V4WorkspaceID *v4_workspace_id.Client
 
 	V4WorkspaceIDAudits *v4_workspace_id_audits.Client
@@ -233,6 +238,8 @@ func (c *Cloudbreak) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
 
 	c.Autoscale.SetTransport(transport)
+
+	c.V1distrox.SetTransport(transport)
 
 	c.V4WorkspaceID.SetTransport(transport)
 

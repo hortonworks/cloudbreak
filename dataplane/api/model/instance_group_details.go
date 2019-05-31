@@ -6,6 +6,8 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"strconv"
+
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -31,14 +33,8 @@ type InstanceGroupDetails struct {
 	// security group
 	SecurityGroup *SecurityGroupDetails `json:"securityGroup,omitempty"`
 
-	// volume count
-	VolumeCount int32 `json:"volumeCount,omitempty"`
-
-	// volume size
-	VolumeSize int32 `json:"volumeSize,omitempty"`
-
-	// volume type
-	VolumeType string `json:"volumeType,omitempty"`
+	// volumes
+	Volumes []*VolumeDetails `json:"volumes"`
 }
 
 // Validate validates this instance group details
@@ -46,6 +42,10 @@ func (m *InstanceGroupDetails) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateSecurityGroup(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateVolumes(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -68,6 +68,31 @@ func (m *InstanceGroupDetails) validateSecurityGroup(formats strfmt.Registry) er
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *InstanceGroupDetails) validateVolumes(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Volumes) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.Volumes); i++ {
+		if swag.IsZero(m.Volumes[i]) { // not required
+			continue
+		}
+
+		if m.Volumes[i] != nil {
+			if err := m.Volumes[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("volumes" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil

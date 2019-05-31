@@ -332,18 +332,18 @@ var (
 			Usage: "type of execution [pre-ambari-start, pre-termination, post-ambari-start, post-cluster-install]",
 		},
 	}
-	FlAmbariUserOptional = StringFlag{
+	FlCMUserOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:  "input-json-param-user",
-			Usage: "user of the cluster and ambari",
+			Usage: "user of the cluster and Cloudera Manager",
 		},
 	}
-	FlAmbariPasswordOptional = StringFlag{
+	FlCMPasswordOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:  "input-json-param-password",
-			Usage: "password of the cluster and ambari",
+			Usage: "password of the cluster and Cloudera Manager",
 		},
 	}
 	FlGroupName = StringFlag{

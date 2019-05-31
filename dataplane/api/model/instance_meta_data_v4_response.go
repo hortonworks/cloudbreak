@@ -7,6 +7,7 @@ package model
 
 import (
 	"encoding/json"
+	"strconv"
 
 	strfmt "github.com/go-openapi/strfmt"
 
@@ -39,6 +40,9 @@ type InstanceMetaDataV4Response struct {
 	// Enum: [GATEWAY GATEWAY_PRIMARY CORE]
 	InstanceType string `json:"instanceType,omitempty"`
 
+	// mounted volumes
+	MountedVolumes []*MountedVolumeV4Response `json:"mountedVolumes"`
+
 	// private ip of the insctance
 	PrivateIP string `json:"privateIp,omitempty"`
 
@@ -61,6 +65,10 @@ func (m *InstanceMetaDataV4Response) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateInstanceType(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateMountedVolumes(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -175,6 +183,31 @@ func (m *InstanceMetaDataV4Response) validateInstanceType(formats strfmt.Registr
 	// value enum
 	if err := m.validateInstanceTypeEnum("instanceType", "body", m.InstanceType); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *InstanceMetaDataV4Response) validateMountedVolumes(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.MountedVolumes) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.MountedVolumes); i++ {
+		if swag.IsZero(m.MountedVolumes[i]) { // not required
+			continue
+		}
+
+		if m.MountedVolumes[i] != nil {
+			if err := m.MountedVolumes[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("mountedVolumes" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil

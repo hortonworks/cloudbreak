@@ -108,8 +108,8 @@ func assembleStackRequest(c *cli.Context) *model.StackV4Request {
 		commonutils.LogErrorMessageAndExit("Name of the cluster must be set either in the template or with the --name command line option.")
 	}
 
-	ambariUser := c.String(fl.FlAmbariUserOptional.Name)
-	ambariPassword := c.String(fl.FlAmbariPasswordOptional.Name)
+	ambariUser := c.String(fl.FlCMUserOptional.Name)
+	ambariPassword := c.String(fl.FlCMPasswordOptional.Name)
 	if len(ambariUser) != 0 || len(ambariPassword) != 0 {
 		if req.Cluster != nil {
 			if len(ambariUser) != 0 {
