@@ -31,6 +31,18 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigConfigProvider 
 
     private static final String GATEWAY_PATH = "gateway_path";
 
+    private static final String SIGNING_KEYSTORE_NAME = "gateway_signing_keystore_name";
+
+    private static final String SIGNING_KEYSTORE_TYPE = "gateway_signing_keystore_type";
+
+    private static final String SIGNING_KEY_ALIAS = "gateway_signing_key_alias";
+
+    private static final String SIGNING_JKS = "signing.jks";
+
+    private static final String JKS = "JKS";
+
+    private static final String SIGNING_IDENTITY = "signing-identity";
+
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
         GatewayView gateway = source.getGatewayView();
@@ -42,6 +54,9 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigConfigProvider 
                 config.add(config(KNOX_MASTER_SECRET, masterSecret));
                 if (gateway != null) {
                     config.add(config(GATEWAY_PATH, gateway.getPath()));
+                    config.add(config(SIGNING_KEYSTORE_NAME, SIGNING_JKS));
+                    config.add(config(SIGNING_KEYSTORE_TYPE, JKS));
+                    config.add(config(SIGNING_KEY_ALIAS, SIGNING_IDENTITY));
                 }
                 return config;
             case KnoxRoles.IDBROKER:
