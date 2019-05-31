@@ -70,23 +70,23 @@ knox-master-secret:
   cmd.run:
     - name: /usr/{{ ambari.stack_type }}/current/knox-server/bin/knoxcli.sh create-master --master '{{ salt['pillar.get']('gateway:mastersecret') }}'
     - runas: knox
-    - creates: /usr/{{ ambari.stack_type }}/current/knox-server/data/security/master
+    - creates: /usr/{{ ambari.stack_type }}{{ gateway.knox_data_root }}/security/master
     - output_loglevel: quiet
 
 knox-create-cert:
   cmd.run:
     - name: /usr/{{ ambari.stack_type }}/current/knox-server/bin/knoxcli.sh create-cert --hostname {{ salt['grains.get']('gateway-address')[0] }}
     - runas: knox
-    - creates: /usr/{{ ambari.stack_type }}/current/knox-server/data/security/keystores/gateway.jks
+    - creates: /usr/{{ ambari.stack_type }}{{ gateway.knox_data_root }}/security/keystores/gateway.jks
 
-/usr/{{ ambari.stack_type }}/current/knox-server/data/security/keystores/signkey.pem:
+/usr/{{ ambari.stack_type }}{{ gateway.knox_data_root }}/security/keystores/signkey.pem:
   file.managed:
     - user: knox
     - group: hadoop
     - contents_pillar: gateway:signkey
     - makedirs: True
 
-/usr/{{ ambari.stack_type }}/current/knox-server/data/security/keystores/signcert.pem:
+/usr/{{ ambari.stack_type }}{{ gateway.knox_data_root }}/security/keystores/signcert.pem:
   file.managed:
     - user: knox
     - group: hadoop
@@ -98,25 +98,25 @@ knox-create-cert:
 
 knox-create-sign-pkcs12:
   cmd.run:
-    - name: cd /usr/{{ ambari.stack_type }}/current/knox-server/data/security/keystores/ && openssl pkcs12 -export -in signcert.pem -inkey signkey.pem -out signing.p12 -name signing-identity -password pass:{{ salt['pillar.get']('gateway:mastersecret') }}
+    - name: cd /usr/{{ ambari.stack_type }}{{ gateway.knox_data_root }}/security/keystores/ && openssl pkcs12 -export -in signcert.pem -inkey signkey.pem -out signing.p12 -name signing-identity -password pass:{{ salt['pillar.get']('gateway:mastersecret') }}
     - runas: knox
-    - creates: /usr/{{ ambari.stack_type }}/current/knox-server/data/security/keystores/signing.p12
+    - creates: /usr/{{ ambari.stack_type }}{{ gateway.knox_data_root }}/security/keystores/signing.p12
     - output_loglevel: quiet
 
 knox-create-sign-jks:
   cmd.run:
-    - name: cd /usr/{{ ambari.stack_type }}/current/knox-server/data/security/keystores/ && keytool -importkeystore -deststorepass {{ salt['pillar.get']('gateway:mastersecret') }} -destkeypass {{ salt['pillar.get']('gateway:mastersecret') }} -destkeystore signing.jks -srckeystore signing.p12 -srcstoretype PKCS12 -srcstorepass {{ salt['pillar.get']('gateway:mastersecret') }} -alias signing-identity
+    - name: cd /usr/{{ ambari.stack_type }}{{ gateway.knox_data_root }}/security/keystores/ && keytool -importkeystore -deststorepass {{ salt['pillar.get']('gateway:mastersecret') }} -destkeypass {{ salt['pillar.get']('gateway:mastersecret') }} -destkeystore signing.jks -srckeystore signing.p12 -srcstoretype PKCS12 -srcstorepass {{ salt['pillar.get']('gateway:mastersecret') }} -alias signing-identity
     - runas: knox
-    - creates: /usr/{{ ambari.stack_type }}/current/knox-server/data/security/keystores/signing.jks
+    - creates: /usr/{{ ambari.stack_type }}{{ gateway.knox_data_root }}/security/keystores/signing.jks
     - output_loglevel: quiet
 
 #knox-export-cert:
 #  cmd.run:
 #    - name: /usr/{{ ambari.stack_type }}/current/knox-server/bin/knoxcli.sh export-cert --type PEM
 #    - user: knox
-#    - creates: /usr/{{ ambari.stack_type }}/current/knox-server/data/security/keystores/gateway-identity.pem
+#    - creates: /usr/{{ ambari.stack_type }}{{ gateway.knox_data_root }}/security/keystores/gateway-identity.pem
 
- # openssl x509 -in /usr/{{ ambari.stack_type }}/current/knox-server/data/security/keystores/gateway-identity.pem -text -noout
+ # openssl x509 -in /usr/{{ ambari.stack_type }}{{ gateway.knox_data_root }}/security/keystores/gateway-identity.pem -text -noout
 
 {% if gateway.is_local_ldap %}
 
