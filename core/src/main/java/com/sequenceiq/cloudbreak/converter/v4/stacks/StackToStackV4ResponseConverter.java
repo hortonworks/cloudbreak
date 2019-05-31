@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes.Volume;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
@@ -131,11 +132,11 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
         });
     }
 
-    private void addVolumeToInstanceMetadata(InstanceMetaDataV4Response instanceMetaData, VolumeSetAttributes.Volume volume) {
+    private void addVolumeToInstanceMetadata(InstanceMetaDataV4Response instanceMetaData, Volume volume) {
         MountedVolumeV4Response mountedVolumeV4Response = new MountedVolumeV4Response();
         mountedVolumeV4Response.setVolumeId(volume.getId());
         mountedVolumeV4Response.setDevice(volume.getDevice());
-        mountedVolumeV4Response.setVolumeSize(volume.getSize().toString());
+        mountedVolumeV4Response.setVolumeSize(String.valueOf(volume.getSize()));
         mountedVolumeV4Response.setVolumeType(volume.getType());
         instanceMetaData.getMountedVolumes().add(mountedVolumeV4Response);
     }

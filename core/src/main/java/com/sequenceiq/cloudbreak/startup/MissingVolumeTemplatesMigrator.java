@@ -3,7 +3,8 @@ package com.sequenceiq.cloudbreak.startup;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -11,10 +12,12 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
@@ -22,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes.Volume;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
@@ -53,10 +57,9 @@ public class MissingVolumeTemplatesMigrator {
     public void run() {
         try {
             Set<Stack> liveStacks = stackService.getAllAliveWithInstanceGroups();
-            liveStacks.stream()
-                    .forEach(stack -> stack.getInstanceGroups().stream()
-                        .filter(ig -> ig.getTemplate().getVolumeTemplates().isEmpty())
-                        .forEach(ig -> addMountedVolumesToInstanceMetadata(stack, ig)));
+            liveStacks.forEach(stack -> stack.getInstanceGroups().stream()
+                    .filter(ig -> ig.getTemplate().getVolumeTemplates().isEmpty())
+                    .forEach(ig -> addMountedVolumesToInstanceMetadata(stack, ig)));
         } catch (Exception e) {
             LOGGER.error("Exception during missing volumes migration: ", e);
         }
@@ -80,8 +83,9 @@ public class MissingVolumeTemplatesMigrator {
         if (attributes.isPresent()) {
             VolumeSetAttributes volumeSetAttributes = attributes.get();
             try {
-                Set<String> volumeTypes = volumeSetAttributes.getVolumes().stream().map(VolumeSetAttributes.Volume::getType).collect(Collectors.toSet());
-                volumeTypes.stream().forEach(volumeType -> createVolumeTemplate(volumeSetAttributes, instanceGroup, volumeType));
+                Set<String> volumeTypes = volumeSetAttributes.getVolumeType() != null ? Sets.newHashSet(volumeSetAttributes.getVolumeType())
+                        : volumeSetAttributes.getVolumes().stream().map(Volume::getType).filter(Objects::nonNull).collect(Collectors.toSet());
+                volumeTypes.forEach(volumeType -> createVolumeTemplate(volumeSetAttributes, instanceGroup, volumeType));
                 LOGGER.info("Added volumetemplate to template in instancegroup {} in stack {}", instanceGroup.getGroupName(), stack.getName());
             } catch (Exception e) {
                 LOGGER.error("Exception occured during addition of volumetemplate to template in instancegroup "
@@ -93,26 +97,28 @@ public class MissingVolumeTemplatesMigrator {
     private void setDefaultVolumeTemplateForInstanceGroup(Stack stack, InstanceGroup instanceGroup) {
         try {
             VmRecommendations recommendations = cloudParameterService.getRecommendation(stack.cloudPlatform());
-            VmRecommendation recommendation = recommendations.getWorker();
-            PlatformDisks platformDisks = cloudParameterService.getDiskTypes();
-            Platform platform = platform(stack.cloudPlatform());
-            DiskTypes diskTypes = new DiskTypes(
-                    platformDisks.getDiskTypes().get(platform),
-                    platformDisks.getDefaultDisks().get(platform),
-                    platformDisks.getDiskMappings().get(platform),
-                    platformDisks.getDiskDisplayNames().get(platform));
-            VolumeParameterType volumeParameterType = VolumeParameterType.valueOf(recommendation.getVolumeType());
-            if (diskTypes.diskMapping().containsValue(volumeParameterType)) {
-                Optional<Map.Entry<String, VolumeParameterType>> recommendedVolumeName = diskTypes
-                        .diskMapping()
-                        .entrySet()
-                        .stream()
-                        .filter(entry -> volumeParameterType.equals(entry.getValue()))
-                        .findFirst();
-                if (recommendedVolumeName.isPresent()) {
-                    createDefaultVolumeTemplate(instanceGroup, recommendedVolumeName.get().getKey(),
-                            Math.toIntExact(recommendation.getVolumeCount()), Math.toIntExact(recommendation.getVolumeSizeGB()));
-                    LOGGER.info("Added default volumetemplate to template in instancegroup {} in stack {}", instanceGroup.getGroupName(), stack.getName());
+            if (recommendations != null) {
+                VmRecommendation recommendation = recommendations.getWorker();
+                PlatformDisks platformDisks = cloudParameterService.getDiskTypes();
+                Platform platform = platform(stack.cloudPlatform());
+                DiskTypes diskTypes = new DiskTypes(
+                        platformDisks.getDiskTypes().get(platform),
+                        platformDisks.getDefaultDisks().get(platform),
+                        platformDisks.getDiskMappings().get(platform),
+                        platformDisks.getDiskDisplayNames().get(platform));
+                VolumeParameterType volumeParameterType = VolumeParameterType.valueOf(recommendation.getVolumeType());
+                if (diskTypes.diskMapping().containsValue(volumeParameterType)) {
+                    Optional<Entry<String, VolumeParameterType>> recommendedVolumeName = diskTypes
+                            .diskMapping()
+                            .entrySet()
+                            .stream()
+                            .filter(entry -> volumeParameterType.equals(entry.getValue()))
+                            .findFirst();
+                    if (recommendedVolumeName.isPresent()) {
+                        createDefaultVolumeTemplate(instanceGroup, recommendedVolumeName.get().getKey(),
+                                Math.toIntExact(recommendation.getVolumeCount()), Math.toIntExact(recommendation.getVolumeSizeGB()));
+                        LOGGER.info("Added default volumetemplate to template in instancegroup {} in stack {}", instanceGroup.getGroupName(), stack.getName());
+                    }
                 }
             }
         } catch (Exception e) {
@@ -124,14 +130,21 @@ public class MissingVolumeTemplatesMigrator {
     private void createVolumeTemplate(VolumeSetAttributes volumeSetAttributes, InstanceGroup instanceGroup, String volumeType) {
         VolumeTemplate volumeTemplate = new VolumeTemplate();
         volumeTemplate.setVolumeType(volumeType);
-        volumeTemplate.setVolumeSize(volumeSetAttributes.getVolumes().stream()
-                .filter(volume -> volume.getType().contentEquals(volumeType))
-                .findFirst()
-                .get()
-                .getSize());
-        volumeTemplate.setVolumeCount(Math.toIntExact(volumeSetAttributes.getVolumes().stream()
-                .filter(volume -> volume.getType().contentEquals(volumeType))
-                .count()));
+        Optional<Volume> sizeByVolumesOpt = volumeSetAttributes.getVolumes().stream()
+                .filter(volume -> volumeType.equals(volume.getType()))
+                .findFirst();
+        if (sizeByVolumesOpt.isPresent()) {
+            volumeTemplate.setVolumeSize(sizeByVolumesOpt.get().getSize());
+        } else {
+            volumeTemplate.setVolumeSize(volumeSetAttributes.getVolumeSize());
+        }
+        if (StringUtils.isNoneEmpty(volumeSetAttributes.getVolumeType())) {
+            volumeTemplate.setVolumeCount(volumeSetAttributes.getVolumes().size());
+        } else {
+            volumeTemplate.setVolumeCount(Math.toIntExact(volumeSetAttributes.getVolumes().stream()
+                    .filter(volume -> volumeType.equals(volume.getType()))
+                    .count()));
+        }
         volumeTemplate.setTemplate(instanceGroup.getTemplate());
         volumeTemplateRepository.save(volumeTemplate);
     }

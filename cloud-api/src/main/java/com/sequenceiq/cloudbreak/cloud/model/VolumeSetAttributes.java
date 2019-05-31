@@ -24,13 +24,20 @@ public class VolumeSetAttributes {
 
     private String uuids;
 
+    private Integer volumeSize;
+
+    private String volumeType;
+
     @JsonCreator
     public VolumeSetAttributes(@JsonProperty("availabilityZone") String availabilityZone, @JsonProperty("deleteOnTermination") Boolean deleteOnTermination,
-            @JsonProperty("fstab") String fstab, @JsonProperty("volumes") List<Volume> volumes) {
+            @JsonProperty("fstab") String fstab, @JsonProperty("volumes") List<Volume> volumes, @JsonProperty("volumeSize") Integer volumeSize,
+            @JsonProperty("volumeType") String volumeType) {
         this.availabilityZone = availabilityZone;
         this.deleteOnTermination = deleteOnTermination;
         this.fstab = fstab;
         this.volumes = volumes;
+        this.volumeSize = volumeSize;
+        this.volumeType = volumeType;
     }
 
     public String getAvailabilityZone() {
@@ -71,6 +78,22 @@ public class VolumeSetAttributes {
 
     public String getUuids() {
         return uuids;
+    }
+
+    public Integer getVolumeSize() {
+        return volumeSize;
+    }
+
+    public void setVolumeSize(Integer volumeSize) {
+        this.volumeSize = volumeSize;
+    }
+
+    public String getVolumeType() {
+        return volumeType;
+    }
+
+    public void setVolumeType(String volumeType) {
+        this.volumeType = volumeType;
     }
 
     @JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, setterVisibility = NONE)
@@ -139,6 +162,10 @@ public class VolumeSetAttributes {
 
         private List<Volume> volumes;
 
+        private Integer volumeSize;
+
+        private String volumeType;
+
         public Builder withAvailabilityZone(String availabilityZone) {
             this.availabilityZone = availabilityZone;
             return this;
@@ -159,8 +186,18 @@ public class VolumeSetAttributes {
             return this;
         }
 
+        public Builder withVolumeSize(Integer volumeSize) {
+            this.volumeSize = volumeSize;
+            return this;
+        }
+
+        public Builder withVolumeType(String volumeType) {
+            this.volumeType = volumeType;
+            return this;
+        }
+
         public VolumeSetAttributes build() {
-            return new VolumeSetAttributes(availabilityZone, deleteOnTermination, fstab, volumes);
+            return new VolumeSetAttributes(availabilityZone, deleteOnTermination, fstab, volumes, volumeSize, volumeType);
         }
     }
 }

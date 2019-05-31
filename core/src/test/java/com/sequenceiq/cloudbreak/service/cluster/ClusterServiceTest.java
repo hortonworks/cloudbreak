@@ -161,7 +161,7 @@ public class ClusterServiceTest {
 
 
         Resource volumeSet = new Resource();
-        VolumeSetAttributes attributes = new VolumeSetAttributes("eu-west-1", Boolean.TRUE, "", List.of());
+        VolumeSetAttributes attributes = new VolumeSetAttributes("eu-west-1", Boolean.TRUE, "", List.of(), 100, "standard");
         attributes.setDeleteOnTermination(null);
         volumeSet.setAttributes(new Json(attributes));
         volumeSet.setInstanceId("instanceId1");
