@@ -28,8 +28,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBluepr
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
-import com.sequenceiq.cloudbreak.workspace.resource.ResourceAction;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.type.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.controller.StackCreatorService;
@@ -38,8 +36,6 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConver
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -50,6 +46,10 @@ import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.template.BlueprintUpdaterConnectors;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.workspace.resource.ResourceAction;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @Service
 public class StackCommonService {
@@ -231,7 +231,7 @@ public class StackCommonService {
         return response;
     }
 
-    @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
+    @PreAuthorize("hasRole('AUTOSCALE')")
     public CertificateV4Response getCertificate(Long stackId) {
         return tlsSecurityService.getCertificates(stackId);
     }

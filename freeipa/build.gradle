@@ -37,7 +37,6 @@ dependencies {
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-actuator'
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey'
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa'
-  implementation     group: 'org.springframework.security.oauth', name: 'spring-security-oauth2',      version: springOauthVersion
   implementation     group: 'io.projectreactor',         name: 'reactor-core',                         version: eventBusVersion
   implementation     group: 'io.projectreactor',         name: 'reactor-bus',                          version: eventBusVersion
   implementation     group: 'io.projectreactor',         name: 'reactor-stream',                       version: eventBusVersion

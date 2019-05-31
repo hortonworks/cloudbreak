@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.auth.security.authentication;
 
-import java.io.IOException;
-import java.util.Map;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -10,15 +7,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.jwt.Jwt;
-import org.springframework.security.jwt.JwtHelper;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.auth.security.CrnUser;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.util.MapTypeReference;
 
 @Service
 public class AuthenticatedUserService {
@@ -30,11 +22,8 @@ public class AuthenticatedUserService {
 
     public CloudbreakUser getCbUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof OAuth2Authentication) {
-            OAuth2Authentication oauth = (OAuth2Authentication) authentication;
-            if (oauth.getUserAuthentication() != null) {
-                return authenticationService.getCloudbreakUser(oauth);
-            }
+        if (authentication != null) {
+            return authenticationService.getCloudbreakUser(authentication);
         }
         return null;
     }
@@ -55,30 +44,15 @@ public class AuthenticatedUserService {
         return cbUser.getUserCrn();
     }
 
-    public String getTokenValue(OAuth2Authentication auth) {
-        return ((OAuth2AuthenticationDetails) auth.getDetails()).getTokenValue();
-    }
-
-    public static String getTenant(OAuth2Authentication oauth) {
-        Jwt decodedJwt = JwtHelper.decode(((OAuth2AuthenticationDetails) oauth.getDetails()).getTokenValue());
-        String tenant = "DEFAULT";
-        try {
-            Map<String, Object> claims = JsonUtil.readValue(decodedJwt.getClaims(), new MapTypeReference());
-            if (claims.get("tenant_name") != null) {
-                tenant = claims.get("tenant_name").toString();
-            }
-        } catch (IOException e) {
-            LOGGER.warn("Can not get claims from token", e);
-        }
-        LOGGER.debug("Tenant_name claim from jwt token: {}", tenant);
-        return tenant;
+    public String getTokenValue(Authentication auth) {
+        return ((CrnUser) auth.getPrincipal()).getUserCrn();
     }
 
     public String getServiceAccountId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof OAuth2Authentication) {
-            OAuth2Authentication oauth = (OAuth2Authentication) authentication;
-            return oauth.getName();
+        if (authentication instanceof CrnUser) {
+            CrnUser user = (CrnUser) authentication.getPrincipal();
+            return user.getTenant();
         }
         return "";
     }

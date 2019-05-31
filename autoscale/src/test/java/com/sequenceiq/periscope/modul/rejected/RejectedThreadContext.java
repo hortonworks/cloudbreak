@@ -18,6 +18,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 import org.springframework.test.context.TestPropertySource;
 
+import com.sequenceiq.cloudbreak.auth.altus.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.periscope.aspects.AmbariRequestLogging;
 import com.sequenceiq.periscope.monitor.AmbariAgentHealthMonitor;
@@ -56,7 +57,8 @@ public class RejectedThreadContext {
                             Clock.class
                     })
     )
-    @MockBean({Clock.class, ClusterService.class, AmbariClientProvider.class, CloudbreakClientConfiguration.class, MetricUtils.class, LoggerUtils.class})
+    @MockBean({Clock.class, ClusterService.class, AmbariClientProvider.class, CloudbreakClientConfiguration.class,
+            MetricUtils.class, LoggerUtils.class, InternalCrnBuilder.class})
     @EnableAsync
     public static class SpringConfig implements AsyncConfigurer {
 

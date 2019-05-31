@@ -3,9 +3,10 @@ package com.sequenceiq.it.cloudbreak.log;
 import java.io.IOException;
 import java.io.StringWriter;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.testng.Reporter;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Log {
     private Log() {

@@ -18,10 +18,11 @@ dependencies {
   compile project(':grpc-common')
 
   compile group: 'org.springframework.boot',            name: 'spring-boot-starter-jersey',     version: '2.0.3.RELEASE'
-  compile group: 'org.springframework.security.oauth',  name: 'spring-security-oauth2',         version: springOauthVersion
   compile group: 'org.springframework.security',        name: 'spring-security-jwt',            version: '1.0.8.RELEASE'
+  compile group: 'org.springframework.security',        name: 'spring-security-core',           version: springFrameworkVersion
   compile group: 'org.bouncycastle',                    name: 'bcprov-jdk15on',                 version: bouncycastleVersion
   compile group: 'org.bouncycastle',                    name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
+
   implementation group: 'org.glassfish.jersey.core',    name: 'jersey-client',                  version: jerseyCoreVersion
   implementation group: 'org.glassfish.jersey.media',   name: 'jersey-media-multipart',         version: jerseyCoreVersion
   implementation group: 'org.apache.httpcomponents',    name: 'httpclient',                     version: httpClientVersion

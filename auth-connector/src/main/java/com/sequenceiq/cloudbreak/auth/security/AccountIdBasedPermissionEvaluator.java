@@ -10,7 +10,6 @@ import javax.inject.Inject;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticationService;
@@ -31,12 +30,11 @@ public class AccountIdBasedPermissionEvaluator implements PermissionEvaluator {
         if (target == null) {
             return false;
         }
-        OAuth2Authentication oauth = (OAuth2Authentication) authentication;
-        if (oauth.getUserAuthentication() == null) {
+        if (authentication == null) {
             return false;
         }
 
-        CloudbreakUser user = authService.getCloudbreakUser(oauth);
+        CloudbreakUser user = authService.getCloudbreakUser(authentication);
         Collection<?> targets = target instanceof Collection ? (Collection<?>) target : Collections.singleton(target);
         return targets.stream().allMatch(t -> hasPermission(user, t));
     }
