@@ -15,13 +15,13 @@ import org.springframework.stereotype.Controller;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.CoreApi;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.info.CloudbreakInfoV4Endpoint;
 import com.sequenceiq.cloudbreak.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.v4.AuditEventV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.AutoscaleV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.BlueprintUtilV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.BlueprintV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.CloudbreakInfoV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.ClusterTemplateV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.CredentialV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.DatabaseV4Controller;
@@ -78,7 +78,7 @@ public class EndpointConfig extends ResourceConfig {
             AutoscaleV4Controller.class,
             ManagementPackV4Controller.class,
             StackV4Controller.class,
-            CloudbreakInfoV4Endpoint.class,
+            CloudbreakInfoV4Controller.class,
             DistroXV1Controller.class
     );
 
@@ -115,7 +115,7 @@ public class EndpointConfig extends ResourceConfig {
         swaggerConfig.setSchemes(new String[]{"http", "https"});
         swaggerConfig.setBasePath(CoreApi.API_ROOT_CONTEXT);
         swaggerConfig.setLicenseUrl("https://github.com/hortonworks/cloudbreak/blob/master/LICENSE");
-        swaggerConfig.setResourcePackage("com.sequenceiq.cloudbreak.api");
+        swaggerConfig.setResourcePackage("com.sequenceiq.cloudbreak.api,com.sequenceiq.distrox.api");
         swaggerConfig.setScan(true);
         swaggerConfig.setContact("https://hortonworks.com/contact-sales/");
         swaggerConfig.setPrettyPrint(true);
