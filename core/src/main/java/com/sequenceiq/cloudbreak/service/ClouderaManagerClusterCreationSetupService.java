@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
@@ -31,13 +30,13 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
-import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @Service
 public class ClouderaManagerClusterCreationSetupService {
@@ -61,19 +60,19 @@ public class ClouderaManagerClusterCreationSetupService {
             List<Component> stackCdhRepoConfig,
             Optional<Component> stackImageComponent) throws IOException {
         List<ClusterComponent> components = new ArrayList<>();
-        ClouderaManagerRepositoryV4Request repoDetailsJson = Optional.ofNullable(
-                request.getCm()).map(ClouderaManagerV4Request::getRepository).orElse(null);
+        String blueprintCdhVersion = blueprintUtils.getCDHStackVersion(JsonUtil.readTree(cluster.getBlueprint().getBlueprintText()));
+        Optional<ClouderaManagerRepositoryV4Request> cmRepoRequest = Optional.ofNullable(request.getCm()).map(ClouderaManagerV4Request::getRepository);
         ClusterComponent cmRepoConfig;
-        if (repoDetailsJson == null) {
-            cmRepoConfig = determineCmRepoConfig(stackClouderaManagerRepoConfig, stackImageComponent, cluster);
+        if (cmRepoRequest.isEmpty()) {
+            cmRepoConfig = determineCmRepoConfig(stackClouderaManagerRepoConfig, stackImageComponent, cluster, blueprintCdhVersion);
             components.add(cmRepoConfig);
         } else {
             cmRepoConfig = cluster.getComponents().stream().
                     filter(component -> ComponentType.CM_REPO_DETAILS.equals(component.getComponentType())).findFirst().orElse(null);
         }
-        List<ClouderaManagerProductV4Request> products = Optional.ofNullable(request.getCm()).map(ClouderaManagerV4Request::getProducts).orElse(null);
-        if (products == null || products.isEmpty()) {
-            List<ClusterComponent> cdhProductRepoConfig = determineCdhRepoConfig(cluster, stackCdhRepoConfig, stackImageComponent);
+        Optional<List<ClouderaManagerProductV4Request>> products = Optional.ofNullable(request.getCm()).map(ClouderaManagerV4Request::getProducts);
+        if (products.isEmpty() || products.get().isEmpty()) {
+            List<ClusterComponent> cdhProductRepoConfig = determineCdhRepoConfig(cluster, stackCdhRepoConfig, stackImageComponent, blueprintCdhVersion);
             components.addAll(cdhProductRepoConfig);
         }
         components.addAll(cluster.getComponents());
@@ -104,14 +103,11 @@ public class ClouderaManagerClusterCreationSetupService {
     }
 
     private ClusterComponent determineCmRepoConfig(Optional<Component> stackClouderaManagerRepoConfig,
-            Optional<Component> stackImageComponent, Cluster cluster) throws IOException {
+            Optional<Component> stackImageComponent, Cluster cluster, String cdhStackVersion) throws IOException {
         Json json;
-        if (Objects.isNull(stackClouderaManagerRepoConfig) || !stackClouderaManagerRepoConfig.isPresent()) {
-            JsonNode root = JsonUtil.readTree(cluster.getBlueprint().getBlueprintText());
-            String cdhStackVersion = blueprintUtils.getCDHStackVersion(root);
-            String cdh = StackType.CDH.name();
+        if (Objects.isNull(stackClouderaManagerRepoConfig) || stackClouderaManagerRepoConfig.isEmpty()) {
             ClouderaManagerRepo clouderaManagerRepo = defaultClouderaManagerRepoService.getDefault(
-                    getOsType(stackImageComponent), cdh, cdhStackVersion);
+                    getOsType(stackImageComponent), StackType.CDH.name(), cdhStackVersion);
             if (clouderaManagerRepo == null) {
                 throw new BadRequestException(String.format("Couldn't determine Cloudera Manager repo for the stack: %s", cluster.getStack().getName()));
             }
@@ -123,28 +119,27 @@ public class ClouderaManagerClusterCreationSetupService {
     }
 
     private List<ClusterComponent> determineCdhRepoConfig(Cluster cluster, List<Component> stackCdhRepoConfig,
-            Optional<Component> stackImageComponent) throws IOException {
+            Optional<Component> stackImageComponent, String blueprintCdhVersion) throws IOException {
         if (Objects.isNull(stackCdhRepoConfig) || stackCdhRepoConfig.isEmpty()) {
             String osType = getOsType(stackImageComponent);
 
-            Map.Entry<String, DefaultCDHInfo> defaultCDHInfoEntry = defaultCDHEntries.
-                    getEntries().
-                    entrySet().
-                    stream().
-                    filter(entry -> Objects.nonNull(entry.getValue().getRepo().getStack().get(osType))).
-                    max(DefaultCDHEntries.CDH_ENTRY_COMPARATOR).
-                    orElseThrow(notFound("Default Product Info with OS type:", osType));
-            ClouderaManagerProduct cmProduct = new ClouderaManagerProduct();
-            DefaultCDHInfo defaultCDHInfo = defaultCDHInfoEntry.getValue();
+            DefaultCDHInfo defaultCDHInfo = null;
+            if (blueprintCdhVersion != null) {
+                defaultCDHInfo = defaultCDHEntries.getEntries().get(blueprintCdhVersion);
+            }
+            if (defaultCDHInfo == null) {
+                defaultCDHInfo = defaultCDHEntries.getEntries().entrySet().stream()
+                        .filter(entry -> Objects.nonNull(entry.getValue().getRepo().getStack().get(osType)))
+                        .max(DefaultCDHEntries.CDH_ENTRY_COMPARATOR)
+                        .orElseThrow(notFound("Default Product Info with OS type:", osType))
+                        .getValue();
+            }
             Map<String, String> stack = defaultCDHInfo.getRepo().getStack();
-            cmProduct.
-                    withVersion(defaultCDHInfo.getVersion()).
-                    withName(stack.get("repoid").split("-")[0]).
-                    withParcel(stack.get(osType));
-            ClusterComponent product = new ClusterComponent(ComponentType.CDH_PRODUCT_DETAILS, new Json(cmProduct), cluster);
-            List<ClusterComponent> productList = new ArrayList<>();
-            productList.add(product);
-            return productList;
+            ClouderaManagerProduct cmProduct = new ClouderaManagerProduct()
+                    .withVersion(defaultCDHInfo.getVersion())
+                    .withName(stack.get("repoid").split("-")[0])
+                    .withParcel(stack.get(osType));
+            return List.of(new ClusterComponent(ComponentType.CDH_PRODUCT_DETAILS, new Json(cmProduct), cluster));
         } else {
             return stackCdhRepoConfig.stream().
                     map(Component::getAttributes).
