@@ -17,6 +17,9 @@ import (
 // swagger:model ProxyResponse
 type ProxyResponse struct {
 
+	// proxy configuration id for the cluster
+	Crn string `json:"crn,omitempty"`
+
 	// description of the resource
 	// Max Length: 1000
 	// Min Length: 0
@@ -28,9 +31,6 @@ type ProxyResponse struct {
 	// Min Length: 1
 	// Pattern: (^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$)
 	Host *string `json:"host"`
-
-	// proxy configuration id for the cluster
-	ID string `json:"id,omitempty"`
 
 	// Name of the proxy configuration resource
 	// Required: true

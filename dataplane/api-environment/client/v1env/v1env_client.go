@@ -25,36 +25,6 @@ type Client struct {
 }
 
 /*
-AttachResourcesToEnvironmentV1 attaches resources to an environment
-
-Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.
-*/
-func (a *Client) AttachResourcesToEnvironmentV1(params *AttachResourcesToEnvironmentV1Params) (*AttachResourcesToEnvironmentV1OK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewAttachResourcesToEnvironmentV1Params()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "attachResourcesToEnvironmentV1",
-		Method:             "PUT",
-		PathPattern:        "/v1/env/{name}/attach",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &AttachResourcesToEnvironmentV1Reader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*AttachResourcesToEnvironmentV1OK), nil
-
-}
-
-/*
 ChangeCredentialInEnvironmentV1 changes the credential of the environment and the clusters in the environment
 
 Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.
@@ -145,32 +115,32 @@ func (a *Client) DeleteEnvironmentV1(params *DeleteEnvironmentV1Params) (*Delete
 }
 
 /*
-DetachResourcesFromEnvironmentV1 detaches resources from an environment
+DeleteEnvironments deletes multiple environment only possible if no cluster is running in the environments
 
 Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.
 */
-func (a *Client) DetachResourcesFromEnvironmentV1(params *DetachResourcesFromEnvironmentV1Params) (*DetachResourcesFromEnvironmentV1OK, error) {
+func (a *Client) DeleteEnvironments(params *DeleteEnvironmentsParams) (*DeleteEnvironmentsOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDetachResourcesFromEnvironmentV1Params()
+		params = NewDeleteEnvironmentsParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "detachResourcesFromEnvironmentV1",
-		Method:             "PUT",
-		PathPattern:        "/v1/env/{name}/detach",
+		ID:                 "deleteEnvironments",
+		Method:             "DELETE",
+		PathPattern:        "/v1/env",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DetachResourcesFromEnvironmentV1Reader{formats: a.formats},
+		Reader:             &DeleteEnvironmentsReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*DetachResourcesFromEnvironmentV1OK), nil
+	return result.(*DeleteEnvironmentsOK), nil
 
 }
 

@@ -42,6 +42,18 @@ func init() {
 					}
 				},
 			},
+			{
+				Name:   "describe",
+				Usage:  "describes a FreeIpa cluster",
+				Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,
+				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentName).AddAuthenticationFlags().Build(),
+				Action: freeipa.DescribeFreeIpa,
+				BashComplete: func(c *cli.Context) {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentName).AddAuthenticationFlags().Build() {
+						fl.PrintFlagCompletion(f)
+					}
+				},
+			},
 		},
 	})
 }

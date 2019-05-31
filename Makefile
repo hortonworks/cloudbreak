@@ -134,7 +134,7 @@ _init-swagger-generation-redbeams:
 _init-swagger-generation-environment:
 	rm -rf dataplane/api-environment/client dataplane/api-environment/model
 	rm -f build/swagger.json
-	curl -sL http://$(ENVIRONMENT_IP):$(ENVIRONMENT_PORT)/env/api/swagger.json -o build/swagger.json
+	curl -sL http://$(ENVIRONMENT_IP):$(ENVIRONMENT_PORT)/environmentservice/api/swagger.json -o build/swagger.json
 
 generate-swagger: _init-swagger-generation
 	swagger generate client -f build/swagger.json -c client -m model -t dataplane/api
@@ -157,7 +157,7 @@ generate-swagger-redbeams:
 
 generate-swagger-environment:
 	rm -rf dataplane/api-environment/client dataplane/api-environment/model
-	swagger generate client -f http://$(ENVIRONMENT_IP):$(ENVIRONMENT_PORT)/env/api/swagger.json -c client -m model -t dataplane/api-environment
+	swagger generate client -f http://$(ENVIRONMENT_IP):$(ENVIRONMENT_PORT)/environmentservice/api/swagger.json -c client -m model -t dataplane/api-environment
 
 generate-swagger-docker: _init-swagger-generation
 	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -v ${PWD}/build/swagger.json:${PWD}/build/swagger.json  -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:v0.17.2 \

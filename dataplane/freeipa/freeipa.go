@@ -4,14 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hortonworks/cb-cli/dataplane/api-freeipa/client/v1freeipa"
 	freeIpaModel "github.com/hortonworks/cb-cli/dataplane/api-freeipa/model"
-	env "github.com/hortonworks/cb-cli/dataplane/env"
+	"github.com/hortonworks/cb-cli/dataplane/env"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
-	"github.com/hortonworks/dp-cli-common/utils"
 	commonutils "github.com/hortonworks/dp-cli-common/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -25,7 +26,7 @@ func CreateFreeIpa(c *cli.Context) {
 	freeIpaClient := ClientFreeIpa(*oauth.NewFreeIpaClientFromContext(c)).FreeIpa
 	resp, err := freeIpaClient.V1freeipa.CreateFreeIpaV1(v1freeipa.NewCreateFreeIpaV1Params().WithBody(FreeIpaRequest))
 	if err != nil {
-		utils.LogErrorAndExit(err)
+		commonutils.LogErrorAndExit(err)
 	}
 	freeIpaCluster := resp.Payload
 	if freeIpaCluster.Name != nil {
@@ -36,12 +37,232 @@ func CreateFreeIpa(c *cli.Context) {
 func DeleteFreeIpa(c *cli.Context) {
 	defer commonutils.TimeTrack(time.Now(), "delete FreeIpa cluster")
 	envName := c.String(fl.FlEnvironmentName.Name)
+	envCrn := env.GetEnvirontmentCrnByName(c, envName)
 	freeIpaClient := ClientFreeIpa(*oauth.NewFreeIpaClientFromContext(c)).FreeIpa
-	err := freeIpaClient.V1freeipa.DeleteFreeIpaByEnvironmentV1(v1freeipa.NewDeleteFreeIpaByEnvironmentV1Params().WithEnvironment(&envName))
+	err := freeIpaClient.V1freeipa.DeleteFreeIpaByEnvironmentV1(v1freeipa.NewDeleteFreeIpaByEnvironmentV1Params().WithEnvironment(&envCrn))
 	if err != nil {
-		utils.LogErrorAndExit(err)
+		commonutils.LogErrorAndExit(err)
 	}
 	log.Infof("[deleteFreeIpa] FreeIpa cluster delete requested in enviornment %s", envName)
+}
+
+func DescribeFreeIpa(c *cli.Context) {
+	defer commonutils.TimeTrack(time.Now(), "describe FreeIpa cluster")
+	envName := c.String(fl.FlEnvironmentName.Name)
+	envCrn := env.GetEnvirontmentCrnByName(c, envName)
+	freeIpaClient := ClientFreeIpa(*oauth.NewFreeIpaClientFromContext(c)).FreeIpa
+	resp, err := freeIpaClient.V1freeipa.GetFreeIpaByEnvironmentV1(v1freeipa.NewGetFreeIpaByEnvironmentV1Params().WithEnvironment(&envCrn))
+	if err != nil {
+		commonutils.LogErrorAndExit(err)
+	}
+	log.Infof("[describeFreeIpa] FreeIpa cluster describe requested in enviornment %s", envName)
+	output := commonutils.Output{Format: c.String(fl.FlOutputOptional.Name)}
+	iparesp := resp.Payload
+	freeIpaOut := freeIpaOutDescibe{
+		&freeIpa{
+			EnvironmentCrn: *iparesp.EnvironmentCrn,
+			Name:           *iparesp.Name,
+			Placement: &placement{
+				AvailabilityZone: iparesp.Placement.AvailabilityZone,
+				Region:           *iparesp.Placement.Region,
+			},
+			InstanceGroups: convertInstanceGroupModel(iparesp.InstanceGroups),
+			Authentication: &authentication{
+				PublicKey:     iparesp.Authentication.PublicKey,
+				PublicKeyID:   iparesp.Authentication.PublicKeyID,
+				LoginUserName: iparesp.Authentication.LoginUserName,
+			},
+			Image: &image{
+				Catalog: iparesp.Image.Catalog,
+				ID:      iparesp.Image.ID,
+				Os:      iparesp.Image.Os,
+			},
+			FreeIpaServer: &freeIpaServer{
+				Domain:   *iparesp.FreeIpa.Domain,
+				Hostname: *iparesp.FreeIpa.Hostname,
+			},
+		},
+		*iparesp.EnvironmentCrn,
+	}
+	if iparesp.Network.Aws != nil {
+		freeIpaOut.Network = &network{
+			Aws: &awsNetwork{
+				VpcID:    iparesp.Network.Aws.VpcID,
+				SubnetID: iparesp.Network.Aws.SubnetID,
+			},
+		}
+	}
+	if iparesp.Network.Azure != nil {
+		freeIpaOut.Network = &network{
+			Azure: &azureNetwork{
+				NetworkID:         iparesp.Network.Azure.NetworkID,
+				NoFirewallRules:   strconv.FormatBool(iparesp.Network.Azure.NoFirewallRules),
+				NoPublicIP:        strconv.FormatBool(iparesp.Network.Azure.NoPublicIP),
+				ResourceGroupName: iparesp.Network.Azure.ResourceGroupName,
+				SubnetID:          iparesp.Network.Azure.SubnetID,
+			},
+		}
+	}
+	output.Write(header, &freeIpaOut)
+}
+
+func (f *freeIpaOutDescibe) DataAsStringArray() []string {
+	return append(f.freeIpa.DataAsStringArray(), f.ID)
+}
+
+func (f *freeIpa) DataAsStringArray() []string {
+	var instanceGroups string
+	for _, ig := range f.InstanceGroups {
+		var group string
+		group += fmt.Sprintf("Name: %s\n", ig.Name)
+		group += fmt.Sprintf("InstanceTemplate: %s\n", ig.InstanceTemplate.DataAsString())
+		group += fmt.Sprintf("SecurityGroup: %s\n", ig.SecurityGroup.DataAsString())
+		group += fmt.Sprintf("NodeCount: %s\n", ig.NodeCount)
+		group += fmt.Sprint("MetaData:\n")
+		for _, metadata := range ig.MetaData {
+			group += fmt.Sprintf("%s\n", metadata.DataAsString())
+		}
+		instanceGroups += fmt.Sprintf("%s\n\n", group)
+	}
+	freeIpaArr := []string{f.EnvironmentCrn, f.Name}
+	freeIpaArr = append(freeIpaArr, f.Placement.DataAsString())
+	freeIpaArr = append(freeIpaArr, f.Authentication.DataAsString())
+	freeIpaArr = append(freeIpaArr, f.Network.DataAsString())
+	freeIpaArr = append(freeIpaArr, f.Image.DataAsString())
+	freeIpaArr = append(freeIpaArr, f.FreeIpaServer.DataAsString())
+	freeIpaArr = append(freeIpaArr, instanceGroups)
+	return freeIpaArr
+}
+
+func (it *instanceTemplate) DataAsString() string {
+	var template string
+	template += fmt.Sprintf("  InstanceType: %s\n", it.InstanceType)
+	template += fmt.Sprint("  Volumes:\n")
+	for _, vol := range it.AttachedVolumes {
+		template += fmt.Sprintf("    Count: %s\n", vol.Count)
+		template += fmt.Sprintf("    VolumeType: %s\n", vol.VolumeType)
+		template += fmt.Sprintf("    Size: %s\n\n", vol.Size)
+	}
+	return template
+}
+
+func (sg *securityGroup) DataAsString() string {
+	var group string
+	group += fmt.Sprintf("  SecurityGroupIDs: %s\n", strings.Join(sg.SecurityGroupIDs, ", "))
+	group += fmt.Sprintf("  SecurityRules:\n")
+	for _, rules := range sg.SecurityRules {
+		group += fmt.Sprintf("    Subnet: %s\n", rules.Subnet)
+		group += fmt.Sprintf("    Ports: %s\n", strings.Join(rules.Ports, ", "))
+		group += fmt.Sprintf("    Protocol: %s\n", rules.Protocol)
+		group += fmt.Sprintf("    Modifiable: %s\n", rules.Modifiable)
+	}
+	return group
+}
+
+func (m *metadata) DataAsString() string {
+	var md string
+	md += fmt.Sprintf("  DiscoveryFQDN: %s\n", m.DiscoveryFQDN)
+	md += fmt.Sprintf("  InstanceGroup: %s\n", m.InstanceGroup)
+	md += fmt.Sprintf("  InstanceID: %s\n", m.InstanceID)
+	md += fmt.Sprintf("  InstanceStatus: %s\n", m.InstanceStatus)
+	md += fmt.Sprintf("  InstanceType: %s\n", m.InstanceType)
+	md += fmt.Sprintf("  PrivateIP: %s\n", m.PrivateIP)
+	md += fmt.Sprintf("  PublicIP: %s\n", m.PublicIP)
+	md += fmt.Sprintf("  SSHPort: %s\n", m.SSHPort)
+	md += fmt.Sprintf("  State: %s\n", m.State)
+	return md
+}
+
+func (p *placement) DataAsString() string {
+	var plc string
+	plc += fmt.Sprintf("  AvailabilityZone: %s\n", p.AvailabilityZone)
+	plc += fmt.Sprintf("  Region: %s\n", p.Region)
+	return plc
+}
+
+func (a *authentication) DataAsString() string {
+	var auth string
+	auth += fmt.Sprintf("  PublicKey: %s\n", a.PublicKey)
+	auth += fmt.Sprintf("  PublicKeyID: %s\n", a.PublicKeyID)
+	auth += fmt.Sprintf("  PublicKey: %s\n", a.PublicKey)
+	return auth
+}
+
+func (n *network) DataAsString() string {
+	var nw string
+	if n.Aws != nil {
+		nw += fmt.Sprint("  Aws:\n")
+		nw += fmt.Sprintf("    VpcID: %s\n", n.Aws.VpcID)
+		nw += fmt.Sprintf("    SubnetID: %s\n", n.Aws.SubnetID)
+	}
+	if n.Azure != nil {
+		nw += fmt.Sprint("  Azure:\n")
+		nw += fmt.Sprintf("    NetworkID: %s\n", n.Azure.NetworkID)
+		nw += fmt.Sprintf("    NoFirewallRules: %s\n", n.Azure.NoFirewallRules)
+		nw += fmt.Sprintf("    NoPublicIP: %s\n", n.Azure.NoPublicIP)
+		nw += fmt.Sprintf("    ResourceGroupName: %s\n", n.Azure.ResourceGroupName)
+		nw += fmt.Sprintf("    SubnetID: %s\n", n.Azure.SubnetID)
+	}
+	return nw
+}
+
+func (i *image) DataAsString() string {
+	var img string
+	img += fmt.Sprintf("  Catalog: %s\n", i.Catalog)
+	img += fmt.Sprintf("  ID: %s\n", i.ID)
+	img += fmt.Sprintf("  Os: %s\n", i.Os)
+	return img
+}
+
+func (f *freeIpaServer) DataAsString() string {
+	var srv string
+	srv += fmt.Sprintf("  Domain: %s\n", f.Domain)
+	srv += fmt.Sprintf("  Hostname: %s\n", f.Hostname)
+	return srv
+}
+
+func convertInstanceGroupModel(igmodels []*freeIpaModel.InstanceGroupV1Response) []instanceGroup {
+	var instanceGroups []instanceGroup
+	for _, ig := range igmodels {
+		instanceGroups = append(instanceGroups, instanceGroup{
+			InstanceTemplate: &instanceTemplate{
+				InstanceType:    ig.InstanceTemplate.InstanceType,
+				AttachedVolumes: convertAttachedVolumesModel(ig.InstanceTemplate.AttachedVolumes),
+			},
+			SecurityGroup: &securityGroup{
+				SecurityGroupIDs: ig.SecurityGroup.SecurityGroupIds,
+				SecurityRules:    converSecurityRulesModel(ig.SecurityGroup.SecurityRules),
+			},
+			Name:      *ig.Name,
+			NodeCount: fmt.Sprint(*ig.NodeCount),
+		})
+	}
+	return instanceGroups
+}
+
+func convertAttachedVolumesModel(volmodels []*freeIpaModel.VolumeV1Response) []volume {
+	var volumes []volume
+	for _, vol := range volmodels {
+		volumes = append(volumes, volume{
+			Count:      fmt.Sprint(vol.Count),
+			VolumeType: vol.Type,
+			Size:       fmt.Sprint(*vol.Size),
+		})
+	}
+	return volumes
+}
+
+func converSecurityRulesModel(rulemodel []*freeIpaModel.SecurityRuleV1Response) []securityRule {
+	var securityRules []securityRule
+	for _, rule := range rulemodel {
+		securityRules = append(securityRules, securityRule{
+			Subnet:     *rule.Subnet,
+			Ports:      rule.Ports,
+			Protocol:   *rule.Protocol,
+			Modifiable: strconv.FormatBool(rule.Modifiable),
+		})
+	}
+	return securityRules
 }
 
 func assembleFreeIpaRequest(c *cli.Context) *freeIpaModel.CreateFreeIpaV1Request {
