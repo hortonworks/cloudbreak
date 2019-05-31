@@ -10,15 +10,16 @@ import org.springframework.stereotype.Component;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 @Component
-public class HiveMetastoreConfigProvider implements CmTemplateComponentConfigProvider {
+public class HiveMetastoreConfigProvider extends AbstractRoleConfigConfigProvider {
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(TemplatePreparationObject templatePreparationObject) {
@@ -48,6 +49,13 @@ public class HiveMetastoreConfigProvider implements CmTemplateComponentConfigPro
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return getFirstRDSConfigOptional(source).isPresent() && cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes());
+    }
+
+    @Override
+    protected List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
+        return List.of(
+                config("metastore_canary_health_enabled", Boolean.FALSE.toString())
+        );
     }
 
     private Optional<RDSConfig> getFirstRDSConfigOptional(TemplatePreparationObject source) {
