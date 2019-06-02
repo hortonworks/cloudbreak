@@ -24,6 +24,14 @@ echo -e "\n\033[1;96m--- Start cloudbreak\033[0m\n"
 cd $INTEGCB_LOCATION
 ./cbd regenerate
 ./cbd start-wait identity commondb vault cloudbreak environment periscope freeipa redbeams datalake
+
+if [ $? -ne 0 ]; then
+    echo ERROR: Failed to bring up all the necessary services! Process is about to terminate.
+    ./cbd kill
+    .deps/bin/docker-compose down
+    exit 1
+fi
+
 cd ..
 
 PUBLIC_IP=`echo $DOCKER_HOST | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'`
