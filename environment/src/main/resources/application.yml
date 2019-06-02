@@ -1,4 +1,4 @@
-server.servlet.context-path: "/environmentservice"
+server.servlet.context-path: "/environmentserviceasdasd"
 
 server.port: 8088
 

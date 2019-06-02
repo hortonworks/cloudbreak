@@ -24,6 +24,14 @@ echo -e "\n\033[1;96m--- Start cloudbreak\033[0m\n"
 cd $INTEGCB_LOCATION
 ./cbd regenerate
 ./cbd start-wait identity commondb vault cloudbreak environment periscope freeipa redbeams datalake
+
+if [ $? -gt 0 ]; then
+    ./cbd kill
+    .deps/bin/docker-compose down
+    echo ERROR: Failed to bring up all the necessary containers
+    exit 1
+fi
+
 cd ..
 
 docker rm -f cbreak_environment_1
