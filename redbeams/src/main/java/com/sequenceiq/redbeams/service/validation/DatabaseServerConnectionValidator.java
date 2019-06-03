@@ -1,14 +1,14 @@
 package com.sequenceiq.redbeams.service.validation;
 
-import org.springframework.stereotype.Component;
-import org.springframework.validation.Errors;
-import org.springframework.validation.Validator;
-
 import java.util.Optional;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.util.DatabaseCommon;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
+
+import com.sequenceiq.cloudbreak.validation.DatabaseCommon;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 
 @Component
