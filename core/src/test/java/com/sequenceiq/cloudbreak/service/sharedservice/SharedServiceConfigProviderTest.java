@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -57,9 +56,6 @@ public class SharedServiceConfigProviderTest {
 
     @Mock
     private Workspace workspace;
-
-    @Mock
-    private LdapConfig ldapConfig;
 
     @Mock
     private Blueprint blueprint;

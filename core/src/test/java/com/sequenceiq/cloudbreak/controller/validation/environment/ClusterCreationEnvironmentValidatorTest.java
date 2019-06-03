@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig.ProxyConfigBuilder;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
-import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
@@ -40,9 +39,6 @@ public class ClusterCreationEnvironmentValidatorTest {
 
     @Mock
     private ProxyConfigDtoService proxyConfigDtoService;
-
-    @Mock
-    private LdapConfigService ldapConfigService;
 
     @Mock
     private RdsConfigService rdsConfigService;
