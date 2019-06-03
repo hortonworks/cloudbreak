@@ -4,10 +4,7 @@
     "availabilityZone": "string",
     "region": "string"
   },
-  "environment": {
-    "name": "string",
-    "credentialName": "string"
-  },
+  "environmentCrn": "string",
   "platformVariant": "string",
   "ambariVersion": "string",
   "hdpVersion": "string",

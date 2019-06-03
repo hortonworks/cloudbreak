@@ -22,7 +22,7 @@ public class NotificationTestingTest extends AbstractIntegrationTest {
         createDefaultUser((TestContext) data[0]);
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a notification test request",
             when = "posting to notification test",

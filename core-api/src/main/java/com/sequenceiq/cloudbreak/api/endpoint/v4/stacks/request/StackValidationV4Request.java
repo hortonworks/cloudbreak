@@ -30,11 +30,8 @@ public class StackValidationV4Request implements JsonEntity {
     @ApiModelProperty(StackModelDescription.NETWORK)
     private NetworkV4Request network;
 
-    @ApiModelProperty(StackModelDescription.ENVIRONMENT)
-    private String environmentName;
-
-    @ApiModelProperty(StackModelDescription.CREDENTIAL_NAME)
-    private String credentialName;
+    @ApiModelProperty(StackModelDescription.ENVIRONMENT_CRN)
+    private String environmentCrn;
 
     @ApiModelProperty(StackModelDescription.FILESYSTEM)
     private FileSystemValidationV4Request fileSystem;
@@ -79,20 +76,12 @@ public class StackValidationV4Request implements JsonEntity {
         this.network = network;
     }
 
-    public String getEnvironmentName() {
-        return environmentName;
+    public String getEnvironmentCrn() {
+        return environmentCrn;
     }
 
-    public void setEnvironmentName(String environmentName) {
-        this.environmentName = environmentName;
-    }
-
-    public String getCredentialName() {
-        return credentialName;
-    }
-
-    public void setCredentialName(String credentialName) {
-        this.credentialName = credentialName;
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 
     public FileSystemValidationV4Request getFileSystem() {

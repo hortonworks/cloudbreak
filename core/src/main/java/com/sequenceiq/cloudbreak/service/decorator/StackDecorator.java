@@ -13,7 +13,6 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -40,11 +39,10 @@ import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.service.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
@@ -53,6 +51,8 @@ import com.sequenceiq.cloudbreak.service.stack.SharedServiceValidator;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
 public class StackDecorator {
@@ -92,17 +92,19 @@ public class StackDecorator {
     private SharedServiceValidator sharedServiceValidator;
 
     @Inject
-    private EnvironmentViewService environmentViewService;
+    private EnvironmentClientService environmentClientService;
+
+    @Inject
+    private CredentialEndpoint credentialEndpoint;
 
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
     @Measure(StackDecorator.class)
     public Stack decorate(@Nonnull Stack subject, @Nonnull StackV4Request request, User user, Workspace workspace) {
-        setEnvironment(subject, request, workspace);
-
+        subject.setEnvironmentCrn(request.getEnvironmentCrn());
         String stackName = request.getName();
-        measure(() -> prepareCredential(subject, request, workspace),
+        measure(() -> prepareCredential(subject, workspace),
                 LOGGER, "Credential was prepared under {} ms for stack {}", stackName);
 
         measure(() -> prepareDomainIfDefined(subject, request, user, workspace),
@@ -145,22 +147,11 @@ public class StackDecorator {
         return subject;
     }
 
-    private void setEnvironment(@Nonnull Stack subject, @Nonnull StackV4Request request, Workspace workspace) {
-        if (!StringUtils.isEmpty(request.getEnvironment().getName())) {
-            EnvironmentView environment = environmentViewService.getByNameForWorkspace(request.getEnvironment().getName(), workspace);
-            subject.setEnvironment(environment);
-        }
-    }
-
-    private void prepareCredential(Stack subject, StackV4Request request, Workspace workspace) {
-        if (subject.getEnvironment() != null) {
-            subject.setCredential(subject.getEnvironment().getCredential());
-        } else if (subject.getCredential() == null) {
-            if (request.getEnvironment().getCredentialName() != null) {
-                Credential credential = credentialService.getByNameForWorkspace(request.getEnvironment().getCredentialName(), workspace);
-                subject.setCredential(credential);
-            }
-        }
+    private void prepareCredential(Stack subject, Workspace workspace) {
+        DetailedEnvironmentResponse environment = environmentClientService.get(subject.getEnvironmentCrn());
+        String credentialName = environment.getCredentialName();
+        Credential credential = credentialService.getByNameForWorkspace(credentialName, workspace);
+        subject.setCredential(credential);
     }
 
     private void prepareInstanceGroups(Stack subject, StackV4Request request, Credential credential, User user) {

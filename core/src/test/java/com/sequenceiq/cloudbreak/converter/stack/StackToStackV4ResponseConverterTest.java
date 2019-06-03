@@ -24,12 +24,11 @@ import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CloudbreakDetailsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.PlacementSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.authentication.StackAuthenticationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.customdomain.CustomDomainSettingsV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.environment.EnvironmentSettingsV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.environment.placement.PlacementSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
@@ -60,7 +59,6 @@ import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
-import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -117,7 +115,6 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         given(imageService.getImage(source.getId())).willReturn(mock(Image.class));
         given(conversionService.convert(any(Image.class), eq(StackImageV4Response.class))).willReturn(new StackImageV4Response());
         given(conversionService.convert(any(), eq(StackAuthenticationV4Response.class))).willReturn(new StackAuthenticationV4Response());
-        given(conversionService.convert(any(), eq(EnvironmentSettingsV4Response.class))).willReturn(new EnvironmentSettingsV4Response());
         given(conversionService.convert(any(), eq(CustomDomainSettingsV4Response.class))).willReturn(new CustomDomainSettingsV4Response());
         given(conversionService.convert(any(), eq(ClusterV4Response.class))).willReturn(new ClusterV4Response());
         given(conversionService.convert(any(), eq(NetworkV4Response.class))).willReturn(new NetworkV4Response());
@@ -139,7 +136,6 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         getSource().setCluster(null);
         given(imageService.getImage(source.getId())).willReturn(mock(Image.class));
         given(conversionService.convert(any(Image.class), eq(StackImageV4Response.class))).willReturn(new StackImageV4Response());
-        given(conversionService.convert(any(), eq(EnvironmentSettingsV4Response.class))).willReturn(new EnvironmentSettingsV4Response());
         given(conversionService.convert(any(), eq(CustomDomainSettingsV4Response.class))).willReturn(new CustomDomainSettingsV4Response());
         given(conversionService.convert(any(), eq(StackAuthenticationV4Response.class))).willReturn(new StackAuthenticationV4Response());
         given(conversionService.convert(any(), eq(NetworkV4Response.class))).willReturn(new NetworkV4Response());
@@ -163,7 +159,6 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         getSource().setNetwork(null);
         given(imageService.getImage(source.getId())).willReturn(mock(Image.class));
         given(conversionService.convert(any(Image.class), eq(StackImageV4Response.class))).willReturn(new StackImageV4Response());
-        given(conversionService.convert(any(), eq(EnvironmentSettingsV4Response.class))).willReturn(new EnvironmentSettingsV4Response());
         given(conversionService.convert(any(), eq(CustomDomainSettingsV4Response.class))).willReturn(new CustomDomainSettingsV4Response());
         given(conversionService.convert(any(), eq(StackAuthenticationV4Response.class))).willReturn(new StackAuthenticationV4Response());
         given(conversionService.convert(any(), eq(ClusterV4Response.class))).willReturn(new ClusterV4Response());
@@ -210,9 +205,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         stack.setParameters(Map.of(PlatformParametersConsts.TTL_MILLIS, String.valueOf(System.currentTimeMillis())));
         Resource s3ArnResource = new Resource(ResourceType.S3_ACCESS_ROLE_ARN, "s3Arn", stack);
         stack.setResources(Collections.singleton(s3ArnResource));
-        EnvironmentView environmentView = new EnvironmentView();
-        environmentView.setName("env");
-        stack.setEnvironment(environmentView);
+        stack.setEnvironmentCrn("");
         stack.setTerminated(100L);
         return stack;
     }

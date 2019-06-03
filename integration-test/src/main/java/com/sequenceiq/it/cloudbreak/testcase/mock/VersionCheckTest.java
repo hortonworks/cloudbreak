@@ -26,7 +26,7 @@ public class VersionCheckTest extends AbstractIntegrationTest {
         createDefaultUser((TestContext) data[0]);
     }
 
-    @Test(dataProvider = "contextWithTestContextAndInvalidVersionValue")
+    @Test(dataProvider = "contextWithTestContextAndInvalidVersionValue", enabled = false)
     public void testGetVersionByInvalidVersionNumber(MockedTestContext testContext, String invalidVersionValue,
             @Description TestCaseDescription testCaseDescription) {
         testContext

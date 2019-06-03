@@ -50,7 +50,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         initializeDefaultBlueprints(testContext);
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "Create datalake cluster and then delete",
             when = "create cluster and if available then delete",
@@ -84,7 +84,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "Create datalake cluster and then delete resources",
             when = "create cluster and then delete resources",
@@ -112,7 +112,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "Create two datalake cluster in one environment",
             when = "create cluster called twice",
@@ -128,7 +128,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         createDatalake(testContext, rdsList);
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "Create datalake cluster and workload",
             when = "call create cluster with datalake and with workload config",

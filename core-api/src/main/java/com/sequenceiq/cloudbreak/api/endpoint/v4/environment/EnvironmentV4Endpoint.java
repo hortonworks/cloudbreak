@@ -15,18 +15,19 @@ import javax.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.DatalakePrerequisiteV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentAttachV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentDetachV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentEditV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.RegisterDatalakeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DatalakePrerequisiteV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Responses;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.EnvironmentOpDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UtilityOpDescription;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -40,67 +41,67 @@ public interface EnvironmentV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.CREATE, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
             nickname = "createEnvironment")
-    DetailedEnvironmentV4Response post(@PathParam("workspaceId") Long workspaceId, @Valid EnvironmentV4Request request);
+    DetailedEnvironmentResponse post(@PathParam("workspaceId") Long workspaceId, @Valid EnvironmentRequest request);
 
     @GET
-    @Path("/{name}")
+    @Path("/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.GET, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
             nickname = "getEnvironment")
-    DetailedEnvironmentV4Response get(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName);
+    DetailedEnvironmentResponse get(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String environmentCrn);
 
     @DELETE
-    @Path("/{name}")
+    @Path("/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.DELETE, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
             nickname = "deleteEnvironment")
-    SimpleEnvironmentV4Response delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName);
+    SimpleEnvironmentResponse delete(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String environmentCrn);
 
     @PUT
-    @Path("/{name}")
+    @Path("/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.EDIT, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
             nickname = "editEnvironment")
-    DetailedEnvironmentV4Response edit(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName,
-            @NotNull EnvironmentEditV4Request request);
+    DetailedEnvironmentResponse edit(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String environmentCrn,
+            @NotNull EnvironmentEditRequest request);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.LIST, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
             nickname = "listEnvironment")
-    SimpleEnvironmentV4Responses list(@PathParam("workspaceId") Long workspaceId);
+    SimpleEnvironmentResponses list(@PathParam("workspaceId") Long workspaceId);
 
     @PUT
-    @Path("/{name}/attach")
+    @Path("/{crn}/attach")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.ATTACH_RESOURCES, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
             nickname = "attachResourcesToEnvironment")
-    DetailedEnvironmentV4Response attach(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName,
+    DetailedEnvironmentV4Response attach(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String environmentCrn,
             @Valid EnvironmentAttachV4Request request);
 
     @PUT
-    @Path("/{name}/detach")
+    @Path("/{crn}/detach")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.DETACH_RESOURCES, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
             nickname = "detachResourcesFromEnvironment")
-    DetailedEnvironmentV4Response detach(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName,
+    DetailedEnvironmentV4Response detach(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String environmentCrn,
             @Valid EnvironmentDetachV4Request request);
 
     @PUT
-    @Path("/{name}/register_datalake")
+    @Path("/{crn}/register_datalake")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.REGISTER_EXTERNAL_DATALAKE, produces = ContentType.JSON, notes = Notes.ENVIRONMENT_NOTES,
             nickname = "registerExternalDatalake")
-    DetailedEnvironmentV4Response registerExternalDatalake(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String environmentName,
-        @Valid RegisterDatalakeV4Request request);
+    DetailedEnvironmentV4Response registerExternalDatalake(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String environmentCrn,
+            @Valid RegisterDatalakeV4Request request);
 
     @POST
-    @Path("/{name}/register_datalake_prerequisites")
+    @Path("/{crn}/register_datalake_prerequisites")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UtilityOpDescription.DATALAKE_PREREQUISITES, produces = ContentType.JSON,
             nickname = "registerDatalakePrerequisites")
     DatalakePrerequisiteV4Response registerDatalakePrerequisite(
             @PathParam("workspaceId") Long workspaceId,
-            @PathParam("name") String environmentName,
+            @PathParam("crn") String environmentName,
             @Valid DatalakePrerequisiteV4Request datalakePrerequisiteV4Request);
 }
