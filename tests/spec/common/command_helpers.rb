@@ -80,6 +80,23 @@ RSpec.shared_context "shared command helpers", :a => :b do
     return json_has_name(json, name)
   end
 
+  def json_has_env(json, name)
+    json.each do |s|
+      if s["EnvironmentID"] == name
+        return true, json
+       end
+    end
+    return false, json   
+  end  
+         
+
+  def describe_with_env_exists(name, &block) 
+    json = list_parse do
+      block.call  
+    end
+    return json_has_env(json, name)
+  end
+
   def list_parse(&block) 
     result = block.call
     expect(result.exit_status).to eql 0     

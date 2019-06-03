@@ -1,5 +1,7 @@
 RSpec.shared_context "mock shared vars", :a => :b do
   before (:all) {
+    @env_name = "mockenv"
+
     @os_cluster_name = "os-cluster"
     @os_credential_name = "openstack"
     @cli_input_json = "../../templates/kilo-openstack-template.json"

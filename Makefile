@@ -39,6 +39,14 @@ ifeq ($(REDBEAMS_PORT),)
         REDBEAMS_PORT = 8087
 endif
 
+ifeq ($(ENVIRONMENT_IP),)
+        ENVIRONMENT_IP = localhost
+endif
+ENVIRONMENT_PORT = $(shell echo \${PORT})
+ifeq ($(ENVIRONMENT_PORT),)
+        ENVIRONMENT_PORT = 8088
+endif
+
 deps: deps-errcheck
 	go get -u golang.org/x/tools/cmd/goimports
 	curl -o $(GOPATH)/bin/swagger -L'#' https://github.com/go-swagger/go-swagger/releases/download/v0.19.0/swagger_$(shell echo `uname`|tr '[:upper:]' '[:lower:]')_amd64
@@ -123,6 +131,11 @@ _init-swagger-generation-redbeams:
 	rm -f build/swagger.json
 	curl -sL http://$(REDBEAMS_IP):$(REDBEAMS_PORT)/redbeams/api/swagger.json -o build/swagger.json
 
+_init-swagger-generation-environment:
+	rm -rf dataplane/api-environment/client dataplane/api-environment/model
+	rm -f build/swagger.json
+	curl -sL http://$(ENVIRONMENT_IP):$(ENVIRONMENT_PORT)/env/api/swagger.json -o build/swagger.json
+
 generate-swagger: _init-swagger-generation
 	swagger generate client -f build/swagger.json -c client -m model -t dataplane/api
 
@@ -142,6 +155,10 @@ generate-swagger-redbeams:
 	rm -rf dataplane/api-redbeams/client dataplane/api-redbeams/model
 	swagger generate client -f http://$(REDBEAMS_IP):$(REDBEAMS_PORT)/redbeams/api/swagger.json -c client -m model -t dataplane/api-redbeams
 
+generate-swagger-environment:
+	rm -rf dataplane/api-environment/client dataplane/api-environment/model
+	swagger generate client -f http://$(ENVIRONMENT_IP):$(ENVIRONMENT_PORT)/env/api/swagger.json -c client -m model -t dataplane/api-environment
+
 generate-swagger-docker: _init-swagger-generation
 	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -v ${PWD}/build/swagger.json:${PWD}/build/swagger.json  -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:v0.17.2 \
 	generate client -f ${PWD}/build/swagger.json -c client -m model -t dataplane/api
@@ -157,6 +174,10 @@ generate-swagger-freeipa-docker: _init-swagger-generation-freeipa
 generate-swagger-redbeams-docker: _init-swagger-generation-redbeams
 	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -v ${PWD}/build/swagger.json:${PWD}/build/swagger.json  -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:v0.19.0 \
 	generate client -f ${PWD}/build/swagger.json -c client -m model -t dataplane/api-redbeams
+
+generate-swagger-environment-docker: _init-swagger-generation-environment
+	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -v ${PWD}/build/swagger.json:${PWD}/build/swagger.json  -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:v0.17.2 \
+	generate client -f ${PWD}/build/swagger.json -c client -m model -t dataplane/api-environment
 
 release: build
 	rm -rf release

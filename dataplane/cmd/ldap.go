@@ -15,14 +15,14 @@ func init() {
 			{
 				Name:  "create",
 				Usage: "creates a new LDAP",
-				Flags: fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlLdapServer, fl.FlLdapDomain,
+				Flags: fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlEnvironmentName, fl.FlLdapServer, fl.FlLdapDomain,
 					fl.FlLdapBindDN, fl.FlLdapBindPassword, fl.FlLdapDirectoryType, fl.FlLdapUserSearchBase, fl.FlLdapUserDnPattern,
 					fl.FlLdapUserNameAttribute, fl.FlLdapUserObjectClass, fl.FlLdapGroupMemberAttribute, fl.FlEnvironmentsOptional,
 					fl.FlLdapGroupNameAttribute, fl.FlLdapGroupObjectClass, fl.FlLdapGroupSearchBase, fl.FlLdapAdminGroup, fl.FlLdapCertificate).AddAuthenticationFlags().Build(),
 				Before: cf.CheckConfigAndCommandFlags,
 				Action: ldap.CreateLDAP,
 				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlLdapServer, fl.FlLdapDomain,
+					for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlEnvironmentName, fl.FlLdapServer, fl.FlLdapDomain,
 						fl.FlLdapBindDN, fl.FlLdapBindPassword, fl.FlLdapDirectoryType, fl.FlLdapUserSearchBase, fl.FlLdapUserDnPattern,
 						fl.FlLdapUserNameAttribute, fl.FlLdapUserObjectClass, fl.FlLdapGroupMemberAttribute, fl.FlEnvironmentsOptional,
 						fl.FlLdapGroupNameAttribute, fl.FlLdapGroupObjectClass, fl.FlLdapGroupSearchBase, fl.FlLdapAdminGroup, fl.FlLdapCertificate).AddAuthenticationFlags().Build() {
@@ -33,11 +33,11 @@ func init() {
 			{
 				Name:   "delete",
 				Usage:  "deletes an LDAP",
-				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
+				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentName).AddOutputFlag().AddAuthenticationFlags().Build(),
 				Before: cf.CheckConfigAndCommandFlags,
 				Action: ldap.DeleteLdap,
 				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentName).AddOutputFlag().AddAuthenticationFlags().Build() {
 						fl.PrintFlagCompletion(f)
 					}
 				},
@@ -45,23 +45,11 @@ func init() {
 			{
 				Name:   "describe",
 				Usage:  "describes an LDAP",
-				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
+				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentName).AddOutputFlag().AddAuthenticationFlags().Build(),
 				Before: cf.CheckConfigAndCommandFlags,
 				Action: ldap.DescribeLdap,
 				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
-						fl.PrintFlagCompletion(f)
-					}
-				},
-			},
-			{
-				Name:   "list",
-				Usage:  "list the available ldaps",
-				Flags:  fl.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build(),
-				Before: cf.CheckConfigAndCommandFlags,
-				Action: ldap.ListLdaps,
-				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build() {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentName).AddOutputFlag().AddAuthenticationFlags().Build() {
 						fl.PrintFlagCompletion(f)
 					}
 				},

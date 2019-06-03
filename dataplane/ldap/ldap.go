@@ -13,8 +13,9 @@ import (
 	"strconv"
 	"strings"
 
-	v4ldap "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_ldaps"
-	"github.com/hortonworks/cb-cli/dataplane/api/model"
+	"github.com/hortonworks/cb-cli/dataplane/api-freeipa/client/v1ldaps"
+	"github.com/hortonworks/cb-cli/dataplane/api-freeipa/model"
+	env "github.com/hortonworks/cb-cli/dataplane/env"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/dp-cli-common/utils"
 	log "github.com/sirupsen/logrus"
@@ -43,21 +44,21 @@ type ldap struct {
 	GroupSearchBase      string `json:"GroupSearchBase,omitempty" yaml:"GroupSearchBase,omitempty"`
 	AdminGroup           string `json:"AdminGroup,omitempty" yaml:"AdminGroup,omitempty"`
 	Certificate          string `json:"Certificate,omitempty" yaml:"Certificate,omitempty"`
-	Environments         []string
+	EnvironmentCrn       string
 }
 
 type ldapOutDescribe struct {
 	*ldap
-	ID string `json:"ID" yaml:"ID"`
+	Crn string `json:"Crn" yaml:"Crn"`
 }
 
 func (l *ldap) DataAsStringArray() []string {
 	return []string{l.Name, l.Description, l.Server, l.Domain, l.DirectoryType, l.UserSearchBase, l.UserDnPattern, l.UserNameAttribute,
-		l.UserObjectClass, l.GroupMemberAttribute, l.GroupNameAttribute, l.GroupObjectClass, l.GroupSearchBase, strings.Join(l.Environments, ",")}
+		l.UserObjectClass, l.GroupMemberAttribute, l.GroupNameAttribute, l.GroupObjectClass, l.GroupSearchBase, l.EnvironmentCrn}
 }
 
 func (l *ldapOutDescribe) DataAsStringArray() []string {
-	return append(l.ldap.DataAsStringArray(), l.ID)
+	return append(l.ldap.DataAsStringArray(), l.Crn)
 }
 
 var Users = []string{"Distinguished Names", "Email", "Member of Group"}
@@ -83,8 +84,7 @@ func (l *ldapGroupSearchResult) DataAsStringArray() []string {
 }
 
 type ldapClient interface {
-	CreateLdapConfigsInWorkspace(params *v4ldap.CreateLdapConfigsInWorkspaceParams) (*v4ldap.CreateLdapConfigsInWorkspaceOK, error)
-	ListLdapsByWorkspace(params *v4ldap.ListLdapsByWorkspaceParams) (*v4ldap.ListLdapsByWorkspaceOK, error)
+	CreateLdapConfigV1(params *v1ldaps.CreateLdapConfigV1Params) (*v1ldaps.CreateLdapConfigV1OK, error)
 }
 
 func CreateLDAP(c *cli.Context) error {
@@ -113,7 +113,8 @@ func CreateLDAP(c *cli.Context) error {
 	}
 	server := c.String(fl.FlLdapServer.Name)
 
-	environments := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentsOptional.Name), ",")
+	environmentName := c.String(fl.FlEnvironmentName.Name)
+	environment := env.GetEnvirontmentCrnByName(c, environmentName)
 
 	ldapRegexp := regexp.MustCompile("^(?:ldap://|ldaps://)[a-z0-9-.]+:\\d+$")
 	if !ldapRegexp.MatchString(server) {
@@ -125,19 +126,19 @@ func CreateLDAP(c *cli.Context) error {
 	protocol := server[0:strings.Index(server, ":")]
 	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
 
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
+	freeIpaClient := oauth.FreeIpa(*oauth.NewFreeIpaClientFromContext(c)).FreeIpa
 
-	return createLDAPImpl(cbClient.Cloudbreak.V4WorkspaceIDLdaps, int32(serverPort), workspaceID, name, description, server, protocol, domain, bindDn, bindPassword, directoryType,
-		userSearchBase, userDnPattern, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute, groupObjectClass, adminGroup, certificate, environments)
+	return createLDAPImpl(freeIpaClient.V1ldaps, int32(serverPort), workspaceID, name, description, server, protocol, domain, bindDn, bindPassword, directoryType,
+		userSearchBase, userDnPattern, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute, groupObjectClass, adminGroup, certificate, environment)
 }
 
 func createLDAPImpl(ldapClient ldapClient, port int32, workspaceID int64, name, description, server, protocol, domain, bindDn, bindPassword, directoryType,
 	userSearchBase, userDnPattern, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute,
-	groupObjectClass, adminGroup, certificate string, environments []string) error {
+	groupObjectClass, adminGroup, certificate string, environment string) error {
 	defer utils.TimeTrack(time.Now(), "create ldap")
 
 	host := server[strings.LastIndex(server, "/")+1 : strings.LastIndex(server, ":")]
-	ldapConfigRequest := &model.LdapV4Request{
+	ldapConfigRequest := &model.CreateLdapConfigV1Request{
 		Name:                 &name,
 		Description:          &description,
 		Host:                 &host,
@@ -157,75 +158,32 @@ func createLDAPImpl(ldapClient ldapClient, port int32, workspaceID int64, name, 
 		GroupSearchBase:      groupSearchBase,
 		AdminGroup:           adminGroup,
 		Certificate:          certificate,
+		EnvironmentCrn:       &environment,
 	}
 
 	log.Infof("[createLDAPImpl] create ldap with name: %s", name)
-	var ldap *model.LdapV4Response
-	resp, err := ldapClient.CreateLdapConfigsInWorkspace(v4ldap.NewCreateLdapConfigsInWorkspaceParams().WithWorkspaceID(workspaceID).WithBody(ldapConfigRequest))
+	resp, err := ldapClient.CreateLdapConfigV1(v1ldaps.NewCreateLdapConfigV1Params().WithBody(ldapConfigRequest))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	ldap = resp.Payload
+	ldap := resp.Payload
 
-	log.Infof("[createLDAPImpl] ldap created with name: %s, id: %d", name, ldap.ID)
-	return nil
-}
-
-func ListLdaps(c *cli.Context) error {
-	defer utils.TimeTrack(time.Now(), "list ldap configs")
-
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-
-	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	return listLdapsImpl(cbClient.Cloudbreak.V4WorkspaceIDLdaps, output.WriteList, workspaceID)
-}
-
-func listLdapsImpl(ldapClient ldapClient, writer func([]string, []utils.Row), workspaceID int64) error {
-	resp, err := ldapClient.ListLdapsByWorkspace(v4ldap.NewListLdapsByWorkspaceParams().WithWorkspaceID(workspaceID))
-	if err != nil {
-		utils.LogErrorAndExit(err)
-	}
-
-	var tableRows []utils.Row
-	for _, l := range resp.Payload.Responses {
-		server := fmt.Sprintf("%s://%s:%d", l.Protocol, utils.SafeStringConvert(l.Host), utils.SafeInt32Convert(l.Port))
-		row := &ldap{
-			Name:                 *l.Name,
-			Description:          utils.SafeStringConvert(l.Description),
-			Server:               server,
-			Domain:               l.Domain,
-			DirectoryType:        l.DirectoryType,
-			UserSearchBase:       utils.SafeStringConvert(l.UserSearchBase),
-			UserDnPattern:        utils.SafeStringConvert(l.UserDnPattern),
-			UserNameAttribute:    l.UserNameAttribute,
-			UserObjectClass:      l.UserObjectClass,
-			GroupMemberAttribute: l.GroupMemberAttribute,
-			GroupNameAttribute:   l.GroupNameAttribute,
-			GroupObjectClass:     l.GroupObjectClass,
-			GroupSearchBase:      l.GroupSearchBase,
-			AdminGroup:           l.AdminGroup,
-			Certificate:          l.Certificate,
-		}
-		tableRows = append(tableRows, row)
-	}
-
-	writer(Header, tableRows)
+	log.Infof("[createLDAPImpl] ldap created with name: %s, id: %s", name, ldap.Crn)
 	return nil
 }
 
 func DeleteLdap(c *cli.Context) error {
 	defer utils.TimeTrack(time.Now(), "delete an ldap")
 
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	ldapName := c.String(fl.FlName.Name)
-	log.Infof("[DeleteLdap] delete ldap config by name: %s", ldapName)
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
+	environmentName := c.String(fl.FlEnvironmentName.Name)
+	environment := env.GetEnvirontmentCrnByName(c, environmentName)
+	log.Infof("[DeleteLdap] ldap config deleted from environment: %s", environment)
+	freeIpaClient := oauth.FreeIpa(*oauth.NewFreeIpaClientFromContext(c)).FreeIpa
 
-	if _, err := cbClient.Cloudbreak.V4WorkspaceIDLdaps.DeleteLdapConfigInWorkspace(v4ldap.NewDeleteLdapConfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(ldapName)); err != nil {
+	if err := freeIpaClient.V1ldaps.DeleteLdapConfigV1(v1ldaps.NewDeleteLdapConfigV1Params().WithEnvironmentCrn(&environment)); err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	log.Infof("[DeleteLdap] ldap config deleted: %s", ldapName)
+	log.Infof("[DeleteLdap] ldap config deleted: %s", environment)
 	return nil
 }
 
@@ -233,18 +191,18 @@ func DescribeLdap(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "describe an ldap")
 
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
-	ldapName := c.String(fl.FlName.Name)
-	log.Infof("[DescribeLdap] describe ldap config by name: %s", ldapName)
-	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
+	environmentName := c.String(fl.FlEnvironmentName.Name)
+	environment := env.GetEnvirontmentCrnByName(c, environmentName)
+	log.Infof("[DescribeLdap] describe ldap config in environment: %s", environment)
+	freeIpaClient := oauth.FreeIpa(*oauth.NewFreeIpaClientFromContext(c)).FreeIpa
 
-	resp, err := cbClient.Cloudbreak.V4WorkspaceIDLdaps.GetLdapConfigInWorkspace(v4ldap.NewGetLdapConfigInWorkspaceParams().WithWorkspaceID(workspaceID).WithName(ldapName))
+	resp, err := freeIpaClient.V1ldaps.GetLdapConfigV1(v1ldaps.NewGetLdapConfigV1Params().WithEnvironmentCrn(&environment))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	l := resp.Payload
 	server := fmt.Sprintf("%s://%s:%d", l.Protocol, utils.SafeStringConvert(l.Host), utils.SafeInt32Convert(l.Port))
-	output.Write(append(Header, "ID"), &ldapOutDescribe{
+	output.Write(append(Header, "Crn"), &ldapOutDescribe{
 		&ldap{
 			Name:                 *l.Name,
 			Description:          utils.SafeStringConvert(l.Description),
@@ -261,8 +219,9 @@ func DescribeLdap(c *cli.Context) {
 			GroupSearchBase:      l.GroupSearchBase,
 			AdminGroup:           l.AdminGroup,
 			Certificate:          l.Certificate,
+			EnvironmentCrn:       *l.EnvironmentCrn,
 		},
-		strconv.FormatInt(l.ID, 10)})
+		l.Crn})
 }
 
 func CreateLdapUser(c *cli.Context) error {

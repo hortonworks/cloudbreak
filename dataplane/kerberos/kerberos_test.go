@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	v4krb "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_kerberos"
-	"github.com/hortonworks/cb-cli/dataplane/api/model"
+	"github.com/hortonworks/cb-cli/dataplane/api-freeipa/client/v1kerberos"
+	model "github.com/hortonworks/cb-cli/dataplane/api-freeipa/model"
 	"github.com/hortonworks/cb-cli/dataplane/types"
 	"github.com/hortonworks/dp-cli-common/utils"
 )
@@ -13,24 +13,21 @@ import (
 type mockKerberosClient struct {
 }
 
-func MockKerberosResponse(name string) *model.KerberosV4Response {
-	return &model.KerberosV4Response{
+func MockKerberosResponse(name string, environment string) *model.DescribeKerberosConfigV1Response {
+	return &model.DescribeKerberosConfigV1Response{
 		AdminURL:    "AdminURL",
 		ContainerDn: "CD",
 		Description: &(&types.S{S: "testdescription"}).S,
 		Domain:      "Domain",
-		ID:          123,
+		Crn:         "123",
 		Name:        name,
 		Type:        &(&types.S{S: "ACTIVE_DIRECTORY"}).S,
 		URL:         "testUrl",
-		Admin: &model.SecretResponse{
-			EnginePath: "",
-			SecretPath: "",
-		},
 		Password: &model.SecretResponse{
 			EnginePath: "",
 			SecretPath: "",
 		},
+		EnvironmentCrn: &environment,
 	}
 }
 
@@ -40,72 +37,38 @@ func CheckResponseRow(row utils.Row, expected string, t *testing.T) {
 	}
 }
 
-func (*mockKerberosClient) ListKerberosConfigByWorkspace(params *v4krb.ListKerberosConfigByWorkspaceParams) (*v4krb.ListKerberosConfigByWorkspaceOK, error) {
-	resp := []*model.KerberosViewV4Response{
-		{
-			Name:        &(&types.S{S: "testkdc"}).S,
-			Description: &(&types.S{S: "testdescription"}).S,
-			ID:          123,
-			Type:        "ACTIVE_DIRECTORY",
-		},
-	}
-	return &v4krb.ListKerberosConfigByWorkspaceOK{Payload: &model.KerberosViewV4Responses{Responses: resp}}, nil
+func (*mockKerberosClient) GetKerberosConfigForEnvironment(params *v1kerberos.GetKerberosConfigForEnvironmentParams) (*v1kerberos.GetKerberosConfigForEnvironmentOK, error) {
+	resp := MockKerberosResponse("kerberos_name", *params.EnvironmentCrn)
+	return &v1kerberos.GetKerberosConfigForEnvironmentOK{Payload: resp}, nil
 }
 
-func (*mockKerberosClient) GetKerberosConfigInWorkspace(params *v4krb.GetKerberosConfigInWorkspaceParams) (*v4krb.GetKerberosConfigInWorkspaceOK, error) {
-	resp := MockKerberosResponse(params.Name)
-	return &v4krb.GetKerberosConfigInWorkspaceOK{Payload: resp}, nil
+func (*mockKerberosClient) CreateKerberosConfigForEnvironment(params *v1kerberos.CreateKerberosConfigForEnvironmentParams) (*v1kerberos.CreateKerberosConfigForEnvironmentOK, error) {
+	resp := MockKerberosResponse("created", *params.Body.EnvironmentCrn)
+	return &v1kerberos.CreateKerberosConfigForEnvironmentOK{Payload: resp}, nil
 }
 
-func (*mockKerberosClient) CreateKerberosConfigInWorkspace(params *v4krb.CreateKerberosConfigInWorkspaceParams) (*v4krb.CreateKerberosConfigInWorkspaceOK, error) {
-	resp := MockKerberosResponse("created")
-	return &v4krb.CreateKerberosConfigInWorkspaceOK{Payload: resp}, nil
-}
-
-func (*mockKerberosClient) AttachKerberosConfigToEnvironments(params *v4krb.AttachKerberosConfigToEnvironmentsParams) (*v4krb.AttachKerberosConfigToEnvironmentsOK, error) {
-	resp := MockKerberosResponse(params.Name)
-	return &v4krb.AttachKerberosConfigToEnvironmentsOK{Payload: resp}, nil
-}
-
-func (*mockKerberosClient) DetachKerberosConfigFromEnvironments(params *v4krb.DetachKerberosConfigFromEnvironmentsParams) (*v4krb.DetachKerberosConfigFromEnvironmentsOK, error) {
-	resp := MockKerberosResponse(params.Name)
-	return &v4krb.DetachKerberosConfigFromEnvironmentsOK{Payload: resp}, nil
-}
-
-func (*mockKerberosClient) DeleteKerberosConfigInWorkspace(params *v4krb.DeleteKerberosConfigInWorkspaceParams) (*v4krb.DeleteKerberosConfigInWorkspaceOK, error) {
-	resp := MockKerberosResponse(params.Name)
-	return &v4krb.DeleteKerberosConfigInWorkspaceOK{Payload: resp}, nil
-}
-
-func TestListKerberosImpl(t *testing.T) {
-	var rows []utils.Row
-	ListKerberosImpl(new(mockKerberosClient), 1, func(h []string, r []utils.Row) { rows = r })
-	if len(rows) != 1 {
-		t.Fatalf("row number doesn't match 1 == %d", len(rows))
-	}
-	for _, r := range rows {
-		expected := "testkdc testdescription ACTIVE_DIRECTORY  123"
-		CheckResponseRow(r, expected, t)
-	}
+func (*mockKerberosClient) DeleteKerberosConfigForEnvironment(params *v1kerberos.DeleteKerberosConfigForEnvironmentParams) error {
+	return nil
 }
 
 func TestGetKerberosImpl(t *testing.T) {
 	var row utils.Row
 	GetKerberosImpl(new(mockKerberosClient), 1, "testget", func(h []string, r utils.Row) { row = r })
-	expected := "testget testdescription ACTIVE_DIRECTORY  123"
+	expected := "kerberos_name testdescription ACTIVE_DIRECTORY testget 123"
 	CheckResponseRow(row, expected, t)
 }
 
 func TestDeleteKerberosImpl(t *testing.T) {
-	var row utils.Row
-	DeleteKerberosImpl(new(mockKerberosClient), 1, "deleted", func(h []string, r utils.Row) { row = r })
-	expected := "deleted testdescription ACTIVE_DIRECTORY  123"
-	CheckResponseRow(row, expected, t)
+	err := DeleteKerberosImpl(new(mockKerberosClient), 1, "deleted")
+	if nil != err {
+		t.Errorf("not expected error from delete")
+	}
 }
 
 func TestCreateKerberosImpl(t *testing.T) {
 	var row utils.Row
-	SendCreateKerberosRequestImpl(new(mockKerberosClient), 1, &model.KerberosV4Request{}, func(h []string, r utils.Row) { row = r })
-	expected := "created testdescription ACTIVE_DIRECTORY  123"
+	environment := "env"
+	SendCreateKerberosRequestImpl(new(mockKerberosClient), 1, &model.CreateKerberosConfigV1Request{EnvironmentCrn: &environment}, func(h []string, r utils.Row) { row = r })
+	expected := "created testdescription ACTIVE_DIRECTORY env 123"
 	CheckResponseRow(row, expected, t)
 }

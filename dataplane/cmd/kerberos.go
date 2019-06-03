@@ -41,13 +41,13 @@ func init() {
 						},
 					},
 					{
-						Name:   "custom",
-						Usage:  "creates a new custom Kerberos",
-						Flags:  fl.NewFlagBuilder().AddResourceDefaultFlags().AddCommonKerberosCreateFlags().AddFlags(fl.FlKerberosDescriptor, fl.FlKerberosKrb5Conf).AddOutputFlag().AddAuthenticationFlags().Build(),
+						Name:   "mit",
+						Usage:  "creates a new mit Kerberos",
+						Flags:  fl.NewFlagBuilder().AddResourceDefaultFlags().AddCommonKerberosCreateFlags().AddFlags(fl.FlKerberosUrl, fl.FlKerberosAdminUrl, fl.FlKerberosRealm).AddOutputFlag().AddAuthenticationFlags().Build(),
 						Before: cf.CheckConfigAndCommandFlags,
-						Action: kerberos.CreateCustomKerberos,
+						Action: kerberos.CreateMitKerberos,
 						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddCommonKerberosCreateFlags().AddFlags(fl.FlKerberosDescriptor, fl.FlKerberosKrb5Conf).AddOutputFlag().AddAuthenticationFlags().Build() {
+							for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddCommonKerberosCreateFlags().AddFlags(fl.FlKerberosUrl, fl.FlKerberosAdminUrl, fl.FlKerberosRealm).AddOutputFlag().AddAuthenticationFlags().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},
@@ -57,11 +57,11 @@ func init() {
 			{
 				Name:   "delete",
 				Usage:  "deletes a Kerberos",
-				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
+				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentName).AddOutputFlag().AddAuthenticationFlags().Build(),
 				Before: cf.CheckConfigAndCommandFlags,
 				Action: kerberos.DeleteKerberos,
 				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentName).AddOutputFlag().AddAuthenticationFlags().Build() {
 						fl.PrintFlagCompletion(f)
 					}
 				},
@@ -69,23 +69,11 @@ func init() {
 			{
 				Name:   "describe",
 				Usage:  "describes a Kerberos",
-				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
+				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentName).AddOutputFlag().AddAuthenticationFlags().Build(),
 				Before: cf.CheckConfigAndCommandFlags,
 				Action: kerberos.GetKerberos,
 				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
-						fl.PrintFlagCompletion(f)
-					}
-				},
-			},
-			{
-				Name:   "list",
-				Usage:  "list the available kerberos configs",
-				Flags:  fl.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build(),
-				Before: cf.CheckConfigAndCommandFlags,
-				Action: kerberos.ListKerberos,
-				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build() {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentName).AddOutputFlag().AddAuthenticationFlags().Build() {
 						fl.PrintFlagCompletion(f)
 					}
 				},

@@ -19,5 +19,6 @@
   "adminGroup": "cloudbreak",
   "name": "default-ldap",
   "id": 1,
-  "public": true
+  "public": true,
+  "environmentId": "mockenv"
 }

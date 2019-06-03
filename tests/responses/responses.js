@@ -104,6 +104,7 @@ responses.getImageCatalogRequestFromName= responseObject(defimagec, OK);
 responses.listLdapsByWorkspace = responseObject(ldap, OK);
 responses.getLdapConfigInWorkspace = responseObject(ldap, OK);
 responses.createLdapConfigsInWorkspace = responseObject(ldapSingle, OK);
+responses.getLdapConfigV1 = responseObject(ldapSingle, OK);
 responses.postLdapConnectionTestInWorkspace = responseObject({ "connectionResult":"Failed to connect to LDAP server: hwxad-1a2bcd3e45678f90.elb.eu-west-1.amazonaws.com:123" }, OK);
 responses.getPrivatesLdap= responseObject(ldap, OK);
 responses.postPrivateLdap= responseObject(ldap, OK);

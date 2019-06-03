@@ -2,6 +2,7 @@ package oauth
 
 import (
 	"github.com/go-openapi/strfmt"
+	environmentclient "github.com/hortonworks/cb-cli/dataplane/api-environment/client"
 	freeipaclient "github.com/hortonworks/cb-cli/dataplane/api-freeipa/client"
 	sdxclient "github.com/hortonworks/cb-cli/dataplane/api-sdx/client"
 	apiclient "github.com/hortonworks/cb-cli/dataplane/api/client"
@@ -26,6 +27,10 @@ type Sdx struct {
 }
 type FreeIpa struct {
 	FreeIpa *freeipaclient.FreeIPA
+}
+
+type Environment struct {
+	Environment *environmentclient.Environment
 }
 
 func NewCloudbreakHTTPClientFromContext(c *cli.Context) *Cloudbreak {
@@ -86,4 +91,17 @@ func NewFreeIpaClient(address string, apiKeyID, privateKey string) *FreeIpa {
 	const baseAPIPath string = "/freeipa/api"
 	transport = apikeyauth.GetAPIKeyAuthTransport(address, baseAPIPath, apiKeyID, privateKey)
 	return &FreeIpa{FreeIpa: freeipaclient.New(transport, strfmt.Default)}
+}
+
+// NewDataplaneHTTPClientFromContext : Initialize Environment client.
+func NewEnvironmentClientFromContext(c *cli.Context) *Environment {
+	return NewEnvironmentClient(c.String(fl.FlServerOptional.Name), c.String(fl.FlApiKeyIDOptional.Name), c.String(fl.FlPrivateKeyOptional.Name))
+}
+
+func NewEnvironmentClient(address string, apiKeyID, privateKey string) *Environment {
+	u.CheckServerAddress(address)
+	var transport *utils.Transport
+	const baseAPIPath string = "/env/api"
+	transport = apikeyauth.GetAPIKeyAuthTransport(address, baseAPIPath, apiKeyID, privateKey)
+	return &Environment{Environment: environmentclient.New(transport, strfmt.Default)}
 }

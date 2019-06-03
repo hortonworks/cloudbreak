@@ -1111,20 +1111,6 @@ var (
 			Usage: "kerberos tcp-allowed flag",
 		},
 	}
-	FlKerberosDescriptor = StringFlag{
-		RequiredFlag: REQUIRED,
-		StringFlag: cli.StringFlag{
-			Name:  "descriptor",
-			Usage: "kerberos descriptor",
-		},
-	}
-	FlKerberosKrb5Conf = StringFlag{
-		RequiredFlag: REQUIRED,
-		StringFlag: cli.StringFlag{
-			Name:  "krb5Conf",
-			Usage: "kerberos krb5Conf",
-		},
-	}
 	FlKerberosUrl = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
@@ -1406,8 +1392,8 @@ func (fb *FlagBuilder) AddTemplateFlags() *FlagBuilder {
 }
 
 func (fb *FlagBuilder) AddCommonKerberosCreateFlags() *FlagBuilder {
-	for _, f := range []cli.Flag{FlEnvironmentsOptional, FlKerberosDisableVerifyKdcTrust, FlKerberosDomain, FlKerberosNameServers,
-		FlKerberosPassword, FlKerberosTcpAllowed, FlKerberosPrincipal, FlKerberosAdmin} {
+	for _, f := range []cli.Flag{FlEnvironmentName, FlKerberosDisableVerifyKdcTrust, FlKerberosDomain, FlKerberosNameServers,
+		FlKerberosPassword, FlKerberosTcpAllowed, FlKerberosPrincipal} {
 		fb.flags = append(fb.flags, f)
 	}
 	return fb
