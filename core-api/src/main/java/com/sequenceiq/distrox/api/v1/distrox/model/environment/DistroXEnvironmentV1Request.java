@@ -1,6 +1,6 @@
 package com.sequenceiq.distrox.api.v1.distrox.model.environment;
 
-import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.ENVIRONMENT;
+import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.ENVIRONMENT_CRN;
 
 import java.io.Serializable;
 
@@ -18,7 +18,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class DistroXEnvironmentV1Request implements Serializable {
 
-    @ApiModelProperty(ENVIRONMENT)
+    @ApiModelProperty(ENVIRONMENT_CRN)
     private String name;
 
     public String getName() {

@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
@@ -175,9 +174,8 @@ public class ProvisionerService {
                 throw new BadRequestException("can not convert from json to tags");
             }
             stackRequest.setTags(tags);
-            EnvironmentSettingsV4Request environment = new EnvironmentSettingsV4Request();
-            environment.setName(sdxCluster.getEnvName());
-            stackRequest.setEnvironment(environment);
+            // TODO: env crn pls
+            stackRequest.setEnvironmentCrn(sdxCluster.getEnvName());
             setupAuthentication(stackRequest);
             setupClusterRequest(stackRequest);
             return stackRequest;

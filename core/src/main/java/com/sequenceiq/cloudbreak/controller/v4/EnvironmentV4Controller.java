@@ -12,64 +12,65 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.EnvironmentV4Endpoi
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.DatalakePrerequisiteV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentAttachV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentDetachV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentEditV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.RegisterDatalakeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DatalakePrerequisiteV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Responses;
+import com.sequenceiq.cloudbreak.service.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakePrerequisiteService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 
 @Controller
 @Transactional(TxType.NEVER)
 public class EnvironmentV4Controller implements EnvironmentV4Endpoint {
 
     @Inject
-    private EnvironmentService environmentService;
-
-    @Inject
     private DatalakePrerequisiteService datalakePrerequisiteService;
 
+    @Inject
+    private EnvironmentClientService environmentClientService;
+
     @Override
-    public DetailedEnvironmentV4Response post(Long workspaceId, @Valid EnvironmentV4Request request) {
-        return environmentService.createForLoggedInUser(request, workspaceId);
+    public DetailedEnvironmentResponse post(Long workspaceId, @Valid EnvironmentRequest request) {
+        return environmentClientService.create(request);
     }
 
     @Override
-    public SimpleEnvironmentV4Responses list(Long workspaceId) {
-        return new SimpleEnvironmentV4Responses(environmentService.listByWorkspaceId(workspaceId));
+    public SimpleEnvironmentResponses list(Long workspaceId) {
+        return environmentClientService.list();
     }
 
     @Override
-    public DetailedEnvironmentV4Response get(Long workspaceId, String environmentName) {
-        return environmentService.get(environmentName, workspaceId);
+    public DetailedEnvironmentResponse get(Long workspaceId, String environmentCrn) {
+        return environmentClientService.get(environmentCrn);
     }
 
     @Override
-    public SimpleEnvironmentV4Response delete(Long workspaceId, String environmentName) {
-        return environmentService.delete(environmentName, workspaceId);
+    public SimpleEnvironmentResponse delete(Long workspaceId, String environmentCrn) {
+        return environmentClientService.delete(environmentCrn);
     }
 
     @Override
-    public DetailedEnvironmentV4Response edit(Long workspaceId, String environmentName, @NotNull EnvironmentEditV4Request request) {
-        return environmentService.edit(workspaceId, environmentName, request);
+    public DetailedEnvironmentResponse edit(Long workspaceId, String environmentCrn, @NotNull EnvironmentEditRequest request) {
+        return environmentClientService.edit(environmentCrn, request);
     }
 
     @Override
-    public DetailedEnvironmentV4Response attach(Long workspaceId, String environmentName, @Valid EnvironmentAttachV4Request request) {
+    public DetailedEnvironmentV4Response attach(Long workspaceId, String environmentCrn, @Valid EnvironmentAttachV4Request request) {
         throw new UnsupportedOperationException("Attaching resource to an environment is not supported anymore!");
     }
 
     @Override
-    public DetailedEnvironmentV4Response detach(Long workspaceId, String environmentName, @Valid EnvironmentDetachV4Request request) {
+    public DetailedEnvironmentV4Response detach(Long workspaceId, String environmentCrn, @Valid EnvironmentDetachV4Request request) {
         throw new UnsupportedOperationException("Detaching resource from an environment is not supported anymore!");
     }
 
     @Override
-    public DetailedEnvironmentV4Response registerExternalDatalake(Long workspaceId, String environmentName, @Valid RegisterDatalakeV4Request request) {
-        return environmentService.registerExternalDatalake(environmentName, workspaceId, request);
+    public DetailedEnvironmentV4Response registerExternalDatalake(Long workspaceId, String environmentCrn, @Valid RegisterDatalakeV4Request request) {
+        throw new UnsupportedOperationException("registerExternalDatalake is not supported.");
     }
 
     @Override

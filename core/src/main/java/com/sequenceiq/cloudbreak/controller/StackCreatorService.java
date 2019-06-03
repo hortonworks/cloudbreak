@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -51,13 +50,14 @@ import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.repository.ClusterComponentRepository;
 import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
+import com.sequenceiq.cloudbreak.service.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
@@ -66,6 +66,9 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
 public class StackCreatorService {
@@ -130,6 +133,15 @@ public class StackCreatorService {
     @Inject
     private CloudbreakMetricService metricService;
 
+    @Inject
+    private EnvironmentClientService environmentClientService;
+
+    @Inject
+    private ClusterService clusterService;
+
+    @Inject
+    private ClusterComponentRepository clusterComponentRepository;
+
     public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest) {
         long start = System.currentTimeMillis();
 
@@ -188,9 +200,10 @@ public class StackCreatorService {
                     stackService.validateStack(stackValidation);
 
                     fileSystemValidator.validateFileSystem(stackValidation.getCredential().cloudPlatform(), cloudCredential,
-                                stackValidationRequest.getFileSystem(), stack.getCreator().getUserId(), stack.getWorkspace().getId());
+                            stackValidationRequest.getFileSystem(), stack.getCreator().getUserId(), stack.getWorkspace().getId());
 
-                    clusterCreationService.validate(stackRequest.getCluster(), cloudCredential, stack, user, workspace);
+                    DetailedEnvironmentResponse environment = environmentClientService.get(stackRequest.getEnvironmentCrn());
+                    clusterCreationService.validate(stackRequest.getCluster(), cloudCredential, stack, user, workspace, environment);
                 }
 
                 fillInstanceMetadata(stack);
@@ -230,17 +243,19 @@ public class StackCreatorService {
     }
 
     private void decorateWithDatalakeResourceIdFromEnvironment(Stack stack) {
-        if (stack.getEnvironment() != null && !CollectionUtils.isEmpty(stack.getEnvironment().getDatalakeResources())
-                && stack.getEnvironment().getDatalakeResources().size() == 1 && stack.getDatalakeResourceId() == null) {
-            stack.setDatalakeResourceId(stack.getEnvironment().getDatalakeResources().stream().findFirst().get().getId());
-        }
+//        Set<DatalakeResources> datalakeResources = datalakeResourcesService
+//                .findDatalakeResourcesByWorkspaceAndEnvironment(stack.getWorkspace().getId(), stack.getEnvironmentCrn());
+//        if (stack.getEnvironmentCrn() != null && !CollectionUtils.isEmpty(datalakeResources)
+//                && datalakeResources.size() == 1 && stack.getDatalakeResourceId() == null) {
+//            stack.setDatalakeResourceId(datalakeResources.stream().findFirst().get().getId());
+//        }
     }
 
     private void setStackTypeAndValidateDatalake(Stack stack, Blueprint blueprint) {
         if (blueprintService.isDatalakeBlueprint(blueprint)) {
             stack.setType(StackType.DATALAKE);
-            if (stack.getEnvironment() != null) {
-                Long datalakesInEnv = datalakeResourcesService.countDatalakeResourcesInEnvironment(stack.getEnvironment());
+            if (stack.getEnvironmentCrn() != null) {
+                Long datalakesInEnv = datalakeResourcesService.countDatalakeResourcesInEnvironment(stack.getEnvironmentCrn());
                 if (datalakesInEnv >= 1L) {
                     throw new BadRequestException("Only 1 datalake cluster / environment is allowed.");
                 }
@@ -263,8 +278,8 @@ public class StackCreatorService {
     private boolean shouldUseBaseImage(ClusterV4Request clusterRequest, Blueprint blueprint) {
         return (clusterRequest.getAmbari() != null && clusterRequest.getAmbari().getRepository() != null)
                 || (clusterRequest.getAmbari() != null
-                    && clusterRequest.getAmbari().getStackRepository() != null
-                    && clusterRequest.getAmbari().getStackRepository().customRepoSpecified())
+                && clusterRequest.getAmbari().getStackRepository() != null
+                && clusterRequest.getAmbari().getStackRepository().customRepoSpecified())
                 || blueprintService.isClouderaManagerTemplate(blueprint);
     }
 

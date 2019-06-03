@@ -24,7 +24,7 @@ public class CloudStorageMatrixTest extends AbstractIntegrationTest {
         createDefaultUser((MockedTestContext) data[0]);
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a cloud storage matrix",
             when = "the cloudstorage endpoint is called",

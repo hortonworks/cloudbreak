@@ -8,10 +8,12 @@ import java.util.Set;
 import javax.ws.rs.WebApplicationException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.EnvironmentV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.EnvironmentV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.LocationV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.DetailedEnvironmentV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
+import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -19,23 +21,23 @@ import com.sequenceiq.it.cloudbreak.dto.DeletableTestDto;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 
 @Prototype
-public class EnvironmentTestDto extends DeletableTestDto<EnvironmentV4Request, DetailedEnvironmentV4Response, EnvironmentTestDto, SimpleEnvironmentV4Response> {
+public class EnvironmentTestDto extends DeletableTestDto<EnvironmentRequest, DetailedEnvironmentResponse, EnvironmentTestDto, SimpleEnvironmentResponse> {
 
     public static final String ENVIRONMENT = "ENVIRONMENT";
 
-    private Collection<SimpleEnvironmentV4Response> response;
+    private Collection<SimpleEnvironmentResponse> response;
 
     private SimpleEnvironmentV4Response simpleResponse;
 
     public EnvironmentTestDto(TestContext testContext) {
-        super(new EnvironmentV4Request(), testContext);
+        super(new EnvironmentRequest(), testContext);
     }
 
     public EnvironmentTestDto() {
         super(ENVIRONMENT);
     }
 
-    public EnvironmentTestDto(EnvironmentV4Request environmentV4Request, TestContext testContext) {
+    public EnvironmentTestDto(EnvironmentRequest environmentV4Request, TestContext testContext) {
         super(environmentV4Request, testContext);
     }
 
@@ -46,9 +48,10 @@ public class EnvironmentTestDto extends DeletableTestDto<EnvironmentV4Request, D
 
     @Override
     public EnvironmentTestDto valid() {
-        return getCloudProvider().environment(withName(resourceProperyProvider().getName())
-                .withDescription(resourceProperyProvider().getDescription("environment")));
-
+        return getCloudProvider()
+                .environment(withName(resourceProperyProvider().getName())
+                        .withDescription(resourceProperyProvider().getDescription("environment")));
+//                .withCredentialName(getTestContext().get(CredentialTestDto.class).getName()));
     }
 
     public EnvironmentTestDto withName(String name) {
@@ -68,9 +71,16 @@ public class EnvironmentTestDto extends DeletableTestDto<EnvironmentV4Request, D
     }
 
     public EnvironmentTestDto withLocation(String location) {
-        LocationV4Request locationV4Request = new LocationV4Request();
+        LocationRequest locationV4Request = new LocationRequest();
         locationV4Request.setName(location);
         getRequest().setLocation(locationV4Request);
+        return this;
+    }
+
+    public EnvironmentTestDto withCredentialName(String credentialName) {
+        CredentialRequest credentialRequest = new CredentialRequest();
+        credentialRequest.setName(credentialName);
+        getRequest().setCredential(credentialRequest);
         return this;
     }
 
@@ -78,7 +88,7 @@ public class EnvironmentTestDto extends DeletableTestDto<EnvironmentV4Request, D
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
         LOGGER.info("Cleaning up resource with name: {}", getName());
         try {
-            SimpleEnvironmentV4Response entity = new SimpleEnvironmentV4Response();
+            SimpleEnvironmentResponse entity = new SimpleEnvironmentResponse();
             entity.setName(getName());
             delete(context, entity, cloudbreakClient);
         } catch (WebApplicationException ignore) {
@@ -86,11 +96,11 @@ public class EnvironmentTestDto extends DeletableTestDto<EnvironmentV4Request, D
         }
     }
 
-    public Collection<SimpleEnvironmentV4Response> getResponseSimpleEnvSet() {
+    public Collection<SimpleEnvironmentResponse> getResponseSimpleEnvSet() {
         return response;
     }
 
-    public void setResponseSimpleEnvSet(Collection<SimpleEnvironmentV4Response> response) {
+    public void setResponseSimpleEnvSet(Collection<SimpleEnvironmentResponse> response) {
         this.response = response;
     }
 
@@ -103,18 +113,18 @@ public class EnvironmentTestDto extends DeletableTestDto<EnvironmentV4Request, D
     }
 
     @Override
-    public List<SimpleEnvironmentV4Response> getAll(CloudbreakClient client) {
+    public List<SimpleEnvironmentResponse> getAll(CloudbreakClient client) {
         EnvironmentV4Endpoint environmentV4Endpoint = client.getCloudbreakClient().environmentV4Endpoint();
         return new ArrayList<>(environmentV4Endpoint.list(client.getWorkspaceId()).getResponses());
     }
 
     @Override
-    protected String name(SimpleEnvironmentV4Response entity) {
+    protected String name(SimpleEnvironmentResponse entity) {
         return entity.getName();
     }
 
     @Override
-    public void delete(TestContext testContext, SimpleEnvironmentV4Response entity, CloudbreakClient client) {
+    public void delete(TestContext testContext, SimpleEnvironmentResponse entity, CloudbreakClient client) {
         try {
             client.getCloudbreakClient().environmentV4Endpoint().delete(client.getWorkspaceId(), entity.getName());
         } catch (Exception e) {
