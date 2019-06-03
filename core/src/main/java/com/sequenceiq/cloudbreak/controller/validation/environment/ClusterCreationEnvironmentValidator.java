@@ -12,17 +12,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.requests.RegisterDatalakeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.environment.Environment;
-import com.sequenceiq.cloudbreak.domain.environment.Region;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
@@ -31,6 +27,7 @@ import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
 public class ClusterCreationEnvironmentValidator {
@@ -46,13 +43,12 @@ public class ClusterCreationEnvironmentValidator {
     @Inject
     private KerberosConfigService kerberosConfigService;
 
-    public ValidationResult validate(ClusterV4Request clusterRequest, Stack stack, User user) {
+    public ValidationResult validate(ClusterV4Request clusterRequest, Stack stack, User user, DetailedEnvironmentResponse environment) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        EnvironmentView stackEnv = stack.getEnvironment();
-        if (stackEnv != null && !CollectionUtils.isEmpty(stackEnv.getRegionSet())
-                && stackEnv.getRegionSet().stream().noneMatch(region -> region.getName().equals(stack.getRegion()))) {
-            resultBuilder.error(String.format("[%s] region is not enabled in [%s] environment. Enabled environments: [%s]", stack.getRegion(),
-                    stackEnv.getName(), stackEnv.getRegionSet().stream().map(Region::getName).sorted().collect(Collectors.joining(","))));
+        if (environment != null && !CollectionUtils.isEmpty(environment.getRegions().getRegions())
+                && environment.getRegions().getRegions().stream().noneMatch(region -> region.equals(stack.getRegion()))) {
+            resultBuilder.error(String.format("[%s] region is not enabled in [%s] environment. Enabled regions: [%s]", stack.getRegion(),
+                    environment.getName(), environment.getRegions().getRegions().stream().sorted().collect(Collectors.joining(","))));
         }
         Long workspaceId = stack.getWorkspace().getId();
 
@@ -71,31 +67,6 @@ public class ClusterCreationEnvironmentValidator {
                 KerberosConfig.class.getSimpleName());
         validateRdsConfigNames(clusterRequest.getDatabases(), resultBuilder, workspaceId);
         validateProxyConfig(clusterRequest.getProxyConfigCrn(), stack.getWorkspace().getTenant().getName(), resultBuilder, user.getUserCrn());
-        return resultBuilder.build();
-    }
-
-    public ValidationResult validate(RegisterDatalakeV4Request registerDatalakeRequest, Environment environment) {
-        ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        Long workspaceId = environment.getWorkspace().getId();
-        if (!CollectionUtils.isEmpty(environment.getDatalakeResources())) {
-            resultBuilder.error("Only one external datalake can be registered to an environment!");
-        }
-
-        validateConfigByName(
-                registerDatalakeRequest.getLdapName(),
-                workspaceId,
-                resultBuilder,
-                ldapConfigService::getByNameForWorkspaceId,
-                LdapConfig.class.getSimpleName());
-
-        validateConfigByName(
-                registerDatalakeRequest.getKerberosName(),
-                workspaceId,
-                resultBuilder,
-                kerberosConfigService::getByNameForWorkspaceId,
-                KerberosConfig.class.getSimpleName());
-
-        validateRdsConfigNames(registerDatalakeRequest.getDatabaseNames(), resultBuilder, workspaceId);
         return resultBuilder.build();
     }
 

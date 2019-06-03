@@ -15,8 +15,7 @@ public class StackV4RequestToStackValidationRequestConverter extends AbstractCon
     public StackValidationV4Request convert(StackV4Request source) {
         StackValidationV4Request stackValidationRequest = new StackValidationV4Request();
         stackValidationRequest.setBlueprintName(source.getCluster().getBlueprintName());
-        stackValidationRequest.setEnvironmentName(source.getEnvironment().getName());
-        stackValidationRequest.setCredentialName(source.getEnvironment().getCredentialName());
+        stackValidationRequest.setEnvironmentCrn(source.getEnvironmentCrn());
         stackValidationRequest.setNetwork(source.getNetwork());
         stackValidationRequest.setInstanceGroups(new HashSet<>(source.getInstanceGroups()));
         return stackValidationRequest;

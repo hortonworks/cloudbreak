@@ -9,16 +9,15 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
+import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByReturnValue;
 import com.sequenceiq.cloudbreak.workspace.repository.check.CheckPermissionsByWorkspaceId;
 import com.sequenceiq.cloudbreak.workspace.repository.check.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.workspace.repository.check.WorkspaceResourceType;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
-import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @DisableHasPermission
 @EntityType(entityClass = DatalakeResources.class)
@@ -30,10 +29,14 @@ public interface DatalakeResourcesRepository extends WorkspaceResourceRepository
     Optional<DatalakeResources> findByDatalakeStackId(Long datalakeStackId);
 
     @CheckPermissionsByWorkspaceId
-    @Query("SELECT dr.name FROM DatalakeResources dr WHERE dr.workspace.id = :workspaceId AND dr.environment.id = :envId")
-    Set<String> findDatalakeResourcesNamesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("envId") Long envId);
+    @Query("SELECT dr.name FROM DatalakeResources dr WHERE dr.workspace.id = :workspaceId AND dr.environmentCrn = :envCrn")
+    Set<DatalakeResources> findDatalakeResourcesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("envCrn") String envCrn);
+
+    @CheckPermissionsByWorkspaceId
+    @Query("SELECT dr.name FROM DatalakeResources dr WHERE dr.workspace.id = :workspaceId AND dr.environmentCrn = :envCrn")
+    Set<String> findDatalakeResourcesNamesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("envCrn") String envCrn);
 
     @DisableCheckPermissions
-    Long countDatalakeResourcesByEnvironment(EnvironmentView environment);
+    Long countDatalakeResourcesByEnvironmentCrn(String environmentCrn);
 
 }

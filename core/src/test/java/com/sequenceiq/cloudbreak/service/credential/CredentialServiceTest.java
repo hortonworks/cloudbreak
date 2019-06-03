@@ -18,11 +18,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -34,14 +32,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.ImmutableSet;
-import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Topology;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -50,7 +46,6 @@ import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
@@ -110,6 +105,7 @@ public class CredentialServiceTest {
     @Mock
     private WorkspaceService workspaceService;
 
+    // TODO: mocking POJOs is a terrible practice and must be stopped!!!
     @Mock
     private Workspace workspace;
 
@@ -118,9 +114,6 @@ public class CredentialServiceTest {
 
     @Mock
     private CloudbreakUser cloudbreakUser;
-
-    @Mock
-    private EnvironmentViewService environmentViewService;
 
     @Mock
     private CredentialPrerequisiteService credentialPrerequisiteService;
@@ -190,23 +183,6 @@ public class CredentialServiceTest {
     }
 
     @Test
-    public void testUpdateByWorkspaceIdWhenCredentialCloudPlatformIsNotValidThenNoUnnecessaryCallsAreHappen() {
-        String message = "Invalid credential";
-        when(testCredential.cloudPlatform()).thenReturn("");
-
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage(message);
-
-        underTest.updateByWorkspaceId(WORKSPACE_ID, testCredential);
-
-        verify(credentialRepository, times(0)).findActiveByNameAndWorkspaceIdFilterByPlatforms(anyString(), anyLong(), anyCollection());
-        verify(preferencesService, times(0)).enabledPlatforms();
-        verify(workspaceService, times(0)).get(anyLong(), any(User.class));
-        verify(credentialAdapter, times(0)).verify(any(Credential.class), anyLong(), anyString());
-        verify(credentialRepository, times(0)).save(any());
-    }
-
-    @Test
     public void testUpdateByWorkspaceIdWhenCredentialDoesNotExistsOrItIsInAnotherWorkspaceWhereUserHasNoRightThenNotFoundExceptionShouldCome() {
         when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, WORKSPACE_ID, CLOUD_PLATFORMS))
                 .thenReturn(Optional.empty());
@@ -273,23 +249,6 @@ public class CredentialServiceTest {
     }
 
     @Test
-    public void testCreateWhenCredentialCloudPlatformIsNotValidThenSaveShouldNotBePerformed() {
-        String invalidCloudPlatformValue = "something invalid";
-        String message = "Invalid credential";
-        when(testCredential.cloudPlatform()).thenReturn(invalidCloudPlatformValue);
-        when(workspaceService.get(WORKSPACE_ID, user)).thenReturn(workspace);
-
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage(message);
-
-        underTest.create(testCredential, WORKSPACE_ID, user);
-
-        verify(credentialAdapter, times(0)).verify(any(Credential.class), anyLong(), anyString());
-        verify(notificationSender, times(0)).send(any());
-        verify(messagesService, times(0)).getMessage(anyString());
-    }
-
-    @Test
     public void testCreateWhenCredentialCloudPlatformIsValidAndCredentialValuesAreFineThenCredentialWillBeSaved() {
         Credential expected = createCredential(TEST_CREDENTIAL_NAME);
         when(testCredential.cloudPlatform()).thenReturn(TEST_CLOUD_PLATFORM);
@@ -306,23 +265,6 @@ public class CredentialServiceTest {
         verify(credentialAdapter, times(1)).verify(testCredential, WORKSPACE_ID, USER_ID);
         verify(notificationSender, times(1)).send(any());
         verify(messagesService, times(1)).getMessage(ResourceEvent.CREDENTIAL_CREATED.getMessage());
-    }
-
-    @Test
-    public void testCreateWithRetryWhenCredentialCloudPlatformIsNotValidThenSaveShouldNotBePerformed() {
-        String invalidCloudPlatformValue = "something invalid";
-        String message = "Invalid credential";
-        when(testCredential.cloudPlatform()).thenReturn(invalidCloudPlatformValue);
-        when(workspaceService.get(WORKSPACE_ID, user)).thenReturn(workspace);
-
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage(message);
-
-        underTest.createWithRetry(testCredential, WORKSPACE_ID, user);
-
-        verify(credentialAdapter, times(0)).verify(any(Credential.class), anyLong(), anyString());
-        verify(notificationSender, times(0)).send(any());
-        verify(messagesService, times(0)).getMessage(anyString());
     }
 
     @Test
@@ -390,44 +332,11 @@ public class CredentialServiceTest {
     }
 
     @Test
-    public void testDeleteByNameWhenEnvironmentsUsesTheGivenCredentialThenBadRequestExceptionShouldComeWithExpectedMessage() {
-        // GIVEN
-        Credential credential = createCredential(TEST_CREDENTIAL_NAME);
-        EnvironmentView env1 = new EnvironmentView();
-        env1.setId(TestUtil.generateUniqueId());
-        env1.setName("env1");
-        EnvironmentView env2 = new EnvironmentView();
-        env2.setId(TestUtil.generateUniqueId());
-        env2.setName("env2");
-        Set<EnvironmentView> envs = new HashSet<>();
-        envs.add(env1);
-        envs.add(env2);
-        when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, WORKSPACE_ID, CLOUD_PLATFORMS))
-                .thenReturn(Optional.ofNullable(credential));
-        when(stackService.findByCredential(credential)).thenReturn(Collections.emptySet());
-        when(environmentViewService.findAllByCredentialId(credential.getId())).thenReturn(envs);
-        // WHEN
-        try {
-            underTest.delete(TEST_CREDENTIAL_NAME, workspace);
-        } catch (BadRequestException ex) {
-            String msg = format("Credential '%s' cannot be deleted because the following environments are using it: [%s].",
-                    TEST_CREDENTIAL_NAME, envs.stream().map(EnvironmentView::getName).collect(Collectors.joining(", ")));
-            assertEquals(msg, ex.getMessage());
-        }
-        // THEN
-        verify(stackService, times(1)).findByCredential(credential);
-        verify(environmentViewService, times(1)).findAllByCredentialId(credential.getId());
-        verify(userProfileHandler, times(0)).destroyProfileCredentialPreparation(credential);
-        verify(credentialRepository, times(0)).save(credential);
-    }
-
-    @Test
     public void testDeleteByNameWhenCredentialIsDeletableThenItWillBeArchivedProperly() {
         Credential credential = createCredential(TEST_CREDENTIAL_NAME);
         when(credentialRepository.findActiveByNameAndWorkspaceIdFilterByPlatforms(TEST_CREDENTIAL_NAME, WORKSPACE_ID, CLOUD_PLATFORMS))
                 .thenReturn(Optional.ofNullable(credential));
         when(stackService.findByCredential(credential)).thenReturn(Collections.emptySet());
-        when(environmentViewService.findAllByCredentialId(credential.getId())).thenReturn(Collections.emptySet());
 
         underTest.delete(TEST_CREDENTIAL_NAME, workspace);
 
@@ -503,7 +412,6 @@ public class CredentialServiceTest {
         when(credentialRepository.save(created)).thenReturn(created);
         when(workspaceService.retrieveForUser(user)).thenReturn(Set.of(workspace));
         when(workspaceService.get(WORKSPACE_ID, user)).thenReturn(workspace);
-        when(testCredential.cloudPlatform()).thenReturn(PLATFORM);
         when(testCredential.getAttributes()).thenReturn(format("{\"%s\":\"%s\"}", "deploymentAddress", "https://MY_DEPLOYMENT_ADDRESS"));
         when(credentialAdapter.initCodeGrantFlow(testCredential, WORKSPACE_ID, USER_ID)).thenReturn(created);
 
@@ -516,7 +424,6 @@ public class CredentialServiceTest {
 
     @Test
     public void testInitCodeGrantFlowWhenCredentialTheSpecifiedCredentialDoesNotContainDeploymentAddressAttributeThenBadRequestExceptionShouldBeThrown() {
-        when(testCredential.cloudPlatform()).thenReturn(PLATFORM);
         when(workspaceService.get(WORKSPACE_ID, user)).thenReturn(workspace);
 
         thrown.expect(BadRequestException.class);
@@ -534,7 +441,6 @@ public class CredentialServiceTest {
         when(credentialRepository.save(created)).thenReturn(created);
         when(workspaceService.retrieveForUser(user)).thenReturn(Set.of(workspace));
         when(workspaceService.get(WORKSPACE_ID, user)).thenReturn(workspace);
-        when(testCredential.cloudPlatform()).thenReturn(PLATFORM);
         when(testCredential.getAttributes()).thenReturn(format("{\"%s\":\"%s\"}", "deploymentAddress", "https://MY_DEPLOYMENT_ADDRESS"));
         when(credentialAdapter.initCodeGrantFlow(testCredential, WORKSPACE_ID, USER_ID)).thenReturn(created);
 

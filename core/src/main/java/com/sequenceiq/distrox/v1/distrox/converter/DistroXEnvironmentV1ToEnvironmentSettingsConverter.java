@@ -5,24 +5,24 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
-import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
+import com.sequenceiq.cloudbreak.service.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.distrox.api.v1.distrox.model.environment.DistroXEnvironmentV1Request;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
 public class DistroXEnvironmentV1ToEnvironmentSettingsConverter {
 
     @Inject
-    private EnvironmentViewService environmentViewService;
+    private EnvironmentClientService environmentClientService;
 
     @Inject
     private WorkspaceService workspaceService;
 
     public EnvironmentSettingsV4Request convert(DistroXEnvironmentV1Request source) {
-        EnvironmentView environmentView = environmentViewService.getByNameForWorkspace(source.getName(), workspaceService.getForCurrentUser());
+        DetailedEnvironmentResponse environment = environmentClientService.get(source.getName());
         EnvironmentSettingsV4Request response = new EnvironmentSettingsV4Request();
-        response.setCredentialName(environmentView.getCredential().getName());
+        response.setCredentialName(environment.getCredentialName());
         response.setName(source.getName());
         return response;
     }

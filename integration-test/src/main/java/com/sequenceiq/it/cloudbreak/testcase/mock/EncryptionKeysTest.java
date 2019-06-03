@@ -28,7 +28,7 @@ public class EncryptionKeysTest extends AbstractIntegrationTest {
         createDefaultUser((TestContext) data[0]);
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "there is a prepared MOCK credential with encryption keys",
             when = "calling get encryption keys endpoint",
@@ -42,7 +42,7 @@ public class EncryptionKeysTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = "contextWithCredentialNameAndException")
+    @Test(dataProvider = "contextWithCredentialNameAndException", enabled = false)
     public void getPlatformEncryptionKeysWithMockCredentialThenReturnWithPlatformRelatedKeys(
             MockedTestContext testContext,
             String credentialName,

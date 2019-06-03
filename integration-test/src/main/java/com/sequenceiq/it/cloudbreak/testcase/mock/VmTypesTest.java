@@ -27,7 +27,7 @@ public class VmTypesTest extends AbstractIntegrationTest {
         createDefaultUser((TestContext) data[0]);
     }
 
-    @Test(dataProvider = "contextWithCredentialNameAndException")
+    @Test(dataProvider = "contextWithCredentialNameAndException", enabled = false)
     public void testGetPlatformVmtypesByCredentialNameWhenCredentialIsInvalid(
             MockedTestContext testContext,
             String credentialName,

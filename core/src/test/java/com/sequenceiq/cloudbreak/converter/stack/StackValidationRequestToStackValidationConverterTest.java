@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter.stack;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.HashMap;
@@ -25,24 +26,29 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackValidationV
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackValidationV4RequestToStackValidationConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
-import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackValidationRequestToStackValidationConverterTest {
+
+    private static final String BP_NAME = "HDF3.1 Datascience Pack";
+
+    private static final String BP_NAME_2 = "HDP 3.1 Spark Pack";
+
     @Rule
     public ExpectedException expectedEx = ExpectedException.none();
 
@@ -74,29 +80,33 @@ public class StackValidationRequestToStackValidationConverterTest {
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Mock
-    private EnvironmentViewService environmentViewService;
+    private ConverterUtil converterUtil;
 
     @Mock
-    private ConverterUtil converterUtil;
+    private EnvironmentClientService environmentClientService;
 
     @InjectMocks
     private StackValidationV4RequestToStackValidationConverter underTest;
 
     private StackValidationV4Request validationRequest;
 
-    private String bpName = "HDF3.1 Datascience Pack";
+    private DetailedEnvironmentResponse environment;
 
-    private String bpName2 = "HDP 3.1 Spark Pack";
+    private final Workspace workspace = TestUtil.workspace(1L, "myWorkspace");
 
-    private Workspace workspace = TestUtil.workspace(1L, "myWorkspace");
-
-    private Credential credential = TestUtil.gcpCredential();
+    private final Credential credential = TestUtil.gcpCredential();
 
     @Before
     public void init() {
         validationRequest = new StackValidationV4Request();
+        validationRequest.setEnvironmentCrn("envCrn");
         mockUserRelated();
         mockBlueprintsInWorkspace();
+        environment = new DetailedEnvironmentResponse();
+        environment.setCredentialName(credential.getName());
+        when(environmentClientService.get(anyString())).thenReturn(environment);
+        when(credentialService.getByNameForWorkspace(anyString(), any(Workspace.class)))
+                .thenReturn(credential);
     }
 
     @Test
@@ -113,10 +123,9 @@ public class StackValidationRequestToStackValidationConverterTest {
     @Test
     public void validBlueprintByName() {
         validationRequest.setNetworkId(442L);
-        validationRequest.setBlueprintName(bpName);
-        validationRequest.setCredentialName("credName");
+        validationRequest.setBlueprintName(BP_NAME);
 
-        when(credentialService.getByNameForWorkspace(validationRequest.getCredentialName(), workspace)).thenReturn(credential);
+        when(credentialService.getByNameForWorkspace(credential.getName(), workspace)).thenReturn(credential);
 
         Map<Platform, PlatformParameters> platformParametersMap = new HashMap<>();
         platformParametersMap.put(Platform.platform("GCP"), parameters);
@@ -125,35 +134,16 @@ public class StackValidationRequestToStackValidationConverterTest {
 
         StackValidation result = underTest.convert(validationRequest);
 
-        assertEquals(bpName, result.getBlueprint().getName());
+        assertEquals(BP_NAME, result.getBlueprint().getName());
     }
 
     @Test
-    public void convertShouldUseEnvironmentCredentialWhenItisGiven() {
+    public void convertShouldThrowAccessDeniedExceptionWhenNoEnvironmentAndCredentialAreGiven() {
         // GIVEN
         validationRequest.setNetworkId(442L);
-        validationRequest.setBlueprintName(bpName);
-        EnvironmentView environmentView = new EnvironmentView();
-        environmentView.setName("env");
-        environmentView.setCredential(credential);
-        validationRequest.setEnvironmentName(environmentView.getName());
-        Map<Platform, PlatformParameters> platformParametersMap = new HashMap<>();
-        platformParametersMap.put(Platform.platform("GCP"), parameters);
-        when(cloudParameterCache.getPlatformParameters()).thenReturn(platformParametersMap);
-        when(networkService.get(any())).thenReturn(TestUtil.network());
-        when(environmentViewService.getByNameForWorkspace(environmentView.getName(), workspace)).thenReturn(environmentView);
-        // WHEN
-        StackValidation actualResult = underTest.convert(validationRequest);
-        // THEN
-        assertEquals(credential, actualResult.getCredential());
-        assertEquals(environmentView, actualResult.getEnvironment());
-    }
+        validationRequest.setBlueprintName(BP_NAME);
+        environment.setCredentialName(null);
 
-    @Test
-    public void convertShouldThrowAccessDeniedExceptinWhenNoEnvironmentAndCredentialAreGiven() {
-        // GIVEN
-        validationRequest.setNetworkId(442L);
-        validationRequest.setBlueprintName(bpName);
         expectedEx.expect(BadRequestException.class);
         expectedEx.expectMessage("Credential is not configured for the validation request!");
         // WHEN
@@ -161,16 +151,16 @@ public class StackValidationRequestToStackValidationConverterTest {
         // THEN expected exception should be thrown
     }
 
-    private void mockBlueprintsInWorkspace() {
-        Set<Blueprint> blueprints = new HashSet<>();
-        blueprints.add(TestUtil.blueprint(1L, bpName, "{}"));
-        blueprints.add(TestUtil.blueprint(2L, bpName2, "{}"));
-        when(blueprintService.getAllAvailableInWorkspace(any())).thenReturn(blueprints);
-    }
-
     private void mockUserRelated() {
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(TestUtil.cbAdminUser());
+    }
+
+    private void mockBlueprintsInWorkspace() {
+        Set<Blueprint> blueprints = new HashSet<>();
+        blueprints.add(TestUtil.blueprint(1L, BP_NAME, "{}"));
+        blueprints.add(TestUtil.blueprint(2L, BP_NAME_2, "{}"));
+        when(blueprintService.getAllAvailableInWorkspace(any())).thenReturn(blueprints);
     }
 
 }
