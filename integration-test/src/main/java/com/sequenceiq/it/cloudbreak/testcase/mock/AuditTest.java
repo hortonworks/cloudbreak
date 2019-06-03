@@ -249,7 +249,7 @@ public class AuditTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "there is a running cloudbreak",
             when = "an Ldap is created",

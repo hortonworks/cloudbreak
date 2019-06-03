@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @Component
@@ -32,6 +33,9 @@ public class RecipeEngine {
 
     @Inject
     private OrchestratorRecipeExecutor orchestratorRecipeExecutor;
+
+    @Inject
+    private LdapConfigService ldapConfigService;
 
     public void uploadRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
@@ -66,8 +70,8 @@ public class RecipeEngine {
     // note: executed when LDAP config is present, because later the LDAP sync is hooked for this salt state in the top.sls.
     public void executePostAmbariStartRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
-        if ((stack.getCluster() != null && stack.getCluster().getLdapConfig() != null) || recipesFound(hostGroups, POST_AMBARI_START)
-                && recipesSupportedOnOrchestrator(orchestrator)) {
+        if ((stack.getCluster() != null && ldapConfigService.isLdapConfigExistsForEnvironment(stack.getEnvironmentCrn()))
+                || recipesFound(hostGroups, POST_AMBARI_START) && recipesSupportedOnOrchestrator(orchestrator)) {
             orchestratorRecipeExecutor.postClusterManagerStartRecipes(stack);
         }
     }

@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.AmbariV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.customcontainer.CustomContainerV4Response;
@@ -82,7 +81,6 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
                     serviceEndpointCollector.prepareClusterExposedServices(source, managerIp);
             clusterResponse.setExposedServices(clusterExposedServicesForTopologies);
         }
-        clusterResponse.setLdap(getConversionService().convert(source.getLdapConfig(), LdapV4Response.class));
         convertCustomQueue(source, clusterResponse);
         convertNullableProperties(source, clusterResponse);
         convertContainerConfig(source, clusterResponse);

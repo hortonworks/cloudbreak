@@ -22,12 +22,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.dto.LdapView;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariLdapServiceTest {
@@ -45,7 +44,7 @@ public class AmbariLdapServiceTest {
 
     private Stack stack;
 
-    private LdapConfig ldapConfig;
+    private LdapView ldapConfig;
 
     private AmbariClient ambariClient;
 
@@ -56,27 +55,7 @@ public class AmbariLdapServiceTest {
         cluster = new Cluster();
         cluster.setName("cluster0");
         cluster.setGateway(gateway);
-        ldapConfig = new LdapConfig();
-        ldapConfig.setProtocol("ldaps");
-        ldapConfig.setName("ldap-name");
-        ldapConfig.setAdminGroup("admingroup");
-        ldapConfig.setBindDn("bindDn");
-        ldapConfig.setBindPassword("bindPasswd");
-        ldapConfig.setDescription("descr");
-        ldapConfig.setDirectoryType(DirectoryType.ACTIVE_DIRECTORY);
-        ldapConfig.setDomain("domain");
-        ldapConfig.setGroupMemberAttribute("groupMemberAttr");
-        ldapConfig.setGroupNameAttribute("groupNameAttr");
-        ldapConfig.setGroupObjectClass("groupObjectClass");
-        ldapConfig.setGroupSearchBase("groupSearchBase");
-        ldapConfig.setUserNameAttribute("userNameAttr");
-        ldapConfig.setUserDnPattern("userDnPattern");
-        ldapConfig.setUserObjectClass("userObjectClass");
-        ldapConfig.setUserSearchBase("userSearchBase");
-        ldapConfig.setServerPort(1234);
-        ldapConfig.setServerHost("host");
-        cluster.setLdapConfig(ldapConfig);
-
+        ldapConfig = TestUtil.adConfigBuilder().withProtocol("ldaps").build();
         stack = new Stack();
         stack.setName("stack0");
         stack.setId(2L);
@@ -89,7 +68,7 @@ public class AmbariLdapServiceTest {
     public void setupLdap() throws IOException, URISyntaxException {
         AmbariRepo ambariRepo = mock(AmbariRepo.class);
         when(ambariRepositoryVersionService.isVersionNewerOrEqualThanLimited(any(), any())).thenReturn(false);
-        ambariLdapService.setupLdap(stack, cluster, ambariRepo, ambariClient);
+        ambariLdapService.setupLdap(stack, cluster, ambariRepo, ambariClient, ldapConfig);
 
         verify(ambariClient).configureLdap(captor.capture());
         Map<String, Object> parameters = captor.getValue();
@@ -120,7 +99,7 @@ public class AmbariLdapServiceTest {
     public void setupLdapWithAmbari2720() throws IOException, URISyntaxException {
         AmbariRepo ambariRepo = mock(AmbariRepo.class);
         when(ambariRepositoryVersionService.isVersionNewerOrEqualThanLimited(any(), any())).thenReturn(true);
-        ambariLdapService.setupLdap(stack, cluster, ambariRepo, ambariClient);
+        ambariLdapService.setupLdap(stack, cluster, ambariRepo, ambariClient, ldapConfig);
 
         verify(ambariClient).configureLdap(captor.capture());
         Map<String, Object> parameters = captor.getValue();
@@ -149,7 +128,7 @@ public class AmbariLdapServiceTest {
 
     @Test
     public void syncLdap() throws IOException, URISyntaxException {
-        ambariLdapService.syncLdap(stack, ambariClient);
+        ambariLdapService.syncLdap(stack, ambariClient, ldapConfig);
         verify(ambariClient, times(1)).syncLdap();
     }
 }

@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.template.views.GeneralClusterConfigsView;
 import com.sequenceiq.cloudbreak.template.views.HdfConfigView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
-import com.sequenceiq.cloudbreak.template.views.LdapView;
+import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 

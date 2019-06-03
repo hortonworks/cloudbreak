@@ -44,7 +44,6 @@ import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConve
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
@@ -52,6 +51,8 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
+import com.sequenceiq.cloudbreak.dto.LdapView;
+import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -150,11 +151,15 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Mock
     private CredentialClientService credentialClientService;
 
+    @Mock
+    private LdapConfigService ldapConfigService;
+
     @Before
     public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
         when(clusterService.getById(any(Long.class))).thenReturn(cluster);
         when(stackMock.getCluster()).thenReturn(sourceCluster);
+        when(stackMock.getEnvironmentCrn()).thenReturn("env");
         when(sourceCluster.getId()).thenReturn(TEST_CLUSTER_ID);
         when(cluster.getId()).thenReturn(TEST_CLUSTER_ID);
         when(clusterComponentConfigProvider.getHDPRepo(TEST_CLUSTER_ID)).thenReturn(stackRepoDetails);
@@ -169,6 +174,7 @@ public class StackToTemplatePreparationObjectConverterTest {
                 .attributes(new Json(""))
                 .build();
         when(credentialClientService.get(anyString())).thenReturn(credential);
+        when(ldapConfigService.get(anyString())).thenReturn(Optional.empty());
     }
 
     @Test
@@ -185,9 +191,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Test
     public void testConvertWhenClusterDoesNotGivesAGatewayThenNullShouldBeStored() {
         when(cluster.getGateway()).thenReturn(null);
-
         TemplatePreparationObject result = underTest.convert(stackMock);
-
         assertNull(result.getGatewayView());
     }
 
@@ -243,10 +247,8 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Test
     public void testConvertWhenClusterFromClusterServiceHasLdapConfigThenItShouldBeStored() {
-        LdapConfig ldapConfig = new LdapConfig();
-        ldapConfig.setProtocol("");
-        ldapConfig.setBindDn("admin<>");
-        when(cluster.getLdapConfig()).thenReturn(ldapConfig);
+        LdapView ldapView = LdapView.LdapViewBuilder.aLdapView().withProtocol("").withBindDn("admin<>").build();
+        when(ldapConfigService.get(anyString())).thenReturn(Optional.of(ldapView));
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
@@ -255,10 +257,7 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Test
     public void testConvertWhenClusterFromClusterServiceHasNoLdapConfigThenTheOptionalShouldBeEmpty() {
-        when(cluster.getLdapConfig()).thenReturn(null);
-
         TemplatePreparationObject result = underTest.convert(stackMock);
-
         assertFalse(result.getLdapConfig().isPresent());
     }
 

@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.cm.ClusterToClouderaManagerV4RequestConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -111,27 +110,6 @@ public class ClusterToClusterV4RequestConverterTest {
 
         assertEquals(expected, result.getCloudStorage());
         verify(conversionService, times(1)).convert(fileSystem, CloudStorageV4Request.class);
-    }
-
-    @Test
-    public void testConvertWhenLdapConfigIsNullThenLdapConfigNameShouldBeNull() {
-        when(cluster.getLdapConfig()).thenReturn(null);
-
-        ClusterV4Request result = underTest.convert(cluster);
-
-        assertNull(result.getLdapName());
-    }
-
-    @Test
-    public void testConvertWhenLdapConfigIsNotNullThenLdapConfigNameShouldBePassedFromConfig() {
-        String expected = "ldapName";
-        LdapConfig ldapConfig = mock(LdapConfig.class);
-        when(cluster.getLdapConfig()).thenReturn(ldapConfig);
-        when(ldapConfig.getName()).thenReturn(expected);
-
-        ClusterV4Request result = underTest.convert(cluster);
-
-        assertEquals(expected, result.getLdapName());
     }
 
     @Test

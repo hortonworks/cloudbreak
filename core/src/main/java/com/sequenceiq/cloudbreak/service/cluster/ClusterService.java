@@ -85,7 +85,6 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
@@ -1185,10 +1184,6 @@ public class ClusterService {
 
     public List<Cluster> findAllClustersForConstraintTemplate(Long constraintTemplateId) {
         return repository.findAllClustersForConstraintTemplate(constraintTemplateId);
-    }
-
-    public Set<Cluster> findByLdapConfig(LdapConfig ldapConfig) {
-        return repository.findByLdapConfigAndStatusNot(ldapConfig, Status.DELETE_COMPLETED);
     }
 
     public Set<Cluster> findByRdsConfig(Long rdsConfigId) {

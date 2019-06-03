@@ -91,7 +91,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         assertEquals(1L, (long) result.getId());
         assertEquals(getSource().getExtendedBlueprintText(), result.getExtendedBlueprintText());
 
-        List<String> skippedFields = Lists.newArrayList("ldap", "customContainers", "ambari", "cm", "creationFinished", "kerberos", "cloudStorage", "gateway");
+        List<String> skippedFields = Lists.newArrayList("customContainers", "ambari", "cm", "creationFinished", "kerberos", "cloudStorage", "gateway");
         assertAllFieldsNotNull(result, skippedFields);
     }
 

@@ -13,7 +13,6 @@ import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
@@ -56,9 +55,6 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
 
     @CheckPermissionsByReturnValue
     Set<Cluster> findByBlueprint(Blueprint blueprint);
-
-    @CheckPermissionsByReturnValue
-    Set<Cluster> findByLdapConfigAndStatusNot(LdapConfig ldapConfig, Status status);
 
     @CheckPermissionsByReturnValue
     @Query("SELECT c FROM Cluster c INNER JOIN c.rdsConfigs rc WHERE rc.id= :id AND c.status != 'DELETE_COMPLETED'")
