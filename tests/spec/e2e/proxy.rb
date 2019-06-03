@@ -9,9 +9,9 @@ define_method(:cb) do
 end
 
 RSpec.describe 'Proxy test cases', :type => :aruba do
+=begin
   include_context "shared command helpers"    
   include_context "e2e shared vars"
-
   before(:all) do
     result = list_with_name_exists(@proxy_name) do
       cb.proxy.list.build
@@ -42,12 +42,12 @@ RSpec.describe 'Proxy test cases', :type => :aruba do
     end
   end
 
-  it "Proxy - Create - Without additional params" do 
+  skip "Proxy - Create - Without additional params" do 
     result = cb.proxy.create.name(@proxy_name).proxy_host(@proxy_server).proxy_port(@proxy_port).build  
     expect(result.exit_status).to eql 0 
   end 
 
-  it "Proxy - List - Checking previously created proxy" do
+  skip "Proxy - List - Checking previously created proxy" do
     result = list_with_name_exists(@proxy_name) do
       cb.proxy.list.build
     end
@@ -65,13 +65,13 @@ RSpec.describe 'Proxy test cases', :type => :aruba do
     end        
   end
 
-  it "Proxy - Create - With additional params" do 
+  skip "Proxy - Create - With additional params" do 
     result = cb.proxy.create.name(@proxy_name + "-extra").proxy_host(@proxy_server).proxy_port(@proxy_port).proxy_user(@proxy_user)
     .proxy_password(@proxy_password).build
     expect(result.exit_status).to eql 0 
   end
 
-  it "Proxy - List - Checking previously created proxy and checking User name" do
+  skip "Proxy - List - Checking previously created proxy and checking User name" do
     result = list_with_name_exists(@proxy_name) do
       cb.proxy.list.build
     end
@@ -89,13 +89,13 @@ RSpec.describe 'Proxy test cases', :type => :aruba do
     end        
   end
 
-  it "Proxy - Create - With additional params - Https protocol" do 
+  skip "Proxy - Create - With additional params - Https protocol" do 
     result = cb.proxy.create.name(@proxy_name + "-https").proxy_host(@proxy_server).proxy_port(@proxy_port).proxy_user(@proxy_user)
     .proxy_password(@proxy_password).proxy_protocol("https").build
     expect(result.exit_status).to eql 0 
   end
 
-  it "Proxy - List - Checking previously created proxy and checking protocol" do
+  skip "Proxy - List - Checking previously created proxy and checking protocol" do
     result = list_with_name_exists(@proxy_name) do
       cb.proxy.list.build
     end
@@ -113,7 +113,7 @@ RSpec.describe 'Proxy test cases', :type => :aruba do
     end        
   end          
 
-  it "Proxy - Delete - Previously created proxies" do
+  skip "Proxy - Delete - Previously created proxies" do
     result = cb.proxy.delete.name(@proxy_name).build
     expect(result.exit_status).to eql 0
 
@@ -122,5 +122,6 @@ RSpec.describe 'Proxy test cases', :type => :aruba do
 
     result = cb.proxy.delete.name(@proxy_name  + "-https").build
     expect(result.exit_status).to eql 0                   
-  end      
+  end
+=end      
 end  

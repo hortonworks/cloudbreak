@@ -12,14 +12,14 @@ RSpec.describe 'Proxy test cases', :type => :aruba do
   include_context "shared command helpers"    
   include_context "mock shared vars"
 
-  it "Proxy - Create - Without additional params" do
+  skip "Proxy - Create - Without additional params" do
     with_environment 'DEBUG' => '1' do 
       result = cb.proxy.create.name(@proxy_name).proxy_host(@proxy_server).proxy_port(@proxy_port).build(false)  
       expect(result.stderr.to_s.downcase).not_to include("failed", "error")
     end
   end 
 
-  it "Proxy - List" do
+  skip "Proxy - List" do
     result = cb.proxy.list.build(false)
     expect(result.exit_status).to eql 0
     expect(result.stdout.empty?).to be_falsy
@@ -34,7 +34,7 @@ RSpec.describe 'Proxy test cases', :type => :aruba do
     end        
   end
 
-  it "Proxy - Create - With additional params" do 
+  skip "Proxy - Create - With additional params" do 
     with_environment 'DEBUG' => '1' do   	
       result = cb.proxy.create.name(@proxy_name).proxy_host(@proxy_server).proxy_port(@proxy_port).proxy_user(@proxy_user)
       .proxy_password(@proxy_password).build(false)  
@@ -43,7 +43,7 @@ RSpec.describe 'Proxy test cases', :type => :aruba do
   end
 
 
-  it "Proxy - Create - With additional params - Https protocol" do 
+  skip "Proxy - Create - With additional params - Https protocol" do 
     with_environment 'DEBUG' => '1' do   	  	
       result = cb.proxy.create.name(@proxy_name).proxy_host(@proxy_server).proxy_port(@proxy_port).proxy_user(@proxy_user)
       .proxy_password(@proxy_password).proxy_protocol("https").build(false)  
@@ -51,7 +51,7 @@ RSpec.describe 'Proxy test cases', :type => :aruba do
     end
   end
 
-  it "Proxy - Create - With additional params - Invalid Https protocol" do 
+  skip "Proxy - Create - With additional params - Invalid Https protocol" do 
     with_environment 'DEBUG' => '1' do   	  	
       result = cb.proxy.create.name(@proxy_name).proxy_host(@proxy_server).proxy_port(@proxy_port).proxy_user(@proxy_user)
       .proxy_password(@proxy_password).proxy_protocol("mock").build(false)  
@@ -59,7 +59,7 @@ RSpec.describe 'Proxy test cases', :type => :aruba do
     end
   end         
 
-  it "Proxy - Delete" do
+  skip "Proxy - Delete" do
   	with_environment 'DEBUG' => '1' do   	
       result = cb.proxy.delete.name(@proxy_name).build(false)  
       expect(result.exit_status).to eql 0              

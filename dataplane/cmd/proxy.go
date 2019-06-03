@@ -51,5 +51,6 @@ func init() {
 				},
 			},
 		},
+		Hidden: true,
 	})
 }
