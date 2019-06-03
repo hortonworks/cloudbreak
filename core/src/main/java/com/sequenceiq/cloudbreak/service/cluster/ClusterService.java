@@ -91,7 +91,6 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
-import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -220,7 +219,7 @@ public class ClusterService {
         }
         return transactionService.required(() -> {
             setWorkspace(cluster, stack.getWorkspace());
-            cluster.setEnvironment(stack.getEnvironment());
+            cluster.setEnvironmentCrn(stack.getEnvironmentCrn());
 
             long start = System.currentTimeMillis();
             if (repository.findByNameAndWorkspace(cluster.getName(), stack.getWorkspace()).isPresent()) {
@@ -265,10 +264,6 @@ public class ClusterService {
             }
             return savedCluster;
         });
-    }
-
-    public List<String> getNameOfAliveByEnvironment(Environment environment) {
-        return repository.getNameOfAliveOnesByWorkspaceAndEnvironment(environment.getWorkspace().getId(), environment.getId());
     }
 
     private void setWorkspace(Cluster cluster, Workspace workspace) {
@@ -1171,16 +1166,8 @@ public class ClusterService {
         return repository.findByRdsConfig(rdsConfigId);
     }
 
-    public Set<Cluster> findAllClustersByRdsConfigInEnvironment(RDSConfig rdsConfig, Long environmentId) {
-        return repository.findByRdsConfigAndEnvironment(rdsConfig.getId(), environmentId);
-    }
-
     public Set<Cluster> findByKerberosConfig(Long kerberosConfigId) {
         return repository.findByKerberosConfig(kerberosConfigId);
-    }
-
-    public Set<Cluster> findAllClustersByKerberosConfigInEnvironment(KerberosConfig kerberosConfig, Long environmentId) {
-        return repository.findByKerberosConfigAndEnvironment(kerberosConfig.getId(), environmentId);
     }
 
     public void updateAmbariRepoDetails(Long clusterId, StackRepositoryV4Request stackRepository) {

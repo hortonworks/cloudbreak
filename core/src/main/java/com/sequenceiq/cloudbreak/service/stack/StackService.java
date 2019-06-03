@@ -56,7 +56,6 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
-import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -206,10 +205,6 @@ public class StackService {
 
     @Value("${info.app.version:}")
     private String cbVersion;
-
-    public List<String> getNameOfAliveByEnvironment(Environment environment) {
-        return stackRepository.findNamesOfAliveOnesByWorkspaceAndEnvironment(environment.getWorkspace().getId(), environment.getId());
-    }
 
     public Set<StackV4Response> retrieveStacksByWorkspaceId(Long workspaceId) {
         try {
@@ -610,14 +605,6 @@ public class StackService {
 
     public List<Stack> getByStatuses(List<Status> statuses) {
         return stackRepository.findByStatuses(statuses);
-    }
-
-    public Set<String> findDatalakeStackNamesByWorkspaceAndEnvironment(Long workspaceId, Long envId) {
-        return stackRepository.findDatalakeStackNamesByWorkspaceAndEnvironment(workspaceId, envId);
-    }
-
-    public Set<String> findWorkloadStackNamesByWorkspaceAndEnvironment(Long workspaceId, Long envId) {
-        return stackRepository.findWorkloadStackNamesByWorkspaceAndEnvironment(workspaceId, envId);
     }
 
     public List<Object[]> getStatuses(Set<Long> stackIds) {

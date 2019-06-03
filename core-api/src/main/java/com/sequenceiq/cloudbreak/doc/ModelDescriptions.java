@@ -208,7 +208,7 @@ public class ModelDescriptions {
         public static final String GENERAL_SETTINGS = "general configuration parameters for a cluster (e.g. 'name', 'credentialname')";
         public static final String PLACEMENT_SETTINGS = "placement configuration parameters for a cluster (e.g. 'region', 'availabilityZone')";
         public static final String SHARED_SERVICE_REQUEST = "Shared service request";
-        public static final String ENVIRONMENT = "environment which the stack is assigned to";
+        public static final String ENVIRONMENT_CRN = "CRN of the environment which the stack is assigned to";
         public static final String KERBEROS_KDC_VERIFY_KDC_TRUST = "Allows to select either a trusting SSL connection or a "
                 + "validating (non-trusting) SSL connection to KDC";
         public static final String TERMINATED = "termination completion time of stack in long";
@@ -216,6 +216,7 @@ public class ModelDescriptions {
         public static final String AZURE_PARAMETERS = "azure specific parameters for stack";
         public static final String GCP_PARAMETERS = "gcp specific parameters for stack";
         public static final String OPENSTACK_PARAMETERS = "openstack specific parameters for stack";
+        public static final String CLOUD_PLATFORM = "Cloudplatform of the stack";
     }
 
     public static class ClusterModelDescription {
@@ -272,7 +273,7 @@ public class ModelDescriptions {
         public static final String PROXY_CRN = "proxy CRN for the cluster";
         public static final String LOCATIONS = "cloud storage locations";
         public static final String STATUS_MAINTENANCE_MODE = "maintenance mode status";
-        public static final String SECURE = "tells wether the cluster is secured or not";
+        public static final String SECURE = "tells whether the cluster is secured or not";
         public static final String KERBEROSCONFIG_NAME = "Kerberos config name for the cluster";
         public static final String AMBARI_URL = "Ambari url";
         public static final String AWS_PARAMETERS = "aws specific parameters for cloud storage";

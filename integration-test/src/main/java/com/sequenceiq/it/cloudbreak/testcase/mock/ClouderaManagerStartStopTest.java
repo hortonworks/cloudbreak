@@ -34,7 +34,7 @@ public class ClouderaManagerStartStopTest extends AbstractClouderaManagerTest {
     @Inject
     private StackTestClient stackTestClient;
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a Cloudera Manager cluster",
             when = "the cluster is stoppend and started",

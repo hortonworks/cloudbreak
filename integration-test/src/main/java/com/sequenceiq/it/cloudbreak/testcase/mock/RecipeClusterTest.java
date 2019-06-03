@@ -56,7 +56,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
     @Inject
     private StackTestClient stackTestClient;
 
-    @Test(dataProvider = "dataProviderForNonPreTerminationRecipeTypes")
+    @Test(dataProvider = "dataProviderForNonPreTerminationRecipeTypes", enabled = false)
     public void testRecipeNotPreTerminationHasGotHighStateOnCluster(
             TestContext testContext,
             RecipeV4Type type,
@@ -86,7 +86,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a deleted recipe",
             when = "starting cluster with deleted recipe",
@@ -116,7 +116,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a created cluster with pretermination recipe",
             when = "calling termination",
@@ -144,7 +144,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a created cluster with post ambari install recipe and ldap attached to the cluster",
             when = "creating cluster",
@@ -166,7 +166,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a created cluster with post ambari install recipe",
             when = "upscaling cluster",
@@ -193,7 +193,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a created cluster with post ambari recipe",
             when = "upscaling cluster on hostgroup which has no post install recipe",
@@ -221,7 +221,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a created cluster with attached recipe",
             when = "delete attached recipe",

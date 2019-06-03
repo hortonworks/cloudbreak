@@ -31,21 +31,20 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
-import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.service.cluster.KerberosConfigProvider;
 import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 public class SharedServiceConfigProviderTest {
 
@@ -160,7 +159,12 @@ public class SharedServiceConfigProviderTest {
     @Test
     public void testPrepareDLConfNotAttached() {
         when(publicStack.getDatalakeResourceId()).thenReturn(null);
-        when(publicStack.getEnvironment()).thenReturn(new EnvironmentView());
+        when(publicStack.getEnvironmentCrn()).thenReturn("");
+        Workspace workspace = new Workspace();
+        workspace.setId(1L);
+        when(publicStack.getWorkspace()).thenReturn(workspace);
+        when(datalakeResourcesService.findDatalakeResourcesByWorkspaceAndEnvironment(anyLong(), anyString()))
+                .thenReturn(Collections.emptySet());
 
         Stack stack = underTest.prepareDatalakeConfigs(publicStack);
 
@@ -177,6 +181,13 @@ public class SharedServiceConfigProviderTest {
         Credential credential = new Credential();
         credential.setAttributes("attr");
         stackIn.setCredential(credential);
+
+        Workspace workspace = new Workspace();
+        workspace.setId(1L);
+        stackIn.setWorkspace(workspace);
+        when(datalakeResourcesService.findDatalakeResourcesByWorkspaceAndEnvironment(anyLong(), anyString()))
+                .thenReturn(Collections.emptySet());
+
         DatalakeResources datalakeResources = new DatalakeResources();
         when(datalakeResourcesService.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
         when(credentialPrerequisiteService.isCumulusCredential(anyString())).thenReturn(Boolean.TRUE);
@@ -209,6 +220,13 @@ public class SharedServiceConfigProviderTest {
         DatalakeResources datalakeResources = new DatalakeResources();
         long datalakeStackId = 11L;
         datalakeResources.setDatalakeStackId(datalakeStackId);
+
+        Workspace workspace = new Workspace();
+        workspace.setId(1L);
+        stackIn.setWorkspace(workspace);
+        when(datalakeResourcesService.findDatalakeResourcesByWorkspaceAndEnvironment(anyLong(), anyString()))
+                .thenReturn(Collections.emptySet());
+
         when(datalakeResourcesService.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
         when(credentialPrerequisiteService.isCumulusCredential(anyString())).thenReturn(Boolean.FALSE);
         when(ambariDatalakeConfigProvider.getAdditionalParameters(stackIn, datalakeResources)).thenReturn(Collections.singletonMap("test", "data"));

@@ -27,12 +27,12 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterCreationSuccessHandler;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
+import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
 import com.sequenceiq.cloudbreak.service.sharedservice.AmbariDatalakeConfigProvider;
@@ -86,6 +86,9 @@ public class ClusterBuilderService {
     @Inject
     private BlueprintUtils blueprintUtils;
 
+    @Inject
+    private DatalakeResourcesService datalakeResourcesService;
+
     public void startCluster(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithTransaction(stackId);
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
@@ -107,8 +110,10 @@ public class ClusterBuilderService {
         cluster.setExtendedBlueprintText(blueprintText);
         clusterService.updateCluster(cluster);
 
-        String sdxContext = Optional.ofNullable(stack.getEnvironment())
-                .map(EnvironmentView::getDatalakeResources)
+
+        Set<DatalakeResources> datalakeResources = datalakeResourcesService
+                .findDatalakeResourcesByWorkspaceAndEnvironment(stack.getWorkspace().getId(), stack.getEnvironmentCrn());
+        String sdxContext = Optional.ofNullable(datalakeResources)
                 .map(Set::stream).flatMap(Stream::findFirst)
                 .map(DatalakeResources::getDatalakeStackId)
                 .map(stackService::getByIdWithListsInTransaction)

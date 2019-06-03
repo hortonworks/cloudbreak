@@ -179,24 +179,30 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     Long countStacksWithNoWorkspaceOrCreator();
 
     @CheckPermissionsByWorkspaceId
-    @Query("SELECT s.name FROM Stack s WHERE s.workspace.id = :workspaceId AND s.environment.id = :environmentId "
+    @Query("SELECT s.name FROM Stack s WHERE s.workspace.id = :workspaceId AND s.environmentCrn = :environmentCrn "
             + "AND s.terminated = null "
             + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
-    List<String> findNamesOfAliveOnesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("environmentId") Long environmentId);
+    List<String> findNamesOfAliveOnesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("environmentCrn") String environmentCrn);
+
+    @CheckPermissionsByWorkspaceId
+    @Query("SELECT COUNT(s) FROM Stack s WHERE s.workspace.id = :workspaceId AND s.environmentCrn = :environmentCrn "
+            + "AND s.terminated = null "
+            + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
+    Long countAliveOnesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("environmentCrn") String environmentCrn);
 
     @DisableCheckPermissions
     @Query("SELECT s.workspace.id FROM Stack s where s.id = :id")
     Long findWorkspaceIdById(@Param("id") Long id);
 
     @CheckPermissionsByWorkspaceId
-    @Query("SELECT s.name FROM Stack s WHERE s.workspace.id = :workspaceId AND s.environment.id = :envId "
+    @Query("SELECT s.name FROM Stack s WHERE s.workspace.id = :workspaceId AND s.environmentCrn = :environmentCrn "
             + "AND s.type = 'DATALAKE' AND s.terminated = null")
-    Set<String> findDatalakeStackNamesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("envId") Long envId);
+    Set<String> findDatalakeStackNamesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("environmentCrn") String environmentCrn);
 
     @CheckPermissionsByWorkspaceId
-    @Query("SELECT s.name FROM Stack s WHERE s.workspace.id = :workspaceId AND s.environment.id = :envId "
+    @Query("SELECT s.name FROM Stack s WHERE s.workspace.id = :workspaceId AND s.environmentCrn = :environmentCrn "
             + "AND s.type = 'WORKLOAD' AND s.terminated = null")
-    Set<String> findWorkloadStackNamesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("envId") Long envId);
+    Set<String> findWorkloadStackNamesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("environmentCrn") String environmentCrn);
 
     @DisableCheckPermissions
     @Query("SELECT s.workspace FROM Stack s where s.id = :id")
