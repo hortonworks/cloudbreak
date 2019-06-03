@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.impala;
 
 import static com.sequenceiq.cloudbreak.TestUtil.kerberosConfigFreeipa;
 import static com.sequenceiq.cloudbreak.TestUtil.kerberosConfigMit;
-import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigTestUtil.getConfigNameToValueMap;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigTestUtil.getConfigNameToVariableNameMap;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigTestUtil.getVariableNameToValueMap;
@@ -23,9 +22,10 @@ import org.mockito.MockitoAnnotations;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
+import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
+import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 
@@ -56,10 +56,10 @@ public class ImpalaLdapConfigProviderTest {
 
     @Test
     public void getServiceConfigsWhenLdapNonsecure() {
-        LdapConfig ldapConfig = ldapConfig();
-        ldapConfig.setDirectoryType(DirectoryType.LDAP);
-        ldapConfig.setProtocol(PROTOCOL_LDAP);
-        TemplatePreparationObject tpo = new Builder().withLdapConfig(ldapConfig, BIND_DN, BIND_PASSWORD).build();
+        LdapView.LdapViewBuilder ldapConfigBuilder = ldapConfigBuilder();
+        ldapConfigBuilder.withDirectoryType(DirectoryType.LDAP);
+        ldapConfigBuilder.withProtocol(PROTOCOL_LDAP);
+        TemplatePreparationObject tpo = new Builder().withLdapConfig(ldapConfigBuilder.build()).build();
 
         List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(tpo);
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
@@ -76,10 +76,10 @@ public class ImpalaLdapConfigProviderTest {
 
     @Test
     public void getServiceConfigsWhenLdapSecure() {
-        LdapConfig ldapConfig = ldapConfig();
-        ldapConfig.setDirectoryType(DirectoryType.LDAP);
-        ldapConfig.setProtocol(PROTOCOL_LDAPS);
-        TemplatePreparationObject tpo = new Builder().withLdapConfig(ldapConfig, BIND_DN, BIND_PASSWORD).build();
+        LdapView.LdapViewBuilder ldapConfigBuilder = ldapConfigBuilder();
+        ldapConfigBuilder.withDirectoryType(DirectoryType.LDAP);
+        ldapConfigBuilder.withProtocol(PROTOCOL_LDAPS);
+        TemplatePreparationObject tpo = new Builder().withLdapConfig(ldapConfigBuilder.build()).build();
 
         List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(tpo);
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
@@ -95,10 +95,10 @@ public class ImpalaLdapConfigProviderTest {
 
     @Test
     public void getServiceConfigsWhenAdNonsecure() {
-        LdapConfig ldapConfig = ldapConfig();
-        ldapConfig.setDirectoryType(DirectoryType.ACTIVE_DIRECTORY);
-        ldapConfig.setProtocol(PROTOCOL_LDAP);
-        TemplatePreparationObject tpo = new Builder().withLdapConfig(ldapConfig, BIND_DN, BIND_PASSWORD).build();
+        LdapView.LdapViewBuilder ldapConfigBuilder = ldapConfigBuilder();
+        ldapConfigBuilder.withDirectoryType(DirectoryType.ACTIVE_DIRECTORY);
+        ldapConfigBuilder.withProtocol(PROTOCOL_LDAP);
+        TemplatePreparationObject tpo = new Builder().withLdapConfig(ldapConfigBuilder.build()).build();
 
         List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(tpo);
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
@@ -115,10 +115,10 @@ public class ImpalaLdapConfigProviderTest {
 
     @Test
     public void getServiceConfigsWhenAdSecure() {
-        LdapConfig ldapConfig = ldapConfig();
-        ldapConfig.setDirectoryType(DirectoryType.ACTIVE_DIRECTORY);
-        ldapConfig.setProtocol(PROTOCOL_LDAPS);
-        TemplatePreparationObject tpo = new Builder().withLdapConfig(ldapConfig, BIND_DN, BIND_PASSWORD).build();
+        LdapView.LdapViewBuilder ldapConfigBuilder = ldapConfigBuilder();
+        ldapConfigBuilder.withDirectoryType(DirectoryType.ACTIVE_DIRECTORY);
+        ldapConfigBuilder.withProtocol(PROTOCOL_LDAPS);
+        TemplatePreparationObject tpo = new Builder().withLdapConfig(ldapConfigBuilder.build()).build();
 
         List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(tpo);
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
@@ -134,9 +134,9 @@ public class ImpalaLdapConfigProviderTest {
 
     @Test
     public void getServiceConfigVariablesWhenLdap() {
-        LdapConfig ldapConfig = ldapConfig();
-        ldapConfig.setDirectoryType(DirectoryType.LDAP);
-        TemplatePreparationObject tpo = new Builder().withLdapConfig(ldapConfig, BIND_DN, BIND_PASSWORD).build();
+        LdapView.LdapViewBuilder ldapConfigBuilder = ldapConfigBuilder();
+        ldapConfigBuilder.withDirectoryType(DirectoryType.LDAP);
+        TemplatePreparationObject tpo = new Builder().withLdapConfig(ldapConfigBuilder.build()).build();
 
         List<ApiClusterTemplateVariable> result = underTest.getServiceConfigVariables(tpo);
         Map<String, String> variableNameToValueMap = getVariableNameToValueMap(result);
@@ -148,9 +148,9 @@ public class ImpalaLdapConfigProviderTest {
 
     @Test
     public void getServiceConfigVariablesWhenAd() {
-        LdapConfig ldapConfig = ldapConfig();
-        ldapConfig.setDirectoryType(DirectoryType.ACTIVE_DIRECTORY);
-        TemplatePreparationObject tpo = new Builder().withLdapConfig(ldapConfig, BIND_DN, BIND_PASSWORD).build();
+        LdapView.LdapViewBuilder ldapConfigBuilder = ldapConfigBuilder();
+        ldapConfigBuilder.withDirectoryType(DirectoryType.ACTIVE_DIRECTORY);
+        TemplatePreparationObject tpo = new Builder().withLdapConfig(ldapConfigBuilder.build()).build();
 
         List<ApiClusterTemplateVariable> result = underTest.getServiceConfigVariables(tpo);
         Map<String, String> variableNameToValueMap = getVariableNameToValueMap(result);
@@ -162,8 +162,9 @@ public class ImpalaLdapConfigProviderTest {
 
     @Test
     public void getRoleConfigWhenBadRole() {
+        LdapView.LdapViewBuilder ldapConfigBuilder = ldapConfigBuilder();
         TemplatePreparationObject tpo = new Builder()
-                .withLdapConfig(ldapConfig(), BIND_DN, BIND_PASSWORD)
+                .withLdapConfig(ldapConfigBuilder.build())
                 .build();
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfig("DUMMY", null, tpo);
@@ -176,7 +177,7 @@ public class ImpalaLdapConfigProviderTest {
     @Test
     public void getRoleConfigWhenImpaladAndNoKerberos() {
         TemplatePreparationObject tpo = new Builder()
-                .withLdapConfig(ldapConfig(), BIND_DN, BIND_PASSWORD)
+                .withLdapConfig(ldapConfigBuilder().build())
                 .build();
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfig(IMPALAD, null, tpo);
@@ -189,7 +190,7 @@ public class ImpalaLdapConfigProviderTest {
     @Test
     public void getRoleConfigWhenImpaladAndKerberosFreeIpa() {
         TemplatePreparationObject tpo = new Builder()
-                .withLdapConfig(ldapConfig(), BIND_DN, BIND_PASSWORD)
+                .withLdapConfig(ldapConfigBuilder().build())
                 .withKerberosConfig(kerberosConfigFreeipa())
                 .build();
 
@@ -205,7 +206,7 @@ public class ImpalaLdapConfigProviderTest {
     @Test
     public void getRoleConfigWhenImpaladAndKerberosMit() {
         TemplatePreparationObject tpo = new Builder()
-                .withLdapConfig(ldapConfig(), BIND_DN, BIND_PASSWORD)
+                .withLdapConfig(ldapConfigBuilder().build())
                 .withKerberosConfig(kerberosConfigMit())
                 .build();
 
@@ -231,7 +232,7 @@ public class ImpalaLdapConfigProviderTest {
     public void isConfigurationNeededTrue() {
         when(templateProcessor.isRoleTypePresentInService(anyString(), any(List.class))).thenReturn(true);
 
-        TemplatePreparationObject tpo = new Builder().withLdapConfig(ldapConfig(), BIND_DN, BIND_PASSWORD).build();
+        TemplatePreparationObject tpo = new Builder().withLdapConfig(ldapConfigBuilder().build()).build();
 
         boolean result = underTest.isConfigurationNeeded(templateProcessor, tpo);
         assertThat(result).isTrue();
@@ -242,7 +243,7 @@ public class ImpalaLdapConfigProviderTest {
     public void isConfigurationNeededFalseWhenNoImpalaOnCluster() {
         when(templateProcessor.isRoleTypePresentInService(anyString(), any(List.class))).thenReturn(false);
 
-        TemplatePreparationObject tpo = new Builder().withLdapConfig(ldapConfig(), BIND_DN, BIND_PASSWORD).build();
+        TemplatePreparationObject tpo = new Builder().withLdapConfig(ldapConfigBuilder().build()).build();
 
         boolean result = underTest.isConfigurationNeeded(templateProcessor, tpo);
         assertThat(result).isFalse();
@@ -259,4 +260,9 @@ public class ImpalaLdapConfigProviderTest {
         assertThat(result).isFalse();
     }
 
+    private LdapView.LdapViewBuilder ldapConfigBuilder() {
+        return TestUtil.ldapConfigBuilder()
+                .withBindDn(BIND_DN)
+                .withBindPassword(BIND_PASSWORD);
+    }
 }

@@ -48,9 +48,6 @@ public class ClusterV4Request implements JsonEntity {
     @ApiModelProperty(value = StackModelDescription.PASSWORD, required = true)
     private String password;
 
-    @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG_NAME)
-    private String ldapName;
-
     @ApiModelProperty(ClusterModelDescription.RDSCONFIG_NAMES)
     private Set<String> databases = new HashSet<>();
 
@@ -167,14 +164,6 @@ public class ClusterV4Request implements JsonEntity {
 
     public void setGateway(GatewayV4Request gateway) {
         this.gateway = gateway;
-    }
-
-    public String getLdapName() {
-        return ldapName;
-    }
-
-    public void setLdapName(String ldapName) {
-        this.ldapName = ldapName;
     }
 
     public String getKerberosName() {

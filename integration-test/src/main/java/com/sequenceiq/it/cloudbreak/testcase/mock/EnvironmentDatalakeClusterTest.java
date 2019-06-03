@@ -68,7 +68,6 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .when(environmentTestClient.createV4())
                 .given(ClusterTestDto.class).valid()
                 .withRdsConfigNames(rdsList)
-                .withLdapConfigName(testContext.get(LdapTestDto.class).getName())
                 .withKerberos(testContext.get(KerberosTestDto.class).getName())
                 .given("placement", PlacementSettingsTestDto.class)
 
@@ -103,7 +102,6 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .when(environmentTestClient.createV4())
                 .given(ClusterTestDto.class).valid()
                 .withRdsConfigNames(rdsList)
-                .withLdapConfigName(testContext.get(LdapTestDto.class).getName())
                 .given("placement", PlacementSettingsTestDto.class)
                 .given(StackTestDto.class).withPlacement("placement")
                 .withEnvironment(EnvironmentTestDto.class)
@@ -157,7 +155,6 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         testContext.given("placement", PlacementSettingsTestDto.class)
                 .given(ClusterTestDto.class).valid()
                 .withRdsConfigNames(rdsList)
-                .withLdapConfigName(testContext.get(LdapTestDto.class).getName())
                 .given(StackTestDto.class)
                 .withName(resourcePropertyProvider().getName())
                 .withPlacement("placement")

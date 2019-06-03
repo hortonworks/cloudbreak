@@ -158,7 +158,6 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .withName(ldapName)
                 .when(ldapTestClient.createV4())
                 .given(ClusterTestDto.class)
-                .withLdapConfigName(ldapName)
                 .given(StackTestDto.class)
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)

@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
-import com.sequenceiq.cloudbreak.template.views.LdapView;
+import com.sequenceiq.cloudbreak.dto.LdapView;
 
 public class RecipeTestUtil {
 
@@ -64,6 +64,6 @@ public class RecipeTestUtil {
     }
 
     public static LdapView generalLdapView() {
-        return new LdapView(ldapConfig(), "cn=admin,dc=example,dc=org", "admin");
+        return ldapConfig();
     }
 }

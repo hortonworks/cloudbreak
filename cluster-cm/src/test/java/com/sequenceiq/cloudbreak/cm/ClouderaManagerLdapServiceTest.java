@@ -28,9 +28,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 
 public class ClouderaManagerLdapServiceTest {
@@ -83,11 +83,10 @@ public class ClouderaManagerLdapServiceTest {
     @Test
     public void testSetupLdapWithoutGroupMapping() throws ApiException {
         // GIVEN
-        LdapConfig ldapConfig = getLdapConfig();
-        cluster.setLdapConfig(ldapConfig);
+        LdapView ldapConfig = getLdapConfig();
         when(authRolesResourceApi.readAuthRolesMetadata(null)).thenReturn(new ApiAuthRoleMetadataList());
         // WHEN
-        underTest.setupLdap(stack, cluster, httpClientConfig);
+        underTest.setupLdap(stack, cluster, httpClientConfig, ldapConfig);
         // THEN
         verify(externalUserMappingsResourceApi, never()).createExternalUserMappings(any(ApiExternalUserMappingList.class));
     }
@@ -95,12 +94,11 @@ public class ClouderaManagerLdapServiceTest {
     @Test
     public void testSetupLdapWithGroupMapping() throws ApiException {
         // GIVEN
-        LdapConfig ldapConfig = getLdapConfig();
-        cluster.setLdapConfig(ldapConfig);
+        LdapView ldapConfig = getLdapConfig();
         when(authRolesResourceApi.readAuthRolesMetadata(null)).thenReturn(new ApiAuthRoleMetadataList().addItemsItem(
                 new ApiAuthRoleMetadata().displayName("role").uuid("uuid").role("ROLE_ADMIN")));
         // WHEN
-        underTest.setupLdap(stack, cluster, httpClientConfig);
+        underTest.setupLdap(stack, cluster, httpClientConfig, ldapConfig);
         // THEN
         ArgumentCaptor<ApiExternalUserMappingList> apiExternalUserMappingListArgumentCaptor = ArgumentCaptor.forClass(ApiExternalUserMappingList.class);
         verify(externalUserMappingsResourceApi).createExternalUserMappings(apiExternalUserMappingListArgumentCaptor.capture());
@@ -114,12 +112,11 @@ public class ClouderaManagerLdapServiceTest {
     @Test
     public void testSetupLdapWithNoRoleAdmin() throws ApiException {
         // GIVEN
-        LdapConfig ldapConfig = getLdapConfig();
-        cluster.setLdapConfig(ldapConfig);
+        LdapView ldapConfig = getLdapConfig();
         when(authRolesResourceApi.readAuthRolesMetadata(null)).thenReturn(new ApiAuthRoleMetadataList().addItemsItem(
                 new ApiAuthRoleMetadata().displayName("role").uuid("uuid").role("NO_ROLE_ADMIN")));
         // WHEN
-        underTest.setupLdap(stack, cluster, httpClientConfig);
+        underTest.setupLdap(stack, cluster, httpClientConfig, ldapConfig);
         // THEN
         verify(externalUserMappingsResourceApi, never()).createExternalUserMappings(any(ApiExternalUserMappingList.class));
     }
@@ -128,29 +125,33 @@ public class ClouderaManagerLdapServiceTest {
     public void testSetupLdapWithoutLdap() throws ApiException {
         // GIVEN
         // WHEN
-        underTest.setupLdap(stack, cluster, httpClientConfig);
+        underTest.setupLdap(stack, cluster, httpClientConfig, null);
         // THEN
         verify(clouderaManagerResourceApi, never()).updateConfig(anyString(), any());
         verify(authRolesResourceApi, never()).readAuthRolesMetadata(anyString());
         verify(externalUserMappingsResourceApi, never()).createExternalUserMappings(any(ApiExternalUserMappingList.class));
     }
 
-    private LdapConfig getLdapConfig() {
-        LdapConfig ldapConfig = new LdapConfig();
-        ldapConfig.setName("ldapcfg");
-        ldapConfig.setDomain("domain");
-        ldapConfig.setProtocol("ldap");
-        ldapConfig.setServerHost("locahost");
-        ldapConfig.setServerPort(389);
-        ldapConfig.setDirectoryType(DirectoryType.LDAP);
-        ldapConfig.setBindDn("binddn");
-        ldapConfig.setBindPassword("bindpwd");
-        ldapConfig.setUserSearchBase("usersearchbase");
-        ldapConfig.setUserNameAttribute("user");
-        ldapConfig.setGroupSearchBase("groupsearchbase");
-        ldapConfig.setGroupMemberAttribute("member");
-        ldapConfig.setAdminGroup("adminGroup");
-        ldapConfig.setUserDnPattern("userDnPattern");
-        return ldapConfig;
+    private static LdapView getLdapConfig() {
+        return LdapView.LdapViewBuilder.aLdapView()
+                .withUserSearchBase("cn=users,dc=example,dc=org")
+                .withUserDnPattern("cn={0},cn=users,dc=example,dc=org")
+                .withGroupSearchBase("cn=groups,dc=example,dc=org")
+                .withBindDn("cn=admin,dc=example,dc=org")
+                .withBindPassword("admin")
+                .withServerHost("localhost")
+                .withUserNameAttribute("cn=admin,dc=example,dc=org")
+                .withDomain("ad.hdc.com")
+                .withServerPort(389)
+                .withProtocol("ldap")
+                .withDirectoryType(DirectoryType.LDAP)
+                .withUserObjectClass("person")
+                .withGroupObjectClass("groupOfNames")
+                .withGroupNameAttribute("cn")
+                .withGroupMemberAttribute("member")
+                .withAdminGroup("ambariadmins")
+                .withCertificate("-----BEGIN CERTIFICATE-----certificate-----END CERTIFICATE-----")
+                .withConnectionURL("ldap://localhost:389")
+                .build();
     }
 }

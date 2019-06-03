@@ -82,8 +82,7 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
                 .given("mpackDetails", ManagementPackDetailsTestDto.class).withName("mock-test-mpack")
                 .given("gatewayTopology", GatewayTopologyTestDto.class).withExposedServices("AMBARI").withTopologyName("proxy-name")
                 .given("gateway", GatewayTestDto.class).withTopologies("gatewayTopology")
-                .given("cluster", ClusterTestDto.class).withRdsConfigNames("mock-test-rds").withLdapConfigName("mock-test-ldap")
-                .withGateway("gateway")
+                .given("cluster", ClusterTestDto.class).withRdsConfigNames("mock-test-rds").withGateway("gateway")
                 .given("imageSettings", ImageSettingsTestDto.class).withImageId("f6e778fc-7f17-4535-9021-515351df3691").withImageCatalog(imgCat.getName());
 
         return withNetwork("network")

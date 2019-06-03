@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.blueprint.template;
 
-import static com.sequenceiq.cloudbreak.TestUtil.adConfig;
-import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
-import static com.sequenceiq.cloudbreak.TestUtil.ldapConfigWithSpecialChars;
 import static com.sequenceiq.cloudbreak.template.filesystem.TemplateCoreTestUtil.adlsFileSystemConfiguration;
 import static com.sequenceiq.cloudbreak.template.filesystem.TemplateCoreTestUtil.emptyStorageLocationViews;
 import static com.sequenceiq.cloudbreak.template.filesystem.TemplateCoreTestUtil.gcsFileSystemConfiguration;
@@ -38,13 +35,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.template.HandlebarUtils;
 import com.sequenceiq.cloudbreak.template.TemplateModelContextBuilder;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
-import com.sequenceiq.cloudbreak.template.views.LdapView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 
 @RunWith(Parameterized.class)
@@ -500,7 +497,7 @@ public class HandlebarTemplateTest {
         kerberosConfig.setAdmin("admin");
 
         return new TemplateModelContextBuilder()
-                .withLdap(new LdapView(ldapConfig(), "cn=admin,dc=example,dc=org", "admin"))
+                .withLdap(ldapConfig("cn=admin,dc=example,dc=org", "admin"))
                 .withGateway(TestUtil.gatewayEnabled(), "/cb/secret/signkey")
                 .withKerberos(kerberosConfig)
                 .build();
@@ -508,14 +505,14 @@ public class HandlebarTemplateTest {
 
     public static Map<String, Object> ldapConfigWhenLdapPresentedThenShouldReturnWithLdapConfig() {
         return new TemplateModelContextBuilder()
-                .withLdap(new LdapView(ldapConfig(), "cn=admin,dc=example,dc=org", "admin"))
+                .withLdap(ldapConfig("cn=admin,dc=example,dc=org", "admin"))
                 .withGateway(TestUtil.gatewayEnabled(), "/cb/secret/signkey")
                 .build();
     }
 
     public static Map<String, Object> ldapConfigWhenLdapPresentedThenShouldReturnWithAdConfig() {
         return new TemplateModelContextBuilder()
-                .withLdap(new LdapView(adConfig(), "cn=admin,dc=example,dc=org", "admin"))
+                .withLdap(adConfig("cn=admin,dc=example,dc=org", "admin"))
                 .withGateway(TestUtil.gatewayEnabled(), "/cb/secret/signkey")
                 .build();
     }
@@ -618,7 +615,7 @@ public class HandlebarTemplateTest {
 
     public static Map<String, Object> nifiWithLdap() {
         return new TemplateModelContextBuilder()
-                .withLdap(new LdapView(ldapConfigWithSpecialChars(), "cn=admin,dc=example,dc=org", "admin<>char"))
+                .withLdap(ldapConfig("cn=admin,dc=example,dc=org", "admin<>char"))
                 .withHdfConfigs(new HdfConfigs("<property>nodeEntities</property>",
                         "<property>registryNodeEntities</property>",
                         "<property>nodeUserEntities</property>",
@@ -642,7 +639,7 @@ public class HandlebarTemplateTest {
 
         return new TemplateModelContextBuilder()
                 .withGeneralClusterConfigs(generalClusterConfigs)
-                .withLdap(new LdapView(ldapConfig(), "cn=admin,dc=example,dc=org", "admin<>char"))
+                .withLdap(ldapConfig("cn=admin,dc=example,dc=org", "admin<>char"))
                 .withFixInputs(properties)
                 .withHdfConfigs(new HdfConfigs("nifigtargets", "nifigtargets", "nifigtargets",
                         withProxyHost ? Optional.of("nifiproxyhost") : Optional.empty()))
@@ -705,7 +702,7 @@ public class HandlebarTemplateTest {
 
     private static Object hiveWhenLdapPresentedThenShouldReturnWithLdapConfigs() {
         return new TemplateModelContextBuilder()
-                .withLdap(new LdapView(ldapConfig(), "cn=admin,dc=example,dc=org", "admin<>char"))
+                .withLdap(ldapConfig("cn=admin,dc=example,dc=org", "admin<>char"))
                 .build();
     }
 
@@ -1002,5 +999,19 @@ public class HandlebarTemplateTest {
         sharedServiceConfigsView.setRangerAdminPort("6080");
         sharedServiceConfigsView.setRangerAdminHost("1.1.1.1");
         return Optional.of(sharedServiceConfigsView);
+    }
+
+    private static LdapView ldapConfig(String bindDn, String bindPassword) {
+        return TestUtil.ldapConfigBuilder()
+                .withBindDn(bindDn)
+                .withBindPassword(bindPassword)
+                .build();
+    }
+
+    private static LdapView adConfig(String bindDn, String bindPassword) {
+        return TestUtil.adConfigBuilder()
+                .withBindDn(bindDn)
+                .withBindPassword(bindPassword)
+                .build();
     }
 }

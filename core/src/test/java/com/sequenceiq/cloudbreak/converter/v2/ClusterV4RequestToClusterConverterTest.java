@@ -51,7 +51,6 @@ import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ClusterV4RequestToClusterConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
@@ -59,7 +58,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -80,9 +78,6 @@ public class ClusterV4RequestToClusterConverterTest {
 
     @Mock
     private WorkspaceService workspaceService;
-
-    @Mock
-    private LdapConfigService ldapConfigService;
 
     @Mock
     private BlueprintService blueprintService;
@@ -126,14 +121,10 @@ public class ClusterV4RequestToClusterConverterTest {
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setName(rdsConfigName);
 
-        LdapConfig ldapConfig = new LdapConfig();
-        ldapConfig.setName(ldapName);
-
         ClusterV4Request source = new ClusterV4Request();
         source.setCloudStorage(cloudStorageRequest);
         source.setDatabases(singleton(rdsConfigName));
         source.setProxyConfigCrn(proxyConfigCrn);
-        source.setLdapName(ldapName);
         source.setAmbari(new AmbariV4Request());
         source.setBlueprintName(BLUEPRINT);
         when(blueprintService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(eq(BLUEPRINT), any())).thenReturn(blueprint);
@@ -141,7 +132,6 @@ public class ClusterV4RequestToClusterConverterTest {
         when(cloudStorageValidationUtil.isCloudStorageConfigured(cloudStorageRequest)).thenReturn(true);
         when(conversionService.convert(cloudStorageRequest, FileSystem.class)).thenReturn(fileSystem);
         when(rdsConfigService.findByNamesInWorkspace(singleton(rdsConfigName), workspace.getId())).thenReturn(singleton(rdsConfig));
-        when(ldapConfigService.getByNameForWorkspace(ldapName, workspace)).thenReturn(ldapConfig);
 
         Cluster actual = underTest.convert(source);
 
@@ -150,12 +140,10 @@ public class ClusterV4RequestToClusterConverterTest {
         assertThat(actual.getRdsConfigs().size(), is(1));
         assertThat(actual.getRdsConfigs().stream().findFirst().get().getName(), is(rdsConfigName));
         assertThat(actual.getProxyConfigCrn(), is(proxyConfigCrn));
-        assertThat(actual.getLdapConfig().getName(), is(ldapName));
 
         verify(cloudStorageValidationUtil, times(1)).isCloudStorageConfigured(cloudStorageRequest);
         verify(conversionService, times(1)).convert(cloudStorageRequest, FileSystem.class);
         verify(rdsConfigService, times(1)).findByNamesInWorkspace(singleton(rdsConfigName), workspace.getId());
-        verify(ldapConfigService, times(1)).getByNameForWorkspace(ldapName, workspace);
     }
 
     @Test

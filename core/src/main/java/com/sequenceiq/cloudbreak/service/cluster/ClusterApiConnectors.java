@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 
 @Service
 public class ClusterApiConnectors {
-
     @Inject
     private ApplicationContext applicationContext;
 

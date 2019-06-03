@@ -25,7 +25,6 @@ import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.dto.mpack.MPackTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTemplateTestDto;
@@ -191,9 +190,9 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
     )
     public void testLaunchClusterFromTemplateWithProperties(MockedTestContext testContext) {
         testContext
-                .given(LdapTestDto.class)
-                .withName("mock-test-ldap")
-                .when(ldapTestClient.createV4())
+//                .given(LdapTestDto.class)
+//                .withName("mock-test-ldap")
+//                .when(ldapTestClient.createV4())
 
                 .given(RecipeTestDto.class)
                 .withName("mock-test-recipe")
