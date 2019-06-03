@@ -1002,7 +1002,7 @@ var (
 	FlEnvironmentNameOptional = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
-			Name:  "name",
+			Name:  "env-name",
 			Usage: "name of an environment",
 		},
 	}

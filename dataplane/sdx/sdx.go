@@ -127,7 +127,7 @@ func DeleteSdx(c *cli.Context) {
 
 func ListSdx(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "List sdx clusters in environment")
-	envName := c.String(fl.FlEnvironmentName.Name)
+	envName := c.String(fl.FlEnvironmentNameOptional.Name)
 	sdxClient := ClientSdx(*oauth.NewSDXClientFromContext(c))
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	writer := output.WriteList

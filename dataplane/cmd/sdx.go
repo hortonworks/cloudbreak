@@ -58,10 +58,10 @@ func init() {
 				Name:   "list",
 				Usage:  "list SDX clusters",
 				Before: cf.CheckConfigAndCommandFlagsWithoutWorkspace,
-				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentName, fl.FlWaitOptional).AddAuthenticationFlags().Build(),
+				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentNameOptional, fl.FlWaitOptional).AddAuthenticationFlags().Build(),
 				Action: sdx.ListSdx,
 				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentName, fl.FlWaitOptional).AddAuthenticationFlags().Build() {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentNameOptional, fl.FlWaitOptional).AddAuthenticationFlags().Build() {
 						fl.PrintFlagCompletion(f)
 					}
 				},
