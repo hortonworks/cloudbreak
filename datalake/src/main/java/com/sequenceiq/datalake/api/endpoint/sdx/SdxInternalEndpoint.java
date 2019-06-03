@@ -11,9 +11,9 @@ import javax.ws.rs.core.MediaType;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Path("/sdxinternal")
+@Path("/internal/sdx")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/sdxinternal", protocols = "http,https")
+@Api(value = "/internal/sdx", protocols = "http,https")
 public interface SdxInternalEndpoint {
 
     @POST
