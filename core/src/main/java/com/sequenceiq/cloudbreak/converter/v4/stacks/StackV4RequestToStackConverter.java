@@ -24,6 +24,12 @@ import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.telemetry.TelemetryV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.telemetry.logging.LoggingV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.telemetry.workload.WorkloadAnalyticsV4Request;
+import com.sequenceiq.cloudbreak.cloud.model.Logging;
+import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
+import com.sequenceiq.cloudbreak.cloud.model.WorkloadAnalytics;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -134,6 +140,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setInstanceGroups(convertInstanceGroups(source, stack));
         updateCluster(source, stack, workspace);
         setNetworkIfApplicable(source, stack);
+        stack.getComponents().add(getTelemetryComponent(source, stack));
         if (source.getCustomDomain() != null) {
             stack.setCustomDomain(source.getCustomDomain().getDomainName());
             stack.setCustomHostname(source.getCustomDomain().getHostname());
@@ -177,6 +184,30 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setName(source.getName());
         stack.setAvailabilityZone(getAvailabilityZone(Optional.ofNullable(source.getPlacement())));
         stack.setOrchestrator(getOrchestrator());
+    }
+
+    private com.sequenceiq.cloudbreak.domain.stack.Component getTelemetryComponent(StackV4Request source, Stack stack) {
+        try {
+            TelemetryV4Request telemetryRequest = source.getTelemetry();
+            Logging logging = null;
+            WorkloadAnalytics workloadAnalytics = null;
+            if (telemetryRequest != null) {
+                if (telemetryRequest.getLogging() != null) {
+                    LoggingV4Request loggingRequest = telemetryRequest.getLogging();
+                    logging = new Logging(loggingRequest.isEnabled(), loggingRequest.getOutput(), loggingRequest.getAttributes());
+                }
+                if (telemetryRequest.getWorkloadAnalytics() != null) {
+                    WorkloadAnalyticsV4Request waRequest = telemetryRequest.getWorkloadAnalytics();
+                    workloadAnalytics = new WorkloadAnalytics(waRequest.isEnabled(), waRequest.getDatabusEndpoint(),
+                            waRequest.getAccessKey(), waRequest.getPrivateKey(), waRequest.getAttributes());
+                }
+            }
+            Telemetry telemetry = new Telemetry(logging, workloadAnalytics);
+            return new com.sequenceiq.cloudbreak.domain.stack.Component(ComponentType.TELEMETRY, ComponentType.TELEMETRY.name(), Json.silent(telemetry), stack);
+        } catch (Exception e) {
+            LOGGER.debug("Exception during reading telemetry settings.", e);
+            throw new BadRequestException("Failed to convert dynamic telemetry settingss.");
+        }
     }
 
     private void updateCloudPlatformAndRelatedFields(StackV4Request source, Stack stack, Workspace workspace) {

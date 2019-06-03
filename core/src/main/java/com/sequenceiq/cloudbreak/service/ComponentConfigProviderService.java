@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
@@ -50,6 +51,18 @@ public class ComponentConfigProviderService {
             return component.getAttributes().get(Image.class);
         } catch (IOException e) {
             throw new CloudbreakServiceException("Failed to read image", e);
+        }
+    }
+
+    public Telemetry getTelemetry(Long stackId) {
+        try {
+            Component component = getComponent(stackId, ComponentType.TELEMETRY, ComponentType.TELEMETRY.name());
+            if (component == null) {
+                return null;
+            }
+            return component.getAttributes().get(Telemetry.class);
+        } catch (IOException e) {
+            throw new CloudbreakServiceException("Failed to read Telemetry for stack.", e);
         }
     }
 

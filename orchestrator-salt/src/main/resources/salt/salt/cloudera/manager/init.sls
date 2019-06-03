@@ -37,6 +37,17 @@ cloudera_manager_setup_ldap:
 
 {% endif %}
 
+{% if salt['pillar.get']('cloudera-manager:cme_enabled') %}
+cmf_ff_cme_enabled:
+  file.blockreplace:
+    - name: /etc/default/cloudera-scm-server
+    - marker_start: "# BLOCK TOP : salt managed zone : please do not edit"
+    - marker_end: "# BLOCK BOTTOM : end of salt managed zone --"
+    - content: "export CMF_FF_CME=true"
+    - show_changes: True
+    - append_if_not_found: True
+{% endif %}
+
 cloudera_manager_set_parcel_validation:
   file.replace:
     - name: /opt/cloudera/cm/bin/cm-server

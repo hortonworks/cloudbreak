@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
@@ -18,7 +19,7 @@ public interface ClusterSetupService {
     void waitForServer() throws CloudbreakException;
 
     Cluster buildCluster(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, TemplatePreparationObject templatePreparationObject,
-            Set<HostMetadata> hostsInCluster, String sdxContext);
+            Set<HostMetadata> hostsInCluster, String sdxContext, Telemetry telemetry);
 
     void waitForHosts(Set<HostMetadata> hostsInCluster);
 

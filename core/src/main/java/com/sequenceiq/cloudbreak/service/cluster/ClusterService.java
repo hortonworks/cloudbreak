@@ -60,6 +60,7 @@ import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
@@ -107,6 +108,7 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
@@ -192,6 +194,9 @@ public class ClusterService {
 
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Inject
+    private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
     private RdsConfigService rdsConfigService;
@@ -581,6 +586,23 @@ public class ClusterService {
         }
         nodeList.add(failedNode);
         autoRecoveryHostMetadata.put(failedNode, hostMetadata);
+    }
+
+    public void cleanupCluster(final Long stackId) {
+        try {
+            transactionService.required(() -> {
+                Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+                Telemetry telemetry = componentConfigProviderService.getTelemetry(stackId);
+                try {
+                    clusterApiConnectors.getConnector(stack).clusterModificationService().cleanupCluster(telemetry);
+                } catch (CloudbreakException e) {
+                    LOGGER.error("Cluster specific cleanup failed.", e);
+                }
+                return stack;
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
     }
 
     public void repairCluster(Long stackId, List<String> repairedHostGroups, boolean removeOnly) {

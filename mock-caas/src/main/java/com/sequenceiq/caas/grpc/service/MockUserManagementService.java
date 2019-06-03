@@ -101,8 +101,15 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         } else {
             String machineUserIdOrCrn = request.getMachineUserNameOrCrn(0);
             String[] splittedCrn = machineUserIdOrCrn.split(":");
-            String userName = splittedCrn[6];
-            String accountId = splittedCrn[4];
+            String userName;
+            String accountId;
+            if (splittedCrn.length > 1) {
+                userName = splittedCrn[6];
+                accountId = splittedCrn[4];
+            } else {
+                userName = machineUserIdOrCrn;
+                accountId = UUID.randomUUID().toString();
+            }
             responseObserver.onNext(
                     ListMachineUsersResponse.newBuilder()
                             .addMachineUser(MachineUser.newBuilder()
@@ -170,6 +177,18 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     }
 
     @Override
+    public void assignRole(UserManagementProto.AssignRoleRequest request, StreamObserver<UserManagementProto.AssignRoleResponse> responseObserver) {
+        responseObserver.onNext(UserManagementProto.AssignRoleResponse.newBuilder().build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void unassignRole(UserManagementProto.UnassignRoleRequest request, StreamObserver<UserManagementProto.UnassignRoleResponse> responseObserver) {
+        responseObserver.onNext(UserManagementProto.UnassignRoleResponse.newBuilder().build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
     public void getAssigneeAuthorizationInformation(UserManagementProto.GetAssigneeAuthorizationInformationRequest request,
             StreamObserver<UserManagementProto.GetAssigneeAuthorizationInformationResponse> responseObserver) {
         responseObserver.onNext(UserManagementProto.GetAssigneeAuthorizationInformationResponse.newBuilder()
@@ -191,6 +210,58 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     public void notifyResourceDeleted(UserManagementProto.NotifyResourceDeletedRequest request,
             StreamObserver<UserManagementProto.NotifyResourceDeletedResponse> responseObserver) {
         responseObserver.onNext(UserManagementProto.NotifyResourceDeletedResponse.newBuilder().build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void createAccessKey(UserManagementProto.CreateAccessKeyRequest request,
+            StreamObserver<UserManagementProto.CreateAccessKeyResponse> responseObserver) {
+        responseObserver.onNext(UserManagementProto.CreateAccessKeyResponse.newBuilder()
+                .setPrivateKey(UUID.randomUUID().toString())
+                .setAccessKey(UserManagementProto.AccessKey.newBuilder()
+                        .setAccessKeyId(UUID.randomUUID().toString())
+                        .build())
+                .build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void listAccessKeys(UserManagementProto.ListAccessKeysRequest request, StreamObserver<UserManagementProto.ListAccessKeysResponse> responseObserver) {
+        responseObserver.onNext(UserManagementProto.ListAccessKeysResponse.newBuilder()
+                .addAccessKey(0, UserManagementProto.AccessKey.newBuilder()
+                        .setAccessKeyId(UUID.randomUUID().toString())
+                        .setCrn(UUID.randomUUID().toString())
+                        .build())
+                .build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void deleteAccessKey(UserManagementProto.DeleteAccessKeyRequest request,
+            StreamObserver<UserManagementProto.DeleteAccessKeyResponse> responseObserver) {
+        responseObserver.onNext(UserManagementProto.DeleteAccessKeyResponse.newBuilder().build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void createMachineUser(UserManagementProto.CreateMachineUserRequest request,
+            StreamObserver<UserManagementProto.CreateMachineUserResponse> responseObserver) {
+        String accountId = Crn.fromString(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn()).getAccountId();
+        String name = request.getMachineUserName();
+        responseObserver.onNext(UserManagementProto.CreateMachineUserResponse.newBuilder()
+                .setMachineUser(MachineUser.newBuilder()
+                        .setMachineUserId(UUID.nameUUIDFromBytes((accountId + "#" + name).getBytes()).toString())
+                        .setCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
+                        .build())
+                .build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void deleteMachineUser(UserManagementProto.DeleteMachineUserRequest request,
+            StreamObserver<UserManagementProto.DeleteMachineUserResponse> responseObserver) {
+        responseObserver.onNext(UserManagementProto.DeleteMachineUserResponse.newBuilder()
+                .build());
         responseObserver.onCompleted();
     }
 

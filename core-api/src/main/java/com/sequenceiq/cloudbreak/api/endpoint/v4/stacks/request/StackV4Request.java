@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSetti
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.telemetry.TelemetryV4Request;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
@@ -48,6 +49,9 @@ public class StackV4Request extends StackV4Base {
 
     @ApiModelProperty(StackModelDescription.TAGS)
     private TagsV4Request tags;
+
+    @ApiModelProperty(StackModelDescription.TELEMETRY)
+    private TelemetryV4Request telemetry;
 
     @Valid
     @ApiModelProperty(PLACEMENT_SETTINGS)
@@ -108,6 +112,14 @@ public class StackV4Request extends StackV4Base {
 
     public void setTags(TagsV4Request tags) {
         this.tags = tags;
+    }
+
+    public TelemetryV4Request getTelemetry() {
+        return telemetry;
+    }
+
+    public void setTelemetry(TelemetryV4Request telemetry) {
+        this.telemetry = telemetry;
     }
 
     public List<InstanceGroupV4Request> getInstanceGroups() {

@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.blueprint.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
@@ -43,6 +44,7 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.TelemetryDecorator;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -233,6 +235,9 @@ public class ClusterHostServiceRunner {
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
 
         if (blueprintService.isClouderaManagerTemplate(cluster.getBlueprint())) {
+            Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
+            new TelemetryDecorator(servicePillar).decoratePillar(telemetry, cluster.getName(), stack.getType());
+            decorateWithClouderaManagerEntrerpriseDetails(telemetry, servicePillar);
             decoratePillarWithClouderaManagerLicense(stack.getId(), servicePillar);
             decoratePillarWithClouderaManagerRepo(stack.getId(), cluster.getId(), servicePillar);
             decoratePillarWithClouderaManagerDatabase(cluster, servicePillar);
@@ -318,6 +323,15 @@ public class ClusterHostServiceRunner {
             sssdConnfig.put("password", kerberosConfig.getPassword());
             sssdConnfig.put("server", kerberosConfig.getUrl());
             servicePillar.put("sssd-ipa", new SaltPillarProperties("/sssd/ipa.sls", singletonMap("sssd-ipa", sssdConnfig)));
+        }
+    }
+
+    // Right now we are assuming that CM enterprise is enabled if workload analytics is used
+    // In the future that should be enabled based on the license
+    private void decorateWithClouderaManagerEntrerpriseDetails(Telemetry telemetry, Map<String, SaltPillarProperties> servicePillar) {
+        if (telemetry != null && telemetry.getWorkloadAnalytics() != null && telemetry.getWorkloadAnalytics().isEnabled()) {
+            servicePillar.put("cloudera-manager-cme",
+                    new SaltPillarProperties("/cloudera-manager/cme.sls", singletonMap("cloudera-manager", singletonMap("cme_enabled", true))));
         }
     }
 
