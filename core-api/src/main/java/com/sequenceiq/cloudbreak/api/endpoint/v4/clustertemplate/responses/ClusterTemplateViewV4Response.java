@@ -38,7 +38,7 @@ public class ClusterTemplateViewV4Response extends CompactViewV4Response {
     private String stackVersion;
 
     @ApiModelProperty
-    private String environmentName;
+    private String environmentCrn;
 
     public ResourceStatus getStatus() {
         return status;
@@ -96,11 +96,11 @@ public class ClusterTemplateViewV4Response extends CompactViewV4Response {
         this.stackVersion = stackVersion;
     }
 
-    public String getEnvironmentName() {
-        return environmentName;
+    public String getEnvironmentCrn() {
+        return environmentCrn;
     }
 
-    public void setEnvironmentName(String environmentName) {
-        this.environmentName = environmentName;
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 }

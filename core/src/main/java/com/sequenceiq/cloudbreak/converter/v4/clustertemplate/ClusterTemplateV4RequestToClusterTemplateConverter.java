@@ -12,18 +12,17 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequire
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.ClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
 public class ClusterTemplateV4RequestToClusterTemplateConverter extends AbstractConversionServiceAwareConverter<ClusterTemplateV4Request, ClusterTemplate> {
@@ -44,9 +43,8 @@ public class ClusterTemplateV4RequestToClusterTemplateConverter extends Abstract
 
     @Override
     public ClusterTemplate convert(ClusterTemplateV4Request source) {
-        EnvironmentSettingsV4Request environment = source.getStackTemplate().getEnvironment();
-        if (environment == null || StringUtils.isEmpty(environment.getName())) {
-            throw new BadRequestException("The environment name cannot be null.");
+        if (StringUtils.isEmpty(source.getStackTemplate().getEnvironmentCrn())) {
+            throw new BadRequestException("The environmentCrn cannot be null.");
         }
 
         ClusterTemplate clusterTemplate = new ClusterTemplate();
@@ -71,6 +69,6 @@ public class ClusterTemplateV4RequestToClusterTemplateConverter extends Abstract
     }
 
     private String getCloudPlatform(ClusterTemplateV4Request source, Stack stack) {
-        return source.getCloudPlatform() != null ? source.getCloudPlatform() : stack.getEnvironment().getCloudPlatform();
+        return source.getCloudPlatform() != null ? source.getCloudPlatform() : stack.getCredential().cloudPlatform();
     }
 }

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.environment.placement;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response;
 
 import javax.validation.constraints.NotNull;
 

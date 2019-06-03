@@ -27,7 +27,7 @@ public class SecurityGroupsTest extends AbstractIntegrationTest {
         createDefaultUser((TestContext) data[0]);
     }
 
-    @Test(dataProvider = "contextWithCredentialNameAndException")
+    @Test(dataProvider = "contextWithCredentialNameAndException", enabled = false)
     public void testGetSecurityGroupsByCredentialNameWhenCredentialIsInvalid(
             MockedTestContext testContext, String credentialName, String exceptionKey,
             Class<Exception> exception, String msg, @Description TestCaseDescription testCaseDescription) {

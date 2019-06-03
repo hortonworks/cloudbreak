@@ -14,15 +14,14 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackValidationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
-import com.sequenceiq.cloudbreak.cloud.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.cloud.model.SpecialParameters;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -31,17 +30,18 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
 public class StackValidationV4RequestToStackValidationConverter extends AbstractConversionServiceAwareConverter<StackValidationV4Request, StackValidation> {
@@ -56,7 +56,7 @@ public class StackValidationV4RequestToStackValidationConverter extends Abstract
     private CredentialService credentialService;
 
     @Inject
-    private EnvironmentViewService environmentViewService;
+    private EnvironmentClientService environmentClientService;
 
     @Inject
     private ConverterUtil converterUtil;
@@ -81,6 +81,7 @@ public class StackValidationV4RequestToStackValidationConverter extends Abstract
         StackValidation stackValidation = new StackValidation();
         Set<InstanceGroup> instanceGroups = converterUtil.convertAllAsSet(stackValidationRequest.getInstanceGroups(), InstanceGroup.class);
         stackValidation.setInstanceGroups(instanceGroups);
+        stackValidation.setEnvironmentCrn(stackValidationRequest.getEnvironmentCrn());
         stackValidation.setHostGroups(convertHostGroupsFromJson(instanceGroups, stackValidationRequest.getHostGroups()));
 
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
@@ -89,16 +90,13 @@ public class StackValidationV4RequestToStackValidationConverter extends Abstract
                 () -> validateBlueprint(stackValidationRequest, stackValidation, workspace),
                 "blueprint", stackValidationRequest.getBlueprintName()
         );
+        DetailedEnvironmentResponse environment = environmentClientService.get(stackValidation.getEnvironmentCrn());
         formatAccessDeniedMessage(
-                () -> validateEnvironment(stackValidationRequest, stackValidation, workspace),
-                "environment", stackValidationRequest.getEnvironmentName()
+                () -> validateCredential(stackValidationRequest, stackValidation, workspace, environment.getCredentialName()),
+                "credential", environment.getCredentialName()
         );
         formatAccessDeniedMessage(
-                () -> validateCredential(stackValidationRequest, stackValidation, workspace),
-                "credential", stackValidationRequest.getCredentialName()
-        );
-        formatAccessDeniedMessage(
-                () -> validateNetwork(stackValidationRequest.getNetworkId(), stackValidationRequest.getNetwork(), stackValidation),
+                () -> validateNetwork(stackValidationRequest.getNetworkId(), stackValidationRequest.getNetwork(), stackValidation, environment),
                 "network",
                 stackValidationRequest.getNetworkId()
         );
@@ -115,31 +113,33 @@ public class StackValidationV4RequestToStackValidationConverter extends Abstract
         }
     }
 
-    private void validateEnvironment(StackValidationV4Request stackValidationRequest, StackValidation stackValidation, Workspace workspace) {
-        if (!StringUtils.isEmpty(stackValidationRequest.getEnvironmentName())) {
-            EnvironmentView environment = environmentViewService.getByNameForWorkspace(stackValidationRequest.getEnvironmentName(), workspace);
-            stackValidation.setEnvironment(environment);
-            stackValidation.setCredential(environment.getCredential());
+    private void validateEnvironment(StackValidationV4Request stackValidationRequest, StackValidation stackValidation, Workspace workspace,
+            DetailedEnvironmentResponse environment) {
+        if (!StringUtils.isEmpty(stackValidationRequest.getEnvironmentCrn())) {
+            stackValidation.setEnvironmentCrn(environment.getId());
+            Credential credential = credentialService.getByNameForWorkspace(environment.getCredentialName(), workspace);
+            stackValidation.setCredential(credential);
         }
     }
 
-    private void validateCredential(StackValidationV4Request stackValidationRequest, StackValidation stackValidation, Workspace workspace) {
-        if (stackValidationRequest.getCredentialName() != null) {
-            Credential credential = credentialService.getByNameForWorkspace(stackValidationRequest.getCredentialName(), workspace);
+    private void validateCredential(StackValidationV4Request stackValidationRequest,
+            StackValidation stackValidation, Workspace workspace, String credentialName) {
+        if (credentialName != null) {
+            Credential credential = credentialService.getByNameForWorkspace(credentialName, workspace);
             stackValidation.setCredential(credential);
         } else if (stackValidation.getCredential() == null) {
             throw new BadRequestException("Credential is not configured for the validation request!");
         }
     }
 
-    private void validateNetwork(Long networkId, NetworkV4Request networkRequest, StackValidation stackValidation) {
+    private void validateNetwork(Long networkId, NetworkV4Request networkRequest, StackValidation stackValidation,
+            DetailedEnvironmentResponse environment) {
         SpecialParameters specialParameters =
                 cloudParameterCache.getPlatformParameters().get(Platform.platform(stackValidation.getCredential().cloudPlatform())).specialParameters();
         if (networkId != null) {
             Network network = networkService.get(networkId);
             stackValidation.setNetwork(network);
         } else {
-            EnvironmentView environment = stackValidation.getEnvironment();
             if (environment != null && environment.getNetwork() != null) {
                 CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
                 EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(cloudPlatform);

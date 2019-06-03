@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
@@ -67,8 +66,7 @@ public class DatalakeResources implements ProvisionEntity, WorkspaceAwareResourc
     @ManyToOne
     private KerberosConfig kerberosConfig;
 
-    @ManyToOne
-    private EnvironmentView environment;
+    private String environmentCrn;
 
     @Override
     public Long getId() {
@@ -183,11 +181,11 @@ public class DatalakeResources implements ProvisionEntity, WorkspaceAwareResourc
         this.kerberosConfig = kerberosConfig;
     }
 
-    public EnvironmentView getEnvironment() {
-        return environment;
+    public String getEnvironmentCrn() {
+        return environmentCrn;
     }
 
-    public void setEnvironment(EnvironmentView environment) {
-        this.environment = environment;
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 }

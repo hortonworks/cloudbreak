@@ -28,7 +28,7 @@ public class SSHKeysTest extends AbstractIntegrationTest {
         createDefaultUser((TestContext) data[0]);
     }
 
-    @Test(dataProvider = "contextWithCredentialNameAndException")
+    @Test(dataProvider = "contextWithCredentialNameAndException", enabled = false)
     public void testGetSSHKeysByCredentialNameWhenCredentialIsInvalid(
             MockedTestContext testContext,
             String credentialName,
