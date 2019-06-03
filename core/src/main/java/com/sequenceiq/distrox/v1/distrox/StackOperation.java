@@ -66,9 +66,9 @@ public class StackOperation {
     @Inject
     private DefaultClouderaManagerRepoService defaultClouderaManagerRepoService;
 
-    public StackViewV4Responses list(Long workspaceId, String environment, Boolean onlyDatalakes) {
+    public StackViewV4Responses list(Long workspaceId, String environmentCrn, Boolean onlyDatalakes) {
         Set<StackViewV4Response> stackViewResponses = converterUtil.convertAllAsSet(
-                stackApiViewService.retrieveStackViewsByWorkspaceId(workspaceId, environment, onlyDatalakes),
+                stackApiViewService.retrieveStackViewsByWorkspaceId(workspaceId, environmentCrn, onlyDatalakes),
                 StackViewV4Response.class
         );
         return new StackViewV4Responses(stackViewResponses);

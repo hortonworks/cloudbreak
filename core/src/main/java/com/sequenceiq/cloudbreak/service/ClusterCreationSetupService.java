@@ -22,8 +22,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.environment.ClusterCreationEnvironmentValidator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
@@ -38,15 +38,16 @@ import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.util.Benchmark.MultiCheckedSupplier;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
 public class ClusterCreationSetupService {
@@ -92,12 +93,13 @@ public class ClusterCreationSetupService {
     @Inject
     private ClusterCreationEnvironmentValidator environmentValidator;
 
-    public void validate(ClusterV4Request request, Stack stack, User user, Workspace workspace) {
-        validate(request, null, stack, user, workspace);
+    public void validate(ClusterV4Request request, Stack stack, User user, Workspace workspace, DetailedEnvironmentResponse environment) {
+        validate(request, null, stack, user, workspace, environment);
     }
 
     @Measure(ClusterCreationSetupService.class)
-    public void validate(ClusterV4Request request, CloudCredential cloudCredential, Stack stack, User user, Workspace workspace) {
+    public void validate(ClusterV4Request request, CloudCredential cloudCredential, Stack stack, User user,
+            Workspace workspace, DetailedEnvironmentResponse environment) {
         if (stack.getDatalakeResourceId() != null && StringUtils.isNotBlank(request.getKerberosName())) {
             throw new BadRequestException("Invalid kerberos settings, attached cluster should inherit kerberos parameters");
         }
@@ -110,7 +112,7 @@ public class ClusterCreationSetupService {
                 stack.getCreator().getUserId(), stack.getWorkspace().getId());
         mpackValidator.validateMpacks(request.getAmbari(), workspace);
         rdsConfigValidator.validateRdsConfigs(request, user, workspace);
-        ValidationResult environmentValidationResult = environmentValidator.validate(request, stack, user);
+        ValidationResult environmentValidationResult = environmentValidator.validate(request, stack, user, environment);
         if (environmentValidationResult.hasError()) {
             throw new BadRequestException(environmentValidationResult.getFormattedErrors());
         }
@@ -125,8 +127,8 @@ public class ClusterCreationSetupService {
         decorateHostGroupWithConstraint(stack, clusterStub);
 
         if (request.getCloudStorage() != null) {
-            FileSystem fs = measure(() -> fileSystemConfigService.createWithMdcContextRestore(converterUtil.convert(request.getCloudStorage(), FileSystem.class),
-                        stack.getWorkspace(), stack.getCreator()),
+            FileSystem fs = measure(() -> fileSystemConfigService.createWithMdcContextRestore(
+                    converterUtil.convert(request.getCloudStorage(), FileSystem.class), stack.getWorkspace(), stack.getCreator()),
                     LOGGER, "File system saving took {} ms for stack {}", stackName);
         }
 

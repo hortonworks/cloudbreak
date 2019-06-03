@@ -13,7 +13,7 @@ import javax.ws.rs.NotFoundException;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
+import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -36,7 +36,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
         initializeDefaultBlueprints(testContext);
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "there is a running cloudbreak",
             when = "valid create environment request is sent",
@@ -50,7 +50,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "there is a running cloudbreak",
             when = "a create environment request is sent with an invalid region in it",
@@ -65,7 +65,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "there is a running cloudbreak",
             when = "a create environment request is sent with no region in it",
@@ -80,7 +80,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "there is a running cloudbreak",
             when = "a create environment request with reference to a non-existing credential is sent",
@@ -94,7 +94,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "there is an available environment",
             when = "a delete request is sent for the environment",
@@ -109,7 +109,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "there is a running cloudbreak",
             when = "a delete request is sent for a non-existing environment",
@@ -124,8 +124,8 @@ public class EnvironmentTest extends AbstractIntegrationTest {
     }
 
     private EnvironmentTestDto checkEnvIsListed(TestContext testContext, EnvironmentTestDto environment, CloudbreakClient cloudbreakClient) {
-        Collection<SimpleEnvironmentV4Response> simpleEnvironmentV4Respons = environment.getResponseSimpleEnvSet();
-        List<SimpleEnvironmentV4Response> result = simpleEnvironmentV4Respons.stream()
+        Collection<SimpleEnvironmentResponse> simpleEnvironmentV4Respons = environment.getResponseSimpleEnvSet();
+        List<SimpleEnvironmentResponse> result = simpleEnvironmentV4Respons.stream()
                 .filter(env -> environment.getName().equals(env.getName()))
                 .collect(Collectors.toList());
         if (result.isEmpty()) {

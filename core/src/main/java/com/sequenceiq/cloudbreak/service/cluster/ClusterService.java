@@ -91,7 +91,6 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
-import com.sequenceiq.cloudbreak.domain.environment.Environment;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -226,7 +225,7 @@ public class ClusterService {
         }
         return transactionService.required(() -> {
             setWorkspace(cluster, stack.getWorkspace());
-            cluster.setEnvironment(stack.getEnvironment());
+            cluster.setEnvironmentCrn(stack.getEnvironmentCrn());
 
             long start = System.currentTimeMillis();
             if (repository.findByNameAndWorkspace(cluster.getName(), stack.getWorkspace()).isPresent()) {
@@ -271,10 +270,6 @@ public class ClusterService {
             }
             return savedCluster;
         });
-    }
-
-    public List<String> getNameOfAliveByEnvironment(Environment environment) {
-        return repository.getNameOfAliveOnesByWorkspaceAndEnvironment(environment.getWorkspace().getId(), environment.getId());
     }
 
     private void setWorkspace(Cluster cluster, Workspace workspace) {
@@ -1168,19 +1163,6 @@ public class ClusterService {
         return clusterApiConnectors.getConnector(stack).clusterStatusService().getHostStatusesRaw();
     }
 
-    public void disconnectTerminatedClustersInEnvironment(Environment environment) {
-        Set<Cluster> terminatedClusters =
-                repository.findByWorkspaceIdAndEnvironmentIdAndStatus(environment.getWorkspace().getId(), environment.getId(), Status.DELETE_COMPLETED);
-        terminatedClusters.forEach(c -> {
-            c.setEnvironment(null);
-            c.setStack(null);
-            c.setRdsConfigs(Set.of());
-            c.setLdapConfig(null);
-            c.setKerberosConfig(null);
-        });
-        repository.saveAll(terminatedClusters);
-    }
-
     public Set<Cluster> findByBlueprint(Blueprint blueprint) {
         return repository.findByBlueprint(blueprint);
     }
@@ -1223,10 +1205,6 @@ public class ClusterService {
 
     public Set<Cluster> findByKerberosConfig(Long kerberosConfigId) {
         return repository.findByKerberosConfig(kerberosConfigId);
-    }
-
-    public Set<Cluster> findAllClustersByKerberosConfigInEnvironment(KerberosConfig kerberosConfig, Long environmentId) {
-        return repository.findByKerberosConfigAndEnvironment(kerberosConfig.getId(), environmentId);
     }
 
     public void updateAmbariRepoDetails(Long clusterId, StackRepositoryV4Request stackRepository) {

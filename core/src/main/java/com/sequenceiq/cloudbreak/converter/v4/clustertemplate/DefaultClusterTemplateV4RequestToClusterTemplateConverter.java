@@ -67,7 +67,7 @@ public class DefaultClusterTemplateV4RequestToClusterTemplateConverter
     }
 
     private String getCloudPlatform(DefaultClusterTemplateV4Request source, Stack stack) {
-        return source.getCloudPlatform() != null ? source.getCloudPlatform() : stack.getEnvironment().getCloudPlatform();
+        return source.getCloudPlatform() != null ? source.getCloudPlatform() : stack.getCredential().cloudPlatform();
 
     }
 }

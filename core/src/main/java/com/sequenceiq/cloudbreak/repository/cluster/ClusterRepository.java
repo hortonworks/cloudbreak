@@ -80,8 +80,8 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     Set<Cluster> findByKerberosConfig(@Param("id") Long kerberosConfigId);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT c FROM Cluster c INNER JOIN c.kerberosConfig kc WHERE c.environment.id = :environmentId AND kc.id= :id AND c.status != 'DELETE_COMPLETED'")
-    Set<Cluster> findByKerberosConfigAndEnvironment(@Param("id") Long id, @Param("environmentId") Long environmentId);
+    @Query("SELECT c FROM Cluster c INNER JOIN c.kerberosConfig kc WHERE c.environmentCrn = :environmentCrn AND kc.id= :id AND c.status != 'DELETE_COMPLETED'")
+    Set<Cluster> findByKerberosConfigAndEnvironment(@Param("id") Long id, @Param("environmentCrn") String environmentCrn);
 
     @CheckPermissionsByWorkspaceId
     @Query("SELECT name FROM Cluster c WHERE c.workspace.id = :workspaceId AND c.environment.id = :environmentId "
@@ -93,4 +93,7 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
             + "AND c.status = 'DELETE_COMPLETED'")
     List<Cluster> getAllTerminatedOnesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("environmentId") Long environmentId);
 
+    @CheckPermissionsByWorkspaceId
+    @Query("SELECT COUNT(c) FROM Cluster c WHERE c.workspace.id = :workspaceId AND c.environmentCrn = :environmentCrn AND c.status != 'DELETE_COMPLETED'")
+    Long countAliveOnesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("environmentCrn") String environmentCrn);
 }

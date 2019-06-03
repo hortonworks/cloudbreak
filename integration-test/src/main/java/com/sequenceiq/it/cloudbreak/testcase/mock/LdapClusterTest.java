@@ -30,7 +30,7 @@ public class LdapClusterTest extends AbstractIntegrationTest {
     @Inject
     private StackTestClient stackTestClient;
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a valid cluster request with ldap configuration",
             when = "calling create cluster",
@@ -53,7 +53,7 @@ public class LdapClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a valid cluster request with ldap configuration",
             when = "calling create cluster and then delete the attached ldap",

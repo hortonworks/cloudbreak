@@ -30,15 +30,14 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.service.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.credential.CredentialPrerequisiteService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
@@ -59,6 +58,7 @@ import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
 public class StackV4RequestToTemplatePreparationObjectConverter extends AbstractConversionServiceAwareConverter<StackV4Request, TemplatePreparationObject> {
@@ -97,7 +97,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
     private WorkspaceService workspaceService;
 
     @Inject
-    private EnvironmentViewService environmentViewService;
+    private EnvironmentClientService environmentClientService;
 
     @Inject
     private KerberosConfigService kerberosConfigService;
@@ -194,12 +194,8 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
     }
 
     private Credential getCredential(StackV4Request source, Workspace workspace) {
-        String environmentName = source.getEnvironment().getName();
-        if (!StringUtils.isEmpty(environmentName)) {
-            EnvironmentView environmentView = environmentViewService.getByNameForWorkspace(environmentName, workspace);
-            return environmentView.getCredential();
-        }
-        return credentialService.getByNameForWorkspace(source.getEnvironment().getCredentialName(), workspace);
+        DetailedEnvironmentResponse environment = environmentClientService.get(source.getEnvironmentCrn());
+        return credentialService.getByNameForWorkspace(environment.getCredentialName(), workspace);
     }
 
     private Blueprint getBlueprint(StackV4Request source, Workspace workspace) {

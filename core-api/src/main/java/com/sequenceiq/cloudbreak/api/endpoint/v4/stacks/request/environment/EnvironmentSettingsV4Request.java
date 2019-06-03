@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment;
 
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.CREDENTIAL_NAME;
-import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.ENVIRONMENT;
+import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.ENVIRONMENT_CRN;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -18,7 +18,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class EnvironmentSettingsV4Request implements JsonEntity {
 
-    @ApiModelProperty(ENVIRONMENT)
+    @ApiModelProperty(ENVIRONMENT_CRN)
     private String name;
 
     @ApiModelProperty(CREDENTIAL_NAME)

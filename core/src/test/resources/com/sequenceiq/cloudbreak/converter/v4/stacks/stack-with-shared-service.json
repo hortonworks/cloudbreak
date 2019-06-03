@@ -8,9 +8,7 @@
     "availabilityZone": "avZone",
     "region": "eu-west-1"
   },
-  "environment": {
-    "credentialName": "cred"
-  },
+  "environmentCrn": "cred",
   "authentication": {
     "publicKey": "ssh-key dsfsdfsdfsdf"
   },

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.environment.EnvironmentSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.UserViewV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
@@ -43,8 +42,11 @@ public class StackViewV4Response implements JsonEntity {
     @ApiModelProperty(StackModelDescription.USER)
     private UserViewV4Response user;
 
-    @ApiModelProperty(StackModelDescription.ENVIRONMENT)
-    private EnvironmentSettingsV4Response environment;
+    @ApiModelProperty(StackModelDescription.ENVIRONMENT_CRN)
+    private String environmentCrn;
+
+    @ApiModelProperty(StackModelDescription.CLOUD_PLATFORM)
+    private String cloudPlatform;
 
     public Long getId() {
         return id;
@@ -102,12 +104,12 @@ public class StackViewV4Response implements JsonEntity {
         this.name = name;
     }
 
-    public EnvironmentSettingsV4Response getEnvironment() {
-        return environment;
+    public String getEnvironmentCrn() {
+        return environmentCrn;
     }
 
-    public void setEnvironment(EnvironmentSettingsV4Response environment) {
-        this.environment = environment;
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 
     public UserViewV4Response getUser() {
@@ -126,4 +128,11 @@ public class StackViewV4Response implements JsonEntity {
         this.terminated = terminated;
     }
 
+    public String getCloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public void setCloudPlatform(String cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
+    }
 }

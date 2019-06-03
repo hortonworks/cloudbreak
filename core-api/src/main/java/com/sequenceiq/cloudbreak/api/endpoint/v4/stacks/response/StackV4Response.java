@@ -20,8 +20,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.authentication.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.customdomain.CustomDomainSettingsV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.environment.EnvironmentSettingsV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.environment.placement.PlacementSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.hardware.HardwareInfoGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
@@ -29,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.Network
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags.TagsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.telemetry.TelemetryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
@@ -44,7 +43,7 @@ public class StackV4Response extends StackV4Base {
     @ApiModelProperty(StackModelDescription.STACK_ID)
     private Long id;
 
-    private EnvironmentSettingsV4Response environment;
+    private String environmentCrn;
 
     @ApiModelProperty(StackModelDescription.STACK_STATUS)
     private Status status;
@@ -108,6 +107,9 @@ public class StackV4Response extends StackV4Base {
 
     @ApiModelProperty(ClusterModelDescription.SHARED_SERVICE_REQUEST)
     private SharedServiceV4Response sharedService;
+
+    @ApiModelProperty(StackModelDescription.CLOUD_PLATFORM)
+    private CloudPlatform cloudPlatform;
 
     public Long getId() {
         return id;
@@ -237,12 +239,12 @@ public class StackV4Response extends StackV4Base {
         this.workspace = workspace;
     }
 
-    public EnvironmentSettingsV4Response getEnvironment() {
-        return environment;
+    public String getEnvironmentCrn() {
+        return environmentCrn;
     }
 
-    public void setEnvironment(EnvironmentSettingsV4Response environment) {
-        this.environment = environment;
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 
     public TagsV4Response getTags() {
@@ -283,5 +285,13 @@ public class StackV4Response extends StackV4Base {
 
     public void setPlacement(PlacementSettingsV4Response placement) {
         this.placement = placement;
+    }
+
+    public CloudPlatform getCloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public void setCloudPlatform(CloudPlatform cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
     }
 }
