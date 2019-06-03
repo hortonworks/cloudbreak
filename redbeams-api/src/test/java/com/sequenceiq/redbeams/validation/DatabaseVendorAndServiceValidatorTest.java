@@ -25,7 +25,7 @@ import org.junit.runners.Parameterized.Parameters;
 import org.mockito.Mock;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
-import com.sequenceiq.cloudbreak.util.DatabaseCommon;
+import com.sequenceiq.cloudbreak.validation.DatabaseCommon;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseV4Request;
 
 @RunWith(Parameterized.class)

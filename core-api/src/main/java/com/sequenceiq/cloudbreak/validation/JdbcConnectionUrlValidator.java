@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.validation;
 
-import com.sequenceiq.cloudbreak.util.DatabaseCommon;
-
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 

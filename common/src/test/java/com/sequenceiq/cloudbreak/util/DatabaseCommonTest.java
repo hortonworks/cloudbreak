@@ -2,7 +2,8 @@ package com.sequenceiq.cloudbreak.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.sequenceiq.cloudbreak.util.DatabaseCommon.JdbcConnectionUrlFields;
+import com.sequenceiq.cloudbreak.validation.DatabaseCommon;
+import com.sequenceiq.cloudbreak.validation.DatabaseCommon.JdbcConnectionUrlFields;
 
 import java.util.Optional;
 

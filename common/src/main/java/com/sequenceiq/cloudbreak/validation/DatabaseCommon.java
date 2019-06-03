@@ -1,14 +1,14 @@
-package com.sequenceiq.cloudbreak.util;
+package com.sequenceiq.cloudbreak.validation;
 
 import static java.util.Objects.requireNonNull;
-
-import com.google.common.base.Strings;
 
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Component;
+
+import com.google.common.base.Strings;
 
 /**
  * Common database functions.
@@ -31,9 +31,6 @@ public class DatabaseCommon {
     private static final int PORT_GROUP = 3;
 
     private static final int DATABASE_GROUP = 4;
-
-    public DatabaseCommon() {
-    }
 
     public boolean isValidJdbcConnectionUrl(String connectionUrl) {
         try {
