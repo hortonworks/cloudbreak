@@ -108,7 +108,11 @@ public class SdxService {
 
     public List<SdxCluster> listSdx(String userCrn, String envName) {
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
-        return sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(accountIdFromCrn, envName);
+        if (envName != null) {
+            return sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(accountIdFromCrn, envName);
+        } else {
+            return sdxClusterRepository.findByAccountIdAndDeletedIsNull(accountIdFromCrn);
+        }
     }
 
     public void deleteSdx(String userCrn, String sdxName) {

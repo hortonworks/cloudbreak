@@ -16,6 +16,8 @@ public interface SdxClusterRepository extends CrudRepository<SdxCluster, Long> {
 
     Optional<SdxCluster> findByAccountIdAndClusterNameAndDeletedIsNull(String accountId, String clusterName);
 
+    List<SdxCluster> findByAccountIdAndDeletedIsNull(String accountId);
+
     List<SdxCluster> findByAccountIdAndEnvNameAndDeletedIsNull(String accountId, String envName);
 
 }
