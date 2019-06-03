@@ -56,7 +56,7 @@ public class ClusterToClusterV4RequestConverter extends AbstractConversionServic
             clusterRequest.setKerberosName(source.getKerberosConfig().getName());
         }
 
-        if (StringUtils.isNoneEmpty(source.getProxyConfigCrn())) {
+        if (StringUtils.isNotEmpty(source.getProxyConfigCrn())) {
             clusterRequest.setProxyConfigCrn(source.getProxyConfigCrn());
         }
 

@@ -37,7 +37,7 @@ public class ManagementPackDetailsV4ToManagementPackComponentConverter
     @Override
     public ManagementPackComponent convert(ManagementPackDetailsV4Request source) {
         ManagementPackComponent mpack = new ManagementPackComponent();
-        if (StringUtils.isNoneEmpty(source.getName())) {
+        if (StringUtils.isNotEmpty(source.getName())) {
             User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
             Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
             ManagementPack dmpack = managementPackService.getByNameForWorkspace(source.getName(), workspace);
@@ -47,7 +47,7 @@ public class ManagementPackDetailsV4ToManagementPackComponentConverter
             mpack.setPreInstalled(false);
             mpack.setForce(dmpack.isForce());
             mpack.setPurge(dmpack.isPurge());
-            if (StringUtils.isNoneEmpty(dmpack.getPurgeList())) {
+            if (StringUtils.isNotEmpty(dmpack.getPurgeList())) {
                 mpack.setPurgeList(Arrays.asList(dmpack.getPurgeList().split(",")));
             }
         } else {

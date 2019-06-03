@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import javax.inject.Inject;
 
@@ -20,32 +20,32 @@ public class RepositoryConfigValidationService {
         RepoConfigValidationV4Response result = new RepoConfigValidationV4Response();
         if (request != null) {
             String ambariBaseUrl = request.getAmbariBaseUrl();
-            if (isNoneEmpty(ambariBaseUrl)) {
+            if (isNotEmpty(ambariBaseUrl)) {
                 result.setAmbariBaseUrl(repoUrlAvailable(ambariBaseUrl, "Ambari"));
             }
 
             String ambariGpgKeyUrl = request.getAmbariGpgKeyUrl();
-            if (isNoneEmpty(ambariGpgKeyUrl)) {
+            if (isNotEmpty(ambariGpgKeyUrl)) {
                 result.setAmbariGpgKeyUrl(isAccessible(ambariGpgKeyUrl, null));
             }
 
             String stackBaseURL = request.getStackBaseURL();
-            if (isNoneEmpty(stackBaseURL)) {
+            if (isNotEmpty(stackBaseURL)) {
                 result.setStackBaseURL(repoUrlAvailable(stackBaseURL, "HDP"));
             }
 
             String utilsBaseURL = request.getUtilsBaseURL();
-            if (isNoneEmpty(utilsBaseURL)) {
+            if (isNotEmpty(utilsBaseURL)) {
                 result.setUtilsBaseURL(repoUrlAvailable(utilsBaseURL, "HDP-UTILS"));
             }
 
             String versionDefinitionFileUrl = request.getVersionDefinitionFileUrl();
-            if (isNoneEmpty(versionDefinitionFileUrl)) {
+            if (isNotEmpty(versionDefinitionFileUrl)) {
                 result.setVersionDefinitionFileUrl(isAccessible(versionDefinitionFileUrl, null));
             }
 
             String mpackUrl = request.getMpackUrl();
-            if (isNoneEmpty(mpackUrl)) {
+            if (isNotEmpty(mpackUrl)) {
                 result.setMpackUrl(isAccessible(mpackUrl, null));
             }
         }
@@ -67,7 +67,7 @@ public class RepositoryConfigValidationService {
 
     private Boolean isAccessible(String baseUrl, String urlExtension) {
         String url = baseUrl;
-        if (isNoneEmpty(urlExtension)) {
+        if (isNotEmpty(urlExtension)) {
             String ext = baseUrl.endsWith("/") ? urlExtension : '/' + urlExtension;
             url += ext;
         }

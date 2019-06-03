@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.util;
 
 import static org.apache.commons.lang3.StringUtils.isAnyEmpty;
-import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -98,7 +98,7 @@ public final class GcpStackUtil {
 
     public static GoogleCredential buildCredential(CloudCredential gcpCredential, HttpTransport httpTransport) throws IOException, GeneralSecurityException {
         String credentialJson = getServiceAccountCredentialJson(gcpCredential);
-        if (isNoneEmpty(credentialJson)) {
+        if (isNotEmpty(credentialJson)) {
             return GoogleCredential.fromStream(new ByteArrayInputStream(Base64.decodeBase64(credentialJson)), httpTransport, JSON_FACTORY)
                     .createScoped(SCOPES);
         } else {
@@ -140,7 +140,7 @@ public final class GcpStackUtil {
     public static CloudCredential prepareCredential(CloudCredential credential) {
         try {
             String credentialJson = getServiceAccountCredentialJson(credential);
-            if (isNoneEmpty(credentialJson)) {
+            if (isNotEmpty(credentialJson)) {
                 JsonNode credNode = JsonUtil.readTree(new String(Base64.decodeBase64(credentialJson)));
                 JsonNode projectId = credNode.get("project_id");
                 if (projectId != null) {
@@ -262,7 +262,7 @@ public final class GcpStackUtil {
     }
 
     public static boolean isExistingNetwork(Network network) {
-        return isNoneEmpty(getCustomNetworkId(network));
+        return isNotEmpty(getCustomNetworkId(network));
     }
 
     public static boolean isNewSubnetInExistingNetwork(Network network) {
@@ -278,7 +278,7 @@ public final class GcpStackUtil {
     }
 
     public static boolean isExistingSubnet(Network network) {
-        return isNoneEmpty(getSubnetId(network));
+        return isNotEmpty(getSubnetId(network));
     }
 
     public static String getCustomNetworkId(Network network) {

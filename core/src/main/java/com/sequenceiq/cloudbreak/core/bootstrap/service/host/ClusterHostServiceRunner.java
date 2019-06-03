@@ -477,7 +477,7 @@ public class ClusterHostServiceRunner {
         Map<String, Object> topology = new HashMap<>();
         topology.put("name", gt.getTopologyName());
         Json exposedJson = gt.getExposedServices();
-        if (exposedJson != null && StringUtils.isNoneEmpty(exposedJson.getValue())) {
+        if (exposedJson != null && StringUtils.isNotEmpty(exposedJson.getValue())) {
             List<String> exposedServices = exposedJson.get(ExposedServices.class).getServices();
             topology.put("exposed", exposedServices);
         } else {
@@ -532,7 +532,7 @@ public class ClusterHostServiceRunner {
         Set<RDSConfig> rdsConfigs = rdsConfigService.findByClusterId(cluster.getId());
         Map<String, Object> connectorJarUrlsByVendor = new HashMap<>();
         rdsConfigs.stream()
-                .filter(rds -> StringUtils.isNoneEmpty(rds.getConnectorJarUrl()))
+                .filter(rds -> StringUtils.isNotEmpty(rds.getConnectorJarUrl()))
                 .forEach(rdsConfig -> {
                     connectorJarUrlsByVendor.put("databaseType", rdsConfig.getDatabaseEngine().databaseType());
                     connectorJarUrlsByVendor.put("connectorJarUrl", rdsConfig.getConnectorJarUrl());

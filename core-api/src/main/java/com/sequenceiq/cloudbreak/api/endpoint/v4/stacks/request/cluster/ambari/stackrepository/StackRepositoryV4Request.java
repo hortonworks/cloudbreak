@@ -175,10 +175,10 @@ public class StackRepositoryV4Request implements JsonEntity {
     }
 
     public boolean customRepoSpecified() {
-        boolean vdfFileSpecified = StringUtils.isNoneEmpty(versionDefinitionFileUrl);
-        boolean repositoriesSpecified = repository != null && StringUtils.isNoneEmpty(repository.getBaseUrl())
-                && StringUtils.isNoneEmpty(utilsBaseURL)
-                && StringUtils.isNoneEmpty(utilsRepoId);
+        boolean vdfFileSpecified = StringUtils.isNotEmpty(versionDefinitionFileUrl);
+        boolean repositoriesSpecified = repository != null && StringUtils.isNotEmpty(repository.getBaseUrl())
+                && StringUtils.isNotEmpty(utilsBaseURL)
+                && StringUtils.isNotEmpty(utilsRepoId);
 
         return vdfFileSpecified || repositoriesSpecified;
     }

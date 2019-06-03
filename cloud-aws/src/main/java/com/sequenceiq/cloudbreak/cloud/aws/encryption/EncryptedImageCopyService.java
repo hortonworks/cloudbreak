@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.encryption;
 
 import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -192,7 +192,7 @@ public class EncryptedImageCopyService {
 
         imageOptional.getBlockDeviceMappings()
                 .stream()
-                .filter(deviceMapping -> deviceMapping.getEbs() != null && isNoneEmpty(deviceMapping.getEbs().getSnapshotId()))
+                .filter(deviceMapping -> deviceMapping.getEbs() != null && isNotEmpty(deviceMapping.getEbs().getSnapshotId()))
                 .forEach(deviceMapping -> deleteSnapshot(client, deviceMapping, encryptedImage, regionName));
     }
 

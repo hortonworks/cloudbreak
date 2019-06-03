@@ -105,7 +105,7 @@ public class ClusterCreationEnvironmentValidator {
             BiFunction<String, Long, ? extends WorkspaceAwareResource> repositoryCall,
             String resourceTypeName) {
 
-        if (StringUtils.isNoneEmpty(configName)) {
+        if (StringUtils.isNotEmpty(configName)) {
             try {
                 repositoryCall.apply(configName, workspaceId);
             } catch (NotFoundException nfe) {
@@ -130,7 +130,7 @@ public class ClusterCreationEnvironmentValidator {
     }
 
     private void validateProxyConfig(String resourceCrn, String accountId, ValidationResultBuilder resultBuilder, String userCrn) {
-        if (StringUtils.isNoneEmpty(resourceCrn)) {
+        if (StringUtils.isNotEmpty(resourceCrn)) {
             try {
                 proxyConfigDtoService.get(resourceCrn, accountId, userCrn);
             } catch (CloudbreakServiceException ex) {

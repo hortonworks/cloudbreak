@@ -50,7 +50,7 @@ public class BlueprintV4RequestToBlueprintConverter
     @Override
     public Blueprint convert(BlueprintV4Request json) {
         Blueprint blueprint = new Blueprint();
-        if (StringUtils.isNoneEmpty(json.getUrl())) {
+        if (StringUtils.isNotEmpty(json.getUrl())) {
             String sourceUrl = json.getUrl().trim();
             try {
                 String urlText = URLUtils.readUrl(sourceUrl);

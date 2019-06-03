@@ -55,7 +55,7 @@ public class ManagementPackValidator {
             throw new BadRequestException("Mpack list contains more than one entries with purge option");
         }
         if (purgedMpacks.size() == 1) {
-            if (StringUtils.isNoneEmpty(mpackUrl)) {
+            if (StringUtils.isNotEmpty(mpackUrl)) {
                 throw new BadRequestException("Mpack list cannot contain mpack with purge option if stack default mpackurl is given");
             } else if (mpackList.size() > 1) {
                 throw new BadRequestException("Mpack list cannot contain purged and non purged mpacks together");

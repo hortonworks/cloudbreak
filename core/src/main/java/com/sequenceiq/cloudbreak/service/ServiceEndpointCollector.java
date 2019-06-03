@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService.getServiceNameBasedOnClusterVariant;
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.YARN;
-import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -79,7 +79,7 @@ public class ServiceEndpointCollector {
                 Gateway gateway = cluster.getGateway();
                 if (gateway != null) {
                     String variant = cluster.getVariant();
-                    ExposedService exposedService = isNoneEmpty(variant) && variant.equals(ClusterApi.CLOUDERA_MANAGER)
+                    ExposedService exposedService = isNotEmpty(variant) && variant.equals(ClusterApi.CLOUDERA_MANAGER)
                             ? ExposedService.CLOUDERA_MANAGER : ExposedService.AMBARI;
                     // Knox cannot proxy Cloudbreak Manager yet
                     if (!ExposedService.CLOUDERA_MANAGER.equals(exposedService)) {

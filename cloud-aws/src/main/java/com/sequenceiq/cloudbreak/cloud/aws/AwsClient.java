@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
 
@@ -126,7 +126,7 @@ public class AwsClient {
     }
 
     public boolean existingKeyPairNameSpecified(InstanceAuthentication instanceAuthentication) {
-        return isNoneEmpty(getExistingKeyPairName(instanceAuthentication));
+        return isNotEmpty(getExistingKeyPairName(instanceAuthentication));
     }
 
     public String getExistingKeyPairName(InstanceAuthentication instanceAuthentication) {
@@ -169,11 +169,11 @@ public class AwsClient {
     }
 
     public boolean roleBasedCredential(AwsCredentialView awsCredential) {
-        return isNoneEmpty(awsCredential.getRoleArn());
+        return isNotEmpty(awsCredential.getRoleArn());
     }
 
     private boolean isRoleAssumeRequired(AwsCredentialView awsCredential) {
-        return isNoneEmpty(awsCredential.getRoleArn()) && isEmpty(awsCredential.getAccessKey()) && isEmpty(awsCredential.getSecretKey());
+        return isNotEmpty(awsCredential.getRoleArn()) && isEmpty(awsCredential.getAccessKey()) && isEmpty(awsCredential.getSecretKey());
     }
 
     private BasicAWSCredentials createAwsCredentials(AwsCredentialView credentialView) {

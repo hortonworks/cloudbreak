@@ -4,7 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getCustomNet
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSharedProjectId;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSubnetId;
 import static java.util.Collections.singletonList;
-import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -314,7 +314,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     private void prepareNetworkAndSubnet(String projectId, Region region, Network network, NetworkInterface networkInterface,
             List<CloudResource> subnet, String networkName) {
-        if (isNoneEmpty(getSharedProjectId(network))) {
+        if (isNotEmpty(getSharedProjectId(network))) {
             networkInterface.setNetwork(getNetworkUrl(getSharedProjectId(network), getCustomNetworkId(network)));
             networkInterface.setSubnetwork(getSubnetUrl(getSharedProjectId(network), region.value(), getSubnetId(network)));
         } else {

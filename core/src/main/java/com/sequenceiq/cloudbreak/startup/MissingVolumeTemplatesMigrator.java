@@ -138,7 +138,7 @@ public class MissingVolumeTemplatesMigrator {
         } else {
             volumeTemplate.setVolumeSize(volumeSetAttributes.getVolumeSize());
         }
-        if (StringUtils.isNoneEmpty(volumeSetAttributes.getVolumeType())) {
+        if (StringUtils.isNotEmpty(volumeSetAttributes.getVolumeType())) {
             volumeTemplate.setVolumeCount(volumeSetAttributes.getVolumes().size());
         } else {
             volumeTemplate.setVolumeCount(Math.toIntExact(volumeSetAttributes.getVolumes().stream()
