@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImag
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags.TagsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.telemetry.TelemetryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
@@ -90,6 +91,9 @@ public class StackV4Response extends StackV4Base {
 
     @ApiModelProperty(StackModelDescription.TAGS)
     private TagsV4Response tags;
+
+    @ApiModelProperty(StackModelDescription.TELEMETRY)
+    private TelemetryV4Response telemetry;
 
     @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
     private WorkspaceResourceV4Response workspace;
@@ -247,6 +251,14 @@ public class StackV4Response extends StackV4Base {
 
     public void setTags(TagsV4Response tags) {
         this.tags = tags;
+    }
+
+    public TelemetryV4Response getTelemetry() {
+        return telemetry;
+    }
+
+    public void setTelemetry(TelemetryV4Response telemetry) {
+        this.telemetry = telemetry;
     }
 
     public CustomDomainSettingsV4Response getCustomDomains() {

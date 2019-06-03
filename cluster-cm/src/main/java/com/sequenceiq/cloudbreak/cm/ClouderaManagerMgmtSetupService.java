@@ -1,27 +1,23 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import static com.sequenceiq.cloudbreak.cm.util.ConfigUtils.makeApiConfig;
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.MgmtRoleConfigGroupsResourceApi;
 import com.cloudera.api.swagger.MgmtRolesResourceApi;
 import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
-import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiRole;
@@ -33,7 +29,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.cm.client.DataView;
+import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
 import com.sequenceiq.cloudbreak.cm.database.DatabaseProperties;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -46,8 +42,6 @@ import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 @Service
 public class ClouderaManagerMgmtSetupService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerMgmtSetupService.class);
-
     private static final String MGMT_SERVICE = "MGMT";
 
     private static final String ACTIVITYMONITOR = "ACTIVITYMONITOR";
@@ -59,24 +53,17 @@ public class ClouderaManagerMgmtSetupService {
             ACTIVITYMONITOR, "firehose",
             REPORTSMANAGER, "headlamp");
 
-    private static final String TELEMETRYPUBLISHER = "TELEMETRYPUBLISHER";
-
-    private static final String TELEMETRY_MASTER = "telemetry_master";
-
-    private static final String TELEMETRY_WA = "telemetry_wa";
-
-    private static final String TELEMETRY_COLLECT_JOB_LOGS = "telemetry_collect_job_logs";
-
-    private static final String TELEMETRY_ALTUS_ACCOUNT = "telemetry_altus_account";
-
     private static final List<String> BLACKLISTED_ROLE_TYPES = ImmutableList.of(
-            TELEMETRYPUBLISHER, "NAVIGATOR", "NAVIGATORMETASERVER");
+            ClouderaManagerMgmtTelemetryService.TELEMETRYPUBLISHER, "NAVIGATOR", "NAVIGATORMETASERVER");
 
     @Inject
     private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
 
     @Inject
     private ClouderaManagerLicenseService licenseService;
+
+    @Inject
+    private ClouderaManagerMgmtTelemetryService telemetryService;
 
     @Inject
     private DatabaseCommon databaseCommon;
@@ -88,13 +75,14 @@ public class ClouderaManagerMgmtSetupService {
      * @param client     the CM API client
      * @param cmHostRef  reference to the CM host
      * @param rdsConfigs the set of all database configs
+     * @param telemetry  telemetry (logging/workload/billing etc.) details
+     * @param sdxContext sdx data holder
      * @throws ApiException if there's a problem setting up management services
      */
-    public void setupMgmtServices(Stack stack, ApiClient client, ApiHostRef cmHostRef, Set<RDSConfig> rdsConfigs)
+    public void setupMgmtServices(Stack stack, ApiClient client, ApiHostRef cmHostRef,
+            Set<RDSConfig> rdsConfigs, Telemetry telemetry, String sdxContext)
             throws ApiException {
         licenseService.beginTrialIfNeeded(stack.getCreator(), client);
-
-        ClouderaManagerResourceApi clouderaManagerResourceApi = new ClouderaManagerResourceApi(client);
         MgmtServiceResourceApi mgmtServiceResourceApi = new MgmtServiceResourceApi(client);
         MgmtRolesResourceApi mgmtRolesResourceApi = new MgmtRolesResourceApi(client);
 
@@ -115,23 +103,9 @@ public class ClouderaManagerMgmtSetupService {
                 mgmtRoles.addItemsItem(apiRole);
             }
         }
-
-        // Add TELEMETRYPUBLISHER if configs are set up properly
-        // We have to do this because we're unable to take advantage of mgmtServiceResourceApi.autoAssignRoles,
-        // which would have this logic baked in server side
-        Map<String, String> configs = clouderaManagerResourceApi.getConfig(DataView.SUMMARY.name()).getItems().stream()
-                .collect(Collectors.toMap(ApiConfig::getName, ApiConfig::getValue));
-        if (Boolean.parseBoolean(configs.getOrDefault(TELEMETRY_MASTER, "false"))
-                && Boolean.parseBoolean(configs.getOrDefault(TELEMETRY_WA, "false"))
-                && Boolean.parseBoolean(configs.getOrDefault(TELEMETRY_COLLECT_JOB_LOGS, "false"))
-                && configs.containsKey(TELEMETRY_ALTUS_ACCOUNT)) {
-            ApiRole telemetryPublisher = new ApiRole();
-            telemetryPublisher.setName(TELEMETRYPUBLISHER);
-            telemetryPublisher.setType(TELEMETRYPUBLISHER);
-            telemetryPublisher.setHostRef(cmHostRef);
-            mgmtRoles.addItemsItem(telemetryPublisher);
-        }
+        telemetryService.setupTelemetryRole(stack, client, cmHostRef, mgmtRoles, telemetry);
         createMgmtRoles(mgmtRolesResourceApi, mgmtRoles);
+        telemetryService.updateTelemetryConfigs(stack, client, telemetry, sdxContext);
         createMgmtDatabases(client, rdsConfigs);
         startMgmtServices(stack, client, mgmtServiceResourceApi);
     }
@@ -256,14 +230,5 @@ public class ClouderaManagerMgmtSetupService {
 
     private String getDatabaseApiConfigName(String prefix, String propertyName) {
         return String.format("%s_database_%s", prefix, propertyName);
-    }
-
-    private ApiConfig makeApiConfig(String name, String value) {
-        ApiConfig apiConfig = new ApiConfig();
-
-        apiConfig.setName(name);
-        apiConfig.setValue(value);
-
-        return apiConfig;
     }
 }

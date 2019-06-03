@@ -5,7 +5,7 @@
   <store ignore_error>
     @type s3
     s3_bucket {{fluent.s3LogArchiveBucketName}}
-    path "{{fluent.s3LogFolderName}}/cluster-logs/%Y-%m-%d/%H/\${tag[1]}-#{Socket.gethostname}-%M"
+    path "{{fluent.s3LogFolderName}}/%Y-%m-%d/%H/\${tag[1]}-#{Socket.gethostname}-%M"
     s3_object_key_format %{path}-%{index}.%{file_extension}
 
     <buffer tag,time>
@@ -25,7 +25,7 @@
   <store ignore_error>
     @type s3
     s3_bucket {{fluent.s3LogArchiveBucketName}}
-    path "{{fluent.s3LogFolderName}}/cluster-logs/%Y-%m-%d/%H/CM_COMMAND-\${tag[6]}-\${tag[1]}-#{Socket.gethostname}-%M"
+    path "{{fluent.s3LogFolderName}}/%Y-%m-%d/%H/CM_COMMAND-\${tag[6]}-\${tag[1]}-#{Socket.gethostname}-%M"
     s3_object_key_format %{path}-%{index}.%{file_extension}
 
     <buffer tag,time>

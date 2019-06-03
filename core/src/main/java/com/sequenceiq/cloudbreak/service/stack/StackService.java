@@ -425,6 +425,9 @@ public class StackService {
         measure(() -> addCloudbreakDetailsForStack(savedStack),
                 LOGGER, "Add Cloudbreak details took {} ms for stack {}", stackName);
 
+        measure(() -> storeTelemetryForStack(savedStack),
+                LOGGER, "Add Telemetry settings took {} ms for stack {}", stackName);
+
         measure(() -> instanceGroupService.saveAll(savedStack.getInstanceGroups()),
                 LOGGER, "Instance groups saved in {} ms for stack {}", stackName);
 
@@ -870,6 +873,18 @@ public class StackService {
             componentConfigProviderService.store(cbDetailsComponent);
         } catch (IllegalArgumentException e) {
             LOGGER.info("Could not create Cloudbreak details component.", e);
+        }
+    }
+
+    private void storeTelemetryForStack(Stack stack) {
+        try {
+            for (Component component : stack.getComponents()) {
+                if (ComponentType.TELEMETRY.equals(component.getComponentType())) {
+                    componentConfigProviderService.store(component);
+                }
+            }
+        } catch (IllegalArgumentException e) {
+            LOGGER.info("Could not create Cloudbreak telemetry component.", e);
         }
     }
 

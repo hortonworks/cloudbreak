@@ -26,7 +26,9 @@ import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
@@ -61,6 +63,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     @Inject
     private CloudbreakEventService eventService;
+
+    @Inject
+    private ClouderaManagerDatabusService databusService;
 
     private final Stack stack;
 
@@ -227,6 +232,17 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             throw new CancellationException("Cluster was terminated while waiting for Cloudera Manager to start.");
         } else if (isTimeout(healthCheckResult)) {
             throw new CloudbreakException("Cloudera Manager server was not restarted properly.");
+        }
+    }
+
+    @Override
+    public void cleanupCluster(Telemetry telemetry) throws CloudbreakException {
+        if (telemetry != null && telemetry.getWorkloadAnalytics() != null && telemetry.getWorkloadAnalytics().isEnabled()) {
+            if (StackType.DATALAKE.equals(stack.getType())) {
+                LOGGER.info("Stack type is datalake, no need for WA cleanup");
+            } else {
+                databusService.cleanUpMachineUser(stack, telemetry);
+            }
         }
     }
 

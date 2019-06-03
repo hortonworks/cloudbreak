@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
+import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -29,6 +30,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterCreationSuccessHandler;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -75,6 +77,9 @@ public class ClusterBuilderService {
     private HostGroupService hostGroupService;
 
     @Inject
+    private ComponentConfigProviderService componentConfigProviderService;
+
+    @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
@@ -106,6 +111,7 @@ public class ClusterBuilderService {
         String blueprintText = cluster.getBlueprint().getBlueprintText();
         cluster.setExtendedBlueprintText(blueprintText);
         clusterService.updateCluster(cluster);
+        final Telemetry telemetry = componentConfigProviderService.getTelemetry(stackId);
 
         String sdxContext = Optional.ofNullable(stack.getEnvironment())
                 .map(EnvironmentView::getDatalakeResources)
@@ -115,7 +121,7 @@ public class ClusterBuilderService {
                 .map(clusterApiConnectors::getConnector)
                 .map(ClusterApi::getSdxContext).orElse(null);
 
-        clusterService.save(connector.buildCluster(instanceMetaDataByHostGroup, templatePreparationObject, hostsInCluster, sdxContext));
+        clusterService.save(connector.buildCluster(instanceMetaDataByHostGroup, templatePreparationObject, hostsInCluster, sdxContext, telemetry));
         recipeEngine.executePostInstallRecipes(stack, instanceMetaDataByHostGroup.keySet());
         clusterCreationSuccessHandler.handleClusterCreationSuccess(stack);
         if (StackType.DATALAKE == stack.getType()) {

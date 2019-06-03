@@ -51,6 +51,9 @@ base:
 {% if salt['file.file_exists']('/srv/pillar/cloudera-manager/license.sls') %}
     - cloudera-manager.license
 {% endif %}
+{% if salt['file.file_exists']('/srv/pillar/cloudera-manager/cme.sls') %}
+    - cloudera-manager.cme
+{% endif %}
     - cloudera-manager.repo
     - cloudera-manager.database
     - gateway.init

@@ -37,6 +37,9 @@ public class DistroXV1RequestToStackV4RequestConverter {
     private DistroXClusterToClusterConverter clusterConverter;
 
     @Inject
+    private DistroXTelemetryToTelemetryV4Converter telemetryConverter;
+
+    @Inject
     private InstanceGroupV1ToInstanceGroupV4Converter instanceGroupConverter;
 
     @Inject
@@ -60,6 +63,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setEnvironment(environmentConverter.convert(source.getEnvironment()));
         ifNotNull(authenticationConverter.convert(source.getAuthentication()), request::setAuthentication);
         request.setImage(ifNotNullF(source.getImage(), imageConverter::convert));
+        request.setTelemetry(ifNotNullF(source.getTelemetry(), telemetryConverter::convert));
         request.setCluster(ifNotNullF(source.getCluster(), clusterConverter::convert));
         request.setInstanceGroups(ifNotNullF(source.getInstanceGroups(), instanceGroupConverter::convert));
         request.setNetwork(ifNotNullF(source.getNetwork(), networkConverter::convert));

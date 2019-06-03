@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
@@ -36,6 +37,8 @@ public interface ClusterModificationService {
     void regenerateKerberosKeytabs(String hostname) throws CloudbreakException;
 
     void startComponents(Map<String, String> components, String hostname) throws CloudbreakException;
+
+    void cleanupCluster(Telemetry telemetry) throws CloudbreakException;
 
     void restartAll() throws CloudbreakException;
 }
