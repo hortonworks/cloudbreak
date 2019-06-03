@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack;
 
+import java.util.List;
+
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -14,6 +16,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaNotes;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.service.api.doc.ContentType;
 
 import io.swagger.annotations.Api;
@@ -35,6 +38,13 @@ public interface FreeIpaV1Endpoint {
     @ApiOperation(value = FreeIpaOperationDescriptions.GET_BY_ENVID, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "getFreeIpaByEnvironmentV1")
     DescribeFreeIpaResponse describe(@QueryParam("environment") String environmentCrn);
+
+    @GET
+    @Path("/list")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = FreeIpaOperationDescriptions.LIST_BY_ACCOUNT, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+            nickname = "getFreeIpaByAccountV1")
+    List<ListFreeIpaResponse> list();
 
     @GET
     @Path("ca.crt")

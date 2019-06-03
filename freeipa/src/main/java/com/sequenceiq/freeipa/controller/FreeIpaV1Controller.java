@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.controller;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.validation.Valid;
 
@@ -8,9 +10,11 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.freeipa.service.stack.FreeIpaCreationService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDeletionService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDescribeService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaListService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaRootCertificateService;
 import com.sequenceiq.freeipa.util.CrnService;
 
@@ -25,6 +29,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private FreeIpaDescribeService freeIpaDescribeService;
+
+    @Inject
+    private FreeIpaListService freeIpaListService;
 
     @Inject
     private FreeIpaRootCertificateService freeIpaRootCertificateService;
@@ -42,6 +49,12 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     public DescribeFreeIpaResponse describe(String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         return freeIpaDescribeService.describe(environmentCrn, accountId);
+    }
+
+    @Override
+    public List<ListFreeIpaResponse> list() {
+        String accountId = crnService.getCurrentAccountId();
+        return freeIpaListService.list(accountId);
     }
 
     @Override
