@@ -51,4 +51,9 @@ cbd-delete:
 	./scripts/cbd-delete.sh
 
 upload-s3:
-	aws s3 cp ./apidefinitions/new.json s3://cloudbreak-swagger/swagger-$(VERSION).json --acl public-read
+	aws s3 cp ./apidefinitions/cb.json s3://cloudbreak-swagger/swagger-$(VERSION).json --acl public-read
+	aws s3 cp ./apidefinitions/environment.json s3://environment-swagger/swagger-$(VERSION).json --acl public-read
+	aws s3 cp ./apidefinitions/freeipa.json s3://freeipa-swagger/swagger-$(VERSION).json --acl public-read
+	aws s3 cp ./apidefinitions/redbeams.json s3://redbeams-swagger/swagger-$(VERSION).json --acl public-read
+	aws s3 cp ./apidefinitions/datalake.json s3://datalake-swagger/swagger-$(VERSION).json --acl public-read
+	aws s3 cp ./apidefinitions/autoscale.json s3://autoscale-swagger/swagger-$(VERSION).json --acl public-read

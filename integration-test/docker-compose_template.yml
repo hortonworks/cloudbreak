@@ -72,7 +72,7 @@ services:
       cbreak_default: {}
     volumes:
       - ./apidefinitions:/json
-    command: bash -c "curl -k http://cloudbreak:8080/cb/api/swagger.json -o new.json && for f in /json/*.json ; do echo check to $${f} ; swagger-diff -i $${f} new.json ; done ; cp new.json /json"
+    command: bash -c "for f in /json/*.json ; do echo check to $${f} ; swagger-diff -i $${f} cb.json ; done ;cp *.json /json"
     image: afarsang/docker-swagger-diff
   swagger-validation:
     networks:
