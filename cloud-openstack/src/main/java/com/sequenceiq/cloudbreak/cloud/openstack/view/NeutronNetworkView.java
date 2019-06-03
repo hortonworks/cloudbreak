@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.openstack.view;
 import static com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants.NETWORK_ID;
 import static com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants.ROUTER_ID;
 import static com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants.SUBNET_ID;
-import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
@@ -21,15 +21,15 @@ public class NeutronNetworkView {
     }
 
     public boolean isAssignFloatingIp() {
-        return isNoneEmpty(getPublicNetId());
+        return isNotEmpty(getPublicNetId());
     }
 
     public boolean isExistingNetwork() {
-        return isNoneEmpty(getCustomNetworkId());
+        return isNotEmpty(getCustomNetworkId());
     }
 
     public boolean isExistingSubnet() {
-        return isNoneEmpty(getCustomSubnetId());
+        return isNotEmpty(getCustomSubnetId());
     }
 
     public String getCustomNetworkId() {

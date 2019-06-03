@@ -4,7 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSharedPro
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isExistingNetwork;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.noFirewallRules;
 import static com.sequenceiq.cloudbreak.common.type.ResourceType.GCP_FIREWALL_IN;
-import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -96,7 +96,7 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
         firewall.setTargetTags(Collections.singletonList(GcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group)));
         firewall.setAllowed(allowedRules);
         firewall.setName(buildableResource.getName());
-        if (isNoneEmpty(getSharedProjectId(network))) {
+        if (isNotEmpty(getSharedProjectId(network))) {
             firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s",
                     getSharedProjectId(network),
                     context.getParameter(GcpNetworkResourceBuilder.NETWORK_NAME, String.class)));

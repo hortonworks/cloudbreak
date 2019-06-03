@@ -43,7 +43,7 @@ public class DefaultClusterTemplateCache {
 
     @PostConstruct
     public void loadClusterTemplatesFromFile() {
-        if (clusterTemplates.stream().anyMatch(StringUtils::isNoneEmpty)) {
+        if (clusterTemplates.stream().anyMatch(StringUtils::isNotEmpty)) {
             LOGGER.debug("Default clustertemplate to load into cache by property: {}", clusterTemplates);
             loadByProperty();
         } else {

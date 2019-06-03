@@ -37,8 +37,8 @@ public class AdlsCloudStorageParametersValidator implements ConstraintValidator<
     }
 
     private boolean isClientIdOrCredentialEmpty(AdlsCloudStorageV4Parameters value) {
-        boolean clientIdEmpty = StringUtils.isNoneEmpty(value.getClientId());
-        boolean credentialEmpty = StringUtils.isNoneEmpty(value.getCredential());
+        boolean clientIdEmpty = StringUtils.isNotEmpty(value.getClientId());
+        boolean credentialEmpty = StringUtils.isNotEmpty(value.getCredential());
         return clientIdEmpty != credentialEmpty;
     }
 

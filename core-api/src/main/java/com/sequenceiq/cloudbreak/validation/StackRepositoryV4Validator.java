@@ -40,12 +40,12 @@ public class StackRepositoryV4Validator implements ConstraintValidator<ValidAmba
     }
 
     private boolean repositorySpecificationFieldsExist(StackRepositoryV4Request stackRepo, ConstraintValidatorContext context) {
-        boolean vdfFileSpecified = StringUtils.isNoneEmpty(stackRepo.getVersionDefinitionFileUrl());
-        boolean mpackSpecified = StringUtils.isNoneEmpty(stackRepo.getMpackUrl())
+        boolean vdfFileSpecified = StringUtils.isNotEmpty(stackRepo.getVersionDefinitionFileUrl());
+        boolean mpackSpecified = StringUtils.isNotEmpty(stackRepo.getMpackUrl())
                 || !CollectionUtils.isEmpty(stackRepo.getMpacks());
-        boolean repositoriesSpecified = stackRepo.getRepository() != null && StringUtils.isNoneEmpty(stackRepo.getRepository().getBaseUrl())
-                && StringUtils.isNoneEmpty(stackRepo.getUtilsBaseURL())
-                && StringUtils.isNoneEmpty(stackRepo.getUtilsRepoId());
+        boolean repositoriesSpecified = stackRepo.getRepository() != null && StringUtils.isNotEmpty(stackRepo.getRepository().getBaseUrl())
+                && StringUtils.isNotEmpty(stackRepo.getUtilsBaseURL())
+                && StringUtils.isNotEmpty(stackRepo.getUtilsRepoId());
 
         if (!vdfFileSpecified && !repositoriesSpecified && !mpackSpecified) {
             buildConstraintValidations(stackRepo, context);
@@ -55,9 +55,9 @@ public class StackRepositoryV4Validator implements ConstraintValidator<ValidAmba
     }
 
     private void buildConstraintValidations(StackRepositoryV4Request stackRepo, ConstraintValidatorContext context) {
-        boolean anyRepositoryDetailsSpecified = stackRepo.getRepository() != null && StringUtils.isNoneEmpty(stackRepo.getRepository().getBaseUrl())
-                || StringUtils.isNoneEmpty(stackRepo.getUtilsBaseURL())
-                || StringUtils.isNoneEmpty(stackRepo.getUtilsRepoId());
+        boolean anyRepositoryDetailsSpecified = stackRepo.getRepository() != null && StringUtils.isNotEmpty(stackRepo.getRepository().getBaseUrl())
+                || StringUtils.isNotEmpty(stackRepo.getUtilsBaseURL())
+                || StringUtils.isNotEmpty(stackRepo.getUtilsRepoId());
 
         if (anyRepositoryDetailsSpecified) {
             if (stackRepo.getRepository() == null || (stackRepo.getRepository() != null && StringUtils.isEmpty(stackRepo.getRepository().getBaseUrl()))) {

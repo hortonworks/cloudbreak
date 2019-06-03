@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.heat;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -96,7 +96,7 @@ public class HeatTemplateBuilder {
         }
         if (existingNetwork) {
             parameters.put("app_net_id", neutronView.getCustomNetworkId());
-            if (isNoneEmpty(existingSubnetCidr)) {
+            if (isNotEmpty(existingSubnetCidr)) {
                 parameters.put("subnet_id", neutronView.getCustomSubnetId());
             } else {
                 parameters.put("router_id", neutronView.getCustomRouterId());

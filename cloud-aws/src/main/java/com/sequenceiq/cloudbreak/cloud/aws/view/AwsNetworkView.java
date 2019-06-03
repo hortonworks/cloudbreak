@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.view;
 
-import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,15 +23,15 @@ public class AwsNetworkView {
     }
 
     public boolean isExistingVPC() {
-        return isNoneEmpty(network.getStringParameter(VPC));
+        return isNotEmpty(network.getStringParameter(VPC));
     }
 
     public boolean isExistingSubnet() {
-        return isNoneEmpty(network.getStringParameter(SUBNET));
+        return isNotEmpty(network.getStringParameter(SUBNET));
     }
 
     public boolean isExistingIGW() {
-        return isNoneEmpty(network.getStringParameter(IGW));
+        return isNotEmpty(network.getStringParameter(IGW));
     }
 
     public String getExistingSubnet() {

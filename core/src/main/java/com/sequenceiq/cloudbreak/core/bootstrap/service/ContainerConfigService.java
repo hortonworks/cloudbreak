@@ -85,7 +85,7 @@ public class ContainerConfigService {
 
     private Map<String, String> getCustomContainerConfig(Stack stack) {
         Json customContainerDefinition = stack.getCluster().getCustomContainerDefinition();
-        if (customContainerDefinition != null && StringUtils.isNoneEmpty(customContainerDefinition.getValue())) {
+        if (customContainerDefinition != null && StringUtils.isNotEmpty(customContainerDefinition.getValue())) {
             try {
                 return customContainerDefinition.get(Map.class);
             } catch (IOException e) {

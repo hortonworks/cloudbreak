@@ -91,9 +91,9 @@ public class CredentialPrerequisiteService {
         String attributes = credential.getAttributes();
         Map<String, Object> newAttributes = convertJsonStringToMap(attributes);
         boolean attributesChanged = false;
-        if (StringUtils.isNoneEmpty((String) newAttributes.get(ROLE_ARN_PARAMTER_KEY))) {
+        if (StringUtils.isNotEmpty((String) newAttributes.get(ROLE_ARN_PARAMTER_KEY))) {
             Optional<UserPreferences> userPreferencesOptional = userPreferencesService.getByUserId(userId);
-            if (userPreferencesOptional.isPresent() && StringUtils.isNoneEmpty(userPreferencesOptional.get().getExternalId())) {
+            if (userPreferencesOptional.isPresent() && StringUtils.isNotEmpty(userPreferencesOptional.get().getExternalId())) {
                 String externalId = userPreferencesOptional.get().getExternalId();
                 newAttributes.put(EXTERNAL_ID_PARAMETER_KEY, externalId);
                 attributesChanged = true;
@@ -137,7 +137,7 @@ public class CredentialPrerequisiteService {
     }
 
     public boolean isCumulusCredential(Map<String, Object> attributes) {
-        return StringUtils.isNoneEmpty((String) attributes.get(CUMULUS_AMBARI_URL));
+        return StringUtils.isNotEmpty((String) attributes.get(CUMULUS_AMBARI_URL));
     }
 
     public boolean isCumulusCredential(String attributes) {

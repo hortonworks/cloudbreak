@@ -6,7 +6,7 @@ import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isExistingSu
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isNewNetworkAndSubnet;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isNewSubnetInExistingNetwork;
 import static com.sequenceiq.cloudbreak.common.type.ResourceType.GCP_SUBNET;
-import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import org.springframework.stereotype.Service;
 
@@ -46,7 +46,7 @@ public class GcpSubnetResourceBuilder extends AbstractGcpNetworkBuilder {
             gcpSubnet.setIpCidrRange(network.getSubnet().getCidr());
 
             String networkName = context.getStringParameter(GcpNetworkResourceBuilder.NETWORK_NAME);
-            if (isNoneEmpty(getSharedProjectId(network))) {
+            if (isNotEmpty(getSharedProjectId(network))) {
                 gcpSubnet.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s",
                         getSharedProjectId(network), networkName));
             } else {

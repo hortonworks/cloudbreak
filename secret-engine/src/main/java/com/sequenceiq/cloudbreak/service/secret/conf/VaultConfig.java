@@ -134,7 +134,7 @@ public class VaultConfig extends AbstractVaultConfiguration {
             httpClientBuilder.setRoutePlanner(new SystemDefaultRoutePlanner(
                     DefaultSchemePortResolver.INSTANCE, ProxySelector.getDefault()));
 
-            if (isNoneEmpty(httpsProxyUser) && isNoneEmpty(httpsProxyPassword)) {
+            if (isNoneEmpty(httpsProxyUser, httpsProxyPassword)) {
                 UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(httpsProxyUser, httpsProxyPassword);
                 CredentialsProvider provider = new BasicCredentialsProvider();
                 provider.setCredentials(AuthScope.ANY, credentials);

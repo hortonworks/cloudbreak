@@ -24,7 +24,7 @@ public class GatewayTopologyToGatewayTopologyV4RequestConverter extends Abstract
         GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
         gatewayTopologyJson.setTopologyName(gatewayTopology.getTopologyName());
         Json exposedJson = gatewayTopology.getExposedServices();
-        if (exposedJson != null && StringUtils.isNoneEmpty(exposedJson.getValue())) {
+        if (exposedJson != null && StringUtils.isNotEmpty(exposedJson.getValue())) {
             try {
                 gatewayTopologyJson.setExposedServices(exposedJson.get(ExposedServices.class).getServices());
             } catch (IOException e) {

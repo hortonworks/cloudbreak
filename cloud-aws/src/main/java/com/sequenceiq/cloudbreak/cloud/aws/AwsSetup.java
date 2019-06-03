@@ -194,7 +194,7 @@ public class AwsSetup implements Setup {
 
     private void validateExistingKeyPair(InstanceAuthentication instanceAuthentication, AwsCredentialView credentialView, String region) {
         String keyPairName = awsClient.getExistingKeyPairName(instanceAuthentication);
-        if (StringUtils.isNoneEmpty(keyPairName)) {
+        if (StringUtils.isNotEmpty(keyPairName)) {
             boolean keyPairIsPresentOnEC2 = false;
             try {
                 AmazonEC2Client client = awsClient.createAccess(credentialView, region);

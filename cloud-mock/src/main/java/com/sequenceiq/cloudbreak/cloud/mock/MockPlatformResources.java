@@ -4,7 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -230,7 +230,7 @@ public class MockPlatformResources implements PlatformResources {
 
     private Region getDefaultRegion() {
         Map<Platform, Region> defaultRegionsMap = Maps.newHashMap();
-        if (isNoneEmpty(defaultRegions)) {
+        if (isNotEmpty(defaultRegions)) {
             for (String entry : defaultRegions.split(",")) {
                 String[] keyValue = entry.split(":");
                 defaultRegionsMap.put(platform(keyValue[0]), region(keyValue[1]));

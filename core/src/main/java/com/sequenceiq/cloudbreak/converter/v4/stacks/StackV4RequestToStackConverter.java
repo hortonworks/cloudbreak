@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
 import static com.gs.collections.impl.utility.StringIterate.isEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
-import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.HashMap;
@@ -214,7 +214,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         }
         if (isEmpty(source.getPlacement().getRegion())) {
             Map<Platform, Region> regions = Maps.newHashMap();
-            if (isNoneEmpty(defaultRegions)) {
+            if (isNotEmpty(defaultRegions)) {
                 for (String entry : defaultRegions.split(",")) {
                     String[] keyValue = entry.split(":");
                     regions.put(platform(keyValue[0]), Region.region(keyValue[1]));

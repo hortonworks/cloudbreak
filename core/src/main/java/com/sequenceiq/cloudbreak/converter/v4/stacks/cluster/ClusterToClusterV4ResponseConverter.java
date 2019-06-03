@@ -127,7 +127,7 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
     }
 
     private String getExtendedBlueprintText(Cluster source) {
-        if (StringUtils.isNoneEmpty(source.getExtendedBlueprintText()) && !disableShowBlueprint) {
+        if (StringUtils.isNotEmpty(source.getExtendedBlueprintText()) && !disableShowBlueprint) {
             String fromVault = source.getExtendedBlueprintText();
             return anonymize(fromVault);
         }
@@ -154,7 +154,7 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
 
     private void convertContainerConfig(Cluster source, ClusterV4Response clusterResponse) {
         Json customContainerDefinition = source.getCustomContainerDefinition();
-        if (customContainerDefinition != null && StringUtils.isNoneEmpty(customContainerDefinition.getValue())) {
+        if (customContainerDefinition != null && StringUtils.isNotEmpty(customContainerDefinition.getValue())) {
             try {
                 Map<String, String> map = customContainerDefinition.get(Map.class);
                 Map<String, String> result = new HashMap<>();
@@ -182,7 +182,7 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
 
     private void decorateResponseWithProxyConfig(Cluster source, ClusterV4Response clusterResponse) {
         String proxyConfigCrn = source.getProxyConfigCrn();
-        if (StringUtils.isNoneEmpty(proxyConfigCrn)) {
+        if (StringUtils.isNotEmpty(proxyConfigCrn)) {
             clusterResponse.setProxyConfigCrn(proxyConfigCrn);
         }
     }
