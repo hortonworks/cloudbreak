@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.LdapView;
+import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.ldap.LdapSSOConfigurationFailed;
@@ -38,6 +40,9 @@ public class LdapSSOConfigurationHandler implements EventHandler<LdapSSOConfigur
     @Inject
     private GatewayConfigService gatewayConfigService;
 
+    @Inject
+    private LdapConfigService ldapConfigService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(LdapSSOConfigurationRequest.class);
@@ -50,7 +55,8 @@ public class LdapSSOConfigurationHandler implements EventHandler<LdapSSOConfigur
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-            clusterApiConnectors.getConnector(stack).clusterSecurityService().setupLdapAndSSO(primaryGatewayConfig.getPublicAddress());
+            LdapView ldapView = ldapConfigService.get(stack.getEnvironmentCrn()).orElse(null);
+            clusterApiConnectors.getConnector(stack).clusterSecurityService().setupLdapAndSSO(primaryGatewayConfig.getPublicAddress(), ldapView);
             response = new LdapSSOConfigurationSuccess(stackId);
         } catch (Exception e) {
             LOGGER.info("Error during LDAP configuration, stackId: " + stackId, e);

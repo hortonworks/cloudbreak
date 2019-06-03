@@ -1,16 +1,14 @@
 package com.sequenceiq.cloudbreak.blueprint.moduletest;
 
-import static com.sequenceiq.cloudbreak.TestUtil.adConfig;
 import static com.sequenceiq.cloudbreak.TestUtil.gatewayEnabled;
 import static com.sequenceiq.cloudbreak.TestUtil.hostGroup;
 import static com.sequenceiq.cloudbreak.TestUtil.kerberosConfigMit;
-import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
 import static com.sequenceiq.cloudbreak.TestUtil.rdsConfig;
-import static com.sequenceiq.cloudbreak.common.type.InstanceGroupType.CORE;
-import static com.sequenceiq.cloudbreak.common.type.InstanceGroupType.GATEWAY;
 import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.generalBlueprintView;
 import static com.sequenceiq.cloudbreak.blueprint.filesystem.BlueprintTestUtil.generalClusterConfigs;
 import static com.sequenceiq.cloudbreak.blueprint.moduletest.AmbariBlueprintModulTest.BLUEPRINT_UPDATER_TEST_INPUTS;
+import static com.sequenceiq.cloudbreak.common.type.InstanceGroupType.CORE;
+import static com.sequenceiq.cloudbreak.common.type.InstanceGroupType.GATEWAY;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,9 +27,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.blueprint.testrepeater.TestFile;
+import com.sequenceiq.cloudbreak.common.type.filesystem.S3FileSystem;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.common.type.filesystem.S3FileSystem;
+import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
@@ -85,14 +84,14 @@ class AmbariBlueprintModulTestModelProvider {
     static TemplatePreparationObject blueprintObjectWhenLdapPresentedThenRangerAndHadoopLdapShouldConfigured() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
+                .withLdapConfig(ldapConfig("cn=admin,dc=example,dc=org", "admin"))
                 .build();
     }
 
     static TemplatePreparationObject blueprintObjectWhenADPresentedThenRangerAndHadoopADShouldConfigured() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withLdapConfig(adConfig(), "cn=admin,dc=example,dc=org", "admin")
+                .withLdapConfig(adConfig("cn=admin,dc=example,dc=org", "admin"))
                 .build();
     }
 
@@ -100,7 +99,7 @@ class AmbariBlueprintModulTestModelProvider {
         return getPreparedBuilder()
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(DatabaseType.RANGER))))
-                .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
+                .withLdapConfig(ldapConfig("cn=admin,dc=example,dc=org", "admin"))
                 .build();
     }
 
@@ -144,7 +143,7 @@ class AmbariBlueprintModulTestModelProvider {
     static TemplatePreparationObject blueprintObjectWhenNifiAndHdfAndLdapPresentedThenHdfShouldConfigured() {
         return getPreparedBuilder("master", "slave_1")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDF"))
-                .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
+                .withLdapConfig(ldapConfig("cn=admin,dc=example,dc=org", "admin"))
                 .withHdfConfigs(new HdfConfigs("<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>",
                         "<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>",
                         "<property name=\"Node Identity 10.0.0.1\">CN=10.0.0.1, OU=NIFI</property>", Optional.empty()))
@@ -175,7 +174,7 @@ class AmbariBlueprintModulTestModelProvider {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(DatabaseType.RANGER))))
-                .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
+                .withLdapConfig(ldapConfig("cn=admin,dc=example,dc=org", "admin"))
                 .build();
     }
 
@@ -183,7 +182,7 @@ class AmbariBlueprintModulTestModelProvider {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(DatabaseType.RANGER))))
-                .withLdapConfig(adConfig(), "cn=admin,dc=example,dc=org", "admin")
+                .withLdapConfig(adConfig("cn=admin,dc=example,dc=org", "admin"))
                 .build();
     }
 
@@ -191,7 +190,7 @@ class AmbariBlueprintModulTestModelProvider {
         return getPreparedBuilder()
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(DatabaseType.RANGER, DatabaseVendor.ORACLE11))))
-                .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
+                .withLdapConfig(ldapConfig("cn=admin,dc=example,dc=org", "admin"))
                 .build();
     }
 
@@ -214,7 +213,7 @@ class AmbariBlueprintModulTestModelProvider {
                 .withHostgroups(getHostGroups("master", "worker", "compute"))
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.RANGER), rdsConfig(DatabaseType.HIVE)))
-                .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
+                .withLdapConfig(ldapConfig("cn=admin,dc=example,dc=org", "admin"))
                 .withGeneralClusterConfigs(configs)
                 .withSharedServiceConfigs(datalakeSharedServiceConfig().get())
                 .build();
@@ -233,7 +232,7 @@ class AmbariBlueprintModulTestModelProvider {
                 .withHostgroups(groups)
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.RANGER), rdsConfig(DatabaseType.HIVE)))
-                .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
+                .withLdapConfig(ldapConfig("cn=admin,dc=example,dc=org", "admin"))
                 .withGeneralClusterConfigs(configs)
                 .build();
     }
@@ -245,7 +244,7 @@ class AmbariBlueprintModulTestModelProvider {
                 .withHostgroups(getHostGroups("master", "worker", "compute"))
                 .withBlueprintView(generalBlueprintView(testFile.getFileContent(), "2.6", "HDP"))
                 .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.BEACON)))
-                .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
+                .withLdapConfig(ldapConfig("cn=admin,dc=example,dc=org", "admin"))
                 .withGateway(gatewayEnabled(), "/cb/secret/signkey")
                 .withGeneralClusterConfigs(configs)
                 .build();
@@ -258,7 +257,7 @@ class AmbariBlueprintModulTestModelProvider {
                 .withHostgroups(getHostGroups("master", "worker", "compute"))
                 .withBlueprintView(generalBlueprintView(testFile.getFileContent(), "2.6", "HDP"))
                 .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.BEACON)))
-                .withLdapConfig(adConfig(), "cn=admin,dc=example,dc=org", "admin")
+                .withLdapConfig(adConfig("cn=admin,dc=example,dc=org", "admin"))
                 .withGateway(gatewayEnabled(), "/cb/secret/signkey")
                 .withGeneralClusterConfigs(configs)
                 .build();
@@ -312,7 +311,7 @@ class AmbariBlueprintModulTestModelProvider {
         return getPreparedBuilder()
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(DatabaseType.DRUID))))
-                .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
+                .withLdapConfig(ldapConfig("cn=admin,dc=example,dc=org", "admin"))
                 .build();
     }
 
@@ -325,14 +324,14 @@ class AmbariBlueprintModulTestModelProvider {
     static TemplatePreparationObject blueprintObjectWhenAtlasAndLdapPresentedThenBothShouldConfigured() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
+                .withLdapConfig(ldapConfig("cn=admin,dc=example,dc=org", "admin"))
                 .build();
     }
 
     static TemplatePreparationObject blueprintObjectWhenAtlasAndADPresentedThenBothShouldConfigured() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withLdapConfig(adConfig(), "cn=admin,dc=example,dc=org", "admin")
+                .withLdapConfig(adConfig("cn=admin,dc=example,dc=org", "admin"))
                 .build();
     }
 
@@ -381,5 +380,19 @@ class AmbariBlueprintModulTestModelProvider {
         SharedServiceConfigsView sharedServiceConfigsView = new SharedServiceConfigsView();
         sharedServiceConfigsView.setDatalakeCluster(true);
         return Optional.of(sharedServiceConfigsView);
+    }
+
+    private static LdapView ldapConfig(String bindDn, String bindPassword) {
+        return TestUtil.ldapConfigBuilder()
+                .withBindDn(bindDn)
+                .withBindPassword(bindPassword)
+                .build();
+    }
+
+    private static LdapView adConfig(String bindDn, String bindPassword) {
+        return TestUtil.adConfigBuilder()
+                .withBindDn(bindDn)
+                .withBindPassword(bindPassword)
+                .build();
     }
 }
