@@ -3,16 +3,12 @@ package com.sequenceiq.cloudbreak.service.ldapconfig;
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-
-import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapMinimalV4Request;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
 import com.sequenceiq.cloudbreak.service.AbstractArchivistService;
@@ -20,7 +16,6 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
-@Service
 public class LdapConfigService extends AbstractArchivistService<LdapConfig> {
 
     @Inject
@@ -73,15 +68,15 @@ public class LdapConfigService extends AbstractArchivistService<LdapConfig> {
 
     @Override
     protected void prepareDeletion(LdapConfig resource) {
-        Set<Cluster> clustersWithThisProxy = clusterService.findByLdapConfig(resource);
-        if (!clustersWithThisProxy.isEmpty()) {
-            String clusters = clustersWithThisProxy
-                    .stream()
-                    .map(Cluster::getName)
-                    .collect(Collectors.joining(", "));
-            throw new BadRequestException(String.format(resource().getReadableName() + " '%s' cannot be deleted"
-                    + " because there are clusters associated with it: [%s].", resource.getName(), clusters));
-        }
+//        Set<Cluster> clustersWithThisProxy = clusterService.findByLdapConfig(resource);
+//        if (!clustersWithThisProxy.isEmpty()) {
+//            String clusters = clustersWithThisProxy
+//                    .stream()
+//                    .map(Cluster::getName)
+//                    .collect(Collectors.joining(", "));
+//            throw new BadRequestException(String.format(resource().getReadableName() + " '%s' cannot be deleted"
+//                    + " because there are clusters associated with it: [%s].", resource.getName(), clusters));
+//        }
     }
 
     @Override

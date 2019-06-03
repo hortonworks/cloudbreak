@@ -39,7 +39,6 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.ClusterAttributes;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
@@ -49,7 +48,6 @@ import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
-import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
@@ -80,9 +78,6 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
 
     @Inject
     private RdsConfigService rdsConfigService;
-
-    @Inject
-    private LdapConfigService ldapConfigService;
 
     @Override
     public Cluster convert(ClusterV4Request source) {
@@ -119,7 +114,6 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         convertVendorSpecificPart(source, cluster);
         extractClusterManagerAndHdpRepoConfig(cluster, source);
         cluster.setProxyConfigCrn(source.getProxyConfigCrn());
-        cluster.setLdapConfig(getLdap(source.getLdapName(), workspace));
         return cluster;
     }
 
@@ -242,12 +236,5 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
             }
             cluster.setRdsConfigs(rdsConfigs);
         }
-    }
-
-    private LdapConfig getLdap(String ldapName, Workspace workspace) {
-        if (ldapName != null) {
-            return ldapConfigService.getByNameForWorkspace(ldapName, workspace);
-        }
-        return null;
     }
 }

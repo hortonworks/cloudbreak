@@ -4,21 +4,21 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
 public class SharedServiceValidator {
@@ -31,6 +31,9 @@ public class SharedServiceValidator {
 
     @Inject
     private BlueprintService blueprintService;
+
+    @Inject
+    private LdapConfigService ldapConfigService;
 
     public ValidationResult checkSharedServiceStackRequirements(StackV4Request request, Workspace workspace) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
@@ -67,7 +70,6 @@ public class SharedServiceValidator {
         }
         if (!hasConfiguredRdsByType(request, workspace, DatabaseType.HIVE)) {
             resultBuilder.error("Shared service stack should have HIVE database configured.");
-
         }
         if (!hasConfiguredRdsByType(request, workspace, DatabaseType.RANGER)) {
             resultBuilder.error("Shared service stack should have RANGER database configured.");
@@ -75,7 +77,7 @@ public class SharedServiceValidator {
     }
 
     private boolean hasConfiguredLdap(StackV4Request request) {
-        return StringUtils.isNotEmpty(request.getCluster().getLdapName());
+        return ldapConfigService.isLdapConfigExistsForEnvironment(request.getEnvironmentCrn());
     }
 
     private boolean hasConfiguredRdsByType(StackV4Request request, Workspace workspace, DatabaseType rdsType) {

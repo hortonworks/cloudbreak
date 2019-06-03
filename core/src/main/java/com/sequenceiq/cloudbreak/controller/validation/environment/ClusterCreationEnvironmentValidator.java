@@ -16,13 +16,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
-import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -33,9 +31,6 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 public class ClusterCreationEnvironmentValidator {
     @Inject
     private ProxyConfigDtoService proxyConfigDtoService;
-
-    @Inject
-    private LdapConfigService ldapConfigService;
 
     @Inject
     private RdsConfigService rdsConfigService;
@@ -51,14 +46,6 @@ public class ClusterCreationEnvironmentValidator {
                     environment.getName(), environment.getRegions().getRegions().stream().sorted().collect(Collectors.joining(","))));
         }
         Long workspaceId = stack.getWorkspace().getId();
-
-        validateConfigByName(
-                clusterRequest.getLdapName(),
-                workspaceId,
-                resultBuilder,
-                ldapConfigService::getByNameForWorkspaceId,
-                LdapConfig.class.getSimpleName());
-
         validateConfigByName(
                 clusterRequest.getKerberosName(),
                 workspaceId,
