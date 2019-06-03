@@ -107,7 +107,7 @@ func CreateEnvironmentFromTemplate(c *cli.Context) {
 		utils.LogErrorMessageAndExit(msg)
 	}
 
-	if name := c.String(fl.FlEnvironmentNameOptional.Name); len(name) != 0 {
+	if name := c.String(fl.FlNameOptional.Name); len(name) != 0 {
 		req.Name = &name
 	} else if req.Name == nil {
 		utils.LogErrorMessageAndExit("Name of the environment must be set either in the template or with the --name command line option.")

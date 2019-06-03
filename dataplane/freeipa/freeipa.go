@@ -8,6 +8,7 @@ import (
 
 	"github.com/hortonworks/cb-cli/dataplane/api-freeipa/client/v1freeipa"
 	freeIpaModel "github.com/hortonworks/cb-cli/dataplane/api-freeipa/model"
+	env "github.com/hortonworks/cb-cli/dataplane/env"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
 	"github.com/hortonworks/dp-cli-common/utils"
@@ -65,6 +66,14 @@ func assembleFreeIpaRequest(c *cli.Context) *freeIpaModel.CreateFreeIpaV1Request
 	}
 	if req.Name == nil || len(*req.Name) == 0 {
 		commonutils.LogErrorMessageAndExit("Name of the cluster must be set either in the template or with the --name command line option.")
+	}
+	if req.EnvironmentCrn == nil || len(*req.EnvironmentCrn) == 0 {
+		environmentName := c.String(fl.FlEnvironmentNameOptional.Name)
+		if len(environmentName) == 0 {
+			commonutils.LogErrorMessageAndExit("Name of the environment must be set either in the template or with the --env-name command line option.")
+		}
+		crn := env.GetEnvirontmentCrnByName(c, environmentName)
+		req.EnvironmentCrn = &crn
 	}
 	return &req
 }
