@@ -99,6 +99,9 @@ type StackV4Response struct {
 	// stack related tags
 	Tags *TagsV4Response `json:"tags,omitempty"`
 
+	// stack related telemetry settings
+	Telemetry *TelemetryV4Response `json:"telemetry,omitempty"`
+
 	// termination completion time of stack in long
 	Terminated int64 `json:"terminated,omitempty"`
 
@@ -177,6 +180,10 @@ func (m *StackV4Response) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateTags(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateTelemetry(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -584,6 +591,24 @@ func (m *StackV4Response) validateTags(formats strfmt.Registry) error {
 		if err := m.Tags.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("tags")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *StackV4Response) validateTelemetry(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Telemetry) { // not required
+		return nil
+	}
+
+	if m.Telemetry != nil {
+		if err := m.Telemetry.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("telemetry")
 			}
 			return err
 		}
