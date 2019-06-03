@@ -7,12 +7,11 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
-import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.repository.cluster.DatalakeResourcesRepository;
-import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
+import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @Service
 public class DatalakeResourcesService extends AbstractWorkspaceAwareResourceService<DatalakeResources> {
@@ -24,8 +23,12 @@ public class DatalakeResourcesService extends AbstractWorkspaceAwareResourceServ
         return datalakeResourcesRepository.findByDatalakeStackId(datalakeStackId);
     }
 
-    public Set<String> findDatalakeResourcesNamesByWorkspaceAndEnvironment(Long workspaceId, Long envId) {
-        return datalakeResourcesRepository.findDatalakeResourcesNamesByWorkspaceAndEnvironment(workspaceId, envId);
+    public Set<String> findDatalakeResourcesNamesByWorkspaceAndEnvironment(Long workspaceId, String environmentCrn) {
+        return datalakeResourcesRepository.findDatalakeResourcesNamesByWorkspaceAndEnvironment(workspaceId, environmentCrn);
+    }
+
+    public Set<DatalakeResources> findDatalakeResourcesByWorkspaceAndEnvironment(Long workspaceId, String environmentCrn) {
+        return datalakeResourcesRepository.findDatalakeResourcesByWorkspaceAndEnvironment(workspaceId, environmentCrn);
     }
 
     public Optional<DatalakeResources> findById(Long datalakeResourceId) {
@@ -52,8 +55,8 @@ public class DatalakeResourcesService extends AbstractWorkspaceAwareResourceServ
         return WorkspaceResource.STACK;
     }
 
-    public Long countDatalakeResourcesInEnvironment(EnvironmentView environment) {
-        return datalakeResourcesRepository.countDatalakeResourcesByEnvironment(environment);
+    public Long countDatalakeResourcesInEnvironment(String environmentCrn) {
+        return datalakeResourcesRepository.countDatalakeResourcesByEnvironmentCrn(environmentCrn);
     }
 
     public DatalakeResources save(DatalakeResources resources) {

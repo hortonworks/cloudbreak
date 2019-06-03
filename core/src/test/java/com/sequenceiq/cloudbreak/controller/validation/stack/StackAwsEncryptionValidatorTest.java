@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,7 +23,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.common.type.EncryptionType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsEncryptionV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -36,19 +34,20 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
-import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.type.EncryptionType;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.template.InstanceTemplateV4RequestValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBase {
@@ -104,7 +103,7 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     private CredentialService credentialService;
 
     @Mock
-    private EnvironmentService environmentService;
+    private EnvironmentClientService environmentClientService;
 
     @InjectMocks
     private StackV4RequestValidator underTest;
@@ -121,18 +120,16 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         when(templateRequestValidator.validate(any())).thenReturn(ValidationResult.builder().build());
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(1L);
         when(blueprintService.getByNameForWorkspaceId(anyString(), anyLong())).thenReturn(blueprint);
-        when(subject.getEnvironment()).thenReturn(environmentSettingsRequest);
+        when(subject.getEnvironmentCrn()).thenReturn("envCrn");
         when(subject.getPlacement()).thenReturn(placementSettingsRequest);
         when(subject.getCluster()).thenReturn(clusterRequest);
-        when(clusterRequest.getAmbari()).thenReturn(ambariRequest);
         String credentialName = "someCred";
         when(clusterRequest.getBlueprintName()).thenReturn("dummy");
-        when(credential.cloudPlatform()).thenReturn("AWS");
-        when(credentialService.getByNameForWorkspaceId(any(), any())).thenReturn(credential);
         when(platformParameterService.getPlatformResourceRequest(anyLong(), anyString(), eq(null), eq(null), eq(null)))
                 .thenReturn(platformResourceRequest);
-        when(environmentSettingsRequest.getCredentialName()).thenReturn(credentialName);
-        when(platformParameterService.getRegionsByCredential(any())).thenReturn(mock(CloudRegions.class));
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setCredentialName(credentialName);
+        when(environmentClientService.get(anyString())).thenReturn(environmentResponse);
     }
 
     @Test

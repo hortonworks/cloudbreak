@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.ldap;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -24,28 +23,25 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.requests.LdapMinimalV4Request;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.validation.environment.ResourceDetachValidator;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
-import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LdapConfigServiceTest {
@@ -87,9 +83,6 @@ public class LdapConfigServiceTest {
     @Mock
     private Clock clock;
 
-    @Spy
-    private ResourceDetachValidator resourceDetachValidator = new ResourceDetachValidator();
-
     @InjectMocks
     private LdapConfigService underTest;
 
@@ -97,26 +90,16 @@ public class LdapConfigServiceTest {
 
     private final Workspace workspace = new Workspace();
 
-    private final EnvironmentView env1 = new EnvironmentView();
-
-    private final EnvironmentView env2 = new EnvironmentView();
-
     private LdapConfig ldapConfig = new LdapConfig();
 
     @Before
     public void setup() {
-        workspace.setId(WORKSPACE_ID);
-        env1.setId(1L);
-        env1.setName(ENV_1);
-        env2.setId(2L);
-        env2.setName(ENV_2);
         initLdapConfig();
         when(userService.getOrCreate(any())).thenReturn(user);
         when(workspaceService.get(WORKSPACE_ID, user)).thenReturn(workspace);
         when(workspaceService.retrieveForUser(user)).thenReturn(Set.of(workspace));
         when(ldapConfigRepository.save(any(LdapConfig.class)))
                 .thenAnswer((Answer<LdapConfig>) invocation -> (LdapConfig) invocation.getArgument(0));
-        assertNotNull(resourceDetachValidator);
     }
 
     private void initLdapConfig() {

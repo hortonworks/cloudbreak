@@ -17,7 +17,7 @@ public class MockStackCreationTest extends AbstractIntegrationTest {
     @Inject
     private StackTestClient stackTestClient;
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a valid stack request",
             when = "create stack twice",

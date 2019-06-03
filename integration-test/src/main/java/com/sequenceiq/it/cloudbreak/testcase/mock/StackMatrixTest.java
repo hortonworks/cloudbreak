@@ -26,7 +26,7 @@ public class StackMatrixTest extends AbstractIntegrationTest {
         createDefaultUser((TestContext) data[0]);
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "stack matrix",
             when = "list all supported stack combinations",

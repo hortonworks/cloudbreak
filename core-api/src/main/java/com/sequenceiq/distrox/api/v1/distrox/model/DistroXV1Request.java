@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.distrox.api.v1.distrox.model.authentication.DistroXAuthenticationV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXClusterV1Request;
-import com.sequenceiq.distrox.api.v1.distrox.model.environment.DistroXEnvironmentV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.image.DistroXImageV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
@@ -27,7 +26,7 @@ public class DistroXV1Request implements Serializable {
 
     private String name;
 
-    private DistroXEnvironmentV1Request environment;
+    private String environmentCrn;
 
     private Set<InstanceGroupV1Request> instanceGroups;
 
@@ -59,12 +58,12 @@ public class DistroXV1Request implements Serializable {
         this.name = name;
     }
 
-    public DistroXEnvironmentV1Request getEnvironment() {
-        return environment;
+    public String getEnvironmentCrn() {
+        return environmentCrn;
     }
 
-    public void setEnvironment(DistroXEnvironmentV1Request environment) {
-        this.environment = environment;
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 
     public Set<InstanceGroupV1Request> getInstanceGroups() {

@@ -23,7 +23,7 @@ public class ClouderaManagerSetupTest extends AbstractIntegrationTest {
     @Inject
     private EnvironmentTestClient environmentTestClient;
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a working environment",
             when = "a stack is created",
