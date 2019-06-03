@@ -147,9 +147,6 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
             rdsSet.add(rdsName);
             cluster.withRdsConfigNames(rdsSet);
         }
-        if (ldapName != null) {
-            cluster.withLdapConfigName(ldapName);
-        }
         return cluster;
     }
 }

@@ -62,7 +62,7 @@ public class TemplateProcessorTest {
         TemplatePreparationObject templatePreparationObject = Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withGateway(cluster.getGateway(), "/cb/secret/signkey")
-                .withLdapConfig(cluster.getLdapConfig(), "cn=admin,dc=example,dc=org", "admin<>char")
+                .withLdapConfig(TestUtil.ldapConfigWithSpecialChars())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withBlueprintView(new BlueprintView(testBlueprint, blueprintStackInfo.getVersion(),
                         blueprintStackInfo.getType(), ambariBlueprintTextProcessor))
@@ -101,7 +101,7 @@ public class TemplateProcessorTest {
         TemplatePreparationObject templatePreparationObject = Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withGateway(cluster.getGateway(), "/cb/secret/signkey")
-                .withLdapConfig(cluster.getLdapConfig(), "cn=admin,dc=example,dc=org", "admin<>char")
+                .withLdapConfig(TestUtil.ldapConfigWithSpecialChars())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withBlueprintView(new BlueprintView(testBlueprint, blueprintStackInfo.getVersion(),
                         blueprintStackInfo.getType(), ambariBlueprintTextProcessor))
@@ -147,7 +147,7 @@ public class TemplateProcessorTest {
         TemplatePreparationObject templatePreparationObject = Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withGateway(cluster.getGateway(), "/cb/secret/signkey")
-                .withLdapConfig(cluster.getLdapConfig(), "cn=admin,dc=example,dc=org", "admin<>char")
+                .withLdapConfig(TestUtil.ldapConfigWithSpecialChars())
                 .withFixInputs(properties)
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withBlueprintView(new BlueprintView(testBlueprint, blueprintStackInfo.getVersion(),
@@ -183,7 +183,7 @@ public class TemplateProcessorTest {
         TemplatePreparationObject templatePreparationObject = Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withGateway(cluster.getGateway(), "/cb/secret/signkey")
-                .withLdapConfig(cluster.getLdapConfig(), "cn=admin,dc=example,dc=org", "admin<>char")
+                .withLdapConfig(TestUtil.ldapConfigWithSpecialChars())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withFixInputs(properties)
                 .withBlueprintView(new BlueprintView(testBlueprint, blueprintStackInfo.getVersion(),
@@ -206,7 +206,7 @@ public class TemplateProcessorTest {
         TemplatePreparationObject templatePreparationObject = Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withGateway(cluster.getGateway(), "/cb/secret/signkey")
-                .withLdapConfig(cluster.getLdapConfig(), "cn=admin,dc=example,dc=org", "admin<>char")
+                .withLdapConfig(TestUtil.ldapConfigWithSpecialChars())
                 .withGeneralClusterConfigs(generalClusterConfigs())
                 .withBlueprintView(new BlueprintView(testBlueprint, blueprintStackInfo.getVersion(),
                         blueprintStackInfo.getType(), ambariBlueprintTextProcessor))
@@ -232,7 +232,7 @@ public class TemplateProcessorTest {
         TemplatePreparationObject templatePreparationObject = Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withGateway(cluster.getGateway(), "/cb/secret/signkey")
-                .withLdapConfig(cluster.getLdapConfig(), "cn=admin,dc=example,dc=org", "admin<>char")
+                .withLdapConfig(TestUtil.ldapConfigWithSpecialChars())
                 .withGeneralClusterConfigs(generalClusterConfigs())
                 .withBlueprintView(new BlueprintView(testBlueprint, blueprintStackInfo.getVersion(),
                         blueprintStackInfo.getType(), ambariBlueprintTextProcessor))
@@ -258,7 +258,7 @@ public class TemplateProcessorTest {
         TemplatePreparationObject templatePreparationObject = Builder.builder()
                 .withRdsConfigs(cluster.getRdsConfigs())
                 .withGateway(cluster.getGateway(), "/cb/secret/signkey")
-                .withLdapConfig(cluster.getLdapConfig(), "cn=admin,dc=example,dc=org", "admin<>char")
+                .withLdapConfig(TestUtil.ldapConfigWithSpecialChars())
                 .withGeneralClusterConfigs(generalClusterConfigs())
                 .withBlueprintView(new BlueprintView(testBlueprint, blueprintStackInfo.getVersion(),
                         blueprintStackInfo.getType(), ambariBlueprintTextProcessor))

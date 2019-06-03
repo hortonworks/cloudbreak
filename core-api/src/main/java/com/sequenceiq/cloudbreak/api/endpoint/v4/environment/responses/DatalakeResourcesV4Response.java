@@ -14,9 +14,6 @@ public class DatalakeResourcesV4Response {
     @ApiModelProperty(ClusterModelDescription.AMBARI_URL)
     private String ambariUrl;
 
-    @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG_NAME)
-    private String ldapName;
-
     @ApiModelProperty(ClusterModelDescription.RDSCONFIG_NAMES)
     private Set<String> databaseNames;
 
@@ -32,14 +29,6 @@ public class DatalakeResourcesV4Response {
 
     public void setAmbariUrl(String ambariUrl) {
         this.ambariUrl = ambariUrl;
-    }
-
-    public String getLdapName() {
-        return ldapName;
-    }
-
-    public void setLdapName(String ldapName) {
-        this.ldapName = ldapName;
     }
 
     public Set<String> getDatabaseNames() {

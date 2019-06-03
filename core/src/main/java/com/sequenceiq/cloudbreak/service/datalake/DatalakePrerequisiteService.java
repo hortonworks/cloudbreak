@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
-import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -46,9 +45,6 @@ public class DatalakePrerequisiteService {
 
     @Inject
     private RdsConfigService rdsConfigService;
-
-    @Inject
-    private LdapConfigService ldapConfigService;
 
     @Inject
     private KerberosConfigService kerberosConfigService;
@@ -130,8 +126,9 @@ public class DatalakePrerequisiteService {
     }
 
     private LdapConfig createLdapConfig(Long workspaceId, String environment, DatalakePrerequisiteV4Request datalakePrerequisiteV4Request) {
-        LdapConfig ldapConfig = prepareLdapConfig(environment, datalakePrerequisiteV4Request.getLdap());
-        return ldapConfigService.createForLoggedInUser(ldapConfig, workspaceId);
+//        LdapConfig ldapConfig = prepareLdapConfig(environment, datalakePrerequisiteV4Request.getLdap());
+//        return ldapConfigService.createForLoggedInUser(ldapConfig, workspaceId);
+        return null;
     }
 
     private KerberosConfig createKerberosConfig(Long workspaceId, String environment, DatalakePrerequisiteV4Request datalakePrerequisiteV4Request) {

@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterConnectorPollingResultChecker;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -205,13 +206,13 @@ public class AmbariClusterSecurityService implements ClusterSecurityService {
     }
 
     @Override
-    public void setupLdapAndSSO(String primaryGatewayPublicAddress) {
+    public void setupLdapAndSSO(String primaryGatewayPublicAddress, LdapView ldapConfig) {
         AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(stack.getCluster().getId());
         if (ambariRepo != null && ambariRepositoryVersionService.setupLdapAndSsoOnApi(ambariRepo)) {
             LOGGER.debug("Setup LDAP and SSO on API");
             try {
-                ambariLdapService.setupLdap(stack, stack.getCluster(), ambariRepo, ambariClient);
-                ambariLdapService.syncLdap(stack, ambariClient);
+                ambariLdapService.setupLdap(stack, stack.getCluster(), ambariRepo, ambariClient, ldapConfig);
+                ambariLdapService.syncLdap(stack, ambariClient, ldapConfig);
                 ambariSSOService.setupSSO(ambariClient, stack.getCluster(), primaryGatewayPublicAddress);
             } catch (IOException | URISyntaxException e) {
                 throw new RuntimeException(e);

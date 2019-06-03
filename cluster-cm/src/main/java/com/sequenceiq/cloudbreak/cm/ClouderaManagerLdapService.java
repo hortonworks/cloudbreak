@@ -20,10 +20,9 @@ import com.cloudera.api.swagger.model.ApiExternalUserMappingList;
 import com.cloudera.api.swagger.model.ApiExternalUserMappingType;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.template.views.LdapView;
+import com.sequenceiq.cloudbreak.dto.LdapView;
 
 @Service
 public class ClouderaManagerLdapService {
@@ -32,14 +31,11 @@ public class ClouderaManagerLdapService {
     @Inject
     private ClouderaManagerClientFactory clouderaManagerClientFactory;
 
-    public void setupLdap(Stack stack, Cluster cluster, HttpClientConfig clientConfig) throws ApiException {
-        LdapConfig ldapConfig = cluster.getLdapConfig();
-
-        if (ldapConfig != null) {
+    public void setupLdap(Stack stack, Cluster cluster, HttpClientConfig clientConfig, LdapView ldapView) throws ApiException {
+        if (ldapView != null) {
             ApiClient client = clouderaManagerClientFactory.getClient(stack, cluster, clientConfig);
 
             LOGGER.debug("Setup LDAP on ClouderaManager API for stack: {}", stack.getId());
-            LdapView ldapView = new LdapView(ldapConfig, ldapConfig.getBindDn(), ldapConfig.getBindPassword());
             ExternalUserMappingsResourceApi externalUserMappingsResourceApi =
                     clouderaManagerClientFactory.getExternalUserMappingsResourceApi(client);
             AuthRolesResourceApi authRolesResourceApi = clouderaManagerClientFactory.getAuthRolesResourceApi(client);

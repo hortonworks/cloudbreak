@@ -46,7 +46,6 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.TelemetryDecorator;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -58,6 +57,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -84,7 +84,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
-import com.sequenceiq.cloudbreak.template.views.LdapView;
+import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -156,6 +156,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private GrpcUmsClient umsClient;
+
+    @Inject
+    private LdapConfigService ldapConfigService;
 
     public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster) {
         try {
@@ -259,15 +262,15 @@ public class ClusterHostServiceRunner {
             decoratePillarWithAmbariDatabase(cluster, servicePillar);
         }
 
-        if (cluster.getLdapConfig() != null) {
-            LdapConfig ldapConfig = cluster.getLdapConfig().copyWithoutWorkspace();
-            saveLdapPillar(ldapConfig, servicePillar);
-        }
+        //TODO: environment crn!!!!!!
+        Optional<LdapView> ldapView = ldapConfigService.get(stack.getEnvironmentCrn());
+        ldapView.ifPresent(ldap -> saveLdapPillar(ldap, servicePillar));
+
         saveSssdAdPillar(cluster, servicePillar);
         saveSssdIpaPillar(cluster, servicePillar);
         saveDockerPillar(cluster.getExecutorType(), servicePillar);
         saveHDPPillar(cluster.getId(), servicePillar);
-        saveLdapsAdPillar(cluster, servicePillar, connector);
+        ldapView.ifPresent(ldap -> saveLdapsAdPillar(ldap, servicePillar, connector));
         Map<String, Object> credentials = new HashMap<>();
         credentials.put("username", connector.getCloudbreakClusterUserName(cluster));
         credentials.put("password", connector.getCloudbreakClusterPassword(cluster));
@@ -293,8 +296,8 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private void saveLdapsAdPillar(Cluster cluster, Map<String, SaltPillarProperties> servicePillar, ClusterPreCreationApi connector) {
-        if (Objects.nonNull(cluster.getLdapConfig()) && Objects.nonNull(cluster.getLdapConfig().getCertificate())) {
+    private void saveLdapsAdPillar(LdapView ldapView, Map<String, SaltPillarProperties> servicePillar, ClusterPreCreationApi connector) {
+        if (ldapView.getCertificate() != null) {
             Map<String, Object> ldapsProperties = new HashMap<>();
             ldapsProperties.put("certPath", connector.getCertPath());
             ldapsProperties.put("keystorePassword", connector.getKeystorePassword());
@@ -500,9 +503,8 @@ public class ClusterHostServiceRunner {
         return topology;
     }
 
-    private void saveLdapPillar(LdapConfig ldapConfig, Map<String, SaltPillarProperties> servicePillar) {
-        if (ldapConfig != null) {
-            LdapView ldapView = new LdapView(ldapConfig, ldapConfig.getBindDn(), ldapConfig.getBindPassword());
+    private void saveLdapPillar(LdapView ldapView, Map<String, SaltPillarProperties> servicePillar) {
+        if (ldapView != null) {
             servicePillar.put("ldap", new SaltPillarProperties("/gateway/ldap.sls", singletonMap("ldap", ldapView)));
         }
     }
