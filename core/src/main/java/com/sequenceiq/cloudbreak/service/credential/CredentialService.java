@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -36,8 +35,8 @@ import com.sequenceiq.cloudbreak.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.service.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
@@ -87,7 +86,7 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
     private CredentialPrerequisiteService credentialPrerequisiteService;
 
     @Inject
-    private EnvironmentViewService environmentViewService;
+    private EnvironmentClientService environmentClientService;
 
     @Inject
     private SecretService secretService;
@@ -132,7 +131,8 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
     @Override
     public Credential create(Credential credential, @Nonnull Long workspaceId, User user) {
         LOGGER.debug("Creating credential for workspace: {}", getWorkspaceService().get(workspaceId, user).getName());
-        Credential created = super.create(credentialAdapter.verify(credential, workspaceId, user.getUserId()), workspaceId, user);
+        credential = credentialAdapter.verify(credential, workspaceId, user.getUserId());
+        Credential created = super.create(credential, workspaceId, user);
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_CREATED);
         return created;
     }
@@ -279,7 +279,6 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
             throw new NotFoundException("Credential not found.");
         }
         checkStacksForDeletion(credential);
-        checkEnvironmentsForDeletion(credential);
     }
 
     private void checkStacksForDeletion(Credential credential) {
@@ -299,15 +298,6 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
                         + "The following cluster is using this credential: [%s]";
             }
             throw new BadRequestException(String.format(message, credential.getName(), clusters));
-        }
-    }
-
-    private void checkEnvironmentsForDeletion(Credential credential) {
-        Set<EnvironmentView> environments = environmentViewService.findAllByCredentialId(credential.getId());
-        if (!environments.isEmpty()) {
-            String environmentList = environments.stream().map(EnvironmentView::getName).collect(Collectors.joining(", "));
-            String message = "Credential '%s' cannot be deleted because the following environments are using it: [%s].";
-            throw new BadRequestException(String.format(message, credential.getName(), environmentList));
         }
     }
 

@@ -64,7 +64,7 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
     @Inject
     private StackTestClient stackTestClient;
 
-    @Test(dataProvider = "dataProviderForTest")
+    @Test(dataProvider = "dataProviderForTest", enabled = false)
     public void testClusterCreationWithValidKerberos(MockedTestContext testContext, String blueprintName, KerberosTestData testData,
             @Description TestCaseDescription testCaseDescription) {
         DynamicRouteStack dynamicRouteStack = testContext.getModel().getClouderaManagerMock().getDynamicRouteStack();
@@ -93,7 +93,7 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a cluster setup without kerberosname",
             when = "calling cluster creation",
@@ -113,7 +113,7 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a cluster setup with '' kerberosname",
             when = "calling cluster creation",
@@ -140,7 +140,7 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a valid kerberos descriptor JSON which does not contain all the required fields",
             when = "calling kerberos creation",
@@ -161,7 +161,7 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a kerberos configuration where the krb5conf is not a valid JSON",
             when = "calling kerberos creation",

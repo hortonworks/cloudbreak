@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AwsStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.GcpStackV4Parameters;
@@ -23,15 +22,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.it.cloudbreak.SecurityRulesEntity;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
-import com.sequenceiq.it.cloudbreak.dto.EnvironmentSettingsV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.GatewayTestDto;
 import com.sequenceiq.it.cloudbreak.dto.GatewayTopologyTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
@@ -41,8 +41,6 @@ import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.SecurityGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
-import com.sequenceiq.it.cloudbreak.SecurityRulesEntity;
-import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 
@@ -96,12 +94,12 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
                 .withImageSettings("imageSettings");
     }
 
-    public StackTestDtoBase<T> withEnvironmentSettings() {
-        return withEnvironmentSettings(EnvironmentSettingsV4TestDto.class.getSimpleName());
+    public StackTestDtoBase<T> withEnvironmentCrn() {
+        return withEnvironmentCrn("");
     }
 
-    public StackTestDtoBase<T> withEnvironmentSettings(EnvironmentSettingsV4TestDto environment) {
-        getRequest().setEnvironment(environment.getRequest());
+    public StackTestDtoBase<T> withEnvironmentCrn(String environmentCrn) {
+        getRequest().setEnvironmentCrn(environmentCrn);
         return this;
     }
 
@@ -128,23 +126,7 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
         if (env == null) {
             throw new IllegalArgumentException("Env is null with given key: " + environmentKey);
         }
-        return withEnvironmentSettings(getTestContext().init(EnvironmentSettingsV4TestDto.class)
-                .withName(env.getName()));
-    }
-
-    public StackTestDtoBase<T> withEnvironmentSettings(String environmentKey) {
-        EnvironmentSettingsV4TestDto environment = getTestContext().get(environmentKey);
-        getRequest().setEnvironment(environment.getRequest());
-        return this;
-    }
-
-    /**
-     * @deprecated this is forbidden in newway.testcase
-     */
-    @Deprecated
-    public StackTestDtoBase<T> withEnvironmentSettings(EnvironmentSettingsV4Request environment) {
-        getRequest().setEnvironment(environment);
-        return this;
+        return withEnvironmentCrn(environmentKey);
     }
 
     public StackTestDtoBase<T> withName(String name) {

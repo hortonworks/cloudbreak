@@ -48,7 +48,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
         createDefaultEnvironment(testContext);
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "there is a prepared database",
             when = "the database is deleted and then a create request is sent with the same database name",
@@ -70,7 +70,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "there is a prepared database",
             when = "when a database create request is sent with the same database name",
@@ -88,7 +88,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = DB_TYPE_PROVIDER)
+    @Test(dataProvider = DB_TYPE_PROVIDER, enabled = false)
     public void testCreateDatabaseWithTypeAndTestConnection(
             TestContext testContext,
             DatabaseType type,
@@ -158,7 +158,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
     }
     */
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "there is a running cloudbreak",
             when = "calling test database endpoint with a non-existent database name",

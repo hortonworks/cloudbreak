@@ -34,10 +34,9 @@ public class EnvironmentViewService {
     }
 
     public Set<SimpleEnvironmentResponse> listByAccountId(String accountId) {
-        Set<SimpleEnvironmentResponse> environmentResponses = findAllByAccountId(accountId).stream()
+        return findAllByAccountId(accountId).stream()
                 .map(env -> conversionService.convert(env, SimpleEnvironmentResponse.class))
                 .collect(Collectors.toSet());
-        return environmentResponses;
     }
 
     public Set<EnvironmentView> findAllByAccountId(String accountId) {

@@ -13,13 +13,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedse
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.environment.Environment;
-import com.sequenceiq.cloudbreak.domain.environment.Region;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
+import com.sequenceiq.cloudbreak.service.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.sharedservice.SdxV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.tags.TagsV1Request;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
 public class DistroXV1RequestToStackV4RequestConverter {
@@ -46,7 +45,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
     private DistroXParameterConverter stackParameterConverter;
 
     @Inject
-    private EnvironmentService environmentService;
+    private EnvironmentClientService environmentClientService;
 
     @Inject
     private WorkspaceService workspaceService;
@@ -55,9 +54,10 @@ public class DistroXV1RequestToStackV4RequestConverter {
         StackV4Request request = new StackV4Request();
         request.setName(source.getName());
         request.setType(StackType.WORKLOAD);
-        request.setCloudPlatform(getCloudPlatform(source.getEnvironment().getName()));
-
-        request.setEnvironment(environmentConverter.convert(source.getEnvironment()));
+        DetailedEnvironmentResponse environment = environmentClientService.get(source.getEnvironmentCrn());
+        request.setCloudPlatform(getCloudPlatform(environment));
+        request.setPlacement(getPlacement(environment));
+        request.setEnvironmentCrn(source.getEnvironmentCrn());
         ifNotNull(authenticationConverter.convert(source.getAuthentication()), request::setAuthentication);
         request.setImage(ifNotNullF(source.getImage(), imageConverter::convert));
         request.setCluster(ifNotNullF(source.getCluster(), clusterConverter::convert));
@@ -66,7 +66,6 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setAws(ifNotNullF(source.getAws(), stackParameterConverter::convert));
         request.setAzure(ifNotNullF(source.getAzure(), stackParameterConverter::convert));
 
-        request.setPlacement(getPlacement(source.getEnvironment().getName()));
         request.setInputs(source.getInputs());
         request.setTags(ifNotNullF(source.getTags(), this::getTags));
         request.setSharedService(ifNotNullF(source.getSdx(), this::getSharedService));
@@ -79,8 +78,8 @@ public class DistroXV1RequestToStackV4RequestConverter {
         return request;
     }
 
-    private CloudPlatform getCloudPlatform(String environmentName) {
-        return CloudPlatform.valueOf(environmentService.get(environmentName, workspaceService.getForCurrentUser().getId()).getCloudPlatform());
+    private CloudPlatform getCloudPlatform(DetailedEnvironmentResponse environment) {
+        return CloudPlatform.valueOf(environment.getCloudPlatform());
     }
 
     private TagsV4Request getTags(TagsV1Request source) {
@@ -97,10 +96,9 @@ public class DistroXV1RequestToStackV4RequestConverter {
         return sharedServiceV4Request;
     }
 
-    private PlacementSettingsV4Request getPlacement(String name) {
-        Environment environment = environmentService.getByNameForWorkspace(name, workspaceService.getForCurrentUser());
+    private PlacementSettingsV4Request getPlacement(DetailedEnvironmentResponse environment) {
         PlacementSettingsV4Request placementSettings = new PlacementSettingsV4Request();
-        String region = environment.getRegionSet().stream().findFirst().map(Region::getName).orElse(null);
+        String region = environment.getRegions().getRegions().stream().findFirst().orElse(null);
         placementSettings.setRegion(region);
         placementSettings.setAvailabilityZone(region + 'a');
         return placementSettings;

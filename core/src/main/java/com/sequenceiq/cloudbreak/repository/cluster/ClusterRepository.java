@@ -65,19 +65,19 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     Set<Cluster> findByRdsConfig(@Param("id") Long rdsConfigId);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT c FROM Cluster c INNER JOIN c.rdsConfigs rc WHERE c.environment.id = :environmentId AND rc.id= :id AND c.status != 'DELETE_COMPLETED'")
-    Set<Cluster> findByRdsConfigAndEnvironment(@Param("id") Long rdsConfigId, @Param("environmentId") Long environmentId);
+    @Query("SELECT c FROM Cluster c INNER JOIN c.rdsConfigs rc WHERE c.environmentCrn = :environmentCrn AND rc.id= :id AND c.status != 'DELETE_COMPLETED'")
+    Set<Cluster> findByRdsConfigAndEnvironment(@Param("id") Long rdsConfigId, @Param("environmentCrn") String environmentCrn);
 
     @CheckPermissionsByReturnValue
     @Query("SELECT c FROM Cluster c INNER JOIN c.kerberosConfig kc WHERE kc.id= :id AND c.status != 'DELETE_COMPLETED'")
     Set<Cluster> findByKerberosConfig(@Param("id") Long kerberosConfigId);
 
     @CheckPermissionsByReturnValue
-    @Query("SELECT c FROM Cluster c INNER JOIN c.kerberosConfig kc WHERE c.environment.id = :environmentId AND kc.id= :id AND c.status != 'DELETE_COMPLETED'")
-    Set<Cluster> findByKerberosConfigAndEnvironment(@Param("id") Long id, @Param("environmentId") Long environmentId);
+    @Query("SELECT c FROM Cluster c INNER JOIN c.kerberosConfig kc WHERE c.environmentCrn = :environmentCrn AND kc.id= :id AND c.status != 'DELETE_COMPLETED'")
+    Set<Cluster> findByKerberosConfigAndEnvironment(@Param("id") Long id, @Param("environmentCrn") String environmentCrn);
 
     @CheckPermissionsByWorkspaceId
-    @Query("SELECT COUNT(c) FROM Cluster c WHERE c.workspace.id = :workspaceId AND c.environment.id = :environmentId "
+    @Query("SELECT COUNT(c) FROM Cluster c WHERE c.workspace.id = :workspaceId AND c.environmentCrn = :environmentCrn "
             + "AND c.status != 'DELETE_COMPLETED'")
-    Long countAliveOnesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("environmentId") Long environmentId);
+    Long countAliveOnesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("environmentCrn") String environmentCrn);
 }
