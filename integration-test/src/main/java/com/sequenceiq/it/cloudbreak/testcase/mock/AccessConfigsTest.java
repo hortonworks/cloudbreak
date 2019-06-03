@@ -20,7 +20,7 @@ public class AccessConfigsTest extends AbstractIntegrationTest {
     @Inject
     private ConnectorTestClient connectorTestClient;
 
-    @Test(dataProvider = "contextWithCredentialNameAndException")
+    @Test(dataProvider = "contextWithCredentialNameAndException", enabled = false)
     public void testGetAccessConfigsByCredentialNameWhenCredentialIsInvalid(
             MockedTestContext testContext,
             String credentialName,

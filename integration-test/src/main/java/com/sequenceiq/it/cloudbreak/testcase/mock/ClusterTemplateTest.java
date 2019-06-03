@@ -61,7 +61,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         initializeDefaultBlueprints(testContext);
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a prepared environment",
             when = "a valid cluster template create request is sent",
@@ -86,7 +86,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a prepared environment",
             when = "a valid cluster template create request with spark type is sent",
@@ -114,7 +114,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a prepared cluster template",
             when = "a stack is created from the prepared cluster template",
@@ -141,7 +141,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "there is a running cloudbreak",
             when = "a cluster template create request with missing environment is sent",
@@ -161,7 +161,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "there is a running cloudbreak",
             when = "a cluster template create request with null environment name is sent",
@@ -174,7 +174,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         testContext.given(EnvironmentSettingsV4TestDto.class)
                 .withName(null)
                 .given(stackTemplate, StackTemplateTestDto.class)
-                .withEnvironmentSettings()
+                .withEnvironmentCrn()
                 .given(ClusterTemplateTestDto.class)
                 .withStackTemplate(stackTemplate)
                 .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey))
@@ -183,7 +183,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a prepared cluster template with many properties",
             when = "a stack is created from the prepared cluster template",
@@ -233,7 +233,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a prepared environment",
             when = "a cluster template create request is sent with invalid name",
@@ -251,7 +251,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a prepared environment",
             when = "a cluster template create request is sent with a special name",
@@ -274,7 +274,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "there is a running cloudbreak",
             when = "a cluster template create request is sent with a too short name",
@@ -293,7 +293,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a prepared environment and cluster template",
             when = "the cluster template create request is sent again",
@@ -321,7 +321,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a prepared environment",
             when = "a create cluster template request is sent with too long description",
@@ -344,7 +344,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a prepared environment",
             when = "a cluster template create request without stack template is sent",
@@ -361,7 +361,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a prepared environment",
             when = "a cluster tempalte create request with null name is sent",

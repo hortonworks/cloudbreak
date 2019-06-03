@@ -140,10 +140,6 @@ public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSC
         return clusterService.findByRdsConfig(rdsConfig.getId());
     }
 
-    public Set<Cluster> getClustersUsingResourceInEnvironment(RDSConfig rdsConfig, Long environmentId) {
-        return clusterService.findAllClustersByRdsConfigInEnvironment(rdsConfig, environmentId);
-    }
-
     @Override
     public WorkspaceResource resource() {
         return WorkspaceResource.DATABASE;

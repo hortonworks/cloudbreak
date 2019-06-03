@@ -131,7 +131,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
             throw new BadRequestException("The stack tempalte cannot be null.");
         }
 
-        if (resource.getStatus() != ResourceStatus.DEFAULT && resource.getStackTemplate().getEnvironment() == null) {
+        if (resource.getStatus() != ResourceStatus.DEFAULT && resource.getStackTemplate().getEnvironmentCrn() == null) {
             throw new BadRequestException("The environment cannot be null.");
         }
 

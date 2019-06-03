@@ -21,6 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Joiner;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
@@ -28,9 +30,6 @@ import com.sequenceiq.cloudbreak.workspace.repository.check.WorkspaceResourceTyp
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.resource.ResourceAction;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
-import com.google.common.base.Joiner;
-import com.sequenceiq.cloudbreak.repository.environment.EnvironmentResourceRepository;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 
 @Component
 public class PermissionCheckingUtils {
@@ -130,7 +129,7 @@ public class PermissionCheckingUtils {
         return Arrays.stream(proceedingJoinPoint.getTarget().getClass().getInterfaces())
                 .filter(i -> {
                     List<Class<?>> interfaces = Arrays.asList(i.getInterfaces());
-                    return interfaces.contains(WorkspaceResourceRepository.class) || interfaces.contains(EnvironmentResourceRepository.class);
+                    return interfaces.contains(WorkspaceResourceRepository.class);
                 })
                 .findFirst();
     }

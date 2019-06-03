@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
 import static com.gs.collections.impl.utility.StringIterate.isEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,29 +24,29 @@ import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.telemetry.TelemetryV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.telemetry.logging.LoggingV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.telemetry.workload.WorkloadAnalyticsV4Request;
-import com.sequenceiq.cloudbreak.cloud.model.Logging;
-import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
-import com.sequenceiq.cloudbreak.cloud.model.WorkloadAnalytics;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.telemetry.TelemetryV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.telemetry.logging.LoggingV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.telemetry.workload.WorkloadAnalyticsV4Request;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.Logging;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
-import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
+import com.sequenceiq.cloudbreak.cloud.model.WorkloadAnalytics;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
+import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -54,23 +54,23 @@ import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.type.KerberosType;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
 public class StackV4RequestToStackConverter extends AbstractConversionServiceAwareConverter<StackV4Request, Stack> {
@@ -90,7 +90,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     private CredentialService credentialService;
 
     @Inject
-    private EnvironmentViewService environmentViewService;
+    private EnvironmentClientService environmentClientService;
 
     @Inject
     private DefaultCostTaggingService defaultCostTaggingService;
@@ -117,13 +117,14 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
 
         Stack stack = new Stack();
+        DetailedEnvironmentResponse environment = environmentClientService.get(source.getEnvironmentCrn());
 
         if (isTemplate(source)) {
-            convertAsStackTemplate(source, stack, workspace);
+            convertAsStackTemplate(source, stack, workspace, environment);
         } else {
-            convertAsStack(source, stack, workspace);
+            convertAsStack(source, stack, workspace, environment);
         }
-        updateCloudPlatformAndRelatedFields(source, stack, workspace);
+        updateCloudPlatformAndRelatedFields(source, stack, workspace, environment);
         Map<String, Object> asMap = providerParameterCalculator.get(source).asMap();
         if (asMap != null) {
             Map<String, String> parameter = new HashMap<>();
@@ -139,8 +140,8 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setCreated(clock.getCurrentTimeMillis());
         stack.setInstanceGroups(convertInstanceGroups(source, stack));
         updateCluster(source, stack, workspace);
-        setNetworkIfApplicable(source, stack);
         stack.getComponents().add(getTelemetryComponent(source, stack));
+        setNetworkIfApplicable(source, stack, environment);
         if (source.getCustomDomain() != null) {
             stack.setCustomDomain(source.getCustomDomain().getDomainName());
             stack.setCustomHostname(source.getCustomDomain().getHostname());
@@ -178,9 +179,9 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         return source.getType() == StackType.TEMPLATE;
     }
 
-    private void convertAsStack(StackV4Request source, Stack stack, Workspace workspace) {
+    private void convertAsStack(StackV4Request source, Stack stack, Workspace workspace, DetailedEnvironmentResponse environment) {
         validateStackAuthentication(source);
-        updateEnvironment(source, stack, workspace);
+        updateEnvironment(source, stack, workspace, environment);
         stack.setName(source.getName());
         stack.setAvailabilityZone(getAvailabilityZone(Optional.ofNullable(source.getPlacement())));
         stack.setOrchestrator(getOrchestrator());
@@ -210,8 +211,8 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         }
     }
 
-    private void updateCloudPlatformAndRelatedFields(StackV4Request source, Stack stack, Workspace workspace) {
-        String cloudPlatform = determineCloudPlatform(source, workspace);
+    private void updateCloudPlatformAndRelatedFields(StackV4Request source, Stack stack, Workspace workspace, DetailedEnvironmentResponse environment) {
+        String cloudPlatform = determineCloudPlatform(source, workspace, environment);
         source.setCloudPlatform(CloudPlatform.valueOf(cloudPlatform));
         stack.setRegion(getRegion(source, cloudPlatform));
         stack.setCloudPlatform(cloudPlatform);
@@ -219,10 +220,10 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setPlatformVariant(cloudPlatform);
     }
 
-    private void convertAsStackTemplate(StackV4Request source, Stack stack, Workspace workspace) {
-        if (source.getEnvironment() != null) {
-            updateEnvironment(source, stack, workspace);
-            updateCloudPlatformAndRelatedFields(source, stack, workspace);
+    private void convertAsStackTemplate(StackV4Request source, Stack stack, Workspace workspace, DetailedEnvironmentResponse environment) {
+        if (source.getEnvironmentCrn() != null) {
+            updateEnvironment(source, stack, workspace, environment);
+            updateCloudPlatformAndRelatedFields(source, stack, workspace, environment);
             stack.setAvailabilityZone(source.getPlacement().getAvailabilityZone());
         }
         stack.setType(StackType.TEMPLATE);
@@ -262,13 +263,11 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         return source.getPlacement().getRegion();
     }
 
-    private String determineCloudPlatform(StackV4Request source, Workspace workspace) {
+    private String determineCloudPlatform(StackV4Request source, Workspace workspace, DetailedEnvironmentResponse environmentResponse) {
         if (source.getCloudPlatform() != null) {
             return source.getCloudPlatform().name();
         }
-        return isEmpty(source.getEnvironment().getName())
-                ? credentialService.getByNameForWorkspace(source.getEnvironment().getCredentialName(), workspace).cloudPlatform()
-                : environmentViewService.getByNameForWorkspace(source.getEnvironment().getName(), workspace).getCloudPlatform();
+        return environmentResponse.getCloudPlatform();
     }
 
     private Json getTags(StackV4Request source, String cloudPlatform) {
@@ -313,15 +312,9 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         }
     }
 
-    private void updateEnvironment(StackV4Request source, Stack stack, Workspace workspace) {
-        if (!isEmpty(source.getEnvironment().getCredentialName())) {
-            Credential credential = credentialService.getByNameForWorkspace(source.getEnvironment().getCredentialName(), workspace);
-            stack.setCredential(credential);
-        }
-        if (!isEmpty(source.getEnvironment().getName())) {
-            EnvironmentView environment = environmentViewService.getByNameForWorkspace(source.getEnvironment().getName(), workspace);
-            stack.setEnvironment(environment);
-        }
+    private void updateEnvironment(StackV4Request source, Stack stack, Workspace workspace, DetailedEnvironmentResponse environment) {
+        Credential credential = credentialService.getByNameForWorkspace(environment.getCredentialName(), workspace);
+        stack.setCredential(credential);
     }
 
     private Set<InstanceGroup> convertInstanceGroups(StackV4Request source, Stack stack) {
@@ -363,12 +356,11 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         return new com.sequenceiq.cloudbreak.domain.stack.Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), Json.silent(image), stack);
     }
 
-    private void setNetworkIfApplicable(StackV4Request source, Stack stack) {
+    private void setNetworkIfApplicable(StackV4Request source, Stack stack, DetailedEnvironmentResponse environment) {
         if (source.getNetwork() != null) {
             source.getNetwork().setCloudPlatform(source.getCloudPlatform());
             stack.setNetwork(getConversionService().convert(source.getNetwork(), Network.class));
         } else {
-            EnvironmentView environment = stack.getEnvironment();
             if (environment != null && environment.getNetwork() != null) {
                 EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(source.getCloudPlatform());
                 if (environmentNetworkConverter != null) {

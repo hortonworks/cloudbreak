@@ -75,9 +75,10 @@ public class SharedServiceConfigProvider {
         try {
             DatalakeConfigApi connector = null;
             Optional<DatalakeResources> datalakeResource = Optional.empty();
-            if (publicStack.getDatalakeResourceId() != null || (!CollectionUtils.isEmpty(publicStack.getEnvironment().getDatalakeResources())
-                    && publicStack.getEnvironment().getDatalakeResources().size() == 1)) {
-                Long datalakeResourceId = getDatalakeResourceIdFromEnvOrStack(publicStack);
+            Set<DatalakeResources> datalakeResources = datalakeResourcesService
+                    .findDatalakeResourcesByWorkspaceAndEnvironment(publicStack.getWorkspace().getId(), publicStack.getEnvironmentCrn());
+            if (publicStack.getDatalakeResourceId() != null || (!CollectionUtils.isEmpty(datalakeResources) && datalakeResources.size() == 1)) {
+                Long datalakeResourceId = getDatalakeResourceIdFromEnvOrStack(publicStack, datalakeResources);
                 datalakeResource = datalakeResourcesService.findById(datalakeResourceId);
                 if (credentialPrerequisiteService.isCumulusCredential(publicStack.getCredential().getAttributes())) {
                     connector = credentialPrerequisiteService.createCumulusDatalakeConnector(publicStack.getCredential().getAttributes());
@@ -122,9 +123,9 @@ public class SharedServiceConfigProvider {
         return false;
     }
 
-    private Long getDatalakeResourceIdFromEnvOrStack(Stack publicStack) {
+    private Long getDatalakeResourceIdFromEnvOrStack(Stack publicStack, Set<DatalakeResources> datalakeResources) {
         return publicStack.getDatalakeResourceId() != null
-                ? publicStack.getDatalakeResourceId() : publicStack.getEnvironment().getDatalakeResources().stream().findFirst().get().getId();
+                ? publicStack.getDatalakeResourceId() : datalakeResources.stream().findFirst().get().getId();
     }
 
     private Long getDatalakeStackId(Stack publicStack, Optional<DatalakeResources> datalakeResource) {

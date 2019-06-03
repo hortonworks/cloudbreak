@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
 import io.swagger.annotations.ApiModel;
@@ -28,12 +27,10 @@ public class CompactRegionResponse implements Serializable {
         displayNames = new HashMap<>();
     }
 
-    @JsonProperty("values")
     public Set<String> getRegions() {
         return regions;
     }
 
-    @JsonProperty("values")
     public void setRegions(Set<String> regions) {
         this.regions = regions;
     }

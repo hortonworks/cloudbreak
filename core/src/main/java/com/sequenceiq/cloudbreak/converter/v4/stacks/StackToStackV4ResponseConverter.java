@@ -15,14 +15,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CloudbreakDetailsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.PlacementSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.authentication.StackAuthenticationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.AttachedClusterInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.customdomain.CustomDomainSettingsV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.environment.EnvironmentSettingsV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.environment.placement.PlacementSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
@@ -98,10 +97,8 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
         response.setName(source.getName());
         response.setAuthentication(getConversionService().convert(source.getStackAuthentication(), StackAuthenticationV4Response.class));
         response.setId(source.getId());
-        if (source.getEnvironment() != null) {
-            response.setEnvironment(getConversionService().convert(source.getEnvironment(), EnvironmentSettingsV4Response.class));
-            response.setCloudPlatform(CloudPlatform.valueOf(source.getCloudPlatform()));
-        }
+        response.setEnvironmentCrn(source.getEnvironmentCrn());
+        response.setCloudPlatform(CloudPlatform.valueOf(source.getCloudPlatform()));
         response.setPlacement(getConversionService().convert(source, PlacementSettingsV4Response.class));
         response.setStatus(source.getStatus());
         response.setTerminated(source.getTerminated());
@@ -134,7 +131,7 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
                 instanceGroup.get().getMetadata().stream()
                         .filter(instanceMetadata -> StringUtils.equals(instanceMetadata.getInstanceId(), diskResource.getInstanceId()))
                         .forEach(instanceMetaData -> attributes.get().getVolumes().stream()
-                            .forEach(volume -> addVolumeToInstanceMetadata(instanceMetaData, volume)));
+                                .forEach(volume -> addVolumeToInstanceMetadata(instanceMetaData, volume)));
             }
         });
     }

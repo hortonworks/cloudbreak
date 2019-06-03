@@ -31,8 +31,8 @@ public class ClusterTemplateViewToClusterTemplateViewV4ResponseConverter
                 clusterTemplateViewV4Response.setStackType(cluster.getBlueprint() != null ? cluster.getBlueprint().getStackType() : "");
                 clusterTemplateViewV4Response.setStackVersion(cluster.getBlueprint() != null ? cluster.getBlueprint().getStackVersion() : "");
             }
-            if (stackTemplate.getEnvironment() != null) {
-                clusterTemplateViewV4Response.setEnvironmentName(stackTemplate.getEnvironment().getName());
+            if (stackTemplate.getEnvironmentCrn() != null) {
+                clusterTemplateViewV4Response.setEnvironmentCrn(stackTemplate.getEnvironmentCrn());
             }
         }
         return clusterTemplateViewV4Response;
