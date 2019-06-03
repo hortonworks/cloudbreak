@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
-import com.sequenceiq.cloudbreak.template.views.LdapView;
+import com.sequenceiq.cloudbreak.dto.LdapView;
 
 @Component
 public class RangerLdapConfigProvider extends AbstractRoleConfigConfigProvider {

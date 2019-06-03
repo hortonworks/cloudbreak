@@ -85,7 +85,7 @@ public class AmbariDatalakeConfigProviderTest {
         when(connector.getHostNamesByComponent("component4")).thenReturn(List.of("host3"));
         // WHEN
         DatalakeResources datalakeResources = underTest.collectDatalakeResources("ambariName", "ambariUrl", "ambariIp", "ambariFqdn", connector,
-                serviceSecretParamMap, null, null, null);
+                serviceSecretParamMap, null, null);
         // THEN
         Assert.assertNotNull(datalakeResources);
         ServiceDescriptor serviceDescriptor1 = datalakeResources.getServiceDescriptorMap().get("service1");

@@ -108,16 +108,13 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(ClusterTestDto.class)
                 .withRdsConfigNames(createSetOfNotNulls(hiveRdsName, rangerRdsName))
                 .withBlueprintName(blueprintName)
-                .withLdapConfigName(ldapName)
                 .withCloudStorage(cloudStorage())
                 .given(StackTestDto.class)
                 .withInstanceGroups(HostGroupType.MASTER.name())
                 .capture(SharedServiceTest::rdsConfigNamesFromRequest, RunningParameter.key(RDS_KEY))
-                .capture(SharedServiceTest::ldapNameFromRequest, RunningParameter.key(LDAP_KEY))
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .verify(SharedServiceTest::rdsConfigNamesFromResponse, RunningParameter.key(RDS_KEY))
-                .verify(SharedServiceTest::ldapNameFromResponse, RunningParameter.key(LDAP_KEY))
                 .then(SharedServiceTest::checkBlueprintTaggedWithSharedService)
                 .then(cloudStorageParametersHasPassedToAmbariBlueprint())
                 .then(ldapParametersHasPassedToAmbariBlueprint(ldapName))
@@ -147,7 +144,6 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(ClusterTestDto.class)
                 .withRdsConfigNames(createSetOfNotNulls(hiveRdsName, rangerRdsName))
                 .withBlueprintName(blueprintName)
-                .withLdapConfigName(ldapName)
                 .withCloudStorage(cloudStorage())
                 .init(StackTestDto.class)
                 .when(stackTestClient.createV4(), RunningParameter.key(BAD_REQUEST_KEY))
@@ -202,7 +198,6 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(ClusterTestDto.class)
                 .withRdsConfigNames(createSetOfNotNulls(hiveRdsName))
                 .withBlueprintName(blueprintName)
-                .withLdapConfigName(ldapName)
                 .withCloudStorage(cloudStorage())
                 .init(StackTestDto.class)
                 .withInstanceGroups(HostGroupType.MASTER.name())
@@ -231,7 +226,6 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(ClusterTestDto.class)
                 .withRdsConfigNames(createSetOfNotNulls(rangerRdsName))
                 .withBlueprintName(blueprintName)
-                .withLdapConfigName(ldapName)
                 .withCloudStorage(cloudStorage())
                 .init(StackTestDto.class)
                 .withInstanceGroups(HostGroupType.MASTER.name())
@@ -256,7 +250,6 @@ public class SharedServiceTest extends AbstractIntegrationTest {
                 .given(HostGroupType.MASTER.name(), InstanceGroupTestDto.class).valid().withHostGroup(HostGroupType.MASTER).withNodeCount(1)
                 .given(ClusterTestDto.class)
                 .withBlueprintName(blueprintName)
-                .withLdapConfigName(ldapName)
                 .withCloudStorage(cloudStorage())
                 .init(StackTestDto.class)
                 .withInstanceGroups(HostGroupType.MASTER.name())
@@ -410,13 +403,4 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     private static Set<String> rdsConfigNamesFromRequest(StackTestDto entity) {
         return entity.getRequest().getCluster().getDatabases();
     }
-
-    private static String ldapNameFromRequest(StackTestDto entity) {
-        return entity.getRequest().getCluster().getLdapName();
-    }
-
-    private static String ldapNameFromResponse(StackTestDto entity) {
-        return entity.getResponse().getCluster().getLdap().getName();
-    }
-
 }

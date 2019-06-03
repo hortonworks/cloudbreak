@@ -2,10 +2,11 @@ package com.sequenceiq.cloudbreak.recipe.moduletest;
 
 import static com.sequenceiq.cloudbreak.TestUtil.hostGroup;
 import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
+import static com.sequenceiq.cloudbreak.TestUtil.ldapConfigBuilder;
 import static com.sequenceiq.cloudbreak.TestUtil.rdsConfig;
 import static com.sequenceiq.cloudbreak.TestUtil.storageLocation;
-import static com.sequenceiq.cloudbreak.recipe.util.RecipeTestUtil.generalClusterConfigs;
 import static com.sequenceiq.cloudbreak.recipe.util.RecipeTestUtil.generalBlueprintView;
+import static com.sequenceiq.cloudbreak.recipe.util.RecipeTestUtil.generalClusterConfigs;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,14 +20,14 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.recipe.testrepeater.TestFile;
 import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsFileSystem;
 import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.cloudbreak.common.type.filesystem.GcsFileSystem;
 import com.sequenceiq.cloudbreak.common.type.filesystem.S3FileSystem;
 import com.sequenceiq.cloudbreak.common.type.filesystem.WasbFileSystem;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.dto.LdapView;
+import com.sequenceiq.cloudbreak.recipe.testrepeater.TestFile;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
@@ -53,25 +54,27 @@ class RecipeModulTestModelProvider {
     static TemplatePreparationObject testTemplateWithLocalLdap() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withLdapConfig(ldapConfig(), "cn=admin,dc=example,dc=org", "admin")
+                .withLdapConfig(ldapConfig())
                 .build();
     }
 
     static TemplatePreparationObject testTemplateWithLongLdapUrl() {
-        LdapConfig ldapConfig = ldapConfig();
-        ldapConfig.setServerHost(String.format("%s%s", StringUtils.repeat("some-superlong-content", "-", 93), ".com"));
+        LdapView.LdapViewBuilder ldapBuilder = ldapConfigBuilder();
+        ldapBuilder.withServerHost(String.format("%s%s", StringUtils.repeat("some-superlong-content", "-", 93), ".com"));
+        ldapBuilder.withConnectionURL(null);
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withLdapConfig(ldapConfig, "cn=admin,dc=example,dc=org", "admin")
+                .withLdapConfig(ldapBuilder.build())
                 .build();
     }
 
     static TemplatePreparationObject testTemplateWithInvalidLdapUrl() {
-        LdapConfig ldapConfig = ldapConfig();
-        ldapConfig.setServerHost("\\");
+        LdapView.LdapViewBuilder ldapBuilder = ldapConfigBuilder();
+        ldapBuilder.withServerHost("\\");
+        ldapBuilder.withConnectionURL(null);
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withLdapConfig(ldapConfig, "cn=admin,dc=example,dc=org", "admin")
+                .withLdapConfig(ldapBuilder.build())
                 .build();
     }
 

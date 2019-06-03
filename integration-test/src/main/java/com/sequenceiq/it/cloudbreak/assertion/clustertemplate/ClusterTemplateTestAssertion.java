@@ -165,10 +165,6 @@ public class ClusterTemplateTestAssertion {
                 throw new IllegalArgumentException("RDS is mismatch!");
             }
 
-            if (!"mock-test-ldap".equals(stackTemplate.getCluster().getLdapName())) {
-                throw new IllegalArgumentException("LDAP is mismatch!");
-            }
-
             if (!"custom-tag".equals(stackTemplate.getTags().getUserDefined().get("some-tag"))) {
                 throw new IllegalArgumentException("User defined tag is mismatch!");
             }

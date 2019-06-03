@@ -58,7 +58,6 @@ public class SharedServiceConfigProvider {
             Optional<DatalakeResources> datalakeResources = datalakeResourcesService.findById(stack.getDatalakeResourceId());
             if (datalakeResources.isPresent()) {
                 DatalakeResources datalakeResource = datalakeResources.get();
-                setupLdap(requestedCluster, datalakeResource);
                 setupRds(requestedCluster, datalakeResource);
                 kerberosConfigProvider.setKerberosConfigForWorkloadCluster(requestedCluster, datalakeResource);
             }
@@ -161,9 +160,5 @@ public class SharedServiceConfigProvider {
         return sourceClusterName.isPresent()
                 ? stackService.getByNameInWorkspace(sourceClusterName.get(), workspace.getId())
                 : stackService.getById(sourceClusterId);
-    }
-
-    private void setupLdap(Cluster requestedCluster, DatalakeResources datalakeResources) {
-        requestedCluster.setLdapConfig(datalakeResources.getLdapConfig());
     }
 }

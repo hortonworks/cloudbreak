@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger;
 
-import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigTestUtil.getConfigNameToValueMap;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigTestUtil.getConfigNameToVariableNameMap;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigTestUtil.getVariableNameToValueMap;
@@ -21,7 +20,9 @@ import org.mockito.MockitoAnnotations;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
+import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -58,7 +59,7 @@ public class RangerLdapConfigProviderTest {
     @Test
     public void getRoleConfigWhenBadRole() {
         TemplatePreparationObject tpo = new Builder()
-                .withLdapConfig(ldapConfig(), BIND_DN, BIND_PASSWORD)
+                .withLdapConfig(ldapConfig())
                 .build();
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfig(DUMMY, hostGroupView, tpo);
@@ -71,7 +72,7 @@ public class RangerLdapConfigProviderTest {
     @Test
     public void getRoleConfigWhenRangerAdmin() {
         TemplatePreparationObject tpo = new Builder()
-                .withLdapConfig(ldapConfig(), BIND_DN, BIND_PASSWORD)
+                .withLdapConfig(ldapConfig())
                 .build();
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfig(RANGER_ADMIN, hostGroupView, tpo);
@@ -100,7 +101,7 @@ public class RangerLdapConfigProviderTest {
     @Test
     public void getRoleConfigWhenRangerUsersync() {
         TemplatePreparationObject tpo = new Builder()
-                .withLdapConfig(ldapConfig(), BIND_DN, BIND_PASSWORD)
+                .withLdapConfig(ldapConfig())
                 .build();
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfig(RANGER_USERSYNC, hostGroupView, tpo);
@@ -132,7 +133,7 @@ public class RangerLdapConfigProviderTest {
     @Test
     public void getRoleConfigVariableWhenBadRole() {
         TemplatePreparationObject tpo = new Builder()
-                .withLdapConfig(ldapConfig(), BIND_DN, BIND_PASSWORD)
+                .withLdapConfig(ldapConfig())
                 .build();
 
         List<ApiClusterTemplateVariable> result = underTest.getRoleConfigVariable(DUMMY, hostGroupView, tpo);
@@ -143,7 +144,7 @@ public class RangerLdapConfigProviderTest {
     @Test
     public void getRoleConfigVariableWhenRangerAdmin() {
         TemplatePreparationObject tpo = new Builder()
-                .withLdapConfig(ldapConfig(), BIND_DN, BIND_PASSWORD)
+                .withLdapConfig(ldapConfig())
                 .build();
 
         List<ApiClusterTemplateVariable> result = underTest.getRoleConfigVariable(RANGER_ADMIN, hostGroupView, tpo);
@@ -170,7 +171,7 @@ public class RangerLdapConfigProviderTest {
     @Test
     public void getRoleConfigVariableWhenRangerUsersync() {
         TemplatePreparationObject tpo = new Builder()
-                .withLdapConfig(ldapConfig(), BIND_DN, BIND_PASSWORD)
+                .withLdapConfig(ldapConfig())
                 .build();
 
         List<ApiClusterTemplateVariable> result = underTest.getRoleConfigVariable(RANGER_USERSYNC, hostGroupView, tpo);
@@ -206,7 +207,7 @@ public class RangerLdapConfigProviderTest {
     public void isConfigurationNeededTrue() {
         when(templateProcessor.isRoleTypePresentInService(anyString(), any(List.class))).thenReturn(true);
 
-        TemplatePreparationObject tpo = new Builder().withLdapConfig(ldapConfig(), BIND_DN, BIND_PASSWORD).build();
+        TemplatePreparationObject tpo = new Builder().withLdapConfig(ldapConfig()).build();
 
         boolean result = underTest.isConfigurationNeeded(templateProcessor, tpo);
         assertThat(result).isTrue();
@@ -217,7 +218,7 @@ public class RangerLdapConfigProviderTest {
     public void isConfigurationNeededFalseWhenNoRangerOnCluster() {
         when(templateProcessor.isRoleTypePresentInService(anyString(), any(List.class))).thenReturn(false);
 
-        TemplatePreparationObject tpo = new Builder().withLdapConfig(ldapConfig(), BIND_DN, BIND_PASSWORD).build();
+        TemplatePreparationObject tpo = new Builder().withLdapConfig(ldapConfig()).build();
 
         boolean result = underTest.isConfigurationNeeded(templateProcessor, tpo);
         assertThat(result).isFalse();
@@ -234,4 +235,10 @@ public class RangerLdapConfigProviderTest {
         assertThat(result).isFalse();
     }
 
+    private LdapView ldapConfig() {
+        return TestUtil.ldapConfigBuilder()
+                .withBindDn(BIND_DN)
+                .withBindPassword(BIND_PASSWORD)
+                .build();
+    }
 }

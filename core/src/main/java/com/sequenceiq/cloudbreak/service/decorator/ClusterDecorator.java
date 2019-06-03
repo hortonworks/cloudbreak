@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +19,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
@@ -30,7 +28,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.AmbariHaComponentFilter;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -51,9 +48,6 @@ public class ClusterDecorator {
     private RdsConfigService rdsConfigService;
 
     @Inject
-    private LdapConfigService ldapConfigService;
-
-    @Inject
     private SharedServiceConfigProvider sharedServiceConfigProvider;
 
     @Inject
@@ -66,15 +60,8 @@ public class ClusterDecorator {
         prepareClusterManagerVariant(cluster);
         validateBlueprintIfRequired(cluster, request, stack);
         prepareRds(cluster, request, stack);
-        prepareLdap(cluster, request, user, workspace);
         cluster = sharedServiceConfigProvider.configureCluster(cluster, user, workspace);
         return cluster;
-    }
-
-    private void prepareLdap(@Nonnull Cluster cluster, @Nonnull ClusterV4Request request, User user, Workspace workspace) {
-        if (request.getLdapName() != null) {
-            prepareLdap(cluster, workspace, request.getLdapName());
-        }
     }
 
     private void validateBlueprintIfRequired(Cluster subject, ClusterV4Request request, Stack stack) {
@@ -124,11 +111,6 @@ public class ClusterDecorator {
                 }
             });
         }
-    }
-
-    private void prepareLdap(Cluster cluster, Workspace workspace, @NotNull String ldapName) {
-        LdapConfig ldapConfig = ldapConfigService.getByNameForWorkspace(ldapName, workspace);
-        cluster.setLdapConfig(ldapConfig);
     }
 
     private void prepareRds(Cluster subject, ClusterV4Request request, Stack stack) {
