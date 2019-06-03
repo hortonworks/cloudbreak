@@ -46,7 +46,6 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -160,9 +159,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ConfigStrategy configStrategy;
-
-    @ManyToOne
-    private LdapConfig ldapConfig;
 
     @Convert(converter = SecretToString.class)
     @SecretValue
@@ -423,14 +419,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setConfigStrategy(ConfigStrategy configStrategy) {
         this.configStrategy = configStrategy;
-    }
-
-    public LdapConfig getLdapConfig() {
-        return ldapConfig;
-    }
-
-    public void setLdapConfig(LdapConfig ldapConfig) {
-        this.ldapConfig = ldapConfig;
     }
 
     public String getCloudbreakAmbariUser() {

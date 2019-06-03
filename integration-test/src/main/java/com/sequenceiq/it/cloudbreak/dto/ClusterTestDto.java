@@ -10,7 +10,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.Cluster
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 
 @Prototype
 public class ClusterTestDto extends AbstractCloudbreakTestDto<ClusterV4Request, ClusterV4Response, ClusterTestDto> {
@@ -77,17 +76,6 @@ public class ClusterTestDto extends AbstractCloudbreakTestDto<ClusterV4Request, 
     public ClusterTestDto withClouderaManager(ClouderaManagerTestDto clouderaManagerTestDto) {
         getRequest().setCm(clouderaManagerTestDto.getRequest());
         getRequest().setAmbari(null);
-        return this;
-    }
-
-    public ClusterTestDto withLdapConfig() {
-        LdapTestDto ldap = getTestContext().get(LdapTestDto.class);
-        getRequest().setLdapName(ldap.getName());
-        return this;
-    }
-
-    public ClusterTestDto withLdapConfigName(String ldap) {
-        getRequest().setLdapName(ldap);
         return this;
     }
 

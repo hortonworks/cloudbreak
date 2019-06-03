@@ -25,12 +25,13 @@ import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
+import com.sequenceiq.cloudbreak.dto.LdapView;
+import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
@@ -39,7 +40,6 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
-import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.AmbariDatalakeConfigProvider;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeConfigApiConnector;
@@ -125,7 +125,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
             Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
             Credential credential = getCredential(source);
             KerberosConfig kerberosConfig = getKerberosConfig(source);
-            LdapConfig ldapConfig = getLdapConfig(source, workspace);
+            LdapView ldapConfig = getLdapConfig(source);
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, credential.getAttributes());
             Set<RDSConfig> rdsConfigs = getRdsConfigs(source, workspace);
             Blueprint blueprint = getBlueprint(source, workspace);
@@ -136,12 +136,6 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
             BlueprintView blueprintView = blueprintViewProvider.getBlueprintView(blueprint);
             GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, cloudbreakUser.getEmail(),
                     blueprintService.getBlueprintVariant(blueprint));
-            String bindDn = null;
-            String bindPassword = null;
-            if (ldapConfig != null) {
-                bindDn = ldapConfig.getBindDn();
-                bindPassword = ldapConfig.getBindPassword();
-            }
             String gatewaySignKey = null;
             if (gateway != null) {
                 gatewaySignKey = gateway.getSignKey();
@@ -154,7 +148,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                     .withStackRepoDetailsHdpVersion(blueprintStackInfo.getVersion())
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
                     .withGeneralClusterConfigs(generalClusterConfigs)
-                    .withLdapConfig(ldapConfig, bindDn, bindPassword)
+                    .withLdapConfig(ldapConfig)
                     .withKerberosConfig(kerberosConfig);
 
             SharedServiceV4Request sharedService = source.getSharedService();
@@ -226,12 +220,8 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
         return fileSystemConfigurationView;
     }
 
-    private LdapConfig getLdapConfig(StackV4Request source, Workspace workspace) {
-        LdapConfig ldapConfig = null;
-        if (source.getCluster().getLdapName() != null) {
-            ldapConfig = ldapConfigService.getByNameForWorkspace(source.getCluster().getLdapName(), workspace);
-        }
-        return ldapConfig;
+    private LdapView getLdapConfig(StackV4Request source) {
+        return ldapConfigService.get(source.getEnvironmentCrn()).orElse(null);
     }
 
     private KerberosConfig getKerberosConfig(StackV4Request source) {
