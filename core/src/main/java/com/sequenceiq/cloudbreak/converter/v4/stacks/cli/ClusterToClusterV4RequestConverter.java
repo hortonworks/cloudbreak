@@ -42,7 +42,6 @@ public class ClusterToClusterV4RequestConverter extends AbstractConversionServic
         if (source.getFileSystem() != null) {
             clusterRequest.setCloudStorage(getConversionService().convert(source.getFileSystem(), CloudStorageV4Request.class));
         }
-        clusterRequest.setLdapName(source.getLdapConfig() == null ? null : source.getLdapConfig().getName());
         clusterRequest.setName(source.getName());
         if (source.getRdsConfigs() != null && !source.getRdsConfigs().isEmpty()) {
             Set<String> databaseNames = source.getRdsConfigs().stream()
@@ -75,5 +74,4 @@ public class ClusterToClusterV4RequestConverter extends AbstractConversionServic
             clusterRequest.setCm(clouderaManagerV4RequestConverter.convert(cluster));
         }
     }
-
 }

@@ -52,7 +52,6 @@ import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -76,6 +75,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.structuredevent.event.LdapDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.LdapNotificationDetails;
@@ -428,7 +428,6 @@ public class TestUtil {
         Set<RDSConfig> rdsConfigs = new HashSet<>();
         rdsConfigs.add(rdsConfig);
         cluster.setRdsConfigs(rdsConfigs);
-        cluster.setLdapConfig(ldapConfig());
         cluster.setHostGroups(hostGroups(cluster));
         cluster.setConfigStrategy(ConfigStrategy.ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES);
 
@@ -535,77 +534,42 @@ public class TestUtil {
         return recipes;
     }
 
-    public static LdapConfig ldapConfig() {
-        LdapConfig config = new LdapConfig();
-        config.setId(generateUniqueId());
-        config.setName(DUMMY_NAME);
-        config.setDescription(DUMMY_DESCRIPTION);
-        config.setUserSearchBase("cn=users,dc=example,dc=org");
-        config.setUserDnPattern("cn={0},cn=users,dc=example,dc=org");
-        config.setGroupSearchBase("cn=groups,dc=example,dc=org");
-        setSecretField(LdapConfig.class, "bindDn", config, "cn=admin,dc=example,dc=org", "secret/path");
-        setSecretField(LdapConfig.class, "bindPassword", config, "admin", "secret/path");
-        config.setServerHost("localhost");
-        config.setUserNameAttribute("cn=admin,dc=example,dc=org");
-        config.setDomain("ad.hdc.com");
-        config.setServerPort(389);
-        config.setProtocol("ldap");
-        config.setDirectoryType(DirectoryType.LDAP);
-        config.setUserObjectClass("person");
-        config.setGroupObjectClass("groupOfNames");
-        config.setGroupNameAttribute("cn");
-        config.setGroupMemberAttribute("member");
-        config.setAdminGroup("ambariadmins");
-        config.setCertificate("-----BEGIN CERTIFICATE-----certificate-----END CERTIFICATE-----");
-        return config;
+    public static LdapView.LdapViewBuilder ldapConfigBuilder() {
+        return LdapView.LdapViewBuilder.aLdapView().
+                withUserSearchBase("cn=users,dc=example,dc=org").
+                withUserDnPattern("cn={0},cn=users,dc=example,dc=org").
+                withGroupSearchBase("cn=groups,dc=example,dc=org").
+                withBindDn("cn=admin,dc=example,dc=org").
+                withBindPassword("admin").
+                withServerHost("localhost").
+                withUserNameAttribute("cn=admin,dc=example,dc=org").
+                withDomain("ad.hdc.com").
+                withServerPort(389).
+                withProtocol("ldap").
+                withDirectoryType(DirectoryType.LDAP).
+                withUserObjectClass("person").
+                withGroupObjectClass("groupOfNames").
+                withGroupNameAttribute("cn").
+                withGroupMemberAttribute("member").
+                withAdminGroup("ambariadmins").
+                withCertificate("-----BEGIN CERTIFICATE-----certificate-----END CERTIFICATE-----").
+                withConnectionURL("ldap://localhost:389");
     }
 
-    public static LdapConfig ldapConfigWithSpecialChars() {
-        LdapConfig config = new LdapConfig();
-        config.setId(generateUniqueId());
-        config.setName(DUMMY_NAME);
-        config.setDescription(DUMMY_DESCRIPTION);
-        config.setUserSearchBase("cn=users,dc=example,dc=org");
-        config.setUserDnPattern("cn={0},cn=users,dc=example,dc=org");
-        config.setGroupSearchBase("cn=groups,dc=example,dc=org");
-        config.setBindDn("cn=admin,dc=example,dc=org");
-        config.setBindPassword("admin<>char");
-        config.setServerHost("localhost");
-        config.setUserNameAttribute("cn=admin,dc=example,dc=org");
-        config.setDomain("ad.hdc.com");
-        config.setServerPort(389);
-        config.setProtocol("ldap");
-        config.setDirectoryType(DirectoryType.LDAP);
-        config.setUserObjectClass("person");
-        config.setGroupObjectClass("groupOfNames");
-        config.setGroupNameAttribute("cn");
-        config.setGroupMemberAttribute("member");
-        config.setAdminGroup("ambariadmins");
-        return config;
+    public static LdapView ldapConfig() {
+        return ldapConfigBuilder().build();
     }
 
-    public static LdapConfig adConfig() {
-        LdapConfig config = new LdapConfig();
-        config.setId(generateUniqueId());
-        config.setName(DUMMY_NAME);
-        config.setDescription(DUMMY_DESCRIPTION);
-        config.setUserSearchBase("cn=users,dc=example,dc=org");
-        config.setUserDnPattern("cn={0},cn=users,dc=example,dc=org");
-        config.setGroupSearchBase("cn=groups,dc=example,dc=org");
-        config.setBindDn("cn=admin,dc=example,dc=org");
-        config.setBindPassword("admin");
-        config.setServerHost("localhost");
-        config.setUserNameAttribute("cn=admin,dc=example,dc=org");
-        config.setDomain("ad.hdc.com");
-        config.setServerPort(389);
-        config.setProtocol("ldap");
-        config.setDirectoryType(DirectoryType.ACTIVE_DIRECTORY);
-        config.setUserObjectClass("person");
-        config.setGroupObjectClass("groupOfNames");
-        config.setGroupNameAttribute("cn");
-        config.setGroupMemberAttribute("member");
-        config.setAdminGroup("ambariadmins");
-        return config;
+    public static LdapView ldapConfigWithSpecialChars() {
+        return ldapConfigBuilder().withBindPassword("admin<>char").build();
+    }
+
+    public static LdapView.LdapViewBuilder adConfigBuilder() {
+        return ldapConfigBuilder().withDirectoryType(DirectoryType.ACTIVE_DIRECTORY);
+    }
+
+    public static LdapView adConfig() {
+        return adConfigBuilder().build();
     }
 
     public static Blueprint blueprint(String name) {

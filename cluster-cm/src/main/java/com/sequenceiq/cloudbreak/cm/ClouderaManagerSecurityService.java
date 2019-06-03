@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterSecurityService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @Service
@@ -138,9 +139,9 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     }
 
     @Override
-    public void setupLdapAndSSO(String primaryGatewayPublicAddress) throws CloudbreakException {
+    public void setupLdapAndSSO(String primaryGatewayPublicAddress, LdapView ldapConfig) throws CloudbreakException {
         try {
-            ldapService.setupLdap(stack, stack.getCluster(), clientConfig);
+            ldapService.setupLdap(stack, stack.getCluster(), clientConfig, ldapConfig);
         } catch (ApiException apiException) {
             throw new CloudbreakException(apiException);
         }

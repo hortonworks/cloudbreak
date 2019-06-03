@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.responses.LdapV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.AmbariV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.customcontainer.CustomContainerV4Response;
@@ -55,9 +54,6 @@ public class ClusterV4Response implements JsonEntity {
 
     @ApiModelProperty(ClusterModelDescription.STATUS_REASON)
     private String statusReason;
-
-    @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG)
-    private LdapV4Response ldap;
 
     @ApiModelProperty(ClusterModelDescription.DATABASES)
     private List<DatabaseV4Response> databases;
@@ -172,14 +168,6 @@ public class ClusterV4Response implements JsonEntity {
 
     public void setStatusReason(String statusReason) {
         this.statusReason = statusReason;
-    }
-
-    public LdapV4Response getLdap() {
-        return ldap;
-    }
-
-    public void setLdap(LdapV4Response ldap) {
-        this.ldap = ldap;
     }
 
     public CloudStorageV4Response getCloudStorage() {

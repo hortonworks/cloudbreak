@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
@@ -21,7 +20,7 @@ import com.sequenceiq.cloudbreak.template.model.HdfConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
-import com.sequenceiq.cloudbreak.template.views.LdapView;
+import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 
 public class TemplatePreparationObject {
@@ -193,8 +192,8 @@ public class TemplatePreparationObject {
             return this;
         }
 
-        public Builder withLdapConfig(LdapConfig ldapConfig, String bindDn, String bindPassword) {
-            this.ldapConfig = ldapConfig != null ? Optional.of(new LdapView(ldapConfig, bindDn, bindPassword)) : Optional.empty();
+        public Builder withLdapConfig(LdapView ldapConfig) {
+            this.ldapConfig = Optional.ofNullable(ldapConfig);
             return this;
         }
 
