@@ -18,14 +18,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.environment.Region;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
+import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig.ProxyConfigBuilder;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
@@ -36,6 +33,8 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegionResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterCreationEnvironmentValidatorTest {
@@ -63,25 +62,37 @@ public class ClusterCreationEnvironmentValidatorTest {
         // GIVEN
         Stack stack = getStack();
         ClusterV4Request clusterRequest = new ClusterV4Request();
+        DetailedEnvironmentResponse environment = getEnvironmentResponse();
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, user);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, user, environment);
         // THEN
         assertFalse(actualResult.hasError());
+    }
+
+    private DetailedEnvironmentResponse getEnvironmentResponse() {
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setCloudPlatform("AWS");
+        environmentResponse.setCredentialName("cred");
+        CompactRegionResponse compactRegionResponse = new CompactRegionResponse();
+        compactRegionResponse.setRegions(Set.of("region1"));
+        environmentResponse.setRegions(compactRegionResponse);
+        return environmentResponse;
     }
 
     @Test
     public void testValidateShouldBeSuccessWhenNoEnvironmentProvided() throws IOException {
         // GIVEN
         Stack stack = getStack();
-        stack.setEnvironment(null);
+        stack.setEnvironmentCrn(null);
         ClusterV4Request clusterRequest = new ClusterV4Request();
         ProxyConfig proxyConfig = createProxyConfig("proxy");
         clusterRequest.setProxyConfigCrn(proxyConfig.getName());
         LdapConfig ldapConfig = createLdapConfig("ldap");
         when(ldapConfigService.getByNameForWorkspaceId(ldapConfig.getName(), stack.getWorkspace().getId())).thenReturn(ldapConfig);
         clusterRequest.setLdapName("ldap");
+        DetailedEnvironmentResponse environment = getEnvironmentResponse();
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, user);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, user, environment);
         // THEN
         assertFalse(actualResult.hasError());
     }
@@ -96,8 +107,9 @@ public class ClusterCreationEnvironmentValidatorTest {
         LdapConfig ldapConfig = createLdapConfig("ldap");
         when(ldapConfigService.getByNameForWorkspaceId(ldapConfig.getName(), stack.getWorkspace().getId())).thenReturn(ldapConfig);
         clusterRequest.setLdapName("ldap");
+        DetailedEnvironmentResponse environment = getEnvironmentResponse();
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, user);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, user, environment);
         // THEN
         assertFalse(actualResult.hasError());
     }
@@ -113,12 +125,15 @@ public class ClusterCreationEnvironmentValidatorTest {
         LdapConfig ldapConfig = createLdapConfig("ldap");
         when(ldapConfigService.getByNameForWorkspaceId(ldapConfig.getName(), stack.getWorkspace().getId())).thenReturn(ldapConfig);
         clusterRequest.setLdapName("ldap");
+        DetailedEnvironmentResponse environment = getEnvironmentResponse();
+        environment.getRegions().setRegions(Set.of("region1", "region2"));
+        environment.setName("env1");
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, user);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, user, environment);
         // THEN
         Assert.assertTrue(actualResult.hasError());
         Assert.assertEquals(1, actualResult.getErrors().size());
-        Assert.assertEquals("[region3] region is not enabled in [env1] environment. Enabled environments: [region1,region2]",
+        Assert.assertEquals("[region3] region is not enabled in [env1] environment. Enabled regions: [region1,region2]",
                 actualResult.getErrors().get(0));
     }
 
@@ -126,7 +141,7 @@ public class ClusterCreationEnvironmentValidatorTest {
     public void testValidateShouldWorkWhenStackEnvIsNullButResourcesCouldBeFoundInTheSameWorkspace() throws IOException {
         // GIVEN
         Stack stack = getStack();
-        stack.setEnvironment(null);
+        stack.setEnvironmentCrn(null);
         ClusterV4Request clusterRequest = new ClusterV4Request();
         ProxyConfig proxyConfig = createProxyConfig("proxy");
         clusterRequest.setProxyConfigCrn(proxyConfig.getName());
@@ -137,8 +152,9 @@ public class ClusterCreationEnvironmentValidatorTest {
         RDSConfig rdsConfig = createRdsConfig(rdsName);
         when(rdsConfigService.getByNamesForWorkspaceId(Set.of(rdsConfig.getName()), stack.getWorkspace().getId())).thenReturn(Set.of(rdsConfig));
         clusterRequest.setDatabases(Set.of(rdsName));
+        DetailedEnvironmentResponse environment = getEnvironmentResponse();
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, user);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, user, environment);
         // THEN
         assertFalse(actualResult.hasError());
     }
@@ -147,7 +163,7 @@ public class ClusterCreationEnvironmentValidatorTest {
     public void testValidateShouldFailWhenProxyCouldNotBeFoundInTheSameWorkspace() throws IOException {
         // GIVEN
         Stack stack = getStack();
-        stack.setEnvironment(null);
+        stack.setEnvironmentCrn(null);
         ClusterV4Request clusterRequest = new ClusterV4Request();
         ProxyConfig proxyConfig = createProxyConfig("proxy");
         clusterRequest.setProxyConfigCrn(proxyConfig.getName());
@@ -160,8 +176,9 @@ public class ClusterCreationEnvironmentValidatorTest {
         when(rdsConfigService.getByNamesForWorkspaceId(Set.of(rdsConfig.getName()), stack.getWorkspace().getId())).thenReturn(Set.of(rdsConfig));
         clusterRequest.setDatabases(Set.of(rdsName));
         when(user.getUserCrn()).thenReturn("aUserCRN");
+        DetailedEnvironmentResponse environment = getEnvironmentResponse();
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, user);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, user, environment);
         // THEN
         assertTrue(actualResult.hasError());
         Assert.assertEquals(1, actualResult.getErrors().size());
@@ -173,7 +190,7 @@ public class ClusterCreationEnvironmentValidatorTest {
     public void testValidateShouldFailWhenLdapCouldNotBeFoundInTheSameWorkspace() throws IOException {
         // GIVEN
         Stack stack = getStack();
-        stack.setEnvironment(null);
+        stack.setEnvironmentCrn(null);
         ClusterV4Request clusterRequest = new ClusterV4Request();
         ProxyConfig proxyConfig = createProxyConfig("proxy");
         clusterRequest.setProxyConfigCrn(proxyConfig.getName());
@@ -184,8 +201,9 @@ public class ClusterCreationEnvironmentValidatorTest {
         RDSConfig rdsConfig = createRdsConfig(rdsName);
         when(rdsConfigService.getByNamesForWorkspaceId(Set.of(rdsConfig.getName()), stack.getWorkspace().getId())).thenReturn(Set.of(rdsConfig));
         clusterRequest.setDatabases(Set.of(rdsName));
+        DetailedEnvironmentResponse environment = getEnvironmentResponse();
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, user);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, user, environment);
         // THEN
         assertTrue(actualResult.hasError());
         Assert.assertEquals(1, actualResult.getErrors().size());
@@ -197,7 +215,7 @@ public class ClusterCreationEnvironmentValidatorTest {
     public void testValidateShouldFailWhenRdsCouldNotBeFoundInTheSameWorkspace() throws IOException {
         // GIVEN
         Stack stack = getStack();
-        stack.setEnvironment(null);
+        stack.setEnvironmentCrn(null);
         ClusterV4Request clusterRequest = new ClusterV4Request();
         ProxyConfig proxyConfig = createProxyConfig("proxy");
         clusterRequest.setProxyConfigCrn(proxyConfig.getName());
@@ -208,8 +226,9 @@ public class ClusterCreationEnvironmentValidatorTest {
         String rdsName2 = "aSecondrds";
         when(rdsConfigService.getByNamesForWorkspaceId(Set.of(rdsName, rdsName2), stack.getWorkspace().getId())).thenReturn(Set.of());
         clusterRequest.setDatabases(Set.of(rdsName, rdsName2));
+        DetailedEnvironmentResponse environment = getEnvironmentResponse();
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, user);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, user, environment);
         // THEN
         assertTrue(actualResult.hasError());
         Assert.assertEquals(2, actualResult.getErrors().size());
@@ -226,14 +245,7 @@ public class ClusterCreationEnvironmentValidatorTest {
         tenant.setName("test-tenant-name");
         workspace.setTenant(tenant);
         stack.setWorkspace(workspace);
-        EnvironmentView environmentView = new EnvironmentView();
-        environmentView.setName("env1");
-        Region region1 = new Region();
-        region1.setName("region1");
-        Region region2 = new Region();
-        region2.setName("region2");
-        environmentView.setRegions(new Json(Set.of(region1, region2)));
-        stack.setEnvironment(environmentView);
+        stack.setEnvironmentCrn("");
         return stack;
     }
 

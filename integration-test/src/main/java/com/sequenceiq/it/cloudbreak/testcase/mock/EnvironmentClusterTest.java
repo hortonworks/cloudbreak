@@ -49,7 +49,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         initializeDefaultBlueprints(testContext);
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "there is an environment with a attached shared resources and a running cluster that is using these resources",
             when = "the resource delete endpoints and environment delete endpoints are called",
@@ -77,7 +77,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "there is an environment with a cluster in it",
             when = "calling create cluster with a different cluster name",
@@ -96,7 +96,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "there is an environment and a database which in not attached to the environment",
             when = "a cluster is created in the environment and with the non-attached database",
@@ -114,7 +114,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "there is an available environment",
             when = "create cluster request is sent with missing environment settings",
@@ -127,7 +127,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .withName(null)
                 .withCredentialName(null)
                 .given(StackTestDto.class)
-                .withEnvironmentSettings("invalidEnvironmentSettingsRequest")
+                .withEnvironmentCrn("invalidEnvironmentSettingsRequest")
                 .when(stackTestClient.createV4(), RunningParameter.key("badRequest"))
                 .expect(BadRequestException.class, RunningParameter.key("badRequest")
                         .withExpectedMessage(".*CredentialName or EnvironmentName is mandatory"))

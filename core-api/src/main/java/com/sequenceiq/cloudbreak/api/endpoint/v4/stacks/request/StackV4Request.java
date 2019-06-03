@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.S
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
@@ -40,8 +39,8 @@ public class StackV4Request extends StackV4Base {
 
     @Valid
     @NotNull
-    @ApiModelProperty(value = StackModelDescription.GENERAL_SETTINGS, required = true)
-    private EnvironmentSettingsV4Request environment;
+    @ApiModelProperty(value = StackModelDescription.ENVIRONMENT_CRN, required = true)
+    private String environmentCrn;
 
     @ApiModelProperty(StackModelDescription.CUSTOM_DOMAIN_SETTINGS)
     private CustomDomainSettingsV4Request customDomain;
@@ -86,12 +85,12 @@ public class StackV4Request extends StackV4Base {
     @ApiModelProperty(StackModelDescription.INPUTS)
     private Map<String, Object> inputs = new HashMap<>();
 
-    public EnvironmentSettingsV4Request getEnvironment() {
-        return environment;
+    public String getEnvironmentCrn() {
+        return environmentCrn;
     }
 
-    public void setEnvironment(EnvironmentSettingsV4Request environment) {
-        this.environment = environment;
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 
     public CustomDomainSettingsV4Request getCustomDomain() {

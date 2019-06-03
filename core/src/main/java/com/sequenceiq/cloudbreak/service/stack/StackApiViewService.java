@@ -13,15 +13,14 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.flow.core.FlowLogService;
-import com.sequenceiq.cloudbreak.domain.environment.Environment;
-import com.sequenceiq.cloudbreak.domain.view.StackApiView;
-import com.sequenceiq.cloudbreak.repository.StackApiViewRepository;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
+import com.sequenceiq.cloudbreak.domain.view.StackApiView;
+import com.sequenceiq.cloudbreak.repository.StackApiViewRepository;
+import com.sequenceiq.cloudbreak.service.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.stack.ShowTerminatedClusterConfigService.ShowTerminatedClustersAfterConfig;
+import com.sequenceiq.flow.core.FlowLogService;
 
 @Service
 public class StackApiViewService {
@@ -36,10 +35,10 @@ public class StackApiViewService {
     private FlowLogService flowLogService;
 
     @Inject
-    private EnvironmentViewService environmentViewService;
+    private ConverterUtil converterUtil;
 
     @Inject
-    private ConverterUtil converterUtil;
+    private EnvironmentClientService environmentClientService;
 
     @Inject
     private ShowTerminatedClusterConfigService showTerminatedClusterConfigService;
@@ -57,11 +56,11 @@ public class StackApiViewService {
         return stackApiViewRepository.save(stackApiView);
     }
 
-    public Set<StackApiView> retrieveStackViewsByWorkspaceId(Long workspaceId, String environmentName, boolean dataLakeOnly) {
+    public Set<StackApiView> retrieveStackViewsByWorkspaceId(Long workspaceId, String environmentCrn, boolean dataLakeOnly) {
         ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.get();
-        Set<StackApiView> stackViewResponses = StringUtils.isEmpty(environmentName)
+        Set<StackApiView> stackViewResponses = StringUtils.isEmpty(environmentCrn)
                 ? getAllByWorkspace(workspaceId, showTerminatedClustersAfterConfig)
-                : getAllByWorkspaceAndEnvironment(workspaceId, environmentName, showTerminatedClustersAfterConfig);
+                : getAllByWorkspaceAndEnvironment(workspaceId, environmentCrn, showTerminatedClustersAfterConfig);
         stackViewResponses = filterDatalakes(dataLakeOnly, stackViewResponses);
         return stackViewResponses;
     }
@@ -77,14 +76,6 @@ public class StackApiViewService {
         }
     }
 
-    public Environment decorate(Environment environment, Long workspaceId) {
-        ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.get();
-        if (showTerminatedClustersAfterConfig.isActive()) {
-            environment.setStacks(getAllByWorkspaceAndEnvironment(workspaceId, environment.getId(), showTerminatedClustersAfterConfig));
-        }
-        return environment;
-    }
-
     private Set<StackApiView> filterDatalakes(boolean dataLakeOnly, Set<StackApiView> stackViewResponses) {
         if (dataLakeOnly) {
             stackViewResponses = stackViewResponses.stream()
@@ -95,17 +86,11 @@ public class StackApiViewService {
         return new HashSet<>(stackViewResponses);
     }
 
-    private Set<StackApiView> getAllByWorkspaceAndEnvironment(Long workspaceId, String environmentName,
-            ShowTerminatedClustersAfterConfig showTerminatedClustersAfter) {
-        Long environmentId = environmentViewService.getIdByName(environmentName, workspaceId);
-        return getAllByWorkspaceAndEnvironment(workspaceId, environmentId, showTerminatedClustersAfter);
-    }
-
-    private Set<StackApiView> getAllByWorkspaceAndEnvironment(Long workspaceId, Long environmentId,
+    private Set<StackApiView> getAllByWorkspaceAndEnvironment(Long workspaceId, String environmentCrn,
             ShowTerminatedClustersAfterConfig showTerminatedClustersAfter) {
         return stackApiViewRepository.findAllByWorkspaceIdAndEnvironments(
                 workspaceId,
-                environmentId,
+                environmentCrn,
                 showTerminatedClustersAfter.isActive(),
                 showTerminatedClustersAfter.showAfterMillisecs()
         );

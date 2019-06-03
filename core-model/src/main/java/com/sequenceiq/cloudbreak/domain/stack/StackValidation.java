@@ -8,7 +8,6 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
 
 public class StackValidation implements ProvisionEntity {
     private Set<HostGroup> hostGroups;
@@ -21,7 +20,7 @@ public class StackValidation implements ProvisionEntity {
 
     private Credential credential;
 
-    private EnvironmentView environment;
+    private String environmentCrn;
 
     public Set<HostGroup> getHostGroups() {
         return hostGroups;
@@ -63,11 +62,11 @@ public class StackValidation implements ProvisionEntity {
         this.credential = credential;
     }
 
-    public EnvironmentView getEnvironment() {
-        return environment;
+    public String getEnvironmentCrn() {
+        return environmentCrn;
     }
 
-    public void setEnvironment(EnvironmentView environment) {
-        this.environment = environment;
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 }

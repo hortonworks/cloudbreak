@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -16,36 +15,34 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.common.type.EncryptionType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
-import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
+import com.sequenceiq.cloudbreak.common.type.EncryptionType;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.controller.validation.Validator;
 import com.sequenceiq.cloudbreak.controller.validation.template.InstanceTemplateV4RequestValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
 public class StackV4RequestValidator implements Validator<StackV4Request> {
@@ -81,7 +78,7 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
     private CredentialService credentialService;
 
     @Inject
-    private EnvironmentService environmentService;
+    private EnvironmentClientService environmentClientService;
 
     @Override
     public ValidationResult validate(StackV4Request subject) {
@@ -94,8 +91,6 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
         validateSharedService(subject, validationBuilder, workspaceId);
         validateEncryptionKey(subject, validationBuilder, workspaceId);
         validateKerberos(subject.getCluster().getKerberosName(), validationBuilder, workspaceId);
-        validatePlacementByCredentialOrEnvironmentName(subject.getPlacement(), validationBuilder,
-                Optional.ofNullable(subject.getEnvironment().getCredentialName()), Optional.ofNullable(subject.getEnvironment().getName()), workspaceId);
         return validationBuilder.build();
     }
 
@@ -145,8 +140,11 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
                     EncryptionType valueForTypeKey = getEncryptionType(request.getTemplate());
                     return EncryptionType.CUSTOM.equals(valueForTypeKey);
                 })
-                .forEach(request -> checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(request, stackRequest.getEnvironment().getCredentialName(),
-                        stackRequest.getPlacement().getRegion(), validationBuilder, workspaceId));
+                .forEach(request -> {
+                    DetailedEnvironmentResponse environment = environmentClientService.get(stackRequest.getEnvironmentCrn());
+                    checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(request, environment.getCredentialName(),
+                            stackRequest.getPlacement().getRegion(), validationBuilder, workspaceId);
+                });
     }
 
     private EncryptionType getEncryptionType(InstanceTemplateV4Request template) {
@@ -233,29 +231,5 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
     private boolean isEncryptionTypeSetUp(InstanceTemplateV4Request template) {
         return getEncryptionType(template) != null;
     }
-
-    private void validatePlacementByCredentialOrEnvironmentName(PlacementSettingsV4Request placementSettingsV4Request,
-            ValidationResultBuilder validationBuilder, Optional<String> credentialName, Optional<String> environmentName, Long workspaceId) {
-        Credential credential;
-        if (credentialName.isPresent()) {
-            credential = credentialService.getByNameForWorkspaceId(credentialName.get(), workspaceId);
-        } else if (environmentName.isPresent()) {
-            String credentialNameFromEnvironment = environmentService.get(environmentName.get(), workspaceId).getCredentialName();
-            credential = credentialService.getByNameForWorkspaceId(credentialNameFromEnvironment, workspaceId);
-        } else {
-            validationBuilder.error("Environment must contains at least environment name or the name of the credential!");
-            return;
-        }
-        PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
-        platformResourceRequest.setCloudPlatform(credential.cloudPlatform());
-        platformResourceRequest.setCredential(credential);
-        platformResourceRequest.setPlatformVariant(credential.cloudPlatform());
-        platformResourceRequest.setFilters(Collections.emptyMap());
-        Optional<CloudRegions> cloudRegions = Optional.ofNullable(platformParameterService.getRegionsByCredential(platformResourceRequest));
-        if (cloudRegions.isPresent() && cloudRegions.get().areRegionsSupported() && placementSettingsV4Request == null) {
-            validationBuilder.error("The given cloud platform must contain a valid placement request!");
-        }
-    }
-
 }
 

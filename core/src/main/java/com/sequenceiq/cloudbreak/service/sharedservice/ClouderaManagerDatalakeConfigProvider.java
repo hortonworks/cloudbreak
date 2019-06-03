@@ -49,7 +49,7 @@ public class ClouderaManagerDatalakeConfigProvider {
                 if (datalakeResources == null) {
                     datalakeResources = collectDatalakeResources(datalakeStack, cluster, connector);
                     datalakeResources.setDatalakeStackId(datalakeStack.getId());
-                    datalakeResources.setEnvironment(datalakeStack.getEnvironment());
+                    datalakeResources.setEnvironmentCrn(datalakeStack.getEnvironmentCrn());
                     Workspace workspace = datalakeStack.getWorkspace();
                     storeDatalakeResources(datalakeResources, workspace);
                 }

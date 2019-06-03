@@ -20,19 +20,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.repository.KerberosConfigRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentViewService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 public class KerberosConfigServiceTest {
 
@@ -44,9 +43,6 @@ public class KerberosConfigServiceTest {
 
     @Mock
     private ClusterService clusterService;
-
-    @Mock
-    private EnvironmentViewService environmentViewService;
 
     @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -79,7 +75,6 @@ public class KerberosConfigServiceTest {
         when(userService.getOrCreate(any())).thenReturn(user);
         when(workspaceService.retrieveForUser(eq(user))).thenReturn(Sets.newHashSet(workspace));
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);
-        when(environmentViewService.findByNamesInWorkspace(any(), anyLong())).thenReturn(Sets.newHashSet());
         when(kerberosConfigRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.of(resource));
 
         thrown.expect(BadRequestException.class);
@@ -101,7 +96,6 @@ public class KerberosConfigServiceTest {
         when(userService.getOrCreate(any())).thenReturn(user);
         when(workspaceService.retrieveForUser(eq(user))).thenReturn(Sets.newHashSet(workspace));
         when(workspaceService.get(anyLong(), any())).thenReturn(workspace);
-        when(environmentViewService.findByNamesInWorkspace(any(), anyLong())).thenReturn(Sets.newHashSet());
         when(kerberosConfigRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.empty());
         when(kerberosConfigRepository.save(any())).thenReturn(resource);
 

@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
@@ -66,6 +67,7 @@ import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 public class StackV4RequestToTemplatePreparationObjectConverterTest {
 
@@ -120,6 +122,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     @Mock
     private UserService userService;
 
+    // TODO: mocking POJOs is a terrible practice and must be stopped!!!
     @Mock
     private CloudbreakUser cloudbreakUser;
 
@@ -156,11 +159,18 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     @Mock
     private BlueprintViewProvider blueprintViewProvider;
 
+    @Mock
+    private EnvironmentClientService environmentClientService;
+
+    @Mock
+    private DetailedEnvironmentResponse environmentResponse;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        credential.setName(TEST_CREDENTIAL_NAME);
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
-        when(source.getEnvironment()).thenReturn(environment);
+        when(source.getEnvironmentCrn()).thenReturn("envCrn");
         when(environment.getCredentialName()).thenReturn(TEST_CREDENTIAL_NAME);
         when(source.getCluster()).thenReturn(cluster);
         when(cluster.getAmbari()).thenReturn(ambari);
@@ -173,6 +183,9 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(cloudbreakUser.getEmail()).thenReturn("test@hortonworks.com");
         when(workspaceService.get(anyLong(), eq(user))).thenReturn(workspace);
         when(credentialService.getByNameForWorkspace(TEST_CREDENTIAL_NAME, workspace)).thenReturn(credential);
+        when(credential.getName()).thenReturn(TEST_CREDENTIAL_NAME);
+        when(environmentResponse.getCredentialName()).thenReturn(TEST_CREDENTIAL_NAME);
+        when(environmentClientService.get(anyString())).thenReturn(environmentResponse);
     }
 
     @Test

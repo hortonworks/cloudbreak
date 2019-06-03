@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.util.Benchmark.MultiCheckedSupplier;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
 public class ClusterCreationSetupService {
@@ -92,12 +93,13 @@ public class ClusterCreationSetupService {
     @Inject
     private ClusterCreationEnvironmentValidator environmentValidator;
 
-    public void validate(ClusterV4Request request, Stack stack, User user, Workspace workspace) {
-        validate(request, null, stack, user, workspace);
+    public void validate(ClusterV4Request request, Stack stack, User user, Workspace workspace, DetailedEnvironmentResponse environment) {
+        validate(request, null, stack, user, workspace, environment);
     }
 
     @Measure(ClusterCreationSetupService.class)
-    public void validate(ClusterV4Request request, CloudCredential cloudCredential, Stack stack, User user, Workspace workspace) {
+    public void validate(ClusterV4Request request, CloudCredential cloudCredential, Stack stack, User user,
+            Workspace workspace, DetailedEnvironmentResponse environment) {
         if (stack.getDatalakeResourceId() != null && StringUtils.isNotBlank(request.getKerberosName())) {
             throw new BadRequestException("Invalid kerberos settings, attached cluster should inherit kerberos parameters");
         }
@@ -110,7 +112,7 @@ public class ClusterCreationSetupService {
                 stack.getCreator().getUserId(), stack.getWorkspace().getId());
         mpackValidator.validateMpacks(request.getAmbari(), workspace);
         rdsConfigValidator.validateRdsConfigs(request, user, workspace);
-        ValidationResult environmentValidationResult = environmentValidator.validate(request, stack, user);
+        ValidationResult environmentValidationResult = environmentValidator.validate(request, stack, user, environment);
         if (environmentValidationResult.hasError()) {
             throw new BadRequestException(environmentValidationResult.getFormattedErrors());
         }
@@ -126,7 +128,7 @@ public class ClusterCreationSetupService {
 
         if (request.getCloudStorage() != null) {
             FileSystem fs = measure(() -> fileSystemConfigService.create(converterUtil.convert(request.getCloudStorage(), FileSystem.class),
-                        stack.getWorkspace(), stack.getCreator()),
+                    stack.getWorkspace(), stack.getCreator()),
                     LOGGER, "File system saving took {} ms for stack {}", stackName);
         }
 

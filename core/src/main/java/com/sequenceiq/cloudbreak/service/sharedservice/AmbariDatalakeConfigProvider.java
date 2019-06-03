@@ -18,26 +18,25 @@ import org.springframework.util.CollectionUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
+import com.sequenceiq.cloudbreak.cluster.api.DatalakeConfigApi;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ServiceDescriptor;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ServiceDescriptorDefinition;
-import com.sequenceiq.cloudbreak.domain.view.EnvironmentView;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.servicedescriptor.ServiceDescriptorService;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
 public class AmbariDatalakeConfigProvider {
@@ -90,7 +89,7 @@ public class AmbariDatalakeConfigProvider {
                                 Map.ofEntries(Map.entry(ServiceDescriptorDefinitionProvider.RANGER_ADMIN_PWD_KEY, cluster.getPassword()))));
                         datalakeResources = collectDatalakeResources(datalakeStack, cluster, connector, serviceSecretParamMap);
                         datalakeResources.setDatalakeStackId(datalakeStack.getId());
-                        datalakeResources.setEnvironment(datalakeStack.getEnvironment());
+                        datalakeResources.setEnvironmentCrn(datalakeStack.getEnvironmentCrn());
                         Workspace workspace = datalakeStack.getWorkspace();
                         storeDatalakeResources(datalakeResources, workspace);
                     }
@@ -152,22 +151,6 @@ public class AmbariDatalakeConfigProvider {
             datalakeResources.setRdsConfigs(new HashSet<>(rdsConfigs));
         }
         return datalakeResources;
-    }
-
-    public DatalakeResources collectAndStoreDatalakeResources(String datalakeName, EnvironmentView environment, String datalakeAmbariUrl,
-            String datalakeAmbariIp, String datalakeAmbariFqdn, DatalakeConfigApi connector, Map<String, Map<String, String>> serviceSecretParamMap,
-            LdapConfig ldapConfig, KerberosConfig kerberosConfig, Set<RDSConfig> rdsConfigs, Workspace workspace) {
-        try {
-            DatalakeResources datalakeResources = collectDatalakeResources(datalakeName, datalakeAmbariUrl, datalakeAmbariIp, datalakeAmbariFqdn,
-                    connector, serviceSecretParamMap, ldapConfig, kerberosConfig, rdsConfigs);
-            datalakeResources.setEnvironment(environment);
-            return transactionService.required(() -> {
-                storeDatalakeResources(datalakeResources, workspace);
-                return datalakeResources;
-            });
-        } catch (TransactionExecutionException | JsonProcessingException ex) {
-            throw new RuntimeException("Error during datalake resource collection from ambari.", ex);
-        }
     }
     //CHECKSTYLE:ON
 

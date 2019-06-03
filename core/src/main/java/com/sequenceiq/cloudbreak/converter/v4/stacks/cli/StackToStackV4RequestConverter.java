@@ -16,13 +16,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
@@ -32,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
+import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Recipe;
@@ -58,21 +57,21 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
 
     @Override
     public StackV4Request convert(Stack source) {
-        StackV4Request stackV2Request = new StackV4Request();
-        stackV2Request.setEnvironment(getEnvironment(source));
-        stackV2Request.setCustomDomain(getCustomDomainSettings(source));
-        providerParameterCalculator.parse(new HashMap<>(source.getParameters()), stackV2Request);
-        stackV2Request.setAuthentication(getConversionService().convert(source.getStackAuthentication(), StackAuthenticationV4Request.class));
-        stackV2Request.setNetwork(getConversionService().convert(source.getNetwork(), NetworkV4Request.class));
-        stackV2Request.setCluster(getConversionService().convert(source.getCluster(), ClusterV4Request.class));
-        stackV2Request.setInstanceGroups(getInstanceGroups(source));
-        prepareImage(source, stackV2Request);
-        prepareTags(source, stackV2Request);
-        prepareDatalakeRequest(source, stackV2Request);
-        stackV2Request.setPlacement(getPlacementSettings(source.getRegion(), source.getAvailabilityZone()));
-        prepareInputs(source, stackV2Request);
-        stackV2Request.setTimeToLive(getStackTimeToLive(source));
-        return stackV2Request;
+        StackV4Request stackV4Request = new StackV4Request();
+        stackV4Request.setEnvironmentCrn(source.getEnvironmentCrn());
+        stackV4Request.setCustomDomain(getCustomDomainSettings(source));
+        providerParameterCalculator.parse(new HashMap<>(source.getParameters()), stackV4Request);
+        stackV4Request.setAuthentication(getConversionService().convert(source.getStackAuthentication(), StackAuthenticationV4Request.class));
+        stackV4Request.setNetwork(getConversionService().convert(source.getNetwork(), NetworkV4Request.class));
+        stackV4Request.setCluster(getConversionService().convert(source.getCluster(), ClusterV4Request.class));
+        stackV4Request.setInstanceGroups(getInstanceGroups(source));
+        prepareImage(source, stackV4Request);
+        prepareTags(source, stackV4Request);
+        prepareDatalakeRequest(source, stackV4Request);
+        stackV4Request.setPlacement(getPlacementSettings(source.getRegion(), source.getAvailabilityZone()));
+        prepareInputs(source, stackV4Request);
+        stackV4Request.setTimeToLive(getStackTimeToLive(source));
+        return stackV4Request;
     }
 
     private void prepareDatalakeRequest(Stack source, StackV4Request stackRequest) {
@@ -100,18 +99,6 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
         cd.setHostgroupNameAsHostname(stack.isHostgroupNameAsHostname());
         cd.setClusterNameAsSubdomain(stack.isClusterNameAsSubdomain());
         return cd;
-    }
-
-    private EnvironmentSettingsV4Request getEnvironment(Stack source) {
-        EnvironmentSettingsV4Request environment = new EnvironmentSettingsV4Request();
-        environment.setName("");
-        if (source.getEnvironment() != null) {
-            environment.setName(source.getEnvironment().getName());
-        }
-        if (source.getCredential() != null) {
-            environment.setCredentialName(source.getCredential().getName());
-        }
-        return environment;
     }
 
     private void prepareImage(Stack source, StackV4Request stackV2Request) {
