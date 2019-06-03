@@ -26,6 +26,21 @@ cd $INTEGCB_LOCATION
 ./cbd start-wait identity commondb vault cloudbreak environment periscope freeipa redbeams datalake
 cd ..
 
+PUBLIC_IP=`echo $DOCKER_HOST | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'`
+
+if [[ "$PUBLIC_IP" ]]; then
+    PUBLIC_IP=$PUBLIC_IP
+else
+    PUBLIC_IP=127.0.0.1
+fi
+
+curl -k http://${PUBLIC_IP}:8080/cb/api/swagger.json -o ./apidefinitions/cb.json
+curl -k http://${PUBLIC_IP}:8088/environmentservice/api/swagger.json -o ./apidefinitions/environment.json
+curl -k http://${PUBLIC_IP}:8090/freeipa/api/swagger.json -o ./apidefinitions/freeipa.json
+curl -k http://${PUBLIC_IP}:8087/redbeams/api/swagger.json -o ./apidefinitions/redbeams.json
+curl -k http://${PUBLIC_IP}:8086/dl/api/swagger.json -o ./apidefinitions/datalake.json
+curl -k http://${PUBLIC_IP}:8085/as/api/swagger.json -o ./apidefinitions/autoscale.json
+
 docker rm -f cbreak_environment_1
 docker rm -f cbreak_freeipa_1
 docker rm -f cbreak_redbeams_1
