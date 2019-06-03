@@ -1,8 +1,9 @@
 package sdx
 
 import (
-	"time"
-
+	"encoding/json"
+	"fmt"
+	"github.com/hortonworks/cb-cli/dataplane/api-sdx/client/internalsdx"
 	"github.com/hortonworks/cb-cli/dataplane/api-sdx/client/sdx"
 	sdxModel "github.com/hortonworks/cb-cli/dataplane/api-sdx/model"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
@@ -11,6 +12,8 @@ import (
 	commonutils "github.com/hortonworks/dp-cli-common/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
+	"os"
+	"time"
 )
 
 var sdxClusterHeader = []string{"Name"}
@@ -31,6 +34,30 @@ type clientSdx interface {
 	ListSdx(params *sdx.ListSdxParams) (*sdx.ListSdxOK, error)
 }
 
+func assembleStackRequest(c *cli.Context) *sdxModel.StackV4Request {
+	path := c.String(fl.FlInputJson.Name)
+
+	if path == "" {
+		return nil
+	}
+
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		commonutils.LogErrorAndExit(err)
+	}
+
+	log.Infof("[assembleStackTemplateForSdx] read cluster create json from file: %s", path)
+	content := commonutils.ReadFile(path)
+
+	var req sdxModel.StackV4Request
+	err := json.Unmarshal(content, &req)
+	if err != nil {
+		msg := fmt.Sprintf(`Invalid json format: %s. Please make sure that the json is valid (check for commas and double quotes).`, err.Error())
+		commonutils.LogErrorMessageAndExit(msg)
+	}
+
+	return &req
+}
+
 func CreateSdx(c *cli.Context) {
 	defer commonutils.TimeTrack(time.Now(), "create SDX cluster")
 
@@ -44,22 +71,46 @@ func CreateSdx(c *cli.Context) {
 		cidr = "0.0.0.0/0"
 	}
 
+	inputJson := assembleStackRequest(c)
+
+	if inputJson != nil {
+		createInternalSdx(cidr, clusterShape, envName, inputJson, c, name)
+	} else {
+		createSdx(cidr, clusterShape, envName, c, name)
+	}
+}
+
+func createSdx(cidr string, clusterShape string, envName string, c *cli.Context, name string) {
 	SdxRequest := &sdxModel.SdxClusterRequest{
 		AccessCidr:   &cidr,
 		ClusterShape: &clusterShape,
 		Environment:  &envName,
 		Tags:         nil,
 	}
-
 	sdxClient := ClientSdx(*oauth.NewSDXClientFromContext(c)).Sdx
 	resp, err := sdxClient.Sdx.CreateSdx(sdx.NewCreateSdxParams().WithSdxName(name).WithBody(SdxRequest))
-
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	sdxCluster := resp.Payload
-
 	log.Infof("[createSdx] SDX cluster created in environment: %s, with name: %s", envName, sdxCluster.SdxName)
+}
+
+func createInternalSdx(cidr string, clusterShape string, envName string, inputJson *sdxModel.StackV4Request, c *cli.Context, name string) {
+	SdxInternalRequest := &sdxModel.SdxInternalClusterRequest{
+		AccessCidr:     &cidr,
+		ClusterShape:   &clusterShape,
+		Environment:    &envName,
+		Tags:           nil,
+		StackV4Request: inputJson,
+	}
+	sdxClient := ClientSdx(*oauth.NewSDXClientFromContext(c)).Sdx
+	resp, err := sdxClient.Internalsdx.CreateInternalSdx(internalsdx.NewCreateInternalSdxParams().WithSdxName(name).WithBody(SdxInternalRequest))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	sdxCluster := resp.Payload
+	log.Infof("[createInternalSdx] SDX cluster created in environment: %s, with name: %s", envName, sdxCluster.SdxName)
 }
 
 func DeleteSdx(c *cli.Context) {

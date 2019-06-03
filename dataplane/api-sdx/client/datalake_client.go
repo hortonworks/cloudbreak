@@ -11,6 +11,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
+	"github.com/hortonworks/cb-cli/dataplane/api-sdx/client/internalsdx"
 	"github.com/hortonworks/cb-cli/dataplane/api-sdx/client/sdx"
 )
 
@@ -56,6 +57,8 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Datalake {
 
 	cli := new(Datalake)
 	cli.Transport = transport
+
+	cli.Internalsdx = internalsdx.New(transport, formats)
 
 	cli.Sdx = sdx.New(transport, formats)
 
@@ -103,6 +106,8 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // Datalake is a client for datalake
 type Datalake struct {
+	Internalsdx *internalsdx.Client
+
 	Sdx *sdx.Client
 
 	Transport runtime.ClientTransport
@@ -111,6 +116,8 @@ type Datalake struct {
 // SetTransport changes the transport on the client and all its subresources
 func (c *Datalake) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
+
+	c.Internalsdx.SetTransport(transport)
 
 	c.Sdx.SetTransport(transport)
 
