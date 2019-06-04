@@ -11,8 +11,8 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import com.cloudera.api.swagger.model.ApiConfig;
+import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.validation.DatabaseCommon;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
