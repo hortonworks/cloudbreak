@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,9 @@ public class ClouderaManagerStartupListenerTask extends ClusterBasedStatusChecke
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerStartupListenerTask.class);
 
-    private static final int[] ERROR_CODES = { 502, 503, 504 };
+    private static final int[] ERROR_CODES = {502, 503, 504};
+
+    private static final String CONNECTION_REFUSED_MESSAGE = "Connection refused";
 
     @Override
     public boolean checkStatus(ClouderaManagerPollerObject clouderaManagerPollerObject) {
@@ -34,7 +37,7 @@ public class ClouderaManagerStartupListenerTask extends ClusterBasedStatusChecke
                 return false;
             }
         } catch (ApiException e) {
-            if (ArrayUtils.contains(ERROR_CODES, e.getCode())) {
+            if (ArrayUtils.contains(ERROR_CODES, e.getCode()) || StringUtils.containsIgnoreCase(e.getMessage(), CONNECTION_REFUSED_MESSAGE)) {
                 LOGGER.debug("cloudera manager is not running", e);
                 return false;
             } else {
