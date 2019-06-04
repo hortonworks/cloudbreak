@@ -8,7 +8,7 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.connector.PlatformDiskTestDto;
 
-public class PlatformDisksAction implements Action<PlatformDiskTestDto> {
+public class PlatformDisksAction implements Action<PlatformDiskTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PlatformDisksAction.class);
 

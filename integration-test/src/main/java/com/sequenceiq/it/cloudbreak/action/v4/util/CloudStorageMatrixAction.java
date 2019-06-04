@@ -10,7 +10,7 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.CloudStorageMatrixTestDto;
 
-public class CloudStorageMatrixAction implements Action<CloudStorageMatrixTestDto> {
+public class CloudStorageMatrixAction implements Action<CloudStorageMatrixTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudStorageMatrixAction.class);
 

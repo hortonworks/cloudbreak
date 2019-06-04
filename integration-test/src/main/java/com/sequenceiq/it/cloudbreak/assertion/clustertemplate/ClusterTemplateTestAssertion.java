@@ -17,10 +17,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
-import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 
 public class ClusterTemplateTestAssertion {
 
@@ -28,7 +29,7 @@ public class ClusterTemplateTestAssertion {
 
     }
 
-    public static Assertion<ClusterTemplateTestDto> getResponse() {
+    public static Assertion<ClusterTemplateTestDto, CloudbreakClient> getResponse() {
         return (testContext, entity, cloudbreakClient) -> {
             Optional<ClusterTemplateV4Response> first = entity
                     .getResponses()
@@ -63,7 +64,7 @@ public class ClusterTemplateTestAssertion {
         };
     }
 
-    public static Assertion<ClusterTemplateTestDto> getResponses(int expectedSize) {
+    public static Assertion<ClusterTemplateTestDto, CloudbreakClient> getResponses(int expectedSize) {
         return (testContext, entity, cloudbreakClient) -> {
             if (entity.getResponses().size() != expectedSize) {
                 throw new IllegalArgumentException(String.format("expected size is %s but got %s", expectedSize, entity.getResponses().size()));
@@ -72,7 +73,7 @@ public class ClusterTemplateTestAssertion {
         };
     }
 
-    public static Assertion<ClusterTemplateTestDto> containsType(ClusterTemplateV4Type expectedType) {
+    public static Assertion<ClusterTemplateTestDto, CloudbreakClient> containsType(ClusterTemplateV4Type expectedType) {
         return (testContext, entity, cloudbreakClient) -> {
             ClusterTemplateTestDto clusterTemplate = testContext.get(ClusterTemplateTestDto.class);
             Optional<ClusterTemplateV4Response> first = entity.getResponses().stream().filter(ct -> ct.getName().equals(clusterTemplate.getName())).findFirst();
@@ -90,7 +91,7 @@ public class ClusterTemplateTestAssertion {
         };
     }
 
-    public static Assertion<ClusterTemplateTestDto> checkStackTemplateAfterClusterTemplateCreation() {
+    public static Assertion<ClusterTemplateTestDto, CloudbreakClient> checkStackTemplateAfterClusterTemplateCreation() {
         return (testContext, entity, cloudbreakClient) -> {
             Optional<ClusterTemplateV4Response> first = entity.getResponses().stream().filter(f -> f.getName().equals(entity.getName())).findFirst();
             if (!first.isPresent()) {
@@ -120,7 +121,7 @@ public class ClusterTemplateTestAssertion {
         };
     }
 
-    public static Assertion<ClusterTemplateTestDto> checkStackTemplateAfterClusterTemplateCreationWithProperties() {
+    public static Assertion<ClusterTemplateTestDto, CloudbreakClient> checkStackTemplateAfterClusterTemplateCreationWithProperties() {
         return (testContext, entity, cloudbreakClient) -> {
             ClusterTemplateTestDto clusterTemplate = testContext.get(ClusterTemplateTestDto.class);
             Optional<ClusterTemplateV4Response> first = entity.getResponses().stream().filter(ct -> ct.getName().equals(clusterTemplate.getName())).findFirst();

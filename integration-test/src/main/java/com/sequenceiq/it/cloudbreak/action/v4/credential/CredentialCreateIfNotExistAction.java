@@ -10,7 +10,7 @@ import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.exception.ProxyMethodInvocationException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class CredentialCreateIfNotExistAction implements Action<CredentialTestDto> {
+public class CredentialCreateIfNotExistAction implements Action<CredentialTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialCreateIfNotExistAction.class);
 

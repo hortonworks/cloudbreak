@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class StackDeleteAction implements Action<StackTestDto> {
+public class StackDeleteAction implements Action<StackTestDto, CloudbreakClient> {
 
     public static final String INSTANCE_ID = "SDA-instanceId";
 

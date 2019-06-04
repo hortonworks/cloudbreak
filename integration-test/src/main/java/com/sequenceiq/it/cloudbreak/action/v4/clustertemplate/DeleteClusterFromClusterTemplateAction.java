@@ -10,7 +10,7 @@ import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class DeleteClusterFromClusterTemplateAction implements Action<ClusterTemplateTestDto> {
+public class DeleteClusterFromClusterTemplateAction implements Action<ClusterTemplateTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeleteClusterFromClusterTemplateAction.class);
 

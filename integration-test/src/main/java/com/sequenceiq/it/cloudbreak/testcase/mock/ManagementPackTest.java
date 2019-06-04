@@ -7,6 +7,7 @@ import javax.ws.rs.NotFoundException;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.mpacks.response.ManagementPackV4Response;
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.MpackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -112,7 +113,7 @@ public class ManagementPackTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    private Assertion<MPackTestDto> assertMpackExist() {
+    private Assertion<MPackTestDto, CloudbreakClient> assertMpackExist() {
         return (testContext, entity, cloudbreakClient) -> {
             Long workspaceId = cloudbreakClient.getWorkspaceId();
             ManagementPackV4Response response;
@@ -128,7 +129,7 @@ public class ManagementPackTest extends AbstractIntegrationTest {
         };
     }
 
-    private Assertion<MPackTestDto> assertMpackNotExist() {
+    private Assertion<MPackTestDto, CloudbreakClient> assertMpackNotExist() {
         return (testContext, entity, cloudbreakClient) -> {
             Long workspaceId = cloudbreakClient.getWorkspaceId();
             ManagementPackV4Response response;

@@ -9,7 +9,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class LdapCreateAction implements Action<LdapTestDto> {
+public class LdapCreateAction implements Action<LdapTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LdapCreateAction.class);
 

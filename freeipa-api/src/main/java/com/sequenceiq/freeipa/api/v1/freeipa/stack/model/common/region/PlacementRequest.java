@@ -10,4 +10,14 @@ import io.swagger.annotations.ApiModel;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class PlacementRequest extends PlacementBase {
+
+    public PlacementRequest withAvailabilityZone(String availabilityZone) {
+        setAvailabilityZone(availabilityZone);
+        return this;
+    }
+
+    public PlacementRequest withRegion(String region) {
+        setRegion(region);
+        return this;
+    }
 }

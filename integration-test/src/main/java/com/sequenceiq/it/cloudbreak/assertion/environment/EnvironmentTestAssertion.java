@@ -6,7 +6,7 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 
-public class EnvironmentTestAssertion implements Assertion<EnvironmentTestDto> {
+public class EnvironmentTestAssertion implements Assertion<EnvironmentTestDto, CloudbreakClient> {
     private String expectedCredentialName;
 
     public EnvironmentTestAssertion(String expectedCredentialName) {

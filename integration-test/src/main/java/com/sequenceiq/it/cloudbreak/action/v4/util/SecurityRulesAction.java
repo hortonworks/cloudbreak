@@ -8,7 +8,7 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.securityrule.SecurityRulesTestDto;
 
-public class SecurityRulesAction implements Action<SecurityRulesTestDto> {
+public class SecurityRulesAction implements Action<SecurityRulesTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityRulesAction.class);
 

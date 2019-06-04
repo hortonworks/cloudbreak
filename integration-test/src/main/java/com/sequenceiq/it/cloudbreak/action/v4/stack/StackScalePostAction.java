@@ -7,7 +7,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class StackScalePostAction implements Action<StackTestDto> {
+public class StackScalePostAction implements Action<StackTestDto, CloudbreakClient> {
 
     private StackScaleV4Request request = new StackScaleV4Request();
 

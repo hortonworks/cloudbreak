@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceGroupV4Base;
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -83,7 +84,7 @@ public class AwsBasicStackTests extends AbstractE2ETest {
                 .validate();
     }
 
-    private Assertion<StackTestDto> checkWorgerGroupNodeCount(String scaledGroup, int expectedCount) {
+    private Assertion<StackTestDto, CloudbreakClient> checkWorgerGroupNodeCount(String scaledGroup, int expectedCount) {
         return (ctx, testDto, cloudbreakClient) -> {
             Integer nodeCount = testDto.getResponse().getInstanceGroups().stream()
                     .filter(group -> scaledGroup.equals(group.getName()))

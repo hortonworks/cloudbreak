@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.assertion.info;
 
 import java.util.Map;
 
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.dto.info.CloudbreakInfoTestDto;
 
@@ -16,7 +17,7 @@ public class InfoTestAssertion {
     private InfoTestAssertion() {
     }
 
-    public static Assertion<CloudbreakInfoTestDto> infoContainsProperties(String name) {
+    public static Assertion<CloudbreakInfoTestDto, CloudbreakClient> infoContainsProperties(String name) {
         return (testContext, testDto, cloudbreakClient) -> {
             hasInfoVersion(testDto);
             hasAppName(testDto, name);

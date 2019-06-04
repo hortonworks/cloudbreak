@@ -8,7 +8,7 @@ import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 
-public class CloudbreakClient extends Entity {
+public class CloudbreakClient extends MicroserviceClient {
     public static final String CLOUDBREAK_CLIENT = "CLOUDBREAK_CLIENT";
 
     private static CloudbreakEndpoint singletonCloudbreakClient;

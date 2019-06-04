@@ -5,7 +5,7 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 
-public class RecipeListAction implements Action<RecipeTestDto> {
+public class RecipeListAction implements Action<RecipeTestDto, CloudbreakClient> {
 
     @Override
     public RecipeTestDto action(TestContext testContext, RecipeTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {

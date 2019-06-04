@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 
-public class CloudbreakInfoGetAction implements Action<CloudbreakInfoTestDto> {
+public class CloudbreakInfoGetAction implements Action<CloudbreakInfoTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakInfoGetAction.class);
 

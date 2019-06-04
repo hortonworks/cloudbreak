@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class ImageCatalogCreateWithoutNameLoggingAction implements Action<ImageCatalogTestDto> {
+public class ImageCatalogCreateWithoutNameLoggingAction implements Action<ImageCatalogTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogCreateWithoutNameLoggingAction.class);
 

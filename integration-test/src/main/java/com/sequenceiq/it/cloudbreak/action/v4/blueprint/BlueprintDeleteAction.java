@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class BlueprintDeleteAction implements Action<BlueprintTestDto> {
+public class BlueprintDeleteAction implements Action<BlueprintTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintDeleteAction.class);
 

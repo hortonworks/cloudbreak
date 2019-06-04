@@ -8,15 +8,16 @@ import static org.junit.Assert.assertTrue;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.it.cloudbreak.dto.util.DeploymentPreferencesTestDto;
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
+import com.sequenceiq.it.cloudbreak.dto.util.DeploymentPreferencesTestDto;
 
 public class DeploymentPreferencesTestAssertion {
 
     private DeploymentPreferencesTestAssertion() {
     }
 
-    public static Assertion<DeploymentPreferencesTestDto> supportedExternalDatabasesExists() {
+    public static Assertion<DeploymentPreferencesTestDto, CloudbreakClient> supportedExternalDatabasesExists() {
         return (testContext, entity, cloudbreakClient) -> {
             assertNotNull(entity.getResponse().getSupportedExternalDatabases());
             assertFalse(entity.getResponse().getSupportedExternalDatabases().isEmpty());
@@ -24,7 +25,7 @@ public class DeploymentPreferencesTestAssertion {
         };
     }
 
-    public static Assertion<DeploymentPreferencesTestDto> platformEnablementValid() {
+    public static Assertion<DeploymentPreferencesTestDto, CloudbreakClient> platformEnablementValid() {
         return (testContext, entity, cloudbreakClient) -> {
             assertNotNull(entity.getResponse().getPlatformEnablement());
             assertFalse(entity.getResponse().getPlatformEnablement().isEmpty());

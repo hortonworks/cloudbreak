@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class RecipeDeleteAction implements Action<RecipeTestDto> {
+public class RecipeDeleteAction implements Action<RecipeTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeDeleteAction.class);
 

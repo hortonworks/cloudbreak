@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.location.StorageLocationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage.location.StorageLocationV4Response;
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 
@@ -13,7 +14,7 @@ public class AdlsGen2TestAssertion {
     private AdlsGen2TestAssertion() {
     }
 
-    public static Assertion<StackTestDto> stackContainsAdlsGen2Properties() {
+    public static Assertion<StackTestDto, CloudbreakClient> stackContainsAdlsGen2Properties() {
         return (testContext, testDto, cloudbreakClient) -> {
             cloudStorageParametersExists(testDto);
             accountKeyIsTheExpectedOnRequest(testDto);
@@ -22,7 +23,7 @@ public class AdlsGen2TestAssertion {
         };
     }
 
-    public static Assertion<StackTestDto> stackContainsStorageLocations() {
+    public static Assertion<StackTestDto, CloudbreakClient> stackContainsStorageLocations() {
         return (testContext, testDto, cloudbreakClient) -> {
             storageLocationExists(testDto);
             storageLocationsSizeMatches(testDto);

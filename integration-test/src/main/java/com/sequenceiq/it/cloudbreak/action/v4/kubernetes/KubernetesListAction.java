@@ -13,7 +13,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.kubernetes.KubernetesTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class KubernetesListAction implements Action<KubernetesTestDto> {
+public class KubernetesListAction implements Action<KubernetesTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesListAction.class);
 

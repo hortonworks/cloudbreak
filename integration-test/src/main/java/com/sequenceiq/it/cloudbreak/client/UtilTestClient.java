@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.client;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v4.util.CloudStorageMatrixAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.DeploymentPreferencesAction;
@@ -21,31 +22,31 @@ import com.sequenceiq.it.cloudbreak.dto.util.VersionCheckTestDto;
 @Service
 public class UtilTestClient {
 
-    public Action<CloudStorageMatrixTestDto> cloudStorageMatrix() {
+    public Action<CloudStorageMatrixTestDto, CloudbreakClient> cloudStorageMatrix() {
         return new CloudStorageMatrixAction();
     }
 
-    public Action<DeploymentPreferencesTestDto> deploymentPreferencesV4() {
+    public Action<DeploymentPreferencesTestDto, CloudbreakClient> deploymentPreferencesV4() {
         return new DeploymentPreferencesAction();
     }
 
-    public Action<RepoConfigValidationTestDto> repoConfigValidationV4() {
+    public Action<RepoConfigValidationTestDto, CloudbreakClient> repoConfigValidationV4() {
         return new RepoConfigValidationAction();
     }
 
-    public Action<SecurityRulesTestDto> securityRulesV4() {
+    public Action<SecurityRulesTestDto, CloudbreakClient> securityRulesV4() {
         return new SecurityRulesAction();
     }
 
-    public Action<StackMatrixTestDto> stackMatrixV4() {
+    public Action<StackMatrixTestDto, CloudbreakClient> stackMatrixV4() {
         return new StackMatrixAction();
     }
 
-    public Action<TagSpecificationsTestDto> tagSpecificationsV4() {
+    public Action<TagSpecificationsTestDto, CloudbreakClient> tagSpecificationsV4() {
         return new TagSpecificationsAction();
     }
 
-    public Action<VersionCheckTestDto> versionChecker() {
+    public Action<VersionCheckTestDto, CloudbreakClient> versionChecker() {
         return new VersionCheckAction();
     }
 

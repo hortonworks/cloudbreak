@@ -13,7 +13,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.audit.AuditTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class AuditListAction implements Action<AuditTestDto> {
+public class AuditListAction implements Action<AuditTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditListAction.class);
 

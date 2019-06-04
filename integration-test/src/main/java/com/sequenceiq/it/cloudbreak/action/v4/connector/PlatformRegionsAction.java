@@ -8,7 +8,7 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.connector.PlatformRegionTestDto;
 
-public class PlatformRegionsAction implements Action<PlatformRegionTestDto> {
+public class PlatformRegionsAction implements Action<PlatformRegionTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PlatformRegionsAction.class);
 

@@ -8,7 +8,7 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.DeploymentPreferencesTestDto;
 
-public class DeploymentPreferencesAction implements Action<DeploymentPreferencesTestDto> {
+public class DeploymentPreferencesAction implements Action<DeploymentPreferencesTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeploymentPreferencesAction.class);
 

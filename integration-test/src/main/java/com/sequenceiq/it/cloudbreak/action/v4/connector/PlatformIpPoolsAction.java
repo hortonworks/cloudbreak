@@ -8,7 +8,7 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.connector.PlatformIpPoolsTestDto;
 
-public class PlatformIpPoolsAction implements Action<PlatformIpPoolsTestDto> {
+public class PlatformIpPoolsAction implements Action<PlatformIpPoolsTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PlatformIpPoolsAction.class);
 

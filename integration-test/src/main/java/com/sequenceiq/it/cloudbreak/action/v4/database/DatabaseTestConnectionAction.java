@@ -9,7 +9,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class DatabaseTestConnectionAction implements Action<DatabaseTestTestDto> {
+public class DatabaseTestConnectionAction implements Action<DatabaseTestTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseTestConnectionAction.class);
 
