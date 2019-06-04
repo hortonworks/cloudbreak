@@ -10,7 +10,7 @@ import com.sequenceiq.it.cloudbreak.dto.kubernetes.KubernetesTestDto;
 import com.sequenceiq.it.cloudbreak.exception.ProxyMethodInvocationException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class KubernetesCreateIfNotExistAction implements Action<KubernetesTestDto> {
+public class KubernetesCreateIfNotExistAction implements Action<KubernetesTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesCreateIfNotExistAction.class);
 

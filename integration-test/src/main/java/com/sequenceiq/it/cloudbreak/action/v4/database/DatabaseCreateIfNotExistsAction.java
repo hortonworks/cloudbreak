@@ -9,7 +9,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class DatabaseCreateIfNotExistsAction implements Action<DatabaseTestDto> {
+public class DatabaseCreateIfNotExistsAction implements Action<DatabaseTestDto, CloudbreakClient> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseCreateIfNotExistsAction.class);
 
     @Override

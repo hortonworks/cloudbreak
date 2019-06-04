@@ -9,7 +9,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class ImageCatalogCreateIfNotExistsAction implements Action<ImageCatalogTestDto> {
+public class ImageCatalogCreateIfNotExistsAction implements Action<ImageCatalogTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogCreateIfNotExistsAction.class);
 

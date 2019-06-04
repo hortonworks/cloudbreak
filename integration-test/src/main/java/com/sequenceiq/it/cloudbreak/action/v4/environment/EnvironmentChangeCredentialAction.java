@@ -6,7 +6,7 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 
-public class EnvironmentChangeCredentialAction implements Action<EnvironmentTestDto> {
+public class EnvironmentChangeCredentialAction implements Action<EnvironmentTestDto, CloudbreakClient> {
     @Override
     public EnvironmentTestDto action(TestContext testContext, EnvironmentTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
         EnvironmentChangeCredentialV4Request envChangeCredentialRequest = new EnvironmentChangeCredentialV4Request();

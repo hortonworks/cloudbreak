@@ -63,6 +63,9 @@ dependencies {
   compile (project(':autoscale-api')) {
     transitive = false;
   }
+  compile (project(':freeipa-api')) {
+    transitive = false;
+  }
   compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
     exclude group: 'org.slf4j';
   }

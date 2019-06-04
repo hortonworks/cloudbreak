@@ -8,7 +8,7 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.RepoConfigValidationTestDto;
 
-public class RepoConfigValidationAction implements Action<RepoConfigValidationTestDto> {
+public class RepoConfigValidationAction implements Action<RepoConfigValidationTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RepoConfigValidationAction.class);
 

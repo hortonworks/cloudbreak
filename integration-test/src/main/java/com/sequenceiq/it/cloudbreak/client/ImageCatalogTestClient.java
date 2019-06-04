@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.client;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateIfNotExistsAction;
@@ -17,47 +18,47 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 @Service
 public class ImageCatalogTestClient {
 
-    public Action<ImageCatalogTestDto> createV4() {
+    public Action<ImageCatalogTestDto, CloudbreakClient> createV4() {
         return new ImageCatalogCreateAction();
     }
 
-    public Action<ImageCatalogTestDto> createIfNotExistV4() {
+    public Action<ImageCatalogTestDto, CloudbreakClient> createIfNotExistV4() {
         return new ImageCatalogCreateIfNotExistsAction();
     }
 
-    public Action<ImageCatalogTestDto> createWithoutNameV4() {
+    public Action<ImageCatalogTestDto, CloudbreakClient> createWithoutNameV4() {
         return new ImageCatalogCreateWithoutNameLoggingAction();
     }
 
-    public Action<ImageCatalogTestDto> deleteV4() {
+    public Action<ImageCatalogTestDto, CloudbreakClient> deleteV4() {
         return new ImageCatalogDeleteAction();
     }
 
-    public Action<ImageCatalogTestDto> getV4() {
+    public Action<ImageCatalogTestDto, CloudbreakClient> getV4() {
         return new ImageCatalogGetAction();
     }
 
-    public Action<ImageCatalogTestDto> getV4(Boolean withImages) {
+    public Action<ImageCatalogTestDto, CloudbreakClient> getV4(Boolean withImages) {
         return new ImageCatalogGetAction(withImages);
     }
 
-    public Action<ImageCatalogTestDto> getImagesByNameV4() {
+    public Action<ImageCatalogTestDto, CloudbreakClient> getImagesByNameV4() {
         return new ImageCatalogGetImagesByNameAction();
     }
 
-    public Action<ImageCatalogTestDto> getImagesByNameV4(String stackName) {
+    public Action<ImageCatalogTestDto, CloudbreakClient> getImagesByNameV4(String stackName) {
         return new ImageCatalogGetImagesByNameAction(stackName);
     }
 
-    public Action<ImageCatalogTestDto> getImagesFromDefaultCatalog() {
+    public Action<ImageCatalogTestDto, CloudbreakClient> getImagesFromDefaultCatalog() {
         return new ImageCatalogGetImagesFromDefaultCatalogAction();
     }
 
-    public Action<ImageCatalogTestDto> getImagesFromDefaultCatalog(CloudPlatform platform) {
+    public Action<ImageCatalogTestDto, CloudbreakClient> getImagesFromDefaultCatalog(CloudPlatform platform) {
         return new ImageCatalogGetImagesFromDefaultCatalogAction(platform);
     }
 
-    public Action<ImageCatalogTestDto> setAsDefault() {
+    public Action<ImageCatalogTestDto, CloudbreakClient> setAsDefault() {
         return new ImageCatalogSetAsDefaultAction();
     }
 

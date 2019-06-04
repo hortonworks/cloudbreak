@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.AmbariKerbero
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.FreeIPAKerberosDescriptor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.MITKerberosDescriptor;
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
@@ -234,8 +235,8 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
 
         ACTIVE_DIRECTORY {
             @Override
-            public List<Assertion<StackTestDto>> getAssertions() {
-                List<Assertion<StackTestDto>> verifications = new LinkedList<>();
+            public List<Assertion<StackTestDto, CloudbreakClient>> getAssertions() {
+                List<Assertion<StackTestDto, CloudbreakClient>> verifications = new LinkedList<>();
                 verifications.add(clusterTemplatePostToCMContains("enableKerberos").exactTimes(1));
                 verifications.add(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(SALT_HIGHSTATE).exactTimes(2));
                 return verifications;
@@ -261,8 +262,8 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
 
         MIT {
             @Override
-            public List<Assertion<StackTestDto>> getAssertions() {
-                List<Assertion<StackTestDto>> verifications = new LinkedList<>();
+            public List<Assertion<StackTestDto, CloudbreakClient>> getAssertions() {
+                List<Assertion<StackTestDto, CloudbreakClient>> verifications = new LinkedList<>();
                 verifications.add(clusterTemplatePostToCMContains("enableKerberos").exactTimes(1));
                 verifications.add(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(SALT_HIGHSTATE).exactTimes(2));
                 return verifications;
@@ -286,8 +287,8 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
 
         AMBARI_DESCRIPTOR {
             @Override
-            public List<Assertion<StackTestDto>> getAssertions() {
-                List<Assertion<StackTestDto>> verifications = new LinkedList<>();
+            public List<Assertion<StackTestDto, CloudbreakClient>> getAssertions() {
+                List<Assertion<StackTestDto, CloudbreakClient>> verifications = new LinkedList<>();
                 verifications.add(clusterTemplatePostToCMContains("enableKerberos").exactTimes(1));
                 verifications.add(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(SALT_HIGHSTATE).exactTimes(2));
                 return verifications;
@@ -312,8 +313,8 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
 
         FREEIPA {
             @Override
-            public List<Assertion<StackTestDto>> getAssertions() {
-                List<Assertion<StackTestDto>> verifications = new LinkedList<>();
+            public List<Assertion<StackTestDto, CloudbreakClient>> getAssertions() {
+                List<Assertion<StackTestDto, CloudbreakClient>> verifications = new LinkedList<>();
                 verifications.add(clusterTemplatePostToCMContains("enableKerberos").exactTimes(1));
                 return verifications;
             }
@@ -335,7 +336,7 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
             }
         };
 
-        public abstract List<Assertion<StackTestDto>> getAssertions();
+        public abstract List<Assertion<StackTestDto, CloudbreakClient>> getAssertions();
 
         public abstract KerberosV4Request getRequest();
 

@@ -8,7 +8,7 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.StackMatrixTestDto;
 
-public class StackMatrixAction implements Action<StackMatrixTestDto> {
+public class StackMatrixAction implements Action<StackMatrixTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackMatrixAction.class);
 

@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.kubernetes.KubernetesTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class KubernetesDeleteAction implements Action<KubernetesTestDto> {
+public class KubernetesDeleteAction implements Action<KubernetesTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesDeleteAction.class);
 

@@ -9,7 +9,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class CredentialModifyAction implements Action<CredentialTestDto> {
+public class CredentialModifyAction implements Action<CredentialTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialModifyAction.class);
 

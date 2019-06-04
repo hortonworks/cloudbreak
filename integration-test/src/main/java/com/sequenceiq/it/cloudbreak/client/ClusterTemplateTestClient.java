@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.client;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v4.clustertemplate.ClusterTemplateCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.clustertemplate.ClusterTemplateDeleteAction;
@@ -15,35 +16,35 @@ import com.sequenceiq.it.cloudbreak.dto.stack.StackTemplateTestDto;
 @Service
 public class ClusterTemplateTestClient {
 
-    public Action<ClusterTemplateTestDto> createV4() {
+    public Action<ClusterTemplateTestDto, CloudbreakClient> createV4() {
         return new ClusterTemplateCreateAction();
     }
 
-    public Action<ClusterTemplateTestDto> getV4() {
+    public Action<ClusterTemplateTestDto, CloudbreakClient> getV4() {
         return new ClusterTemplateGetAction();
     }
 
-    public Action<ClusterTemplateTestDto> listV4() {
+    public Action<ClusterTemplateTestDto, CloudbreakClient> listV4() {
         return new ClusterTemplateListAction();
     }
 
-    public Action<ClusterTemplateTestDto> deleteV4() {
+    public Action<ClusterTemplateTestDto, CloudbreakClient> deleteV4() {
         return new ClusterTemplateDeleteAction();
     }
 
-    public Action<ClusterTemplateTestDto> deleteCluster(String stackTemplateKey) {
+    public Action<ClusterTemplateTestDto, CloudbreakClient> deleteCluster(String stackTemplateKey) {
         return new DeleteClusterFromClusterTemplateAction(stackTemplateKey);
     }
 
-    public Action<ClusterTemplateTestDto> deleteCluster(Class<StackTemplateTestDto> stackTemplateKey) {
+    public Action<ClusterTemplateTestDto, CloudbreakClient> deleteCluster(Class<StackTemplateTestDto> stackTemplateKey) {
         return new DeleteClusterFromClusterTemplateAction(stackTemplateKey);
     }
 
-    public Action<ClusterTemplateTestDto> launchCluster(String stackTemplateKey) {
+    public Action<ClusterTemplateTestDto, CloudbreakClient> launchCluster(String stackTemplateKey) {
         return new LaunchClusterFromClusterTemplateAction(stackTemplateKey);
     }
 
-    public Action<ClusterTemplateTestDto> launchCluster(Class<StackTemplateTestDto> stackTemplateKey) {
+    public Action<ClusterTemplateTestDto, CloudbreakClient> launchCluster(Class<StackTemplateTestDto> stackTemplateKey) {
         return new LaunchClusterFromClusterTemplateAction(stackTemplateKey);
     }
 

@@ -4,6 +4,8 @@ package com.sequenceiq.it.cloudbreak.util.wait;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.ws.rs.NotFoundException;
@@ -17,6 +19,9 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.it.cloudbreak.FreeIPAClient;
 import com.sequenceiq.it.cloudbreak.util.WaitResult;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 
@@ -26,6 +31,9 @@ public class WaitUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(WaitUtil.class);
 
     private static final int MAX_RETRY = 1800;
+
+    private static final com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status FREE_IPA_DELETE_COMPLETED =
+            com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED;
 
     @Value("${integrationtest.testsuite.pollingInterval:1000}")
     private long pollingInterval;
@@ -97,6 +105,46 @@ public class WaitUtil {
         return waitResult;
     }
 
+    private WaitResult waitForStatuses(FreeIPAClient freeIPAClient, String environmentCrn,
+            com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status desiredStatus) {
+        WaitResult waitResult = WaitResult.SUCCESSFUL;
+        com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status currentStatus =
+                com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.CREATE_IN_PROGRESS;
+
+        int retryCount = 0;
+        while (currentStatus != desiredStatus && !checkFailedStatuses(currentStatus) && retryCount < MAX_RETRY) {
+            LOGGER.info("Waiting for status(es) {}, stack id: {}, current status(es) {} ...", desiredStatus, environmentCrn, currentStatus);
+
+            sleep();
+            FreeIpaV1Endpoint freeIpaV1Endpoint = freeIPAClient.getFreeIpaClient().getFreeIpaV1Endpoint();
+            try {
+                Optional<com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status> statusResult =
+                        Optional.ofNullable(freeIpaV1Endpoint.describe(environmentCrn).getStatus());
+                com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status currStatus = FREE_IPA_DELETE_COMPLETED;
+                if (statusResult.isPresent()) {
+                    currStatus = statusResult.get();
+                }
+                currentStatus = currStatus;
+            } catch (NotFoundException notFoundException) {
+                LOGGER.info("Stack not found: {}", environmentCrn);
+                currentStatus = FREE_IPA_DELETE_COMPLETED;
+                break;
+            }
+            retryCount++;
+        }
+
+        if (currentStatus.name().contains("FAILED") && FREE_IPA_DELETE_COMPLETED != desiredStatus && FREE_IPA_DELETE_COMPLETED == currentStatus) {
+            waitResult = WaitResult.FAILED;
+            LOGGER.info("Desired status(es) are {} for {} but status(es) are {}", desiredStatus, environmentCrn, currentStatus);
+        } else if (retryCount == MAX_RETRY) {
+            waitResult = WaitResult.TIMEOUT;
+            LOGGER.info("Timeout: Desired tatus(es) are {} for {} but status(es) are {}", desiredStatus, environmentCrn, currentStatus);
+        } else {
+            LOGGER.info("{} are in desired status(es) {}", environmentCrn, currentStatus);
+        }
+        return waitResult;
+    }
+
     private void sleep() {
         try {
             Thread.sleep(pollingInterval);
@@ -113,6 +161,10 @@ public class WaitUtil {
         return currentStatus.name().contains("FAILED") || currentStatus == DELETE_COMPLETED;
     }
 
+    private boolean checkFailedStatuses(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status currentStatus) {
+        return currentStatus.name().contains("FAILED") || currentStatus == com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED;
+    }
+
     private boolean hasNoExpectedFailure(Status currentStatuses, Status desiredStatuses) {
         return hasNoExpectedStatus(currentStatuses, desiredStatuses);
     }
@@ -123,5 +175,32 @@ public class WaitUtil {
 
     private boolean hasNoExpectedStatus(Status currentStatus, Status desiredStatus) {
         return DELETE_COMPLETED != desiredStatus && DELETE_COMPLETED == currentStatus;
+    }
+
+    public Map<String, String> waitAndCheckStatuses(FreeIPAClient freeIPAClient, String name,
+            com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status desiredStatus, long pollingInterval) {
+        Map<String, String> errors = new HashMap<>();
+        WaitResult waitResult = WaitResult.SUCCESSFUL;
+        for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
+            waitResult = waitForStatuses(freeIPAClient, name, desiredStatus);
+        }
+        if (waitResult == WaitResult.FAILED) {
+            StringBuilder builder = new StringBuilder("The stack has failed: ").append(System.lineSeparator());
+            DescribeFreeIpaResponse freeIpaResponse = freeIPAClient.getFreeIpaClient().getFreeIpaV1Endpoint()
+                    .describe(name);
+            if (freeIpaResponse != null && freeIpaResponse.getStatus() != null) {
+                builder.append("statusReason: ").append(freeIpaResponse.getStatusReason());
+            }
+            throw new RuntimeException(builder.toString());
+        } else if (waitResult == WaitResult.TIMEOUT) {
+            throw new RuntimeException("Timeout happened");
+        } else if (com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED != desiredStatus) {
+            DescribeFreeIpaResponse freeIpaResponse = freeIPAClient.getFreeIpaClient().getFreeIpaV1Endpoint()
+                    .describe(name);
+            if (freeIpaResponse != null) {
+                    errors = Map.of("status", freeIpaResponse.getStatus().name());
+            }
+        }
+        return errors;
     }
 }

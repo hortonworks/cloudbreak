@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.assertion.util;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.dto.securityrule.SecurityRulesTestDto;
 
@@ -11,7 +12,7 @@ public class SecurityRulesTestAssertion {
     private SecurityRulesTestAssertion() {
     }
 
-    public static Assertion<SecurityRulesTestDto> coreIsNotEmpty() {
+    public static Assertion<SecurityRulesTestDto, CloudbreakClient> coreIsNotEmpty() {
         return (testContext, entity, cloudbreakClient) -> {
             assertNotNull(entity.getResponse().getCore());
             assertFalse(entity.getResponse().getCore().isEmpty());
@@ -19,7 +20,7 @@ public class SecurityRulesTestAssertion {
         };
     }
 
-    public static Assertion<SecurityRulesTestDto> gatewayIsNotEmpty() {
+    public static Assertion<SecurityRulesTestDto, CloudbreakClient> gatewayIsNotEmpty() {
         return (testContext, entity, cloudbreakClient) -> {
             assertNotNull(entity.getResponse().getGateway());
             assertFalse(entity.getResponse().getGateway().isEmpty());

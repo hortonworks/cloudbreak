@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.audit.AuditTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class AuditListZipAction implements Action<AuditTestDto> {
+public class AuditListZipAction implements Action<AuditTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditListZipAction.class);
 

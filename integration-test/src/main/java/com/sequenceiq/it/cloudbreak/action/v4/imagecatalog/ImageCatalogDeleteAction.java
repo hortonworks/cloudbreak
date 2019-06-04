@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class ImageCatalogDeleteAction implements Action<ImageCatalogTestDto> {
+public class ImageCatalogDeleteAction implements Action<ImageCatalogTestDto, CloudbreakClient> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogDeleteAction.class);
 
     @Override

@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class StackGetAction implements Action<StackTestDto> {
+public class StackGetAction implements Action<StackTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackGetAction.class);
 

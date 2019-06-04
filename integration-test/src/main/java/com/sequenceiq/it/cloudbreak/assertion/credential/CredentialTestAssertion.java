@@ -4,6 +4,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.credentials.responses.CredentialV4Response;
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 
@@ -13,7 +14,7 @@ public class CredentialTestAssertion {
 
     }
 
-    public static Assertion<CredentialTestDto> validateModifcation(String modifiedDescription) {
+    public static Assertion<CredentialTestDto, CloudbreakClient> validateModifcation(String modifiedDescription) {
         return (testContext, entity, cloudbreakClient) -> {
             Set<CredentialV4Response> collect = entity.getResponses()
                     .stream()
@@ -29,7 +30,7 @@ public class CredentialTestAssertion {
         };
     }
 
-    public static Assertion<CredentialTestDto> listContains(String credentialName, Integer expectedCount) {
+    public static Assertion<CredentialTestDto, CloudbreakClient> listContains(String credentialName, Integer expectedCount) {
         return (testContext, entity, cloudbreakClient) -> {
             boolean countCorrect = entity.getResponses()
                     .stream()

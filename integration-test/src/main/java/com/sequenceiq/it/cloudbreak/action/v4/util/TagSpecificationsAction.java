@@ -8,7 +8,7 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.TagSpecificationsTestDto;
 
-public class TagSpecificationsAction implements Action<TagSpecificationsTestDto> {
+public class TagSpecificationsAction implements Action<TagSpecificationsTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TagSpecificationsAction.class);
 

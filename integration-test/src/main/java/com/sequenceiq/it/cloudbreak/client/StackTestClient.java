@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.client;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.ChangeImageAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackBlueprintRequestAction;
@@ -22,7 +23,7 @@ import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 @Service
 public class StackTestClient {
 
-    public Action<StackTestDto> nodeUnhealthyV4(String hostgroup, int nodeCount) {
+    public Action<StackTestDto, CloudbreakClient> nodeUnhealthyV4(String hostgroup, int nodeCount) {
         return new StackNodeUnhealthyAction(hostgroup, nodeCount);
     }
 
@@ -30,51 +31,51 @@ public class StackTestClient {
         return new StackScalePostAction();
     }
 
-    public Action<StackTestDto> createV4() {
+    public Action<StackTestDto, CloudbreakClient> createV4() {
         return new StackCreateAction();
     }
 
-    public Action<StackTestDto> deleteV4() {
+    public Action<StackTestDto, CloudbreakClient> deleteV4() {
         return new StackDeleteAction();
     }
 
-    public Action<StackTestDto> blueprintRequestV4() {
+    public Action<StackTestDto, CloudbreakClient> blueprintRequestV4() {
         return new StackBlueprintRequestAction();
     }
 
-    public Action<StackTestDto> getV4() {
+    public Action<StackTestDto, CloudbreakClient> getV4() {
         return new StackGetAction();
     }
 
-    public Action<StackTestDto> modifyAmbariPasswordV4() {
+    public Action<StackTestDto, CloudbreakClient> modifyAmbariPasswordV4() {
         return new StackModifyAmbariPasswordAction();
     }
 
-    public Action<StackTestDto> refreshV4() {
+    public Action<StackTestDto, CloudbreakClient> refreshV4() {
         return new StackRefreshAction();
     }
 
-    public Action<StackTestDto> requestV4() {
+    public Action<StackTestDto, CloudbreakClient> requestV4() {
         return new StackRequestAction();
     }
 
-    public Action<StackTestDto> startV4() {
+    public Action<StackTestDto, CloudbreakClient> startV4() {
         return new StackStartAction();
     }
 
-    public Action<StackTestDto> stopV4() {
+    public Action<StackTestDto, CloudbreakClient> stopV4() {
         return new StackStopAction();
     }
 
-    public Action<StackTestDto> syncV4() {
+    public Action<StackTestDto, CloudbreakClient> syncV4() {
         return new StackSyncAction();
     }
 
-    public Action<StackTestDto> deleteInstanceV4() {
+    public Action<StackTestDto, CloudbreakClient> deleteInstanceV4() {
         return new StackDeleteInstanceAction();
     }
 
-    public Action<StackTestDto> changeImage() {
+    public Action<StackTestDto, CloudbreakClient> changeImage() {
         return new ChangeImageAction();
     }
 

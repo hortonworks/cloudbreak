@@ -8,7 +8,7 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.VersionCheckTestDto;
 
-public class VersionCheckAction implements Action<VersionCheckTestDto> {
+public class VersionCheckAction implements Action<VersionCheckTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VersionCheckAction.class);
 

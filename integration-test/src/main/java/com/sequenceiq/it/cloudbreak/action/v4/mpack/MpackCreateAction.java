@@ -9,7 +9,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.mpack.MPackTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class MpackCreateAction implements Action<MPackTestDto> {
+public class MpackCreateAction implements Action<MPackTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MpackCreateAction.class);
 

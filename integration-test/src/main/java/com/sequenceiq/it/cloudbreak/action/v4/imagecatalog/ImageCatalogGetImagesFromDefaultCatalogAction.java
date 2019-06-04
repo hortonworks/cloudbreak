@@ -10,7 +10,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class ImageCatalogGetImagesFromDefaultCatalogAction implements Action<ImageCatalogTestDto> {
+public class ImageCatalogGetImagesFromDefaultCatalogAction implements Action<ImageCatalogTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogGetImagesFromDefaultCatalogAction.class);
 

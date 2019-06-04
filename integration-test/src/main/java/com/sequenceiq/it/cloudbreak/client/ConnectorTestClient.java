@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.client;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v4.connector.PlatformAccessConfigsAction;
 import com.sequenceiq.it.cloudbreak.action.v4.connector.PlatformDisksAction;
@@ -27,43 +28,43 @@ import com.sequenceiq.it.cloudbreak.dto.connector.PlatformVmTypesTestDto;
 @Service
 public class ConnectorTestClient {
 
-    public Action<PlatformAccessConfigsTestDto> accessConfigs() {
+    public Action<PlatformAccessConfigsTestDto, CloudbreakClient> accessConfigs() {
         return new PlatformAccessConfigsAction();
     }
 
-    public Action<PlatformDiskTestDto> disks() {
+    public Action<PlatformDiskTestDto, CloudbreakClient> disks() {
         return new PlatformDisksAction();
     }
 
-    public Action<PlatformEncryptionKeysTestDto> encryptionKeys() {
+    public Action<PlatformEncryptionKeysTestDto, CloudbreakClient> encryptionKeys() {
         return new PlatformEncryptionKeysAction();
     }
 
-    public Action<PlatformIpPoolsTestDto> ipPools() {
+    public Action<PlatformIpPoolsTestDto, CloudbreakClient> ipPools() {
         return new PlatformIpPoolsAction();
     }
 
-    public Action<PlatformNetworksTestDto> networks() {
+    public Action<PlatformNetworksTestDto, CloudbreakClient> networks() {
         return new PlatformNetworksAction();
     }
 
-    public Action<PlatformGatewaysTestDto> gateways() {
+    public Action<PlatformGatewaysTestDto, CloudbreakClient> gateways() {
         return new PlatformGatewaysAction();
     }
 
-    public Action<PlatformRegionTestDto> regions() {
+    public Action<PlatformRegionTestDto, CloudbreakClient> regions() {
         return new PlatformRegionsAction();
     }
 
-    public Action<PlatformSecurityGroupsTestDto> securityGroups() {
+    public Action<PlatformSecurityGroupsTestDto, CloudbreakClient> securityGroups() {
         return new PlatformSecurityGroupsAction();
     }
 
-    public Action<PlatformSshKeysTestDto> sshKeys() {
+    public Action<PlatformSshKeysTestDto, CloudbreakClient> sshKeys() {
         return new PlatformSshKeysAction();
     }
 
-    public Action<PlatformVmTypesTestDto> vmTypes() {
+    public Action<PlatformVmTypesTestDto, CloudbreakClient> vmTypes() {
         return new PlatformVmTypesAction();
     }
 

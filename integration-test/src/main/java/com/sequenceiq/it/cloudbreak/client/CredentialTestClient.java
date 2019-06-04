@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.client;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v4.credential.CredentialCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.credential.CredentialCreateIfNotExistAction;
@@ -14,27 +15,27 @@ import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 @Service
 public class CredentialTestClient {
 
-    public Action<CredentialTestDto> createV4() {
+    public Action<CredentialTestDto, CloudbreakClient> createV4() {
         return new CredentialCreateAction();
     }
 
-    public Action<CredentialTestDto> deleteV4() {
+    public Action<CredentialTestDto, CloudbreakClient> deleteV4() {
         return new CredentialDeleteAction();
     }
 
-    public Action<CredentialTestDto> listV4() {
+    public Action<CredentialTestDto, CloudbreakClient> listV4() {
         return new CredentialListAction();
     }
 
-    public Action<CredentialTestDto> createIfNotExistV4() {
+    public Action<CredentialTestDto, CloudbreakClient> createIfNotExistV4() {
         return new CredentialCreateIfNotExistAction();
     }
 
-    public Action<CredentialTestDto> modifyV4() {
+    public Action<CredentialTestDto, CloudbreakClient> modifyV4() {
         return new CredentialModifyAction();
     }
 
-    public Action<CredentialTestDto> getV4() {
+    public Action<CredentialTestDto, CloudbreakClient> getV4() {
         return new CredentialGetAction();
     }
 

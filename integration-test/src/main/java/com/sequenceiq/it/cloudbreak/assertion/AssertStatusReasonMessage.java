@@ -4,7 +4,7 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 
-public class AssertStatusReasonMessage<T extends CloudbreakTestDto> implements Assertion<T> {
+public class AssertStatusReasonMessage<T extends CloudbreakTestDto> implements Assertion<T, CloudbreakClient> {
 
     private String message;
 

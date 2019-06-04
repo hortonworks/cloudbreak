@@ -13,7 +13,7 @@ import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.ClusterTemplateUtil;
 
-public class ClusterTemplateListAction implements Action<ClusterTemplateTestDto> {
+public class ClusterTemplateListAction implements Action<ClusterTemplateTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTemplateListAction.class);
 

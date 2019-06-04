@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class KerberosDeleteAction implements Action<KerberosTestDto> {
+public class KerberosDeleteAction implements Action<KerberosTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KerberosDeleteAction.class);
 

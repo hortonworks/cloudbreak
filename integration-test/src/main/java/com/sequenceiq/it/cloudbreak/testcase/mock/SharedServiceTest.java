@@ -335,16 +335,16 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         return stack;
     }
 
-    private List<Assertion<StackTestDto>> cloudStorageParametersHasPassedToAmbariBlueprint() {
-        List<Assertion<StackTestDto>> verifications = new LinkedList<>();
+    private List<Assertion<StackTestDto, CloudbreakClient>> cloudStorageParametersHasPassedToAmbariBlueprint() {
+        List<Assertion<StackTestDto, CloudbreakClient>> verifications = new LinkedList<>();
         verifications.add(blueprintPostToAmbariContains(cloudStorage().getAdls().getAccountName()));
         verifications.add(blueprintPostToAmbariContains(cloudStorage().getAdls().getClientId()));
         verifications.add(blueprintPostToAmbariContains(cloudStorage().getAdls().getCredential()));
         return verifications;
     }
 
-    private List<Assertion<StackTestDto>> ldapParametersHasPassedToAmbariBlueprint(String ldapName) {
-        List<Assertion<StackTestDto>> verifications = new LinkedList<>();
+    private List<Assertion<StackTestDto, CloudbreakClient>> ldapParametersHasPassedToAmbariBlueprint(String ldapName) {
+        List<Assertion<StackTestDto, CloudbreakClient>> verifications = new LinkedList<>();
         verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getUserDnPattern()));
         verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getBindPassword()));
         verifications.add(blueprintPostToAmbariContains(ldapRequest(ldapName).getBindDn()));
@@ -356,8 +356,8 @@ public class SharedServiceTest extends AbstractIntegrationTest {
         return verifications;
     }
 
-    private List<Assertion<StackTestDto>> rdsParametersHasPassedToAmbariBlueprint(DatabaseV4Request hive, DatabaseV4Request ranger) {
-        List<Assertion<StackTestDto>> verifications = new LinkedList<>();
+    private List<Assertion<StackTestDto, CloudbreakClient>> rdsParametersHasPassedToAmbariBlueprint(DatabaseV4Request hive, DatabaseV4Request ranger) {
+        List<Assertion<StackTestDto, CloudbreakClient>> verifications = new LinkedList<>();
         verifications.add(blueprintPostToAmbariContains("ranger_privelege_user_jdbc_url"));
         verifications.add(blueprintPostToAmbariContains(ranger.getConnectionURL()));
         verifications.add(blueprintPostToAmbariContains("javax.jdo.option.ConnectionURL"));

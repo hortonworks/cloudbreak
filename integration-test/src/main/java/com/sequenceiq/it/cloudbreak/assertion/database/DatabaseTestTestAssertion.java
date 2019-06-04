@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.assertion.database;
 
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestTestDto;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 
@@ -9,7 +10,7 @@ public class DatabaseTestTestAssertion {
 
     }
 
-    public static Assertion<DatabaseTestTestDto> validConnectionTest() {
+    public static Assertion<DatabaseTestTestDto, CloudbreakClient> validConnectionTest() {
         return (testContext, entity, cloudbreakClient) -> {
             if (!entity.getResponse().getResult().contains("access is denied")) {
                 throw new IllegalArgumentException("Database test connection result is not as expected.");

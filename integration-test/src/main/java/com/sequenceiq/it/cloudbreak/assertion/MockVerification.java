@@ -22,7 +22,7 @@ import com.sequenceiq.it.verification.Call;
 
 import spark.Response;
 
-public class MockVerification implements Assertion<StackTestDto> {
+public class MockVerification implements Assertion<StackTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockVerification.class);
 

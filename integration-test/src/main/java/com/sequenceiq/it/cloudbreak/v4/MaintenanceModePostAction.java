@@ -12,7 +12,7 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 
-public class MaintenanceModePostAction implements Action<StackTestDto> {
+public class MaintenanceModePostAction implements Action<StackTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MaintenanceModePostAction.class);
 

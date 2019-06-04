@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class ClusterTemplateGetAction implements Action<ClusterTemplateTestDto> {
+public class ClusterTemplateGetAction implements Action<ClusterTemplateTestDto, CloudbreakClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTemplateGetAction.class);
 
