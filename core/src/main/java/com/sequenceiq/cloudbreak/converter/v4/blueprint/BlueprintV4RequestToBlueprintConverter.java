@@ -7,6 +7,8 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -33,6 +35,8 @@ import com.sequenceiq.cloudbreak.json.JsonHelper;
 public class BlueprintV4RequestToBlueprintConverter
         extends AbstractConversionServiceAwareConverter<BlueprintV4Request, Blueprint> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintV4RequestToBlueprintConverter.class);
+
     private static final String JSON_PARSE_EXCEPTION_MESSAGE = "Invalid blueprint: Failed to parse JSON.";
 
     @Inject
@@ -57,7 +61,7 @@ public class BlueprintV4RequestToBlueprintConverter
                 jsonHelper.createJsonFromString(urlText);
                 blueprint.setBlueprintText(urlText);
             } catch (IOException | CloudbreakApiException e) {
-                throw new BadRequestException(String.format("Cannot download ambari validation from: %s", sourceUrl), e);
+                throw new BadRequestException(String.format("Cannot download blueprint from: %s", sourceUrl), e);
             }
         } else if (!CollectionUtils.isEmpty(json.getServices()) && !Strings.isNullOrEmpty(json.getPlatform())) {
             GeneratedCmTemplate generatedCmTemplate =
@@ -66,8 +70,15 @@ public class BlueprintV4RequestToBlueprintConverter
         } else {
             blueprint.setBlueprintText(json.getBlueprint());
         }
+
         try {
             JsonNode blueprintJson = JsonUtil.readTree(blueprint.getBlueprintText());
+            if (blueprintUtils.isBuiltinBlueprint(blueprintJson)) {
+                LOGGER.info("Built-in blueprint format detected, applying embedded \"blueprint\" content");
+                blueprintJson = blueprintUtils.getBuiltinBlueprintContent(blueprintJson);
+                blueprint.setBlueprintText(JsonUtil.writeValueAsString(blueprintJson));
+            }
+
             if (blueprintUtils.isAmbariBlueprint(blueprintJson)) {
                 validateAmbariBlueprint(blueprintJson);
                 validateAmbariBlueprintStackVersion(blueprintJson);
@@ -75,11 +86,13 @@ public class BlueprintV4RequestToBlueprintConverter
                 blueprint.setHostGroupCount(blueprintUtils.countHostGroups(blueprintJson));
                 blueprint.setStackType(blueprintUtils.getBlueprintStackName(blueprintJson));
                 blueprint.setStackVersion(blueprintUtils.getBlueprintStackVersion(blueprintJson));
-            } else {
+            } else if (blueprintUtils.isClouderaManagerClusterTemplate(blueprintJson)) {
                 blueprint.setStackName(blueprintUtils.getCDHDisplayName(blueprintJson));
                 blueprint.setHostGroupCount(blueprintUtils.countHostTemplates(blueprintJson));
                 blueprint.setStackVersion(blueprintUtils.getCDHStackVersion(blueprintJson));
                 blueprint.setStackType("CDH");
+            } else {
+                throw new BadRequestException("Failed to determine blueprint format");
             }
         } catch (IOException e) {
             throw new BadRequestException(JSON_PARSE_EXCEPTION_MESSAGE, e);

@@ -1,0 +1,10 @@
+{
+  "tags": {
+    "shared_services_ready": true
+  },
+  "description": "desc",
+  "blueprint": {
+    "cdhVersion": "7.0.0",
+    "displayName": "datalake"
+  }
+}

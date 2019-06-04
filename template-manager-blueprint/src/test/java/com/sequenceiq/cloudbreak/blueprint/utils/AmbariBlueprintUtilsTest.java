@@ -147,4 +147,32 @@ public class AmbariBlueprintUtilsTest {
     public void testIsValidHostGroupNameWithMaster() {
         assertTrue(underTest.isValidHostGroupName("master"));
     }
+
+    @Test
+    public void builtinBlueprintConsideredBuiltin() throws Exception {
+        String text = FileReaderUtils.readFileFromClasspath("defaults/blueprints/cdp.bp");
+        JsonNode json = new JsonHelper().createJsonFromString(text);
+
+        assertTrue(underTest.isBuiltinBlueprint(json));
+    }
+
+    @Test
+    public void otherBlueprintNotConsideredBuiltin() throws Exception {
+        String text = FileReaderUtils.readFileFromClasspath("blueprints-jackson/test-bp-without-config-block.bp");
+        JsonNode json = new JsonHelper().createJsonFromString(text);
+
+        assertFalse(underTest.isBuiltinBlueprint(json));
+    }
+
+    @Test
+    public void emptyBlueprintIsNotBuiltin() {
+        JsonNode json = new JsonHelper().createJsonFromString("{}");
+        assertFalse(underTest.isBuiltinBlueprint(json));
+    }
+
+    @Test
+    public void blueprintWithEmptyContentIsNotBuiltin() {
+        JsonNode json = new JsonHelper().createJsonFromString("{ \"blueprint\": { } }");
+        assertFalse(underTest.isBuiltinBlueprint(json));
+    }
 }

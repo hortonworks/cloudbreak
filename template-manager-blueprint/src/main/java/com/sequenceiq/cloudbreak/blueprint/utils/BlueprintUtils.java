@@ -24,6 +24,8 @@ public class BlueprintUtils {
 
     public static final String CDH_VERSION_JSON_NODE_TEXT = "cdhVersion";
 
+    private static final String BLUEPRINT_NODE = "blueprint";
+
     @Inject
     private JsonHelper jsonHelper;
 
@@ -73,6 +75,16 @@ public class BlueprintUtils {
 
     public boolean isAmbariBlueprint(JsonNode blueprint) {
         return blueprint.path(CDH_VERSION_JSON_NODE_TEXT).isMissingNode() && blueprint.path(BLUEPRINTS_JSON_NODE_TEXT).isContainerNode();
+    }
+
+    public boolean isBuiltinBlueprint(JsonNode root) {
+        JsonNode blueprint = getBuiltinBlueprintContent(root);
+        return blueprint != null
+                && (isClouderaManagerClusterTemplate(blueprint) || isAmbariBlueprint(blueprint));
+    }
+
+    public JsonNode getBuiltinBlueprintContent(JsonNode root) {
+        return root.get(BLUEPRINT_NODE);
     }
 
     public String getBlueprintName(JsonNode root) {
