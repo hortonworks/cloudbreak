@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v4.blueprint;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConverterTest<BlueprintV4Request> {
 
@@ -96,7 +98,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         request.setUrl(wrongUrl);
 
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage(String.format("Cannot download ambari validation from: %s", wrongUrl));
+        thrown.expectMessage(String.format("Cannot download blueprint from: %s", wrongUrl));
 
         underTest.convert(request);
     }
@@ -246,6 +248,39 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
     public void testWithInvalidUnderscoreInHostgroupName() {
         Blueprint result = underTest.convert(getRequest("blueprint-hostgroup-name-with-underscore.json"));
         assertNotNull(result);
+    }
+
+    @Test
+    public void acceptsBuiltinClouderaManagerTemplate() {
+        BlueprintV4Request request = new BlueprintV4Request();
+        request.setBlueprint(FileReaderUtils.readFileFromClasspathQuietly("defaults/blueprints/cdp-sdx.bp"));
+        Blueprint result = underTest.convert(request);
+        assertNotNull(result);
+        assertEquals("CDH", result.getStackType());
+        assertEquals("7.0.0", result.getStackVersion());
+        assertEquals(2, result.getHostGroupCount());
+        assertNotNull(result.getBlueprintText());
+        assertNotEquals("", result.getBlueprintText());
+    }
+
+    @Test
+    public void rejectsBuiltinWithoutContent() {
+        BlueprintV4Request request = new BlueprintV4Request();
+        request.setBlueprint("{ \"blueprint\": {}");
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Invalid blueprint: Failed to parse JSON.");
+
+        underTest.convert(request);
+    }
+
+    @Test
+    public void rejectsBuiltinWithInvalidContent() {
+        BlueprintV4Request request = new BlueprintV4Request();
+        request.setBlueprint("{ \"blueprint\": { \"cdhVersion\": \"7.0.0\", { } }");
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Invalid blueprint: Failed to parse JSON.");
+
+        underTest.convert(request);
     }
 
     @Override
