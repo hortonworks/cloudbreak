@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.CreateUsersRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SetPasswordRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUsersRequest;
@@ -23,6 +24,8 @@ public class UserV1ControllerTest {
 
     private static final String ACCOUNT_ID = "accountId";
 
+    private static final String USER_CRN = ":crn:altus:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:59cbfafb-999b-4df9-81e2-aa00a88382e9";
+
     @InjectMocks
     private UserV1Controller underTest;
 
@@ -34,6 +37,9 @@ public class UserV1ControllerTest {
 
     @Mock
     private CrnService crnService;
+
+    @Mock
+    private ThreadBasedUserCrnProvider threadBaseUserCrnProvider;
 
     @Test
     void synchronizeUsers() {
@@ -55,14 +61,14 @@ public class UserV1ControllerTest {
 
     @Test
     void setPassword() {
-        String username = "username";
+        when(threadBaseUserCrnProvider.getUserCrn()).thenReturn(USER_CRN);
         String password = "password";
         SetPasswordRequest request = mock(SetPasswordRequest.class);
         when(request.getPassword()).thenReturn(password);
 
-        underTest.setPassword(username, request);
+        underTest.setPassword(request);
 
-        verify(passwordService, times(1)).setPassword(username, password);
+        verify(passwordService, times(1)).setPassword(USER_CRN, password);
     }
 
     @Test

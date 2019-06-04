@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.service.user;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -9,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SetPasswordResponse;
@@ -33,10 +35,14 @@ public class PasswordService {
     @Inject
     private CrnService crnService;
 
-    public SetPasswordResponse setPassword(String username, String password) {
-        String accountId = crnService.getCurrentAccountId();
+    @Inject
+    private GrpcUmsClient umsClient;
 
-        LOGGER.debug("setting password for user {} in account {}", username, accountId);
+    public SetPasswordResponse setPassword(String userCrn, String password) {
+        String accountId = crnService.getCurrentAccountId();
+        String userId = getUserIdFromUserCrn(userCrn);
+
+        LOGGER.debug("setting password for user {} in account {}", userCrn, accountId);
 
         List<Stack> stacks = stackService.getAllByAccountId(accountId);
 
@@ -46,7 +52,7 @@ public class PasswordService {
 
         List<SetPasswordRequest> requests = new ArrayList<>();
         for (Stack stack : stacks) {
-            requests.add(triggerSetPassword(stack, stack.getEnvironmentCrn(), username, password));
+            requests.add(triggerSetPassword(stack, stack.getEnvironmentCrn(), userId, password));
         }
 
         List<String> success = new ArrayList<>();
@@ -57,15 +63,21 @@ public class PasswordService {
                 waitSetPassword(request);
                 success.add(request.getEnvironment());
             } catch (OperationException e) {
-                LOGGER.debug("Failed to set password for user {} in environment {}", username, request.getEnvironment());
+                LOGGER.debug("Failed to set password for user {} in environment {}", userCrn, request.getEnvironment());
                 failure.add(request.getEnvironment());
             } catch (InterruptedException e) {
-                LOGGER.error("Interrupted while setting passwords for user {} in account {}", username, accountId);
+                LOGGER.error("Interrupted while setting passwords for user {} in account {}", userCrn, accountId);
                 throw new OperationException(e);
             }
         }
 
         return new SetPasswordResponse(success, failure);
+    }
+
+    private String getUserIdFromUserCrn(String userCrn) {
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User user = umsClient.getUserDetails(userCrn, userCrn, Optional.empty());
+        // TODO share this code with DISTX-126
+        return user.getEmail().split("@")[0];
     }
 
     private SetPasswordRequest triggerSetPassword(Stack stack, String environment, String username, String password) {

@@ -4,7 +4,6 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -39,10 +38,10 @@ public interface UserV1Endpoint {
     SynchronizeUsersResponse getStatus(@QueryParam("id") String syncId);
 
     @POST
-    @Path("/{username}/password")
+    @Path("/password")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UserOperationDescriptions.SET_PASSWORD, notes = UserNotes.USER_NOTES, produces = ContentType.JSON, nickname = "setPasswordV1")
-    SetPasswordResponse setPassword(@PathParam("username") String username, SetPasswordRequest request);
+    SetPasswordResponse setPassword(SetPasswordRequest request);
 
     @POST
     @Path("create")
