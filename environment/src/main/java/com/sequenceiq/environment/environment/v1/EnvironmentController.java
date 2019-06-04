@@ -6,11 +6,9 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.environment.api.WelcomeResponse;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
@@ -23,6 +21,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.service.EnvironmentCreationService;
+import com.sequenceiq.environment.environment.service.EnvironmentModificationService;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentViewService;
 
@@ -40,14 +39,17 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
+    private final EnvironmentModificationService environmentModificationService;
+
     public EnvironmentController(EnvironmentApiConverter environmentApiConverter, EnvironmentService environmentService,
             EnvironmentCreationService environmentCreationService, EnvironmentViewService environmentViewService,
-            ThreadBasedUserCrnProvider threadBasedUserCrnProvider, AuthenticatedUserService authenticatedUserService) {
+            ThreadBasedUserCrnProvider threadBasedUserCrnProvider, EnvironmentModificationService environmentModificationService) {
         this.environmentApiConverter = environmentApiConverter;
         this.environmentService = environmentService;
         this.environmentCreationService = environmentCreationService;
         this.environmentViewService = environmentViewService;
         this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
+        this.environmentModificationService = environmentModificationService;
     }
 
     @Override
@@ -85,7 +87,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @Override
     public DetailedEnvironmentResponse edit(String environmentName, @NotNull EnvironmentEditRequest request) {
         EnvironmentEditDto editDto = environmentApiConverter.initEditDto(request);
-        return environmentService.edit(environmentName, editDto);
+        EnvironmentDto result = environmentModificationService.edit(environmentName, editDto);
+        return environmentApiConverter.dtoToDetailedResponse(result);
     }
 
     @Override
@@ -96,7 +99,10 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     public DetailedEnvironmentResponse changeCredential(String environmentName, @Valid EnvironmentChangeCredentialRequest request) {
-        throw new NotImplementedException("changing credential is not supported yet");
+        String accountId = threadBasedUserCrnProvider.getAccountId();
+        EnvironmentDto result = environmentModificationService.changeCredential(accountId, environmentName,
+                environmentApiConverter.convertEnvironmentChangeCredentialDto(request));
+        return environmentApiConverter.dtoToDetailedResponse(result);
     }
 
 }
