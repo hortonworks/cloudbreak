@@ -6,6 +6,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,16 +31,18 @@ import org.mockito.stubbing.Answer;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.redbeams.TestData;
+import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
+import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.repository.DatabaseConfigRepository;
 import com.sequenceiq.redbeams.service.crn.CrnService;
+import com.sequenceiq.redbeams.service.drivers.DriverFunctions;
 
 public class DatabaseConfigServiceTest {
 
@@ -57,7 +60,10 @@ public class DatabaseConfigServiceTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Mock
-    private DatabaseConfigRepository databaseConfigRepository;
+    private DatabaseConfigRepository repository;
+
+    @Mock
+    private DriverFunctions driverFunctions;
 
     @Mock
     private Clock clock;
@@ -84,7 +90,7 @@ public class DatabaseConfigServiceTest {
 
     @Test
     public void testFindAll() {
-        when(databaseConfigRepository.findByEnvironmentId("myenv")).thenReturn(Collections.singleton(db));
+        when(repository.findByEnvironmentId("myenv")).thenReturn(Collections.singleton(db));
 
         Set<DatabaseConfig> dbs = underTest.findAll("myenv");
 
@@ -100,14 +106,13 @@ public class DatabaseConfigServiceTest {
         when(clock.getCurrentTimeMillis()).thenReturn(CURRENT_TIME_MILLIS);
         Crn dbCrn = TestData.getTestCrn("database", "name");
         when(crnService.createCrn(configToRegister)).thenReturn(dbCrn);
-        when(databaseConfigRepository.save(configToRegister)).thenReturn(configToRegister);
+        when(repository.save(configToRegister)).thenReturn(configToRegister);
 
         DatabaseConfig createdConfig = underTest.register(configToRegister);
 
         assertEquals(configToRegister, createdConfig);
-        verify(databaseConfigRepository).save(configToRegister);
+        verify(repository).save(configToRegister);
         assertEquals(CURRENT_TIME_MILLIS, createdConfig.getCreationDate().longValue());
-        assertEquals(ResourceStatus.USER_MANAGED, createdConfig.getStatus());
         assertEquals(dbCrn, createdConfig.getResourceCrn());
         assertEquals(dbCrn.getAccountId(), createdConfig.getAccountId());
     }
@@ -115,42 +120,49 @@ public class DatabaseConfigServiceTest {
     @Test
     public void testDeleteRegisteredDatabase() throws TransactionService.TransactionExecutionException {
         DatabaseConfig databaseConfig = getDatabaseConfig(ResourceStatus.USER_MANAGED, DATABASE_NAME);
-        when(databaseConfigRepository.findByEnvironmentIdAndName(ENVIRONMENT_CRN, DATABASE_NAME)).thenReturn(Optional.of(databaseConfig));
+        when(repository.findByEnvironmentIdAndName(ENVIRONMENT_CRN, DATABASE_NAME)).thenReturn(Optional.of(databaseConfig));
         setupTransactionServiceRequired();
 
         underTest.delete(DATABASE_NAME, ENVIRONMENT_CRN);
 
         assertTrue(databaseConfig.isArchived());
-        verify(databaseConfigRepository).save(databaseConfig);
+        verify(repository).save(databaseConfig);
     }
 
     @Test
     public void testDeleteNotFound() {
         thrown.expect(NotFoundException.class);
-        when(databaseConfigRepository.findByEnvironmentIdAndName(ENVIRONMENT_CRN, DATABASE_NAME)).thenReturn(Optional.empty());
+        when(repository.findByEnvironmentIdAndName(ENVIRONMENT_CRN, DATABASE_NAME)).thenReturn(Optional.empty());
 
         underTest.delete(DATABASE_NAME, ENVIRONMENT_CRN);
     }
 
     @Test
     public void testDeleteCreatedDatabase() throws TransactionService.TransactionExecutionException {
-        DatabaseConfig databaseConfig = getDatabaseConfig(ResourceStatus.DEFAULT, DATABASE_NAME);
-        when(databaseConfigRepository.findByEnvironmentIdAndName(ENVIRONMENT_CRN, DATABASE_NAME)).thenReturn(Optional.of(databaseConfig));
+        DatabaseServerConfig server = new DatabaseServerConfig();
+        server.setId(1L);
+        server.setName("myserver");
+
+        DatabaseConfig databaseConfig = getDatabaseConfig(ResourceStatus.SERVICE_MANAGED, DATABASE_NAME);
+        databaseConfig.setServer(server);
+        when(repository.findByEnvironmentIdAndName(ENVIRONMENT_CRN, DATABASE_NAME)).thenReturn(Optional.of(databaseConfig));
         setupTransactionServiceRequired();
 
         underTest.delete(DATABASE_NAME, ENVIRONMENT_CRN);
 
         assertTrue(databaseConfig.isArchived());
-        verify(databaseConfigRepository).save(databaseConfig);
+        verify(repository).save(databaseConfig);
+
+        verify(driverFunctions).execWithDatabaseDriver(eq(server), any());
     }
 
     @Test
     public void testDeleteMultiple() throws TransactionService.TransactionExecutionException {
         Set<DatabaseConfig> databaseConfigs = new HashSet<>();
-        databaseConfigs.add(getDatabaseConfig(ResourceStatus.DEFAULT, DATABASE_NAME));
+        databaseConfigs.add(getDatabaseConfig(ResourceStatus.USER_MANAGED, DATABASE_NAME));
         databaseConfigs.add(getDatabaseConfig(ResourceStatus.USER_MANAGED, DATABASE_NAME2));
         Set<String> databasesToDelete = Set.of(DATABASE_NAME, DATABASE_NAME2);
-        when(databaseConfigRepository.findAllByEnvironmentIdAndNameIn(ENVIRONMENT_CRN, databasesToDelete)).thenReturn(databaseConfigs);
+        when(repository.findAllByEnvironmentIdAndNameIn(ENVIRONMENT_CRN, databasesToDelete)).thenReturn(databaseConfigs);
         setupTransactionServiceRequired();
 
         underTest.delete(databasesToDelete, ENVIRONMENT_CRN);
@@ -162,9 +174,9 @@ public class DatabaseConfigServiceTest {
     public void testDeleteMultipleWhenNotFound() throws TransactionService.TransactionExecutionException {
         thrown.expect(NotFoundException.class);
         thrown.expectMessage(String.format("Database(s) for %s not found", DATABASE_NAME2));
-        DatabaseConfig databaseConfig = getDatabaseConfig(ResourceStatus.DEFAULT, DATABASE_NAME);
+        DatabaseConfig databaseConfig = getDatabaseConfig(ResourceStatus.SERVICE_MANAGED, DATABASE_NAME);
         Set<String> databasesToDelete = Set.of(DATABASE_NAME, DATABASE_NAME2);
-        when(databaseConfigRepository.findAllByEnvironmentIdAndNameIn(ENVIRONMENT_CRN, databasesToDelete)).thenReturn(Set.of(databaseConfig));
+        when(repository.findAllByEnvironmentIdAndNameIn(ENVIRONMENT_CRN, databasesToDelete)).thenReturn(Set.of(databaseConfig));
         setupTransactionServiceRequired();
 
         underTest.delete(databasesToDelete, ENVIRONMENT_CRN);
@@ -179,7 +191,7 @@ public class DatabaseConfigServiceTest {
         DatabaseConfig configToRegister = new DatabaseConfig();
         when(clock.getCurrentTimeMillis()).thenReturn(CURRENT_TIME_MILLIS);
         when(crnService.createCrn(configToRegister)).thenReturn(TestData.getTestCrn("database", "name"));
-        when(databaseConfigRepository.save(configToRegister)).thenThrow(getDataIntegrityException());
+        when(repository.save(configToRegister)).thenThrow(getDataIntegrityException());
 
         underTest.register(configToRegister);
     }
@@ -201,7 +213,7 @@ public class DatabaseConfigServiceTest {
         DatabaseConfig configToRegister = new DatabaseConfig();
         when(clock.getCurrentTimeMillis()).thenReturn(CURRENT_TIME_MILLIS);
         when(crnService.createCrn(configToRegister)).thenReturn(TestData.getTestCrn("database", "name"));
-        when(databaseConfigRepository.save(configToRegister)).thenThrow(new AccessDeniedException("User has no right to access resource"));
+        when(repository.save(configToRegister)).thenThrow(new AccessDeniedException("User has no right to access resource"));
 
         underTest.register(configToRegister);
     }
@@ -212,4 +224,23 @@ public class DatabaseConfigServiceTest {
             return supplier.get();
         });
     }
+
+    @Test
+    public void testGetFound() {
+        when(repository.findByEnvironmentIdAndName("id", db.getName())).thenReturn(Optional.of(db));
+
+        DatabaseConfig foundDb = underTest.get(db.getName(), "id");
+
+        assertEquals(db, foundDb);
+    }
+
+    @Test
+    public void testGetNotFound() {
+        thrown.expect(NotFoundException.class);
+
+        when(repository.findByEnvironmentIdAndName("id", db.getName())).thenReturn(Optional.empty());
+
+        underTest.get(db.getName(), "id");
+    }
+
 }

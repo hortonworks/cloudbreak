@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 
@@ -41,6 +42,7 @@ public class DatabaseServerV4RequestToDatabaseServerConfigConverterTest {
         assertEquals(request.getConnectionPassword(), server.getConnectionPassword());
         assertEquals(request.getConnectorJarUrl(), server.getConnectorJarUrl());
         assertEquals(request.getEnvironmentId(), server.getEnvironmentId());
+        assertEquals(ResourceStatus.USER_MANAGED, server.getResourceStatus());
     }
 
 }

@@ -57,7 +57,6 @@ public class DatabaseConfigToDatabaseV4ResponseConverterTest {
         databaseConfig.setResourceCrn(CRN);
         databaseConfig.setDescription(DESCRIPTION);
         databaseConfig.setCreationDate(CREATION_DATE);
-//        databaseConfig.setStatus(ResourceStatus.USER_MANAGED);
         databaseConfig.setConnectionDriver(CONNECTION_DRIVER);
         databaseConfig.setConnectionUserName("userName");
         databaseConfig.setConnectionPassword("password");
@@ -73,7 +72,6 @@ public class DatabaseConfigToDatabaseV4ResponseConverterTest {
         assertEquals(CRN.toString(), response.getCrn());
         assertEquals(DESCRIPTION, response.getDescription());
         assertEquals(CREATION_DATE, response.getCreationDate().longValue());
-//        assertEquals(ResourceStatus.USER_MANAGED.toString(), response.ge);
         assertEquals(CONNECTION_DRIVER, response.getConnectionDriver());
         assertNotNull(response.getConnectionPassword());
         assertNotNull(response.getConnectionUserName());

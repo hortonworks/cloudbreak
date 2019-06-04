@@ -9,10 +9,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.redbeams.TestData;
+import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 
 public class DatabaseServerConfigTest {
@@ -67,8 +67,8 @@ public class DatabaseServerConfigTest {
         config.setCreationDate(now);
         assertEquals(now, config.getCreationDate().longValue());
 
-        config.setResourceStatus(ResourceStatus.DEFAULT);
-        assertEquals(ResourceStatus.DEFAULT, config.getResourceStatus());
+        config.setResourceStatus(ResourceStatus.SERVICE_MANAGED);
+        assertEquals(ResourceStatus.SERVICE_MANAGED, config.getResourceStatus());
 
         config.setConnectorJarUrl("http://drivers.example.com/postgresql.jar");
         assertEquals("http://drivers.example.com/postgresql.jar", config.getConnectorJarUrl());
