@@ -2,7 +2,6 @@ package com.sequenceiq.distrox.api.v1.distrox.model;
 
 import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupAdjustmentModelDescription;
@@ -23,8 +22,6 @@ public class DistroXScaleV1Request implements JsonEntity {
     @ApiModelProperty(value = InstanceGroupAdjustmentModelDescription.SCALING_ADJUSTMENT, required = true)
     private Integer desiredCount;
 
-    private String name;
-
     public String getGroup() {
         return group;
     }
@@ -39,15 +36,5 @@ public class DistroXScaleV1Request implements JsonEntity {
 
     public void setDesiredCount(Integer desiredCount) {
         this.desiredCount = desiredCount;
-    }
-
-    @JsonIgnore
-    public String getName() {
-        return name;
-    }
-
-    @JsonIgnore
-    public void setName(String name) {
-        this.name = name;
     }
 }
