@@ -1,12 +1,14 @@
 package com.sequenceiq.environment.environment.v1;
 
-import org.springframework.core.convert.ConversionService;
+import static com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto.EnvironmentChangeCredentialDtoBuilder.anEnvironmentChangeCredentialDto;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
@@ -15,6 +17,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
+import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
@@ -31,13 +34,9 @@ public class EnvironmentApiConverter {
 
     private final RegionConverter regionConverter;
 
-    private final ConversionService conversionService;
-
-    public EnvironmentApiConverter(ThreadBasedUserCrnProvider threadBasedUserCrnProvider, RegionConverter regionConverter,
-            ConversionService conversionService) {
+    public EnvironmentApiConverter(ThreadBasedUserCrnProvider threadBasedUserCrnProvider, RegionConverter regionConverter) {
         this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
         this.regionConverter = regionConverter;
-        this.conversionService = conversionService;
     }
 
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
@@ -152,4 +151,11 @@ public class EnvironmentApiConverter {
         NullUtil.ifNotNull(request.getLocation(), location -> builder.withLocation(locationRequestToDto(location)));
         return builder.build();
     }
+
+    public EnvironmentChangeCredentialDto convertEnvironmentChangeCredentialDto(EnvironmentChangeCredentialRequest request) {
+        return anEnvironmentChangeCredentialDto()
+                .withCredentialName(request.getCredential() != null ? request.getCredential().getName() : request.getCredentialName())
+                .build();
+    }
+
 }

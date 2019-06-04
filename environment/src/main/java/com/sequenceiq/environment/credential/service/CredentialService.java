@@ -70,12 +70,8 @@ public class CredentialService extends AbstractCredentialService {
         return repository.findAllByAccountId(accountId, ENABLED_PLATFORMS);
     }
 
-    public Credential get(String accountId, String name) {
-        return repository.findByNameAndAccountId(name, accountId, ENABLED_PLATFORMS).get();
-    }
-
     public Credential getByNameForAccountId(String name, String accountId) {
-        return repository.findByNameAndAccountId(name, accountId, ENABLED_PLATFORMS).get();
+        return repository.findByNameAndAccountId(name, accountId, ENABLED_PLATFORMS).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
     }
 
     public Map<String, String> interactiveLogin(String accountId, Credential credential) {
@@ -113,7 +109,7 @@ public class CredentialService extends AbstractCredentialService {
         return created;
     }
 
-    public CredentialPrerequisitesResponse getPrerequisites(String accountId, String cloudPlatform, String deploymentAddress) {
+    public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, String deploymentAddress) {
         String cloudPlatformUppercased = cloudPlatform.toUpperCase();
         credentialValidator.validateCredentialCloudPlatform(cloudPlatformUppercased);
         return credentialPrerequisiteService.getPrerequisites(cloudPlatformUppercased, deploymentAddress);
@@ -186,4 +182,5 @@ public class CredentialService extends AbstractCredentialService {
                 .build()
                 .toString();
     }
+
 }
