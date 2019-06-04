@@ -31,6 +31,8 @@ public class DatabaseCommonTest {
 
     private static final String POSTGRES_URL_WITHOUT_DATABASE = "jdbc:postgresql://test.eu-west-1.rds.amazonaws.com:5432/";
 
+    private static final String POSTGRES_URL_WITH_POSTGRES_DATABASE = POSTGRES_URL_WITHOUT_DATABASE + "postgres";
+
     private static final String POSTGRES_URL = POSTGRES_URL_WITHOUT_DATABASE + "hivedb";
 
     private static final String POSTGRES_URL_WITH_HYPHENATED_DATABASE_NAME = POSTGRES_URL_WITHOUT_DATABASE + "hive-db-";
@@ -117,12 +119,9 @@ public class DatabaseCommonTest {
 
     @Test
     public void testPostgresNoDatabaseParsing() {
-        JdbcConnectionUrlFields fields = databaseCommon.parseJdbcConnectionUrl(POSTGRES_URL_WITHOUT_DATABASE);
-        assertThat(fields.getVendorDriverId()).isEqualTo("postgresql");
-        assertThat(fields.getHost()).isEqualTo("test.eu-west-1.rds.amazonaws.com");
-        assertThat(fields.getPort()).isEqualTo(5432);
-        assertThat(fields.getHostAndPort()).isEqualTo("test.eu-west-1.rds.amazonaws.com:5432");
-        assertThat(fields.getDatabase().isPresent()).isFalse();
+        thrown.expect(IllegalArgumentException.class);
+
+        databaseCommon.parseJdbcConnectionUrl(POSTGRES_URL_WITHOUT_DATABASE);
     }
 
     @Test
@@ -138,7 +137,7 @@ public class DatabaseCommonTest {
     @Test
     public void testPostgresConnectionUrlWithoutDatabase() {
         String url = databaseCommon.getJdbcConnectionUrl("postgresql", "test.eu-west-1.rds.amazonaws.com", 5432, Optional.empty());
-        assertThat(url).isEqualTo(POSTGRES_URL_WITHOUT_DATABASE);
+        assertThat(url).isEqualTo(POSTGRES_URL_WITH_POSTGRES_DATABASE);
     }
 
     @Test

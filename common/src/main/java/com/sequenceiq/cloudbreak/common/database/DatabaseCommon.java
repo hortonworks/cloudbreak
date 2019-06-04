@@ -61,6 +61,11 @@ public class DatabaseCommon {
         }
         int port = Integer.parseInt(portString);
         Optional<String> database = Optional.ofNullable(matcher.group(DATABASE_GROUP));
+
+        if ("postgresql".equals(vendorDriverId) && !database.isPresent()) {
+            throw new IllegalArgumentException("PostgreSQL connection URLs require a database");
+        }
+
         return new JdbcConnectionUrlFields(vendorDriverId, host, port, database);
     }
 
@@ -75,6 +80,9 @@ public class DatabaseCommon {
                 url = String.format("jdbc:postgresql://%s:%d/", fields.getHost(), fields.getPort());
                 if (fields.getDatabase().isPresent()) {
                     url += fields.getDatabase().get();
+                } else {
+                    // PostgreSQL requires a database for connecting; this is a suitable default
+                    url += "postgres";
                 }
                 break;
             case "mysql":
