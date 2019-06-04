@@ -207,8 +207,8 @@ public class StackService {
     @Value("${info.app.version:}")
     private String cbVersion;
 
-    public Long countAliveByEnvironment(Environment environment) {
-        return stackRepository.countAliveOnesByWorkspaceAndEnvironment(environment.getWorkspace().getId(), environment.getId());
+    public List<String> getNameOfAliveByEnvironment(Environment environment) {
+        return stackRepository.findNamesOfAliveOnesByWorkspaceAndEnvironment(environment.getWorkspace().getId(), environment.getId());
     }
 
     public Set<StackV4Response> retrieveStacksByWorkspaceId(Long workspaceId) {

@@ -267,8 +267,8 @@ public class ClusterService {
         });
     }
 
-    public Long countAliveByEnvironment(Environment environment) {
-        return repository.countAliveOnesByWorkspaceAndEnvironment(environment.getWorkspace().getId(), environment.getId());
+    public List<String> getNameOfAliveByEnvironment(Environment environment) {
+        return repository.getNameOfAliveOnesByWorkspaceAndEnvironment(environment.getWorkspace().getId(), environment.getId());
     }
 
     private void setWorkspace(Cluster cluster, Workspace workspace) {

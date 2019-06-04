@@ -179,10 +179,10 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     Long countStacksWithNoWorkspaceOrCreator();
 
     @CheckPermissionsByWorkspaceId
-    @Query("SELECT COUNT(s) FROM Stack s WHERE s.workspace.id = :workspaceId AND s.environment.id = :environmentId "
+    @Query("SELECT s.name FROM Stack s WHERE s.workspace.id = :workspaceId AND s.environment.id = :environmentId "
             + "AND s.terminated = null "
             + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
-    Long countAliveOnesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("environmentId") Long environmentId);
+    List<String> findNamesOfAliveOnesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("environmentId") Long environmentId);
 
     @DisableCheckPermissions
     @Query("SELECT s.workspace.id FROM Stack s where s.id = :id")

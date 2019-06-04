@@ -77,7 +77,7 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     Set<Cluster> findByKerberosConfigAndEnvironment(@Param("id") Long id, @Param("environmentId") Long environmentId);
 
     @CheckPermissionsByWorkspaceId
-    @Query("SELECT COUNT(c) FROM Cluster c WHERE c.workspace.id = :workspaceId AND c.environment.id = :environmentId "
+    @Query("SELECT name FROM Cluster c WHERE c.workspace.id = :workspaceId AND c.environment.id = :environmentId "
             + "AND c.status != 'DELETE_COMPLETED'")
-    Long countAliveOnesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("environmentId") Long environmentId);
+    List<String> getNameOfAliveOnesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("environmentId") Long environmentId);
 }
