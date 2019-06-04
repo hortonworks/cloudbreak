@@ -51,7 +51,8 @@ public class DatabaseV4Controller implements DatabaseV4Endpoint {
 
     @Override
     public DatabaseV4Response get(String environmentId, String name) {
-        return new DatabaseV4Response();
+        DatabaseConfig databaseConfig = databaseConfigService.get(name, environmentId);
+        return redbeamsConverterUtil.convert(databaseConfig, DatabaseV4Response.class);
     }
 
     @Override

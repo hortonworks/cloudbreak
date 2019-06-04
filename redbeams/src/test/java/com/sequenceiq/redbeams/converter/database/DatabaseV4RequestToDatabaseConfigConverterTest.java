@@ -17,6 +17,7 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseV4Request;
 import com.sequenceiq.redbeams.api.util.DatabaseVendorUtil;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
@@ -80,6 +81,7 @@ public class DatabaseV4RequestToDatabaseConfigConverterTest {
         assertEquals(CONNECTION_USERNAME, databaseConfig.getConnectionUserName().getRaw());
         assertEquals(CONNECTOR_JAR_URL, databaseConfig.getConnectorJarUrl());
         assertEquals(DatabaseVendor.POSTGRES, databaseConfig.getDatabaseVendor());
+        assertEquals(ResourceStatus.USER_MANAGED, databaseConfig.getStatus());
         verify(databaseVendorUtil).getVendorByJdbcUrl(request);
         verify(missingResourceNameGenerator, never()).generateName(any());
     }

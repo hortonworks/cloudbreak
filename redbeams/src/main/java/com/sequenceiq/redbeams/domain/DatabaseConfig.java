@@ -7,7 +7,9 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
+import javax.persistence.JoinColumn;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -15,12 +17,12 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.Where;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.archive.ArchivableResource;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
+import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.converter.CrnConverter;
 
 @Entity
@@ -85,6 +87,10 @@ public class DatabaseConfig implements ArchivableResource {
     @Column(nullable = false, name = "environment_id")
     private String environmentId;
 
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "server_id", nullable = true)
+    private DatabaseServerConfig server;
+
     public Long getId() {
         return id;
     }
@@ -133,10 +139,6 @@ public class DatabaseConfig implements ArchivableResource {
         return status;
     }
 
-    public boolean isUserManaged() {
-        return status == ResourceStatus.USER_MANAGED;
-    }
-
     public String getType() {
         return type;
     }
@@ -155,6 +157,10 @@ public class DatabaseConfig implements ArchivableResource {
 
     public String getEnvironmentId() {
         return environmentId;
+    }
+
+    public DatabaseServerConfig getServer() {
+        return server;
     }
 
     public void setId(Long id) {
@@ -227,5 +233,9 @@ public class DatabaseConfig implements ArchivableResource {
 
     public void setEnvironmentId(String environment) {
         this.environmentId = environment;
+    }
+
+    public void setServer(DatabaseServerConfig server) {
+        this.server = server;
     }
 }

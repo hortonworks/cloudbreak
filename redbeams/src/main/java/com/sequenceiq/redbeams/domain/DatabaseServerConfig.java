@@ -8,6 +8,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -16,16 +17,17 @@ import org.hibernate.annotations.Where;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.archive.ArchivableResource;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.converter.CrnConverter;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Entity
 @Where(clause = "archived = false")
@@ -93,6 +95,9 @@ public class DatabaseServerConfig implements ArchivableResource {
 
     @Column(nullable = false)
     private String environmentId;
+
+    @OneToMany(mappedBy = "server")
+    private Set<DatabaseConfig> databases;
 
     public Long getId() {
         return id;
@@ -256,14 +261,19 @@ public class DatabaseServerConfig implements ArchivableResource {
         this.environmentId = environmentId;
     }
 
+    public Set<DatabaseConfig> getDatabases() {
+        return databases;
+    }
+
     /**
-     * Creates a database with a database name and type from the database server config.
+     * Creates a database based on this database server config.
      *
      * @param databaseName the name of the database
-     * @param type         the type of database
+     * @param type         the type of the database
+     * @param status       the resource status of the database
      * @return a DatabaseConfig
      */
-    public DatabaseConfig createDatabaseConfig(String databaseName, String type) {
+    public DatabaseConfig createDatabaseConfig(String databaseName, String type, ResourceStatus status) {
         DatabaseConfig databaseConfig = new DatabaseConfig();
 
         databaseConfig.setDatabaseVendor(databaseVendor);
@@ -274,10 +284,11 @@ public class DatabaseServerConfig implements ArchivableResource {
         databaseConfig.setConnectionDriver(connectionDriver);
         databaseConfig.setConnectionUserName(connectionUserName.getRaw());
         databaseConfig.setConnectionPassword(connectionPassword.getRaw());
-        databaseConfig.setStatus(ResourceStatus.USER_MANAGED);
+        databaseConfig.setStatus(status);
         databaseConfig.setType(type);
         databaseConfig.setConnectorJarUrl(connectorJarUrl);
         databaseConfig.setEnvironmentId(environmentId);
+        databaseConfig.setServer(this);
 
         return databaseConfig;
     }

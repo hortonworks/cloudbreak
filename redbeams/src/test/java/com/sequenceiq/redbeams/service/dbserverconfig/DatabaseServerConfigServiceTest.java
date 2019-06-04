@@ -80,7 +80,7 @@ public class DatabaseServerConfigServiceTest {
 
         server2 = new DatabaseServerConfig();
         server2.setId(2L);
-        server.setName("myotherserver");
+        server2.setName("myotherserver");
     }
 
     @Test

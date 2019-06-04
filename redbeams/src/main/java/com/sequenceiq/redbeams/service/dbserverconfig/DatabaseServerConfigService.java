@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.repository.DatabaseServerConfigRepository;
@@ -174,7 +175,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
                     createResult.append("created");
 
                     DatabaseConfig newDatabaseConfig =
-                            databaseServerConfig.createDatabaseConfig(databaseName, databaseType);
+                            databaseServerConfig.createDatabaseConfig(databaseName, databaseType, ResourceStatus.SERVICE_MANAGED);
                     databaseConfigService.register(newDatabaseConfig);
 
                 } else {
