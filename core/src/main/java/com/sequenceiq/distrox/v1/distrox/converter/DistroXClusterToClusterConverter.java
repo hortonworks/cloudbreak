@@ -58,7 +58,7 @@ public class DistroXClusterToClusterConverter {
         response.setBlueprintName(source.getBlueprintName());
         response.setUserName(source.getUserName());
         response.setPassword(source.getPassword());
-        response.setProxyConfigCrn(source.getProxy() != null ? getProxyCrnByName(source) : null);
+        response.setProxyConfigCrn(ifNotNullF(source.getProxy(), this::getProxyCrnByName));
         response.setCm(ifNotNullF(source.getCm(), cmConverter::convert));
         response.setCloudStorage(ifNotNullF(source.getCloudStorage(), cloudStorageConverter::convert));
         response.setValidateBlueprint(false);
@@ -68,10 +68,10 @@ public class DistroXClusterToClusterConverter {
         return response;
     }
 
-    private String getProxyCrnByName(DistroXClusterV1Request source) {
+    private String getProxyCrnByName(String proxyName) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
         //TODO use the dedicated endpoint when name and crn will be break down on the API level
-        return proxyConfigDtoService.get(source.getProxy(), accountId, userCrn).getCrn();
+        return proxyConfigDtoService.get(proxyName, accountId, userCrn).getCrn();
     }
 }

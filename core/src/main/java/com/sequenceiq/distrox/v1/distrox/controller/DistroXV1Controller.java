@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -92,7 +93,9 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     public void putScaling(String name, @Valid DistroXScaleV1Request updateRequest) {
-        stackOperation.putScaling(workspaceService.getForCurrentUser().getId(), name, scaleRequestConverter.convert(updateRequest));
+        StackScaleV4Request stackScaleV4Request = scaleRequestConverter.convert(updateRequest);
+        stackScaleV4Request.setStackId(stackOperation.getStackByName(name).getId());
+        stackOperation.putScaling(workspaceService.getForCurrentUser().getId(), name, stackScaleV4Request);
     }
 
     @Override

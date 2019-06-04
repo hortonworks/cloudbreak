@@ -166,4 +166,8 @@ public class StackOperation {
                 .header("content-disposition", String.format("attachment; filename = %s-hosts.ini", stack.getName()))
                 .build();
     }
+
+    public Stack getStackByName(String name) {
+        return stackService.getByNameInWorkspace(name, workspaceService.getForCurrentUser().getId());
+    }
 }
