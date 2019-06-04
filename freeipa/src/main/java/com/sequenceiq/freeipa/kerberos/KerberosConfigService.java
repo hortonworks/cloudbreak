@@ -39,21 +39,21 @@ public class KerberosConfigService extends AbstractArchivistService<KerberosConf
         return kerberosConfigRepository.save(kerberosConfig);
     }
 
-    public KerberosConfig get(String environmentId) {
+    public KerberosConfig get(String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
-        return kerberosConfigRepository.findByAccountIdAndEnvironmentId(accountId, environmentId)
-                .orElseThrow(notFound("KerberosConfig for environment", environmentId));
+        return kerberosConfigRepository.findByAccountIdAndEnvironmentCrn(accountId, environmentCrn)
+                .orElseThrow(notFound("KerberosConfig for environment", environmentCrn));
     }
 
-    public void delete(String environmentId) {
+    public void delete(String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
-        delete(environmentId, accountId);
+        delete(environmentCrn, accountId);
     }
 
-    public void delete(String environmentId, String accountId) {
-        Optional<KerberosConfig> kerberosConfig = kerberosConfigRepository.findByAccountIdAndEnvironmentId(accountId, environmentId);
+    public void delete(String environmentCrn, String accountId) {
+        Optional<KerberosConfig> kerberosConfig = kerberosConfigRepository.findByAccountIdAndEnvironmentCrn(accountId, environmentCrn);
         kerberosConfig.ifPresentOrElse(this::delete, () -> {
-            throw notFound("KerberosConfig for environment", environmentId).get();
+            throw notFound("KerberosConfig for environment", environmentCrn).get();
         });
     }
 
@@ -63,10 +63,10 @@ public class KerberosConfigService extends AbstractArchivistService<KerberosConf
     }
 
     private void checkIfExists(KerberosConfig resource) {
-        kerberosConfigRepository.findByAccountIdAndEnvironmentId(resource.getAccountId(), resource.getEnvironmentId())
+        kerberosConfigRepository.findByAccountIdAndEnvironmentCrn(resource.getAccountId(), resource.getEnvironmentCrn())
                 .ifPresent(kerberosConfig -> {
                     String message = format("KerberosConfig in the [%s] account's [%s] environment is already exists", resource.getAccountId(),
-                            resource.getEnvironmentId());
+                            resource.getEnvironmentCrn());
                     LOGGER.info(message);
                     throw new BadRequestException(message);
                 });

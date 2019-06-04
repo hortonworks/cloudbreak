@@ -19,9 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.entity.Stack;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
+import com.sequenceiq.freeipa.service.FreeIpaFlowManager;
 
 @Service
 public class StackTemplateService {
@@ -29,7 +27,7 @@ public class StackTemplateService {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackTemplateService.class);
 
     @Inject
-    private EventBus eventBus;
+    private FreeIpaFlowManager freeIpaFlowManager;
 
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
@@ -40,7 +38,7 @@ public class StackTemplateService {
                 location, stack.getOwner(), stack.getAccountId());
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         GetPlatformTemplateRequest getPlatformTemplateRequest = new GetPlatformTemplateRequest(cloudContext, cloudCredential);
-        eventBus.notify(getPlatformTemplateRequest.selector(), new Event<>(getPlatformTemplateRequest));
+        freeIpaFlowManager.notify(getPlatformTemplateRequest);
         return getPlatformTemplateRequest;
     }
 

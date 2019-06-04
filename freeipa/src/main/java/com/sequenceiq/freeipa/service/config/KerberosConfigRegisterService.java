@@ -35,7 +35,7 @@ public class KerberosConfigRegisterService extends AbstractConfigRegister {
         InstanceMetaData master = getMasterInstance(stack);
         kerberosConfig.setAdminUrl(master.getDiscoveryFQDN());
         kerberosConfig.setDomain(freeIpa.getDomain());
-        kerberosConfig.setEnvironmentId(stack.getEnvironment());
+        kerberosConfig.setEnvironmentCrn(stack.getEnvironmentCrn());
         kerberosConfig.setName(stack.getName());
         kerberosConfig.setPrincipal(FREEIPA_DEFAULT_ADMIN);
         kerberosConfig.setRealm(freeIpa.getDomain().toUpperCase());
@@ -53,9 +53,9 @@ public class KerberosConfigRegisterService extends AbstractConfigRegister {
     @Override
     public void delete(Stack stack) {
         try {
-            kerberosConfigService.delete(stack.getEnvironment(), stack.getAccountId());
+            kerberosConfigService.delete(stack.getEnvironmentCrn(), stack.getAccountId());
         } catch (NotFoundException e) {
-            LOGGER.info("Kerberos config not exists for environment {}", stack.getEnvironment());
+            LOGGER.info("Kerberos config not exists for environment {}", stack.getEnvironmentCrn());
         }
     }
 }

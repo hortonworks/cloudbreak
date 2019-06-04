@@ -53,7 +53,7 @@ public class LdapConfigRegisterService extends AbstractConfigRegister {
         FreeIpa freeIpa = getFreeIpaService().findByStackId(stackId);
         LdapConfig ldapConfig = new LdapConfig();
         ldapConfig.setName(stack.getName());
-        ldapConfig.setEnvironmentId(stack.getEnvironment());
+        ldapConfig.setEnvironmentCrn(stack.getEnvironmentCrn());
         ldapConfig.setAdminGroup(ADMIN_GROUP);
         String domainComponent = generateDomainComponent(freeIpa);
         ldapConfig.setBindDn(BIND_DN + domainComponent);
@@ -85,9 +85,9 @@ public class LdapConfigRegisterService extends AbstractConfigRegister {
     @Override
     public void delete(Stack stack) {
         try {
-            ldapConfigService.delete(stack.getEnvironment(), stack.getAccountId());
+            ldapConfigService.delete(stack.getEnvironmentCrn(), stack.getAccountId());
         } catch (NotFoundException e) {
-            LOGGER.info("Ldap config not exists for environment {}", stack.getEnvironment());
+            LOGGER.info("Ldap config not exists for environment {}", stack.getEnvironmentCrn());
         }
     }
 }

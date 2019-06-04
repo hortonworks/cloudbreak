@@ -9,5 +9,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 @Transactional(TxType.REQUIRED)
 public interface KerberosConfigRepository extends JpaRepository<KerberosConfig, Long> {
-    Optional<KerberosConfig> findByAccountIdAndEnvironmentId(String accountId, String environmentId);
+    Optional<KerberosConfig> findByAccountIdAndEnvironmentCrn(String accountId, String environmentCrn);
 }

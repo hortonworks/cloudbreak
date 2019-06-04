@@ -66,7 +66,7 @@ public class LdapConfigV1Service {
             config.setName(createLdapConfigRequest.getName());
         }
         config.setDescription(createLdapConfigRequest.getDescription());
-        config.setEnvironmentId(createLdapConfigRequest.getEnvironmentCrn());
+        config.setEnvironmentCrn(createLdapConfigRequest.getEnvironmentCrn());
         config.setBindDn(createLdapConfigRequest.getBindDn());
         config.setBindPassword(createLdapConfigRequest.getBindPassword());
         config.setServerHost(createLdapConfigRequest.getHost());
@@ -109,7 +109,7 @@ public class LdapConfigV1Service {
         describeLdapConfigResponse.setGroupMemberAttribute(config.getGroupMemberAttribute());
         describeLdapConfigResponse.setAdminGroup(config.getAdminGroup());
         describeLdapConfigResponse.setCertificate(config.getCertificate());
-        describeLdapConfigResponse.setEnvironmentCrn(config.getEnvironmentId());
+        describeLdapConfigResponse.setEnvironmentCrn(config.getEnvironmentCrn());
         return describeLdapConfigResponse;
     }
 
@@ -126,7 +126,7 @@ public class LdapConfigV1Service {
     private CreateLdapConfigRequest convertLdapConfigToCreateLdapConfigRequest(LdapConfig source) {
         CreateLdapConfigRequest createLdapConfigRequest = new CreateLdapConfigRequest();
         createLdapConfigRequest.setName(source.getName());
-        createLdapConfigRequest.setEnvironmentCrn(source.getEnvironmentId());
+        createLdapConfigRequest.setEnvironmentCrn(source.getEnvironmentCrn());
         createLdapConfigRequest.setBindDn("fake-user");
         createLdapConfigRequest.setBindPassword("fake-password");
         createLdapConfigRequest.setAdminGroup(source.getAdminGroup());

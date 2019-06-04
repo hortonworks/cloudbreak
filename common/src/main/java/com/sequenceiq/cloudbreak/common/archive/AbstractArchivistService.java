@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.common.archive;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,11 +14,13 @@ public abstract class AbstractArchivistService<T extends ArchivableResource> {
     private Clock clock;
 
     public T delete(T resource) {
+        Map<String, String> mdcContextMap = MDCBuilder.getMdcContextMap();
         MDCBuilder.buildMdcContext(resource);
         resource.setArchived(true);
         resource.setDeletionTimestamp(clock.getCurrentTimeMillis());
         resource.unsetRelationsToEntitiesToBeDeleted();
         repository().save(resource);
+        MDCBuilder.buildMdcContextFromMap(mdcContextMap);
         return resource;
     }
 

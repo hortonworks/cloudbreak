@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 
 @Component
@@ -31,6 +32,26 @@ public class CrnService {
         }
         if (crn != null) {
             return crn.getAccountId();
+        } else {
+            throw new CrnParseException("Can not parse account ID from CRN");
+        }
+    }
+
+    public String getCurrentUserId() {
+        String userCrn = threadBaseUserCrnProvider.getUserCrn();
+        Crn crn = null;
+        try {
+            crn = Crn.fromString(userCrn);
+        } catch (NullPointerException e) {
+            LOGGER.warn("Crn is not set", e);
+            throw new CrnParseException("CRN is not set");
+        }
+        if (crn != null) {
+            if (ResourceType.USER.equals(crn.getResourceType())) {
+                return crn.getResource();
+            } else {
+                return null;
+            }
         } else {
             throw new CrnParseException("Can not parse account ID from CRN");
         }

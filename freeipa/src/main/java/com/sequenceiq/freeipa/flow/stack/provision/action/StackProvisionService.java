@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.OperationException;
-import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
@@ -44,8 +43,6 @@ import com.sequenceiq.freeipa.service.stack.MetadataSetupService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
-import reactor.bus.EventBus;
-
 @Component
 public class StackProvisionService {
 
@@ -59,12 +56,6 @@ public class StackProvisionService {
 
     @Inject
     private ImageService imageService;
-
-    @Inject
-    private ErrorHandlerAwareReactorEventFactory eventFactory;
-
-    @Inject
-    private EventBus eventBus;
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;

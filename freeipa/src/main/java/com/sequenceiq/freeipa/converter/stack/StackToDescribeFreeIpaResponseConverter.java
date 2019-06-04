@@ -38,7 +38,7 @@ public class StackToDescribeFreeIpaResponseConverter {
     public DescribeFreeIpaResponse convert(Stack stack, Image image, FreeIpa freeIpa) {
         DescribeFreeIpaResponse describeFreeIpaResponse = new DescribeFreeIpaResponse();
         describeFreeIpaResponse.setName(stack.getName());
-        describeFreeIpaResponse.setEnvironmentCrn(stack.getEnvironment());
+        describeFreeIpaResponse.setEnvironmentCrn(stack.getEnvironmentCrn());
         describeFreeIpaResponse.setCrn(stack.getResourceCrn());
         describeFreeIpaResponse.setAuthentication(authenticationResponseConverter.convert(stack.getStackAuthentication()));
         Optional.ofNullable(image).ifPresent(i -> describeFreeIpaResponse.setImage(imageSettingsResponseConverter.convert(i)));

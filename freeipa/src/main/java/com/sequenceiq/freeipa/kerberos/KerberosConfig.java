@@ -38,7 +38,7 @@ public class KerberosConfig implements ArchivableResource, AuthResource {
 
     private String accountId;
 
-    private String environmentId;
+    private String environmentCrn;
 
     private boolean archived;
 
@@ -124,12 +124,12 @@ public class KerberosConfig implements ArchivableResource, AuthResource {
         this.accountId = accountId;
     }
 
-    public String getEnvironmentId() {
-        return environmentId;
+    public String getEnvironmentCrn() {
+        return environmentCrn;
     }
 
-    public void setEnvironmentId(String environmentId) {
-        this.environmentId = environmentId;
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 
     public void setName(String name) {

@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"accountid", "environment", "terminated"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"accountid", "environmentcrn", "terminated"}))
 @Where(clause = "terminated = -1")
 public class Stack {
     @Id
@@ -39,7 +39,7 @@ public class Stack {
 
     private String name;
 
-    private String environment;
+    private String environmentCrn;
 
     private String accountId;
 
@@ -247,12 +247,12 @@ public class Stack {
                 .collect(Collectors.toSet());
     }
 
-    public String getEnvironment() {
-        return environment;
+    public String getEnvironmentCrn() {
+        return environmentCrn;
     }
 
-    public void setEnvironment(String environment) {
-        this.environment = environment;
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 
     public String getAccountId() {

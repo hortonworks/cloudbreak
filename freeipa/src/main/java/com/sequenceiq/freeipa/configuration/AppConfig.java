@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -14,11 +15,13 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
 import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorComponentRunner;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.sequenceiq.freeipa.logger.MDCContextFilter;
 import com.sequenceiq.freeipa.runner.ExecutorBasedParallelOrchestratorComponentRunner;
 
 @Configuration
@@ -39,6 +42,9 @@ public class AppConfig {
 
     @Inject
     private List<HostOrchestrator> hostOrchestrators;
+
+    @Inject
+    private ThreadBasedUserCrnProvider threadBaseUserCrnProvider;
 
     @Bean
     @Primary
@@ -76,6 +82,15 @@ public class AppConfig {
         executor.setTaskDecorator(new MDCCleanerTaskDecorator());
         executor.initialize();
         return executor;
+    }
+
+    @Bean
+    public FilterRegistrationBean<MDCContextFilter> mdcContextFilterRegistrationBean() {
+        FilterRegistrationBean<MDCContextFilter> registrationBean = new FilterRegistrationBean<>();
+        MDCContextFilter filter = new MDCContextFilter(threadBaseUserCrnProvider);
+        registrationBean.setFilter(filter);
+        registrationBean.setOrder(Integer.MAX_VALUE);
+        return registrationBean;
     }
 
     private static class MyExitCriteria implements ExitCriteria {

@@ -17,19 +17,19 @@ public interface StackRepository extends JpaRepository<Stack, Long> {
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.id= :id ")
     Optional<Stack> findOneWithLists(@Param("id") Long id);
 
-    @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId and s.environment = :environment and s.name = :name")
-    Optional<Stack> findByAccountIdEnvironmentAndName(
+    @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId and s.environmentCrn = :environmentCrn and s.name = :name")
+    Optional<Stack> findByAccountIdEnvironmentCrnAndName(
             @Param("accountId") String accountId,
-            @Param("environment") String environment,
+            @Param("environmentCrn") String environmentCrn,
             @Param("name") String name);
 
     List<Stack> findByAccountId(String accountId);
 
-    Optional<Stack> findByEnvironmentAndAccountId(String environment, String accountId);
+    Optional<Stack> findByEnvironmentCrnAndAccountId(String environmentCrn, String accountId);
 
-    List<Stack> findAllByEnvironmentAndAccountId(String environment, String accountId);
+    List<Stack> findAllByEnvironmentCrnAndAccountId(String environmentCrn, String accountId);
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig "
-            + "LEFT JOIN FETCH ig.instanceMetaData WHERE s.environment = :environment AND s.accountId = :accountId")
-    Optional<Stack> findByEnvironmentAndAccountIdWithList(@Param("environment") String environment, @Param("accountId") String accountId);
+            + "LEFT JOIN FETCH ig.instanceMetaData WHERE s.environmentCrn = :environmentCrn AND s.accountId = :accountId")
+    Optional<Stack> findByEnvironmentCrnAndAccountIdWithList(@Param("environmentCrn") String environmentCrn, @Param("accountId") String accountId);
 }

@@ -62,9 +62,9 @@ public class CreateFreeIpaRequestToStackConverter {
     @Value("${cb.nginx.port:9443}")
     private Integer nginxPort;
 
-    public Stack convert(CreateFreeIpaRequest source, String accountId) {
+    public Stack convert(CreateFreeIpaRequest source, String accountId, String userId) {
         Stack stack = new Stack();
-        stack.setEnvironment(source.getEnvironmentCrn());
+        stack.setEnvironmentCrn(source.getEnvironmentCrn());
         stack.setAccountId(accountId);
         stack.setName(source.getName());
         stack.setCreated(System.currentTimeMillis());
@@ -79,7 +79,7 @@ public class CreateFreeIpaRequestToStackConverter {
             stack.setNetwork(networkConverter.convert(source.getNetwork()));
         }
         stack.setCredential(credentialConverter.convert(source.getCredential()));
-        stack.setOwner(accountId);
+        stack.setOwner(Optional.of(userId).orElse(accountId));
         return stack;
     }
 
