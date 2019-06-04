@@ -8,6 +8,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -400,11 +401,19 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
 
     @Override
     protected void prepareDeletion(Environment environment) {
-        Long aliveStacks = stackService.countAliveByEnvironment(environment);
-        Long aliveClusters = clusterService.countAliveByEnvironment(environment);
-        if (aliveStacks > 0 || aliveClusters > 0) {
+        List<String> aliveStacks = stackService.getNameOfAliveByEnvironment(environment);
+        if (!aliveStacks.isEmpty()) {
             throw new BadRequestException("Cannot delete environment. "
-                    + "All clusters must be terminated before environment deletion. Alive clusters: " + aliveStacks);
+                    + "All clusters must be terminated before environment deletion. Alive cluster(s): "
+                    + String.join(", ", aliveStacks) + "."
+            );
+        }
+        List<String> aliveClusters = clusterService.getNameOfAliveByEnvironment(environment);
+        if (!aliveClusters.isEmpty()) {
+            throw new BadRequestException("Cannot delete environment. "
+                    + "All clusters must be terminated before environment deletion. One or more clusters are in invalid state after termination: "
+                    + String.join(", ", aliveClusters) + "."
+            );
         }
     }
 

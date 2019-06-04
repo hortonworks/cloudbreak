@@ -396,7 +396,7 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Long countAliveOnesByWorkspaceAndEnvironment(Long workspaceId, Long environmentId) {
+        public List<String> findNamesOfAliveOnesByWorkspaceAndEnvironment(Long workspaceId, Long environmentId) {
             return null;
         }
 
