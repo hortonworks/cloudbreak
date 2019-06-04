@@ -102,8 +102,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
 
     @Override
     public CredentialPrerequisitesResponse getPrerequisitesForCloudPlatform(String platform, String deploymentAddress) {
-        String accountId = threadBasedUserCrnProvider.getAccountId();
-        return credentialService.getPrerequisites(accountId, platform, deploymentAddress);
+        return credentialService.getPrerequisites(platform, deploymentAddress);
     }
 
     @Override
