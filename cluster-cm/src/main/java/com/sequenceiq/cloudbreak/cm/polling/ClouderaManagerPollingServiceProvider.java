@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerServiceStartList
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerStartManagementServiceListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerStartupListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerStopListenerTask;
+import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerStopManagementServiceListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerTemplateInstallChecker;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
@@ -76,6 +77,9 @@ public class ClouderaManagerPollingServiceProvider {
 
     @Inject
     private ClouderaManagerStartManagementServiceListenerTask startManagementServiceListenerTask;
+
+    @Inject
+    private ClouderaManagerStopManagementServiceListenerTask stopManagementServiceListenerTask;
 
     @Inject
     private ClouderaManagerDeleteUnusedCredentialsListenerTask deleteUnusedCredentialsListenerTask;
@@ -137,7 +141,7 @@ public class ClouderaManagerPollingServiceProvider {
 
     public PollingResult stopManagementServicePollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to stop management service. [Server address: {}]", stack.getAmbariIp());
-        return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, startManagementServiceListenerTask);
+        return pollCommandWithListener(stack, apiClient, commandId, TWELVE_HOUR, stopManagementServiceListenerTask);
     }
 
     public PollingResult deleteUnusuedCredentialsPollingService(Stack stack, ApiClient apiClient, BigDecimal commandId) {
