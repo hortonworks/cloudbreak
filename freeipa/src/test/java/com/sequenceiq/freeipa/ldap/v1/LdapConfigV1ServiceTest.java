@@ -119,7 +119,7 @@ public class LdapConfigV1ServiceTest {
         LdapConfig ldapConfig = new LdapConfig();
         ldapConfig.setName(LDAPNAME);
         ldapConfig.setDescription(LDAPDESC);
-        ldapConfig.setEnvironmentId(ENVID);
+        ldapConfig.setEnvironmentCrn(ENVID);
         ldapConfig.setProtocol(LDAP_PROTOCOL);
         ldapConfig.setServerHost(HOST);
         ldapConfig.setServerPort(PORT);
@@ -191,7 +191,7 @@ public class LdapConfigV1ServiceTest {
     private void checkInnerLdapConfig(LdapConfig innerLdapConfig) {
         Assert.assertEquals(LDAPNAME, innerLdapConfig.getName());
         Assert.assertEquals(LDAPDESC, innerLdapConfig.getDescription());
-        Assert.assertEquals(ENVID, innerLdapConfig.getEnvironmentId());
+        Assert.assertEquals(ENVID, innerLdapConfig.getEnvironmentCrn());
         Assert.assertEquals(LDAP_PROTOCOL, innerLdapConfig.getProtocol());
         Assert.assertEquals(HOST, innerLdapConfig.getServerHost());
         Assert.assertEquals(PORT, innerLdapConfig.getServerPort());

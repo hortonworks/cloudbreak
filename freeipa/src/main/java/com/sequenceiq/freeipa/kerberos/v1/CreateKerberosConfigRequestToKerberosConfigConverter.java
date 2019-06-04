@@ -29,7 +29,7 @@ public class CreateKerberosConfigRequestToKerberosConfigConverter {
         }
         kerberos.setName(request.getName());
         kerberos.setDescription(request.getDescription());
-        kerberos.setEnvironmentId(request.getEnvironmentCrn());
+        kerberos.setEnvironmentCrn(request.getEnvironmentCrn());
         return kerberos;
     }
 

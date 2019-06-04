@@ -55,7 +55,7 @@ class LdapConfigRegisterServiceTest {
     @Test
     void testRegister() {
         Stack stack = new Stack();
-        stack.setEnvironment("env");
+        stack.setEnvironmentCrn("env");
         stack.setAccountId("acc");
         stack.setName("name");
         InstanceGroup instanceGroup = new InstanceGroup();
@@ -82,7 +82,7 @@ class LdapConfigRegisterServiceTest {
 
         LdapConfig ldapConfig = ldapConfigArgumentCaptor.getValue();
         assertEquals(ldapConfig.getName(), stack.getName());
-        assertEquals(ldapConfig.getEnvironmentId(), stack.getEnvironment());
+        assertEquals(ldapConfig.getEnvironmentCrn(), stack.getEnvironmentCrn());
         assertEquals(ldapConfig.getAdminGroup(), ADMIN_GROUP);
         String domainComponent = ",dc=testdomain,dc=local";
         assertEquals(ldapConfig.getBindDn(), BIND_DN + domainComponent);
@@ -105,11 +105,11 @@ class LdapConfigRegisterServiceTest {
     @Test
     void testDelete() {
         Stack stack = new Stack();
-        stack.setEnvironment("env");
+        stack.setEnvironmentCrn("env");
         stack.setAccountId("acc");
 
         underTest.delete(stack);
 
-        verify(ldapConfigService).delete(stack.getEnvironment(), stack.getAccountId());
+        verify(ldapConfigService).delete(stack.getEnvironmentCrn(), stack.getAccountId());
     }
 }

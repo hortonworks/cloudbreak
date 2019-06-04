@@ -12,7 +12,7 @@ public class MDCBuilderTest {
 
     @Test
     public void buildSimpleContext() {
-        MDCBuilder.buildMdcContext(null);
+        MDCBuilder.buildMdcContextFromCrn(null);
         assertEquals("undefined", MDC.get(LoggerContextKey.RESOURCE_TYPE.toString()));
         assertEquals("undefined", MDC.get(LoggerContextKey.RESOURCE_ID.toString()));
         assertEquals("undefined", MDC.get(LoggerContextKey.RESOURCE_NAME.toString()));

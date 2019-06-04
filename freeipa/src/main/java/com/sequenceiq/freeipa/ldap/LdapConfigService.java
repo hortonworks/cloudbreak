@@ -42,31 +42,31 @@ public class LdapConfigService extends AbstractArchivistService<LdapConfig> {
         return ldapConfigRepository.save(ldapConfig);
     }
 
-    public LdapConfig get(String environmentId) {
+    public LdapConfig get(String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
-        return ldapConfigRepository.findByAccountIdAndEnvironmentId(accountId, environmentId)
-                .orElseThrow(notFound("LdapConfig for environment", environmentId));
+        return ldapConfigRepository.findByAccountIdAndEnvironmentCrn(accountId, environmentCrn)
+                .orElseThrow(notFound("LdapConfig for environment", environmentCrn));
     }
 
-    public void delete(String environmentId) {
+    public void delete(String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
-        delete(environmentId, accountId);
+        delete(environmentCrn, accountId);
     }
 
-    public void delete(String environmentId, String accountId) {
-        Optional<LdapConfig> ldapConfig = ldapConfigRepository.findByAccountIdAndEnvironmentId(accountId, environmentId);
+    public void delete(String environmentCrn, String accountId) {
+        Optional<LdapConfig> ldapConfig = ldapConfigRepository.findByAccountIdAndEnvironmentCrn(accountId, environmentCrn);
         ldapConfig.ifPresentOrElse(this::delete, () -> {
-            throw notFound("LdapConfig for environment", environmentId).get();
+            throw notFound("LdapConfig for environment", environmentCrn).get();
         });
     }
 
-    public String testConnection(String environmentId, LdapConfig ldapConfig) {
-        if (environmentId == null && ldapConfig == null) {
+    public String testConnection(String environmentCrn, LdapConfig ldapConfig) {
+        if (environmentCrn == null && ldapConfig == null) {
             throw new BadRequestException("Either an environment or an LDAP 'validationRequest' needs to be specified in the request. ");
         }
         try {
-            if (environmentId != null) {
-                ldapConfig = get(environmentId);
+            if (environmentCrn != null) {
+                ldapConfig = get(environmentCrn);
             }
             ldapConfigValidator.validateLdapConnection(ldapConfig);
             return "connected";
@@ -81,10 +81,10 @@ public class LdapConfigService extends AbstractArchivistService<LdapConfig> {
     }
 
     private void checkIfExists(LdapConfig resource) {
-        ldapConfigRepository.findByAccountIdAndEnvironmentId(resource.getAccountId(), resource.getEnvironmentId())
+        ldapConfigRepository.findByAccountIdAndEnvironmentCrn(resource.getAccountId(), resource.getEnvironmentCrn())
                 .ifPresent(kerberosConfig -> {
                     String message = format("LdapConfig in the [%s] account's [%s] environment is already exists", resource.getAccountId(),
-                            resource.getEnvironmentId());
+                            resource.getEnvironmentCrn());
                     LOGGER.info(message);
                     throw new BadRequestException(message);
                 });

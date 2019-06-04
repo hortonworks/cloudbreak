@@ -1,13 +1,11 @@
 package com.sequenceiq.freeipa.service.stack;
 
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -43,10 +41,6 @@ public class FreeIpaCreationService {
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
 
-    @Qualifier("freeipaListeningScheduledExecutorService")
-    @Inject
-    private ExecutorService executorService;
-
     @Inject
     private TlsSecurityService tlsSecurityService;
 
@@ -79,7 +73,8 @@ public class FreeIpaCreationService {
 
     public DescribeFreeIpaResponse launchFreeIpa(CreateFreeIpaRequest request, String accountId) {
         checkIfAlreadyExistsInEnvironment(request, accountId);
-        Stack stack = stackConverter.convert(request, accountId);
+        String userId = crnService.getCurrentUserId();
+        Stack stack = stackConverter.convert(request, accountId, userId);
         stack.setResourceCrn(crnService.createCrn(accountId, Crn.ResourceType.FREEIPA));
         GetPlatformTemplateRequest getPlatformTemplateRequest = templateService.triggerGetTemplate(stack);
 

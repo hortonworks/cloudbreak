@@ -15,11 +15,11 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
 import com.sequenceiq.environment.CloudPlatform;
-import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.logger.MDCContextFilter;
-import com.sequenceiq.environment.logger.MDCCleanerTaskDecorator;
+import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 
 @Configuration
 public class AppConfig {

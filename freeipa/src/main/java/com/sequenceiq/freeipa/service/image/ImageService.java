@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -20,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
@@ -46,9 +46,8 @@ public class ImageService {
     @Inject
     private PlatformParameterService platformParameterService;
 
-    @Qualifier("freeipaListeningScheduledExecutorService")
     @Inject
-    private ExecutorService executorService;
+    private AsyncTaskExecutor intermediateBuilderExecutor;
 
     @Inject
     @Qualifier("conversionService")
@@ -67,7 +66,7 @@ public class ImageService {
     private String defaultOs;
 
     public Image create(Stack stack, ImageSettingsRequest imageRequest) {
-        Future<PlatformParameters> platformParametersFuture = executorService.submit(() -> platformParameterService.getPlatformParameters(stack));
+        Future<PlatformParameters> platformParametersFuture = intermediateBuilderExecutor.submit(() -> platformParameterService.getPlatformParameters(stack));
         String userData = createUserData(stack, platformParametersFuture);
         String region = stack.getRegion();
         String platformString = stack.getCloudPlatform().toLowerCase();

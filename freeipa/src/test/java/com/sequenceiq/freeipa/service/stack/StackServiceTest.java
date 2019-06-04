@@ -80,7 +80,7 @@ class StackServiceTest {
 
     @Test
     void getByAccountIdEnvironmentAndNameNotFound() {
-        when(stackRepository.findByAccountIdEnvironmentAndName(ACCOUNT_ID, ENVIRONMENT_CRN, STACK_NAME)).thenReturn(Optional.empty());
+        when(stackRepository.findByAccountIdEnvironmentCrnAndName(ACCOUNT_ID, ENVIRONMENT_CRN, STACK_NAME)).thenReturn(Optional.empty());
         NotFoundException notFoundException = assertThrows(NotFoundException.class,
                 () -> underTest.getByAccountIdEnvironmentAndName(ACCOUNT_ID, ENVIRONMENT_CRN, STACK_NAME));
         assertEquals("Stack [" + STACK_NAME + "] in environment [" + ENVIRONMENT_CRN + "] not found", notFoundException.getMessage());
@@ -88,14 +88,14 @@ class StackServiceTest {
 
     @Test
     void getByAccountIdEnvironmentAndName() {
-        when(stackRepository.findByAccountIdEnvironmentAndName(ACCOUNT_ID, ENVIRONMENT_CRN, STACK_NAME)).thenReturn(Optional.of(stack));
+        when(stackRepository.findByAccountIdEnvironmentCrnAndName(ACCOUNT_ID, ENVIRONMENT_CRN, STACK_NAME)).thenReturn(Optional.of(stack));
         Stack stackByAccountIdEnvironmentAndName = underTest.getByAccountIdEnvironmentAndName(ACCOUNT_ID, ENVIRONMENT_CRN, STACK_NAME);
         assertEquals(stack, stackByAccountIdEnvironmentAndName);
     }
 
     @Test
     void getByEnvironmentCrnNotFound() {
-        when(stackRepository.findByEnvironmentAndAccountId(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.empty());
+        when(stackRepository.findByEnvironmentCrnAndAccountId(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.empty());
         NotFoundException notFoundException =
                 assertThrows(NotFoundException.class, () -> underTest.getByEnvironmentCrnAndAccountId(ENVIRONMENT_CRN, ACCOUNT_ID));
         assertEquals("Stack by environment [" + ENVIRONMENT_CRN + "] not found", notFoundException.getMessage());
@@ -103,7 +103,7 @@ class StackServiceTest {
 
     @Test
     void getByEnvironmentCrn() {
-        when(stackRepository.findByEnvironmentAndAccountId(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.of(stack));
+        when(stackRepository.findByEnvironmentCrnAndAccountId(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.of(stack));
         Stack stackByEnvironmentCrn = underTest.getByEnvironmentCrnAndAccountId(ENVIRONMENT_CRN, ACCOUNT_ID);
         assertEquals(stack, stackByEnvironmentCrn);
     }

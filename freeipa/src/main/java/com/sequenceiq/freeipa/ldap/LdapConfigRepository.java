@@ -9,5 +9,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 @Transactional(TxType.REQUIRED)
 public interface LdapConfigRepository extends JpaRepository<LdapConfig, Long> {
-    Optional<LdapConfig> findByAccountIdAndEnvironmentId(String accountId, String environmentId);
+    Optional<LdapConfig> findByAccountIdAndEnvironmentCrn(String accountId, String environmentCrn);
 }

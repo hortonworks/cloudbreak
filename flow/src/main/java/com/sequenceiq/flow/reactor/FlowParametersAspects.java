@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.FlowConstants;
 
 import reactor.bus.Event;
@@ -35,6 +37,11 @@ public class FlowParametersAspects {
             flowTriggerUserCrn = event.getHeaders().get(FlowConstants.FLOW_TRIGGER_USERCRN);
             if (flowTriggerUserCrn != null) {
                 threadBasedUserCrnProvider.setUserCrn(flowTriggerUserCrn);
+                try {
+                    MDCBuilder.buildMdcContextFromCrn(Crn.fromString(flowTriggerUserCrn));
+                } catch (Exception e) {
+                    LOGGER.debug("Couldn't set MDCContext from crn: [{}]", flowTriggerUserCrn, e);
+                }
                 LOGGER.debug("A Reactor event handler's 'accept' method has been intercepted: {}, FlowTriggerUserCrn set to threadlocal.",
                         proceedingJoinPoint.toShortString());
             }

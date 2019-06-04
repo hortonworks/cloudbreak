@@ -29,21 +29,21 @@ public class StackService {
     }
 
     public Stack getByAccountIdEnvironmentAndName(String accountId, String environment, String name) {
-        return stackRepository.findByAccountIdEnvironmentAndName(accountId, environment, name)
+        return stackRepository.findByAccountIdEnvironmentCrnAndName(accountId, environment, name)
                 .orElseThrow(() -> new NotFoundException(String.format("Stack [%s] in environment [%s] not found", name, environment)));
     }
 
     public Stack getByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
-        return stackRepository.findByEnvironmentAndAccountId(environmentCrn, accountId)
+        return stackRepository.findByEnvironmentCrnAndAccountId(environmentCrn, accountId)
                 .orElseThrow(() -> new NotFoundException(String.format("Stack by environment [%s] not found", environmentCrn)));
     }
 
     public List<Stack> findAllByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
-        return stackRepository.findAllByEnvironmentAndAccountId(environmentCrn, accountId);
+        return stackRepository.findAllByEnvironmentCrnAndAccountId(environmentCrn, accountId);
     }
 
     public Stack getByEnvironmentCrnAndAccountIdWithLists(String environmentCrn, String accountId) {
-        return stackRepository.findByEnvironmentAndAccountIdWithList(environmentCrn, accountId)
+        return stackRepository.findByEnvironmentCrnAndAccountIdWithList(environmentCrn, accountId)
                 .orElseThrow(() -> new NotFoundException(String.format("Stack by environment [%s] not found", environmentCrn)));
     }
 

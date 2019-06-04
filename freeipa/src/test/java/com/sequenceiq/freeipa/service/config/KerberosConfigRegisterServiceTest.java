@@ -43,7 +43,7 @@ class KerberosConfigRegisterServiceTest {
     @Test
     void testRegister() {
         Stack stack = new Stack();
-        stack.setEnvironment("env");
+        stack.setEnvironmentCrn("env");
         stack.setAccountId("acc");
         stack.setName("name");
         InstanceGroup instanceGroup = new InstanceGroup();
@@ -68,7 +68,7 @@ class KerberosConfigRegisterServiceTest {
         assertEquals(stack.getAccountId(), accountIdArgumentCaptor.getValue());
         KerberosConfig kerberosConfig = kerberosConfigArgumentCaptor.getValue();
         assertEquals(stack.getName(), kerberosConfig.getName());
-        assertEquals(stack.getEnvironment(), kerberosConfig.getEnvironmentId());
+        assertEquals(stack.getEnvironmentCrn(), kerberosConfig.getEnvironmentCrn());
         assertEquals(instanceMetaData.getDiscoveryFQDN(), kerberosConfig.getUrl());
         assertEquals(instanceMetaData.getDiscoveryFQDN(), kerberosConfig.getAdminUrl());
         assertEquals(instanceMetaData.getPrivateIp(), kerberosConfig.getNameServers());
@@ -82,11 +82,11 @@ class KerberosConfigRegisterServiceTest {
     @Test
     void delete() {
         Stack stack = new Stack();
-        stack.setEnvironment("env");
+        stack.setEnvironmentCrn("env");
         stack.setAccountId("acc");
 
         underTest.delete(stack);
 
-        verify(kerberosConfigService).delete(stack.getEnvironment(), stack.getAccountId());
+        verify(kerberosConfigService).delete(stack.getEnvironmentCrn(), stack.getAccountId());
     }
 }

@@ -9,6 +9,7 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.slf4j.MDC;
 
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 
 public class MDCBuilder {
@@ -40,6 +41,9 @@ public class MDCBuilder {
             MDC.put(LoggerContextKey.RESOURCE_ID.toString(), getFieldValue(object, "id"));
             MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), getFieldValue(object, "name"));
             MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), object.getClass().getSimpleName().toUpperCase());
+            MDC.put(LoggerContextKey.ENVIRONMENT_CRN.toString(), getFieldValue(object, "environmentCrn"));
+            MDC.put(LoggerContextKey.TENANT.toString(), getFieldValue(object, "accountId"));
+
         }
     }
 
@@ -61,6 +65,13 @@ public class MDCBuilder {
         }
     }
 
+    public static void buildMdcContextFromCrn(Crn crn) {
+        if (crn != null) {
+            MDC.put(LoggerContextKey.TENANT.toString(), crn.getAccountId());
+            MDC.put(LoggerContextKey.USER_ID.toString(), crn.getResource());
+        }
+    }
+
     public static void buildUserMdcContext(String userId, String userName) {
         if (StringUtils.isNotEmpty(userId)) {
             MDC.put(LoggerContextKey.USER_ID.toString(), userId);
@@ -68,6 +79,19 @@ public class MDCBuilder {
         if (StringUtils.isNotEmpty(userName)) {
             MDC.put(LoggerContextKey.USER_NAME.toString(), userName);
         }
+    }
+
+    public static void buildUserAndTenantMdcContext(String userId, String tenant) {
+        if (StringUtils.isNotEmpty(userId)) {
+            MDC.put(LoggerContextKey.USER_ID.toString(), userId);
+        }
+        if (StringUtils.isNotEmpty(tenant)) {
+            MDC.put(LoggerContextKey.TENANT.toString(), tenant);
+        }
+    }
+
+    public static void buildEnvironmentMdcContext(String environmentCrn) {
+        MDC.put(LoggerContextKey.ENVIRONMENT_CRN.toString(), environmentCrn == null ? "undefined" : environmentCrn);
     }
 
     public static void buildWorkspaceMdcContext(Long workspaceId) {

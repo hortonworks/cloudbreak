@@ -62,7 +62,7 @@ public class KerberosConfigV1Service {
         describeKerberosConfigResponse.setDescription(source.getDescription());
         describeKerberosConfigResponse.setCrn(source.getResourceCrn());
         describeKerberosConfigResponse.setVerifyKdcTrust(source.getVerifyKdcTrust());
-        describeKerberosConfigResponse.setEnvironmentCrn(source.getEnvironmentId());
+        describeKerberosConfigResponse.setEnvironmentCrn(source.getEnvironmentCrn());
         return describeKerberosConfigResponse;
     }
 }

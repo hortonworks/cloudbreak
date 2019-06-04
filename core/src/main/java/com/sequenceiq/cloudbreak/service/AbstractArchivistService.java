@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -19,6 +21,7 @@ public abstract class AbstractArchivistService<T extends WorkspaceAwareResource 
 
     @Override
     public T delete(T resource) {
+        Map<String, String> mdcContextMap = MDCBuilder.getMdcContextMap();
         MDCBuilder.buildMdcContext(resource);
         LOGGER.debug("Archiving {} with name: {}", resource().getReadableName(), resource.getName());
         prepareDeletion(resource);
@@ -26,6 +29,7 @@ public abstract class AbstractArchivistService<T extends WorkspaceAwareResource 
         resource.setDeletionTimestamp(clock.getCurrentTimeMillis());
         resource.unsetRelationsToEntitiesToBeDeleted();
         repository().save(resource);
+        MDCBuilder.buildMdcContextFromMap(mdcContextMap);
         return resource;
     }
 }
