@@ -2,18 +2,36 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.cloudera.api.swagger.model.ApiConfig;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
-
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+
+import com.cloudera.api.swagger.model.ApiConfig;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.validation.DatabaseCommon;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public class ClouderaManagerMgmtSetupServiceTest {
+
+    @Spy
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD", justification = "Injected by Mockito")
+    private DatabaseCommon databaseCommon = new DatabaseCommon();
+
+    @InjectMocks
+    private ClouderaManagerMgmtSetupService setupService = new ClouderaManagerMgmtSetupService();
+
+    @Before
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
+    }
+
     @Test
     public void baseRCGNameTest() {
-        ClouderaManagerMgmtSetupService setupService = new ClouderaManagerMgmtSetupService();
-
         assertThat(setupService.getBaseRoleConfigGroupName("test")).isEqualTo("MGMT-test-BASE");
     }
 
@@ -23,8 +41,6 @@ public class ClouderaManagerMgmtSetupServiceTest {
         rdsConfig.setConnectionURL("jdbc:postgresql://somehost.com:5432/dbName");
         rdsConfig.setConnectionUserName("testUser");
         rdsConfig.setConnectionPassword("testPassword");
-
-        ClouderaManagerMgmtSetupService setupService = new ClouderaManagerMgmtSetupService();
 
         List<ApiConfig> configList = setupService.buildApiConfigList("testPrefix", rdsConfig).getItems();
 
