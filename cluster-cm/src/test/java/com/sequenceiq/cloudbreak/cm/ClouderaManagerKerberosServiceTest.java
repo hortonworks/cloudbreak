@@ -61,6 +61,9 @@ public class ClouderaManagerKerberosServiceTest {
     @Mock
     private ClouderaManagerClientFactory clouderaManagerClientFactory;
 
+    @Mock
+    private ClouderaManagerClusterDecomissionService decommissionService;
+
     @InjectMocks
     private ClouderaManagerKerberosService underTest = new ClouderaManagerKerberosService();
 
@@ -84,10 +87,11 @@ public class ClouderaManagerKerberosServiceTest {
         when(clouderaManagerClientFactory.getClouderaManagerResourceApi(client)).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerClientFactory.getClustersResourceApi(client)).thenReturn(clustersResourceApi);
         when(applicationContext.getBean(eq(ClouderaManagerModificationService.class), eq(stack), eq(clientConfig))).thenReturn(modificationService);
+        when(applicationContext.getBean(eq(ClouderaManagerClusterDecomissionService.class), eq(stack), eq(clientConfig))).thenReturn(decommissionService);
     }
 
     @Test
-    public void testSetupKerberosWithAd() throws CloudbreakException, ApiException {
+    public void testSetupKerberosWithAd() throws ApiException {
         KerberosConfig kerberosConfig = spy(new KerberosConfig());
         kerberosConfig.setType(KerberosType.ACTIVE_DIRECTORY);
         kerberosConfig.setRealm("TESTREALM");

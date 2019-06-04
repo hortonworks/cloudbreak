@@ -89,7 +89,6 @@ public class ClouderaManagerLdapServiceTest {
         // WHEN
         underTest.setupLdap(stack, cluster, httpClientConfig);
         // THEN
-        verify(licenseService).beginTrialIfNeeded(stack.getCreator(), apiClient);
         verify(externalUserMappingsResourceApi, never()).createExternalUserMappings(any(ApiExternalUserMappingList.class));
     }
 
@@ -103,7 +102,6 @@ public class ClouderaManagerLdapServiceTest {
         // WHEN
         underTest.setupLdap(stack, cluster, httpClientConfig);
         // THEN
-        verify(licenseService).beginTrialIfNeeded(stack.getCreator(), apiClient);
         ArgumentCaptor<ApiExternalUserMappingList> apiExternalUserMappingListArgumentCaptor = ArgumentCaptor.forClass(ApiExternalUserMappingList.class);
         verify(externalUserMappingsResourceApi).createExternalUserMappings(apiExternalUserMappingListArgumentCaptor.capture());
         ApiExternalUserMapping apiExternalUserMapping = apiExternalUserMappingListArgumentCaptor.getValue().getItems().get(0);
@@ -123,7 +121,6 @@ public class ClouderaManagerLdapServiceTest {
         // WHEN
         underTest.setupLdap(stack, cluster, httpClientConfig);
         // THEN
-        verify(licenseService).beginTrialIfNeeded(stack.getCreator(), apiClient);
         verify(externalUserMappingsResourceApi, never()).createExternalUserMappings(any(ApiExternalUserMappingList.class));
     }
 
