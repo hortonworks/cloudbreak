@@ -19,7 +19,6 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
-import com.sequenceiq.environment.proxy.service.ProxyConfigService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 
 @Service
@@ -29,8 +28,6 @@ public class EnvironmentCreationService {
 
     private final EnvironmentValidatorService validatorService;
 
-    private final ProxyConfigService proxyConfigService;
-
     private final EnvironmentResourceService environmentResourceService;
 
     private final EventSender eventSender;
@@ -38,11 +35,9 @@ public class EnvironmentCreationService {
     private final EnvironmentDtoConverter environmentDtoConverter;
 
     public EnvironmentCreationService(EnvironmentService environmentService, EnvironmentValidatorService validatorService,
-            ProxyConfigService proxyConfigService, EnvironmentResourceService environmentResourceService,
-            EventSender eventSender, EnvironmentDtoConverter environmentDtoConverter) {
+            EnvironmentResourceService environmentResourceService, EventSender eventSender, EnvironmentDtoConverter environmentDtoConverter) {
         this.environmentService = environmentService;
         this.validatorService = validatorService;
-        this.proxyConfigService = proxyConfigService;
         this.environmentResourceService = environmentResourceService;
         this.eventSender = eventSender;
         this.environmentDtoConverter = environmentDtoConverter;
@@ -97,7 +92,7 @@ public class EnvironmentCreationService {
         }
     }
 
-    public String createCrn(@Nonnull String accountId) {
+    private String createCrn(@Nonnull String accountId) {
         return Crn.builder()
                 .setService(Crn.Service.ENVIRONMENTS)
                 .setAccountId(accountId)
@@ -106,4 +101,5 @@ public class EnvironmentCreationService {
                 .build()
                 .toString();
     }
+
 }
