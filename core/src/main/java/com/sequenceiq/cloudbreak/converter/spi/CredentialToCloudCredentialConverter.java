@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
-import com.sequenceiq.cloudbreak.service.credential.CredentialClientService;
+import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 
 @Component
 public class CredentialToCloudCredentialConverter {

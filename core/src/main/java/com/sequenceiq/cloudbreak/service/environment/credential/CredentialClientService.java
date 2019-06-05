@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.credential;
+package com.sequenceiq.cloudbreak.service.environment.credential;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
