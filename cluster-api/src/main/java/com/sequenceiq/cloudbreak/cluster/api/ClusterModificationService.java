@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 public interface ClusterModificationService {
@@ -33,7 +34,7 @@ public interface ClusterModificationService {
 
     void installComponents(Map<String, String> components, String hostname) throws CloudbreakException;
 
-    void regenerateKerberosKeytabs(String hostname) throws CloudbreakException;
+    void regenerateKerberosKeytabs(String hostname, KerberosConfig kerberosConfig) throws CloudbreakException;
 
     void startComponents(Map<String, String> components, String hostname) throws CloudbreakException;
 

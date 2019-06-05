@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.AmbariV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.customcontainer.CustomContainerV4Response;
@@ -84,9 +83,6 @@ public class ClusterV4Response implements JsonEntity {
 
     @ApiModelProperty(ClusterModelDescription.UPTIME)
     private Long uptime;
-
-    @ApiModelProperty
-    private KerberosV4Response kerberos;
 
     @ApiModelProperty(ClusterModelDescription.CLUSTER_EXPOSED_SERVICES)
     private Map<String, Collection<ClusterExposedServiceV4Response>> exposedServices;
@@ -280,14 +276,6 @@ public class ClusterV4Response implements JsonEntity {
 
     public void setCustomContainers(CustomContainerV4Response customContainers) {
         this.customContainers = customContainers;
-    }
-
-    public KerberosV4Response getKerberos() {
-        return kerberos;
-    }
-
-    public void setKerberos(KerberosV4Response kerberos) {
-        this.kerberos = kerberos;
     }
 
     public Map<String, Collection<ClusterExposedServiceV4Response>> getExposedServices() {

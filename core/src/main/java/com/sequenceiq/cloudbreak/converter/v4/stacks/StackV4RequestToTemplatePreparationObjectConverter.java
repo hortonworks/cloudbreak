@@ -24,13 +24,14 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
@@ -39,7 +40,6 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
-import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.AmbariDatalakeConfigProvider;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeConfigApiConnector;
@@ -124,7 +124,6 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
             User user = userService.getOrCreate(cloudbreakUser);
             Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
             Credential credential = getCredential(source);
-            KerberosConfig kerberosConfig = getKerberosConfig(source);
             LdapView ldapConfig = getLdapConfig(source);
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, credential.getAttributes());
             Set<RDSConfig> rdsConfigs = getRdsConfigs(source, workspace);
@@ -149,7 +148,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
                     .withGeneralClusterConfigs(generalClusterConfigs)
                     .withLdapConfig(ldapConfig)
-                    .withKerberosConfig(kerberosConfig);
+                    .withKerberosConfig(getKerberosConfig(source));
 
             SharedServiceV4Request sharedService = source.getSharedService();
             if (sharedService != null && StringUtils.isNotBlank(sharedService.getDatalakeName())) {
@@ -225,11 +224,6 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
     }
 
     private KerberosConfig getKerberosConfig(StackV4Request source) {
-        KerberosConfig kerberosConfig = null;
-        if (StringUtils.isNotBlank(source.getCluster().getKerberosName())) {
-            kerberosConfig = kerberosConfigService.getByNameForWorkspaceId(source.getCluster().getKerberosName(),
-                    restRequestThreadLocalService.getRequestedWorkspaceId());
-        }
-        return kerberosConfig;
+        return kerberosConfigService.get(source.getEnvironmentCrn()).orElse(null);
     }
 }

@@ -51,11 +51,11 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterConnectorPollingResultChecker;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterException;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.retry.RetryUtil;
@@ -289,9 +289,8 @@ public class AmbariClusterModificationService implements ClusterModificationServ
     }
 
     @Override
-    public void regenerateKerberosKeytabs(String hostname) throws CloudbreakException {
+    public void regenerateKerberosKeytabs(String hostname, KerberosConfig kerberosConfig) throws CloudbreakException {
         try {
-            KerberosConfig kerberosConfig = stack.getCluster().getKerberosConfig();
             LOGGER.info("Setting kerberos principal {} and password on master node {} ", kerberosConfig.getPrincipal(), hostname);
             ambariClient.setKerberosPrincipal(kerberosConfig.getPrincipal(), kerberosConfig.getPassword());
             LOGGER.info("Regenerating kerberos keytabs for missing nodes and services");

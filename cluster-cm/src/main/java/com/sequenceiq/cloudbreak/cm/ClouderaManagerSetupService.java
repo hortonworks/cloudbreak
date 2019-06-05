@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
@@ -119,7 +120,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Override
     public Cluster buildCluster(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, TemplatePreparationObject templatePreparationObject,
-            Set<HostMetadata> hostsInCluster, String sdxContext) {
+            Set<HostMetadata> hostsInCluster, String sdxContext, KerberosConfig kerberosConfig) {
         Cluster cluster = stack.getCluster();
         Long clusterId = cluster.getId();
         try {
@@ -156,10 +157,10 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                 removeRemoteParcelRepos(clouderaManagerResourceApi);
                 refreshParcelRepos(clouderaManagerResourceApi);
             }
-            kerberosService.setupKerberos(client, stack);
+            kerberosService.setupKerberos(client, stack, kerberosConfig);
             installCluster(cluster, apiClusterTemplate, clouderaManagerResourceApi, prewarmed);
             if (!CMRepositoryVersionUtil.isEnableKerberosSupportedViaBlueprint(clouderaManagerRepoDetails)) {
-                kerberosService.configureKerberosViaApi(client, clientConfig, stack, clouderaManagerRepoDetails);
+                kerberosService.configureKerberosViaApi(client, clientConfig, stack, kerberosConfig);
             }
         } catch (CancellationException cancellationException) {
             throw cancellationException;

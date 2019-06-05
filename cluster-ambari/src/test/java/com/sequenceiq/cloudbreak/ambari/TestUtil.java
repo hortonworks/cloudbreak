@@ -403,10 +403,6 @@ public class TestUtil {
     }
 
     public static Cluster cluster(Blueprint blueprint, Stack stack, Long id) {
-        return cluster(blueprint, stack, id, null);
-    }
-
-    public static Cluster cluster(Blueprint blueprint, Stack stack, Long id, KerberosConfig kerberosConfig) {
         Cluster cluster = new Cluster();
         cluster.setAmbariIp("50.51.52.100");
         cluster.setStack(stack);
@@ -434,9 +430,6 @@ public class TestUtil {
         Map<String, String> map = new HashMap<>();
         cluster.setAttributes(new Json(map).getValue());
 
-        if (kerberosConfig != null) {
-            cluster.setKerberosConfig(kerberosConfig);
-        }
         Workspace workspace = new Workspace();
         workspace.setName("org 1");
         workspace.setId(1L);

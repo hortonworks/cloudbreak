@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -102,9 +101,6 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
         cluster = new Cluster();
         stack.setCluster(cluster);
         cluster.setStack(stack);
-        KerberosConfig kerberosConfig = new KerberosConfig();
-        kerberosConfig.setDomain("domain");
-        cluster.setKerberosConfig(kerberosConfig);
         cluster.setBlueprint(blueprint);
         setupDefaultClouderaManagerEntries();
 

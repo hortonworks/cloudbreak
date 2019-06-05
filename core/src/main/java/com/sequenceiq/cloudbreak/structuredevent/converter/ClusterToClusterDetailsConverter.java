@@ -14,10 +14,11 @@ import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
 
@@ -29,6 +30,9 @@ public class ClusterToClusterDetailsConverter extends AbstractConversionServiceA
 
     @Inject
     private RdsConfigService rdsConfigService;
+
+    @Inject
+    private KerberosConfigService kerberosConfigService;
 
     @Override
     public ClusterDetails convert(Cluster source) {
@@ -58,13 +62,11 @@ public class ClusterToClusterDetailsConverter extends AbstractConversionServiceA
     }
 
     private void convertKerberosConfig(ClusterDetails clusterDetails, Cluster source) {
-        if (source.getKerberosConfig() != null) {
-            KerberosConfig kerberosConfig = source.getKerberosConfig();
+        KerberosConfig kerberosConfig = kerberosConfigService.get(source.getEnvironmentCrn()).orElse(null);
+        if (kerberosConfig != null) {
             String kerberosType = "New MIT Kerberos";
-            if (kerberosConfig != null) {
-                if (StringUtils.isNotEmpty(kerberosConfig.getUrl())) {
-                    kerberosType = StringUtils.isNotEmpty(kerberosConfig.getLdapUrl()) ? "Active Directory" : "MIT Kerberos";
-                }
+            if (StringUtils.isNotEmpty(kerberosConfig.getUrl())) {
+                kerberosType = StringUtils.isNotEmpty(kerberosConfig.getLdapUrl()) ? "Active Directory" : "MIT Kerberos";
             }
             clusterDetails.setKerberosType(kerberosType);
         }

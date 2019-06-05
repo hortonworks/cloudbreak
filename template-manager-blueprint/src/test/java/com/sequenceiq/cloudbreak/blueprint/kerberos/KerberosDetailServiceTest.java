@@ -8,7 +8,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
+import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 
 public class KerberosDetailServiceTest {
@@ -17,23 +18,23 @@ public class KerberosDetailServiceTest {
 
     private KerberosDetailService underTest = new KerberosDetailService();
 
-    private KerberosConfig config;
+    private KerberosConfig.KerberosConfigBuilder configBuilder;
 
     @Before
     public void setUp() {
-        config = new KerberosConfig();
+        configBuilder = KerberosConfig.KerberosConfigBuilder.aKerberosConfig();
     }
 
     @Test
     public void testResolveHostForKerberosWhenUrlIsNullThenDefaultHostShouldReturn() {
-        config.setUrl(null);
+        KerberosConfig config = configBuilder.withUrl(null).build();
         String result = underTest.resolveHostForKerberos(config, TEST_DEFAULT_HOST);
         assertEquals(TEST_DEFAULT_HOST, result);
     }
 
     @Test
     public void testResolveHostForKerberosWhenUrlIsEmptyThenDefaultHostShouldReturn() {
-        config.setUrl("");
+        KerberosConfig config = configBuilder.withUrl("").build();
         String result = underTest.resolveHostForKerberos(config, TEST_DEFAULT_HOST);
         assertEquals(TEST_DEFAULT_HOST, result);
     }
@@ -41,28 +42,28 @@ public class KerberosDetailServiceTest {
     @Test
     public void testResolveHostForKerberosWhenUrlIsNotEmptyThenThatValueShouldReturn() {
         String expected = "some value";
-        config.setUrl(expected);
+        KerberosConfig config = configBuilder.withUrl(expected).build();
         String result = underTest.resolveHostForKerberos(config, TEST_DEFAULT_HOST);
         assertEquals(expected, result);
     }
 
     @Test
     public void testResolveHostForKerberosWhenUrlContainsOnlySpacesThenDefaultHostShouldReturn() {
-        config.setUrl("   ");
+        KerberosConfig config = configBuilder.withUrl("   ").build();
         String result = underTest.resolveHostForKerberos(config, TEST_DEFAULT_HOST);
         assertEquals(TEST_DEFAULT_HOST, result);
     }
 
     @Test
     public void testResolveHostForKdcAdminWhenUrlIsNullThenDefaultHostShouldReturn() {
-        config.setAdminUrl(null);
+        KerberosConfig config = configBuilder.withAdminUrl(null).build();
         String result = underTest.resolveHostForKdcAdmin(config, TEST_DEFAULT_HOST);
         assertEquals(TEST_DEFAULT_HOST, result);
     }
 
     @Test
     public void testResolveHostForKdcAdminWhenUrlIsEmptyThenDefaultHostShouldReturn() {
-        config.setAdminUrl("");
+        KerberosConfig config = configBuilder.withAdminUrl("").build();
         String result = underTest.resolveHostForKdcAdmin(config, TEST_DEFAULT_HOST);
         assertEquals(TEST_DEFAULT_HOST, result);
     }
@@ -70,60 +71,60 @@ public class KerberosDetailServiceTest {
     @Test
     public void testResolveHostForKdcAdminWhenUrlIsNotEmptyThenThatValueShouldReturn() {
         String expected = "some value";
-        config.setAdminUrl(expected);
+        KerberosConfig config = configBuilder.withAdminUrl(expected).build();
         String result = underTest.resolveHostForKdcAdmin(config, TEST_DEFAULT_HOST);
         assertEquals(expected, result);
     }
 
     @Test
     public void testResolveHostForKdcAdminWhenUrlContainsOnlySpacesThenDefaultHostShouldReturn() {
-        config.setAdminUrl("   ");
+        KerberosConfig config = configBuilder.withAdminUrl("   ").build();
         String result = underTest.resolveHostForKdcAdmin(config, TEST_DEFAULT_HOST);
         assertEquals(TEST_DEFAULT_HOST, result);
     }
 
     @Test
     public void testAmbariManagedKerberosMissing() throws IOException {
-        Assert.assertTrue(underTest.isAmbariManagedKerberosPackages(config));
+        Assert.assertTrue(underTest.isAmbariManagedKerberosPackages(configBuilder.build()));
     }
 
     @Test
     public void testAmbariManagedKerberosTrue() throws IOException {
-        config.setDescriptor("{\"kerberos-env\":{\"properties\":{\"install_packages\":true}}}");
-        Assert.assertTrue(underTest.isAmbariManagedKerberosPackages(config));
+        configBuilder.withDescriptor("{\"kerberos-env\":{\"properties\":{\"install_packages\":true}}}");
+        Assert.assertTrue(underTest.isAmbariManagedKerberosPackages(configBuilder.build()));
     }
 
     @Test
     public void testAmbariManagedKerberosFalse() throws IOException {
-        config.setDescriptor("{\"kerberos-env\":{\"properties\":{\"install_packages\":false}}}");
-        Assert.assertFalse(underTest.isAmbariManagedKerberosPackages(config));
+        configBuilder.withDescriptor("{\"kerberos-env\":{\"properties\":{\"install_packages\":false}}}");
+        Assert.assertFalse(underTest.isAmbariManagedKerberosPackages(configBuilder.build()));
     }
 
     public void testAmbariManagedKrb5ConfMissing() throws IOException {
-        Assert.assertFalse(underTest.isAmbariManagedKrb5Conf(config));
+        Assert.assertFalse(underTest.isAmbariManagedKrb5Conf(configBuilder.build()));
     }
 
     @Test
     public void testAmbariManagedKrb5ConfTrue() throws IOException {
-        config.setKrb5Conf("{\"krb5-conf\":{\"properties\":{\"manage_krb5_conf\":true}}}");
-        Assert.assertTrue(underTest.isAmbariManagedKrb5Conf(config));
+        configBuilder.withKrb5Conf("{\"krb5-conf\":{\"properties\":{\"manage_krb5_conf\":true}}}");
+        Assert.assertTrue(underTest.isAmbariManagedKrb5Conf(configBuilder.build()));
     }
 
     @Test
     public void testAmbariManagedKrb5ConfFalse() throws IOException {
-        config.setKrb5Conf("{\"krb5-conf\":{\"properties\":{\"manage_krb5_conf\":false}}}");
-        Assert.assertFalse(underTest.isAmbariManagedKrb5Conf(config));
+        configBuilder.withKrb5Conf("{\"krb5-conf\":{\"properties\":{\"manage_krb5_conf\":false}}}");
+        Assert.assertFalse(underTest.isAmbariManagedKrb5Conf(configBuilder.build()));
     }
 
     @Test
     public void testResolveTypeForKerberos() {
-        config.setType(KerberosType.FREEIPA);
-        assertEquals("ipa", underTest.resolveTypeForKerberos(config));
-        config.setType(KerberosType.ACTIVE_DIRECTORY);
-        assertEquals("active-directory", underTest.resolveTypeForKerberos(config));
-        config.setType(KerberosType.MIT);
-        assertEquals("mit-kdc", underTest.resolveTypeForKerberos(config));
-        config.setType(KerberosType.AMBARI_DESCRIPTOR);
-        assertEquals("mit-kdc", underTest.resolveTypeForKerberos(config));
+        configBuilder.withType(KerberosType.FREEIPA);
+        assertEquals("ipa", underTest.resolveTypeForKerberos(configBuilder.build()));
+        configBuilder.withType(KerberosType.ACTIVE_DIRECTORY);
+        assertEquals("active-directory", underTest.resolveTypeForKerberos(configBuilder.build()));
+        configBuilder.withType(KerberosType.MIT);
+        assertEquals("mit-kdc", underTest.resolveTypeForKerberos(configBuilder.build()));
+        configBuilder.withType(KerberosType.AMBARI_DESCRIPTOR);
+        assertEquals("mit-kdc", underTest.resolveTypeForKerberos(configBuilder.build()));
     }
 }

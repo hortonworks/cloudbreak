@@ -27,6 +27,8 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterCreationSuccessHandler;
@@ -89,6 +91,9 @@ public class ClusterBuilderService {
     @Inject
     private DatalakeResourcesService datalakeResourcesService;
 
+    @Inject
+    private KerberosConfigService kerberosConfigService;
+
     public void startCluster(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithTransaction(stackId);
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
@@ -120,7 +125,10 @@ public class ClusterBuilderService {
                 .map(clusterApiConnectors::getConnector)
                 .map(ClusterApi::getSdxContext).orElse(null);
 
-        clusterService.save(connector.buildCluster(instanceMetaDataByHostGroup, templatePreparationObject, hostsInCluster, sdxContext));
+        // TODO kerberost nyald fel itt
+        KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn()).orElse(null);
+        clusterService.save(connector.clusterSetupService().buildCluster(
+                instanceMetaDataByHostGroup, templatePreparationObject, hostsInCluster, sdxContext, kerberosConfig));
         recipeEngine.executePostInstallRecipes(stack, instanceMetaDataByHostGroup.keySet());
         clusterCreationSuccessHandler.handleClusterCreationSuccess(stack);
         if (StackType.DATALAKE == stack.getType()) {

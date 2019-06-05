@@ -18,13 +18,13 @@ import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiConfigureForKerberosArguments;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 
 @Service
 public class ClouderaManagerKerberosService {
@@ -46,21 +46,23 @@ public class ClouderaManagerKerberosService {
     @Inject
     private ApplicationContext applicationContext;
 
-    public void setupKerberos(ApiClient client, Stack stack) throws ApiException {
+    @Inject
+    private KerberosDetailService kerberosDetailService;
+
+    public void setupKerberos(ApiClient client, Stack stack, KerberosConfig kerberosConfig) throws ApiException {
         Cluster cluster = stack.getCluster();
         String clusterName = cluster.getName();
-        if (cluster.isAdJoinable() || cluster.isIpaJoinable()) {
+        if (kerberosDetailService.isAdJoinable(kerberosConfig) || kerberosDetailService.isIpaJoinable(kerberosConfig)) {
             LOGGER.debug("Configure cluster {} with Kerberos", clusterName);
             ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerClientFactory.getClouderaManagerResourceApi(client);
-            KerberosConfig kerberosConfig = cluster.getKerberosConfig();
             ApiConfigList apiConfigList = new ApiConfigList()
                     .addItemsItem(new ApiConfig().name("security_realm").value(kerberosConfig.getRealm()))
                     .addItemsItem(new ApiConfig().name("kdc_host").value(kerberosConfig.getUrl()))
                     .addItemsItem(new ApiConfig().name("kdc_admin_host").value(kerberosConfig.getAdminUrl()));
-            if (cluster.isAdJoinable()) {
+            if (kerberosDetailService.isAdJoinable(kerberosConfig)) {
                 apiConfigList.addItemsItem(new ApiConfig().name("kdc_type").value(ACTIVE_DIRECTORY));
                 apiConfigList.addItemsItem(new ApiConfig().name("ad_kdc_domain").value(kerberosConfig.getContainerDn()));
-            } else if (cluster.isIpaJoinable()) {
+            } else if (kerberosDetailService.isIpaJoinable(kerberosConfig)) {
                 LOGGER.debug("Enable FreeIPA on cluster: {}", clusterName);
                 apiConfigList.addItemsItem(new ApiConfig().name("kdc_type").value(FREEIPA));
                 ApiConfigList enableIpa = new ApiConfigList()
@@ -68,7 +70,7 @@ public class ClouderaManagerKerberosService {
                 clouderaManagerResourceApi.updateConfig("Enable FreeIPA", enableIpa);
             }
             clouderaManagerResourceApi.updateConfig("Add kerberos configuration", apiConfigList);
-            if (cluster.isAdJoinable()) {
+            if (kerberosDetailService.isAdJoinable(kerberosConfig)) {
                 LOGGER.debug("Import kerberos credentials for AD on cluster: {}", clusterName);
                 ApiCommand importAdminCredentials =
                         clouderaManagerResourceApi.importAdminCredentials(kerberosConfig.getPassword(), kerberosConfig.getPrincipal());
@@ -77,10 +79,10 @@ public class ClouderaManagerKerberosService {
         }
     }
 
-    public void configureKerberosViaApi(ApiClient client, HttpClientConfig clientConfig, Stack stack, ClouderaManagerRepo clouderaManagerRepoDetails)
+    public void configureKerberosViaApi(ApiClient client, HttpClientConfig clientConfig, Stack stack, KerberosConfig kerberosConfig)
             throws ApiException, CloudbreakException {
         Cluster cluster = stack.getCluster();
-        if (cluster.isAdJoinable() || cluster.isIpaJoinable()) {
+        if (kerberosDetailService.isAdJoinable(kerberosConfig) || kerberosDetailService.isIpaJoinable(kerberosConfig)) {
             ClouderaManagerModificationService modificationService = applicationContext.getBean(ClouderaManagerModificationService.class, stack, clientConfig);
             ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerClientFactory.getClouderaManagerResourceApi(client);
             modificationService.stopCluster();

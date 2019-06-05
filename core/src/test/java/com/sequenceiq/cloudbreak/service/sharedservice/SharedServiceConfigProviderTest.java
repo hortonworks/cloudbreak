@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
-import com.sequenceiq.cloudbreak.service.cluster.KerberosConfigProvider;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -72,9 +71,6 @@ public class SharedServiceConfigProviderTest {
     private Cluster publicStackCluster;
 
     @Mock
-    private KerberosConfigProvider kerberosConfigProvider;
-
-    @Mock
     private DatalakeResourcesService datalakeResourcesService;
 
     @Mock
@@ -106,8 +102,6 @@ public class SharedServiceConfigProviderTest {
 
         Assert.assertEquals(cluster, result);
         verify(datalakeResourcesService, times(0)).findById(anyLong());
-        verify(kerberosConfigProvider, times(0)).setKerberosConfigForWorkloadCluster(any(Cluster.class), any(DatalakeResources.class));
-        assertNull(cluster.getKerberosConfig());
         assertNull(cluster.getRdsConfigs());
     }
 
@@ -125,7 +119,6 @@ public class SharedServiceConfigProviderTest {
 
         Assert.assertTrue(result.getRdsConfigs().isEmpty());
         verify(datalakeResourcesService, times(1)).findById(anyLong());
-        verify(kerberosConfigProvider, times(1)).setKerberosConfigForWorkloadCluster(requestedCluster, datalakeResources);
     }
 
     @Test
@@ -144,7 +137,6 @@ public class SharedServiceConfigProviderTest {
 
         Assert.assertEquals(1L, result.getRdsConfigs().size());
         result.getRdsConfigs().forEach(rdsConfig -> Assert.assertNotEquals(DEFAULT, rdsConfig.getStatus()));
-        verify(kerberosConfigProvider, times(1)).setKerberosConfigForWorkloadCluster(requestedCluster, datalakeResources);
     }
 
     @Test

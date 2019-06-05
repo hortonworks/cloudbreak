@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.service.cluster.KerberosConfigProvider;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -38,9 +37,6 @@ public class SharedServiceConfigProvider {
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private KerberosConfigProvider kerberosConfigProvider;
 
     @Inject
     private AmbariDatalakeConfigProvider ambariDatalakeConfigProvider;
@@ -59,7 +55,6 @@ public class SharedServiceConfigProvider {
             if (datalakeResources.isPresent()) {
                 DatalakeResources datalakeResource = datalakeResources.get();
                 setupRds(requestedCluster, datalakeResource);
-                kerberosConfigProvider.setKerberosConfigForWorkloadCluster(requestedCluster, datalakeResource);
             }
         }
         return requestedCluster;

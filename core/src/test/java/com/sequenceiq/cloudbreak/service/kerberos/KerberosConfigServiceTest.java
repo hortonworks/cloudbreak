@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.kerberos;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -10,7 +9,6 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Optional;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -22,7 +20,6 @@ import org.mockito.Mock;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.repository.KerberosConfigRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
@@ -101,18 +98,6 @@ public class KerberosConfigServiceTest {
 
         KerberosConfig kerberosConfig = underTest.create(resource,  1L, user);
         assertEquals(kerberosConfig.getId(), resource.getId());
-    }
-
-    @Test
-    public void testGetClusterUsingResource() {
-        Cluster cluster = new Cluster();
-        KerberosConfig kerberosConfig = new KerberosConfig();
-        kerberosConfig.setId(1L);
-        when(clusterService.findByKerberosConfig(eq(1L))).thenReturn(Sets.newHashSet(cluster));
-
-        Set<Cluster> clustersUsingResource = underTest.getClustersUsingResource(kerberosConfig);
-
-        assertTrue(clustersUsingResource.contains(cluster));
     }
 
     @Test
