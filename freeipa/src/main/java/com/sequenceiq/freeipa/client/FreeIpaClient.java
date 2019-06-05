@@ -149,6 +149,24 @@ public class FreeIpaClient {
         return response.getResult().getCertificate();
     }
 
+    public void addPasswordExpirationPermission(String permission) throws FreeIpaClientException {
+        List<String> flags = List.of(permission);
+        Map<String, Object> params = Map.of(
+                "attrs", List.of("krbpasswordexpiration"),
+                "ipapermright", List.of("write"),
+                "type", "user"
+        );
+        invoke("permission_add", flags, params, Object.class);
+    }
+
+    public void addPermissionToPrivilege(String privilege, String permission) throws FreeIpaClientException {
+        List<String> flags = List.of(privilege);
+        Map<String, Object> params = Map.of(
+                "permission", List.of(permission)
+        );
+        invoke("privilege_add_permission", flags, params, Object.class);
+    }
+
     public <T> RPCResponse<T> invoke(String method, List<String> flags, Map<String, Object> params, Type resultType) throws FreeIpaClientException {
         Map<String, Object> parameterMap = new HashMap<>();
         if (params != null && !params.isEmpty()) {

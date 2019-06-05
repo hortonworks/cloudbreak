@@ -6,6 +6,8 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMa
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.hostmetadatasetup.HostMetadataSetupFailed;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.hostmetadatasetup.HostMetadataSetupSuccess;
+import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInstallFreeIpaFailed;
+import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInstallFreeIpaSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesFailed;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesSuccess;
 
@@ -17,6 +19,8 @@ public enum FreeIpaProvisionEvent implements FlowEvent {
     HOST_METADATASETUP_FAILED_EVENT(EventSelectorUtil.selector(HostMetadataSetupFailed.class)),
     FREEIPA_INSTALL_FINISHED_EVENT(EventSelectorUtil.selector(InstallFreeIpaServicesSuccess.class)),
     FREEIPA_INSTALL_FAILED_EVENT(EventSelectorUtil.selector(InstallFreeIpaServicesFailed.class)),
+    FREEIPA_POST_INSTALL_FINISHED_EVENT(EventSelectorUtil.selector(PostInstallFreeIpaSuccess.class)),
+    FREEIPA_POST_INSTALL_FAILED_EVENT(EventSelectorUtil.selector(PostInstallFreeIpaFailed.class)),
     FREEIPA_PROVISION_FAILED_EVENT("FREEIPA_PROVISION_FAILED_EVENT"),
     FREEIPA_PROVISION_FINISHED_EVENT("FREEIPA_PROVISION_FINISHED_EVENT"),
     FREEIPA_PROVISION_FAILURE_HANDLED_EVENT("FREEIPA_PROVISION_FAILURE_HANDLED_EVENT");
