@@ -2,6 +2,7 @@ package com.sequenceiq.distrox.v1.distrox.converter;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.ifNotNullF;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,12 +26,24 @@ public class GatewayV1ToGatewayV4Converter {
         return response;
     }
 
+    public GatewayV1Request convert(GatewayV4Request source) {
+        GatewayV1Request response = new GatewayV1Request();
+        response.setPath(source.getPath());
+        response.setExposedServices(ifNotNullF(source.getTopologies(), this::exposedService));
+        response.setGatewayType(source.getGatewayType());
+        response.setSsoProvider(source.getSsoProvider());
+        response.setSsoType(source.getSsoType());
+        response.setTokenCert(source.getTokenCert());
+        return response;
+    }
+
+    private List<String> exposedService(List<GatewayTopologyV4Request> topologies) {
+        return topologies.stream().flatMap(s -> s.getExposedServices().stream()).collect(Collectors.toList());
+    }
+
     private List<GatewayTopologyV4Request> topologies(List<String> exposedServices) {
-        return exposedServices.stream().map(e -> {
-            GatewayTopologyV4Request gatewayTopologyV4Request = new GatewayTopologyV4Request();
-            gatewayTopologyV4Request.setTopologyName("topology-name");
-            gatewayTopologyV4Request.setExposedServices(exposedServices);
-            return gatewayTopologyV4Request;
-        }).collect(Collectors.toList());
+        GatewayTopologyV4Request topologyV4Request = new GatewayTopologyV4Request();
+        topologyV4Request.setExposedServices(exposedServices);
+        return Collections.singletonList(topologyV4Request);
     }
 }

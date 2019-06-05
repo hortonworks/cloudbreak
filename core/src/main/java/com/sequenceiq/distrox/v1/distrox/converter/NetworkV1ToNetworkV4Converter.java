@@ -38,4 +38,29 @@ public class NetworkV1ToNetworkV4Converter {
         response.setInternetGatewayId(source.getInternetGatewayId());
         return response;
     }
+
+    public NetworkV1Request convert(NetworkV4Request network) {
+        NetworkV1Request response = new NetworkV1Request();
+        response.setAws(ifNotNullF(network.getAws(), this::convert));
+        response.setAzure(ifNotNullF(network.getAzure(), this::convert));
+        return response;
+    }
+
+    private AzureNetworkV1Parameters convert(AzureNetworkV4Parameters source) {
+        AzureNetworkV1Parameters response = new AzureNetworkV1Parameters();
+        response.setNetworkId(source.getNetworkId());
+        response.setNoFirewallRules(source.getNoFirewallRules());
+        response.setNoPublicIp(source.getNoPublicIp());
+        response.setResourceGroupName(source.getResourceGroupName());
+        response.setSubnetId(source.getSubnetId());
+        return response;
+    }
+
+    private AwsNetworkV1Parameters convert(AwsNetworkV4Parameters source) {
+        AwsNetworkV1Parameters response = new AwsNetworkV1Parameters();
+        response.setSubnetId(source.getSubnetId());
+        response.setVpcId(source.getVpcId());
+        response.setInternetGatewayId(source.getInternetGatewayId());
+        return response;
+    }
 }
