@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -16,6 +17,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigConfigProvider;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -43,6 +45,8 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigConfigProvider 
 
     private static final String SIGNING_IDENTITY = "signing-identity";
 
+    private static final String GATEWAY_WHITELIST = "gateway_dispatch_whitelist";
+
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
         GatewayView gateway = source.getGatewayView();
@@ -52,11 +56,18 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigConfigProvider 
             case KnoxRoles.KNOX_GATEWAY:
                 List<ApiClusterTemplateConfig> config = new ArrayList<>();
                 config.add(config(KNOX_MASTER_SECRET, masterSecret));
+                Optional<KerberosConfig> kerberosConfig = source.getKerberosConfig();
                 if (gateway != null) {
                     config.add(config(GATEWAY_PATH, gateway.getPath()));
                     config.add(config(SIGNING_KEYSTORE_NAME, SIGNING_JKS));
                     config.add(config(SIGNING_KEYSTORE_TYPE, JKS));
                     config.add(config(SIGNING_KEY_ALIAS, SIGNING_IDENTITY));
+                    if (kerberosConfig.isPresent()) {
+                        String domain = kerberosConfig.get().getDomain();
+                        config.add(config(GATEWAY_WHITELIST, "^/.*$;^https?://(.+." + domain + "):[0-9]+/?.*$"));
+                    } else {
+                        config.add(config(GATEWAY_WHITELIST, "^*.*$"));
+                    }
                 }
                 return config;
             case KnoxRoles.IDBROKER:

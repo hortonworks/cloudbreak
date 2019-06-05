@@ -35,6 +35,8 @@ import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
@@ -43,6 +45,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintTextProcessorUtil;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
+import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.template.processor.ClusterManagerType;
 
 @Service
@@ -58,6 +61,9 @@ public class ServiceEndpointCollector {
 
     @Inject
     private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
+
+    @Inject
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Inject
     private AmbariHaComponentFilter ambariHaComponentFilter;
@@ -161,7 +167,11 @@ public class ServiceEndpointCollector {
             haComponents.remove(ExposedService.RANGER.getAmbariServiceName());
             return ExposedServiceV4Response.fromExposedServices(getExposedServices(blueprintTextProcessor, haComponents));
         } else {
-            return List.of();
+            CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
+            return ExposedServiceV4Response.fromExposedServices(
+                    ExposedService.knoxServicesForCmComponents(
+                            processor.getAllComponents().stream().map(
+                                    ServiceComponent::getComponent).collect(Collectors.toList())));
         }
     }
 

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -18,7 +19,7 @@ public enum ExposedService {
     CLOUDERA_MANAGER("CM", "CM-API", "CM-API", "CM-API", "/cm-api/", true, null, 7180),
     AMBARI("Ambari", "AMBARI_SERVER", "", "AMBARI", "/ambari/", true, 8080, null),
     WEBHDFS("WebHDFS", "NAMENODE", "NAMENODE", "WEBHDFS", "/webhdfs/v1", false, 50070),
-    NAMENODE("Name Node", "NAMENODE", "NAMENODE", "HDFSUI", "/hdfs/", true, 50070, 20102),
+    NAMENODE("Name Node", "NAMENODE", "NAMENODE", "HDFSUI", "/hdfs/", true, 50070, 9870),
     RESOURCEMANAGER_WEB("Resource Manager", "RESOURCEMANAGER", "RESOURCEMANAGER", "YARNUI", "/yarn/", true, 8088),
     RESOURCEMANAGER_WEB_V2("Resource Manager V2", "RESOURCEMANAGER", "RESOURCEMANAGER", "YARNUIV2", "/yarnuiv2/", true, 8088),
     JOB_HISTORY_SERVER("Job History Server", "HISTORYSERVER", "JOBHISTORY", "JOBHISTORYUI", "/jobhistory/", true, 19888),
@@ -26,17 +27,17 @@ public enum ExposedService {
     HIVE_SERVER_INTERACTIVE("Hive Server Interactive", "HIVE_SERVER_INTERACTIVE", "", "HIVE_INTERACTIVE", "/hive/", false, 10501),
     ATLAS("Atlas", "ATLAS_SERVER", "ATLAS_SERVER", "ATLAS", "/atlas/", true, 21000),
     SPARK_HISTORY_SERVER("Spark 1.x History Server", "SPARK_JOBHISTORYSERVER", "SPARK_YARN_HISTORY_SERVER", "SPARKHISTORYUI",
-            "/sparkhistory/", true, 18080, 18488),
+            "/sparkhistory/", true, 18080, 18088),
     SPARK2_HISTORY_SERVER("Spark History Server", "SPARK2_JOBHISTORYSERVER", "", "SPARK2HISTORYUI",
             "/sparkhistory/", true, 18081),
-    ZEPPELIN("Zeppelin", "ZEPPELIN_MASTER", "ZEPPELIN_SERVER", "ZEPPELIN", "/zeppelin/", false, 9995),
+    ZEPPELIN("Zeppelin", "ZEPPELIN_MASTER", "ZEPPELIN_SERVER", "ZEPPELIN", "/zeppelin/", false, 9995, 8885),
     RANGER("Ranger", "RANGER_ADMIN", "RANGER_ADMIN", "RANGER", "/ranger/", true, 6080, 6080),
     DP_PROFILER_AGENT("DP Profiler Agent", "DP_PROFILER_AGENT", "", "PROFILER-AGENT", "", true, 21900, null),
     BEACON_SERVER("Beacon", "BEACON_SERVER", "", "BEACON", "/beacon", true, 25968, null),
     LOGSEARCH("Log Search", "LOGSEARCH_SERVER", "", "LOGSEARCH", "/logsearch", true, 61888, null),
     LIVY2_SERVER("Livy Server 2", "LIVY2_SERVER", "", "LIVYSERVER", "/livy/v1/sessions/", true, 8999, null),
     LIVY_SERVER("Livy Server", "", "LIVY_SERVER", "LIVYSERVER1", "/livy/v1/", true, null, 8998),
-    OOZIE_UI("Oozie Server", "", "OOZIE_SERVER", "OOZIEUI", "/oozie/", true, null, 11443);
+    OOZIE_UI("Oozie Server", "", "OOZIE_SERVER", "OOZIE", "/oozie/", true, null, 11000);
 
     private final String ambariServiceName;
     private final String cmServiceName;
@@ -88,6 +89,14 @@ public enum ExposedService {
                 .collect(Collectors.toList());
     }
 
+    public static Collection<ExposedService> knoxServicesForCmComponents(Collection<String> components) {
+        Collection<ExposedService> supportedKnoxServices = filterSupportedKnoxServices();
+        return supportedKnoxServices.stream()
+                .filter(exposedService ->
+                        components.contains(exposedService.cmServiceName))
+                .collect(Collectors.toList());
+    }
+
     public static List<String> getAllKnoxExposed() {
         List<String> allKnoxExposed = filterSupportedKnoxServices().stream().map(ExposedService::getKnoxService).collect(Collectors.toList());
         return ImmutableList.copyOf(allKnoxExposed);
@@ -107,7 +116,9 @@ public enum ExposedService {
 
     public static Map<String, Integer> getAllServicePortsForCM() {
         return Arrays.stream(values()).filter(x -> !Strings.isNullOrEmpty(x.cmServiceName))
-                .filter(x -> !Strings.isNullOrEmpty(x.knoxService)).collect(Collectors.toMap(k -> k.knoxService, v -> v.cmPort));
+                .filter(x -> !Strings.isNullOrEmpty(x.knoxService))
+                .filter(x -> Objects.nonNull(x.cmPort))
+                .collect(Collectors.toMap(k -> k.knoxService, v -> v.cmPort));
     }
 
     public String getAmbariServiceName() {

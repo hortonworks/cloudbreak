@@ -39,7 +39,7 @@
             </param>
             <param>
                 <name>redirectToUrl</name>
-                <value>/gateway/knoxsso/knoxauth/login.html</value>
+                <value>/{{ salt['pillar.get']('gateway:path') }}/knoxsso/knoxauth/login.html</value>
             </param>
             <param>
                 <name>restrictedCookies</name>
@@ -80,6 +80,10 @@
         <param>
             <name>knoxsso.token.ttl</name>
             <value>-1</value>
+        </param>
+        <param>
+           <name>knoxsso.redirect.whitelist.regex</name>
+           <value>.*</value>
         </param>
     </service>
 
