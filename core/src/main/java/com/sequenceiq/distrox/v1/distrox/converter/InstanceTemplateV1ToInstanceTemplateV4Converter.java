@@ -1,6 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
-import static com.sequenceiq.cloudbreak.util.NullUtil.ifNotNullF;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import javax.inject.Inject;
 
@@ -20,12 +20,12 @@ public class InstanceTemplateV1ToInstanceTemplateV4Converter {
 
     public InstanceTemplateV4Request convert(InstanceTemplateV1Request source) {
         InstanceTemplateV4Request response = new InstanceTemplateV4Request();
-        response.setRootVolume(ifNotNullF(source.getRootVolume(), volumeConverter::convert));
-        response.setRootVolume(ifNotNullF(source.getRootVolume(), volumeConverter::convert));
-        response.setAttachedVolumes(ifNotNullF(source.getAttachedVolumes(), volumeConverter::convertTo));
-        response.setEphemeralVolume(ifNotNullF(source.getEphemeralVolume(), volumeConverter::convert));
-        response.setAws(ifNotNullF(source.getAws(), instanceTemplateParameterConverter::convert));
-        response.setAzure(ifNotNullF(source.getAzure(), instanceTemplateParameterConverter::convert));
+        response.setRootVolume(getIfNotNull(source.getRootVolume(), volumeConverter::convert));
+        response.setRootVolume(getIfNotNull(source.getRootVolume(), volumeConverter::convert));
+        response.setAttachedVolumes(getIfNotNull(source.getAttachedVolumes(), volumeConverter::convertTo));
+        response.setEphemeralVolume(getIfNotNull(source.getEphemeralVolume(), volumeConverter::convert));
+        response.setAws(getIfNotNull(source.getAws(), instanceTemplateParameterConverter::convert));
+        response.setAzure(getIfNotNull(source.getAzure(), instanceTemplateParameterConverter::convert));
         response.setCloudPlatform(source.getCloudPlatform());
         response.setInstanceType(source.getInstanceType());
         return response;
@@ -33,12 +33,12 @@ public class InstanceTemplateV1ToInstanceTemplateV4Converter {
 
     public InstanceTemplateV1Request convert(InstanceTemplateV4Request source) {
         InstanceTemplateV1Request response = new InstanceTemplateV1Request();
-        response.setRootVolume(ifNotNullF(source.getRootVolume(), volumeConverter::convert));
-        response.setRootVolume(ifNotNullF(source.getRootVolume(), volumeConverter::convert));
-        response.setAttachedVolumes(ifNotNullF(source.getAttachedVolumes(), volumeConverter::convertFrom));
-        response.setEphemeralVolume(ifNotNullF(source.getEphemeralVolume(), volumeConverter::convert));
-        response.setAws(ifNotNullF(source.getAws(), instanceTemplateParameterConverter::convert));
-        response.setAzure(ifNotNullF(source.getAzure(), instanceTemplateParameterConverter::convert));
+        response.setRootVolume(getIfNotNull(source.getRootVolume(), volumeConverter::convert));
+        response.setRootVolume(getIfNotNull(source.getRootVolume(), volumeConverter::convert));
+        response.setAttachedVolumes(getIfNotNull(source.getAttachedVolumes(), volumeConverter::convertFrom));
+        response.setEphemeralVolume(getIfNotNull(source.getEphemeralVolume(), volumeConverter::convert));
+        response.setAws(getIfNotNull(source.getAws(), instanceTemplateParameterConverter::convert));
+        response.setAzure(getIfNotNull(source.getAzure(), instanceTemplateParameterConverter::convert));
         response.setInstanceType(source.getInstanceType());
         return response;
     }

@@ -1,6 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
-import static com.sequenceiq.cloudbreak.util.NullUtil.ifNotNullF;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import javax.inject.Inject;
 
@@ -50,7 +50,7 @@ public class DistroXClusterToClusterConverter {
 
         ClusterV4Request response = new ClusterV4Request();
         response.setKerberosName(null);
-        response.setGateway(ifNotNullF(source.getGateway(), gatewayConverter::convert));
+        response.setGateway(getIfNotNull(source.getGateway(), gatewayConverter::convert));
         response.setAmbari(null);
         response.setName(null);
         response.setDatabases(source.getDatabases());
@@ -58,9 +58,9 @@ public class DistroXClusterToClusterConverter {
         response.setBlueprintName(source.getBlueprintName());
         response.setUserName(source.getUserName());
         response.setPassword(source.getPassword());
-        response.setProxyConfigCrn(ifNotNullF(source.getProxy(), this::getProxyCrnByName));
-        response.setCm(ifNotNullF(source.getCm(), cmConverter::convert));
-        response.setCloudStorage(ifNotNullF(source.getCloudStorage(), cloudStorageConverter::convert));
+        response.setProxyConfigCrn(getIfNotNull(source.getProxy(), this::getProxyCrnByName));
+        response.setCm(getIfNotNull(source.getCm(), cmConverter::convert));
+        response.setCloudStorage(getIfNotNull(source.getCloudStorage(), cloudStorageConverter::convert));
         response.setValidateBlueprint(false);
         response.setExecutorType(ExecutorType.DEFAULT);
         response.setCustomContainer(null);
@@ -70,13 +70,13 @@ public class DistroXClusterToClusterConverter {
 
     public DistroXClusterV1Request convert(ClusterV4Request source) {
         DistroXClusterV1Request response = new DistroXClusterV1Request();
-        response.setGateway(ifNotNullF(source.getGateway(), gatewayConverter::convert));
+        response.setGateway(getIfNotNull(source.getGateway(), gatewayConverter::convert));
         response.setDatabases(source.getDatabases());
         response.setBlueprintName(source.getBlueprintName());
         response.setUserName(source.getUserName());
         response.setPassword(source.getPassword());
-        response.setCm(ifNotNullF(source.getCm(), cmConverter::convert));
-        response.setCloudStorage(ifNotNullF(source.getCloudStorage(), cloudStorageConverter::convert));
+        response.setCm(getIfNotNull(source.getCm(), cmConverter::convert));
+        response.setCloudStorage(getIfNotNull(source.getCloudStorage(), cloudStorageConverter::convert));
         response.setProxy(source.getProxyConfigCrn());
         return response;
     }

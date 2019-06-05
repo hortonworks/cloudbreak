@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.credential.v1.converter;
 
-import static com.sequenceiq.cloudbreak.util.NullUtil.ifNotNull;
+import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 
 import org.springframework.stereotype.Component;
 
@@ -18,8 +18,8 @@ class AzureCredentialV1ParametersToAzureCredentialAttributesConverter {
 
     public AzureCredentialAttributes convert(AzureCredentialRequestParameters source) {
         AzureCredentialAttributes response = new AzureCredentialAttributes();
-        ifNotNull(source.getAppBased(), param -> response.setAppBased(getAppBased(param)));
-        ifNotNull(source.getRoleBased(), param -> response.setRoleBased(getRoleBased(param)));
+        doIfNotNull(source.getAppBased(), param -> response.setAppBased(getAppBased(param)));
+        doIfNotNull(source.getRoleBased(), param -> response.setRoleBased(getRoleBased(param)));
         response.setSubscriptionId(source.getSubscriptionId());
         response.setTenantId(source.getTenantId());
         return response;
@@ -27,7 +27,7 @@ class AzureCredentialV1ParametersToAzureCredentialAttributesConverter {
 
     public AzureCredentialResponseParameters convert(AzureCredentialAttributes source) {
         AzureCredentialResponseParameters response = new AzureCredentialResponseParameters();
-        ifNotNull(source.getRoleBased(), param -> response.setRoleBased(getRoleBased(param)));
+        doIfNotNull(source.getRoleBased(), param -> response.setRoleBased(getRoleBased(param)));
         response.setAccessKey(source.getAccessKey());
         response.setSubscriptionId(source.getSubscriptionId());
         response.setTenantId(source.getTenantId());
