@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.controller.v4.KerberosConfigV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.KubernetesV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.LdapV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.ManagementPackV4Controller;
-import com.sequenceiq.cloudbreak.controller.v4.PlatformParameterV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.RecipesV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.StackV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.UserProfileV4Controller;
@@ -65,7 +64,6 @@ public class EndpointConfig extends ResourceConfig {
             LdapV4Controller.class,
             KubernetesV4Controller.class,
             WorkspaceV4Controller.class,
-            PlatformParameterV4Controller.class,
             RecipesV4Controller.class,
             UserProfileV4Controller.class,
             UserV4Controller.class,

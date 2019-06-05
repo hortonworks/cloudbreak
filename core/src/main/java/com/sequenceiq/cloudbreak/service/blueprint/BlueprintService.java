@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -25,6 +26,9 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
+import com.sequenceiq.cloudbreak.service.stack.CloudResourceAdvisor;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
@@ -79,6 +83,9 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     @Inject
     private BlueprintLoaderService blueprintLoaderService;
 
+    @Inject
+    private CloudResourceAdvisor cloudResourceAdvisor;
+
     public Blueprint get(Long id) {
         return blueprintRepository.findById(id).orElseThrow(notFound("Cluster definition", id));
     }
@@ -113,6 +120,14 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
             throw new BadRequestException(msg, ex);
         }
         return savedBlueprint;
+    }
+
+    public PlatformRecommendation getRecommendation(Long workspaceId, String blueprintName, String credentialName,
+            String region, String platformVariant, String availabilityZone) {
+        if (!ObjectUtils.allNotNull(region, availabilityZone)) {
+            throw new BadRequestException("region and availabilityZone cannot be null");
+        }
+        return cloudResourceAdvisor.createForBlueprint(workspaceId, blueprintName, credentialName, region, platformVariant, availabilityZone);
     }
 
     @Override

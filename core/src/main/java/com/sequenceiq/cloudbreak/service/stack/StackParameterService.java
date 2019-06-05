@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetStackParamValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetStackParamValidationResult;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
-import com.sequenceiq.cloudbreak.service.credential.CredentialClientService;
+import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
