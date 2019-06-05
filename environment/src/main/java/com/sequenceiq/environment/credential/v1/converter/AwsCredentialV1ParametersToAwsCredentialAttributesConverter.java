@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.credential.v1.converter;
 
-import static com.sequenceiq.cloudbreak.util.NullUtil.ifNotNull;
+import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 
 import org.springframework.stereotype.Component;
 
@@ -16,16 +16,16 @@ class AwsCredentialV1ParametersToAwsCredentialAttributesConverter {
 
     public AwsCredentialAttributes convert(AwsCredentialParameters source) {
         AwsCredentialAttributes response = new AwsCredentialAttributes();
-        ifNotNull(source.getKeyBased(), params -> response.setKeyBased(getKeyBased(params)));
-        ifNotNull(source.getKeyBased(), params -> response.setKeyBased(getKeyBased(params)));
-        ifNotNull(source.getRoleBased(), params -> response.setRoleBased(getRoleBased(params)));
+        doIfNotNull(source.getKeyBased(), params -> response.setKeyBased(getKeyBased(params)));
+        doIfNotNull(source.getKeyBased(), params -> response.setKeyBased(getKeyBased(params)));
+        doIfNotNull(source.getRoleBased(), params -> response.setRoleBased(getRoleBased(params)));
         return response;
     }
 
     public AwsCredentialParameters convert(AwsCredentialAttributes source) {
         AwsCredentialParameters response = new AwsCredentialParameters();
-        ifNotNull(source.getKeyBased(), params -> response.setKeyBased(getKeyBased(params)));
-        ifNotNull(source.getRoleBased(), params -> response.setRoleBased(getRoleBased(params)));
+        doIfNotNull(source.getKeyBased(), params -> response.setKeyBased(getKeyBased(params)));
+        doIfNotNull(source.getRoleBased(), params -> response.setRoleBased(getRoleBased(params)));
         return response;
     }
 

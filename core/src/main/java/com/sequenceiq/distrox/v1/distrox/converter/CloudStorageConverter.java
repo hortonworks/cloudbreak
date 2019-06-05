@@ -1,6 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
-import static com.sequenceiq.cloudbreak.util.NullUtil.ifNotNull;
+import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 
 import org.springframework.stereotype.Component;
 
@@ -18,7 +18,7 @@ public class CloudStorageConverter {
 
     public S3CloudStorageV4Parameters convert(S3CloudStorageV1Parameters source) {
         S3CloudStorageV4Parameters response = new S3CloudStorageV4Parameters();
-        ifNotNull(source.getInstanceProfile(), response::setInstanceProfile);
+        doIfNotNull(source.getInstanceProfile(), response::setInstanceProfile);
         return response;
     }
 
@@ -49,7 +49,7 @@ public class CloudStorageConverter {
 
     public S3CloudStorageV1Parameters convert(S3CloudStorageV4Parameters source) {
         S3CloudStorageV1Parameters response = new S3CloudStorageV1Parameters();
-        ifNotNull(source.getInstanceProfile(), response::setInstanceProfile);
+        doIfNotNull(source.getInstanceProfile(), response::setInstanceProfile);
         return response;
     }
 

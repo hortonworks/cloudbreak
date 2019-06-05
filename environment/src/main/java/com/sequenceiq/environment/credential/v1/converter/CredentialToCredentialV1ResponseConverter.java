@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.credential.v1.converter;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
-import static com.sequenceiq.cloudbreak.util.NullUtil.ifNotNull;
+import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -81,13 +81,13 @@ public class CredentialToCredentialV1ResponseConverter {
             credentialDefinitionService.removeSensitives(platform(source.getCloudPlatform()), json);
             coverSensitiveData(json);
             CredentialAttributes credentialAttributes = json.get(CredentialAttributes.class);
-            ifNotNull(credentialAttributes.getAws(), param -> response.setAws(awsConverter.convert(param)));
-            ifNotNull(credentialAttributes.getAzure(), param -> response.setAzure(azureConverter.convert(param)));
-            ifNotNull(credentialAttributes.getGcp(), param -> response.setGcp(gcpConverter.convert(param)));
-            ifNotNull(credentialAttributes.getOpenstack(), param -> response.setOpenstack(openstackConverter.convert(param)));
-            ifNotNull(credentialAttributes.getCumulus(), param -> response.setCumulus(cumulusConverter.convert(param)));
-            ifNotNull(credentialAttributes.getMock(), param -> response.setMock(mockConverter.convert(param)));
-            ifNotNull(credentialAttributes.getYarn(), param -> response.setYarn(yarnConverter.convert(param)));
+            doIfNotNull(credentialAttributes.getAws(), param -> response.setAws(awsConverter.convert(param)));
+            doIfNotNull(credentialAttributes.getAzure(), param -> response.setAzure(azureConverter.convert(param)));
+            doIfNotNull(credentialAttributes.getGcp(), param -> response.setGcp(gcpConverter.convert(param)));
+            doIfNotNull(credentialAttributes.getOpenstack(), param -> response.setOpenstack(openstackConverter.convert(param)));
+            doIfNotNull(credentialAttributes.getCumulus(), param -> response.setCumulus(cumulusConverter.convert(param)));
+            doIfNotNull(credentialAttributes.getMock(), param -> response.setMock(mockConverter.convert(param)));
+            doIfNotNull(credentialAttributes.getYarn(), param -> response.setYarn(yarnConverter.convert(param)));
         } catch (IOException e) {
             throw new BadRequestException("Cannot deserialize the credential's attributes", e);
         }
@@ -110,13 +110,13 @@ public class CredentialToCredentialV1ResponseConverter {
 
     private void convertAttributes(CredentialRequest source, Credential credential) {
         CredentialAttributes credentialAttributes = new CredentialAttributes();
-        ifNotNull(source.getAws(), params -> credentialAttributes.setAws(awsConverter.convert(params)));
-        ifNotNull(source.getAzure(), params -> credentialAttributes.setAzure(azureConverter.convert(params)));
-        ifNotNull(source.getGcp(), params -> credentialAttributes.setGcp(gcpConverter.convert(params)));
-        ifNotNull(source.getCumulus(), params -> credentialAttributes.setCumulus(cumulusConverter.convert(params)));
-        ifNotNull(source.getMock(), params -> credentialAttributes.setMock(mockConverter.convert(params)));
-        ifNotNull(source.getOpenstack(), params -> credentialAttributes.setOpenstack(openstackConverter.convert(params)));
-        ifNotNull(source.getYarn(), params -> credentialAttributes.setYarn(yarnConverter.convert(params)));
+        doIfNotNull(source.getAws(), params -> credentialAttributes.setAws(awsConverter.convert(params)));
+        doIfNotNull(source.getAzure(), params -> credentialAttributes.setAzure(azureConverter.convert(params)));
+        doIfNotNull(source.getGcp(), params -> credentialAttributes.setGcp(gcpConverter.convert(params)));
+        doIfNotNull(source.getCumulus(), params -> credentialAttributes.setCumulus(cumulusConverter.convert(params)));
+        doIfNotNull(source.getMock(), params -> credentialAttributes.setMock(mockConverter.convert(params)));
+        doIfNotNull(source.getOpenstack(), params -> credentialAttributes.setOpenstack(openstackConverter.convert(params)));
+        doIfNotNull(source.getYarn(), params -> credentialAttributes.setYarn(yarnConverter.convert(params)));
         credential.setAttributes(new Json(credentialAttributes).getValue());
     }
 

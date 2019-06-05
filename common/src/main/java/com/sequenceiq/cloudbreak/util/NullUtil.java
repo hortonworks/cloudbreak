@@ -8,13 +8,13 @@ public class NullUtil {
     private NullUtil() {
     }
 
-    public static <T> void ifNotNull(T value, Consumer<T> consumer) {
+    public static <T> void doIfNotNull(T value, Consumer<T> consumer) {
         if (value != null) {
             consumer.accept(value);
         }
     }
 
-    public static <T, R> R ifNotNullF(T value, Function<T, R> consumer) {
+    public static <T, R> R getIfNotNull(T value, Function<T, R> consumer) {
         if (value != null) {
             return consumer.apply(value);
         }
