@@ -2,7 +2,6 @@ package com.sequenceiq.distrox.api.v1.distrox.endpoint;
 
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.WorkspaceOpDescription.DELETE_BY_NAME;
-import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.CHECK_IMAGE;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.CREATE;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_INSTANCE_BY_ID;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_WITH_KERBEROS;
@@ -39,7 +38,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Re
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.doc.Notes;
-import com.sequenceiq.distrox.api.v1.distrox.model.DistroXImageChangeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceModeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXRepairV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXScaleV1Request;
@@ -111,11 +109,6 @@ public interface DistroXV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = POST_STACK_FOR_BLUEPRINT, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "postDistroXForBlueprintV1")
     GeneratedBlueprintV4Response postStackForBlueprint(@PathParam("name") String name, @Valid DistroXV1Request stackRequest);
-
-    @PUT
-    @Path("{name}/change_image")
-    @ApiOperation(value = CHECK_IMAGE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "changeImageDistroXV1")
-    void changeImage(@PathParam("name") String name, @Valid DistroXImageChangeV1Request stackImageChangeRequest);
 
     @GET
     @Path("{name}/request")
