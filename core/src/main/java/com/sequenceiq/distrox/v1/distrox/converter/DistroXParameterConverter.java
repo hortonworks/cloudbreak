@@ -20,4 +20,15 @@ public class DistroXParameterConverter {
     public AwsStackV4Parameters convert(AwsDistroXV1Parameters source) {
         return new AwsStackV4Parameters();
     }
+
+    public AzureDistroXV1Parameters convert(AzureStackV4Parameters source) {
+        AzureDistroXV1Parameters response = new AzureDistroXV1Parameters();
+        response.setEncryptStorage(source.isEncryptStorage());
+        response.setResourceGroupName(source.getResourceGroupName());
+        return response;
+    }
+
+    public AwsDistroXV1Parameters convert(AwsStackV4Parameters source) {
+        return new AwsDistroXV1Parameters();
+    }
 }

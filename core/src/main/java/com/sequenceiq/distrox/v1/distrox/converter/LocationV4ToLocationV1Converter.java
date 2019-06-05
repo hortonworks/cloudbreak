@@ -11,12 +11,24 @@ import com.sequenceiq.distrox.api.v1.distrox.model.cluster.storage.location.Stor
 @Component
 public class LocationV4ToLocationV1Converter {
 
-    public Set<StorageLocationV4Request> convert(Set<StorageLocationV1Request> source) {
+    public Set<StorageLocationV4Request> convertTo(Set<StorageLocationV1Request> source) {
         return source.stream().map(this::convert).collect(Collectors.toSet());
     }
 
     public StorageLocationV4Request convert(StorageLocationV1Request source) {
         StorageLocationV4Request response = new StorageLocationV4Request();
+        response.setPropertyFile(source.getPropertyFile());
+        response.setPropertyName(source.getPropertyName());
+        response.setValue(source.getValue());
+        return response;
+    }
+
+    public Set<StorageLocationV1Request> convertFrom(Set<StorageLocationV4Request> source) {
+        return source.stream().map(this::convert).collect(Collectors.toSet());
+    }
+
+    public StorageLocationV1Request convert(StorageLocationV4Request source) {
+        StorageLocationV1Request response = new StorageLocationV1Request();
         response.setPropertyFile(source.getPropertyFile());
         response.setPropertyName(source.getPropertyName());
         response.setValue(source.getValue());

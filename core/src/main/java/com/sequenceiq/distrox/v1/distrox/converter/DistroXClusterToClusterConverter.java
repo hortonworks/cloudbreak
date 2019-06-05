@@ -68,10 +68,29 @@ public class DistroXClusterToClusterConverter {
         return response;
     }
 
+    public DistroXClusterV1Request convert(ClusterV4Request source) {
+        DistroXClusterV1Request response = new DistroXClusterV1Request();
+        response.setGateway(ifNotNullF(source.getGateway(), gatewayConverter::convert));
+        response.setDatabases(source.getDatabases());
+        response.setBlueprintName(source.getBlueprintName());
+        response.setUserName(source.getUserName());
+        response.setPassword(source.getPassword());
+        response.setCm(ifNotNullF(source.getCm(), cmConverter::convert));
+        response.setCloudStorage(ifNotNullF(source.getCloudStorage(), cloudStorageConverter::convert));
+        response.setProxy(source.getProxyConfigCrn());
+        return response;
+    }
+
     private String getProxyCrnByName(String proxyName) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        return proxyConfigDtoService.get(proxyName, accountId, userCrn).getName();
+    }
+
+    private String getProxyNameByCrn(String proxyCrn) {
+        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
         //TODO use the dedicated endpoint when name and crn will be break down on the API level
-        return proxyConfigDtoService.get(proxyName, accountId, userCrn).getCrn();
+        return proxyConfigDtoService.get(proxyCrn, accountId, userCrn).getCrn();
     }
 }
