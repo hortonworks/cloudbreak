@@ -8,7 +8,9 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableSwagger2
 @SpringBootApplication(scanBasePackages = {"com.sequenceiq.redbeams",
+        "com.sequenceiq.cloudbreak.auth",
         "com.sequenceiq.cloudbreak.auth.altus",
+        "com.sequenceiq.cloudbreak.auth.filter",
         "com.sequenceiq.cloudbreak.auth.security",
         "com.sequenceiq.cloudbreak.security",
         "com.sequenceiq.cloudbreak.api.util",
