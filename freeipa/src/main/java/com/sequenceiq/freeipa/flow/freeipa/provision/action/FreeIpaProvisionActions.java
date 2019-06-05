@@ -17,6 +17,8 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMa
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.hostmetadatasetup.HostMetadataSetupRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.hostmetadatasetup.HostMetadataSetupSuccess;
+import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInstallFreeIpaRequest;
+import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInstallFreeIpaSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesSuccess;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackFailureAction;
@@ -83,15 +85,33 @@ public class FreeIpaProvisionActions {
         };
     }
 
+    @Bean(name = "FREEIPA_POST_INSTALL_STATE")
+    public Action<?, ?> postInstallFreeIpa() {
+        return new AbstractStackProvisionAction<>(InstallFreeIpaServicesSuccess.class) {
+
+            @Override
+            protected void doExecute(StackContext context, InstallFreeIpaServicesSuccess payload, Map<Object, Object> variables) {
+                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.POSTINSTALL_FREEIPA_CONFIGURATION,
+                        "Performing FreeIPA post-install configuration");
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new PostInstallFreeIpaRequest(context.getStack().getId());
+            }
+        };
+    }
+
     @Bean(name = "FREEIPA_PROVISION_FINISHED_STATE")
     public Action<?, ?> provisionFinished() {
-        return new AbstractStackProvisionAction<>(InstallFreeIpaServicesSuccess.class) {
+        return new AbstractStackProvisionAction<>(PostInstallFreeIpaSuccess.class) {
 
             @Inject
             private Set<AbstractConfigRegister> configRegisters;
 
             @Override
-            protected void doExecute(StackContext context, InstallFreeIpaServicesSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(StackContext context, PostInstallFreeIpaSuccess payload, Map<Object, Object> variables) {
                 stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.PROVISIONED, "FreeIPA installation finished");
                 configRegisters.forEach(configProvider -> configProvider.register(context.getStack().getId()));
                 sendEvent(context);
