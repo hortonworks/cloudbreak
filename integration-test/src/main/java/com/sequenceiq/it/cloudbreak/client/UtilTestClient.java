@@ -9,14 +9,12 @@ import com.sequenceiq.it.cloudbreak.action.v4.util.DeploymentPreferencesAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.RepoConfigValidationAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.SecurityRulesAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.StackMatrixAction;
-import com.sequenceiq.it.cloudbreak.action.v4.util.TagSpecificationsAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.VersionCheckAction;
 import com.sequenceiq.it.cloudbreak.dto.securityrule.SecurityRulesTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.CloudStorageMatrixTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.DeploymentPreferencesTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.RepoConfigValidationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.StackMatrixTestDto;
-import com.sequenceiq.it.cloudbreak.dto.util.TagSpecificationsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.VersionCheckTestDto;
 
 @Service
@@ -40,10 +38,6 @@ public class UtilTestClient {
 
     public Action<StackMatrixTestDto, CloudbreakClient> stackMatrixV4() {
         return new StackMatrixAction();
-    }
-
-    public Action<TagSpecificationsTestDto, CloudbreakClient> tagSpecificationsV4() {
-        return new TagSpecificationsAction();
     }
 
     public Action<VersionCheckTestDto, CloudbreakClient> versionChecker() {
