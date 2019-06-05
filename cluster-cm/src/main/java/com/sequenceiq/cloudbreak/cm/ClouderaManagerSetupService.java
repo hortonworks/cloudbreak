@@ -12,6 +12,7 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,7 @@ import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiRemoteDataContext;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -161,8 +163,12 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             }
         } catch (CancellationException cancellationException) {
             throw cancellationException;
+        } catch (ApiException e) {
+            LOGGER.info("Error while building the cluster. Message: {}; Response: {}", e.getMessage(), e.getResponseBody(), e);
+            String msg = extractMessage(e);
+            throw new ClouderaManagerOperationFailedException(msg, e);
         } catch (Exception e) {
-            LOGGER.info("Error while building the cluster. Message {}, throwable: {}", e.getMessage(), e);
+            LOGGER.info("Error while building the cluster. Message: {}", e.getMessage(), e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
         return cluster;
@@ -216,9 +222,14 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         Optional<ApiCommand> clusterInstallCommand = clouderaManagerResourceApi.listActiveCommands("SUMMARY").getItems()
                 .stream().filter(cmd -> "ClusterTemplateImport".equals(cmd.getName())).findFirst();
         if (cmCluster == null) {
-            // addRepositories - if true the parcels repositories in the cluster template will be added.
-            clusterInstallCommand = Optional.of(clouderaManagerResourceApi.importClusterTemplate(!prewarmed, apiClusterTemplate));
-            LOGGER.debug("Cloudera cluster template has been submitted, cluster install is in progress");
+            try {
+                // addRepositories - if true the parcels repositories in the cluster template will be added.
+                clusterInstallCommand = Optional.of(clouderaManagerResourceApi.importClusterTemplate(!prewarmed, apiClusterTemplate));
+                LOGGER.debug("Cloudera cluster template has been submitted, cluster install is in progress");
+            } catch (ApiException e) {
+                String msg = "Cluster template install failed: " + extractMessage(e);
+                throw new ClouderaManagerOperationFailedException(msg, e);
+            }
         }
         clusterInstallCommand.ifPresent(cmd -> clouderaManagerPollingServiceProvider.templateInstallCheckerService(stack, client, cmd.getId()));
     }
@@ -286,5 +297,24 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     private Boolean isPrewarmed(Long clusterId) {
         return clusterComponentProvider.getClouderaManagerRepoDetails(clusterId).getPredefined();
+    }
+
+    private String extractMessage(ApiException apiException) {
+        if (StringUtils.isEmpty(apiException.getResponseBody())) {
+            return apiException.getMessage();
+        }
+        try {
+            JsonNode tree = JsonUtil.readTree(apiException.getResponseBody());
+            JsonNode message = tree.get("message");
+            if (message != null && message.isTextual()) {
+                String text = message.asText();
+                if (StringUtils.isNotEmpty(text)) {
+                    return text;
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.debug("Failed to parse API response body as JSON", e);
+        }
+        return apiException.getResponseBody();
     }
 }

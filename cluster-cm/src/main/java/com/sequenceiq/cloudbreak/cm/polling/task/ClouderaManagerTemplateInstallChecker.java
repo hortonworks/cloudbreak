@@ -1,15 +1,15 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -44,28 +44,17 @@ public class ClouderaManagerTemplateInstallChecker extends AbstractClouderaManag
             } else if (apiCommand.getSuccess()) {
                 return true;
             } else {
-                List<String> errorReasons = Optional.ofNullable(apiCommand.getChildren()).stream()
-                        .flatMap(extractErrorMessages(commandsResourceApi))
-                        .collect(Collectors.toList());
+                List<String> errorReasons = new ArrayList<>();
+                digForFailureCause(apiCommand, errorReasons, commandsResourceApi);
 
-                LOGGER.info("Command [" + getCommandName() + "] failed: " + errorReasons);
-                throw new ClouderaManagerOperationFailedException("Cluster template install failed: " + errorReasons);
+                String msg = "Cluster template install failed: " + errorReasons;
+                LOGGER.info(msg);
+                throw new ClouderaManagerOperationFailedException(msg);
             }
         } catch (ApiException e) {
             LOGGER.debug("cloudera manager is not running", e);
             return false;
         }
-    }
-
-    private Function<ApiCommandList, Stream<String>> extractErrorMessages(CommandsResourceApi commandsResourceApi) {
-        return apiCommandList -> {
-            List<String> errorReasons = new ArrayList<>();
-            apiCommandList.getItems().stream()
-                    .filter(commandFailed())
-                    .map(readCommand(commandsResourceApi))
-                    .forEach(cmd -> digForFailureCause(cmd, errorReasons, commandsResourceApi));
-            return errorReasons.stream();
-        };
     }
 
     private Predicate<ApiCommand> commandFailed() {
@@ -84,16 +73,18 @@ public class ClouderaManagerTemplateInstallChecker extends AbstractClouderaManag
     }
 
     private void digForFailureCause(ApiCommand apiCommand, List<String> errorReasons, CommandsResourceApi commandsResourceApi) {
-        List<ApiCommand> children = Optional.ofNullable(apiCommand.getChildren()).map(ApiCommandList::getItems).orElse(List.of());
-        if (children.isEmpty()) {
+        List<String> childErrors = new LinkedList<>();
+        Optional.ofNullable(apiCommand.getChildren()).map(ApiCommandList::getItems).orElse(List.of()).stream()
+                .filter(commandFailed())
+                .map(readCommand(commandsResourceApi))
+                .forEach(cmd -> digForFailureCause(cmd, childErrors, commandsResourceApi));
+
+        if (childErrors.isEmpty() && StringUtils.isNotEmpty(apiCommand.getResultMessage())) {
             String reason = String.format("Command [%s], with id [%.0f] failed: %s", apiCommand.getName(), apiCommand.getId(), apiCommand.getResultMessage());
             errorReasons.add(reason);
-        } else {
-            children.stream()
-                    .filter(commandFailed())
-                    .map(readCommand(commandsResourceApi))
-                    .forEach(cmd -> digForFailureCause(cmd, errorReasons, commandsResourceApi));
         }
+
+        errorReasons.addAll(childErrors);
     }
 
     @Override
