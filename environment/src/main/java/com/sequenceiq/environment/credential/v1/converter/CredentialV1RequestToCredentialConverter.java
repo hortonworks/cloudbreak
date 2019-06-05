@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.credential.v1.converter;
 
-import static com.sequenceiq.cloudbreak.util.NullUtil.ifNotNull;
+import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 
 import javax.inject.Inject;
 
@@ -49,13 +49,13 @@ public class CredentialV1RequestToCredentialConverter {
 
     private void convertAttributes(CredentialRequest source, Credential credential) {
         CredentialAttributes credentialAttributes = new CredentialAttributes();
-        ifNotNull(source.getAws(), param -> credentialAttributes.setAws(awsConverter.convert(param)));
-        ifNotNull(source.getAzure(), param -> credentialAttributes.setAzure(azureConverter.convert(param)));
-        ifNotNull(source.getGcp(), param -> credentialAttributes.setGcp(gcpConverter.convert(param)));
-        ifNotNull(source.getCumulus(), param -> credentialAttributes.setCumulus(cumulusConverter.convert(param)));
-        ifNotNull(source.getMock(), param -> credentialAttributes.setMock(mockConverter.convert(param)));
-        ifNotNull(source.getOpenstack(), param -> credentialAttributes.setOpenstack(openstackConverter.convert(param)));
-        ifNotNull(source.getYarn(), param -> credentialAttributes.setYarn(yarnConverter.convert(param)));
+        doIfNotNull(source.getAws(), param -> credentialAttributes.setAws(awsConverter.convert(param)));
+        doIfNotNull(source.getAzure(), param -> credentialAttributes.setAzure(azureConverter.convert(param)));
+        doIfNotNull(source.getGcp(), param -> credentialAttributes.setGcp(gcpConverter.convert(param)));
+        doIfNotNull(source.getCumulus(), param -> credentialAttributes.setCumulus(cumulusConverter.convert(param)));
+        doIfNotNull(source.getMock(), param -> credentialAttributes.setMock(mockConverter.convert(param)));
+        doIfNotNull(source.getOpenstack(), param -> credentialAttributes.setOpenstack(openstackConverter.convert(param)));
+        doIfNotNull(source.getYarn(), param -> credentialAttributes.setYarn(yarnConverter.convert(param)));
         credential.setAttributes(new Json(credentialAttributes).getValue());
     }
 

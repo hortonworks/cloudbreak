@@ -1,6 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
-import static com.sequenceiq.cloudbreak.util.NullUtil.ifNotNullF;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import javax.inject.Inject;
 
@@ -58,21 +58,19 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setName(source.getName());
         request.setType(StackType.WORKLOAD);
         request.setCloudPlatform(getCloudPlatform(source.getEnvironment().getName()));
-
         request.setEnvironment(environmentConverter.convert(source.getEnvironment()));
-        request.setAuthentication(ifNotNullF(source.getAuthentication(), authenticationConverter::convert));
-        request.setImage(ifNotNullF(source.getImage(), imageConverter::convert));
-        request.setTelemetry(ifNotNullF(source.getTelemetry(), telemetryConverter::convert));
-        request.setCluster(ifNotNullF(source.getCluster(), clusterConverter::convert));
-        request.setInstanceGroups(ifNotNullF(source.getInstanceGroups(), instanceGroupConverter::convertTo));
-        request.setNetwork(ifNotNullF(source.getNetwork(), networkConverter::convert));
-        request.setAws(ifNotNullF(source.getAws(), stackParameterConverter::convert));
-        request.setAzure(ifNotNullF(source.getAzure(), stackParameterConverter::convert));
-
+        request.setTelemetry(getIfNotNull(source.getTelemetry(), telemetryConverter::convert));
+        request.setAuthentication(getIfNotNull(source.getAuthentication(), authenticationConverter::convert));
+        request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
+        request.setCluster(getIfNotNull(source.getCluster(), clusterConverter::convert));
+        request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), instanceGroupConverter::convertTo));
+        request.setNetwork(getIfNotNull(source.getNetwork(), networkConverter::convert));
+        request.setAws(getIfNotNull(source.getAws(), stackParameterConverter::convert));
+        request.setAzure(getIfNotNull(source.getAzure(), stackParameterConverter::convert));
         request.setPlacement(getPlacement(source.getEnvironment().getName()));
         request.setInputs(source.getInputs());
-        request.setTags(ifNotNullF(source.getTags(), this::getTags));
-        request.setSharedService(ifNotNullF(source.getSdx(), this::getSharedService));
+        request.setTags(getIfNotNull(source.getTags(), this::getTags));
+        request.setSharedService(getIfNotNull(source.getSdx(), this::getSharedService));
         request.setCustomDomain(null);
         request.setGatewayPort(null);
         request.setGcp(null);
@@ -87,16 +85,16 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setName(source.getName());
 
         request.setEnvironment(environmentConverter.convert(source.getEnvironment()));
-        request.setAuthentication(ifNotNullF(source.getAuthentication(), authenticationConverter::convert));
-        request.setImage(ifNotNullF(source.getImage(), imageConverter::convert));
-        request.setCluster(ifNotNullF(source.getCluster(), clusterConverter::convert));
-        request.setInstanceGroups(ifNotNullF(source.getInstanceGroups(), instanceGroupConverter::convertFrom));
-        request.setNetwork(ifNotNullF(source.getNetwork(), networkConverter::convert));
-        request.setAws(ifNotNullF(source.getAws(), stackParameterConverter::convert));
-        request.setAzure(ifNotNullF(source.getAzure(), stackParameterConverter::convert));
+        request.setAuthentication(getIfNotNull(source.getAuthentication(), authenticationConverter::convert));
+        request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
+        request.setCluster(getIfNotNull(source.getCluster(), clusterConverter::convert));
+        request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), instanceGroupConverter::convertFrom));
+        request.setNetwork(getIfNotNull(source.getNetwork(), networkConverter::convert));
+        request.setAws(getIfNotNull(source.getAws(), stackParameterConverter::convert));
+        request.setAzure(getIfNotNull(source.getAzure(), stackParameterConverter::convert));
         request.setInputs(source.getInputs());
-        request.setTags(ifNotNullF(source.getTags(), this::getTags));
-        request.setSdx(ifNotNullF(source.getSharedService(), this::getSdx));
+        request.setTags(getIfNotNull(source.getTags(), this::getTags));
+        request.setSdx(getIfNotNull(source.getSharedService(), this::getSdx));
         return request;
     }
 
