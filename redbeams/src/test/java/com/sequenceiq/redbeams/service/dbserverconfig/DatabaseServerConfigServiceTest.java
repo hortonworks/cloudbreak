@@ -85,7 +85,7 @@ public class DatabaseServerConfigServiceTest {
 
     @Test
     public void testFindAll() {
-        when(repository.findAllByWorkspaceIdAndEnvironmentId(0L, "myenv")).thenReturn(Collections.singleton(server));
+        when(repository.findByWorkspaceIdAndEnvironmentId(0L, "myenv")).thenReturn(Collections.singleton(server));
 
         Set<DatabaseServerConfig> servers = underTest.findAll(0L, "myenv", false);
 

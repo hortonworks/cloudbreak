@@ -2,16 +2,31 @@ package com.sequenceiq.redbeams.service.crn;
 
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 
 @Service
 public class CrnService {
 
-    // FIXME Account id is to be fixed - maybe comes from user CRN via CrnFilter / RestRequestThreadLocalService
+    @Inject
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
+
+    public String getCurrentAccountId() {
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        if (userCrn == null) {
+            throw new CrnParseException("Current user CRN is not set");
+        }
+        Crn crn = Crn.safeFromString(userCrn);
+        return crn.getAccountId();
+    }
+
     public Crn createCrn(DatabaseConfig resource) {
         return createCrn(resource, Crn.ResourceType.DATABASE);
     }
@@ -29,7 +44,7 @@ public class CrnService {
 
         return Crn.builder()
                 .setService(Crn.Service.REDBEAMS)
-                .setAccountId("ACCOUNT_ID")
+                .setAccountId(getCurrentAccountId())
                 .setResourceType(resourceType)
                 .setResource(resourceId)
                 .build();

@@ -70,7 +70,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
             throw new IllegalArgumentException("No environmentId supplied.");
         }
 
-        return repository.findAllByWorkspaceIdAndEnvironmentId(workspaceId, environmentId);
+        return repository.findByWorkspaceIdAndEnvironmentId(workspaceId, environmentId);
     }
 
     public DatabaseServerConfig create(DatabaseServerConfig resource, Long workspaceId) {

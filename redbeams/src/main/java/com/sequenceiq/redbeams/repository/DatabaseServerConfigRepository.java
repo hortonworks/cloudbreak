@@ -7,6 +7,7 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
@@ -16,10 +17,14 @@ import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 @Transactional(TxType.REQUIRED)
 public interface DatabaseServerConfigRepository extends JpaRepository<DatabaseServerConfig, Long> {
 
-    Set<DatabaseServerConfig> findAllByWorkspaceIdAndEnvironmentId(Long workspaceId, String environmentId);
+    Set<DatabaseServerConfig> findByWorkspaceIdAndEnvironmentId(Long workspaceId, String environmentId);
 
+    @Query("SELECT s FROM DatabaseServerConfig s WHERE s.workspaceId = :workspaceId AND s.environmentId = :environmentId "
+        + "AND (s.name = :name OR s.resourceCrn = :name)")
     Optional<DatabaseServerConfig> findByNameAndWorkspaceIdAndEnvironmentId(String name, Long workspaceId, String environmentId);
 
+    @Query("SELECT s FROM DatabaseServerConfig s WHERE s.workspaceId = :workspaceId AND s.environmentId = :environmentId "
+        + "AND (s.name IN :names OR s.resourceCrn IN :names)")
     Set<DatabaseServerConfig> findByNameInAndWorkspaceIdAndEnvironmentId(Set<String> names, Long workspaceId, String environmentId);
 
 }
