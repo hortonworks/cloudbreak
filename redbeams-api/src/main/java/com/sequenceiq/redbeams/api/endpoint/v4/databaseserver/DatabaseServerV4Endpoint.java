@@ -3,6 +3,7 @@ package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver;
 import java.util.Set;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -39,8 +40,8 @@ public interface DatabaseServerV4Endpoint {
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.LIST, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
-        nickname = "listDatabasesServers")
-    DatabaseServerV4Responses list(@QueryParam("environmentId") String environmentId,
+        nickname = "listDatabaseServers")
+    DatabaseServerV4Responses list(@NotNull @QueryParam("environmentId") String environmentId,
         @QueryParam("attachGlobal") @DefaultValue("false") Boolean attachGlobal);
 
     @GET
@@ -48,7 +49,7 @@ public interface DatabaseServerV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.GET_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
         nickname = "getDatabaseServer")
-    DatabaseServerV4Response get(@QueryParam("environmentId") String environmentId, @PathParam("name") String name);
+    DatabaseServerV4Response get(@NotNull @QueryParam("environmentId") String environmentId, @PathParam("name") String name);
 
     @POST
     @Path("register")
@@ -62,14 +63,14 @@ public interface DatabaseServerV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
         nickname = "deleteDatabaseServer")
-    DatabaseServerV4Response delete(@QueryParam("environmentId") String environmentId, @PathParam("name") String name);
+    DatabaseServerV4Response delete(@NotNull @QueryParam("environmentId") String environmentId, @PathParam("name") String name);
 
     @DELETE
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.DELETE_MULTIPLE_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
             nickname = "deleteMultipleDatabaseServers")
-    DatabaseServerV4Responses deleteMultiple(@QueryParam("environmentId") String environmentId, Set<String> names);
+    DatabaseServerV4Responses deleteMultiple(@NotNull @QueryParam("environmentId") String environmentId, Set<String> names);
 
 //    @GET
 //    @Path("{name}/request")

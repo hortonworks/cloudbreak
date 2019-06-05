@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -70,9 +71,25 @@ public class DatabaseConfigServiceTest {
     @InjectMocks
     private DatabaseConfigService underTest;
 
+    private DatabaseConfig db;
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+
+        db = new DatabaseConfig();
+        db.setId(1L);
+        db.setName("mydb");
+    }
+
+    @Test
+    public void testFindAll() {
+        when(databaseConfigRepository.findByEnvironmentId("myenv")).thenReturn(Collections.singleton(db));
+
+        Set<DatabaseConfig> dbs = underTest.findAll("myenv");
+
+        assertEquals(1, dbs.size());
+        assertEquals(1L, dbs.iterator().next().getId().longValue());
     }
 
     @Test

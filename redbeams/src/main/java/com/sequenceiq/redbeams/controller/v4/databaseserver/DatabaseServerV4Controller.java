@@ -34,13 +34,13 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Override
     public DatabaseServerV4Responses list(String environmentId, Boolean attachGlobal) {
-        Set<DatabaseServerConfig> all = databaseServerConfigService.findAllInWorkspaceAndEnvironment(DEFAULT_WORKSPACE, environmentId, attachGlobal);
+        Set<DatabaseServerConfig> all = databaseServerConfigService.findAll(DEFAULT_WORKSPACE, environmentId, attachGlobal);
         return new DatabaseServerV4Responses(converterUtil.convertAllAsSet(all, DatabaseServerV4Response.class));
     }
 
     @Override
     public DatabaseServerV4Response get(String environmentId, String name) {
-        DatabaseServerConfig server = databaseServerConfigService.getByNameInWorkspaceAndEnvironment(DEFAULT_WORKSPACE, environmentId, name);
+        DatabaseServerConfig server = databaseServerConfigService.getByName(DEFAULT_WORKSPACE, environmentId, name);
         return converterUtil.convert(server, DatabaseServerV4Response.class);
     }
 
@@ -54,7 +54,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @Override
     public DatabaseServerV4Response delete(String environmentId, String name) {
         DatabaseServerConfig deleted =
-                databaseServerConfigService.deleteByNameInWorkspace(DEFAULT_WORKSPACE, environmentId, name);
+                databaseServerConfigService.deleteByName(DEFAULT_WORKSPACE, environmentId, name);
         //notify(ResourceEvent.DATABASE_SERVER_CONFIG_DELETED);
         return converterUtil.convert(deleted, DatabaseServerV4Response.class);
     }
@@ -62,7 +62,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @Override
     public DatabaseServerV4Responses deleteMultiple(String environmentId, Set<String> names) {
         Set<DatabaseServerConfig> deleted =
-                databaseServerConfigService.deleteMultipleByNameInWorkspace(DEFAULT_WORKSPACE, environmentId, names);
+                databaseServerConfigService.deleteMultipleByName(DEFAULT_WORKSPACE, environmentId, names);
         //notify(ResourceEvent.DATABASE_SERVER_CONFIG_DELETED);
         return new DatabaseServerV4Responses(converterUtil.convertAllAsSet(deleted, DatabaseServerV4Response.class));
     }
@@ -70,9 +70,10 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @Override
     public DatabaseServerTestV4Response test(DatabaseServerTestV4Request request) {
         String connectionResult;
-        if (request.getExistingDatabaseServerName() != null) {
-            connectionResult = databaseServerConfigService.testConnection(DEFAULT_WORKSPACE,
-                    request.getEnvironmentId(), request.getExistingDatabaseServerName());
+        if (request.getExistingDatabaseServer() != null) {
+            String name = request.getExistingDatabaseServer().getName();
+            String environmentId = request.getExistingDatabaseServer().getEnvironmentId();
+            connectionResult = databaseServerConfigService.testConnection(DEFAULT_WORKSPACE, environmentId, name);
         } else {
             DatabaseServerConfig server = converterUtil.convert(request.getDatabaseServer(), DatabaseServerConfig.class);
             connectionResult = databaseServerConfigService.testConnection(server);

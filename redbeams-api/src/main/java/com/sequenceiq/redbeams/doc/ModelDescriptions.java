@@ -20,7 +20,8 @@ public final class ModelDescriptions {
         public static final String TYPE = "Type of database, aka the service name that will use the database like HIVE, DRUID, SUPERSET, RANGER, etc.";
         public static final String CONNECTOR_JAR_URL = "URL that points to the jar of the connection driver(connector)";
         public static final String DATABASE_CONNECTION_TEST_RESULT = "Result of database connection test";
-        public static final String DATABASE_REQUEST = "Unsaved database config to be tested for connectivity";
+        public static final String DATABASE_TEST_EXISTING_REQUEST = "Identifiers of saved database config to be tested for connectivity";
+        public static final String DATABASE_TEST_NEW_REQUEST = "Unsaved database config to be tested for connectivity";
         public static final String DATABASE_CREATE_RESULT = "Result of database creation";
     }
 
@@ -34,7 +35,8 @@ public final class ModelDescriptions {
         public static final String CONNECTOR_JAR_URL = "URL that points to the JAR of the connection driver (JDBC connector)";
         public static final String CONNECTION_USER_NAME = "User name for the administrative user of the database server";
         public static final String CONNECTION_PASSWORD = "Password for the administrative user of the database server";
-        public static final String DATABASE_SERVER_REQUEST = "Unsaved database server config to be tested for connectivity";
+        public static final String DATABASE_SERVER_TEST_EXISTING_REQUEST = "Identifiers of saved database server config to be tested for connectivity";
+        public static final String DATABASE_SERVER_TEST_NEW_REQUEST = "Unsaved database server config to be tested for connectivity";
         public static final String DATABASE_SERVER_CONNECTION_TEST_RESULT = "Result of database server connection test";
     }
 

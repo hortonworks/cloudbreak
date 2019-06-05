@@ -1,6 +1,5 @@
 package com.sequenceiq.redbeams.service.dbconfig;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -15,7 +14,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -46,8 +44,8 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
     @Inject
     private TransactionService transactionService;
 
-    public List<DatabaseConfig> list(String environmentId) {
-        return Lists.newArrayList(databaseConfigRepository.findByEnvironmentId(environmentId));
+    public Set<DatabaseConfig> findAll(String environmentId) {
+        return databaseConfigRepository.findByEnvironmentId(environmentId);
     }
 
     public DatabaseConfig register(DatabaseConfig configToSave) {
@@ -76,25 +74,34 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
         }
     }
 
-    public Set<DatabaseConfig> delete(Set<String> names, String environmentCrn) {
+    public DatabaseConfig get(String name, String environmentId) {
+        Optional<DatabaseConfig> resourceOpt =
+                databaseConfigRepository.findByEnvironmentIdAndName(environmentId, name);
+        if (resourceOpt.isEmpty()) {
+            throw new NotFoundException(String.format("No database found with name '%s' in environment '%s'",
+                    name, environmentId));
+        }
+        MDCBuilder.buildMdcContext(resourceOpt.get());
+        return resourceOpt.get();
+    }
+
+    public Set<DatabaseConfig> delete(Set<String> names, String environmentId) {
         // TODO return a MUTLI-STATUS if some of the deletes won't succeed.
         // TODO crn validation, maybe as a validator
-        Set<DatabaseConfig> foundDatabaseConfigs = databaseConfigRepository.findAllByEnvironmentIdAndNameIn(environmentCrn, names);
+        Set<DatabaseConfig> foundDatabaseConfigs = databaseConfigRepository.findAllByEnvironmentIdAndNameIn(environmentId, names);
         if (names.size() != foundDatabaseConfigs.size()) {
             Set<String> notFoundDatabaseConfigs = Sets.difference(names, foundDatabaseConfigs.stream().map(DatabaseConfig::getName).collect(Collectors.toSet()));
             throw new NotFoundException(
-                    String.format("Database(s) for %s not found in environment %s", String.join(", ", notFoundDatabaseConfigs), environmentCrn));
+                    String.format("Database(s) for %s not found in environment %s", String.join(", ", notFoundDatabaseConfigs), environmentId));
         }
-        foundDatabaseConfigs.forEach(this::deleteOne);
-        return foundDatabaseConfigs;
+        return foundDatabaseConfigs.stream()
+            .map(this::deleteOne)
+            .collect(Collectors.toSet());
     }
 
-    public DatabaseConfig delete(String databaseName, String environmentCrnString) {
-        Optional<DatabaseConfig> foundDatabaseConfig = databaseConfigRepository.findByEnvironmentIdAndName(environmentCrnString, databaseName);
-        DatabaseConfig databaseConfig = foundDatabaseConfig
-                .orElseThrow(() -> new NotFoundException(
-                        String.format("Database with name '%s' not found in environment %s", databaseName, environmentCrnString)));
-        return deleteOne(databaseConfig);
+    public DatabaseConfig delete(String name, String environmentId) {
+        DatabaseConfig resource = get(name, environmentId);
+        return deleteOne(resource);
     }
 
     private DatabaseConfig deleteOne(DatabaseConfig databaseConfig) {

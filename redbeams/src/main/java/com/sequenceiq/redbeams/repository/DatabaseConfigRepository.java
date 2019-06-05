@@ -1,6 +1,5 @@
 package com.sequenceiq.redbeams.repository;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -22,7 +21,7 @@ public interface DatabaseConfigRepository extends JpaRepository<DatabaseConfig, 
     Optional<DatabaseConfig> findByEnvironmentIdAndName(String environmentId, String name);
 
     @CheckPermissionsByReturnValue(action = ResourceAction.READ)
-    List<DatabaseConfig> findByEnvironmentId(String environmentId);
+    Set<DatabaseConfig> findByEnvironmentId(String environmentId);
 
     @CheckPermissionsByReturnValue(action = ResourceAction.READ)
     Set<DatabaseConfig> findAllByEnvironmentIdAndNameIn(String environmentId, Set<String> names);
