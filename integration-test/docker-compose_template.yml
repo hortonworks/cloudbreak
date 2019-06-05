@@ -73,7 +73,7 @@ services:
       cbreak_default: {}
     volumes:
       - ./apidefinitions:/json
-    command: bash -c "for f in /json/*.json ; do echo check to $${f} ; swagger-diff -i $${f} cb.json ; done ;cp *.json /json"
+    command: bash -c "for f in /json/cb*.json ; do echo check to $${f} ; swagger-diff -i $${f} /json/cb.json ; done;"
     image: afarsang/docker-swagger-diff
   swagger-validation:
     networks:
