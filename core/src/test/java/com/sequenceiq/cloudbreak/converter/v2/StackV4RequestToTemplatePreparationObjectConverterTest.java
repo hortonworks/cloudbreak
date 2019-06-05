@@ -45,18 +45,18 @@ import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
-import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -192,18 +192,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
 
     @Test
     public void testConvertWhenKerberosNameIsNullInAmbariThenEmptyKerberosShouldBeStored() {
-        when(cluster.getKerberosName()).thenReturn(null);
-
-        TemplatePreparationObject result = underTest.convert(source);
-
-        assertNotNull(result);
-        assertFalse(result.getKerberosConfig().isPresent());
-    }
-
-    @Test
-    public void testConvertWhenKerberosNameIsNotNullInAmbariButSecurityFalseThenEmptyKerberosShouldBeStored() {
-        when(cluster.getKerberosName()).thenReturn(TEST_KERBEROS_NAME);
-
+        when(kerberosConfigService.get("envCrn")).thenReturn(Optional.empty());
         TemplatePreparationObject result = underTest.convert(source);
 
         assertNotNull(result);
@@ -212,16 +201,14 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
 
     @Test
     public void testConvertWhenKerberosNameIsNotNullInAmbariAndSecurityTrueThenExpectedKerberosConfigShouldBeStored() {
-        KerberosConfig expected = new KerberosConfig();
-        when(cluster.getKerberosName()).thenReturn(TEST_KERBEROS_NAME);
-        when(kerberosConfigService.getByNameForWorkspaceId(eq(TEST_KERBEROS_NAME), anyLong())).thenReturn(expected);
+        KerberosConfig expected = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().build();
+        when(kerberosConfigService.get("envCrn")).thenReturn(Optional.of(expected));
 
         TemplatePreparationObject result = underTest.convert(source);
 
         assertNotNull(result);
         assertTrue(result.getKerberosConfig().isPresent());
         assertEquals(expected, result.getKerberosConfig().get());
-        verify(kerberosConfigService, times(1)).getByNameForWorkspaceId(anyString(), anyLong());
     }
 
     @Test

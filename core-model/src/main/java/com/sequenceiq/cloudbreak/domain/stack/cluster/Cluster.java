@@ -45,7 +45,6 @@ import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -54,7 +53,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
-import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
@@ -126,9 +124,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @Convert(converter = SecretToString.class)
     @SecretValue
     private Secret dpAmbariPassword = Secret.EMPTY;
-
-    @ManyToOne
-    private KerberosConfig kerberosConfig;
 
     @Column(nullable = false)
     private Boolean topologyValidation = Boolean.TRUE;
@@ -469,14 +464,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         this.dpAmbariPassword = new Secret(dpAmbariPassword);
     }
 
-    public KerberosConfig getKerberosConfig() {
-        return kerberosConfig;
-    }
-
-    public void setKerberosConfig(KerberosConfig kerberosConfig) {
-        this.kerberosConfig = kerberosConfig;
-    }
-
     public Boolean getTopologyValidation() {
         return topologyValidation;
     }
@@ -554,14 +541,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @Override
     public WorkspaceResource getResource() {
         return WorkspaceResource.STACK;
-    }
-
-    public boolean isAdJoinable() {
-        return kerberosConfig != null && kerberosConfig.getType() == KerberosType.ACTIVE_DIRECTORY;
-    }
-
-    public boolean isIpaJoinable() {
-        return kerberosConfig != null && kerberosConfig.getType() == KerberosType.FREEIPA;
     }
 
     @Override

@@ -9,10 +9,12 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -32,20 +34,26 @@ public class PreTerminationStateExecutor {
     @Inject
     private StackUtil stackUtil;
 
+    @Inject
+    private KerberosConfigService kerberosConfigService;
+
+    @Inject
+    private KerberosDetailService kerberosDetailService;
+
     public void runPreteraminationTasks(Stack stack) throws CloudbreakException {
         leaveDomains(stack);
     }
 
     private void leaveDomains(Stack stack) throws CloudbreakException {
-        Cluster cluster = stack.getCluster();
-        if (cluster.isAdJoinable() || cluster.isIpaJoinable()) {
+        KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn()).orElse(null);
+        if (kerberosDetailService.isAdJoinable(kerberosConfig) || kerberosDetailService.isIpaJoinable(kerberosConfig)) {
             try {
                 HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
                 GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
                 ExitCriteriaModel noExitModel = ClusterDeletionBasedExitCriteriaModel.nonCancellableModel();
-                if (cluster.isAdJoinable()) {
+                if (kerberosDetailService.isAdJoinable(kerberosConfig)) {
                     hostOrchestrator.leaveDomain(gatewayConfig, stackUtil.collectNodes(stack), "ad_member", "ad_leave", noExitModel);
-                } else if (cluster.isIpaJoinable()) {
+                } else if (kerberosDetailService.isIpaJoinable(kerberosConfig)) {
                     hostOrchestrator.leaveDomain(gatewayConfig, stackUtil.collectNodes(stack), "ipa_member", "ipa_leave", noExitModel);
                 }
             } catch (CloudbreakOrchestratorFailedException e) {

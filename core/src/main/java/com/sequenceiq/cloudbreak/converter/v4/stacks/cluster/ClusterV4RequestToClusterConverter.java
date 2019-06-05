@@ -38,7 +38,6 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.Clo
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.ClusterAttributes;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
@@ -47,7 +46,6 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
@@ -68,9 +66,6 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
     private CloudStorageValidationUtil cloudStorageValidationUtil;
 
     @Inject
-    private KerberosConfigService kerberosConfigService;
-
-    @Inject
     private BlueprintService blueprintService;
 
     @Inject
@@ -82,18 +77,12 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
     @Override
     public Cluster convert(ClusterV4Request source) {
         Workspace workspace = workspaceService.getForCurrentUser();
-
         Cluster cluster = new Cluster();
         cluster.setName(source.getName());
         cluster.setStatus(REQUESTED);
         cluster.setUserName(source.getUserName());
         cluster.setPassword(source.getPassword());
         cluster.setExecutorType(source.getExecutorType());
-
-        if (source.getKerberosName() != null) {
-            KerberosConfig kerberosConfig = kerberosConfigService.getByNameForWorkspaceId(source.getKerberosName(), workspace.getId());
-            cluster.setKerberosConfig(kerberosConfig);
-        }
         cluster.setCloudbreakAmbariUser(ambariUserName);
         cluster.setCloudbreakAmbariPassword(PasswordUtil.generatePassword());
         cluster.setDpAmbariUser(cmMgmtUsername);

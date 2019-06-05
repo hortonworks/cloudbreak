@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.blueprint.kerberos.KerberosDetailService;
+import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -43,7 +43,6 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -54,7 +53,9 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -158,6 +159,9 @@ public class ClusterHostServiceRunner {
     @Inject
     private LdapConfigService ldapConfigService;
 
+    @Inject
+    private KerberosConfigService kerberosConfigService;
+
     public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster) {
         try {
             Set<Node> nodes = stackUtil.collectNodes(stack);
@@ -208,12 +212,12 @@ public class ClusterHostServiceRunner {
     private SaltConfig createSaltConfig(Stack stack, Cluster cluster, GatewayConfig primaryGatewayConfig, Iterable<GatewayConfig> gatewayConfigs)
             throws IOException, CloudbreakOrchestratorException {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
-        saveCustomNameservers(stack, cluster.getKerberosConfig(), servicePillar);
-        if (cluster.getKerberosConfig() != null
-                && kerberosDetailService.isAmbariManagedKerberosPackages(cluster.getKerberosConfig())
-                && !kerberosDetailService.isAmbariManagedKrb5Conf(cluster.getKerberosConfig())) {
+        KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn()).orElse(null);
+        saveCustomNameservers(stack, kerberosConfig, servicePillar);
+        if (kerberosConfig != null
+                && kerberosDetailService.isAmbariManagedKerberosPackages(kerberosConfig)
+                && !kerberosDetailService.isAmbariManagedKrb5Conf(kerberosConfig)) {
             Map<String, String> kerberosPillarConf = new HashMap<>();
-            KerberosConfig kerberosConfig = cluster.getKerberosConfig();
             if (StringUtils.isEmpty(kerberosConfig.getDescriptor())) {
                 putIfNotNull(kerberosPillarConf, kerberosConfig.getUrl(), "url");
                 putIfNotNull(kerberosPillarConf, kerberosDetailService.resolveHostForKdcAdmin(kerberosConfig, kerberosConfig.getUrl()), "adminUrl");
@@ -231,7 +235,7 @@ public class ClusterHostServiceRunner {
         servicePillar.put("metadata", new SaltPillarProperties("/metadata/init.sls",
                 singletonMap("cluster", singletonMap("name", stack.getCluster().getName()))));
         ClusterPreCreationApi connector = clusterApiConnectors.getConnector(cluster);
-        saveGatewayPillar(primaryGatewayConfig, cluster, servicePillar, connector);
+        saveGatewayPillar(primaryGatewayConfig, cluster, servicePillar, connector, kerberosConfig);
 
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
 
@@ -257,12 +261,11 @@ public class ClusterHostServiceRunner {
             decoratePillarWithAmbariDatabase(cluster, servicePillar);
         }
 
-        //TODO: environment crn!!!!!!
         Optional<LdapView> ldapView = ldapConfigService.get(stack.getEnvironmentCrn());
         ldapView.ifPresent(ldap -> saveLdapPillar(ldap, servicePillar));
 
-        saveSssdAdPillar(cluster, servicePillar);
-        saveSssdIpaPillar(cluster, servicePillar);
+        saveSssdAdPillar(cluster, servicePillar, kerberosConfig);
+        saveSssdIpaPillar(cluster, servicePillar, kerberosConfig);
         saveDockerPillar(cluster.getExecutorType(), servicePillar);
         saveHDPPillar(cluster.getId(), servicePillar);
         ldapView.ifPresent(ldap -> saveLdapsAdPillar(ldap, servicePillar, connector));
@@ -279,9 +282,8 @@ public class ClusterHostServiceRunner {
         return new SaltConfig(servicePillar, createGrainProperties(gatewayConfigs));
     }
 
-    private void saveSssdAdPillar(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
-        if (cluster.isAdJoinable()) {
-            KerberosConfig kerberosConfig = cluster.getKerberosConfig();
+    private void saveSssdAdPillar(Cluster cluster, Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) {
+        if (kerberosDetailService.isAdJoinable(kerberosConfig)) {
             Map<String, Object> sssdConnfig = new HashMap<>();
             sssdConnfig.put("username", kerberosConfig.getPrincipal());
             sssdConnfig.put("domainuppercase", kerberosConfig.getRealm().toUpperCase());
@@ -311,9 +313,8 @@ public class ClusterHostServiceRunner {
         return parameters;
     }
 
-    private void saveSssdIpaPillar(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
-        if (cluster.isIpaJoinable()) {
-            KerberosConfig kerberosConfig = cluster.getKerberosConfig();
+    private void saveSssdIpaPillar(Cluster cluster, Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) {
+        if (kerberosDetailService.isIpaJoinable(kerberosConfig)) {
             Map<String, Object> sssdConnfig = new HashMap<>();
             sssdConnfig.put("principal", kerberosConfig.getPrincipal());
             sssdConnfig.put("realm", kerberosConfig.getRealm().toUpperCase());
@@ -414,7 +415,7 @@ public class ClusterHostServiceRunner {
     }
 
     private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Map<String, SaltPillarProperties> servicePillar,
-            ClusterPreCreationApi connector) throws IOException {
+            ClusterPreCreationApi connector, KerberosConfig kerberosConfig) throws IOException {
         Map<String, Object> gateway = new HashMap<>();
         gateway.put("address", gatewayConfig.getPublicAddress());
         gateway.put("username", cluster.getUserName());
@@ -440,7 +441,7 @@ public class ClusterHostServiceRunner {
                 gateway.put("ports", servicePorts);
             }
         }
-        gateway.put("kerberos", cluster.getKerberosConfig() != null);
+        gateway.put("kerberos", kerberosConfig != null);
 
         boolean ambariBlueprint = blueprintService.isAmbariBlueprint(cluster.getBlueprint());
         List<String> serviceNames = ambariBlueprint ? ExposedService.getAllServiceNameForAmbari() : ExposedService.getAllServiceNameForCM();

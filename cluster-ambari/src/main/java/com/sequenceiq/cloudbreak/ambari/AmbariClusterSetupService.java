@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -125,7 +126,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
 
     @Override
     public Cluster buildCluster(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, TemplatePreparationObject templatePreparationObject,
-            Set<HostMetadata> hostsInCluster, String sdxContext) {
+            Set<HostMetadata> hostsInCluster, String sdxContext, KerberosConfig kerberosConfig) {
         Cluster cluster = stack.getCluster();
         try {
             ambariRepositoryVersionService.setBaseRepoURL(stack.getName(), cluster.getId(), ambariClient);
@@ -135,7 +136,7 @@ public class AmbariClusterSetupService implements ClusterSetupService {
             clusterConnectorPollingResultChecker
                     .checkPollingResult(waitForHostsResult, cloudbreakMessagesService.getMessage(AMBARI_CLUSTER_HOST_JOIN_FAILED.code()));
             Map<String, List<Map<String, String>>> hostGroupMappings = hostGroupAssociationBuilder.buildHostGroupAssociations(instanceMetaDataByHostGroup);
-            ambariClusterTemplateSubmitter.addClusterTemplate(cluster, hostGroupMappings, ambariClient);
+            ambariClusterTemplateSubmitter.addClusterTemplate(cluster, hostGroupMappings, ambariClient, kerberosConfig);
             Pair<PollingResult, Exception> pollingResult =
                     ambariOperationService.waitForOperationsToStart(stack, ambariClient, singletonMap("INSTALL_START", 1), START_OPERATION_STATE);
 

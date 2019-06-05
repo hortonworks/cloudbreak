@@ -28,11 +28,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -84,7 +82,6 @@ import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
@@ -101,6 +98,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -113,7 +111,6 @@ import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.hostmetadata.HostMetadataService;
-import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -240,10 +237,6 @@ public class ClusterService {
             }
             LOGGER.debug("Filesystem config saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
-            if (cluster.getKerberosConfig() != null) {
-                kerberosConfigService.save(cluster.getKerberosConfig());
-            }
-
             removeGatewayIfNotSupported(cluster, components);
 
             cluster.setStack(stack);
@@ -269,9 +262,6 @@ public class ClusterService {
         cluster.setWorkspace(workspace);
         if (cluster.getGateway() != null) {
             cluster.getGateway().setWorkspace(workspace);
-        }
-        if (cluster.getKerberosConfig() != null) {
-            cluster.getKerberosConfig().setWorkspace(workspace);
         }
     }
 
@@ -384,7 +374,7 @@ public class ClusterService {
         }
         LOGGER.debug("Cluster delete requested.");
         markVolumesForDeletion(stack);
-        flowManager.triggerClusterTermination(stackId, withStackDelete, deleteDependencies);
+        flowManager.triggerClusterTermination(stack, withStackDelete, deleteDependencies);
     }
 
     private void markVolumesForDeletion(Stack stack) {
@@ -867,14 +857,11 @@ public class ClusterService {
     }
 
     public Cluster recreate(Stack stack, String blueprintName, Set<HostGroup> hostGroups, boolean validateBlueprint,
-            StackRepoDetails stackRepoDetails, String kerberosPassword, String kerberosPrincipal) throws TransactionExecutionException {
+            StackRepoDetails stackRepoDetails) throws TransactionExecutionException {
         return transactionService.required(() -> {
             checkBlueprintIdAndHostGroups(blueprintName, hostGroups);
             Stack stackWithLists = stackService.getByIdWithListsInTransaction(stack.getId());
             Cluster cluster = getCluster(stackWithLists);
-            if (cluster != null && stackWithLists.getCluster().getKerberosConfig() != null) {
-                initKerberos(kerberosPassword, kerberosPrincipal, cluster);
-            }
             Blueprint blueprint = blueprintService.getByNameForWorkspace(blueprintName, stack.getWorkspace());
             if (!withEmbeddedAmbariDB(cluster)) {
                 throw new BadRequestException("Ambari doesn't support resetting external DB automatically. To reset Ambari Server schema you must first drop "
@@ -902,20 +889,6 @@ public class ClusterService {
             }
             return stackWithLists.getCluster();
         });
-    }
-
-    private void initKerberos(String kerberosPassword, String kerberosPrincipal, Cluster cluster) {
-        List<String> missing = Stream.of(Pair.of("password", kerberosPassword), Pair.of("principal", kerberosPrincipal))
-                .filter(p -> !StringUtils.hasLength(p.getRight()))
-                .map(Pair::getLeft).collect(Collectors.toList());
-        if (!missing.isEmpty()) {
-            throw new BadRequestException(String.format("Missing Kerberos credential detail(s): %s", String.join(", ", missing)));
-        }
-        KerberosConfig kerberosConfig = cluster.getKerberosConfig();
-        kerberosConfig.setPassword(kerberosPassword);
-        kerberosConfig.setPrincipal(kerberosPrincipal);
-
-        kerberosConfigService.save(kerberosConfig);
     }
 
     private void checkBlueprintIdAndHostGroups(String blueprint, Set<HostGroup> hostGroups) {
@@ -1159,10 +1132,6 @@ public class ClusterService {
 
     public Set<Cluster> findByRdsConfig(Long rdsConfigId) {
         return repository.findByRdsConfig(rdsConfigId);
-    }
-
-    public Set<Cluster> findByKerberosConfig(Long kerberosConfigId) {
-        return repository.findByKerberosConfig(kerberosConfigId);
     }
 
     public void updateAmbariRepoDetails(Long clusterId, StackRepositoryV4Request stackRepository) {

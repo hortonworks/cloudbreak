@@ -9,7 +9,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 
 @Prototype
 public class ClusterTestDto extends AbstractCloudbreakTestDto<ClusterV4Request, ClusterV4Response, ClusterTestDto> {
@@ -102,21 +101,6 @@ public class ClusterTestDto extends AbstractCloudbreakTestDto<ClusterV4Request, 
     public ClusterTestDto withGateway(String key) {
         GatewayTestDto gatewayEntity = getTestContext().get(key);
         getRequest().setGateway(gatewayEntity.getRequest());
-        return this;
-    }
-
-    public ClusterTestDto withKerberosKey(String kerberos) {
-        KerberosTestDto kerberosEntity = getTestContext().get(kerberos);
-        getRequest().setKerberosName(kerberosEntity.getName());
-        return this;
-    }
-
-    public ClusterTestDto withKerberos() {
-        return withKerberosKey(KerberosTestDto.class.getSimpleName());
-    }
-
-    public ClusterTestDto withKerberos(String kerberos) {
-        getRequest().setKerberosName(kerberos);
         return this;
     }
 
