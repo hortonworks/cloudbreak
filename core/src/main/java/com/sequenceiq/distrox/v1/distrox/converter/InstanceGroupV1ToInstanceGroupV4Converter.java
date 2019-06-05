@@ -25,6 +25,10 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
     @Inject
     private InstanceGroupParameterConverter instanceGroupParameterConverter;
 
+    public List<InstanceGroupV4Request> convertTo(Set<InstanceGroupV1Request> instanceGroups) {
+        return instanceGroups.stream().map(this::convert).collect(Collectors.toList());
+    }
+
     public InstanceGroupV4Request convert(InstanceGroupV1Request source) {
         InstanceGroupV4Request response = new InstanceGroupV4Request();
         response.setNodeCount(source.getNodeCount());
@@ -33,14 +37,31 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         response.setName(source.getName());
         response.setTemplate(ifNotNullF(source.getTemplate(), instanceTemplateConverter::convert));
         response.setRecoveryMode(source.getRecoveryMode());
-        response.setSecurityGroup(getSecurotyGroup(source.getName()));
+        response.setSecurityGroup(getSecurityGroup(source.getName()));
         response.setRecipeNames(source.getRecipeNames());
         response.setAws(ifNotNullF(source.getAws(), instanceGroupParameterConverter::convert));
         response.setAzure(ifNotNullF(source.getAzure(), instanceGroupParameterConverter::convert));
         return response;
     }
 
-    private SecurityGroupV4Request getSecurotyGroup(String name) {
+    public Set<InstanceGroupV1Request> convertFrom(List<InstanceGroupV4Request> instanceGroups) {
+        return instanceGroups.stream().map(this::convert).collect(Collectors.toSet());
+    }
+
+    public InstanceGroupV1Request convert(InstanceGroupV4Request source) {
+        InstanceGroupV1Request response = new InstanceGroupV1Request();
+        response.setNodeCount(source.getNodeCount());
+        response.setType(source.getType());
+        response.setName(source.getName());
+        response.setTemplate(ifNotNullF(source.getTemplate(), instanceTemplateConverter::convert));
+        response.setRecoveryMode(source.getRecoveryMode());
+        response.setRecipeNames(source.getRecipeNames());
+        response.setAws(ifNotNullF(source.getAws(), instanceGroupParameterConverter::convert));
+        response.setAzure(ifNotNullF(source.getAzure(), instanceGroupParameterConverter::convert));
+        return response;
+    }
+
+    private SecurityGroupV4Request getSecurityGroup(String name) {
         SecurityGroupV4Request response = new SecurityGroupV4Request();
         SecurityRuleV4Request securityRule = new SecurityRuleV4Request();
         securityRule.setProtocol("tcp");
@@ -57,9 +78,5 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
             ret.addAll(List.of("9443", "8443", "443"));
         }
         return ret;
-    }
-
-    public List<InstanceGroupV4Request> convert(Set<InstanceGroupV1Request> instanceGroups) {
-        return instanceGroups.stream().map(this::convert).collect(Collectors.toList());
     }
 }

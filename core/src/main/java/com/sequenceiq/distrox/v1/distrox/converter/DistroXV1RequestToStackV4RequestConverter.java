@@ -1,6 +1,5 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
-import static com.sequenceiq.cloudbreak.util.NullUtil.ifNotNull;
 import static com.sequenceiq.cloudbreak.util.NullUtil.ifNotNullF;
 
 import javax.inject.Inject;
@@ -58,10 +57,10 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setCloudPlatform(getCloudPlatform(source.getEnvironment().getName()));
 
         request.setEnvironment(environmentConverter.convert(source.getEnvironment()));
-        ifNotNull(authenticationConverter.convert(source.getAuthentication()), request::setAuthentication);
+        request.setAuthentication(ifNotNullF(source.getAuthentication(), authenticationConverter::convert));
         request.setImage(ifNotNullF(source.getImage(), imageConverter::convert));
         request.setCluster(ifNotNullF(source.getCluster(), clusterConverter::convert));
-        request.setInstanceGroups(ifNotNullF(source.getInstanceGroups(), instanceGroupConverter::convert));
+        request.setInstanceGroups(ifNotNullF(source.getInstanceGroups(), instanceGroupConverter::convertTo));
         request.setNetwork(ifNotNullF(source.getNetwork(), networkConverter::convert));
         request.setAws(ifNotNullF(source.getAws(), stackParameterConverter::convert));
         request.setAzure(ifNotNullF(source.getAzure(), stackParameterConverter::convert));
@@ -79,6 +78,24 @@ public class DistroXV1RequestToStackV4RequestConverter {
         return request;
     }
 
+    public DistroXV1Request convert(StackV4Request source) {
+        DistroXV1Request request = new DistroXV1Request();
+        request.setName(source.getName());
+
+        request.setEnvironment(environmentConverter.convert(source.getEnvironment()));
+        request.setAuthentication(ifNotNullF(source.getAuthentication(), authenticationConverter::convert));
+        request.setImage(ifNotNullF(source.getImage(), imageConverter::convert));
+        request.setCluster(ifNotNullF(source.getCluster(), clusterConverter::convert));
+        request.setInstanceGroups(ifNotNullF(source.getInstanceGroups(), instanceGroupConverter::convertFrom));
+        request.setNetwork(ifNotNullF(source.getNetwork(), networkConverter::convert));
+        request.setAws(ifNotNullF(source.getAws(), stackParameterConverter::convert));
+        request.setAzure(ifNotNullF(source.getAzure(), stackParameterConverter::convert));
+        request.setInputs(source.getInputs());
+        request.setTags(ifNotNullF(source.getTags(), this::getTags));
+        request.setSdx(ifNotNullF(source.getSharedService(), this::getSdx));
+        return request;
+    }
+
     private CloudPlatform getCloudPlatform(String environmentName) {
         return CloudPlatform.valueOf(environmentService.get(environmentName, workspaceService.getForCurrentUser().getId()).getCloudPlatform());
     }
@@ -91,10 +108,24 @@ public class DistroXV1RequestToStackV4RequestConverter {
         return response;
     }
 
+    private TagsV1Request getTags(TagsV4Request source) {
+        TagsV1Request response = new TagsV1Request();
+        response.setApplication(source.getApplication());
+        response.setUserDefined(source.getUserDefined());
+        response.setDefaults(source.getDefaults());
+        return response;
+    }
+
     private SharedServiceV4Request getSharedService(SdxV1Request sdx) {
         SharedServiceV4Request sharedServiceV4Request = new SharedServiceV4Request();
         sharedServiceV4Request.setDatalakeName(sdx.getName());
         return sharedServiceV4Request;
+    }
+
+    private SdxV1Request getSdx(SharedServiceV4Request sharedServiceV4Request) {
+        SdxV1Request sdx = new SdxV1Request();
+        sdx.setName(sharedServiceV4Request.getDatalakeName());
+        return sdx;
     }
 
     private PlacementSettingsV4Request getPlacement(String name) {
