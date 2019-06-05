@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.EphemeralClusterUpdateTriggerEvent;
@@ -91,6 +92,9 @@ public class ReactorFlowManager {
 
     @Inject
     private AuthenticatedUserService authenticatedUserService;
+
+    @Inject
+    private KerberosConfigService kerberosConfigService;
 
     public void triggerProvisioning(Long stackId) {
         String selector = FlowChainTriggers.FULL_PROVISION_TRIGGER_EVENT;
@@ -230,8 +234,9 @@ public class ReactorFlowManager {
         notifyWithoutCheck(stackId, selector, new StackEvent(selector, stackId));
     }
 
-    public void triggerClusterTermination(Long stackId, Boolean withStackDelete, Boolean deleteDependencies) {
-        Boolean secure = stackService.getByIdWithTransaction(stackId).getCluster().getKerberosConfig() != null;
+    public void triggerClusterTermination(Stack stack, Boolean withStackDelete, Boolean deleteDependencies) {
+        Long stackId = stack.getId();
+        Boolean secure = kerberosConfigService.isKerberosConfigExistsForEnvironment(stack.getEnvironmentCrn());
         String selector = secure ? FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT : FlowChainTriggers.TERMINATION_TRIGGER_EVENT;
         notify(stackId, selector, new TerminationEvent(selector, stackId, false, deleteDependencies));
         cancelRunningFlows(stackId);

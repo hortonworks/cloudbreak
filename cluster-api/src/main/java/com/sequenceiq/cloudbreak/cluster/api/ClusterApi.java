@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
@@ -31,8 +32,9 @@ public interface ClusterApi {
     }
 
     default Cluster buildCluster(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, TemplatePreparationObject templatePreparationObject,
-            Set<HostMetadata> hostsInCluster, String sdxContext, Telemetry telemetry) {
-        return clusterSetupService().buildCluster(instanceMetaDataByHostGroup, templatePreparationObject, hostsInCluster, sdxContext, telemetry);
+            Set<HostMetadata> hostsInCluster, String sdxContext, Telemetry telemetry, KerberosConfig kerberosConfig) {
+        return clusterSetupService().buildCluster(instanceMetaDataByHostGroup, templatePreparationObject, hostsInCluster, sdxContext, telemetry,
+                kerberosConfig);
     }
 
     default void waitForHosts(Stack stack, Set<HostMetadata> hostsInCluster) {
@@ -93,10 +95,6 @@ public interface ClusterApi {
 
     default void installComponents(Map<String, String> components, String hostname) throws CloudbreakException {
         clusterModificationService().installComponents(components, hostname);
-    }
-
-    default void regenerateKerberosKeytabs(String hostname) throws CloudbreakException {
-        clusterModificationService().regenerateKerberosKeytabs(hostname);
     }
 
     default void startComponents(Map<String, String> components, String hostname) throws CloudbreakException {

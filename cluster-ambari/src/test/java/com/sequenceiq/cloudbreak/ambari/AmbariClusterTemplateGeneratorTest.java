@@ -14,8 +14,8 @@ import org.powermock.reflect.Whitebox;
 
 import com.sequenceiq.ambari.client.services.ClusterService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariClusterTemplateGeneratorTest {
@@ -42,7 +42,7 @@ public class AmbariClusterTemplateGeneratorTest {
         cluster.setPassword("UserProvidedPassword");
 
         // WHEN
-        underTest.generateClusterTemplate(cluster, new HashMap<>(), ambariClient);
+        underTest.generateClusterTemplate(cluster, new HashMap<>(), ambariClient, null);
 
         // THEN
         Mockito.verify(ambariClient, Mockito.times(1)).
@@ -56,13 +56,13 @@ public class AmbariClusterTemplateGeneratorTest {
         // GIVEN
         Cluster cluster = TestUtil.cluster();
         cluster.setPassword("UserProvidedPassword");
-        KerberosConfig kerberosConfig = new KerberosConfig();
-        kerberosConfig.setPassword("KerberosPassword");
-        kerberosConfig.setPrincipal("principal");
-        cluster.setKerberosConfig(kerberosConfig);
+        KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig()
+            .withPassword("KerberosPassword")
+            .withPrincipal("principal")
+            .build();
 
         // WHEN
-        underTest.generateClusterTemplate(cluster, new HashMap<>(), ambariClient);
+        underTest.generateClusterTemplate(cluster, new HashMap<>(), ambariClient, kerberosConfig);
 
         // THEN
         Mockito.verify(ambariClient, Mockito.times(1)).

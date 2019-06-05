@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.controller.validation.stack;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -38,7 +37,6 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.PlatformResourceClientService;
-import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -65,9 +63,6 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
     private RdsConfigService rdsConfigService;
 
     @Inject
-    private KerberosConfigService kerberosConfigService;
-
-    @Inject
     private DatalakeResourcesService datalakeResourcesService;
 
     @Inject
@@ -89,7 +84,6 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
         validateTemplates(subject, validationBuilder);
         validateSharedService(subject, validationBuilder, workspaceId);
         validateEncryptionKey(subject, validationBuilder);
-        validateKerberos(subject.getCluster().getKerberosName(), validationBuilder, workspaceId);
         return validationBuilder.build();
     }
 
@@ -219,16 +213,7 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
                 rdsConfigService.getByNameForWorkspaceId(s, workspaceId).getType()).collect(Collectors.toSet());
     }
 
-    private void validateKerberos(String kerberosName, ValidationResultBuilder validationBuilder, Long workspaceId) {
-        if (kerberosName != null && kerberosName.isEmpty()) {
-            validationBuilder.error("kerberosName should not be empty. Should be either filled or null!");
-        } else if (isNotEmpty(kerberosName)) {
-            kerberosConfigService.getByNameForWorkspaceId(kerberosName, workspaceId);
-        }
-    }
-
     private boolean isEncryptionTypeSetUp(InstanceTemplateV4Request template) {
         return getEncryptionType(template) != null;
     }
 }
-
