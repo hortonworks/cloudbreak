@@ -2,13 +2,11 @@ package com.sequenceiq.cloudbreak.client;
 
 import javax.ws.rs.client.WebTarget;
 
-import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintUtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.ConnectorV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.EnvironmentV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.EventV4Endpoint;
@@ -26,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.UserProfileV4Endpoi
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.WorkspaceAwareUtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.WorkspaceV4Endpoint;
+import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 
 public class CloudbreakUserCrnClient extends AbstractUserCrnServiceClient<CloudbreakUserCrnClient.CloudbreakEndpoint> {
     public CloudbreakUserCrnClient(String serviceAddress, ConfigKey configKey, String apiRoot) {
@@ -88,10 +87,6 @@ public class CloudbreakUserCrnClient extends AbstractUserCrnServiceClient<Cloudb
 
         public WorkspaceV4Endpoint workspaceV4Endpoint() {
             return getEndpoint(WorkspaceV4Endpoint.class);
-        }
-
-        public ConnectorV4Endpoint connectorV4Endpoint() {
-            return getEndpoint(ConnectorV4Endpoint.class);
         }
 
         public DatabaseV4Endpoint databaseV4Endpoint() {
