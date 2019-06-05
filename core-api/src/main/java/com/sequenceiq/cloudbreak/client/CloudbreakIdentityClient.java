@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintUtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.ConnectorV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.EventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
@@ -69,7 +68,6 @@ public class CloudbreakIdentityClient {
             ManagementPackV4Endpoint.class,
             KubernetesV4Endpoint.class,
             WorkspaceV4Endpoint.class,
-            ConnectorV4Endpoint.class,
             RecipeV4Endpoint.class,
             UserProfileV4Endpoint.class,
             UserV4Endpoint.class,
@@ -163,10 +161,6 @@ public class CloudbreakIdentityClient {
 
     public WorkspaceV4Endpoint workspaceV4Endpoint() {
         return getEndpoint(WorkspaceV4Endpoint.class);
-    }
-
-    public ConnectorV4Endpoint connectorV3Endpoint() {
-        return getEndpoint(ConnectorV4Endpoint.class);
     }
 
     public DatabaseV4Endpoint databaseV4Endpoint() {

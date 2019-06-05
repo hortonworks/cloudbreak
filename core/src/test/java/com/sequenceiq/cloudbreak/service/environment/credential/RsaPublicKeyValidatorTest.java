@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.credential;
+package com.sequenceiq.cloudbreak.service.environment.credential;
 
 import org.junit.Before;
 import org.junit.Rule;
