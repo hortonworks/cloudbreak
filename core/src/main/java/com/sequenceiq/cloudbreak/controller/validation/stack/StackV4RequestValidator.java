@@ -28,17 +28,16 @@ import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.Validati
 import com.sequenceiq.cloudbreak.controller.validation.Validator;
 import com.sequenceiq.cloudbreak.controller.validation.template.InstanceTemplateV4RequestValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.PlatformResourceClientService;
 import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
-import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -68,13 +67,13 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
     private KerberosConfigService kerberosConfigService;
 
     @Inject
-    private PlatformParameterService platformParameterService;
-
-    @Inject
     private DatalakeResourcesService datalakeResourcesService;
 
     @Inject
     private EnvironmentClientService environmentClientService;
+
+    @Inject
+    private PlatformResourceClientService platformResourceClientService;
 
     @Override
     public ValidationResult validate(StackV4Request subject) {
@@ -85,7 +84,7 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
         }
         validateTemplates(subject, validationBuilder);
         validateSharedService(subject, validationBuilder, workspaceId);
-        validateEncryptionKey(subject, validationBuilder, workspaceId);
+        validateEncryptionKey(subject, validationBuilder);
         validateKerberos(subject.getCluster().getKerberosName(), validationBuilder, workspaceId);
         return validationBuilder.build();
     }
@@ -129,7 +128,7 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
         }
     }
 
-    private void validateEncryptionKey(StackV4Request stackRequest, ValidationResultBuilder validationBuilder, Long workspaceId) {
+    private void validateEncryptionKey(StackV4Request stackRequest, ValidationResultBuilder validationBuilder) {
         DetailedEnvironmentResponse environment = environmentClientService.get(stackRequest.getEnvironmentCrn());
         stackRequest.getInstanceGroups().stream()
                 .filter(request -> isEncryptionTypeSetUp(request.getTemplate()))
@@ -139,7 +138,7 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
                 })
                 .forEach(request -> {
                     checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(request, environment.getCredentialName(),
-                            stackRequest.getPlacement().getRegion(), validationBuilder, workspaceId);
+                            stackRequest.getPlacement().getRegion(), validationBuilder);
                 });
     }
 
@@ -154,8 +153,8 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
     }
 
     private void checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(InstanceGroupV4Request instanceGroupRequest, String credentialName,
-            String region, ValidationResultBuilder validationBuilder, Long workspaceId) {
-        Optional<CloudEncryptionKeys> keys = getEncryptionKeysWithExceptionHandling(credentialName, region, workspaceId);
+            String region, ValidationResultBuilder validationBuilder) {
+        Optional<CloudEncryptionKeys> keys = getEncryptionKeysWithExceptionHandling(credentialName, region);
         if (keys.isPresent() && !keys.get().getCloudEncryptionKeys().isEmpty()) {
             if (getEncryptionKey(instanceGroupRequest.getTemplate()) == null) {
                 validationBuilder.error("There is no encryption key provided but CUSTOM type is given for encryption.");
@@ -176,10 +175,10 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
         return null;
     }
 
-    private Optional<CloudEncryptionKeys> getEncryptionKeysWithExceptionHandling(String credentialName, String region, Long workspaceId) {
+    private Optional<CloudEncryptionKeys> getEncryptionKeysWithExceptionHandling(String credentialName, String region) {
         try {
-            PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(workspaceId, credentialName, region, null, null);
-            return Optional.ofNullable(platformParameterService.getEncryptionKeys(request));
+            CloudEncryptionKeys cloudEncryptionKeys = platformResourceClientService.getEncryptionKeys(credentialName, region);
+            return Optional.ofNullable(cloudEncryptionKeys);
         } catch (RuntimeException ignore) {
             return Optional.empty();
         }
