@@ -102,7 +102,7 @@ public class DependecyDeletionService {
     private void deleteSecurityGroup(SecurityGroup securityGroup) {
         try {
             if (securityGroup != null) {
-                securityGroupService.delete(securityGroup);
+                securityGroupService.deleteWithMdcContextRestore(securityGroup);
             }
         } catch (Exception ex) {
             LOGGER.debug("Could not delete securityGroup {} which is associated with the stack: {}", securityGroup, ex.getMessage());

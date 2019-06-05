@@ -173,7 +173,7 @@ public class CredentialService extends AbstractWorkspaceAwareResourceService<Cre
 
     @Override
     public Credential create(Credential resource, Workspace workspace, User user) {
-        Credential created = super.create(resource, workspace, user);
+        Credential created = createWithMdcContextRestore(resource, workspace, user);
         userProfileHandler.createProfilePreparation(created, user);
         return created;
     }

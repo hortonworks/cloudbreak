@@ -60,7 +60,8 @@ public class StackTerminationService {
             dependecyDeletionService.deleteDependencies(stack);
         }
         if (stack.getType() == StackType.DATALAKE) {
-            datalakeResourcesService.findByDatalakeStackId(stack.getId()).ifPresent(datalakeResources -> datalakeResourcesService.delete(datalakeResources));
+            datalakeResourcesService.findByDatalakeStackId(stack.getId()).ifPresent(datalakeResources ->
+                    datalakeResourcesService.deleteWithMdcContextRestore(datalakeResources));
         }
         metricService.incrementMetricCounter(MetricType.STACK_TERMINATION_SUCCESSFUL, stack);
     }

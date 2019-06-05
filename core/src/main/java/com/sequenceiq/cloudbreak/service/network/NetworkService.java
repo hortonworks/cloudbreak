@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -15,16 +14,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.repository.NetworkRepository;
-import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @Service
 public class NetworkService extends AbstractArchivistService<Network> {
@@ -48,11 +47,6 @@ public class NetworkService extends AbstractArchivistService<Network> {
 
     public Network get(Long id) {
         return repository().findById(id).orElseThrow(notFound("Network", id));
-    }
-
-    public void delete(Long id) {
-        Optional.ofNullable(networkRepository.findById(id)).orElseThrow(notFound("Network", id))
-                .map(this::delete);
     }
 
     @Override

@@ -6,8 +6,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.ImmutableSet;
-
 import java.util.Set;
 
 import org.junit.Before;
@@ -16,11 +14,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.google.common.collect.ImmutableSet;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AbstractWorkspaceAwareResourceServiceTest {
@@ -45,6 +44,7 @@ public class AbstractWorkspaceAwareResourceServiceTest {
         // under test.
         when(underTest.delete(any(TestWorkspaceAwareResource.class))).thenCallRealMethod();
         when(underTest.delete(any(Set.class))).thenCallRealMethod();
+        when(underTest.deleteWithMdcContextRestore(any(TestWorkspaceAwareResource.class))).thenCallRealMethod();
         when(underTest.deleteMultipleByNameFromWorkspace(any(Set.class), any(Long.class))).thenCallRealMethod();
         when(underTest.getByNamesForWorkspaceId(any(Set.class), any(Long.class))).thenCallRealMethod();
     }

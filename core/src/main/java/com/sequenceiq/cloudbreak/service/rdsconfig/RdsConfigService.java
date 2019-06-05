@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.rdsconfig;
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -78,24 +79,11 @@ public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSC
         return rdsConfig;
     }
 
-    public void delete(Long id) {
-        RDSConfig rdsConfig = rdsConfigRepository.findById(id)
-                .orElseThrow(notFound("RDS configuration", id));
-        delete(rdsConfig);
-    }
-
-    public RDSConfig delete(String name) {
-        RDSConfig rdsConfig = Optional.ofNullable(rdsConfigRepository.findUserManagedByName(name))
-                .orElseThrow(notFound("RDS configuration", name));
-        delete(rdsConfig);
-        return rdsConfig;
-    }
-
     public RDSConfig createIfNotExists(User user, RDSConfig rdsConfig, Long workspaceId) {
         Optional<RDSConfig> configByName = rdsConfigRepository.findByNameAndWorkspaceId(rdsConfig.getName(), workspaceId);
         if (configByName.isEmpty()) {
             Workspace workspace = getWorkspaceService().get(workspaceId, user);
-            return create(rdsConfig, workspace, user);
+            return createWithMdcContextRestore(rdsConfig, workspace, user);
         }
         return rdsConfig;
 
@@ -114,10 +102,11 @@ public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSC
     }
 
     public void deleteDefaultRdsConfigs(Set<RDSConfig> rdsConfigs) {
-        delete(rdsConfigs.stream()
+        Map<String, String> mdcContextMap = MDCBuilder.getMdcContextMap();
+        rdsConfigs.stream()
                 .filter(rdsConfig -> ResourceStatus.DEFAULT == rdsConfig.getStatus())
-                .collect(Collectors.toSet())
-        );
+                .forEach(this::delete);
+        MDCBuilder.buildMdcContextFromMap(mdcContextMap);
     }
 
     public Set<RDSConfig> findAllByWorkspaceId(Long workspaceId) {

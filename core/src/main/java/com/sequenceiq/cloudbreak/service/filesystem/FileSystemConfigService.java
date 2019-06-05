@@ -36,10 +36,6 @@ public class FileSystemConfigService extends AbstractWorkspaceAwareResourceServi
     protected void prepareDeletion(FileSystem resource) {
     }
 
-    public FileSystem deleteByIdFromAnyAvailableWorkspace(Long id) {
-        return delete(getByIdFromAnyAvailableWorkspace(id));
-    }
-
     @Override
     protected void prepareCreation(FileSystem resource) {
     }

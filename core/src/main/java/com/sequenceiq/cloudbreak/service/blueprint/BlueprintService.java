@@ -187,10 +187,6 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         return blueprintRepository.saveAll(blueprints);
     }
 
-    public Blueprint delete(Long id) {
-        return delete(get(id));
-    }
-
     public boolean isClouderaManagerTemplate(Blueprint blueprint) {
         return blueprintUtils.isClouderaManagerClusterTemplate(blueprint.getBlueprintText());
     }
