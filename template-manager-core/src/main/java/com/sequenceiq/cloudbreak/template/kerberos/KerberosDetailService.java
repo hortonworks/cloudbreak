@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.blueprint.kerberos;
+package com.sequenceiq.cloudbreak.template.kerberos;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -13,8 +13,9 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
+import com.sequenceiq.cloudbreak.type.KerberosType;
 
 @Service
 public class KerberosDetailService {
@@ -89,5 +90,13 @@ public class KerberosDetailService {
     public Map<String, Object> getKrb5ConfProperties(@Nonnull KerberosConfig kerberosConfig) {
         Map<String, Object> krb5Conf = (Map<String, Object>) gson.fromJson(kerberosConfig.getKrb5Conf(), Map.class).get("krb5-conf");
         return (Map<String, Object>) krb5Conf.get("properties");
+    }
+
+    public boolean isAdJoinable(KerberosConfig kerberosConfig) {
+        return kerberosConfig != null && kerberosConfig.getType() == KerberosType.ACTIVE_DIRECTORY;
+    }
+
+    public boolean isIpaJoinable(KerberosConfig kerberosConfig) {
+        return kerberosConfig != null && kerberosConfig.getType() == KerberosType.FREEIPA;
     }
 }

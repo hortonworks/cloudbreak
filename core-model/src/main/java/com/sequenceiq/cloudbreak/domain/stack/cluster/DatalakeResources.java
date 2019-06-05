@@ -20,7 +20,6 @@ import javax.persistence.SequenceGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonStringSetUtils;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -58,9 +57,6 @@ public class DatalakeResources implements ProvisionEntity, WorkspaceAwareResourc
 
     @ManyToMany(cascade = CascadeType.MERGE)
     private Set<RDSConfig> rdsConfigs;
-
-    @ManyToOne
-    private KerberosConfig kerberosConfig;
 
     private String environmentCrn;
 
@@ -159,14 +155,6 @@ public class DatalakeResources implements ProvisionEntity, WorkspaceAwareResourc
 
     public void setRdsConfigs(Set<RDSConfig> rdsConfigs) {
         this.rdsConfigs = rdsConfigs;
-    }
-
-    public KerberosConfig getKerberosConfig() {
-        return kerberosConfig;
-    }
-
-    public void setKerberosConfig(KerberosConfig kerberosConfig) {
-        this.kerberosConfig = kerberosConfig;
     }
 
     public String getEnvironmentCrn() {

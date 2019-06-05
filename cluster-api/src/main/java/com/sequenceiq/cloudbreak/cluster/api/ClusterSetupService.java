@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
@@ -19,7 +20,7 @@ public interface ClusterSetupService {
     void waitForServer() throws CloudbreakException;
 
     Cluster buildCluster(Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, TemplatePreparationObject templatePreparationObject,
-            Set<HostMetadata> hostsInCluster, String sdxContext, Telemetry telemetry);
+            Set<HostMetadata> hostsInCluster, String sdxContext, Telemetry telemetry, KerberosConfig kerberosConfig);
 
     void waitForHosts(Set<HostMetadata> hostsInCluster);
 

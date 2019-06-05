@@ -53,7 +53,6 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -79,6 +78,7 @@ import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.dto.credential.aws.AwsCredentialAttributes;
 import com.sequenceiq.cloudbreak.dto.credential.azure.AzureCredentialAttributes;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.structuredevent.event.LdapDetails;
@@ -408,10 +408,6 @@ public class TestUtil {
     }
 
     public static Cluster cluster(Blueprint blueprint, Stack stack, Long id) {
-        return cluster(blueprint, stack, id, null);
-    }
-
-    public static Cluster cluster(Blueprint blueprint, Stack stack, Long id, KerberosConfig kerberosConfig) {
         Cluster cluster = new Cluster();
         cluster.setAmbariIp("50.51.52.100");
         cluster.setStack(stack);
@@ -442,9 +438,6 @@ public class TestUtil {
         } catch (IllegalArgumentException ignored) {
         }
 
-        if (kerberosConfig != null) {
-            cluster.setKerberosConfig(kerberosConfig);
-        }
         Workspace workspace = new Workspace();
         workspace.setName("org 1");
         workspace.setId(1L);
@@ -453,23 +446,21 @@ public class TestUtil {
     }
 
     public static KerberosConfig kerberosConfigFreeipa() {
-        KerberosConfig kerberosConfig = new KerberosConfig();
-        kerberosConfig.setType(KerberosType.FREEIPA);
-        kerberosConfig.setAdmin("admin");
-        kerberosConfig.setPassword("passwd");
-        kerberosConfig.setVerifyKdcTrust(true);
-        kerberosConfig.setTcpAllowed(true);
-        return kerberosConfig;
+        return KerberosConfig.KerberosConfigBuilder.aKerberosConfig()
+                .withType(KerberosType.FREEIPA)
+                .withPassword("passwd")
+                .withVerifyKdcTrust(true)
+                .withTcpAllowed(true)
+                .build();
     }
 
     public static KerberosConfig kerberosConfigMit() {
-        KerberosConfig kerberosConfig = new KerberosConfig();
-        kerberosConfig.setType(KerberosType.MIT);
-        kerberosConfig.setAdmin("admin");
-        kerberosConfig.setPassword("passwd");
-        kerberosConfig.setVerifyKdcTrust(true);
-        kerberosConfig.setTcpAllowed(true);
-        return kerberosConfig;
+        return KerberosConfig.KerberosConfigBuilder.aKerberosConfig()
+                .withType(KerberosType.MIT)
+                .withPassword("passwd")
+                .withVerifyKdcTrust(true)
+                .withTcpAllowed(true)
+                .build();
     }
 
     public static HostGroup hostGroup(String name) {

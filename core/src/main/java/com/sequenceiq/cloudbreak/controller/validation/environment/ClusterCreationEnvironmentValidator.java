@@ -15,12 +15,11 @@ import org.springframework.util.CollectionUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.service.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -46,12 +45,6 @@ public class ClusterCreationEnvironmentValidator {
                     environment.getName(), environment.getRegions().getNames().stream().sorted().collect(Collectors.joining(","))));
         }
         Long workspaceId = stack.getWorkspace().getId();
-        validateConfigByName(
-                clusterRequest.getKerberosName(),
-                workspaceId,
-                resultBuilder,
-                kerberosConfigService::getByNameForWorkspaceId,
-                KerberosConfig.class.getSimpleName());
         validateRdsConfigNames(clusterRequest.getDatabases(), resultBuilder, workspaceId);
         validateProxyConfig(clusterRequest.getProxyConfigCrn(), stack.getWorkspace().getTenant().getName(), resultBuilder, user.getUserCrn());
         return resultBuilder.build();
