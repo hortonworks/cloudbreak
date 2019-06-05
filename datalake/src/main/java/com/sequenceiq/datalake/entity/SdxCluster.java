@@ -15,6 +15,9 @@ import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.service.secret.SecretValue;
+import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
+import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"accountid", "envname"}))
@@ -56,9 +59,13 @@ public class SdxCluster {
     @Enumerated(EnumType.STRING)
     private SdxClusterStatus status;
 
-    private String stackRequest;
+    @Convert(converter = SecretToString.class)
+    @SecretValue
+    private Secret stackRequest = Secret.EMPTY;
 
-    private String stackRequestToCloudbreak;
+    @Convert(converter = SecretToString.class)
+    @SecretValue
+    private Secret stackRequestToCloudbreak = Secret.EMPTY;
 
     private Long deleted;
 
@@ -159,18 +166,18 @@ public class SdxCluster {
     }
 
     public String getStackRequest() {
-        return stackRequest;
+        return stackRequest.getRaw();
     }
 
     public void setStackRequest(String stackRequest) {
-        this.stackRequest = stackRequest;
+        this.stackRequest = new Secret(stackRequest);
     }
 
     public String getStackRequestToCloudbreak() {
-        return stackRequestToCloudbreak;
+        return stackRequestToCloudbreak.getRaw();
     }
 
     public void setStackRequestToCloudbreak(String stackRequestToCloudbreak) {
-        this.stackRequestToCloudbreak = stackRequestToCloudbreak;
+        this.stackRequestToCloudbreak = new Secret(stackRequestToCloudbreak);
     }
 }
