@@ -1,6 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
-import static com.sequenceiq.cloudbreak.util.NullUtil.ifNotNullF;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import org.springframework.stereotype.Component;
 
@@ -16,8 +16,8 @@ public class NetworkV1ToNetworkV4Converter {
 
     public NetworkV4Request convert(NetworkV1Request network) {
         NetworkV4Request response = new NetworkV4Request();
-        response.setAws(ifNotNullF(network.getAws(), this::convert));
-        response.setAzure(ifNotNullF(network.getAzure(), this::convert));
+        response.setAws(getIfNotNull(network.getAws(), this::convert));
+        response.setAzure(getIfNotNull(network.getAzure(), this::convert));
         return response;
     }
 
@@ -41,8 +41,8 @@ public class NetworkV1ToNetworkV4Converter {
 
     public NetworkV1Request convert(NetworkV4Request network) {
         NetworkV1Request response = new NetworkV1Request();
-        response.setAws(ifNotNullF(network.getAws(), this::convert));
-        response.setAzure(ifNotNullF(network.getAzure(), this::convert));
+        response.setAws(getIfNotNull(network.getAws(), this::convert));
+        response.setAzure(getIfNotNull(network.getAzure(), this::convert));
         return response;
     }
 

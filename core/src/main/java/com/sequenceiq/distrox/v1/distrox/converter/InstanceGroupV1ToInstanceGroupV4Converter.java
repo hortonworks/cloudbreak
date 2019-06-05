@@ -1,6 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
-import static com.sequenceiq.cloudbreak.util.NullUtil.ifNotNullF;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,12 +35,12 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         response.setType(source.getType());
         response.setCloudPlatform(source.getCloudPlatform());
         response.setName(source.getName());
-        response.setTemplate(ifNotNullF(source.getTemplate(), instanceTemplateConverter::convert));
+        response.setTemplate(getIfNotNull(source.getTemplate(), instanceTemplateConverter::convert));
         response.setRecoveryMode(source.getRecoveryMode());
         response.setSecurityGroup(getSecurityGroup(source.getName()));
         response.setRecipeNames(source.getRecipeNames());
-        response.setAws(ifNotNullF(source.getAws(), instanceGroupParameterConverter::convert));
-        response.setAzure(ifNotNullF(source.getAzure(), instanceGroupParameterConverter::convert));
+        response.setAws(getIfNotNull(source.getAws(), instanceGroupParameterConverter::convert));
+        response.setAzure(getIfNotNull(source.getAzure(), instanceGroupParameterConverter::convert));
         return response;
     }
 
@@ -53,11 +53,11 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         response.setNodeCount(source.getNodeCount());
         response.setType(source.getType());
         response.setName(source.getName());
-        response.setTemplate(ifNotNullF(source.getTemplate(), instanceTemplateConverter::convert));
+        response.setTemplate(getIfNotNull(source.getTemplate(), instanceTemplateConverter::convert));
         response.setRecoveryMode(source.getRecoveryMode());
         response.setRecipeNames(source.getRecipeNames());
-        response.setAws(ifNotNullF(source.getAws(), instanceGroupParameterConverter::convert));
-        response.setAzure(ifNotNullF(source.getAzure(), instanceGroupParameterConverter::convert));
+        response.setAws(getIfNotNull(source.getAws(), instanceGroupParameterConverter::convert));
+        response.setAzure(getIfNotNull(source.getAzure(), instanceGroupParameterConverter::convert));
         return response;
     }
 

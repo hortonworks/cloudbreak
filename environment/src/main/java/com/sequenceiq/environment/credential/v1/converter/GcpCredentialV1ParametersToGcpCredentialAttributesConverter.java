@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.credential.v1.converter;
 
-import static com.sequenceiq.cloudbreak.util.NullUtil.ifNotNull;
+import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 
 import org.springframework.stereotype.Component;
 
@@ -16,15 +16,15 @@ class GcpCredentialV1ParametersToGcpCredentialAttributesConverter {
 
     public GcpCredentialAttributes convert(GcpCredentialParameters source) {
         GcpCredentialAttributes response = new GcpCredentialAttributes();
-        ifNotNull(source.getJson(), param -> response.setJson(getJson(param)));
-        ifNotNull(source.getP12(), param -> response.setP12(getP12(param)));
+        doIfNotNull(source.getJson(), param -> response.setJson(getJson(param)));
+        doIfNotNull(source.getP12(), param -> response.setP12(getP12(param)));
         return response;
     }
 
     public GcpCredentialParameters convert(GcpCredentialAttributes source) {
         GcpCredentialParameters response = new GcpCredentialParameters();
-        ifNotNull(source.getJson(), param -> response.setJson(getJson(param)));
-        ifNotNull(source.getP12(), param -> response.setP12(getP12(param)));
+        doIfNotNull(source.getJson(), param -> response.setJson(getJson(param)));
+        doIfNotNull(source.getP12(), param -> response.setP12(getP12(param)));
         return response;
     }
 

@@ -1,6 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
-import static com.sequenceiq.cloudbreak.util.NullUtil.ifNotNullF;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -18,7 +18,7 @@ public class GatewayV1ToGatewayV4Converter {
     public GatewayV4Request convert(GatewayV1Request source) {
         GatewayV4Request response = new GatewayV4Request();
         response.setPath(source.getPath());
-        response.setTopologies(ifNotNullF(source.getExposedServices(), this::topologies));
+        response.setTopologies(getIfNotNull(source.getExposedServices(), this::topologies));
         response.setGatewayType(source.getGatewayType());
         response.setSsoProvider(source.getSsoProvider());
         response.setSsoType(source.getSsoType());
@@ -29,7 +29,7 @@ public class GatewayV1ToGatewayV4Converter {
     public GatewayV1Request convert(GatewayV4Request source) {
         GatewayV1Request response = new GatewayV1Request();
         response.setPath(source.getPath());
-        response.setExposedServices(ifNotNullF(source.getTopologies(), this::exposedService));
+        response.setExposedServices(getIfNotNull(source.getTopologies(), this::exposedService));
         response.setGatewayType(source.getGatewayType());
         response.setSsoProvider(source.getSsoProvider());
         response.setSsoType(source.getSsoType());
