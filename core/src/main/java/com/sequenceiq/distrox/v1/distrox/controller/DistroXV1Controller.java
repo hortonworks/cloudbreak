@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -115,8 +116,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     public DistroXV1Request getRequestfromName(String name) {
-//        return stackOperation.getRequestfromName(workspaceService.getForCurrentUser().getId(), name);
-        return null;
+        StackV4Request stackV4Request = stackOperation.getRequestfromName(workspaceService.getForCurrentUser().getId(), name);
+        return stackRequestConverter.convert(stackV4Request);
     }
 
     @Override
