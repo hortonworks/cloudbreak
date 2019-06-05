@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.filesystem;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,10 +19,10 @@ import org.mockito.Spy;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.repository.FileSystemRepository;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.repository.FileSystemRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FileSystemConfigServiceTest {
@@ -69,19 +68,6 @@ public class FileSystemConfigServiceTest {
 
         underTest.getByIdFromAnyAvailableWorkspace(NOT_EXISTING_ID);
         verify(fileSystemRepository, times(1)).findById(NOT_EXISTING_ID);
-    }
-
-    @Test
-    public void testDeleteByIdWhenThereIsNoRecordToDeleteWithIdThenExceptionWouldComeAndNothingCatchesIt() {
-        when(fileSystemRepository.findById(NOT_EXISTING_ID)).thenReturn(Optional.ofNullable(null));
-
-        expectedException.expect(NotFoundException.class);
-        expectedException.expectMessage(String.format(NOT_FOUND_EXCEPTION_MESSAGE, NOT_EXISTING_ID));
-
-        underTest.deleteByIdFromAnyAvailableWorkspace(NOT_EXISTING_ID);
-
-        verify(fileSystemRepository, times(1)).findById(NOT_EXISTING_ID);
-        verify(fileSystemRepository, times(0)).delete(any());
     }
 
     private FileSystem setIdForCreatedFileSystemEntry(InvocationOnMock invocation) {

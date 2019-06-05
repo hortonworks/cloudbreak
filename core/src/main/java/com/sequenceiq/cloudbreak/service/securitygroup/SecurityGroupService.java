@@ -53,10 +53,6 @@ public class SecurityGroupService extends AbstractWorkspaceAwareResourceService<
         return groupRepository.findById(id).orElseThrow(notFound("SecurityGroup", id));
     }
 
-    public void delete(Long id) {
-        delete(get(id));
-    }
-
     public void delete(String name, Workspace workspace) {
         SecurityGroup securityGroup = groupRepository.findByNameAndWorkspace(name, workspace).orElseThrow(notFound("SecurityGroup", name));
         deleteImpl(securityGroup);

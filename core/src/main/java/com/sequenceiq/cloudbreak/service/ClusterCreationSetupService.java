@@ -125,7 +125,7 @@ public class ClusterCreationSetupService {
         decorateHostGroupWithConstraint(stack, clusterStub);
 
         if (request.getCloudStorage() != null) {
-            FileSystem fs = measure(() -> fileSystemConfigService.create(converterUtil.convert(request.getCloudStorage(), FileSystem.class),
+            FileSystem fs = measure(() -> fileSystemConfigService.createWithMdcContextRestore(converterUtil.convert(request.getCloudStorage(), FileSystem.class),
                         stack.getWorkspace(), stack.getCreator()),
                     LOGGER, "File system saving took {} ms for stack {}", stackName);
         }

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -52,7 +53,21 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
     }
 
     @Override
+    public T createWithMdcContextRestore(T resource, Workspace workspace, User user) {
+        Map<String, String> mdcContextMap = MDCBuilder.getMdcContextMap();
+        try {
+            return createInternal(resource, workspace, user);
+        } finally {
+            MDCBuilder.buildMdcContextFromMap(mdcContextMap);
+        }
+    }
+
+    @Override
     public T create(T resource, Workspace workspace, User user) {
+        return createInternal(resource, workspace, user);
+    }
+
+    private T createInternal(T resource, Workspace workspace, User user) {
         try {
             MDCBuilder.buildMdcContext(resource);
             prepareCreation(resource);
@@ -114,7 +129,21 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
     }
 
     @Override
+    public T deleteWithMdcContextRestore(T resource) {
+        Map<String, String> mdcContextMap = MDCBuilder.getMdcContextMap();
+        try {
+            return deleteInternal(resource);
+        } finally {
+            MDCBuilder.buildMdcContextFromMap(mdcContextMap);
+        }
+    }
+
+    @Override
     public T delete(T resource) {
+        return deleteInternal(resource);
+    }
+
+    private T deleteInternal(T resource) {
         MDCBuilder.buildMdcContext(resource);
         LOGGER.debug("Deleting {} with name: {}", resource().getReadableName(), resource.getName());
         prepareDeletion(resource);
@@ -125,7 +154,7 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
     @Override
     public Set<T> delete(Set<T> resources) {
         return resources.stream()
-                .map(r -> delete(r))
+                .map(this::delete)
                 .collect(Collectors.toSet());
     }
 

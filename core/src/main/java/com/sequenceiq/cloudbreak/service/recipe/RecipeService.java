@@ -57,10 +57,6 @@ public class RecipeService extends AbstractArchivistService<Recipe> {
         return repository().findById(id).orElseThrow(notFound("Recipe", id));
     }
 
-    public Recipe delete(Long id) {
-        return delete(get(id));
-    }
-
     private String collectMissingRecipeNames(Set<Recipe> recipes, Collection<String> recipeNames) {
         Set<String> foundRecipes = recipes.stream().map(Recipe::getName).collect(Collectors.toSet());
         return recipeNames.stream().filter(r -> !foundRecipes.contains(r)).collect(Collectors.joining(","));

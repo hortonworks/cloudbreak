@@ -36,10 +36,6 @@ public class LdapConfigService extends AbstractArchivistService<LdapConfig> {
         return ldapConfigRepository.findById(id).orElseThrow(notFound("LdapConfig", id));
     }
 
-    public void delete(Long id) {
-        delete(get(id));
-    }
-
     @Override
     public WorkspaceResource resource() {
         return WorkspaceResource.LDAP;

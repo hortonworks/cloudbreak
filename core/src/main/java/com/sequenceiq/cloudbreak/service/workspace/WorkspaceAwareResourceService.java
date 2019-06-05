@@ -13,6 +13,8 @@ public interface WorkspaceAwareResourceService<T extends WorkspaceAwareResource>
 
     T create(T resource, Long workspaceId, User user);
 
+    T createWithMdcContextRestore(T resource, Workspace workspace, User user);
+
     T create(T resource, Workspace workspace, User user);
 
     T getByNameForWorkspaceId(String name, Long workspaceId);
@@ -26,6 +28,8 @@ public interface WorkspaceAwareResourceService<T extends WorkspaceAwareResource>
     Set<T> findAllByWorkspaceId(Long workspaceId);
 
     T delete(T resource);
+
+    T deleteWithMdcContextRestore(T resource);
 
     Set<T> delete(Set<T> resources);
 
