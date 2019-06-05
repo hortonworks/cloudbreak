@@ -12,12 +12,24 @@ import com.sequenceiq.distrox.api.v1.distrox.model.cluster.cm.product.ClouderaMa
 @Component
 public class ClouderaManagerProductV1ToClouderaManagerProductV4Converter {
 
-    public List<ClouderaManagerProductV4Request> convert(List<ClouderaManagerProductV1Request> source) {
+    public List<ClouderaManagerProductV4Request> convertTo(List<ClouderaManagerProductV1Request> source) {
         return source.stream().map(this::convert).collect(toList());
     }
 
     public ClouderaManagerProductV4Request convert(ClouderaManagerProductV1Request source) {
         ClouderaManagerProductV4Request response = new ClouderaManagerProductV4Request();
+        response.setName(source.getName());
+        response.setParcel(source.getParcel());
+        response.setVersion(source.getVersion());
+        return response;
+    }
+
+    public List<ClouderaManagerProductV1Request> convertFrom(List<ClouderaManagerProductV4Request> source) {
+        return source.stream().map(this::convert).collect(toList());
+    }
+
+    public ClouderaManagerProductV1Request convert(ClouderaManagerProductV4Request source) {
+        ClouderaManagerProductV1Request response = new ClouderaManagerProductV1Request();
         response.setName(source.getName());
         response.setParcel(source.getParcel());
         response.setVersion(source.getVersion());
