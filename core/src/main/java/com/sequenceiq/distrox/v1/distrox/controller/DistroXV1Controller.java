@@ -14,15 +14,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBluepr
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
-import com.sequenceiq.distrox.v1.distrox.converter.DistroXImageChangeV1RequestToStackImageChangeV4RequestConverter;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.distrox.api.v1.distrox.model.DistroXImageChangeV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceModeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXRepairV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXScaleV1Request;
-import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.v1.distrox.StackOperation;
+import com.sequenceiq.distrox.v1.distrox.converter.DistroXImageChangeV1RequestToStackImageChangeV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXMaintenanceModeV1ToMainenanceModeV4Converter;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXRepairV1RequestToClusterRepairV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXScaleV1RequestToStackScaleV4RequestConverter;
@@ -107,11 +106,6 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     public GeneratedBlueprintV4Response postStackForBlueprint(String name, @Valid DistroXV1Request stackRequest) {
         return stackOperation.postStackForBlueprint(workspaceService.getForCurrentUser().getId(), name, stackRequestConverter.convert(stackRequest));
-    }
-
-    @Override
-    public void changeImage(String name, @Valid DistroXImageChangeV1Request stackImageChangeRequest) {
-        stackOperation.changeImage(workspaceService.getForCurrentUser().getId(), name, imageChangeRequestConverter.convert(stackImageChangeRequest));
     }
 
     @Override
