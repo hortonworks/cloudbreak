@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.credential;
+package com.sequenceiq.cloudbreak.service.environment.credential;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 

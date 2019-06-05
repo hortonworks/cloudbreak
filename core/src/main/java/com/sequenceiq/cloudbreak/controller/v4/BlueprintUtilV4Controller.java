@@ -15,19 +15,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.Recommendat
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.ServiceDependencyMatrixV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.SupportedVersionsV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.platform.PlatformParameterService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 
 @Controller
 @Transactional(TxType.NEVER)
 @WorkspaceEntityType(Blueprint.class)
 public class BlueprintUtilV4Controller extends NotificationController implements BlueprintUtilV4Endpoint {
-
-    @Inject
-    private PlatformParameterService platformParameterService;
 
     @Inject
     private CmTemplateGeneratorService clusterTemplateGeneratorService;
@@ -41,13 +38,14 @@ public class BlueprintUtilV4Controller extends NotificationController implements
     @Override
     public RecommendationV4Response createRecommendation(Long workspaceId, String blueprintName, String credentialName,
             String region, String platformVariant, String availabilityZone) {
-        return converterUtil.convert(platformParameterService.getRecommendation(workspaceId, blueprintName,
-                credentialName, region, platformVariant, availabilityZone), RecommendationV4Response.class);
+        PlatformRecommendation recommendation
+                = blueprintService.getRecommendation(workspaceId, blueprintName, credentialName, region, platformVariant, availabilityZone);
+        return converterUtil.convert(recommendation, RecommendationV4Response.class);
     }
 
     @Override
     public ServiceDependencyMatrixV4Response getServiceAndDependencies(Long workspaceId, Set<String> services,
-        String platform) {
+            String platform) {
         return converterUtil.convert(clusterTemplateGeneratorService.getServicesAndDependencies(services, platform),
                 ServiceDependencyMatrixV4Response.class);
     }
