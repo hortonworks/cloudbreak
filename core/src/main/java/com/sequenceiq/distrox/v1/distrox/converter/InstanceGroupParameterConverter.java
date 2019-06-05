@@ -1,6 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
-import static com.sequenceiq.cloudbreak.util.NullUtil.ifNotNullF;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import org.springframework.stereotype.Component;
 
@@ -19,7 +19,7 @@ public class InstanceGroupParameterConverter {
 
     public AzureInstanceGroupV4Parameters convert(AzureInstanceGroupV1Parameters source) {
         AzureInstanceGroupV4Parameters response = new AzureInstanceGroupV4Parameters();
-        response.setAvailabilitySet(ifNotNullF(source.getAvailabilitySet(), this::getAvailabilitySet));
+        response.setAvailabilitySet(getIfNotNull(source.getAvailabilitySet(), this::getAvailabilitySet));
         return response;
     }
 
@@ -37,7 +37,7 @@ public class InstanceGroupParameterConverter {
 
     public AzureInstanceGroupV1Parameters convert(AzureInstanceGroupV4Parameters source) {
         AzureInstanceGroupV1Parameters response = new AzureInstanceGroupV1Parameters();
-        response.setAvailabilitySet(ifNotNullF(source.getAvailabilitySet(), this::getAvailabilitySet));
+        response.setAvailabilitySet(getIfNotNull(source.getAvailabilitySet(), this::getAvailabilitySet));
         return response;
     }
 
