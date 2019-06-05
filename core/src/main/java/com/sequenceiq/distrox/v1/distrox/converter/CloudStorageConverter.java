@@ -46,4 +46,35 @@ public class CloudStorageConverter {
         response.setSecure(source.isSecure());
         return response;
     }
+
+    public S3CloudStorageV1Parameters convert(S3CloudStorageV4Parameters source) {
+        S3CloudStorageV1Parameters response = new S3CloudStorageV1Parameters();
+        ifNotNull(source.getInstanceProfile(), response::setInstanceProfile);
+        return response;
+    }
+
+    public AdlsCloudStorageV1Parameters convert(AdlsCloudStorageV4Parameters source) {
+        AdlsCloudStorageV1Parameters response = new AdlsCloudStorageV1Parameters();
+        response.setCredential(source.getCredential());
+        response.setAccountName(source.getAccountName());
+        response.setClientId(source.getClientId());
+        response.setTenantId(source.getTenantId());
+        return response;
+    }
+
+    public AdlsGen2CloudStorageV1Parameters convert(AdlsGen2CloudStorageV4Parameters source) {
+        AdlsGen2CloudStorageV1Parameters response = new AdlsGen2CloudStorageV1Parameters();
+        response.setAccountKey(source.getAccountKey());
+        response.setAccountName(source.getAccountName());
+        response.setSecure(source.isSecure());
+        return response;
+    }
+
+    public WasbCloudStorageV1Parameters convert(WasbCloudStorageV4Parameters source) {
+        WasbCloudStorageV1Parameters response = new WasbCloudStorageV1Parameters();
+        response.setAccountKey(source.getAccountKey());
+        response.setAccountName(source.getAccountName());
+        response.setSecure(source.isSecure());
+        return response;
+    }
 }

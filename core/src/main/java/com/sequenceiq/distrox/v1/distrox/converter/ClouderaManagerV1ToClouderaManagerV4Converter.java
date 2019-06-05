@@ -20,7 +20,14 @@ public class ClouderaManagerV1ToClouderaManagerV4Converter {
 
     public ClouderaManagerV4Request convert(ClouderaManagerV1Request source) {
         ClouderaManagerV4Request response = new ClouderaManagerV4Request();
-        response.setProducts(ifNotNullF(source.getProducts(), clouderaManagerProductConverter::convert));
+        response.setProducts(ifNotNullF(source.getProducts(), clouderaManagerProductConverter::convertTo));
+        response.setRepository(ifNotNullF(source.getRepository(), repositoryConverter::convert));
+        return response;
+    }
+
+    public ClouderaManagerV1Request convert(ClouderaManagerV4Request source) {
+        ClouderaManagerV1Request response = new ClouderaManagerV1Request();
+        response.setProducts(ifNotNullF(source.getProducts(), clouderaManagerProductConverter::convertFrom));
         response.setRepository(ifNotNullF(source.getRepository(), repositoryConverter::convert));
         return response;
     }

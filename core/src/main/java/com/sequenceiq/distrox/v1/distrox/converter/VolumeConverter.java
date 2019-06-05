@@ -28,7 +28,26 @@ public class VolumeConverter {
         return response;
     }
 
-    public Set<VolumeV4Request> convert(Set<VolumeV1Request> attachedVolumes) {
+    public Set<VolumeV4Request> convertTo(Set<VolumeV1Request> attachedVolumes) {
         return attachedVolumes.stream().map(this::convert).collect(toSet());
     }
+
+    public RootVolumeV1Request convert(RootVolumeV4Request source) {
+        RootVolumeV1Request response = new RootVolumeV1Request();
+        response.setSize(source.getSize());
+        return response;
+    }
+
+    public VolumeV1Request convert(VolumeV4Request source) {
+        VolumeV1Request response = new VolumeV1Request();
+        response.setSize(source.getSize());
+        response.setCount(source.getCount());
+        response.setType(source.getType());
+        return response;
+    }
+
+    public Set<VolumeV1Request> convertFrom(Set<VolumeV4Request> attachedVolumes) {
+        return attachedVolumes.stream().map(this::convert).collect(toSet());
+    }
+
 }

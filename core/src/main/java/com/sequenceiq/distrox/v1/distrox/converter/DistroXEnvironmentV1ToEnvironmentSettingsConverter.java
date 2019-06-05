@@ -26,4 +26,10 @@ public class DistroXEnvironmentV1ToEnvironmentSettingsConverter {
         response.setName(source.getName());
         return response;
     }
+
+    public DistroXEnvironmentV1Request convert(EnvironmentSettingsV4Request source) {
+        DistroXEnvironmentV1Request response = new DistroXEnvironmentV1Request();
+        response.setName(source.getName());
+        return response;
+    }
 }
