@@ -1,33 +1,36 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.database.request;
 
-import static com.sequenceiq.redbeams.doc.ModelDescriptions.Database;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.validation.ValidIfExactlyOneNonNull;
+import com.sequenceiq.redbeams.api.endpoint.v4.database.base.DatabaseV4Identifiers;
+import com.sequenceiq.redbeams.doc.ModelDescriptions.Database;
 
 import java.io.Serializable;
 
 import javax.validation.Valid;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
+@ValidIfExactlyOneNonNull(fields = { "existingDatabase", "database" })
 public class DatabaseTestV4Request implements Serializable {
 
-    @ApiModelProperty(Database.NAME)
-    private String existingDatabaseName;
+    @Valid
+    @ApiModelProperty(Database.DATABASE_TEST_EXISTING_REQUEST)
+    private DatabaseV4Identifiers existingDatabase;
 
     @Valid
-    @ApiModelProperty(Database.DATABASE_REQUEST)
+    @ApiModelProperty(Database.DATABASE_TEST_NEW_REQUEST)
     private DatabaseV4Request database;
 
-    public String getExistingDatabaseName() {
-        return existingDatabaseName;
+    public DatabaseV4Identifiers getExistingDatabase() {
+        return existingDatabase;
     }
 
-    public void setExistingDatabaseName(String existingDatabaseName) {
-        this.existingDatabaseName = existingDatabaseName;
+    public void setExistingDatabase(DatabaseV4Identifiers existingDatabase) {
+        this.existingDatabase = existingDatabase;
     }
 
     public DatabaseV4Request getDatabase() {

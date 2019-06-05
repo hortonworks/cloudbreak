@@ -64,7 +64,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
     @Inject
     private CrnService crnService;
 
-    public Set<DatabaseServerConfig> findAllInWorkspaceAndEnvironment(Long workspaceId, String environmentId, Boolean attachGlobal) {
+    public Set<DatabaseServerConfig> findAll(Long workspaceId, String environmentId, Boolean attachGlobal) {
         if (environmentId == null) {
             throw new IllegalArgumentException("No environmentId supplied.");
         }
@@ -97,7 +97,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         }
     }
 
-    public DatabaseServerConfig getByNameInWorkspaceAndEnvironment(Long workspaceId, String environmentId, String name) {
+    public DatabaseServerConfig getByName(Long workspaceId, String environmentId, String name) {
         Optional<DatabaseServerConfig> resourceOpt =
                 repository.findByNameAndWorkspaceIdAndEnvironmentId(name, workspaceId, environmentId);
         if (resourceOpt.isEmpty()) {
@@ -108,8 +108,8 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         return resourceOpt.get();
     }
 
-    public DatabaseServerConfig deleteByNameInWorkspace(Long workspaceId, String environemntId, String name) {
-        DatabaseServerConfig resource = getByNameInWorkspaceAndEnvironment(workspaceId, environemntId, name);
+    public DatabaseServerConfig deleteByName(Long workspaceId, String environemntId, String name) {
+        DatabaseServerConfig resource = getByName(workspaceId, environemntId, name);
         return delete(resource);
     }
 
@@ -118,30 +118,29 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         return repository;
     }
 
-    public Set<DatabaseServerConfig> deleteMultipleByNameInWorkspace(Long workspaceId, String environmentId, Set<String> names) {
-        Set<DatabaseServerConfig> resources = getByNamesInWorkspaceAndEnvironmentId(workspaceId, environmentId, names);
+    public Set<DatabaseServerConfig> deleteMultipleByName(Long workspaceId, String environmentId, Set<String> names) {
+        Set<DatabaseServerConfig> resources = getByNames(workspaceId, environmentId, names);
         return resources.stream()
                 .map(this::delete)
                 .collect(Collectors.toSet());
     }
 
-    Set<DatabaseServerConfig> getByNamesInWorkspaceAndEnvironmentId(Long workspaceId, String environmentId,
-        Set<String> names) {
+    Set<DatabaseServerConfig> getByNames(Long workspaceId, String environmentId, Set<String> names) {
         Set<DatabaseServerConfig> resources =
                 repository.findByNameInAndWorkspaceIdAndEnvironmentId(names, workspaceId, environmentId);
         Set<String> notFound = Sets.difference(names,
                 resources.stream().map(DatabaseServerConfig::getName).collect(Collectors.toSet()));
 
         if (!notFound.isEmpty()) {
-            throw new NotFoundException(String.format("No %s(s) found with name(s) %s", resource().getShortName(),
-                    notFound.stream().map(name -> '\'' + name + '\'').collect(Collectors.joining(", "))));
+            throw new NotFoundException(String.format("No %s(s) found with name(s) %s in environment %s", resource().getShortName(),
+                    String.join(", ", notFound), environmentId));
         }
 
         return resources;
     }
 
     public String testConnection(Long workspaceId, String environmentId, String name) {
-        return testConnection(getByNameInWorkspaceAndEnvironment(workspaceId, environmentId, name));
+        return testConnection(getByName(workspaceId, environmentId, name));
     }
 
     public String testConnection(DatabaseServerConfig resource) {
@@ -164,8 +163,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
             throw new IllegalArgumentException("The database must contain only alphanumeric characters or underscores");
         }
 
-        DatabaseServerConfig databaseServerConfig =
-                getByNameInWorkspaceAndEnvironment(workspaceId, environmentId, serverName);
+        DatabaseServerConfig databaseServerConfig = getByName(workspaceId, environmentId, serverName);
         StringBuilder createResult = new StringBuilder();
 
         driverFunctions.execWithDatabaseDriver(databaseServerConfig, driver -> {

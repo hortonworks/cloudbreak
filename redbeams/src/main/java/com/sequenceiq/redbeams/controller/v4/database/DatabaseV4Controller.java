@@ -24,7 +24,7 @@ import com.sequenceiq.redbeams.service.dbconfig.DatabaseConfigService;
 @Transactional(Transactional.TxType.NEVER)
 @WorkspaceEntityType(DatabaseConfig.class)
 @Component
-public class DatabaseV4Controller /*extends NotificationController */ implements DatabaseV4Endpoint {
+public class DatabaseV4Controller implements DatabaseV4Endpoint {
 
     @Inject
     private ConverterUtil redbeamsConverterUtil;
@@ -33,8 +33,8 @@ public class DatabaseV4Controller /*extends NotificationController */ implements
     private DatabaseConfigService databaseConfigService;
 
     @Override
-    public DatabaseV4Responses list(String environment, Boolean attachGlobal) {
-        return new DatabaseV4Responses(redbeamsConverterUtil.convertAllAsSet(databaseConfigService.list(environment),
+    public DatabaseV4Responses list(String environmentId) {
+        return new DatabaseV4Responses(redbeamsConverterUtil.convertAllAsSet(databaseConfigService.findAll(environmentId),
                         DatabaseV4Response.class));
     }
 
@@ -50,24 +50,24 @@ public class DatabaseV4Controller /*extends NotificationController */ implements
     }
 
     @Override
-    public DatabaseV4Response get(String name) {
+    public DatabaseV4Response get(String environmentId, String name) {
         return new DatabaseV4Response();
     }
 
     @Override
-    public DatabaseV4Response delete(String environmentCrn, String name) {
-        return redbeamsConverterUtil.convert(databaseConfigService.delete(name, environmentCrn), DatabaseV4Response.class);
+    public DatabaseV4Response delete(String environmentId, String name) {
+        return redbeamsConverterUtil.convert(databaseConfigService.delete(name, environmentId), DatabaseV4Response.class);
     }
 
     @Override
-    public DatabaseV4Responses deleteMultiple(String environmentCrn, Set<String> names) {
-        return new DatabaseV4Responses(redbeamsConverterUtil.convertAllAsSet(databaseConfigService.delete(names, environmentCrn), DatabaseV4Response.class));
+    public DatabaseV4Responses deleteMultiple(String environmentId, Set<String> names) {
+        return new DatabaseV4Responses(redbeamsConverterUtil.convertAllAsSet(databaseConfigService.delete(names, environmentId), DatabaseV4Response.class));
     }
 
-    @Override
-    public DatabaseV4Request getRequest(String name) {
-        return new DatabaseV4Request();
-    }
+    // @Override
+    // public DatabaseV4Request getRequest(String name) {
+    //     return new DatabaseV4Request();
+    // }
 
     @Override
     public DatabaseTestV4Response test(@Valid DatabaseTestV4Request databaseTestV4Request) {
