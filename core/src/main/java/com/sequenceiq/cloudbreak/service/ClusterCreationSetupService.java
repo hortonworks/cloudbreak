@@ -24,6 +24,8 @@ import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.environment.ClusterCreationEnvironmentValidator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
@@ -38,15 +40,15 @@ import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.util.Benchmark.MultiCheckedSupplier;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
@@ -93,6 +95,9 @@ public class ClusterCreationSetupService {
     @Inject
     private ClusterCreationEnvironmentValidator environmentValidator;
 
+    @Inject
+    private KerberosConfigService kerberosConfigService;
+
     public void validate(ClusterV4Request request, Stack stack, User user, Workspace workspace, DetailedEnvironmentResponse environment) {
         validate(request, null, stack, user, workspace, environment);
     }
@@ -100,9 +105,6 @@ public class ClusterCreationSetupService {
     @Measure(ClusterCreationSetupService.class)
     public void validate(ClusterV4Request request, CloudCredential cloudCredential, Stack stack, User user,
             Workspace workspace, DetailedEnvironmentResponse environment) {
-        if (stack.getDatalakeResourceId() != null && StringUtils.isNotBlank(request.getKerberosName())) {
-            throw new BadRequestException("Invalid kerberos settings, attached cluster should inherit kerberos parameters");
-        }
         MDCBuilder.buildUserMdcContext(user.getUserId(), user.getUserName());
         CloudCredential credential = cloudCredential;
         if (credential == null) {
@@ -137,7 +139,7 @@ public class ClusterCreationSetupService {
 
         Cluster cluster = clusterDecorator.decorate(clusterStub, request, blueprint, user, stack.getWorkspace(), stack);
 
-        decorateStackWithCustomDomainIfAdOrIpaJoinable(stack, cluster);
+        decorateStackWithCustomDomainIfAdOrIpaJoinable(stack);
 
         List<ClusterComponent> components = checkedMeasure((MultiCheckedSupplier<List<ClusterComponent>, IOException, CloudbreakImageNotFoundException>) () -> {
             if (blueprint != null) {
@@ -182,9 +184,10 @@ public class ClusterCreationSetupService {
                 }));
     }
 
-    private void decorateStackWithCustomDomainIfAdOrIpaJoinable(Stack stack, Cluster cluster) {
-        if (cluster.getKerberosConfig() != null && StringUtils.isNotBlank(cluster.getKerberosConfig().getDomain())) {
-            stack.setCustomDomain(cluster.getKerberosConfig().getDomain());
+    private void decorateStackWithCustomDomainIfAdOrIpaJoinable(Stack stack) {
+        KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn()).orElse(null);
+        if (kerberosConfig != null && StringUtils.isNotBlank(kerberosConfig.getDomain())) {
+            stack.setCustomDomain(kerberosConfig.getDomain());
         }
     }
 }

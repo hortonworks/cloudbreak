@@ -33,8 +33,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.template.HandlebarUtils;
 import com.sequenceiq.cloudbreak.template.TemplateModelContextBuilder;
@@ -492,9 +492,10 @@ public class HandlebarTemplateTest {
     }
 
     public static Map<String, Object> ldapConfigWithLdapAndKerberosPresent() {
-        KerberosConfig kerberosConfig = new KerberosConfig();
-        kerberosConfig.setName("kerberos-config");
-        kerberosConfig.setAdmin("admin");
+        KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig()
+            .withDomain("domain")
+            .withPrincipal("admin")
+            .build();
 
         return new TemplateModelContextBuilder()
                 .withLdap(ldapConfig("cn=admin,dc=example,dc=org", "admin"))

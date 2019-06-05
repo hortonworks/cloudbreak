@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -62,6 +63,9 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     @Mock
     private ClusterService clusterService;
+
+    @Mock
+    private KerberosConfigService kerberosConfigService;
 
     @InjectMocks
     private ClusterRepairFlowEventChainFactory underTest;

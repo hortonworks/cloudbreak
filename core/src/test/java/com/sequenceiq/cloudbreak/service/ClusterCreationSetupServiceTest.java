@@ -4,9 +4,9 @@ import static com.sequenceiq.cloudbreak.RepoTestUtil.getDefaultCDHInfo;
 import static com.sequenceiq.cloudbreak.RepoTestUtil.getDefaultHDPInfo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.spy;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -41,17 +42,16 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 public class ClusterCreationSetupServiceTest {
 
@@ -97,6 +97,9 @@ public class ClusterCreationSetupServiceTest {
     @Mock
     private DefaultClouderaManagerRepoService defaultClouderaManagerRepoService;
 
+    @Mock
+    private KerberosConfigService kerberosConfigService;
+
     @InjectMocks
     private ClusterCreationSetupService underTest;
 
@@ -120,6 +123,7 @@ public class ClusterCreationSetupServiceTest {
         stack = new Stack();
         stack.setId(1L);
         stack.setWorkspace(workspace);
+        stack.setEnvironmentCrn("env");
         blueprint = new Blueprint();
         blueprint.setBlueprintText("{}");
         user = new User();
@@ -133,9 +137,6 @@ public class ClusterCreationSetupServiceTest {
 
         cluster = new Cluster();
         stack.setCluster(cluster);
-        KerberosConfig kerberosConfig = new KerberosConfig();
-        kerberosConfig.setDomain("domain");
-        cluster.setKerberosConfig(kerberosConfig);
         when(clusterDecorator.decorate(any(), any(), any(), any(), any(), any())).thenReturn(cluster);
         when(componentConfigProviderService.getAllComponentsByStackIdAndType(any(), any())).thenReturn(Sets.newHashSet(ambariRepoComponent, imageComponent));
         when(blueprintUtils.getBlueprintStackVersion(any())).thenReturn(HDP_VERSION);
@@ -163,30 +164,25 @@ public class ClusterCreationSetupServiceTest {
 
     @Test
     public void testDomainIsSet() throws CloudbreakImageNotFoundException, IOException, TransactionService.TransactionExecutionException {
+        KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig()
+                .withDomain("domain").build();
+        when(kerberosConfigService.get(anyString())).thenReturn(Optional.of(kerberosConfig));
         underTest.prepare(clusterRequest, stack, blueprint, user);
-        assertEquals(cluster.getKerberosConfig().getDomain(), stack.getCustomDomain());
+        assertEquals("domain", stack.getCustomDomain());
     }
 
     @Test
     public void testMissingKerberosConfig() throws CloudbreakImageNotFoundException, IOException, TransactionService.TransactionExecutionException {
-        cluster.setKerberosConfig(null);
         underTest.prepare(clusterRequest, stack, blueprint, user);
         assertNull(stack.getCustomDomain());
     }
 
     @Test
     public void testMissingDomain() throws CloudbreakImageNotFoundException, IOException, TransactionService.TransactionExecutionException {
-        cluster.getKerberosConfig().setDomain(null);
+        KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().build();
+        when(kerberosConfigService.get(anyString())).thenReturn(Optional.of(kerberosConfig));
         underTest.prepare(clusterRequest, stack, blueprint, user);
         assertNull(stack.getCustomDomain());
-    }
-
-    @Test
-    public void testIncorrectKerberosSettingForWorkloadCluster() {
-        stack.setDatalakeResourceId(1L);
-        clusterRequest.setKerberosName("attached_kerberos_which_not_allowed");
-        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
-        assertThrows(BadRequestException.class, () -> underTest.validate(clusterRequest, stack, user, workspace, environmentResponse));
     }
 
     private AmbariRepo getAmbariRepo() {

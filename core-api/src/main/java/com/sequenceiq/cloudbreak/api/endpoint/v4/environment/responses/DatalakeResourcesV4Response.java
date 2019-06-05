@@ -17,9 +17,6 @@ public class DatalakeResourcesV4Response {
     @ApiModelProperty(ClusterModelDescription.RDSCONFIG_NAMES)
     private Set<String> databaseNames;
 
-    @ApiModelProperty(ClusterModelDescription.KERBEROSCONFIG_NAME)
-    private String kerberosName;
-
     @ApiModelProperty(DatalakeResourcesDescription.SERVICE_DESCRIPTORS)
     private Map<String, ServiceDescriptorV4Response> serviceDescriptorMap;
 
@@ -37,14 +34,6 @@ public class DatalakeResourcesV4Response {
 
     public void setDatabaseNames(Set<String> databaseNames) {
         this.databaseNames = databaseNames;
-    }
-
-    public String getKerberosName() {
-        return kerberosName;
-    }
-
-    public void setKerberosName(String kerberosName) {
-        this.kerberosName = kerberosName;
     }
 
     public Map<String, ServiceDescriptorV4Response> getServiceDescriptorMap() {

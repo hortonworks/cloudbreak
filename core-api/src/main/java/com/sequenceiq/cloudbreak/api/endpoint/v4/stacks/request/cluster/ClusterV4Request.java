@@ -68,9 +68,6 @@ public class ClusterV4Request implements JsonEntity {
 
     private GatewayV4Request gateway;
 
-    @Valid
-    private String kerberosName;
-
     @ApiModelProperty(ClusterModelDescription.CUSTOM_CONTAINERS)
     private CustomContainerV4Request customContainer;
 
@@ -164,14 +161,6 @@ public class ClusterV4Request implements JsonEntity {
 
     public void setGateway(GatewayV4Request gateway) {
         this.gateway = gateway;
-    }
-
-    public String getKerberosName() {
-        return kerberosName;
-    }
-
-    public void setKerberosName(String kerberosName) {
-        this.kerberosName = kerberosName;
     }
 
     public String getCustomQueue() {

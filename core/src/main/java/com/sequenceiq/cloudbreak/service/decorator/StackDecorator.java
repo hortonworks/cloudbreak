@@ -101,7 +101,6 @@ public class StackDecorator {
 
     @Measure(StackDecorator.class)
     public Stack decorate(@Nonnull Stack subject, @Nonnull StackV4Request request, User user, Workspace workspace) {
-        subject.setEnvironmentCrn(request.getEnvironmentCrn());
         String stackName = request.getName();
 
         Credential credential = measure(() -> prepareCredential(subject),

@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -109,14 +108,12 @@ public class AmbariDatalakeConfigProvider {
         String ambariFqdn = datalakeStack.getGatewayInstanceMetadata().isEmpty()
                 ? datalakeStack.getAmbariIp() : datalakeStack.getGatewayInstanceMetadata().iterator().next().getDiscoveryFQDN();
         Set<RDSConfig> rdsConfigs = rdsConfigService.findByClusterId(cluster.getId());
-        return collectDatalakeResources(datalakeStack.getName(), ambariFqdn, ambariIp, ambariFqdn, connector, serviceSecretParamMap,
-                cluster.getKerberosConfig(), rdsConfigs);
+        return collectDatalakeResources(datalakeStack.getName(), ambariFqdn, ambariIp, ambariFqdn, connector, serviceSecretParamMap, rdsConfigs);
     }
 
     //CHECKSTYLE:OFF
     public DatalakeResources collectDatalakeResources(String datalakeName, String datalakeAmbariUrl, String datalakeAmbariIp, String datalakeAmbariFqdn,
-            DatalakeConfigApi connector, Map<String, Map<String, String>> serviceSecretParamMap, KerberosConfig kerberosConfig,
-            Set<RDSConfig> rdsConfigs) throws JsonProcessingException {
+            DatalakeConfigApi connector, Map<String, Map<String, String>> serviceSecretParamMap, Set<RDSConfig> rdsConfigs) throws JsonProcessingException {
         DatalakeResources datalakeResources = new DatalakeResources();
         datalakeResources.setName(datalakeName);
         Set<String> datalakeParamKeys = new HashSet<>();
@@ -144,7 +141,6 @@ public class AmbariDatalakeConfigProvider {
         }
         datalakeResources.setServiceDescriptorMap(serviceDescriptors);
         setupDatalakeGlobalParams(datalakeAmbariUrl, datalakeAmbariIp, datalakeAmbariFqdn, connector, datalakeResources);
-        datalakeResources.setKerberosConfig(kerberosConfig);
         if (rdsConfigs != null) {
             datalakeResources.setRdsConfigs(new HashSet<>(rdsConfigs));
         }

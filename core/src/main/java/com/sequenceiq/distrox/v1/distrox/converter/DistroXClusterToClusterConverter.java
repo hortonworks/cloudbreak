@@ -40,7 +40,6 @@ public class DistroXClusterToClusterConverter {
 
     public ClusterV4Request convert(DistroXClusterV1Request source) {
         ClusterV4Request response = new ClusterV4Request();
-        response.setKerberosName(null);
         response.setGateway(getIfNotNull(source.getGateway(), gatewayConverter::convert));
         response.setAmbari(null);
         response.setName(null);

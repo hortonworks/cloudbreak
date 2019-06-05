@@ -158,8 +158,7 @@ public class ClusterCommonService {
         if (stackDetails != null) {
             stackRepoDetails = converterUtil.convert(stackDetails, StackRepoDetails.class);
         }
-        clusterService.recreate(stack, updateCluster.getBlueprintName(), hostGroups, updateCluster.getValidateBlueprint(), stackRepoDetails,
-                updateCluster.getKerberosPassword(), updateCluster.getKerberosPrincipal());
+        clusterService.recreate(stack, updateCluster.getBlueprintName(), hostGroups, updateCluster.getValidateBlueprint(), stackRepoDetails);
     }
 
     private void ambariUserNamePasswordChange(Long stackId, Stack stack, UserNamePasswordV4Request userNamePasswordJson) {

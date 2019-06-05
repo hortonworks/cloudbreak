@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.responses.KerberosV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ambari.AmbariV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.customcontainer.CustomContainerV4Response;
@@ -34,7 +33,6 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.ClusterToClouderaManagerV4ResponseConverter;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
@@ -85,7 +83,6 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
         convertNullableProperties(source, clusterResponse);
         convertContainerConfig(source, clusterResponse);
         clusterResponse.setCreationFinished(source.getCreationFinished());
-        convertKerberosConfig(source, clusterResponse);
         decorateResponseWithProxyConfig(source, clusterResponse);
         clusterResponse.setCloudStorage(getCloudStorage(source));
         clusterResponse.setAmbari(getConversionService().convert(source, AmbariV4Response.class));
@@ -168,13 +165,6 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
                 LOGGER.info("Failed to add customContainerDefinition to response", e);
                 throw new CloudbreakApiException("Failed to add customContainerDefinition to response", e);
             }
-        }
-    }
-
-    private void convertKerberosConfig(Cluster source, ClusterV4Response clusterResponse) {
-        KerberosConfig kerberosConfig = source.getKerberosConfig();
-        if (kerberosConfig != null) {
-            clusterResponse.setKerberos(getConversionService().convert(kerberosConfig, KerberosV4Response.class));
         }
     }
 

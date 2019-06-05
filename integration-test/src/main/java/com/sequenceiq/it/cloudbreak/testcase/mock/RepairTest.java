@@ -197,9 +197,9 @@ public class RepairTest extends AbstractIntegrationTest {
                 .valid()
                 .withRdsConfigNames(ambariRdsName);
 
-        if (kerberosConfigName != null && !kerberosConfigName.isEmpty()) {
-            testContext.given(ClusterTestDto.class).withKerberos(kerberosConfigName);
-        }
+//        if (kerberosConfigName != null && !kerberosConfigName.isEmpty()) {
+//            testContext.given(ClusterTestDto.class).withKerberos(kerberosConfigName);
+//        }
 
         return testContext.given(ClusterTestDto.class);
     }
