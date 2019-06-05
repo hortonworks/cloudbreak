@@ -151,6 +151,7 @@ public class StackDecoratorTest {
         MockitoAnnotations.initMocks(this);
         subject = new Stack();
         subject.setCredentialCrn("aCredentialCRN");
+        subject.setEnvironmentCrn("envCrn");
         subject.setInstanceGroups(createInstanceGroups(GATEWAY));
         when(cloudParameterCache.getPlatformParameters()).thenReturn(platformParametersMap);
         when(platformParametersMap.get(any(Platform.class))).thenReturn(pps);
@@ -162,7 +163,6 @@ public class StackDecoratorTest {
         when(defaultOrchestrator.get(any(Platform.class))).thenReturn(orchestrator);
         when(converterUtil.convert(any(InstanceGroup.class), eq(InstanceGroupParameterRequest.class))).thenReturn(instanceGroupParameterRequest);
         when(request.getCluster()).thenReturn(clusterRequest);
-        when(request.getEnvironmentCrn()).thenReturn("envCrn");
         when(environmentSettingsRequest.getCredentialName()).thenReturn(credentialName);
         when(sharedServiceValidator.checkSharedServiceStackRequirements(any(StackV4Request.class), any(Workspace.class))).thenReturn(validationResult);
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();

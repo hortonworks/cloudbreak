@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
@@ -153,6 +154,9 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Mock
     private LdapConfigService ldapConfigService;
+
+    @Mock
+    private KerberosConfigService kerberosConfigService;
 
     @Before
     public void setUp() throws IOException {
