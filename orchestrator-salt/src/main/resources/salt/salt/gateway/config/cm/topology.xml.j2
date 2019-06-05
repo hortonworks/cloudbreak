@@ -49,6 +49,57 @@
             <enabled>true</enabled>
         </provider>
 
+        <provider>
+            <role>ha</role>
+            <name>HaProvider</name>
+            <enabled>true</enabled>
+            {% if 'WEBHDFS' in exposed -%}
+            <param>
+                <name>WEBHDFS</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'RANGER' in exposed -%}
+            <param>
+                <name>RANGER</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'HIVE' in exposed -%}
+            <param>
+                <name>HIVE</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'YARNUI' in exposed -%}
+            <param>
+                <name>YARNUI</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'YARNUIV2' in exposed -%}
+            <param>
+                <name>YARNUIV2</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'ATLAS' in exposed -%}
+            <param>
+                <name>ATLAS</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            <param>
+                <name>ATLASAPI</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'LIVYSERVER1' in exposed -%}
+            <param>
+                <name>LIVYSERVER</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+        </provider>
     </gateway>
 
     {% if 'CM-API' in salt['pillar.get']('gateway:location') -%}
