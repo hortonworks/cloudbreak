@@ -35,4 +35,26 @@ public class InstanceTemplateParameterConverter {
         response.setPrivateId(source.getPrivateId());
         return response;
     }
+
+    public AwsInstanceTemplateV1Parameters convert(AwsInstanceTemplateV4Parameters source) {
+        AwsInstanceTemplateV1Parameters response = new AwsInstanceTemplateV1Parameters();
+        response.setEncryption(ifNotNullF(source.getEncryption(), this::convert));
+        response.setSpotPrice(source.getSpotPrice());
+        return response;
+    }
+
+    private AwsEncryptionV1Parameters convert(AwsEncryptionV4Parameters source) {
+        AwsEncryptionV1Parameters response = new AwsEncryptionV1Parameters();
+        response.setKey(source.getKey());
+        response.setType(source.getType());
+        return response;
+    }
+
+    public AzureInstanceTemplateV1Parameters convert(AzureInstanceTemplateV4Parameters source) {
+        AzureInstanceTemplateV1Parameters response = new AzureInstanceTemplateV1Parameters();
+        response.setEncrypted(source.getEncrypted());
+        response.setManagedDisk(source.getManagedDisk());
+        response.setPrivateId(source.getPrivateId());
+        return response;
+    }
 }
