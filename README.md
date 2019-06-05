@@ -196,6 +196,8 @@ After importing the cloudbreak repo root, launch the Datalake application by exe
 -Dserver.port=8086
 -Ddatalake.db.env.address=localhost
 -Ddatalake.cloudbreak.url=http://localhost:8080
+-Dvault.addr=localhost
+-Dvault.root.token=<VAULT_ROOT_TOKEN>
 ````
 
 ### Running Redbeams in IDEA
@@ -277,6 +279,8 @@ To run Datalake from the command line, run the following Gradle command:
 ./gradlew :datalake:bootRun -PjvmArgs="-Ddatalake.db.env.address=localhost \
 -Dserver.port=8086 \
 -Ddatalake.cloudbreak.url=http://localhost:8080 \
+-Dvault.addr=localhost \
+-Dvault.root.token=<VAULT_ROOT_TOKEN> \
 -Dspring.config.location=$(pwd)/datalake/src/main/resources/application.yml,$(pwd)/datalake/build/resources/main/application.properties"
 ````
 
