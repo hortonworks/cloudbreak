@@ -15,4 +15,12 @@ public class DistroXAuthenticationToStaAuthenticationConverter {
         response.setPublicKeyId(source.getPublicKeyId());
         return response;
     }
+
+    public DistroXAuthenticationV1Request convert(StackAuthenticationV4Request source) {
+        DistroXAuthenticationV1Request response = new DistroXAuthenticationV1Request();
+        response.setLoginUserName(source.getLoginUserName());
+        response.setPublicKey(source.getPublicKey());
+        response.setPublicKeyId(source.getPublicKeyId());
+        return response;
+    }
 }

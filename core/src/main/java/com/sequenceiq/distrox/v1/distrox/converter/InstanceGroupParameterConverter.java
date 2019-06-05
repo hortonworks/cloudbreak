@@ -30,4 +30,22 @@ public class InstanceGroupParameterConverter {
         response.setUpdateDomainCount(source.getUpdateDomainCount());
         return response;
     }
+
+    public AwsInstanceGroupV1Parameters convert(AwsInstanceGroupV4Parameters source) {
+        return new AwsInstanceGroupV1Parameters();
+    }
+
+    public AzureInstanceGroupV1Parameters convert(AzureInstanceGroupV4Parameters source) {
+        AzureInstanceGroupV1Parameters response = new AzureInstanceGroupV1Parameters();
+        response.setAvailabilitySet(ifNotNullF(source.getAvailabilitySet(), this::getAvailabilitySet));
+        return response;
+    }
+
+    private AzureAvailabiltySetV1Parameters getAvailabilitySet(AzureAvailabiltySetV4 source) {
+        AzureAvailabiltySetV1Parameters response = new AzureAvailabiltySetV1Parameters();
+        response.setFaultDomainCount(source.getFaultDomainCount());
+        response.setName(source.getName());
+        response.setUpdateDomainCount(source.getUpdateDomainCount());
+        return response;
+    }
 }

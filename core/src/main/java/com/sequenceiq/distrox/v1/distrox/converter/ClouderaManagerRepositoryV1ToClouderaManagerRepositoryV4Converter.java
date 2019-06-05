@@ -15,4 +15,12 @@ public class ClouderaManagerRepositoryV1ToClouderaManagerRepositoryV4Converter {
         response.setGpgKeyUrl(source.getGpgKeyUrl());
         return response;
     }
+
+    public ClouderaManagerRepositoryV1Request convert(ClouderaManagerRepositoryV4Request source) {
+        ClouderaManagerRepositoryV1Request response = new ClouderaManagerRepositoryV1Request();
+        response.setBaseUrl(source.getBaseUrl());
+        response.setVersion(source.getVersion());
+        response.setGpgKeyUrl(source.getGpgKeyUrl());
+        return response;
+    }
 }
