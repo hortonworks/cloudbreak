@@ -1,6 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
-import static com.sequenceiq.cloudbreak.util.NullUtil.ifNotNullF;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import org.springframework.stereotype.Component;
 
@@ -16,7 +16,7 @@ public class InstanceTemplateParameterConverter {
 
     public AwsInstanceTemplateV4Parameters convert(AwsInstanceTemplateV1Parameters source) {
         AwsInstanceTemplateV4Parameters response = new AwsInstanceTemplateV4Parameters();
-        response.setEncryption(ifNotNullF(source.getEncryption(), this::convert));
+        response.setEncryption(getIfNotNull(source.getEncryption(), this::convert));
         response.setSpotPrice(source.getSpotPrice());
         return response;
     }
@@ -38,7 +38,7 @@ public class InstanceTemplateParameterConverter {
 
     public AwsInstanceTemplateV1Parameters convert(AwsInstanceTemplateV4Parameters source) {
         AwsInstanceTemplateV1Parameters response = new AwsInstanceTemplateV1Parameters();
-        response.setEncryption(ifNotNullF(source.getEncryption(), this::convert));
+        response.setEncryption(getIfNotNull(source.getEncryption(), this::convert));
         response.setSpotPrice(source.getSpotPrice());
         return response;
     }

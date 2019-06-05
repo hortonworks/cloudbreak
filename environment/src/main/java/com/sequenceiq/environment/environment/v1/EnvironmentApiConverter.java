@@ -50,7 +50,7 @@ public class EnvironmentApiConverter {
                 .withLocation(locationRequestToDto(request.getLocation()))
                 .withRegions(request.getRegions());
 
-        NullUtil.ifNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
+        NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
         return builder.build();
     }
 
@@ -94,7 +94,7 @@ public class EnvironmentApiConverter {
                 .withLocation(locationDtoToResponse(environmentDto.getLocation()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()));
 
-        NullUtil.ifNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
+        NullUtil.doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
         return builder.build();
     }
 
@@ -148,8 +148,8 @@ public class EnvironmentApiConverter {
                 .withDescription(request.getDescription())
                 .withAccountId(threadBasedUserCrnProvider.getAccountId())
                 .withRegions(request.getRegions());
-        NullUtil.ifNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
-        NullUtil.ifNotNull(request.getLocation(), location -> builder.withLocation(locationRequestToDto(location)));
+        NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
+        NullUtil.doIfNotNull(request.getLocation(), location -> builder.withLocation(locationRequestToDto(location)));
         return builder.build();
     }
 }
