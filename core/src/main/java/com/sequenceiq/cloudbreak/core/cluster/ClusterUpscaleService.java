@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
@@ -31,6 +32,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -76,6 +78,9 @@ public class ClusterUpscaleService {
 
     @Inject
     private HostMetadataService hostMetadataService;
+
+    @Inject
+    private KerberosConfigService kerberosConfigService;
 
     public void upscaleClusterManager(Long stackId, String hostGroupName, Integer scalingAdjustment, boolean primaryGatewayChanged) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
@@ -176,8 +181,9 @@ public class ClusterUpscaleService {
 
     public void regenerateKerberosKeytabs(Long stackId, String hostname) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn()).orElse(null);
         LOGGER.info("Start regenerate kerberos keytabs in ambari on host {}", hostname);
-        getClusterConnector(stack).regenerateKerberosKeytabs(hostname);
+        getClusterConnector(stack).clusterModificationService().regenerateKerberosKeytabs(hostname, kerberosConfig);
     }
 
     public void startComponents(Long stackId, Map<String, String> components, String hostname) throws CloudbreakException {

@@ -30,14 +30,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
-import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
+import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -61,6 +61,11 @@ public class ReactorFlowManagerTest {
     @Mock
     private AuthenticatedUserService authenticatedUserService;
 
+    @Mock
+    private KerberosConfigService kerberosConfigService;
+
+    private Stack stack;
+
     @InjectMocks
     private ReactorFlowManager underTest;
 
@@ -70,7 +75,7 @@ public class ReactorFlowManagerTest {
         reset(eventFactory);
         when(reactor.notify((Object) anyObject(), any(Event.class))).thenReturn(new EventBus(new ThreadPoolExecutorDispatcher(1, 1)));
         Acceptable acceptable = new TestAcceptable();
-        Stack stack = TestUtil.stack();
+        stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
         when(stackService.getByIdWithTransaction(anyLong())).thenReturn(stack);
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
@@ -108,8 +113,8 @@ public class ReactorFlowManagerTest {
         underTest.triggerFullSyncWithoutCheck(STACK_ID);
         underTest.triggerClusterCredentialReplace(STACK_ID, "admin", "admin1");
         underTest.triggerClusterCredentialUpdate(STACK_ID, "admin1");
-        underTest.triggerClusterTermination(STACK_ID, false, false);
-        underTest.triggerClusterTermination(STACK_ID, true, false);
+        underTest.triggerClusterTermination(stack, false, false);
+        underTest.triggerClusterTermination(stack, true, false);
         underTest.triggerClusterUpgrade(STACK_ID);
         underTest.triggerManualRepairFlow(STACK_ID);
         underTest.triggerStackRepairFlow(STACK_ID, new UnhealthyInstances());
@@ -130,7 +135,7 @@ public class ReactorFlowManagerTest {
 
     @Test
     public void testClusterTerminationOnlyNotSecuredCluster() {
-        underTest.triggerClusterTermination(1L, false, false);
+        underTest.triggerClusterTermination(stack, false, false);
 
         verify(reactor).notify(eq(FlowChainTriggers.TERMINATION_TRIGGER_EVENT), any(Event.class));
     }
@@ -139,17 +144,18 @@ public class ReactorFlowManagerTest {
     public void testClusterTerminationOnlySecuredCluster() {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
-        stack.getCluster().setKerberosConfig(new KerberosConfig());
+        stack.setEnvironmentCrn("env");
         when(stackService.getByIdWithTransaction(anyLong())).thenReturn(stack);
+        when(kerberosConfigService.isKerberosConfigExistsForEnvironment("env")).thenReturn(true);
 
-        underTest.triggerClusterTermination(1L, false, false);
+        underTest.triggerClusterTermination(stack, false, false);
 
         verify(reactor).notify(eq(FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT), any(Event.class));
     }
 
     @Test
     public void testClusterTerminationNotSecuredClusterAndStack() {
-        underTest.triggerClusterTermination(1L, true, false);
+        underTest.triggerClusterTermination(stack, true, false);
 
         verify(reactor).notify(eq(FlowChainTriggers.TERMINATION_TRIGGER_EVENT), any(Event.class));
     }
@@ -158,10 +164,11 @@ public class ReactorFlowManagerTest {
     public void testClusterTerminationSecuredClusterAndStack() {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
-        stack.getCluster().setKerberosConfig(new KerberosConfig());
+        stack.setEnvironmentCrn("env");
         when(stackService.getByIdWithTransaction(anyLong())).thenReturn(stack);
+        when(kerberosConfigService.isKerberosConfigExistsForEnvironment("env")).thenReturn(true);
 
-        underTest.triggerClusterTermination(1L, true, false);
+        underTest.triggerClusterTermination(stack, true, false);
 
         verify(reactor).notify(eq(FlowChainTriggers.PROPER_TERMINATION_TRIGGER_EVENT), any(Event.class));
     }

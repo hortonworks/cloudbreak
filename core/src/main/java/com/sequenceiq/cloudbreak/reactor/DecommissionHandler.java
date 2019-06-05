@@ -20,7 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterDecomissionService;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -28,6 +30,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -81,6 +84,12 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
     @Inject
     private StackUtil stackUtil;
 
+    @Inject
+    private KerberosDetailService kerberosDetailService;
+
+    @Inject
+    private KerberosConfigService kerberosConfigService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(DecommissionRequest.class);
@@ -110,10 +119,11 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
             }
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
 
+            KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn()).orElse(null);
             Set<Node> decommissionedNodes = stackUtil.collectNodesFromHostnames(stack, decomissionedHostNames);
             GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             hostOrchestrator.stopClusterManagerAgent(gatewayConfig, decommissionedNodes, clusterDeletionBasedModel(stack.getId(), cluster.getId()),
-                    cluster.isAdJoinable(), cluster.isIpaJoinable());
+                    kerberosDetailService.isAdJoinable(kerberosConfig), kerberosDetailService.isIpaJoinable(kerberosConfig));
             decomissionedHostNames.stream().map(hostsToRemove::get).forEach(clusterDecomissionService::deleteHostFromCluster);
 
             List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);

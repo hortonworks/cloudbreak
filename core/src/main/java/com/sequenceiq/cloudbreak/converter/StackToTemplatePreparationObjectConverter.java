@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
@@ -82,6 +83,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     @Inject
     private LdapConfigService ldapConfigService;
 
+    @Inject
+    private KerberosConfigService kerberosConfigService;
+
     @Override
     public TemplatePreparationObject convert(Stack source) {
         try {
@@ -115,7 +119,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withGeneralClusterConfigs(generalClusterConfigsProvider.generalClusterConfigs(source, cluster))
                     .withLdapConfig(ldapView.orElse(null))
                     .withHdfConfigs(hdfConfigs)
-                    .withKerberosConfig(cluster.getKerberosConfig())
+                    .withKerberosConfig(kerberosConfigService.get(source.getEnvironmentCrn()).orElse(null))
                     .withSharedServiceConfigs(sharedServiceConfigProvider.createSharedServiceConfigs(source, dataLakeResource))
                     .build();
         } catch (BlueprintProcessingException | IOException e) {

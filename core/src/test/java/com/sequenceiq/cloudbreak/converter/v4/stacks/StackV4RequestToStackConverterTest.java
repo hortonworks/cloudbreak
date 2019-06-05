@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -55,6 +56,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
@@ -129,6 +131,9 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
     @Mock
     private EnvironmentClientService environmentClientService;
 
+    @Mock
+    private KerberosConfigService kerberosConfigService;
+
     private Credential credential;
 
     @Before
@@ -144,7 +149,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         environmentResponse.setCloudPlatform("AWS");
         when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
-
+        when(kerberosConfigService.get(anyString())).thenReturn(Optional.empty());
         credential = Credential.builder()
                 .cloudPlatform("AWS")
                 .build();
@@ -166,7 +171,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         // THEN
         assertAllFieldsNotNull(
                 stack,
-                Arrays.asList("description", "cluster", "credentialCrn", "gatewayPort", "network", "securityConfig",
+                Arrays.asList("description", "cluster", "credentialCrn", "environmentCrn", "gatewayPort", "network", "securityConfig",
                         "version", "created", "platformVariant", "cloudPlatform",
                         "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "parameters", "creator",
                         "environmentCrn", "terminated", "datalakeResourceId", "type", "inputs", "failurePolicy"));
@@ -192,7 +197,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         // THEN
         assertAllFieldsNotNull(
                 stack,
-                Arrays.asList("description", "cluster", "credentialCrn", "gatewayPort", "network", "securityConfig",
+                Arrays.asList("description", "cluster", "credentialCrn", "environmentCrn", "gatewayPort", "network", "securityConfig",
                         "version", "created", "platformVariant", "cloudPlatform",
                         "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "parameters", "creator",
                         "environmentCrn", "terminated", "datalakeResourceId", "type", "inputs", "failurePolicy"));
@@ -228,8 +233,8 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         // THEN
         assertAllFieldsNotNull(
                 stack,
-                Arrays.asList("description", "statusReason", "cluster", "credential", "gatewayPort", "template", "network", "securityConfig", "securityGroup",
-                        "version", "created", "platformVariant", "cloudPlatform", "saltPassword", "stackTemplate", "datalakeId",
+                Arrays.asList("description", "statusReason", "cluster", "credential", "environmentCrn", "gatewayPort", "template", "network", "securityConfig",
+                        "securityGroup", "version", "created", "platformVariant", "cloudPlatform", "saltPassword", "stackTemplate", "datalakeId",
                         "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "loginUserName", "rootVolumeSize"));
         assertEquals("eu-west-1", stack.getRegion());
     }

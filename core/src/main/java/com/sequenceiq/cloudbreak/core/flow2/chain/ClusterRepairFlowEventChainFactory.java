@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ChangePrimaryGatewayTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.EphemeralClustersUpgradeTriggerEvent;
@@ -57,6 +58,9 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     @Inject
     private ClusterService clusterService;
+
+    @Inject
+    private KerberosConfigService kerberosConfigService;
 
     @Override
     public String initEvent() {
@@ -163,6 +167,6 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private boolean isKerberosSecured(Stack stack) {
-        return stack.getCluster().getKerberosConfig() != null;
+        return kerberosConfigService.isKerberosConfigExistsForEnvironment(stack.getEnvironmentCrn());
     }
 }

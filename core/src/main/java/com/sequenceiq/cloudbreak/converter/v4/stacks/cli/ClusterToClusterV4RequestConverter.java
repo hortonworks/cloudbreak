@@ -51,10 +51,6 @@ public class ClusterToClusterV4RequestConverter extends AbstractConversionServic
             clusterRequest.setDatabases(Collections.unmodifiableSet(databaseNames));
         }
 
-        if (source.getKerberosConfig() != null) {
-            clusterRequest.setKerberosName(source.getKerberosConfig().getName());
-        }
-
         if (StringUtils.isNotEmpty(source.getProxyConfigCrn())) {
             clusterRequest.setProxyConfigCrn(source.getProxyConfigCrn());
         }
