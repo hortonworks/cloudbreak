@@ -26,7 +26,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.datalake.api.endpoint.sdx.SdxClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;

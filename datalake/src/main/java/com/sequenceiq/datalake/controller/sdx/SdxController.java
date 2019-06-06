@@ -9,12 +9,12 @@ import javax.validation.Valid;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.datalake.api.endpoint.sdx.RedeploySdxClusterRequest;
-import com.sequenceiq.datalake.api.endpoint.sdx.SdxClusterRequest;
-import com.sequenceiq.datalake.api.endpoint.sdx.SdxClusterResponse;
-import com.sequenceiq.datalake.api.endpoint.sdx.SdxEndpoint;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.sdx.api.model.RedeploySdxClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
+import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 
 @Controller
 public class SdxController implements SdxEndpoint {
@@ -25,11 +25,14 @@ public class SdxController implements SdxEndpoint {
     @Inject
     private SdxService sdxService;
 
+    @Inject
+    private SdxClusterConverter sdxClusterConverter;
+
     @Override
     public SdxClusterResponse create(String sdxName, @Valid SdxClusterRequest createSdxClusterRequest) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.createSdx(userCrn, sdxName, createSdxClusterRequest, null);
-        SdxClusterResponse sdxClusterResponse = new SdxClusterResponse(sdxCluster.getCrn(), sdxCluster.getClusterName(), sdxCluster.getStatus());
+        SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
         sdxClusterResponse.setSdxName(sdxCluster.getClusterName());
         return sdxClusterResponse;
     }
@@ -49,7 +52,7 @@ public class SdxController implements SdxEndpoint {
     public SdxClusterResponse get(String sdxName) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByAccountIdAndSdxName(userCrn, sdxName);
-        return new SdxClusterResponse(sdxCluster.getCrn(), sdxCluster.getClusterName(), sdxCluster.getStatus());
+        return sdxClusterConverter.sdxClusterToResponse(sdxCluster);
     }
 
     @Override
@@ -57,7 +60,7 @@ public class SdxController implements SdxEndpoint {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
         List<SdxCluster> sdxClusters = sdxService.listSdx(userCrn, envName);
         return sdxClusters.stream()
-                .map(c -> new SdxClusterResponse(c.getCrn(), c.getClusterName(), c.getStatus()))
+                .map(sdx -> sdxClusterConverter.sdxClusterToResponse(sdx))
                 .collect(Collectors.toList());
     }
 

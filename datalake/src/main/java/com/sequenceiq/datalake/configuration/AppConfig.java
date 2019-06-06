@@ -30,5 +30,4 @@ public class AppConfig implements AsyncConfigurer {
                 .build();
 
     }
-
 }

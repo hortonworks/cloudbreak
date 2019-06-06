@@ -1,4 +1,4 @@
-package com.sequenceiq.datalake.api.endpoint.sdx;
+package com.sequenceiq.sdx.api.model;
 
 import java.util.Map;
 

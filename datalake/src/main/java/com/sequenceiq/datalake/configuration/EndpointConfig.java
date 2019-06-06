@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 
-import com.sequenceiq.datalake.api.DatalakeApi;
+import com.sequenceiq.sdx.api.SdxApi;
 import com.sequenceiq.datalake.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.datalake.controller.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.datalake.controller.sdx.SdxController;
@@ -23,7 +23,7 @@ import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.config.SwaggerConfigLocator;
 import io.swagger.jaxrs.config.SwaggerContextService;
 
-@ApplicationPath(DatalakeApi.API_ROOT_CONTEXT)
+@ApplicationPath(SdxApi.API_ROOT_CONTEXT)
 @Configuration
 public class EndpointConfig extends ResourceConfig {
 
@@ -62,7 +62,7 @@ public class EndpointConfig extends ResourceConfig {
             swaggerConfig.setVersion(applicationVersion);
         }
         swaggerConfig.setSchemes(new String[]{"http", "https"});
-        swaggerConfig.setBasePath(DatalakeApi.API_ROOT_CONTEXT);
+        swaggerConfig.setBasePath(SdxApi.API_ROOT_CONTEXT);
         swaggerConfig.setLicenseUrl("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");
         swaggerConfig.setResourcePackage("com.sequenceiq.datalake.api");
         swaggerConfig.setScan(true);

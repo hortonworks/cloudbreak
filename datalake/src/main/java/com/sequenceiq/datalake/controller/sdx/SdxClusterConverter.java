@@ -1,0 +1,22 @@
+package com.sequenceiq.datalake.controller.sdx;
+
+import org.springframework.stereotype.Service;
+
+import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
+import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+
+@Service
+public class SdxClusterConverter {
+
+    public SdxClusterResponse sdxClusterToResponse(SdxCluster sdxCluster) {
+        SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
+        if (sdxCluster.getStatus() != null) {
+            sdxClusterResponse.setStatus(SdxClusterStatusResponse.valueOf(sdxCluster.getStatus().name()));
+        }
+        sdxClusterResponse.setSdxName(sdxCluster.getClusterName());
+        sdxClusterResponse.setSdxCrn(sdxCluster.getCrn());
+        sdxClusterResponse.setEnvironmentName(sdxCluster.getEnvName());
+        return sdxClusterResponse;
+    }
+}

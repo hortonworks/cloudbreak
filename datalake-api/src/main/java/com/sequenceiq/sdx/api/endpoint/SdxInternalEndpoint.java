@@ -1,4 +1,4 @@
-package com.sequenceiq.datalake.api.endpoint.sdx;
+package com.sequenceiq.sdx.api.endpoint;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -7,6 +7,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
+import com.sequenceiq.sdx.api.model.SdxInternalClusterRequest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

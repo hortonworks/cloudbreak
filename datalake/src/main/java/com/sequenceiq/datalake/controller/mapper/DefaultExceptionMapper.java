@@ -3,14 +3,14 @@ package com.sequenceiq.datalake.controller.mapper;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
-import com.sequenceiq.datalake.api.model.ExceptionResponse;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 @Provider
 public class DefaultExceptionMapper extends BaseExceptionMapper<Exception> {
 
     @Override
     protected Object getEntity(Exception exception) {
-        return new ExceptionResponse("Internal server error: " + exception.getMessage());
+        return ExceptionUtils.getStackTrace(exception);
     }
 
     @Override
