@@ -10,7 +10,7 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
-import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.environment.api.v1.platformresource.PlatformResourceEndpoint;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformAccessConfigsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformDisksResponse;
@@ -41,7 +40,7 @@ import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 
 @Controller
 @Transactional(TxType.NEVER)
-public class PlatformParameterController implements PlatformResourceEndpoint {
+public class PlatformResourceController implements PlatformResourceEndpoint {
 
     @Inject
     @Named("conversionService")
@@ -51,7 +50,7 @@ public class PlatformParameterController implements PlatformResourceEndpoint {
     private PlatformParameterService platformParameterService;
 
     @Inject
-    private AuthenticatedUserService authenticatedUserService;
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Override
     public PlatformVmtypesResponse getVmTypesByCredential(String credentialName, String region, String platformVariant,
@@ -154,7 +153,6 @@ public class PlatformParameterController implements PlatformResourceEndpoint {
     }
 
     private String getAccountId() {
-        CloudbreakUser cbUser = authenticatedUserService.getCbUser();
-        return cbUser.getTenant();
+        return threadBasedUserCrnProvider.getAccountId();
     }
 }
