@@ -46,14 +46,14 @@ public interface CredentialEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CredentialOpDescription.GET_BY_NAME, produces = MediaType.APPLICATION_JSON,
             notes = CredentialDescriptor.CREDENTIAL_NOTES, nickname = "getCredentialByNameV1", httpMethod = "GET")
-    CredentialResponse getByName(String credentialName);
+    CredentialResponse getByName(@PathParam("name") String credentialName);
 
     @GET
     @Path("crn/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CredentialOpDescription.GET_BY_CRN, produces = MediaType.APPLICATION_JSON,
             notes = CredentialDescriptor.CREDENTIAL_NOTES, nickname = "getCredentialByResourceCrnV1", httpMethod = "GET")
-    CredentialResponse getByResourceCrn(String credentialCrn);
+    CredentialResponse getByResourceCrn(@PathParam("crn") String credentialCrn);
 
     @POST
     @Path("")
@@ -67,14 +67,14 @@ public interface CredentialEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CredentialOpDescription.DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON,
             notes = CredentialDescriptor.CREDENTIAL_NOTES, nickname = "deleteCredentialByNameV1", httpMethod = "DELETE")
-    CredentialResponse deleteByName(String name);
+    CredentialResponse deleteByName(@PathParam("name") String name);
 
     @DELETE
     @Path("crn/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CredentialOpDescription.DELETE_BY_CRN, produces = MediaType.APPLICATION_JSON,
             notes = CredentialDescriptor.CREDENTIAL_NOTES, nickname = "deleteCredentialByResourceCrnV1", httpMethod = "DELETE")
-    CredentialResponse deleteByResourceCrn(String crn);
+    CredentialResponse deleteByResourceCrn(@PathParam("crn") String crn);
 
     @DELETE
     @Path("")
