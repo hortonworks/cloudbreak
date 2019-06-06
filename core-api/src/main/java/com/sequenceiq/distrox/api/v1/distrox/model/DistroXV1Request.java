@@ -5,6 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -17,15 +21,21 @@ import com.sequenceiq.distrox.api.v1.distrox.model.sharedservice.SdxV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.tags.TagsV1Request;
 
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class DistroXV1Request implements Serializable {
 
+    @Size(max = 40, min = 5, message = "The length of the name has to be in range of 5 to 40")
+    @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
+            message = "The name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
+    @NotNull
+    @ApiModelProperty(required = true)
     private String name;
 
-    private String environmentCrn;
+    private String environmentName;
 
     private Set<InstanceGroupV1Request> instanceGroups;
 
@@ -55,12 +65,12 @@ public class DistroXV1Request implements Serializable {
         this.name = name;
     }
 
-    public String getEnvironmentCrn() {
-        return environmentCrn;
+    public String getEnvironmentName() {
+        return environmentName;
     }
 
-    public void setEnvironmentCrn(String environmentCrn) {
-        this.environmentCrn = environmentCrn;
+    public void setEnvironmentName(String environmentName) {
+        this.environmentName = environmentName;
     }
 
     public Set<InstanceGroupV1Request> getInstanceGroups() {
