@@ -53,7 +53,7 @@ public class EnvironmentCreationService {
         eventSender.sendEvent(envCreationEvent);
     }
 
-    public EnvironmentDto create(EnvironmentCreationDto creationDto) {
+    public EnvironmentDto create(EnvironmentCreationDto creationDto, String accountId) {
         if (environmentService.isNameOccupied(creationDto.getName(), creationDto.getAccountId())) {
             throw new BadRequestException(String.format("Environment with name '%s' already exists in account '%s'.",
                     creationDto.getName(), creationDto.getAccountId()));
@@ -62,7 +62,7 @@ public class EnvironmentCreationService {
         CloudRegions cloudRegions = setLocationAndRegions(creationDto, environment);
         validateCreation(creationDto, environment, cloudRegions);
         environment = environmentService.save(environment);
-        environmentResourceService.createAndSetNetwork(environment, creationDto.getNetwork());
+        environmentResourceService.createAndSetNetwork(environment, creationDto.getNetwork(), accountId);
         return environmentDtoConverter.environmentToDto(environment);
     }
 
