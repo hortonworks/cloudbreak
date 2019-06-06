@@ -51,9 +51,6 @@ type ClusterV4Request struct {
 	// kerberos name
 	KerberosName string `json:"kerberosName,omitempty"`
 
-	// LDAP config name for the cluster
-	LdapName string `json:"ldapName,omitempty"`
-
 	// ambari password
 	// Required: true
 	// Max Length: 100

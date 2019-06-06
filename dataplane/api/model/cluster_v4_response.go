@@ -74,9 +74,6 @@ type ClusterV4Response struct {
 	// kerberos
 	Kerberos *KerberosV4Response `json:"kerberos,omitempty"`
 
-	// LDAP config for the cluster
-	Ldap *LdapV4Response `json:"ldap,omitempty"`
-
 	// duration - how long the cluster is running in minutes (minus hours)
 	MinutesUp int32 `json:"minutesUp,omitempty"`
 
@@ -151,10 +148,6 @@ func (m *ClusterV4Response) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateKerberos(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateLdap(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -379,24 +372,6 @@ func (m *ClusterV4Response) validateKerberos(formats strfmt.Registry) error {
 		if err := m.Kerberos.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("kerberos")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *ClusterV4Response) validateLdap(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Ldap) { // not required
-		return nil
-	}
-
-	if m.Ldap != nil {
-		if err := m.Ldap.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("ldap")
 			}
 			return err
 		}

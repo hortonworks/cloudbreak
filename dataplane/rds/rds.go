@@ -7,8 +7,6 @@ import (
 
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
 
-	"strings"
-
 	v4db "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_databases"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"

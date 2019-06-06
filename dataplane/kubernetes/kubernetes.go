@@ -8,8 +8,6 @@ import (
 
 	"encoding/base64"
 
-	"strings"
-
 	v4kube "github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_kubernetes"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"

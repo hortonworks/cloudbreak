@@ -179,7 +179,6 @@ func generateAttachedTemplateImpl(stringFinder func(string) string, boolFinder f
 		attachedClusterTemplate.Placement.AvailabilityZone = datalake.Placement.AvailabilityZone
 		attachedClusterTemplate.EnvironmentCrn = &datalake.EnvironmentCrn
 		attachedClusterTemplate.Network = cloud.GetProvider().GenerateNetworkRequestFromNetworkResponse(datalake.Network)
-		attachedClusterTemplate.Cluster.LdapName = *datalake.Cluster.Ldap.Name
 		attachedClusterTemplate.Cluster.CloudStorage = generateCloudStorage(datalake.Cluster.CloudStorage)
 		for _, rds := range datalake.Cluster.Databases {
 			if *rds.Type == "RANGER" || *rds.Type == "HIVE" {

@@ -25,7 +25,7 @@ type Client struct {
 }
 
 /*
-ChangeImageDistroXV1 checks image in stack by name in workspace
+ChangeImageDistroXV1 checks image in stack by name
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */
@@ -85,7 +85,7 @@ func (a *Client) DeleteDistroXV1(params *DeleteDistroXV1Params) error {
 }
 
 /*
-DeleteInstanceDistroXV1 deletes instance from the stack s cluster in workspace
+DeleteInstanceDistroXV1 deletes instance from the stack s cluster
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */
@@ -115,7 +115,7 @@ func (a *Client) DeleteInstanceDistroXV1(params *DeleteInstanceDistroXV1Params) 
 }
 
 /*
-DeleteWithKerberosDistroXV1 deletes the stack with kerberos cluster by name in workspace
+DeleteWithKerberosDistroXV1 deletes the stack with kerberos cluster by name
 
 Clusters are materialised Hadoop services on a given infrastructure. They are built based on a blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
 */
@@ -145,7 +145,7 @@ func (a *Client) DeleteWithKerberosDistroXV1(params *DeleteWithKerberosDistroXV1
 }
 
 /*
-GetDistroXRequestFromNameV1 gets stack request by name in workspace
+GetDistroXRequestFromNameV1 gets stack request by name
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */
@@ -175,7 +175,7 @@ func (a *Client) GetDistroXRequestFromNameV1(params *GetDistroXRequestFromNameV1
 }
 
 /*
-GetDistroXV1 gets stack by name in workspace
+GetDistroXV1 gets stack by name
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */
@@ -205,7 +205,7 @@ func (a *Client) GetDistroXV1(params *GetDistroXV1Params) (*GetDistroXV1OK, erro
 }
 
 /*
-ListDistroXV1 lists stacks for the given workspace
+ListDistroXV1 lists stacks
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */
@@ -235,7 +235,7 @@ func (a *Client) ListDistroXV1(params *ListDistroXV1Params) (*ListDistroXV1OK, e
 }
 
 /*
-PostDistroXForBlueprintV1 posts stack for blueprint in workspace
+PostDistroXForBlueprintV1 posts stack for blueprint
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */
@@ -265,7 +265,7 @@ func (a *Client) PostDistroXForBlueprintV1(params *PostDistroXForBlueprintV1Para
 }
 
 /*
-PostDistroXV1 creates stack in workspace
+PostDistroXV1 creates stack
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */
@@ -295,7 +295,7 @@ func (a *Client) PostDistroXV1(params *PostDistroXV1Params) (*PostDistroXV1OK, e
 }
 
 /*
-PutScalingDistroXV1 scales the stack by name in workspace
+PutScalingDistroXV1 scales the stack by name
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */
@@ -325,7 +325,7 @@ func (a *Client) PutScalingDistroXV1(params *PutScalingDistroXV1Params) error {
 }
 
 /*
-RepairDistroXV1 repairs the stack by name in workspace
+RepairDistroXV1 repairs the stack by name
 
 Removing the failed nodes and starting new nodes to substitute them.
 */
@@ -355,7 +355,7 @@ func (a *Client) RepairDistroXV1(params *RepairDistroXV1Params) error {
 }
 
 /*
-RetryDistroXV1 retries the stack by name in workspace
+RetryDistroXV1 retries the stack by name
 
 Failed or interrupted stack and cluster operations can be retried, after the cause of the failure was eliminated. The operations will continue at the state, where the previous process failed.
 */
@@ -415,7 +415,7 @@ func (a *Client) SetDistroXMaintenanceMode(params *SetDistroXMaintenanceModePara
 }
 
 /*
-StartDistroXV1 starts the stack by name in workspace
+StartDistroXV1 starts the stack by name
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */
@@ -475,7 +475,7 @@ func (a *Client) StatusDistroXV1(params *StatusDistroXV1Params) (*StatusDistroXV
 }
 
 /*
-StopDistroXV1 stops the stack by name in workspace
+StopDistroXV1 stops the stack by name
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */
@@ -505,7 +505,7 @@ func (a *Client) StopDistroXV1(params *StopDistroXV1Params) error {
 }
 
 /*
-SyncDistroXV1 syncs the stack by name in workspace
+SyncDistroXV1 syncs the stack by name
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */

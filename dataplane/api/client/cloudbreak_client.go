@@ -18,7 +18,6 @@ import (
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_blueprints"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_blueprints_util"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_clustertemplates"
-	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_connectors"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_databases"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_environments"
 	"github.com/hortonworks/cb-cli/dataplane/api/client/v4_workspace_id_events"
@@ -93,8 +92,6 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Cloudbreak
 	cli.V4WorkspaceIDBlueprintsUtil = v4_workspace_id_blueprints_util.New(transport, formats)
 
 	cli.V4WorkspaceIDClustertemplates = v4_workspace_id_clustertemplates.New(transport, formats)
-
-	cli.V4WorkspaceIDConnectors = v4_workspace_id_connectors.New(transport, formats)
 
 	cli.V4WorkspaceIDDatabases = v4_workspace_id_databases.New(transport, formats)
 
@@ -186,8 +183,6 @@ type Cloudbreak struct {
 
 	V4WorkspaceIDClustertemplates *v4_workspace_id_clustertemplates.Client
 
-	V4WorkspaceIDConnectors *v4_workspace_id_connectors.Client
-
 	V4WorkspaceIDDatabases *v4_workspace_id_databases.Client
 
 	V4WorkspaceIDEnvironments *v4_workspace_id_environments.Client
@@ -240,8 +235,6 @@ func (c *Cloudbreak) SetTransport(transport runtime.ClientTransport) {
 	c.V4WorkspaceIDBlueprintsUtil.SetTransport(transport)
 
 	c.V4WorkspaceIDClustertemplates.SetTransport(transport)
-
-	c.V4WorkspaceIDConnectors.SetTransport(transport)
 
 	c.V4WorkspaceIDDatabases.SetTransport(transport)
 

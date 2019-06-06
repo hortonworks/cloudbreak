@@ -27,9 +27,6 @@ type DatalakeResourcesV4Response struct {
 	// Kerberos config name for the cluster
 	KerberosName string `json:"kerberosName,omitempty"`
 
-	// LDAP config name for the cluster
-	LdapName string `json:"ldapName,omitempty"`
-
 	// Descriptors of the datalake services
 	ServiceDescriptorMap map[string]ServiceDescriptorV4Response `json:"serviceDescriptorMap,omitempty"`
 }

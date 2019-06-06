@@ -3,12 +3,14 @@ package distrox
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/hortonworks/cb-cli/dataplane/api-environment/client/v1env"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
-	v1distrox "github.com/hortonworks/cb-cli/dataplane/api/client/v1distrox"
+	envmodel "github.com/hortonworks/cb-cli/dataplane/api-environment/model"
+	"github.com/hortonworks/cb-cli/dataplane/api/client/v1distrox"
 	"github.com/hortonworks/cb-cli/dataplane/api/model"
 	"github.com/hortonworks/cb-cli/dataplane/common"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
@@ -30,7 +32,8 @@ type dxOut struct {
 }
 
 type stackOutDescribe struct {
-	*model.StackV4Response
+	stack       *model.StackV4Response
+	environment *envmodel.DetailedEnvironmentV1Response
 }
 
 func (s *dxOut) DataAsStringArray() []string {
@@ -42,30 +45,30 @@ func (s *dxOut) DataAsStringArray() []string {
 }
 
 func (s *stackOutDescribe) DataAsStringArray() []string {
-	stack := convertResponseToDx(s.StackV4Response)
-	return append(stack.DataAsStringArray(), s.StatusReason)
+	stack := convertResponseToDx(s)
+	return append(stack.DataAsStringArray(), s.stack.StatusReason)
 }
 
-func convertResponseToDx(s *model.StackV4Response) *dxOut {
+func convertResponseToDx(s *stackOutDescribe) *dxOut {
 	return &dxOut{
 		CloudResourceOut: common.CloudResourceOut{
-			Name:          *s.Name,
-			Description:   utils.SafeClusterDescriptionConvert(s),
-			CloudPlatform: utils.SafeCloudPlatformConvert(s.Environment),
+			Name:          *s.stack.Name,
+			Description:   utils.SafeClusterDescriptionConvert(s.stack),
+			CloudPlatform: s.environment.CloudPlatform,
 		},
-		Environment:   utils.SafeEnvironmentNameConvert(s.Environment),
-		DistroXStatus: s.Status,
-		ClusterStatus: utils.SafeClusterStatusConvert(s),
+		Environment:   s.environment.Name,
+		DistroXStatus: s.stack.Status,
+		ClusterStatus: utils.SafeClusterStatusConvert(s.stack),
 	}
 }
 
-func convertViewResponseToStack(s *model.StackViewV4Response) *dxOut {
+func convertViewResponseToStack(s *model.StackViewV4Response, env *envmodel.DetailedEnvironmentV1Response) *dxOut {
 	return &dxOut{
 		CloudResourceOut: common.CloudResourceOut{
 			Name:          *s.Name,
-			CloudPlatform: utils.SafeCloudPlatformConvert(s.Environment),
+			CloudPlatform: env.CloudPlatform,
 		},
-		Environment:   utils.SafeEnvironmentNameConvert(s.Environment),
+		Environment:   env.Name,
 		DistroXStatus: s.Status,
 		ClusterStatus: utils.SafeClusterViewStatusConvert(s),
 	}
@@ -229,11 +232,17 @@ func DescribeDistroX(c *cli.Context) {
 		commonutils.LogErrorAndExit(err)
 	}
 	s := resp.Payload
-	output.Write(append(stackHeader, "STATUSREASON"), &stackOutDescribe{s})
-}
 
-type listDistroXsClient interface {
-	ListDistroXV1(params *v1distrox.ListDistroXV1Params) (*v1distrox.ListDistroXV1OK, error)
+	envClient := oauth.Environment(*oauth.NewEnvironmentClientFromContext(c)).Environment
+	envResp, err := envClient.V1env.GetEnvironmentV1(v1env.NewGetEnvironmentV1Params().WithName(s.EnvironmentCrn))
+	if err != nil {
+		commonutils.LogErrorAndExit(err)
+	}
+
+	output.Write(append(stackHeader, "STATUSREASON"), &stackOutDescribe{
+		stack:       s,
+		environment: envResp.Payload,
+	})
 }
 
 func ListDistroXs(c *cli.Context) {
@@ -247,9 +256,15 @@ func ListDistroXs(c *cli.Context) {
 		commonutils.LogErrorAndExit(err)
 	}
 
+	envClient := oauth.Environment(*oauth.NewEnvironmentClientFromContext(c)).Environment
+
 	var tableRows []commonutils.Row
 	for _, stack := range resp.Payload.Responses {
-		tableRows = append(tableRows, convertViewResponseToStack(stack))
+		envResp, err := envClient.V1env.GetEnvironmentV1(v1env.NewGetEnvironmentV1Params().WithName(stack.EnvironmentCrn))
+		if err != nil {
+			commonutils.LogErrorAndExit(err)
+		}
+		tableRows = append(tableRows, convertViewResponseToStack(stack, envResp.Payload))
 	}
 
 	output.WriteList(stackHeader, tableRows)
