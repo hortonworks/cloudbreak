@@ -9,7 +9,7 @@ import javax.annotation.Resource;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.datalake.api.DatalakeApi;
+import com.sequenceiq.sdx.api.SdxApi;
 
 import springfox.documentation.swagger.web.InMemorySwaggerResourcesProvider;
 import springfox.documentation.swagger.web.SwaggerResource;
@@ -26,7 +26,7 @@ public class CombinedSwaggerResourcesProvider implements SwaggerResourcesProvide
     public List<SwaggerResource> get() {
 
         SwaggerResource jerseySwaggerResource = new SwaggerResource();
-        jerseySwaggerResource.setLocation(DatalakeApi.API_ROOT_CONTEXT + "/swagger.json");
+        jerseySwaggerResource.setLocation(SdxApi.API_ROOT_CONTEXT + "/swagger.json");
         jerseySwaggerResource.setSwaggerVersion("2.0");
         jerseySwaggerResource.setName("Datalake API");
 

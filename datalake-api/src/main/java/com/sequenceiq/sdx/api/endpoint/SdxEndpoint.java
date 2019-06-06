@@ -1,4 +1,4 @@
-package com.sequenceiq.datalake.api.endpoint.sdx;
+package com.sequenceiq.sdx.api.endpoint;
 
 import java.util.List;
 
@@ -12,6 +12,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+
+import com.sequenceiq.sdx.api.model.RedeploySdxClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

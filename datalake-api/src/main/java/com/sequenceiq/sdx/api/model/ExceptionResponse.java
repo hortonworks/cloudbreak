@@ -1,4 +1,4 @@
-package com.sequenceiq.datalake.api.model;
+package com.sequenceiq.sdx.api.model;
 
 public class ExceptionResponse {
 

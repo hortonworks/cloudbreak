@@ -1,12 +1,9 @@
-package com.sequenceiq.datalake.api.endpoint.sdx;
-
-import javax.validation.constraints.NotNull;
+package com.sequenceiq.sdx.api.model;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 
 public class SdxInternalClusterRequest extends SdxClusterRequest {
 
-    @NotNull
     private StackV4Request stackV4Request;
 
     public StackV4Request getStackV4Request() {
