@@ -22,21 +22,12 @@ DROP TABLE IF EXISTS environment;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
+
 ALTER TABLE cluster DROP COLUMN IF EXISTS environmentcrn;
 ALTER TABLE stack DROP COLUMN IF EXISTS environmentcrn;
 ALTER TABLE datalakeresources DROP COLUMN IF EXISTS environmentcrn;
 
-ALTER TABLE stack ADD COLUMN IF NOT EXISTS environment_id bigint;
-ALTER TABLE ONLY stack ADD CONSTRAINT fk_stack_environment FOREIGN KEY (environment_id) REFERENCES environment(id);
-CREATE INDEX IF NOT EXISTS idx_stack_environment_id ON stack(environment_id);
 
-ALTER TABLE cluster ADD COLUMN IF NOT EXISTS environment_id bigint;
-ALTER TABLE ONLY cluster ADD CONSTRAINT fk_cluster_environment FOREIGN KEY (environment_id) REFERENCES environment(id);
-CREATE INDEX IF NOT EXISTS idx_cluster_environment_id ON cluster(environment_id);
-
-ALTER TABLE datalakeresources ADD COLUMN IF NOT EXISTS environment_id bigint;
-ALTER TABLE ONLY datalakeresources ADD CONSTRAINT fk_datalakeresources_environment FOREIGN KEY (environment_id) REFERENCES environment(id);
-CREATE INDEX IF NOT EXISTS idx_datalakeresources_environment_id ON datalakeresources(environment_id);
 
 CREATE TABLE IF NOT EXISTS environment (
     id bigserial NOT NULL,
@@ -56,6 +47,24 @@ ALTER TABLE environment ADD COLUMN IF NOT EXISTS location varchar(255);
 ALTER TABLE environment ADD COLUMN IF NOT EXISTS longitude DOUBLE PRECISION;
 ALTER TABLE environment ADD COLUMN IF NOT EXISTS latitude DOUBLE PRECISION;
 ALTER TABLE environment ADD COLUMN IF NOT EXISTS datalakeresources_id BIGINT;
+
+
+
+ALTER TABLE stack ADD COLUMN IF NOT EXISTS environment_id bigint;
+ALTER TABLE ONLY stack ADD CONSTRAINT fk_stack_environment FOREIGN KEY (environment_id) REFERENCES environment(id);
+CREATE INDEX IF NOT EXISTS idx_stack_environment_id ON stack(environment_id);
+
+ALTER TABLE cluster ADD COLUMN IF NOT EXISTS environment_id bigint;
+ALTER TABLE ONLY cluster ADD CONSTRAINT fk_cluster_environment FOREIGN KEY (environment_id) REFERENCES environment(id);
+CREATE INDEX IF NOT EXISTS idx_cluster_environment_id ON cluster(environment_id);
+
+ALTER TABLE datalakeresources ADD COLUMN IF NOT EXISTS environment_id bigint;
+ALTER TABLE ONLY datalakeresources ADD CONSTRAINT fk_datalakeresources_environment FOREIGN KEY (environment_id) REFERENCES environment(id);
+CREATE INDEX IF NOT EXISTS idx_datalakeresources_environment_id ON datalakeresources(environment_id);
+
+
+
+
 
 
 CREATE TABLE IF NOT EXISTS environment_network
@@ -80,4 +89,3 @@ CREATE TABLE IF NOT EXISTS environment_network
 
 CREATE INDEX IF NOT EXISTS idx_environment_network_workspace_id_name ON environment_network (workspace_id, name);
 CREATE INDEX IF NOT EXISTS idx_environment_network_environment_id ON environment_network (environment_id);
-
