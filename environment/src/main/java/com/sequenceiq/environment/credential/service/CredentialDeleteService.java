@@ -41,15 +41,25 @@ public class CredentialDeleteService extends AbstractCredentialService {
 
     public Set<Credential> deleteMultiple(Set<String> names, String accountId) {
         Set<Credential> deletedOnes = new LinkedHashSet<>();
-        names.forEach(credentialName -> deletedOnes.add(delete(credentialName, accountId)));
+        names.forEach(credentialName -> deletedOnes.add(deleteByName(credentialName, accountId)));
         return deletedOnes;
     }
 
-    public Credential delete(String name, String accountId) {
+    public Credential deleteByName(String name, String accountId) {
         Credential credential = repository.findByNameAndAccountId(name, accountId, ENABLED_PLATFORMS)
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
         checkEnvironmentsForDeletion(credential);
         LOGGER.debug("About to archive credential: {}", name);
+        Credential archived = archiveCredential(credential);
+        sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_DELETED);
+        return archived;
+    }
+
+    public Credential deleteByCrn(String crn, String accountId) {
+        Credential credential = repository.findByNameAndAccountId(crn, accountId, ENABLED_PLATFORMS)
+                .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, crn));
+        checkEnvironmentsForDeletion(credential);
+        LOGGER.debug("About to archive credential: {}", crn);
         Credential archived = archiveCredential(credential);
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_DELETED);
         return archived;

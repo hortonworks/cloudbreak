@@ -65,7 +65,7 @@ public class CloudResourceAdvisor {
 
     public PlatformRecommendation createForBlueprint(Long workspaceId, String blueprintName, String credentialName,
             String region, String platformVariant, String availabilityZone) {
-        Credential credential = credentialClientService.get(credentialName);
+        Credential credential = credentialClientService.getByName(credentialName);
         String cloudPlatform = credential.cloudPlatform();
         Map<String, VmType> vmTypesByHostGroup = new HashMap<>();
         Map<String, Boolean> hostGroupContainsMasterComp = new HashMap<>();
