@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.v1;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto.EnvironmentChangeCredentialDtoBuilder.anEnvironmentChangeCredentialDto;
 
 import org.springframework.stereotype.Component;
@@ -102,13 +103,13 @@ public class EnvironmentApiConverter {
                 .withId(network.getResourceCrn())
                 .withSubnetIds(network.getSubnetIds())
                 .withAws(EnvironmentNetworkAwsParams.EnvironmentNetworkAwsParamsBuilder.anEnvironmentNetworkAwsParams()
-                        .withVpcId(network.getAws().getVpcId())
+                        .withVpcId(getIfNotNull(network.getAws(), AwsParams::getVpcId))
                         .build())
                 .withAzure(EnvironmentNetworkAzureParams.EnvironmentNetworkAzureParamsBuilder.anEnvironmentNetworkAzureParams()
-                        .withNetworkId(network.getAzure().getNetworkId())
-                        .withResourceGroupName(network.getAzure().getResourceGroupName())
-                        .withNoFirewallRules(network.getAzure().isNoFirewallRules())
-                        .withNoPublicIp(network.getAzure().isNoPublicIp())
+                        .withNetworkId(getIfNotNull(network.getAzure(), AzureParams::getNetworkId))
+                        .withResourceGroupName(getIfNotNull(network.getAzure(), AzureParams::getResourceGroupName))
+                        .withNoFirewallRules(getIfNotNull(network.getAzure(), AzureParams::isNoFirewallRules))
+                        .withNoPublicIp(getIfNotNull(network.getAzure(), AzureParams::isNoPublicIp))
                         .build())
                 .build();
     }

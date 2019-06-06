@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.api.v1.environment.model;
 
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -12,17 +14,20 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class EnvironmentNetworkAzureParams {
+
     @ApiModelProperty(value = EnvironmentModelDescription.AZURE_NETWORK_ID, required = true)
     private String networkId;
 
     @ApiModelProperty(value = EnvironmentModelDescription.AZURE_RESOURCE_GROUP_NAME, required = true)
     private String resourceGroupName;
 
+    @NotNull
     @ApiModelProperty(EnvironmentModelDescription.AZURE_NO_PUBLIC_IP)
-    private boolean noPublicIp;
+    private Boolean noPublicIp;
 
+    @NotNull
     @ApiModelProperty(EnvironmentModelDescription.AZURE_NO_FIREWALL_RULES)
-    private boolean noFirewallRules;
+    private Boolean noFirewallRules;
 
     public String getNetworkId() {
         return networkId;
@@ -40,19 +45,19 @@ public class EnvironmentNetworkAzureParams {
         this.resourceGroupName = resourceGroupName;
     }
 
-    public boolean getNoPublicIp() {
+    public Boolean getNoPublicIp() {
         return noPublicIp;
     }
 
-    public void setNoPublicIp(boolean noPublicIp) {
+    public void setNoPublicIp(Boolean noPublicIp) {
         this.noPublicIp = noPublicIp;
     }
 
-    public boolean getNoFirewallRules() {
+    public Boolean getNoFirewallRules() {
         return noFirewallRules;
     }
 
-    public void setNoFirewallRules(boolean noFirewallRules) {
+    public void setNoFirewallRules(Boolean noFirewallRules) {
         this.noFirewallRules = noFirewallRules;
     }
 
@@ -61,9 +66,9 @@ public class EnvironmentNetworkAzureParams {
 
         private String resourceGroupName;
 
-        private boolean noPublicIp;
+        private Boolean noPublicIp;
 
-        private boolean noFirewallRules;
+        private Boolean noFirewallRules;
 
         private EnvironmentNetworkAzureParamsBuilder() {
         }
@@ -82,12 +87,12 @@ public class EnvironmentNetworkAzureParams {
             return this;
         }
 
-        public EnvironmentNetworkAzureParamsBuilder withNoPublicIp(boolean noPublicIp) {
+        public EnvironmentNetworkAzureParamsBuilder withNoPublicIp(Boolean noPublicIp) {
             this.noPublicIp = noPublicIp;
             return this;
         }
 
-        public EnvironmentNetworkAzureParamsBuilder withNoFirewallRules(boolean noFirewallRules) {
+        public EnvironmentNetworkAzureParamsBuilder withNoFirewallRules(Boolean noFirewallRules) {
             this.noFirewallRules = noFirewallRules;
             return this;
         }
@@ -101,4 +106,5 @@ public class EnvironmentNetworkAzureParams {
             return environmentNetworkAzureParams;
         }
     }
+
 }
