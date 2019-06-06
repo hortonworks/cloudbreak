@@ -9,7 +9,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 @SpringBootApplication(scanBasePackages = {"com.sequenceiq.redbeams",
         "com.sequenceiq.cloudbreak.auth.altus",
-        "com.sequenceiq.cloudbreak.auth.security",
+        "com.sequenceiq.cloudbreak.auth",
         "com.sequenceiq.cloudbreak.security",
         "com.sequenceiq.cloudbreak.api.util",
         "com.sequenceiq.cloudbreak.conf",
@@ -20,7 +20,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
         "com.sequenceiq.cloudbreak.common.service",
         "com.sequenceiq.cloudbreak.common.dbmigration",
         "com.sequenceiq.cloudbreak.validation",
-        "com.sequenceiq.cloudbreak.common.converter"},
+        "com.sequenceiq.cloudbreak.common.converter",
+        "com.sequenceiq.cloudbreak.client"},
         exclude = WebMvcMetricsAutoConfiguration.class)
 public class RedbeamsApplication {
 

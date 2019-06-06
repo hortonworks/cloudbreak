@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -20,6 +21,7 @@ import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.logger.MDCContextFilter;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
+import com.sequenceiq.redbeams.client.RedbeamsApiClientParams;
 
 @Configuration
 public class AppConfig {
@@ -33,11 +35,24 @@ public class AppConfig {
     @Inject
     private AuthenticatedUserService authenticatedUserService;
 
+    @Value("${rest.debug:false}")
+    private boolean restDebug;
+
+    @Value("${cert.validation:true}")
+    private boolean certificateValidation;
+
+    @Value("${cert.ignorePreValidation:false}")
+    private boolean ignorePreValidation;
+
     @Value("${cb.intermediate.threadpool.core.size:}")
     private int intermediateCorePoolSize;
 
     @Value("${cb.intermediate.threadpool.capacity.size:}")
     private int intermediateQueueCapacity;
+
+    @Inject
+    @Named("redbeamsServerUrl")
+    private String redbeamsServerUrl;
 
     @Bean
     public Map<CloudPlatform, EnvironmentNetworkValidator> environmentNetworkValidatorsByCloudPlatform() {
@@ -73,4 +88,10 @@ public class AppConfig {
         registrationBean.setOrder(Integer.MAX_VALUE);
         return registrationBean;
     }
+
+    @Bean
+    public RedbeamsApiClientParams redbeamsApiClientParams() {
+        return new RedbeamsApiClientParams(restDebug, certificateValidation, ignorePreValidation, redbeamsServerUrl);
+    }
+
 }

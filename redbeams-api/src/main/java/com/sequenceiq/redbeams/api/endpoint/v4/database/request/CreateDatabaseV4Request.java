@@ -2,8 +2,9 @@ package com.sequenceiq.redbeams.api.endpoint.v4.database.request;
 
 import static com.sequenceiq.redbeams.doc.ModelDescriptions.ENVIRONMENT_ID;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.Database;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
 
@@ -15,7 +16,7 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CreateDatabaseV4Request implements JsonEntity {
+public class CreateDatabaseV4Request implements Serializable {
 
     @ApiModelProperty(ENVIRONMENT_ID)
     private String environmentId;
