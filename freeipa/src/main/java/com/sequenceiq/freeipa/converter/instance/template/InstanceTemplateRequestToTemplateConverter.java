@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -53,7 +54,7 @@ public class InstanceTemplateRequestToTemplateConverter {
     }
 
     private void setVolumesProperty(Set<VolumeRequest> attachedVolumes, Template template, CloudPlatform cloudPlatform) {
-        if (!attachedVolumes.isEmpty()) {
+        if (!CollectionUtils.isEmpty(attachedVolumes)) {
             attachedVolumes.stream().findFirst().ifPresent(v -> {
                 String volumeType = v.getType();
                 template.setVolumeType(volumeType == null ? "HDD" : volumeType);
