@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.common.type.InstanceGroupType.GATEWAY;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -41,8 +40,8 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
@@ -169,8 +168,8 @@ public class StackDecoratorTest {
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCredentialName(credentialName);
         when(environmentClientService.get(anyString())).thenReturn(environmentResponse);
-        given(credentialClientService.getByCrn(anyString())).willReturn(Credential.builder().cloudPlatform(CloudPlatform.MOCK.name()).build());
-        given(credentialClientService.getByName(anyString())).willReturn(Credential.builder().cloudPlatform(CloudPlatform.MOCK.name()).build());
+        when(credentialClientService.getByCrn(anyString())).thenReturn(Credential.builder().cloudPlatform(CloudPlatform.MOCK.name()).build());
+        when(credentialClientService.getByName(anyString())).thenReturn(Credential.builder().cloudPlatform(CloudPlatform.MOCK.name()).build());
     }
 
     @Test
