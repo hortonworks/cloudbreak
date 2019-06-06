@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
+import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Component
 public class KnoxGatewayConfigProvider extends AbstractRoleConfigConfigProvider {
@@ -44,6 +45,8 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigConfigProvider 
                 if (gateway != null) {
                     config.add(config(KNOX_MASTER_SECRET, gateway.getMasterSecret()));
                     config.add(config(GATEWAY_PATH, gateway.getPath()));
+                } else {
+                    config.add(config(KNOX_MASTER_SECRET, PasswordUtil.generatePassword()));
                 }
                 return config;
             default:
