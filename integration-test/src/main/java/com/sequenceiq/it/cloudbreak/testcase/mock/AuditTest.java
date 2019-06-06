@@ -25,17 +25,12 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.audit.AuditTestDto;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
-import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestDto;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kubernetes.KubernetesTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.dto.mpack.MPackTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
-import com.sequenceiq.it.cloudbreak.dto.stack.StackTemplateTestDto;
-import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
 public class AuditTest extends AbstractIntegrationTest {
@@ -151,30 +146,30 @@ public class AuditTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    @Description(
-            given = "there is a running cloudbreak",
-            when = "a Cluster Template is created",
-            then = "and audit record must be available in the database")
-    public void createValidClusterTemplateThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
-        String clusterTemplateName = resourcePropertyProvider().getName();
-        testContext
-                .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.createV4(), key(clusterTemplateName))
-                .given("stackTemplate", StackTemplateTestDto.class)
-                .withEnvironment(EnvironmentTestDto.class)
-                .given(ClusterTemplateTestDto.class)
-                .withStackTemplate("stackTemplate")
-                .withName(clusterTemplateName)
-                .when(clusterTemplateTestClient.createV4(), key(clusterTemplateName))
-                .select(ct -> ct.getResponse().getId(), key(clusterTemplateName))
-                .given(AuditTestDto.class)
-                .withResourceIdByKey(clusterTemplateName)
-                .withResourceType("cluster_templates")
-                .when(auditTestClient.listV4(), key(clusterTemplateName))
-                .then(AuditTestAssertion.listContainsAtLeast(1), key(clusterTemplateName))
-                .validate();
-    }
+//    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+//    @Description(
+//            given = "there is a running cloudbreak",
+//            when = "a Cluster Template is created",
+//            then = "and audit record must be available in the database")
+//    public void createValidClusterTemplateThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
+//        String clusterTemplateName = resourcePropertyProvider().getName();
+//        testContext
+//                .given(EnvironmentTestDto.class)
+//                .when(environmentTestClient.createV4(), key(clusterTemplateName))
+//                .given("stackTemplate", StackTemplateTestDto.class)
+//                .withEnvironment(EnvironmentTestDto.class)
+//                .given(ClusterTemplateTestDto.class)
+//                .withStackTemplate("stackTemplate")
+//                .withName(clusterTemplateName)
+//                .when(clusterTemplateTestClient.createV4(), key(clusterTemplateName))
+//                .select(ct -> ct.getResponse().getId(), key(clusterTemplateName))
+//                .given(AuditTestDto.class)
+//                .withResourceIdByKey(clusterTemplateName)
+//                .withResourceType("cluster_templates")
+//                .when(auditTestClient.listV4(), key(clusterTemplateName))
+//                .then(AuditTestAssertion.listContainsAtLeast(1), key(clusterTemplateName))
+//                .validate();
+//    }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
@@ -196,25 +191,25 @@ public class AuditTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    @Description(
-            given = "there is a running cloudbreak",
-            when = "an Environment is created",
-            then = "and audit record must be available in the database")
-    public void createValidEnvironmentThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
-        String environmentName = resourcePropertyProvider().getName();
-        testContext
-                .given(EnvironmentTestDto.class)
-                .withName(environmentName)
-                .when(environmentTestClient.createV4(), key(environmentName))
-                .select(env -> env.getResponse().getId(), key(environmentName))
-                .given(AuditTestDto.class)
-                .withResourceIdByKey(environmentName)
-                .withResourceType("environments")
-                .when(auditTestClient.listV4(), key(environmentName))
-                .then(AuditTestAssertion.listContainsAtLeast(1), key(environmentName))
-                .validate();
-    }
+//    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+//    @Description(
+//            given = "there is a running cloudbreak",
+//            when = "an Environment is created",
+//            then = "and audit record must be available in the database")
+//    public void createValidEnvironmentThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
+//        String environmentName = resourcePropertyProvider().getName();
+//        testContext
+//                .given(EnvironmentTestDto.class)
+//                .withName(environmentName)
+//                .when(environmentTestClient.createV4(), key(environmentName))
+//                .select(env -> env.getResponse().getId(), key(environmentName))
+//                .given(AuditTestDto.class)
+//                .withResourceIdByKey(environmentName)
+//                .withResourceType("environments")
+//                .when(auditTestClient.listV4(), key(environmentName))
+//                .then(AuditTestAssertion.listContainsAtLeast(1), key(environmentName))
+//                .validate();
+//    }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
@@ -249,25 +244,25 @@ public class AuditTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    @Description(
-            given = "there is a running cloudbreak",
-            when = "an Ldap is created",
-            then = "and audit record must be available in the database")
-    public void createValidLdapThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
-        String ldapName = resourcePropertyProvider().getName();
-        testContext
-                .given(LdapTestDto.class)
-                .withName(ldapName)
-                .when(ldapTestClient.createV4(), key(ldapName))
-                .select(env -> env.getResponse().getId(), key(ldapName))
-                .given(AuditTestDto.class)
-                .withResourceIdByKey(ldapName)
-                .withResourceType("ldaps")
-                .when(auditTestClient.listV4(), key(ldapName))
-                .then(AuditTestAssertion.listContainsAtLeast(1), key(ldapName))
-                .validate();
-    }
+//    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+//    @Description(
+//            given = "there is a running cloudbreak",
+//            when = "an Ldap is created",
+//            then = "and audit record must be available in the database")
+//    public void createValidLdapThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
+//        String ldapName = resourcePropertyProvider().getName();
+//        testContext
+//                .given(LdapTestDto.class)
+//                .withName(ldapName)
+//                .when(ldapTestClient.createV4(), key(ldapName))
+//                .select(env -> env.getResponse().getId(), key(ldapName))
+//                .given(AuditTestDto.class)
+//                .withResourceIdByKey(ldapName)
+//                .withResourceType("ldaps")
+//                .when(auditTestClient.listV4(), key(ldapName))
+//                .then(AuditTestAssertion.listContainsAtLeast(1), key(ldapName))
+//                .validate();
+//    }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
@@ -289,28 +284,28 @@ public class AuditTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    @Description(
-            given = "there is a running cloudbreak",
-            when = "a Stack is created",
-            then = "and audit record must be available in the database")
-    public void createValidStackThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
-        String stackName = resourcePropertyProvider().getName();
-        String auditName = resourcePropertyProvider().getName();
-        testContext
-                .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.createV4())
-                .given(StackTestDto.class)
-                .when(stackTestClient.createV4())
-                .await(STACK_AVAILABLE)
-                .select(env -> env.getResponse().getId(), key(stackName))
-                .given(AuditTestDto.class)
-                .withResourceIdByKey(stackName)
-                .withResourceType("stacks")
-                .when(auditTestClient.listV4(), key(auditName))
-                .then(AuditTestAssertion.listContainsAtLeast(1), key(auditName))
-                .validate();
-    }
+//    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+//    @Description(
+//            given = "there is a running cloudbreak",
+//            when = "a Stack is created",
+//            then = "and audit record must be available in the database")
+//    public void createValidStackThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
+//        String stackName = resourcePropertyProvider().getName();
+//        String auditName = resourcePropertyProvider().getName();
+//        testContext
+//                .given(EnvironmentTestDto.class)
+//                .when(environmentTestClient.createV4())
+//                .given(StackTestDto.class)
+//                .when(stackTestClient.createV4())
+//                .await(STACK_AVAILABLE)
+//                .select(env -> env.getResponse().getId(), key(stackName))
+//                .given(AuditTestDto.class)
+//                .withResourceIdByKey(stackName)
+//                .withResourceType("stacks")
+//                .when(auditTestClient.listV4(), key(auditName))
+//                .then(AuditTestAssertion.listContainsAtLeast(1), key(auditName))
+//                .validate();
+//    }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
