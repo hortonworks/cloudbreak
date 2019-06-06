@@ -43,6 +43,9 @@ dependencies {
   compile project (":cloud-gcp")
   compile project (":cloud-openstack")
   compile project (":cloud-cumulus-yarn")
+  implementation (project (":redbeams-api")) {
+//    exclude module: 'core-api'
+  }
 
   compile     group: 'com.google.code.gson',      name: 'gson'
   compile     group: 'dnsjava',                   name: 'dnsjava'
