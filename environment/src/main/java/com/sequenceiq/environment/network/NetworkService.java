@@ -1,6 +1,9 @@
 package com.sequenceiq.environment.network;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
@@ -34,12 +37,18 @@ public class NetworkService {
             EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(cloudPlatform);
             if (environmentNetworkConverter != null) {
                 BaseNetwork baseNetwork = environmentNetworkConverter.convert(networkDto, environment);
+                baseNetwork.setId(getIfNotNull(networkDto, NetworkDto::getId));
                 baseNetwork.setResourceCrn(createCRN(accountId));
                 baseNetwork.setAccountId(accountId);
                 network = save(baseNetwork);
             }
         }
         return network;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends BaseNetwork> Optional<T> findByEnvironment(Long environmentId) {
+        return networkRepository.findByEnvironmentId(environmentId);
     }
 
     @SuppressWarnings("unchecked")
