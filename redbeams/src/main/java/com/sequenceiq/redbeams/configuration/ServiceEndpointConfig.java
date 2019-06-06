@@ -49,12 +49,6 @@ public class ServiceEndpointConfig {
 
     @Bean
     @DependsOn("serviceAddressResolver")
-    public String identityServerUrl(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
-        return serviceAddressResolver.resolveUrl(identityServiceUrl, "http", identityServiceId);
-    }
-
-    @Bean
-    @DependsOn("serviceAddressResolver")
     public String cloudbreakUrl(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
         return serviceAddressResolver.resolveUrl(cloudbreakUrl, "http", cloudbreakServiceId);
     }

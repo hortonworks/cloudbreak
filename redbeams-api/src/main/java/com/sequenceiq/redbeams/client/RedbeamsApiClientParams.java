@@ -1,23 +1,23 @@
-package com.sequenceiq.environment.client;
+package com.sequenceiq.redbeams.client;
 
-public class EnvironmentApiClientParams {
+public class RedbeamsApiClientParams {
     private boolean restDebug;
 
     private boolean certificateValidation;
 
     private boolean ignorePreValidation;
 
-    private String environmentServerUrl;
+    private String redbeamsServerUrl;
 
-    public EnvironmentApiClientParams(boolean restDebug, boolean certificateValidation, boolean ignorePreValidation, String environmentServerUrl) {
+    public RedbeamsApiClientParams(boolean restDebug, boolean certificateValidation, boolean ignorePreValidation, String redbeamsServerUrl) {
         this.restDebug = restDebug;
         this.certificateValidation = certificateValidation;
         this.ignorePreValidation = ignorePreValidation;
-        this.environmentServerUrl = environmentServerUrl;
+        this.redbeamsServerUrl = redbeamsServerUrl;
     }
 
     public String getServiceUrl() {
-        return environmentServerUrl;
+        return redbeamsServerUrl;
     }
 
     public boolean isCertificateValidation() {
