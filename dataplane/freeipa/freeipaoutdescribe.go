@@ -4,11 +4,11 @@ var header = []string{"FreeIPA", "ID"}
 
 type freeIpaOutDescibe struct {
 	*freeIpa
-	ID string `json:"ID" yaml:"ID"`
+	CRN string `json:"CRN" yaml:"CRN"`
 }
 
 type freeIpa struct {
-	EnvironmentCrn string          `json:"EnvironmentID" yaml:"EnvironmentID"`
+	EnvironmentCrn string          `json:"EnvironmentCrn" yaml:"EnvironmentCrn"`
 	Name           string          `json:"Name" yaml:"Name"`
 	Placement      *placement      `json:"Placement" yaml:"Placement"`
 	InstanceGroups []instanceGroup `json:"InstanceGroups" yaml:"InstanceGroups"`

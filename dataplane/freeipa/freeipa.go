@@ -82,7 +82,7 @@ func DescribeFreeIpa(c *cli.Context) {
 				Hostname: *iparesp.FreeIpa.Hostname,
 			},
 		},
-		*iparesp.EnvironmentCrn,
+		*iparesp.Crn,
 	}
 	if iparesp.Network.Aws != nil {
 		freeIpaOut.Network = &network{
@@ -107,7 +107,7 @@ func DescribeFreeIpa(c *cli.Context) {
 }
 
 func (f *freeIpaOutDescibe) DataAsStringArray() []string {
-	return append(f.freeIpa.DataAsStringArray(), f.ID)
+	return append(f.freeIpa.DataAsStringArray(), f.CRN)
 }
 
 func (f *freeIpa) DataAsStringArray() []string {
