@@ -101,7 +101,7 @@ func NewEnvironmentClientFromContext(c *cli.Context) *Environment {
 func NewEnvironmentClient(address string, apiKeyID, privateKey string) *Environment {
 	u.CheckServerAddress(address)
 	var transport *utils.Transport
-	const baseAPIPath string = "/env/api"
+	const baseAPIPath string = "/environmentservice/api"
 	transport = apikeyauth.GetAPIKeyAuthTransport(address, baseAPIPath, apiKeyID, privateKey)
 	return &Environment{Environment: environmentclient.New(transport, strfmt.Default)}
 }
