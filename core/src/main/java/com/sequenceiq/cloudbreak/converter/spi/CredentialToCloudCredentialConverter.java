@@ -17,7 +17,7 @@ public class CredentialToCloudCredentialConverter {
     private CredentialClientService credentialClientService;
 
     public CloudCredential convert(String credentialCrn) {
-        return convert(credentialClientService.get(credentialCrn));
+        return convert(credentialClientService.getByCrn(credentialCrn));
     }
 
     public CloudCredential convert(Credential credential) {

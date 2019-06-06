@@ -114,7 +114,7 @@ public class StackValidationV4RequestToStackValidationConverter extends Abstract
 
     private void validateCredential(StackValidation stackValidation, String credentialName) {
         if (credentialName != null) {
-            Credential credential = credentialClientService.get(credentialName);
+            Credential credential = credentialClientService.getByName(credentialName);
             stackValidation.setCredential(credential);
         } else if (stackValidation.getCredential() == null) {
             throw new BadRequestException("Credential is not configured for the validation request!");

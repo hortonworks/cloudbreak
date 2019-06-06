@@ -105,7 +105,8 @@ public class StackValidationRequestToStackValidationConverterTest {
         environment = new DetailedEnvironmentResponse();
         environment.setCredentialName(credential.getName());
         when(environmentClientService.get(anyString())).thenReturn(environment);
-        when(credentialClientService.get(anyString())).thenReturn(credential);
+        when(credentialClientService.getByCrn(anyString())).thenReturn(credential);
+        when(credentialClientService.getByName(anyString())).thenReturn(credential);
     }
 
     @Test

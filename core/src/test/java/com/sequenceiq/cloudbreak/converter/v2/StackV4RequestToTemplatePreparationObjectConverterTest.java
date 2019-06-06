@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.powermock.api.mockito.PowerMockito;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -184,7 +185,8 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(workspaceService.get(anyLong(), eq(user))).thenReturn(workspace);
         when(environmentResponse.getCredentialName()).thenReturn(TEST_CREDENTIAL_NAME);
         when(environmentClientService.get(anyString())).thenReturn(environmentResponse);
-        when(credentialClientService.get(TEST_CREDENTIAL_NAME)).thenReturn(credential);
+        PowerMockito.when(credentialClientService.getByCrn(TEST_CREDENTIAL_NAME)).thenReturn(credential);
+        PowerMockito.when(credentialClientService.getByName(TEST_CREDENTIAL_NAME)).thenReturn(credential);
         when(credential.getName()).thenReturn(TEST_CREDENTIAL_NAME);
     }
 

@@ -104,7 +104,7 @@ public class StackDecorator {
         subject.setEnvironmentCrn(request.getEnvironmentCrn());
         String stackName = request.getName();
 
-        Credential credential = measure(() -> prepareCredential(subject, workspace),
+        Credential credential = measure(() -> prepareCredential(subject),
                 LOGGER, "Credential was prepared under {} ms for stack {}", stackName);
 
         measure(() -> prepareDomainIfDefined(subject, request, user, workspace, credential),
@@ -147,10 +147,10 @@ public class StackDecorator {
         return subject;
     }
 
-    private Credential prepareCredential(Stack subject, Workspace workspace) {
+    private Credential prepareCredential(Stack subject) {
         DetailedEnvironmentResponse environment = environmentClientService.get(subject.getEnvironmentCrn());
         String credentialName = environment.getCredentialName();
-        return credentialClientService.get(credentialName);
+        return credentialClientService.getByName(credentialName);
     }
 
     private void prepareInstanceGroups(Stack subject, StackV4Request request, Credential credential, User user) {
