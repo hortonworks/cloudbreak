@@ -24,6 +24,8 @@ management:
         "[http.server.requests]": "0.5, 0.95"
 
 redbeams:
+  schema.migration.auto: true
+  cloudbreak.url: http://127.0.0.1:8080
   cert.dir: /certs/
   client.id: redbeams
   structuredevent:
@@ -31,6 +33,7 @@ redbeams:
       enabled: false
   db:
     port.5432.tcp.port: 5432
+    port.5432.tcp.addr: 127.0.0.1
     env:
       user: postgres
       pass:
@@ -61,7 +64,7 @@ secret:
   engine: "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine"
 
 vault:
-  addr: vault.service.consul
+  addr: localhost
   port: 8200
   ssl.enabled: false
   kv.engine.v2.path: secret
@@ -515,4 +518,5 @@ cb:
       - name: ambari
         pkgName: ambari-agent
         prewarmed: true
+altus.ums.host: localhost
 
