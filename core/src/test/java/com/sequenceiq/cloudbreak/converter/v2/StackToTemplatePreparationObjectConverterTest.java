@@ -10,6 +10,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -173,7 +174,9 @@ public class StackToTemplatePreparationObjectConverterTest {
                 .crn("aCredentialCRN")
                 .attributes(new Json(""))
                 .build();
-        when(credentialClientService.get(anyString())).thenReturn(credential);
+        given(credentialClientService.getByCrn(anyString())).willReturn(credential);
+        given(credentialClientService.getByName(anyString())).willReturn(credential);
+
         when(ldapConfigService.get(anyString())).thenReturn(Optional.empty());
     }
 

@@ -32,12 +32,19 @@ public class PlatformParameterService {
     @Inject
     private CredentialService credentialService;
 
-    public PlatformResourceRequest getPlatformResourceRequest(String accountId, String credentialName, String region, String platformVariant,
+    public PlatformResourceRequest getPlatformResourceRequest(
+            String accountId,
+            String credentialName,
+            String credentialCrn,
+            String region,
+            String platformVariant,
             String availabilityZone) {
         PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
 
         if (!Strings.isNullOrEmpty(credentialName)) {
             platformResourceRequest.setCredential(credentialService.getByNameForAccountId(credentialName, accountId));
+        } else if (!Strings.isNullOrEmpty(credentialCrn)) {
+            platformResourceRequest.setCredential(credentialService.getByCrnForAccountId(credentialCrn, accountId));
         } else {
             throw new BadRequestException("The credentialId or the credentialName must be specified in the request");
         }

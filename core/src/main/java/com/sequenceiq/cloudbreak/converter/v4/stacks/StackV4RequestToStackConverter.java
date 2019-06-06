@@ -282,7 +282,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     }
 
     private void updateEnvironment(Stack stack, DetailedEnvironmentResponse environment) {
-        Credential credential = credentialClientService.get(environment.getCredentialName());
+        Credential credential = credentialClientService.getByName(environment.getCredentialName());
         stack.setCredentialCrn(credential.getCrn());
     }
 
