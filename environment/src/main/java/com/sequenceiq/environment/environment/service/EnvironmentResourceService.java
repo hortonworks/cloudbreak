@@ -31,9 +31,9 @@ public class EnvironmentResourceService {
         this.networkService = networkService;
     }
 
-    public BaseNetwork createAndSetNetwork(Environment environment, NetworkDto networkDto) {
+    public BaseNetwork createAndSetNetwork(Environment environment, NetworkDto networkDto, String accountId) {
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
-        BaseNetwork network = networkService.createNetworkIfPossible(environment, networkDto, cloudPlatform);
+        BaseNetwork network = networkService.createNetworkIfPossible(environment, networkDto, cloudPlatform, accountId);
         if (network != null) {
             environment.setNetwork(network);
         }
