@@ -10,7 +10,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -51,15 +50,15 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.dto.LdapView;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceGroupMetadataCollector;
-import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
+import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -174,8 +173,8 @@ public class StackToTemplatePreparationObjectConverterTest {
                 .crn("aCredentialCRN")
                 .attributes(new Json(""))
                 .build();
-        given(credentialClientService.getByCrn(anyString())).willReturn(credential);
-        given(credentialClientService.getByName(anyString())).willReturn(credential);
+        when(credentialClientService.getByCrn(anyString())).thenReturn(credential);
+        when(credentialClientService.getByName(anyString())).thenReturn(credential);
 
         when(ldapConfigService.get(anyString())).thenReturn(Optional.empty());
     }
