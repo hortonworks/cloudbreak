@@ -1,6 +1,6 @@
 {
   "AWS GovCloud (US)": {
-    "zoneid": "govcloud-us",
+    "zoneid": "us-gov-west-1",
     "defaultvm": "i2.4xlarge"
   },
   "Asia Pacific (Mumbai)": {
