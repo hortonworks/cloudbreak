@@ -23,12 +23,13 @@ import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
+import com.sequenceiq.redbeams.authorization.CrnResource;
 import com.sequenceiq.redbeams.converter.CrnConverter;
 
 @Entity
 @Where(clause = "archived = false")
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name", "deletionTimestamp", "environment_id"}))
-public class DatabaseConfig implements ArchivableResource {
+public class DatabaseConfig implements ArchivableResource, CrnResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "databaseconfig_generator")
@@ -95,10 +96,12 @@ public class DatabaseConfig implements ArchivableResource {
         return id;
     }
 
+    @Override
     public String getAccountId() {
         return accountId;
     }
 
+    @Override
     public Crn getResourceCrn() {
         return resourceCrn;
     }
