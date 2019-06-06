@@ -19,7 +19,7 @@ public class PlatformResourceClientService {
     private PlatformResourceEndpoint platformResourceEndpoint;
 
     public CloudEncryptionKeys getEncryptionKeys(String credentialName, String region) {
-        PlatformEncryptionKeysResponse encryptionKeys = platformResourceEndpoint.getEncryptionKeys(credentialName, region, null, null);
+        PlatformEncryptionKeysResponse encryptionKeys = platformResourceEndpoint.getEncryptionKeys(credentialName, null, region, null, null);
         Set<CloudEncryptionKey> keys = encryptionKeys.getEncryptionKeyConfigs().stream()
                 .map(response -> new CloudEncryptionKey(response.getName(), response.getId(),
                         response.getDescription(), response.getDisplayName(), response.getProperties()))

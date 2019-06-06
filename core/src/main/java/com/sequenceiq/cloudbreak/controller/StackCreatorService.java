@@ -172,7 +172,7 @@ public class StackCreatorService {
             savedStack = transactionService.required(() -> {
                 Stack stack = stackDecorator.decorate(stackStub, stackRequest, user, workspace);
 
-                Credential credential = credentialClientService.get(stack.getCredentialCrn());
+                Credential credential = credentialClientService.getByCrn(stack.getCredentialCrn());
                 CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
 
                 ParametersValidationRequest parametersValidationRequest = parametersValidator.triggerValidate(stackRequest.getCloudPlatform().name(),

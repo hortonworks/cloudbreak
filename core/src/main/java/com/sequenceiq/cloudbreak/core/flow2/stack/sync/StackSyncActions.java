@@ -138,7 +138,7 @@ public class StackSyncActions {
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
             CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                     location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
-            Credential credential = credentialClientService.get(stack.getCredentialCrn());
+            Credential credential = credentialClientService.getByCrn(stack.getCredentialCrn());
             CloudCredential cloudCredential = credentialConverter.convert(credential);
             return new StackSyncContext(flowParameters, stack, stack.getNotTerminatedInstanceMetaDataList(), cloudContext, cloudCredential,
                     isStatusUpdateEnabled(variables));

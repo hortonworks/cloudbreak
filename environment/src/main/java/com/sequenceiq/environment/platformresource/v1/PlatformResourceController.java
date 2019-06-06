@@ -53,19 +53,38 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
     private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Override
-    public PlatformVmtypesResponse getVmTypesByCredential(String credentialName, String region, String platformVariant,
+    public PlatformVmtypesResponse getVmTypesByCredential(
+            String credentialName,
+            String credentialCrn,
+            String region,
+            String platformVariant,
             String availabilityZone) {
         String accountId = getAccountId();
-        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(accountId, credentialName, region, platformVariant,
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
+                accountId,
+                credentialName,
+                credentialCrn,
+                region,
+                platformVariant,
                 availabilityZone);
         CloudVmTypes cloudVmTypes = platformParameterService.getVmTypesByCredential(request);
         return convertersionService.convert(cloudVmTypes, PlatformVmtypesResponse.class);
     }
 
     @Override
-    public RegionResponse getRegionsByCredential(String credentialName, String region, String platformVariant, String availabilityZone) {
+    public RegionResponse getRegionsByCredential(
+            String credentialName,
+            String credentialCrn,
+            String region,
+            String platformVariant,
+            String availabilityZone) {
         String accountId = getAccountId();
-        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(accountId, credentialName, region, platformVariant,
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
+                accountId,
+                credentialName,
+                credentialCrn,
+                region,
+                platformVariant,
                 availabilityZone);
         CloudRegions regions = platformParameterService.getRegionsByCredential(request);
         return convertersionService.convert(regions, RegionResponse.class);
@@ -78,69 +97,133 @@ public class PlatformResourceController implements PlatformResourceEndpoint {
     }
 
     @Override
-    public PlatformNetworksResponse getCloudNetworks(String credentialName, String region, String platformVariant,
+    public PlatformNetworksResponse getCloudNetworks(
+            String credentialName,
+            String credentialCrn,
+            String region,
+            String platformVariant,
             String availabilityZone) {
         String accountId = getAccountId();
-        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(accountId, credentialName, region, platformVariant,
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
+                accountId,
+                credentialName,
+                credentialCrn,
+                region,
+                platformVariant,
                 availabilityZone);
         CloudNetworks networks = platformParameterService.getCloudNetworks(request);
         return convertersionService.convert(networks, PlatformNetworksResponse.class);
     }
 
     @Override
-    public PlatformIpPoolsResponse getIpPoolsCredentialId(String credentialName, String region, String platformVariant,
+    public PlatformIpPoolsResponse getIpPoolsCredentialId(
+            String credentialName,
+            String credentialCrn,
+            String region,
+            String platformVariant,
             String availabilityZone) {
         String accountId = getAccountId();
-        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(accountId, credentialName, region, platformVariant,
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
+                accountId,
+                credentialName,
+                credentialCrn,
+                region,
+                platformVariant,
                 availabilityZone);
         CloudIpPools ipPools = platformParameterService.getIpPoolsCredentialId(request);
         return convertersionService.convert(ipPools, PlatformIpPoolsResponse.class);
     }
 
     @Override
-    public PlatformGatewaysResponse getGatewaysCredentialId(String credentialName, String region, String platformVariant,
+    public PlatformGatewaysResponse getGatewaysCredentialId(
+            String credentialName,
+            String credentialCrn,
+            String region,
+            String platformVariant,
             String availabilityZone) {
         String accountId = getAccountId();
-        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(accountId, credentialName, region, platformVariant,
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
+                accountId,
+                credentialName,
+                credentialCrn,
+                region,
+                platformVariant,
                 availabilityZone);
         CloudGateWays gateWays = platformParameterService.getGatewaysCredentialId(request);
         return convertersionService.convert(gateWays, PlatformGatewaysResponse.class);
     }
 
     @Override
-    public PlatformEncryptionKeysResponse getEncryptionKeys(String credentialName, String region, String platformVariant,
+    public PlatformEncryptionKeysResponse getEncryptionKeys(
+            String credentialName,
+            String credentialCrn,
+            String region,
+            String platformVariant,
             String availabilityZone) {
         String accountId = getAccountId();
-        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(accountId, credentialName, region, platformVariant,
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
+                accountId,
+                credentialName,
+                credentialCrn,
+                region,
+                platformVariant,
                 availabilityZone);
         CloudEncryptionKeys encryptionKeys = platformParameterService.getEncryptionKeys(request);
         return convertersionService.convert(encryptionKeys, PlatformEncryptionKeysResponse.class);
     }
 
     @Override
-    public PlatformSecurityGroupsResponse getSecurityGroups(String credentialName, String region, String platformVariant,
+    public PlatformSecurityGroupsResponse getSecurityGroups(
+            String credentialName,
+            String credentialCrn,
+            String region,
+            String platformVariant,
             String availabilityZone) {
         String accountId = getAccountId();
-        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(accountId, credentialName, region, platformVariant,
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
+                accountId,
+                credentialName,
+                credentialCrn,
+                region,
+                platformVariant,
                 availabilityZone);
         CloudSecurityGroups securityGroups = platformParameterService.getSecurityGroups(request);
         return convertersionService.convert(securityGroups, PlatformSecurityGroupsResponse.class);
     }
 
     @Override
-    public PlatformSshKeysResponse getCloudSshKeys(String credentialName, String region, String platformVariant, String availabilityZone) {
+    public PlatformSshKeysResponse getCloudSshKeys(
+            String credentialName,
+            String credentialCrn,
+            String region,
+            String platformVariant,
+            String availabilityZone) {
         String accountId = getAccountId();
-        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(accountId, credentialName, region, platformVariant,
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
+                accountId,
+                credentialName,
+                credentialCrn,
+                region,
+                platformVariant,
                 availabilityZone);
         CloudSshKeys sshKeys = platformParameterService.getCloudSshKeys(request);
         return convertersionService.convert(sshKeys, PlatformSshKeysResponse.class);
     }
 
     @Override
-    public PlatformAccessConfigsResponse getAccessConfigs(String credentialName, String region, String platformVariant,
+    public PlatformAccessConfigsResponse getAccessConfigs(
+            String credentialName,
+            String credentialCrn,
+            String region,
+            String platformVariant,
             String availabilityZone) {
         String accountId = getAccountId();
-        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(accountId, credentialName, region, platformVariant,
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
+                accountId,
+                credentialName,
+                credentialCrn,
+                region,
+                platformVariant,
                 availabilityZone);
         CloudAccessConfigs accessConfigs = platformParameterService.getAccessConfigs(request);
         return convertersionService.convert(accessConfigs, PlatformAccessConfigsResponse.class);
