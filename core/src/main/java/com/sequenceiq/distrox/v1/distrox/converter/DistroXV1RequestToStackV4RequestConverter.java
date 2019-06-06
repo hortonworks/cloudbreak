@@ -53,10 +53,10 @@ public class DistroXV1RequestToStackV4RequestConverter {
         StackV4Request request = new StackV4Request();
         request.setName(source.getName());
         request.setType(StackType.WORKLOAD);
-        DetailedEnvironmentResponse environment = environmentClientService.get(source.getEnvironmentCrn());
+        DetailedEnvironmentResponse environment = environmentClientService.get(source.getEnvironmentName());
         request.setCloudPlatform(getCloudPlatform(environment));
         request.setPlacement(getPlacement(environment));
-        request.setEnvironmentCrn(source.getEnvironmentCrn());
+        request.setEnvironmentCrn(environment.getId());
         request.setAuthentication(getIfNotNull(source.getAuthentication(), authenticationConverter::convert));
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source.getCluster(), clusterConverter::convert));
@@ -80,7 +80,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
     public DistroXV1Request convert(StackV4Request source) {
         DistroXV1Request request = new DistroXV1Request();
         request.setName(source.getName());
-        request.setEnvironmentCrn(source.getEnvironmentCrn());
+        request.setEnvironmentName(environmentClientService.get(source.getEnvironmentCrn()).getName());
         request.setAuthentication(getIfNotNull(source.getAuthentication(), authenticationConverter::convert));
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source.getCluster(), clusterConverter::convert));
