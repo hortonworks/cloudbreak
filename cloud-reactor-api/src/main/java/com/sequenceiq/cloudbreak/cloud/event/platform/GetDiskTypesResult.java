@@ -1,19 +1,18 @@
 package com.sequenceiq.cloudbreak.cloud.event.platform;
 
-import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 
-public class GetDiskTypesResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
+public class GetDiskTypesResult extends CloudPlatformResult {
     private PlatformDisks platformDisks;
 
-    public GetDiskTypesResult(CloudPlatformRequest<?> request, PlatformDisks platformDisks) {
-        super(request);
+    public GetDiskTypesResult(Long resourceId, PlatformDisks platformDisks) {
+        super(resourceId);
         this.platformDisks = platformDisks;
     }
 
-    public GetDiskTypesResult(String statusReason, Exception errorDetails, CloudPlatformRequest<?> request) {
-        super(statusReason, errorDetails, request);
+    public GetDiskTypesResult(String statusReason, Exception errorDetails, Long resourceId) {
+        super(statusReason, errorDetails, resourceId);
     }
 
     public PlatformDisks getPlatformDisks() {

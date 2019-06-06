@@ -1,20 +1,19 @@
 package com.sequenceiq.cloudbreak.cloud.event.instance;
 
-import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 
-public class GetTlsInfoResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
+public class GetTlsInfoResult extends CloudPlatformResult {
 
     private TlsInfo tlsInfo;
 
-    public GetTlsInfoResult(CloudPlatformRequest<?> request, TlsInfo tlsInfo) {
-        super(request);
+    public GetTlsInfoResult(Long resourceId, TlsInfo tlsInfo) {
+        super(resourceId);
         this.tlsInfo = tlsInfo;
     }
 
-    public GetTlsInfoResult(String statusReason, Exception errorDetails, CloudPlatformRequest<?> request) {
-        super(statusReason, errorDetails, request);
+    public GetTlsInfoResult(String statusReason, Exception errorDetails, Long resourceId) {
+        super(statusReason, errorDetails, resourceId);
     }
 
     public TlsInfo getTlsInfo() {

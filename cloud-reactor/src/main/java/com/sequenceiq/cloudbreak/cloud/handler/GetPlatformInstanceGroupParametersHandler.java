@@ -42,11 +42,11 @@ public class GetPlatformInstanceGroupParametersHandler implements CloudPlatformE
             Map<String, InstanceGroupParameterResponse> instanceGroupParameterResponses = cloudPlatformConnectors.get(variant)
                     .parameters().collectInstanceGroupParameters(request.getInstanceGroupParameterRequest());
             GetPlatformInstanceGroupParameterResult getPlatformInstanceGroupParameterResult =
-                    new GetPlatformInstanceGroupParameterResult(request, instanceGroupParameterResponses);
+                    new GetPlatformInstanceGroupParameterResult(request.getResourceId(), instanceGroupParameterResponses);
             request.getResult().onNext(getPlatformInstanceGroupParameterResult);
             LOGGER.debug("Query platform instance group parameters finished.");
         } catch (Exception e) {
-            request.getResult().onNext(new GetPlatformInstanceGroupParameterResult(e.getMessage(), e, request));
+            request.getResult().onNext(new GetPlatformInstanceGroupParameterResult(e.getMessage(), e, request.getResourceId()));
         }
     }
 }

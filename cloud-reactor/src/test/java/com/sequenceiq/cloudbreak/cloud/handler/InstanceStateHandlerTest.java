@@ -66,7 +66,7 @@ public class InstanceStateHandlerTest {
 
         subject.accept(event);
 
-        verifyResult(new GetInstancesStateResult(request, allStarted));
+        verifyResult(new GetInstancesStateResult(request.getResourceId(), allStarted));
     }
 
     @Test
@@ -76,7 +76,7 @@ public class InstanceStateHandlerTest {
 
         subject.accept(event);
 
-        verifyResult(new GetInstancesStateResult(request, allInstancesInStatus(InstanceStatus.UNKNOWN)));
+        verifyResult(new GetInstancesStateResult(request.getResourceId(), allInstancesInStatus(InstanceStatus.UNKNOWN)));
     }
 
     @Test
@@ -88,7 +88,7 @@ public class InstanceStateHandlerTest {
 
         subject.accept(event);
 
-        verifyResult(new GetInstancesStateResult("some message", exception, request));
+        verifyResult(new GetInstancesStateResult("some message", exception, request.getResourceId()));
     }
 
     private List<CloudVmInstanceStatus> allInstancesInStatus(InstanceStatus status) {

@@ -48,12 +48,12 @@ public class GetPlatformOrchestratorsHandler implements CloudPlatformEventHandle
                 platformCollectionHashMap.put(connector.getKey(), platformOrchestrator.types());
                 defaults.put(connector.getKey(), platformOrchestrator.defaultType());
             }
-            GetPlatformOrchestratorsResult getPlatformOrchestratorsResult = new GetPlatformOrchestratorsResult(request,
+            GetPlatformOrchestratorsResult getPlatformOrchestratorsResult = new GetPlatformOrchestratorsResult(request.getResourceId(),
                     new PlatformOrchestrators(platformCollectionHashMap, defaults));
             request.getResult().onNext(getPlatformOrchestratorsResult);
             LOGGER.debug("Query platform orchestrators types finished.");
         } catch (RuntimeException e) {
-            request.getResult().onNext(new GetPlatformOrchestratorsResult(e.getMessage(), e, request));
+            request.getResult().onNext(new GetPlatformOrchestratorsResult(e.getMessage(), e, request.getResourceId()));
         }
     }
 }

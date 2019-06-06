@@ -11,7 +11,7 @@ public class CloudPlatformResponseToStackFailureConverter implements PayloadConv
 
     @Override
     public StackFailureEvent convert(Object payload) {
-        CloudPlatformResult<?> cloudPlatformResult = (CloudPlatformResult<?>) payload;
-        return new StackFailureEvent(cloudPlatformResult.getRequest().getCloudContext().getId(), cloudPlatformResult.getErrorDetails());
+        CloudPlatformResult cloudPlatformResult = (CloudPlatformResult) payload;
+        return new StackFailureEvent(cloudPlatformResult.getResourceId(), cloudPlatformResult.getErrorDetails());
     }
 }

@@ -2,20 +2,19 @@ package com.sequenceiq.cloudbreak.cloud.event.credential;
 
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 
-public class InteractiveLoginResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
+public class InteractiveLoginResult extends CloudPlatformResult {
 
     private Map<String, String> parameters;
 
-    public InteractiveLoginResult(CloudPlatformRequest<InteractiveLoginResult> request, Map<String, String> parameters) {
-        super(request);
+    public InteractiveLoginResult(Long resourceId, Map<String, String> parameters) {
+        super(resourceId);
         this.parameters = parameters;
     }
 
-    public InteractiveLoginResult(String statusReason, Exception errorDetails, CloudPlatformRequest<InteractiveLoginResult> request) {
-        super(statusReason, errorDetails, request);
+    public InteractiveLoginResult(String statusReason, Exception errorDetails, Long resourceId) {
+        super(statusReason, errorDetails, resourceId);
     }
 
     public Map<String, String> getParameters() {

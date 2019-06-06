@@ -1,19 +1,18 @@
 package com.sequenceiq.cloudbreak.cloud.event.platform;
 
-import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
 
-public class GetPlatformCloudIpPoolsResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
+public class GetPlatformCloudIpPoolsResult extends CloudPlatformResult {
     private CloudIpPools cloudIpPools;
 
-    public GetPlatformCloudIpPoolsResult(CloudPlatformRequest<?> request, CloudIpPools cloudIpPools) {
-        super(request);
+    public GetPlatformCloudIpPoolsResult(Long resourceId, CloudIpPools cloudIpPools) {
+        super(resourceId);
         this.cloudIpPools = cloudIpPools;
     }
 
-    public GetPlatformCloudIpPoolsResult(String statusReason, Exception errorDetails, CloudPlatformRequest<?> request) {
-        super(statusReason, errorDetails, request);
+    public GetPlatformCloudIpPoolsResult(String statusReason, Exception errorDetails, Long resourceId) {
+        super(statusReason, errorDetails, resourceId);
     }
 
     public CloudIpPools getCloudIpPools() {

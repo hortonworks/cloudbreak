@@ -1,19 +1,18 @@
 package com.sequenceiq.cloudbreak.cloud.event.platform;
 
-import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 
-public class GetPlatformCloudAccessConfigsResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
+public class GetPlatformCloudAccessConfigsResult extends CloudPlatformResult {
     private CloudAccessConfigs cloudAccessConfigs;
 
-    public GetPlatformCloudAccessConfigsResult(CloudPlatformRequest<?> request, CloudAccessConfigs cloudAccessConfigs) {
-        super(request);
+    public GetPlatformCloudAccessConfigsResult(Long resourceId, CloudAccessConfigs cloudAccessConfigs) {
+        super(resourceId);
         this.cloudAccessConfigs = cloudAccessConfigs;
     }
 
-    public GetPlatformCloudAccessConfigsResult(String statusReason, Exception errorDetails, CloudPlatformRequest<?> request) {
-        super(statusReason, errorDetails, request);
+    public GetPlatformCloudAccessConfigsResult(String statusReason, Exception errorDetails, Long resourceId) {
+        super(statusReason, errorDetails, resourceId);
     }
 
     public CloudAccessConfigs getCloudAccessConfigs() {

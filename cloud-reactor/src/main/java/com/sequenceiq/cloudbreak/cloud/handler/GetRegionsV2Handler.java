@@ -39,12 +39,12 @@ public class GetRegionsV2Handler implements CloudPlatformEventHandler<GetPlatfor
                     Variant.variant(request.getVariant()));
             CloudRegions cloudRegions = cloudPlatformConnectors.get(cloudPlatformVariant)
                     .platformResources().regions(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
-            GetPlatformRegionsResultV2 getPlatformRegionsResultV2 = new GetPlatformRegionsResultV2(request, cloudRegions);
+            GetPlatformRegionsResultV2 getPlatformRegionsResultV2 = new GetPlatformRegionsResultV2(request.getResourceId(), cloudRegions);
             request.getResult().onNext(getPlatformRegionsResultV2);
             LOGGER.debug("Query platform regions types finished.");
         } catch (Exception e) {
             LOGGER.warn("Could not get regions from the cloud provider due to:", e);
-            request.getResult().onNext(new GetPlatformRegionsResultV2(e.getMessage(), e, request));
+            request.getResult().onNext(new GetPlatformRegionsResultV2(e.getMessage(), e, request.getResourceId()));
         }
     }
 }

@@ -21,10 +21,10 @@ public class ResourcesStatePollerResults {
     }
 
     public static LaunchStackResult transformToLaunchStackResult(LaunchStackRequest request, ResourcesStatePollerResult result) {
-        return new LaunchStackResult(request, result.getResults());
+        return new LaunchStackResult(request.getResourceId(), result.getResults());
     }
 
     public static UpscaleStackResult transformToUpscaleStackResult(ResourcesStatePollerResult result, UpscaleStackRequest<?> request) {
-        return new UpscaleStackResult(request, result.getStatus(), result.getResults());
+        return new UpscaleStackResult(request.getResourceId(), result.getStatus(), result.getResults());
     }
 }

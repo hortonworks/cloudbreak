@@ -5,21 +5,20 @@ import java.util.Collections;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
-import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 
-public class DownscaleStackResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
+public class DownscaleStackResult extends CloudPlatformResult {
 
     private final List<CloudResource> downscaledResources;
 
-    public DownscaleStackResult(CloudPlatformRequest<?> request, Collection<CloudResource> downscaledResources) {
-        super(request);
+    public DownscaleStackResult(Long resourceId, Collection<CloudResource> downscaledResources) {
+        super(resourceId);
         this.downscaledResources = ImmutableList.copyOf(downscaledResources);
     }
 
-    public DownscaleStackResult(String statusReason, Exception errorDetails, CloudPlatformRequest<?> request) {
-        super(statusReason, errorDetails, request);
+    public DownscaleStackResult(String statusReason, Exception errorDetails, Long resourceId) {
+        super(statusReason, errorDetails, resourceId);
         downscaledResources = Collections.emptyList();
     }
 

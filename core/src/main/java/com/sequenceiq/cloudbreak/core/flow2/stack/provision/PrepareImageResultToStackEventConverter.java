@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.provision;
 
-import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
-import com.sequenceiq.flow.core.PayloadConverter;
+import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.flow.core.PayloadConverter;
 
 public class PrepareImageResultToStackEventConverter implements PayloadConverter<StackEvent> {
     @Override
@@ -13,6 +13,6 @@ public class PrepareImageResultToStackEventConverter implements PayloadConverter
 
     @Override
     public StackEvent convert(Object payload) {
-        return new StackEvent(((CloudPlatformResult<?>) payload).getRequest().getCloudContext().getId());
+        return new StackEvent(((Payload) payload).getResourceId());
     }
 }

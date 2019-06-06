@@ -107,7 +107,7 @@ public class StackUpscaleActions {
                     CloudStack stack = cloudStackConverter.convert(stackService.getByIdWithListsInTransaction(payload.getResourceId()));
                     UpscaleStackRequest<UpscaleStackResult> request =
                             new UpscaleStackRequest<>(context.getCloudContext(), context.getCloudCredential(), stack, ResourceLists.transform(list));
-                    UpscaleStackResult result = new UpscaleStackResult(request, ResourceStatus.CREATED, list);
+                    UpscaleStackResult result = new UpscaleStackResult(request.getResourceId(), ResourceStatus.CREATED, list);
                     sendEvent(context, result.selector(), result);
                 }
             }

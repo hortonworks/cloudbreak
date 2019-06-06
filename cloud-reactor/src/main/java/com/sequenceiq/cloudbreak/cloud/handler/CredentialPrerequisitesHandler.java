@@ -38,11 +38,11 @@ public class CredentialPrerequisitesHandler implements CloudPlatformEventHandler
             CloudConnector<?> connector = cloudPlatformConnectors.getDefault(cloudContext.getPlatform());
             CredentialPrerequisitesResponse result = connector.credentials()
                     .getPrerequisites(cloudContext, request.getExternalId(), request.getDeploymentAddress());
-            CredentialPrerequisitesResult credentialPrerequisitesResult = new CredentialPrerequisitesResult(request, result);
+            CredentialPrerequisitesResult credentialPrerequisitesResult = new CredentialPrerequisitesResult(request.getResourceId(), result);
             request.getResult().onNext(credentialPrerequisitesResult);
             LOGGER.debug("Credential prerequisites have been collected successfully for platform: '{}'!", cloudContext.getPlatform().value());
         } catch (RuntimeException e) {
-            request.getResult().onNext(new CredentialPrerequisitesResult(e.getMessage(), e, request));
+            request.getResult().onNext(new CredentialPrerequisitesResult(e.getMessage(), e, request.getResourceId()));
         }
     }
 }

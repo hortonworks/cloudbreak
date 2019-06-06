@@ -41,11 +41,11 @@ public class GetPlatformSecurityGroupsHandler implements CloudPlatformEventHandl
             CloudSecurityGroups securityGroups = cloudPlatformConnectors.get(cloudPlatformVariant)
                     .platformResources()
                     .securityGroups(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
-            GetPlatformSecurityGroupsResult getPlatformSecurityGroupsResult = new GetPlatformSecurityGroupsResult(request, securityGroups);
+            GetPlatformSecurityGroupsResult getPlatformSecurityGroupsResult = new GetPlatformSecurityGroupsResult(request.getResourceId(), securityGroups);
             request.getResult().onNext(getPlatformSecurityGroupsResult);
             LOGGER.debug("Query platform networks types finished.");
         } catch (Exception e) {
-            request.getResult().onNext(new GetPlatformSecurityGroupsResult(e.getMessage(), e, request));
+            request.getResult().onNext(new GetPlatformSecurityGroupsResult(e.getMessage(), e, request.getResourceId()));
         }
     }
 }

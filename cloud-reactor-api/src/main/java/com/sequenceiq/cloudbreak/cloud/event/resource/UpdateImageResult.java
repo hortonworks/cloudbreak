@@ -2,16 +2,13 @@ package com.sequenceiq.cloudbreak.cloud.event.resource;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 
-public class UpdateImageResult extends CloudPlatformResult<UpdateImageRequest<?>> {
+public class UpdateImageResult extends CloudPlatformResult {
 
-    public UpdateImageResult() {
+    public UpdateImageResult(Long resourceId) {
+        super(resourceId);
     }
 
-    public UpdateImageResult(UpdateImageRequest<?> request) {
-        super(request);
-    }
-
-    public UpdateImageResult(String statusReason, Exception errorDetails, UpdateImageRequest<?> request) {
-        super(statusReason, errorDetails, request);
+    public UpdateImageResult(String statusReason, Exception errorDetails, Long resourceId) {
+        super(statusReason, errorDetails, resourceId);
     }
 }

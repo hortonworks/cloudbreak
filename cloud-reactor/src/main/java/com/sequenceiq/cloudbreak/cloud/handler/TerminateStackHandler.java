@@ -69,10 +69,10 @@ public class TerminateStackHandler implements CloudPlatformEventHandler<Terminat
                 if (!statePollerResult.getStatus().equals(ResourceStatus.DELETED)) {
                     throw new CloudConnectorException("Stack could not be terminated, Resource(s) could not be deleted on the provider side.");
                 } else {
-                    result = new TerminateStackResult(request);
+                    result = new TerminateStackResult(request.getResourceId());
                 }
             } else {
-                result = new TerminateStackResult(request);
+                result = new TerminateStackResult(request.getResourceId());
             }
             CloudCredentialStatus credentialStatus = connector.credentials().delete(ac);
             if (CredentialStatus.FAILED == credentialStatus.getStatus()) {
@@ -86,7 +86,7 @@ public class TerminateStackHandler implements CloudPlatformEventHandler<Terminat
             eventBus.notify(result.selector(), new Event<>(terminateStackRequestEvent.getHeaders(), result));
         } catch (Exception e) {
             LOGGER.warn("Failed to handle TerminateStackRequest", e);
-            TerminateStackResult terminateStackResult = new TerminateStackResult("Stack termination failed.", e, request);
+            TerminateStackResult terminateStackResult = new TerminateStackResult("Stack termination failed.", e, request.getResourceId());
             request.getResult().onNext(terminateStackResult);
             eventBus.notify(terminateStackResult.selector(), new Event<>(terminateStackRequestEvent.getHeaders(), terminateStackResult));
         }

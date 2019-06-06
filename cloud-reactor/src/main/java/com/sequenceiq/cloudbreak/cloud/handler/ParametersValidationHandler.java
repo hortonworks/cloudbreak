@@ -35,9 +35,9 @@ public class ParametersValidationHandler implements CloudPlatformEventHandler<Pa
             CloudConnector<Object> connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
             AuthenticatedContext auth = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
             connector.setup().validateParameters(auth, request.getParameters());
-            request.getResult().onNext(new ParametersValidationResult(request));
+            request.getResult().onNext(new ParametersValidationResult(request.getResourceId()));
         } catch (Exception e) {
-            request.getResult().onNext(new ParametersValidationResult(e.getMessage(), e, request));
+            request.getResult().onNext(new ParametersValidationResult(e.getMessage(), e, request.getResourceId()));
         }
     }
 }

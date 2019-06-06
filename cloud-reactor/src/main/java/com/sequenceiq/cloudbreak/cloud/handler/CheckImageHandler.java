@@ -43,11 +43,11 @@ public class CheckImageHandler implements CloudPlatformEventHandler<CheckImageRe
             Image image = request.getImage();
             CloudStack stack = request.getStack();
             ImageStatusResult progress = connector.setup().checkImageStatus(auth, stack, image);
-            CheckImageResult imageResult = new CheckImageResult(request, progress.getImageStatus(), progress.getStatusProgressValue());
+            CheckImageResult imageResult = new CheckImageResult(request.getResourceId(), progress.getImageStatus(), progress.getStatusProgressValue());
             request.getResult().onNext(imageResult);
             LOGGER.debug("Provision setup finished for {}", cloudContext);
         } catch (RuntimeException e) {
-            CheckImageResult failure = new CheckImageResult(e, request, ImageStatus.CREATE_FAILED);
+            CheckImageResult failure = new CheckImageResult(e, request.getResourceId(), ImageStatus.CREATE_FAILED);
             request.getResult().onNext(failure);
         }
     }

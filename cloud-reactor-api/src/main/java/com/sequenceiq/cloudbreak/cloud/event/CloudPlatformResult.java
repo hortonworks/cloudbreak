@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.cloud.event;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 
-public class CloudPlatformResult<R extends CloudPlatformRequest<?>> implements Payload {
+public class CloudPlatformResult implements Payload {
+
+    private final Long resourceId;
 
     private EventStatus status;
 
@@ -11,24 +13,20 @@ public class CloudPlatformResult<R extends CloudPlatformRequest<?>> implements P
 
     private Exception errorDetails;
 
-    private R request;
-
-    protected CloudPlatformResult() {
+    public CloudPlatformResult(Long resourceId) {
+        this.resourceId = resourceId;
+        init(EventStatus.OK, null, null);
     }
 
-    public CloudPlatformResult(R request) {
-        init(EventStatus.OK, null, null, request);
+    public CloudPlatformResult(String statusReason, Exception errorDetails, Long resourceId) {
+        this.resourceId = resourceId;
+        init(EventStatus.FAILED, statusReason, errorDetails);
     }
 
-    public CloudPlatformResult(String statusReason, Exception errorDetails, R request) {
-        init(EventStatus.FAILED, statusReason, errorDetails, request);
-    }
-
-    protected void init(EventStatus status, String statusReason, Exception errorDetails, R request) {
+    protected void init(EventStatus status, String statusReason, Exception errorDetails) {
         this.status = status;
         this.statusReason = statusReason;
         this.errorDetails = errorDetails;
-        this.request = request;
     }
 
     public static String selector(Class<?> clazz) {
@@ -55,22 +53,18 @@ public class CloudPlatformResult<R extends CloudPlatformRequest<?>> implements P
         return errorDetails;
     }
 
-    public R getRequest() {
-        return request;
-    }
-
     @Override
     public String toString() {
         return "CloudPlatformResult{"
                 + "status=" + status
                 + ", statusReason='" + statusReason + '\''
                 + ", errorDetails=" + errorDetails
-                + ", request=" + request
+                + ", resourceId=" + resourceId
                 + '}';
     }
 
     @Override
     public Long getResourceId() {
-        return request.getCloudContext().getId();
+        return resourceId;
     }
 }

@@ -1,19 +1,18 @@
 package com.sequenceiq.cloudbreak.cloud.event.platform;
 
-import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 
-public class GetPlatformOrchestratorsResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
+public class GetPlatformOrchestratorsResult extends CloudPlatformResult {
     private PlatformOrchestrators platformOrchestrators;
 
-    public GetPlatformOrchestratorsResult(CloudPlatformRequest<?> request, PlatformOrchestrators platformOrchestrators) {
-        super(request);
+    public GetPlatformOrchestratorsResult(Long resourceId, PlatformOrchestrators platformOrchestrators) {
+        super(resourceId);
         this.platformOrchestrators = platformOrchestrators;
     }
 
-    public GetPlatformOrchestratorsResult(String statusReason, Exception errorDetails, CloudPlatformRequest<?> request) {
-        super(statusReason, errorDetails, request);
+    public GetPlatformOrchestratorsResult(String statusReason, Exception errorDetails, Long resourceId) {
+        super(statusReason, errorDetails, resourceId);
     }
 
     public PlatformOrchestrators getPlatformOrchestrators() {

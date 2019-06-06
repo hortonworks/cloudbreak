@@ -2,20 +2,19 @@ package com.sequenceiq.cloudbreak.cloud.event.resource;
 
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 
-public class LaunchStackResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
+public class LaunchStackResult extends CloudPlatformResult {
     private List<CloudResourceStatus> results;
 
-    public LaunchStackResult(CloudPlatformRequest<?> request, List<CloudResourceStatus> results) {
-        super(request);
+    public LaunchStackResult(Long resourceId, List<CloudResourceStatus> results) {
+        super(resourceId);
         this.results = results;
     }
 
-    public LaunchStackResult(Exception errorDetails, CloudPlatformRequest<?> request) {
-        super("", errorDetails, request);
+    public LaunchStackResult(Exception errorDetails, Long resourceId) {
+        super("", errorDetails, resourceId);
     }
 
     public List<CloudResourceStatus> getResults() {
@@ -28,7 +27,6 @@ public class LaunchStackResult extends CloudPlatformResult<CloudPlatformRequest<
                 + "status=" + getStatus()
                 + ", statusReason='" + getStatusReason() + '\''
                 + ", errorDetails=" + getErrorDetails()
-                + ", request=" + getRequest()
                 + ", results=" + results
                 + '}';
     }

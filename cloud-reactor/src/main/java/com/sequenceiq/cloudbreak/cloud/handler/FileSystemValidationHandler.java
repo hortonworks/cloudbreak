@@ -33,9 +33,9 @@ public class FileSystemValidationHandler implements CloudPlatformEventHandler<Fi
         try {
             CloudConnector<Object> connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
             connector.setup().validateFileSystem(request.getCredential(), request.getSpiFileSystem());
-            request.getResult().onNext(new FileSystemValidationResult(request));
+            request.getResult().onNext(new FileSystemValidationResult(request.getResourceId()));
         } catch (Exception e) {
-            request.getResult().onNext(new FileSystemValidationResult(e.getMessage(), e, request));
+            request.getResult().onNext(new FileSystemValidationResult(e.getMessage(), e, request.getResourceId()));
         }
     }
 }

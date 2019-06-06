@@ -64,11 +64,11 @@ public class StartStackHandler implements CloudPlatformEventHandler<StartInstanc
             if (!task.completed(statusResult)) {
                 statusResult = syncPollingScheduler.schedule(task);
             }
-            StartInstancesResult result = new StartInstancesResult(request, cloudContext, statusResult);
+            StartInstancesResult result = new StartInstancesResult(request.getResourceId(), statusResult);
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
         } catch (Exception e) {
-            StartInstancesResult failure = new StartInstancesResult("Failed to start stack", e, request);
+            StartInstancesResult failure = new StartInstancesResult("Failed to start stack", e, request.getResourceId());
             request.getResult().onNext(failure);
             eventBus.notify(failure.selector(), new Event<>(event.getHeaders(), failure));
         }

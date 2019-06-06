@@ -1,19 +1,18 @@
 package com.sequenceiq.cloudbreak.cloud.event.platform;
 
-import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 
-public class GetPlatformNetworksResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
+public class GetPlatformNetworksResult extends CloudPlatformResult {
     private CloudNetworks cloudNetworks;
 
-    public GetPlatformNetworksResult(CloudPlatformRequest<?> request, CloudNetworks cloudNetworks) {
-        super(request);
+    public GetPlatformNetworksResult(Long resourceId, CloudNetworks cloudNetworks) {
+        super(resourceId);
         this.cloudNetworks = cloudNetworks;
     }
 
-    public GetPlatformNetworksResult(String statusReason, Exception errorDetails, CloudPlatformRequest<?> request) {
-        super(statusReason, errorDetails, request);
+    public GetPlatformNetworksResult(String statusReason, Exception errorDetails, Long resourceId) {
+        super(statusReason, errorDetails, resourceId);
     }
 
     public CloudNetworks getCloudNetworks() {

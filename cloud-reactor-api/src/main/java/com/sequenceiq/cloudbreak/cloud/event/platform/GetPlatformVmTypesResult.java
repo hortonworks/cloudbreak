@@ -1,19 +1,18 @@
 package com.sequenceiq.cloudbreak.cloud.event.platform;
 
-import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 
-public class GetPlatformVmTypesResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
+public class GetPlatformVmTypesResult extends CloudPlatformResult {
     private CloudVmTypes vmTypes;
 
-    public GetPlatformVmTypesResult(CloudPlatformRequest<?> request, CloudVmTypes vmTypes) {
-        super(request);
+    public GetPlatformVmTypesResult(Long resourceId, CloudVmTypes vmTypes) {
+        super(resourceId);
         this.vmTypes = vmTypes;
     }
 
-    public GetPlatformVmTypesResult(String statusReason, Exception errorDetails, CloudPlatformRequest<?> request) {
-        super(statusReason, errorDetails, request);
+    public GetPlatformVmTypesResult(String statusReason, Exception errorDetails, Long resourceId) {
+        super(statusReason, errorDetails, resourceId);
     }
 
     public CloudVmTypes getCloudVmTypes() {

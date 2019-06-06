@@ -1,16 +1,15 @@
 package com.sequenceiq.cloudbreak.cloud.event.resource;
 
-import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 
-public class CreateCredentialResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
+public class CreateCredentialResult extends CloudPlatformResult {
 
-    public CreateCredentialResult(CloudPlatformRequest<?> request) {
-        super(request);
+    public CreateCredentialResult(Long resourceId) {
+        super(resourceId);
     }
 
-    public CreateCredentialResult(Exception errorDetails, CloudPlatformRequest<?> request) {
-        super("", errorDetails, request);
+    public CreateCredentialResult(Exception errorDetails, Long resourceId) {
+        super("", errorDetails, resourceId);
     }
 
     @Override
@@ -19,7 +18,6 @@ public class CreateCredentialResult extends CloudPlatformResult<CloudPlatformReq
                 + "status=" + getStatus()
                 + ", statusReason='" + getStatusReason() + '\''
                 + ", errorDetails=" + getErrorDetails()
-                + ", request=" + getRequest()
                 + '}';
     }
 }

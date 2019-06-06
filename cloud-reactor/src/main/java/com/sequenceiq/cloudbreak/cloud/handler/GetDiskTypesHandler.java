@@ -53,12 +53,12 @@ public class GetDiskTypesHandler implements CloudPlatformEventHandler<GetDiskTyp
                 diskMappings.put(connector.getKey(), diskTypes.diskMapping());
                 diskDisplayNames.put(connector.getKey(), diskTypes.displayNames());
             }
-            GetDiskTypesResult getDiskTypesResult = new GetDiskTypesResult(request,
+            GetDiskTypesResult getDiskTypesResult = new GetDiskTypesResult(request.getResourceId(),
                     new PlatformDisks(platformDiskTypes, defaultDiskTypes, diskMappings, diskDisplayNames));
             request.getResult().onNext(getDiskTypesResult);
             LOGGER.debug("Query platform disk types finished.");
         } catch (RuntimeException e) {
-            request.getResult().onNext(new GetDiskTypesResult(e.getMessage(), e, request));
+            request.getResult().onNext(new GetDiskTypesResult(e.getMessage(), e, request.getResourceId()));
         }
     }
 }
