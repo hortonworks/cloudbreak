@@ -70,7 +70,7 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                 location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
-        Credential credential = credentialClientService.get(stack.getCredentialCrn());
+        Credential credential = credentialClientService.getByCrn(stack.getCredentialCrn());
         CloudCredential cloudCredential = credentialConverter.convert(credential);
         String instanceGroupName = extractInstanceGroupName(payload, variables);
         Set<String> instanceIds = extractInstanceIds(payload, variables, stack);

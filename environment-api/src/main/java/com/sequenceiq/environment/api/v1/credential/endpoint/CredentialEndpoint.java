@@ -42,11 +42,18 @@ public interface CredentialEndpoint {
     CredentialResponses list();
 
     @GET
-    @Path("{name}")
+    @Path("name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CredentialOpDescription.GET_BY_NAME, produces = MediaType.APPLICATION_JSON,
-            notes = CredentialDescriptor.CREDENTIAL_NOTES, nickname = "getCredentialV1", httpMethod = "GET")
-    CredentialResponse get(@PathParam("name") String credentialName);
+            notes = CredentialDescriptor.CREDENTIAL_NOTES, nickname = "getCredentialByNameV1", httpMethod = "GET")
+    CredentialResponse getByName(String credentialName);
+
+    @GET
+    @Path("crn/{crn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = CredentialOpDescription.GET_BY_CRN, produces = MediaType.APPLICATION_JSON,
+            notes = CredentialDescriptor.CREDENTIAL_NOTES, nickname = "getCredentialByResourceCrnV1", httpMethod = "GET")
+    CredentialResponse getByResourceCrn(String credentialCrn);
 
     @POST
     @Path("")
@@ -56,11 +63,18 @@ public interface CredentialEndpoint {
     CredentialResponse post(@Valid CredentialRequest request);
 
     @DELETE
-    @Path("{name}")
+    @Path("name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CredentialOpDescription.DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON,
-            notes = CredentialDescriptor.CREDENTIAL_NOTES, nickname = "deleteCredentialV1", httpMethod = "DELETE")
-    CredentialResponse delete(@PathParam("name") String name);
+            notes = CredentialDescriptor.CREDENTIAL_NOTES, nickname = "deleteCredentialByNameV1", httpMethod = "DELETE")
+    CredentialResponse deleteByName(String name);
+
+    @DELETE
+    @Path("crn/{crn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = CredentialOpDescription.DELETE_BY_CRN, produces = MediaType.APPLICATION_JSON,
+            notes = CredentialDescriptor.CREDENTIAL_NOTES, nickname = "deleteCredentialByResourceCrnV1", httpMethod = "DELETE")
+    CredentialResponse deleteByResourceCrn(String crn);
 
     @DELETE
     @Path("")

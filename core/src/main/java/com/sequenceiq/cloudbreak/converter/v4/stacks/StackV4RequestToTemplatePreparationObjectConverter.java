@@ -184,7 +184,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
 
     private Credential getCredential(StackV4Request source) {
         DetailedEnvironmentResponse environment = environmentClientService.get(source.getEnvironmentCrn());
-        return credentialClientService.get(environment.getCredentialName());
+        return credentialClientService.getByName(environment.getCredentialName());
     }
 
     private Blueprint getBlueprint(StackV4Request source, Workspace workspace) {

@@ -27,11 +27,24 @@ public class CredentialClientService {
     @Inject
     private CredentialConverter credentialConverter;
 
-    public Credential get(String crnOrName) {
+    public Credential getByName(String name) {
         try {
             //TODO CloudPlatfrom needs to be part of the response
             //TODO Revise paramaters because most of them should be a secret
-            CredentialResponse credentialResponse = credentialEndpoint.get(crnOrName);
+            CredentialResponse credentialResponse = credentialEndpoint.getByName(name);
+            return credentialConverter.convert(credentialResponse);
+        } catch (WebApplicationException e) {
+            String message = String.format("Failed to GET Credential due to: '%s' ", e.getMessage());
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
+
+    public Credential getByCrn(String crn) {
+        try {
+            //TODO CloudPlatfrom needs to be part of the response
+            //TODO Revise paramaters because most of them should be a secret
+            CredentialResponse credentialResponse = credentialEndpoint.getByResourceCrn(crn);
             return credentialConverter.convert(credentialResponse);
         } catch (WebApplicationException e) {
             String message = String.format("Failed to GET Credential due to: '%s' ", e.getMessage());
