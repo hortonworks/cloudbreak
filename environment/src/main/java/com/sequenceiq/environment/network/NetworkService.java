@@ -1,15 +1,22 @@
 package com.sequenceiq.environment.network;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+import javax.annotation.Nonnull;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.network.domain.BaseNetwork;
-import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.repository.BaseNetworkRepository;
+import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 
 @Service
 public class NetworkService {
@@ -24,12 +31,15 @@ public class NetworkService {
         this.environmentNetworkConverterMap = environmentNetworkConverterMap;
     }
 
-    public BaseNetwork createNetworkIfPossible(Environment environment, NetworkDto networkDto, CloudPlatform cloudPlatform) {
+    public BaseNetwork createNetworkIfPossible(Environment environment, NetworkDto networkDto, CloudPlatform cloudPlatform, String accountId) {
         BaseNetwork network = null;
         if (networkDto != null) {
             EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(cloudPlatform);
             if (environmentNetworkConverter != null) {
                 BaseNetwork baseNetwork = environmentNetworkConverter.convert(networkDto, environment);
+                baseNetwork.setId(getIfNotNull(networkDto, NetworkDto::getId));
+                baseNetwork.setResourceCrn(createCRN(accountId));
+                baseNetwork.setAccountId(accountId);
                 network = save(baseNetwork);
             }
         }
@@ -37,8 +47,24 @@ public class NetworkService {
     }
 
     @SuppressWarnings("unchecked")
-    public BaseNetwork save(BaseNetwork awsNetwork) {
-        Object saved = networkRepository.save(awsNetwork);
+    public <T extends BaseNetwork> Optional<T> findByEnvironment(Long environmentId) {
+        return networkRepository.findByEnvironmentId(environmentId);
+    }
+
+    @SuppressWarnings("unchecked")
+    public BaseNetwork save(BaseNetwork network) {
+        Object saved = networkRepository.save(network);
         return (BaseNetwork) saved;
     }
+
+    private String createCRN(@Nonnull String accountId) {
+        return Crn.builder()
+                .setService(Crn.Service.ENVIRONMENTS)
+                .setAccountId(accountId)
+                .setResourceType(Crn.ResourceType.NETWORK)
+                .setResource(UUID.randomUUID().toString())
+                .build()
+                .toString();
+    }
+
 }

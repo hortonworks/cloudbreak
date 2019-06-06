@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.environment.environment.EnvironmentStatus.AVAILABLE;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -90,43 +91,24 @@ public class EnvironmentModificationService {
         return editDto.getLocation() != null && !editDto.getLocation().isEmpty();
     }
 
+    private void editNetworkIfChanged(Environment environment, EnvironmentEditDto editDto) {
+        if (networkChanged(editDto)) {
+            Optional<BaseNetwork> original = networkService.findByEnvironment(environment.getId());
+            original.ifPresent(baseNetwork -> editDto.getNetworkDto().setId(baseNetwork.getId()));
+            BaseNetwork network = createAndSetNetwork(environment, editDto.getNetworkDto(), editDto.getAccountId());
+            if (network != null) {
+                environment.setNetwork(network);
+            }
+        }
+    }
+
     private boolean networkChanged(EnvironmentEditDto editDto) {
         return editDto.getNetworkDto() != null;
     }
 
-    private BaseNetwork createAndSetNetwork(Environment environment, NetworkDto networkDto) {
+    private BaseNetwork createAndSetNetwork(Environment environment, NetworkDto networkDto, String accountId) {
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
-        return networkService.createNetworkIfPossible(environment, networkDto, cloudPlatform);
-    }
-
-    private void editRegionsAndLocation(EnvironmentEditDto editDto, Environment environment, CloudRegions cloudRegions) {
-        validateRegionAndLocation(editDto.getLocation(), editDto.getRegions(), cloudRegions, environment);
-        environmentService.setLocation(environment, editDto.getLocation(), cloudRegions);
-        environmentService.setRegions(environment, editDto.getRegions(), cloudRegions);
-    }
-
-    private void editLocation(EnvironmentEditDto editDto, Environment environment, CloudRegions cloudRegions) {
-        Set<String> regions = environment.getRegionSet().stream()
-                .map(Region::getName).collect(Collectors.toSet());
-        validateRegionAndLocation(editDto.getLocation(), regions, cloudRegions, environment);
-        environmentService.setLocation(environment, editDto.getLocation(), cloudRegions);
-    }
-
-    private void editRegions(EnvironmentEditDto request, Environment environment, CloudRegions cloudRegions) {
-        LocationDto locationDto = environmentDtoConverter.environmentToLocationDto(environment);
-        validateRegionAndLocation(locationDto, request.getRegions(), cloudRegions, environment);
-        environmentService.setRegions(environment, request.getRegions(), cloudRegions);
-    }
-
-    private void validateRegionAndLocation(LocationDto location, Set<String> requestedRegions,
-            CloudRegions cloudRegions, Environment environment) {
-        ValidationResult.ValidationResultBuilder validationResultBuilder = environmentService.getValidatorService().validateRegions(requestedRegions,
-                cloudRegions, environment.getCloudPlatform(), ValidationResult.builder());
-        environmentService.getValidatorService().validateLocation(location, requestedRegions, environment, validationResultBuilder);
-        ValidationResult validationResult = validationResultBuilder.build();
-        if (validationResult.hasError()) {
-            throw new BadRequestException(validationResult.getFormattedErrors());
-        }
+        return networkService.createNetworkIfPossible(environment, networkDto, cloudPlatform, accountId);
     }
 
     private void editDescriptionIfChanged(Environment environment, EnvironmentEditDto editDto) {
@@ -148,13 +130,34 @@ public class EnvironmentModificationService {
         }
     }
 
-    private void editNetworkIfChanged(Environment environment, EnvironmentEditDto editDto) {
-        if (networkChanged(editDto)) {
-            BaseNetwork network = createAndSetNetwork(environment, editDto.getNetworkDto());
-            if (network != null) {
-                environment.setNetwork(network);
-            }
+    private void editRegionsAndLocation(EnvironmentEditDto editDto, Environment environment, CloudRegions cloudRegions) {
+        validateRegionAndLocation(editDto.getLocation(), editDto.getRegions(), cloudRegions, environment);
+        environmentService.setLocation(environment, editDto.getLocation(), cloudRegions);
+        environmentService.setRegions(environment, editDto.getRegions(), cloudRegions);
+    }
+
+    private void editRegions(EnvironmentEditDto request, Environment environment, CloudRegions cloudRegions) {
+        LocationDto locationDto = environmentDtoConverter.environmentToLocationDto(environment);
+        validateRegionAndLocation(locationDto, request.getRegions(), cloudRegions, environment);
+        environmentService.setRegions(environment, request.getRegions(), cloudRegions);
+    }
+
+    private void validateRegionAndLocation(LocationDto location, Set<String> requestedRegions,
+            CloudRegions cloudRegions, Environment environment) {
+        ValidationResult.ValidationResultBuilder validationResultBuilder = environmentService.getValidatorService().validateRegions(requestedRegions,
+                cloudRegions, environment.getCloudPlatform(), ValidationResult.builder());
+        environmentService.getValidatorService().validateLocation(location, requestedRegions, environment, validationResultBuilder);
+        ValidationResult validationResult = validationResultBuilder.build();
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
         }
+    }
+
+    private void editLocation(EnvironmentEditDto editDto, Environment environment, CloudRegions cloudRegions) {
+        Set<String> regions = environment.getRegionSet().stream()
+                .map(Region::getName).collect(Collectors.toSet());
+        validateRegionAndLocation(editDto.getLocation(), regions, cloudRegions, environment);
+        environmentService.setLocation(environment, editDto.getLocation(), cloudRegions);
     }
 
 }

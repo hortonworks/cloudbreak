@@ -7,7 +7,7 @@ import org.apache.commons.collections4.CollectionUtils;
 
 public class NetworkDto {
 
-    private final Long id;
+    private Long id;
 
     private final String resourceCrn;
 
@@ -27,6 +27,10 @@ public class NetworkDto {
         } else {
             this.subnetIds = subnetIds;
         }
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getId() {
