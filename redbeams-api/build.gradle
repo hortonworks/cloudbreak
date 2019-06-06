@@ -33,11 +33,11 @@ dependencies {
   testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
   testCompile group: 'junit',                     name: 'junit',                          version: junitVersion
 
-  compile project(':cloud-common')
   // TODO Why?? :) If we would like use common responses like GeneralCollectionV4Response,
   // TODO please move to some common package instead of use whole core-api dep
-  compile project(':core-api')
-  compile project(':common')
+  implementation project(':core-api')
+  implementation project(':common')
+  implementation project(':auth-connector')
 }
 
 
