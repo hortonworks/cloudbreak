@@ -26,7 +26,7 @@ public interface CredentialRepository extends JpaRepository<Credential, Long> {
     @Query("SELECT c FROM Credential c WHERE c.accountId= :accountId AND c.resourceCrn= :crn "
             + "AND c.archived IS FALSE AND cloudPlatform IN (:cloudPlatforms)")
     Optional<Credential> findByCrnAndAccountId(
-            @Param("name") String crn,
+            @Param("crn") String crn,
             @Param("accountId") String accountId,
             @Param("cloudPlatforms") Collection<String> cloudPlatforms);
 
