@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.environment.environment.EnvironmentStatus.AVAILABLE;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -112,6 +113,8 @@ public class EnvironmentModificationService {
 
     private void editNetworkIfChanged(Environment environment, EnvironmentEditDto editDto) {
         if (networkChanged(editDto)) {
+            Optional<BaseNetwork> original = networkService.findByEnvironment(environment.getId());
+            original.ifPresent(baseNetwork -> editDto.getNetworkDto().setId(baseNetwork.getId()));
             BaseNetwork network = createAndSetNetwork(environment, editDto.getNetworkDto(), editDto.getAccountId());
             if (network != null) {
                 environment.setNetwork(network);
