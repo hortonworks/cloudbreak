@@ -110,6 +110,33 @@ func CreateEnvironmentFromTemplate(c *cli.Context) {
 	createEnvironmentImpl(c, &req)
 }
 
+func EditEnvironmentFromTemplate(c *cli.Context) {
+	defer utils.TimeTrack(time.Now(), "edit environment from template")
+	fileLocation := c.String(fl.FlEnvironmentTemplateFile.Name)
+	log.Infof("[EditEnvironmentFromTemplate] read environment edit template JSON from file: %s", fileLocation)
+	content := utils.ReadFile(fileLocation)
+
+	var req model.EnvironmentEditV1Request
+	err := json.Unmarshal(content, &req)
+	if err != nil {
+		msg := fmt.Sprintf(`Invalid JSON format: %s. Please make sure that the json is valid (check for commas and double quotes).`, err.Error())
+		utils.LogErrorMessageAndExit(msg)
+	}
+	var name string
+	if name = c.String(fl.FlNameOptional.Name); len(name) == 0 {
+		utils.LogErrorMessageAndExit("Name of the environment must be set with the --name command line option.")
+	}
+
+	envClient := oauth.NewEnvironmentClientFromContext(c)
+	resp, err := envClient.Environment.V1env.EditEnvironmentV1(v1env.NewEditEnvironmentV1Params().WithBody(&req).WithName(name))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	environment := resp.Payload
+
+	log.Infof("[EditEnvironmentFromTemplate] environment has edited with name: %s, crn: %s", environment.Name, environment.ID)
+}
+
 func createEnvironmentImpl(c *cli.Context, EnvironmentV1Request *model.EnvironmentV1Request) {
 	log.Infof("[createEnvironmentImpl] create environment with name: %s", *EnvironmentV1Request.Name)
 
@@ -135,8 +162,8 @@ func GenerateAzureEnvironmentTemplate(c *cli.Context) error {
 	template := createEnvironmentWithNetwork(c)
 	template.Network.Azure = &model.EnvironmentNetworkAzureV1Params{
 		NetworkID:         new(string),
-		NoFirewallRules:   *new(bool),
-		NoPublicIP:        *new(bool),
+		NoFirewallRules:   new(bool),
+		NoPublicIP:        new(bool),
 		ResourceGroupName: new(string),
 	}
 	return printTemplate(template)

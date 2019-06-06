@@ -1013,6 +1013,13 @@ var (
 			Usage: "location of the environment JSON template file",
 		},
 	}
+	FlEnvironmentEditTemplateFile = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "file",
+			Usage: "location of the environment edit JSON template file",
+		},
+	}
 	FlEnvironments = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{

@@ -122,16 +122,20 @@ func init() {
 			},
 			{
 				Name:  "edit",
-				Usage: "edit an environment. description, regions and location can be changed.",
-				Flags: fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlDescriptionOptional, fl.FlEnvironmentRegions, fl.FlEnvironmentLocationNameOptional,
-					fl.FlEnvironmentLongitudeOptional, fl.FlEnvironmentLatitudeOptional).AddOutputFlag().AddAuthenticationFlags().Build(),
-				Before: cf.CheckConfigAndCommandFlags,
-				Action: env.EditEnvironment,
-				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlDescriptionOptional, fl.FlEnvironmentRegions, fl.FlEnvironmentLocationNameOptional,
-						fl.FlEnvironmentLongitudeOptional, fl.FlEnvironmentLatitudeOptional).AddOutputFlag().AddAuthenticationFlags().Build() {
-						fl.PrintFlagCompletion(f)
-					}
+				Usage: "edit an environment. description, network, regions and location can be changed.",
+				Subcommands: []cli.Command{
+					{
+						Name:   "from-file",
+						Usage:  "edits an Environment from JSON template",
+						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentEditTemplateFile, fl.FlName).AddAuthenticationFlags().Build(),
+						Before: cf.CheckConfigAndCommandFlags,
+						Action: env.EditEnvironmentFromTemplate,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentEditTemplateFile, fl.FlName).AddAuthenticationFlags().Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
 				},
 			},
 		},

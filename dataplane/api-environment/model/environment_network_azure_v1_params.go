@@ -22,10 +22,12 @@ type EnvironmentNetworkAzureV1Params struct {
 	NetworkID *string `json:"networkId"`
 
 	// Subnet ids of the specified networks
-	NoFirewallRules bool `json:"noFirewallRules,omitempty"`
+	// Required: true
+	NoFirewallRules *bool `json:"noFirewallRules"`
 
 	// Subnet ids of the specified networks
-	NoPublicIP bool `json:"noPublicIp,omitempty"`
+	// Required: true
+	NoPublicIP *bool `json:"noPublicIp"`
 
 	// Subnet ids of the specified networks
 	// Required: true
@@ -37,6 +39,14 @@ func (m *EnvironmentNetworkAzureV1Params) Validate(formats strfmt.Registry) erro
 	var res []error
 
 	if err := m.validateNetworkID(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateNoFirewallRules(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateNoPublicIP(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -53,6 +63,24 @@ func (m *EnvironmentNetworkAzureV1Params) Validate(formats strfmt.Registry) erro
 func (m *EnvironmentNetworkAzureV1Params) validateNetworkID(formats strfmt.Registry) error {
 
 	if err := validate.Required("networkId", "body", m.NetworkID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *EnvironmentNetworkAzureV1Params) validateNoFirewallRules(formats strfmt.Registry) error {
+
+	if err := validate.Required("noFirewallRules", "body", m.NoFirewallRules); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *EnvironmentNetworkAzureV1Params) validateNoPublicIP(formats strfmt.Registry) error {
+
+	if err := validate.Required("noPublicIp", "body", m.NoPublicIP); err != nil {
 		return err
 	}
 
