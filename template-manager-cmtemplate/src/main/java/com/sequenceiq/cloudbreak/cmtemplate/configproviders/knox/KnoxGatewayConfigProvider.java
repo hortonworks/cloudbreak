@@ -44,6 +44,8 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigConfigProvider 
                 if (gateway != null) {
                     config.add(config(KNOX_MASTER_SECRET, gateway.getMasterSecret()));
                     config.add(config(GATEWAY_PATH, gateway.getPath()));
+                } else {
+                    config.add(config(KNOX_MASTER_SECRET, source.getGeneralClusterConfigs().getPassword()));
                 }
                 return config;
             default:
