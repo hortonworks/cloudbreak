@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 
 public class NetworkDto {
 
-    private final Long id;
+    private Long id;
 
     private final String resourceCrn;
 
@@ -39,6 +39,10 @@ public class NetworkDto {
         } else {
             this.subnetMetas = subnetMetas;
         }
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getId() {
