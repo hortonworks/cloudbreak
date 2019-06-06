@@ -40,6 +40,10 @@ public final class ModelDescriptions {
         public static final String DATABASE_SERVER_CONNECTION_TEST_RESULT = "Result of database server connection test";
     }
 
+    public static class ExternalDatabaseServer {
+        public static final String NAME = "Name of the external database server";
+    }
+
     private ModelDescriptions() {
     }
 }

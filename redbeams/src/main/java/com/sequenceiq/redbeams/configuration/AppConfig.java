@@ -16,10 +16,13 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.sequenceiq.cloudbreak.auth.uaa.IdentityClient;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
+import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
 
 // import java.util.ArrayList;
 // import java.util.Collection;
@@ -74,23 +77,23 @@ public class AppConfig implements ResourceLoaderAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);
 
-    // @Value("${cb.etc.config.dir}")
-    // private String etcConfigDir;
+    @Value("${redbeams.etc.config.dir}")
+    private String etcConfigDir;
 
     // @Value("#{'${cb.supported.container.orchestrators:}'.split(',')}")
     // private List<String> orchestrators;
 
-    // @Value("${cb.threadpool.core.size:}")
-    // private int corePoolSize;
+    @Value("${redbeams.threadpool.core.size:}")
+    private int corePoolSize;
 
-    // @Value("${cb.threadpool.capacity.size:}")
-    // private int queueCapacity;
+    @Value("${redbeams.threadpool.capacity.size:}")
+    private int queueCapacity;
 
-    // @Value("${cb.intermediate.threadpool.core.size:}")
-    // private int intermediateCorePoolSize;
+    @Value("${redbeams.intermediate.threadpool.core.size:}")
+    private int intermediateCorePoolSize;
 
-    // @Value("${cb.intermediate.threadpool.capacity.size:}")
-    // private int intermediateQueueCapacity;
+    @Value("${redbeams.intermediate.threadpool.capacity.size:}")
+    private int intermediateQueueCapacity;
 
     // @Value("${cb.container.threadpool.core.size:}")
     // private int containerCorePoolSize;
@@ -227,27 +230,27 @@ public class AppConfig implements ResourceLoaderAware {
     //     return map;
     // }
 
-    // @Bean
-    // public AsyncTaskExecutor intermediateBuilderExecutor() {
-    //     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-    //     executor.setCorePoolSize(intermediateCorePoolSize);
-    //     executor.setQueueCapacity(intermediateQueueCapacity);
-    //     executor.setThreadNamePrefix("intermediateBuilderExecutor-");
-    //     executor.setTaskDecorator(new MDCCleanerTaskDecorator());
-    //     executor.initialize();
-    //     return executor;
-    // }
+    @Bean
+    public AsyncTaskExecutor intermediateBuilderExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(intermediateCorePoolSize);
+        executor.setQueueCapacity(intermediateQueueCapacity);
+        executor.setThreadNamePrefix("intermediateBuilderExecutor-");
+        executor.setTaskDecorator(new MDCCleanerTaskDecorator());
+        executor.initialize();
+        return executor;
+    }
 
-    // @Bean
-    // public AsyncTaskExecutor resourceBuilderExecutor() {
-    //     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-    //     executor.setCorePoolSize(corePoolSize);
-    //     executor.setQueueCapacity(queueCapacity);
-    //     executor.setThreadNamePrefix("resourceBuilderExecutor-");
-    //     executor.setTaskDecorator(new MDCCleanerTaskDecorator());
-    //     executor.initialize();
-    //     return executor;
-    // }
+    @Bean
+    public AsyncTaskExecutor resourceBuilderExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(corePoolSize);
+        executor.setQueueCapacity(queueCapacity);
+        executor.setThreadNamePrefix("resourceBuilderExecutor-");
+        executor.setTaskDecorator(new MDCCleanerTaskDecorator());
+        executor.initialize();
+        return executor;
+    }
 
     // @Bean
     // public AsyncTaskExecutor containerBootstrapBuilderExecutor() {
