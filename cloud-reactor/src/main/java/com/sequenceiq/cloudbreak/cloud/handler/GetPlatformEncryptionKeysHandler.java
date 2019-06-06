@@ -41,11 +41,11 @@ public class GetPlatformEncryptionKeysHandler implements CloudPlatformEventHandl
             CloudEncryptionKeys encryptionKeys = cloudPlatformConnectors.get(cloudPlatformVariant)
                     .platformResources()
                     .encryptionKeys(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
-            GetPlatformEncryptionKeysResult getPlatformEncryptionKeysResult = new GetPlatformEncryptionKeysResult(request, encryptionKeys);
+            GetPlatformEncryptionKeysResult getPlatformEncryptionKeysResult = new GetPlatformEncryptionKeysResult(request.getResourceId(), encryptionKeys);
             request.getResult().onNext(getPlatformEncryptionKeysResult);
             LOGGER.debug("Query platform encryption keys types finished.");
         } catch (Exception e) {
-            request.getResult().onNext(new GetPlatformEncryptionKeysResult(e.getMessage(), e, request));
+            request.getResult().onNext(new GetPlatformEncryptionKeysResult(e.getMessage(), e, request.getResourceId()));
         }
     }
 }

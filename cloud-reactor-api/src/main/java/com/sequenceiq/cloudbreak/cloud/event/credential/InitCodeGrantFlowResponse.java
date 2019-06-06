@@ -4,16 +4,16 @@ import java.util.Map;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 
-public class InitCodeGrantFlowResponse extends CloudPlatformResult<InitCodeGrantFlowRequest> {
+public class InitCodeGrantFlowResponse extends CloudPlatformResult {
     private Map<String, String> codeGrantFlowInitParams;
 
-    public InitCodeGrantFlowResponse(InitCodeGrantFlowRequest request, Map<String, String> codeGrantFlowInitParams) {
-        super(request);
+    public InitCodeGrantFlowResponse(Long resourceId, Map<String, String> codeGrantFlowInitParams) {
+        super(resourceId);
         this.codeGrantFlowInitParams = codeGrantFlowInitParams;
     }
 
-    public InitCodeGrantFlowResponse(String statusReason, Exception errorDetails, InitCodeGrantFlowRequest request) {
-        super(statusReason, errorDetails, request);
+    public InitCodeGrantFlowResponse(String statusReason, Exception errorDetails, Long resourceId) {
+        super(statusReason, errorDetails, resourceId);
     }
 
     public Map<String, String> getCodeGrantFlowInitParams() {

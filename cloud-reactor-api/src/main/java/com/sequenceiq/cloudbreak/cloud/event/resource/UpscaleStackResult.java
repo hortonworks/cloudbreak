@@ -3,25 +3,24 @@ package com.sequenceiq.cloudbreak.cloud.event.resource;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 
-public class UpscaleStackResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
+public class UpscaleStackResult extends CloudPlatformResult {
 
     private final ResourceStatus resourceStatus;
 
     private final List<CloudResourceStatus> results;
 
-    public UpscaleStackResult(CloudPlatformRequest<?> request, ResourceStatus resourceStatus, List<CloudResourceStatus> results) {
-        super(request);
+    public UpscaleStackResult(Long resourceId, ResourceStatus resourceStatus, List<CloudResourceStatus> results) {
+        super(resourceId);
         this.resourceStatus = resourceStatus;
         this.results = results;
     }
 
-    public UpscaleStackResult(String statusReason, Exception errorDetails, CloudPlatformRequest<?> request) {
-        super(statusReason, errorDetails, request);
+    public UpscaleStackResult(String statusReason, Exception errorDetails, Long resourceId) {
+        super(statusReason, errorDetails, resourceId);
         resourceStatus = ResourceStatus.FAILED;
         results = new ArrayList<>();
     }

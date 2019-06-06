@@ -48,11 +48,11 @@ public class ProvisionSetupHandler implements CloudPlatformEventHandler<SetupReq
             AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             CloudStack cloudStack = request.getCloudStack();
             connector.setup().prerequisites(auth, cloudStack, resourceNotifier);
-            result = new SetupResult(request);
+            result = new SetupResult(request.getResourceId());
 
             LOGGER.debug("Provision setup finished for {}", cloudContext);
         } catch (RuntimeException e) {
-            result = new SetupResult(e, request);
+            result = new SetupResult(e, request.getResourceId());
         }
         request.getResult().onNext(result);
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));

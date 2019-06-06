@@ -1,20 +1,19 @@
 package com.sequenceiq.cloudbreak.cloud.event.platform;
 
-import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
-public class ResourceDefinitionResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
+public class ResourceDefinitionResult extends CloudPlatformResult {
 
     private final String definition;
 
-    public ResourceDefinitionResult(CloudPlatformRequest<?> request, String definition) {
-        super(request);
+    public ResourceDefinitionResult(Long resourceId, String definition) {
+        super(resourceId);
         this.definition = definition;
     }
 
-    public ResourceDefinitionResult(String statusReason, Exception errorDetails, CloudPlatformRequest<?> request) {
-        super(statusReason, errorDetails, request);
+    public ResourceDefinitionResult(String statusReason, Exception errorDetails, Long resourceId) {
+        super(statusReason, errorDetails, resourceId);
         definition = null;
     }
 

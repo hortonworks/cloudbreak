@@ -35,12 +35,12 @@ public class ResourceDefinitionHandler implements CloudPlatformEventHandler<Reso
             String definition = connector.parameters().resourceDefinition(request.getResource());
             if (definition == null) {
                 Exception exception = new Exception("Failed to find resource definition for " + resource);
-                request.getResult().onNext(new ResourceDefinitionResult(exception.getMessage(), exception, request));
+                request.getResult().onNext(new ResourceDefinitionResult(exception.getMessage(), exception, null));
             } else {
-                request.getResult().onNext(new ResourceDefinitionResult(request, definition));
+                request.getResult().onNext(new ResourceDefinitionResult(null, definition));
             }
         } catch (RuntimeException e) {
-            request.getResult().onNext(new ResourceDefinitionResult(e.getMessage(), e, request));
+            request.getResult().onNext(new ResourceDefinitionResult(e.getMessage(), e, null));
         }
     }
 }

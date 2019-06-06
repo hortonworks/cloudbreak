@@ -45,14 +45,14 @@ public class GetTlsInfoHandler implements CloudPlatformEventHandler<GetTlsInfoRe
             CloudStack cloudStack = tlsInfoRequest.getCloudStack();
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
             TlsInfo tlsInfo = connector.resources().getTlsInfo(ac, cloudStack);
-            GetTlsInfoResult getTlsInfoResult = new GetTlsInfoResult(tlsInfoRequest, tlsInfo);
+            GetTlsInfoResult getTlsInfoResult = new GetTlsInfoResult(tlsInfoRequest.getResourceId(), tlsInfo);
             tlsInfoRequest.getResult().onNext(getTlsInfoResult);
             eventBus.notify(getTlsInfoResult.selector(), new Event<>(getTlsInfoRequestEvent.getHeaders(), getTlsInfoResult));
             LOGGER.debug("GetTlsInfoHandler finished.");
         } catch (RuntimeException e) {
             String errorMsg = "Failed to get TlS info from cloud connector!";
             LOGGER.warn(errorMsg, e);
-            GetTlsInfoResult failure = new GetTlsInfoResult(errorMsg, e, tlsInfoRequest);
+            GetTlsInfoResult failure = new GetTlsInfoResult(errorMsg, e, tlsInfoRequest.getResourceId());
             tlsInfoRequest.getResult().onNext(failure);
             eventBus.notify(failure.selector(), new Event<>(getTlsInfoRequestEvent.getHeaders(), failure));
         }

@@ -1,15 +1,14 @@
 package com.sequenceiq.cloudbreak.cloud.event.validation;
 
-import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 
-public class ParametersValidationResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
+public class ParametersValidationResult extends CloudPlatformResult {
 
-    public ParametersValidationResult(CloudPlatformRequest<?> request) {
-        super(request);
+    public ParametersValidationResult(Long resourceId) {
+        super(resourceId);
     }
 
-    public ParametersValidationResult(String statusReason, Exception errorDetails, CloudPlatformRequest<?> request) {
-        super(statusReason, errorDetails, request);
+    public ParametersValidationResult(String statusReason, Exception errorDetails, Long resourceId) {
+        super(statusReason, errorDetails, resourceId);
     }
 }

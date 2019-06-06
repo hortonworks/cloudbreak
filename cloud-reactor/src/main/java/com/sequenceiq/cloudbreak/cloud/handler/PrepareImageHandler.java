@@ -45,12 +45,12 @@ public class PrepareImageHandler implements CloudPlatformEventHandler<PrepareIma
             Image image = request.getImage();
             CloudStack stack = request.getStack();
             connector.setup().prepareImage(auth, stack, image);
-            PrepareImageResult result = new PrepareImageResult(request);
+            PrepareImageResult result = new PrepareImageResult(request.getResourceId());
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
             LOGGER.debug("Prepare image finished for {}", cloudContext);
         } catch (RuntimeException e) {
-            PrepareImageResult failure = new PrepareImageResult(e, request);
+            PrepareImageResult failure = new PrepareImageResult(e, request.getResourceId());
             request.getResult().onNext(failure);
             eventBus.notify(failure.selector(), new Event<>(event.getHeaders(), failure));
         }

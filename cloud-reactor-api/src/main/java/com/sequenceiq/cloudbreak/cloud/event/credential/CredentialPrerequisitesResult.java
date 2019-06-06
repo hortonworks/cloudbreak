@@ -1,20 +1,19 @@
 package com.sequenceiq.cloudbreak.cloud.event.credential;
 
-import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 
-public class CredentialPrerequisitesResult extends CloudPlatformResult<CloudPlatformRequest<?>> {
+public class CredentialPrerequisitesResult extends CloudPlatformResult {
 
     private CredentialPrerequisitesResponse credentialPrerequisitesResponse;
 
-    public CredentialPrerequisitesResult(CloudPlatformRequest<?> request, CredentialPrerequisitesResponse credentialPrerequisitesResponse) {
-        super(request);
+    public CredentialPrerequisitesResult(Long resourceId, CredentialPrerequisitesResponse credentialPrerequisitesResponse) {
+        super(resourceId);
         this.credentialPrerequisitesResponse = credentialPrerequisitesResponse;
     }
 
-    public CredentialPrerequisitesResult(String statusReason, Exception errorDetails, CloudPlatformRequest<?> request) {
-        super(statusReason, errorDetails, request);
+    public CredentialPrerequisitesResult(String statusReason, Exception errorDetails, Long resourceId) {
+        super(statusReason, errorDetails, resourceId);
     }
 
     public CredentialPrerequisitesResponse getCredentialPrerequisitesResponse() {

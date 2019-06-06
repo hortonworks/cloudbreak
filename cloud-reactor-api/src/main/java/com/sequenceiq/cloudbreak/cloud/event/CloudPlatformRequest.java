@@ -36,7 +36,13 @@ public class CloudPlatformRequest<T> implements Selectable {
 
     @Override
     public Long getResourceId() {
-        return cloudContext.getId();
+        if (cloudContext != null) {
+            return cloudContext.getId();
+        } else if (cloudCredential != null) {
+            return cloudCredential.getId();
+        } else {
+            return null;
+        }
     }
 
     public CloudContext getCloudContext() {

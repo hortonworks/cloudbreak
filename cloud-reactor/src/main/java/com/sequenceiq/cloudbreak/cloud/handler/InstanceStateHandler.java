@@ -45,14 +45,14 @@ public class InstanceStateHandler implements CloudPlatformEventHandler<GetInstan
             List<CloudVmInstanceStatus> instanceStatuses =
                     instanceStateQuery.getCloudVmInstanceStatuses(
                             request.getCloudCredential(), cloudContext, request.getInstances());
-            result = new GetInstancesStateResult(request, instanceStatuses);
+            result = new GetInstancesStateResult(request.getResourceId(), instanceStatuses);
         } catch (CloudOperationNotSupportedException e) {
             List<CloudVmInstanceStatus> unknownStatuses = request.getInstances().stream()
                     .map(instance -> new CloudVmInstanceStatus(instance, InstanceStatus.UNKNOWN))
                     .collect(Collectors.toList());
-            result = new GetInstancesStateResult(request, unknownStatuses);
+            result = new GetInstancesStateResult(request.getResourceId(), unknownStatuses);
         } catch (RuntimeException e) {
-            result = new GetInstancesStateResult("Instance state synchronizing failed", e, request);
+            result = new GetInstancesStateResult("Instance state synchronizing failed", e, request.getResourceId());
         }
         request.getResult().onNext(result);
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));

@@ -40,11 +40,11 @@ public class GetPlatformGatewaysHandler implements CloudPlatformEventHandler<Get
                     Variant.variant(request.getVariant()));
             CloudGateWays cloudGateWays = cloudPlatformConnectors.get(cloudPlatformVariant)
                     .platformResources().gateways(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
-            GetPlatformCloudGatewaysResult getPlatformCloudGatewaysResult = new GetPlatformCloudGatewaysResult(request, cloudGateWays);
+            GetPlatformCloudGatewaysResult getPlatformCloudGatewaysResult = new GetPlatformCloudGatewaysResult(request.getResourceId(), cloudGateWays);
             request.getResult().onNext(getPlatformCloudGatewaysResult);
             LOGGER.debug("Query platform gateway types finished.");
         } catch (Exception e) {
-            request.getResult().onNext(new GetPlatformCloudGatewaysResult(e.getMessage(), e, request));
+            request.getResult().onNext(new GetPlatformCloudGatewaysResult(e.getMessage(), e, request.getResourceId()));
         }
     }
 }

@@ -40,11 +40,11 @@ public class GetPlatformIpPoolsHandler implements CloudPlatformEventHandler<GetP
                     Variant.variant(request.getVariant()));
             CloudIpPools cloudIpPools = cloudPlatformConnectors.get(cloudPlatformVariant)
                     .platformResources().publicIpPool(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
-            GetPlatformCloudIpPoolsResult getPlatformIpPoolsResult = new GetPlatformCloudIpPoolsResult(request, cloudIpPools);
+            GetPlatformCloudIpPoolsResult getPlatformIpPoolsResult = new GetPlatformCloudIpPoolsResult(request.getResourceId(), cloudIpPools);
             request.getResult().onNext(getPlatformIpPoolsResult);
             LOGGER.debug("Query platform ip pool types finished.");
         } catch (Exception e) {
-            request.getResult().onNext(new GetPlatformCloudIpPoolsResult(e.getMessage(), e, request));
+            request.getResult().onNext(new GetPlatformCloudIpPoolsResult(e.getMessage(), e, request.getResourceId()));
         }
     }
 }

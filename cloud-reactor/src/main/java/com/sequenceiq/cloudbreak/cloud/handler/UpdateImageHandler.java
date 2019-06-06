@@ -52,12 +52,12 @@ public class UpdateImageHandler implements CloudPlatformEventHandler<UpdateImage
                     .forEach(resource -> resource.putParameter(CloudResource.IMAGE, stack.getImage().getImageName()));
 
             connector.resources().update(auth, stack, cloudResources);
-            UpdateImageResult result = new UpdateImageResult(request);
+            UpdateImageResult result = new UpdateImageResult(request.getResourceId());
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
             LOGGER.debug("Update image finished for {}", cloudContext);
         } catch (Exception e) {
-            UpdateImageResult failure = new UpdateImageResult(e.getMessage(), e, request);
+            UpdateImageResult failure = new UpdateImageResult(e.getMessage(), e, request.getResourceId());
             request.getResult().onNext(failure);
             eventBus.notify(failure.selector(), new Event<>(event.getHeaders(), failure));
         }

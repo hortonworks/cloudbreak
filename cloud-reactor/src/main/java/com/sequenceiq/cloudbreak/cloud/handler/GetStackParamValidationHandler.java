@@ -31,12 +31,12 @@ public class GetStackParamValidationHandler implements CloudPlatformEventHandler
         GetStackParamValidationRequest request = getStackParametersRequestEvent.getData();
         try {
             CloudConnector<Object> aDefault = cloudPlatformConnectors.getDefault(request.getCloudContext().getPlatform());
-            GetStackParamValidationResult getStackParamValidationResult = new GetStackParamValidationResult(request,
+            GetStackParamValidationResult getStackParamValidationResult = new GetStackParamValidationResult(request.getResourceId(),
                     aDefault.parameters().additionalStackParameters());
             request.getResult().onNext(getStackParamValidationResult);
             LOGGER.debug("Query platform stack parameters finished.");
         } catch (RuntimeException e) {
-            request.getResult().onNext(new GetStackParamValidationResult(e.getMessage(), e, request));
+            request.getResult().onNext(new GetStackParamValidationResult(e.getMessage(), e, request.getResourceId()));
         }
     }
 }

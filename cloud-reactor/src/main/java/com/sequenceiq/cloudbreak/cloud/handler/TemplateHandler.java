@@ -38,7 +38,7 @@ public class TemplateHandler implements CloudPlatformEventHandler<GetPlatformTem
             }
         } catch (TemplatingDoesNotSupportedException ignored) {
         }
-        GetPlatformTemplateResult getPlatformTemplateResult = new GetPlatformTemplateResult(request, template);
+        GetPlatformTemplateResult getPlatformTemplateResult = new GetPlatformTemplateResult(request.getResourceId(), template);
         request.getResult().onNext(getPlatformTemplateResult);
         LOGGER.debug("Get template finished.");
     }

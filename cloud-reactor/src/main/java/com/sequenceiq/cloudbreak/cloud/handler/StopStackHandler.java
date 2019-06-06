@@ -64,11 +64,11 @@ public class StopStackHandler implements CloudPlatformEventHandler<StopInstances
             if (!task.completed(statusResult)) {
                 statusResult = syncPollingScheduler.schedule(task);
             }
-            StopInstancesResult result = new StopInstancesResult(request, cloudContext, statusResult);
+            StopInstancesResult result = new StopInstancesResult(request.getResourceId(), statusResult);
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
         } catch (Exception e) {
-            StopInstancesResult failure = new StopInstancesResult("Failed to stop stack", e, request);
+            StopInstancesResult failure = new StopInstancesResult("Failed to stop stack", e, request.getResourceId());
             request.getResult().onNext(failure);
             eventBus.notify(failure.selector(), new Event<>(event.getHeaders(), failure));
         }

@@ -31,11 +31,11 @@ public class GetPlatformVariantsHandler implements CloudPlatformEventHandler<Get
         GetPlatformVariantsRequest request = getPlatformVariantsRequestEvent.getData();
         try {
             PlatformVariants pv = cloudPlatformConnectors.getPlatformVariants();
-            GetPlatformVariantsResult platformVariantResult = new GetPlatformVariantsResult(request, pv);
+            GetPlatformVariantsResult platformVariantResult = new GetPlatformVariantsResult(request.getResourceId(), pv);
             request.getResult().onNext(platformVariantResult);
             LOGGER.debug("Query platform variant finished.");
         } catch (RuntimeException e) {
-            request.getResult().onNext(new GetPlatformVariantsResult(e.getMessage(), e, request));
+            request.getResult().onNext(new GetPlatformVariantsResult(e.getMessage(), e, request.getResourceId()));
         }
     }
 }

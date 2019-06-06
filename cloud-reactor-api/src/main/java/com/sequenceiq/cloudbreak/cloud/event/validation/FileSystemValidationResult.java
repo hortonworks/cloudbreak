@@ -2,13 +2,13 @@ package com.sequenceiq.cloudbreak.cloud.event.validation;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 
-public class FileSystemValidationResult<R extends FileSystemValidationRequest> extends CloudPlatformResult<R> {
+public class FileSystemValidationResult extends CloudPlatformResult {
 
-    public FileSystemValidationResult(R request) {
-        super(request);
+    public FileSystemValidationResult(Long resourceId) {
+        super(resourceId);
     }
 
-    public FileSystemValidationResult(String statusReason, Exception errorDetails, R request) {
-        super(statusReason, errorDetails, request);
+    public FileSystemValidationResult(String statusReason, Exception errorDetails, Long resourceId) {
+        super(statusReason, errorDetails, resourceId);
     }
 }

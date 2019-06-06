@@ -34,11 +34,11 @@ public class PlatformParameterHandler implements CloudPlatformEventHandler<Platf
             CloudConnector<Object> connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
             PlatformParameters platformParameters = connector.parameters();
 
-            PlatformParameterResult platformParameterResult = new PlatformParameterResult(request, platformParameters);
+            PlatformParameterResult platformParameterResult = new PlatformParameterResult(request.getResourceId(), platformParameters);
             request.getResult().onNext(platformParameterResult);
             LOGGER.debug("Query platform parameters finished.");
         } catch (RuntimeException e) {
-            request.getResult().onNext(new PlatformParameterResult(e.getMessage(), e, request));
+            request.getResult().onNext(new PlatformParameterResult(e.getMessage(), e, request.getResourceId()));
         }
     }
 }

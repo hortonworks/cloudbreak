@@ -5,16 +5,16 @@ import java.util.List;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 
-public class CollectMetadataResult extends CloudPlatformResult<CollectMetadataRequest> {
+public class CollectMetadataResult extends CloudPlatformResult {
     private List<CloudVmMetaDataStatus> results;
 
-    public CollectMetadataResult(CollectMetadataRequest request, List<CloudVmMetaDataStatus> results) {
-        super(request);
+    public CollectMetadataResult(Long resourceId, List<CloudVmMetaDataStatus> results) {
+        super(resourceId);
         this.results = results;
     }
 
-    public CollectMetadataResult(Exception errorDetails, CollectMetadataRequest request) {
-        super("", errorDetails, request);
+    public CollectMetadataResult(Exception errorDetails, Long resourceId) {
+        super("", errorDetails, resourceId);
     }
 
     public List<CloudVmMetaDataStatus> getResults() {
@@ -24,7 +24,6 @@ public class CollectMetadataResult extends CloudPlatformResult<CollectMetadataRe
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("CollectMetadataResult{");
-        sb.append("cloudContext=").append(getRequest().getCloudContext());
         sb.append(", results=").append(results);
         sb.append(", exception=").append(getErrorDetails());
         sb.append('}');

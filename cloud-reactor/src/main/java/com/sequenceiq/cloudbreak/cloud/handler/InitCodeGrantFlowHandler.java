@@ -37,11 +37,11 @@ public class InitCodeGrantFlowHandler implements CloudPlatformEventHandler<InitC
         try {
             CloudConnector<?> connector = cloudPlatformConnectors.getDefault(cloudContext.getPlatform());
             Map<String, String> parameters = connector.credentials().initCodeGrantFlow(cloudContext, request.getCloudCredential());
-            InitCodeGrantFlowResponse initCodeGrantFlowResponse = new InitCodeGrantFlowResponse(request, parameters);
+            InitCodeGrantFlowResponse initCodeGrantFlowResponse = new InitCodeGrantFlowResponse(request.getResourceId(), parameters);
             request.getResult().onNext(initCodeGrantFlowResponse);
             LOGGER.info("Authorization code grant flow has initialized successfully.");
         } catch (RuntimeException e) {
-            request.getResult().onNext(new InitCodeGrantFlowResponse(e.getMessage(), e, request));
+            request.getResult().onNext(new InitCodeGrantFlowResponse(e.getMessage(), e, request.getResourceId()));
         }
     }
 }

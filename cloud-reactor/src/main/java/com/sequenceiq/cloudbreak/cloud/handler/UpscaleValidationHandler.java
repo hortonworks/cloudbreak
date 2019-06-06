@@ -41,12 +41,12 @@ public class UpscaleValidationHandler implements CloudPlatformEventHandler<Upsca
             CloudConnector<?> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             connector.setup().scalingPrerequisites(ac, request.getCloudStack(), true);
-            UpscaleStackValidationResult result = new UpscaleStackValidationResult(request);
+            UpscaleStackValidationResult result = new UpscaleStackValidationResult(request.getResourceId());
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(upscaleStackValidationRequestEvent.getHeaders(), result));
             LOGGER.debug("Upscale validation successfully finished for {}", cloudContext);
         } catch (Exception e) {
-            UpscaleStackValidationResult result = new UpscaleStackValidationResult(e.getMessage(), e, request);
+            UpscaleStackValidationResult result = new UpscaleStackValidationResult(e.getMessage(), e, request.getResourceId());
             request.getResult().onNext(result);
             eventBus.notify(CloudPlatformResult.failureSelector(UpscaleStackValidationResult.class),
                     new Event<>(upscaleStackValidationRequestEvent.getHeaders(), result));

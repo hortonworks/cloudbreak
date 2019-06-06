@@ -69,16 +69,16 @@ public class GetSSHFingerprintsHandler implements CloudPlatformEventHandler<GetS
                 if (sshFingerprints.isEmpty()) {
                     throw new RuntimeException("Failed to get SSH fingerprints from the specified VM instance.");
                 } else {
-                    fingerprintsResult = new GetSSHFingerprintsResult(fingerprintsRequest, sshFingerprints);
+                    fingerprintsResult = new GetSSHFingerprintsResult(fingerprintsRequest.getResourceId(), sshFingerprints);
                 }
             } catch (CloudOperationNotSupportedException ignored) {
-                fingerprintsResult = new GetSSHFingerprintsResult(fingerprintsRequest, new HashSet<>());
+                fingerprintsResult = new GetSSHFingerprintsResult(fingerprintsRequest.getResourceId(), new HashSet<>());
             }
             fingerprintsRequest.getResult().onNext(fingerprintsResult);
             eventBus.notify(fingerprintsResult.selector(), new Event<>(getSSHFingerprintsRequestEvent.getHeaders(), fingerprintsResult));
             LOGGER.debug("GetSSHFingerprintsHandler finished");
         } catch (Exception e) {
-            GetSSHFingerprintsResult failure = new GetSSHFingerprintsResult("Failed to get ssh fingerprints!", e, fingerprintsRequest);
+            GetSSHFingerprintsResult failure = new GetSSHFingerprintsResult("Failed to get ssh fingerprints!", e, fingerprintsRequest.getResourceId());
             fingerprintsRequest.getResult().onNext(failure);
             eventBus.notify(failure.selector(), new Event<>(getSSHFingerprintsRequestEvent.getHeaders(), failure));
         }

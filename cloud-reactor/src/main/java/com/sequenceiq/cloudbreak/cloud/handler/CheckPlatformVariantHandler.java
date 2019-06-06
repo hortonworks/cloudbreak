@@ -33,11 +33,11 @@ public class CheckPlatformVariantHandler implements CloudPlatformEventHandler<Ch
         try {
             CloudConnector<?> connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatform(), request.getCloudContext().getVariant());
             Variant defaultVariant = connector.variant();
-            CheckPlatformVariantResult platformParameterResult = new CheckPlatformVariantResult(request, defaultVariant);
+            CheckPlatformVariantResult platformParameterResult = new CheckPlatformVariantResult(request.getResourceId(), defaultVariant);
             request.getResult().onNext(platformParameterResult);
             LOGGER.debug("Query platform variant finished.");
         } catch (RuntimeException e) {
-            request.getResult().onNext(new CheckPlatformVariantResult(e.getMessage(), e, request));
+            request.getResult().onNext(new CheckPlatformVariantResult(e.getMessage(), e, request.getResourceId()));
         }
     }
 }
