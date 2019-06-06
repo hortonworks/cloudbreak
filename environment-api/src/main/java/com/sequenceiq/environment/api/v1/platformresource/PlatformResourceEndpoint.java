@@ -34,80 +34,116 @@ public interface PlatformResourceEndpoint {
     @Path("machine_types")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OpDescription.GET_VMTYPES_BY_CREDENTIAL, produces = PlatformResourceModelDescription.JSON_CONTENT_TYPE, notes = CONNECTOR_NOTES,
-            nickname = "getVmTypesByCredentialAndWorkspace")
-    PlatformVmtypesResponse getVmTypesByCredential(@QueryParam("credentialName") String credentialName, @QueryParam("region") String region,
-            @QueryParam("platformVariant") String platformVariant, @QueryParam("availabilityZone") String availabilityZone);
+            nickname = "getVmTypesByCredential")
+    PlatformVmtypesResponse getVmTypesByCredential(
+            @QueryParam("credentialName") String credentialName,
+            @QueryParam("credentialCrn") String credentialCrn,
+            @QueryParam("region") String region,
+            @QueryParam("platformVariant") String platformVariant,
+            @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("regions")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OpDescription.GET_REGION_R_BY_TYPE, produces = PlatformResourceModelDescription.JSON_CONTENT_TYPE, notes = CONNECTOR_NOTES,
-            nickname = "getRegionsByCredentialAndWorkspace")
-    RegionResponse getRegionsByCredential(@QueryParam("credentialName") String credentialName, @QueryParam("region") String region,
-            @QueryParam("platformVariant") String platformVariant, @QueryParam("availabilityZone") String availabilityZone);
+            nickname = "getRegionsByCredential")
+    RegionResponse getRegionsByCredential(
+            @QueryParam("credentialName") String credentialName,
+            @QueryParam("credentialCrn") String credentialCrn,
+            @QueryParam("region") String region,
+            @QueryParam("platformVariant") String platformVariant,
+            @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("disk_types")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OpDescription.GET_DISK_TYPES, produces = PlatformResourceModelDescription.JSON_CONTENT_TYPE, notes = CONNECTOR_NOTES,
-            nickname = "getDisktypesForWorkspace")
+            nickname = "getDisktypes")
     PlatformDisksResponse getDisktypes();
 
     @GET
     @Path("networks")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OpDescription.GET_NETWORKS, produces = PlatformResourceModelDescription.JSON_CONTENT_TYPE, notes = CONNECTOR_NOTES,
-            nickname = "getPlatformNetworksForWorkspace")
-    PlatformNetworksResponse getCloudNetworks(@QueryParam("credentialName") String credentialName, @QueryParam("region") String region,
-            @QueryParam("platformVariant") String platformVariant, @QueryParam("availabilityZone") String availabilityZone);
+            nickname = "getPlatformNetworks")
+    PlatformNetworksResponse getCloudNetworks(
+            @QueryParam("credentialName") String credentialName,
+            @QueryParam("credentialCrn") String credentialCrn,
+            @QueryParam("region") String region,
+            @QueryParam("platformVariant") String platformVariant,
+            @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("ip_pools")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OpDescription.GET_IPPOOLS, produces = PlatformResourceModelDescription.JSON_CONTENT_TYPE, notes = CONNECTOR_NOTES,
-            nickname = "getIpPoolsCredentialIdForWorkspace")
-    PlatformIpPoolsResponse getIpPoolsCredentialId(@QueryParam("credentialName") String credentialName, @QueryParam("region") String region,
-            @QueryParam("platformVariant") String platformVariant, @QueryParam("availabilityZone") String availabilityZone);
+            nickname = "getIpPoolsCredentialId")
+    PlatformIpPoolsResponse getIpPoolsCredentialId(
+            @QueryParam("credentialName") String credentialName,
+            @QueryParam("credentialCrn") String credentialCrn,
+            @QueryParam("region") String region,
+            @QueryParam("platformVariant") String platformVariant,
+            @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("gateways")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OpDescription.GET_GATEWAYS, produces = PlatformResourceModelDescription.JSON_CONTENT_TYPE, notes = CONNECTOR_NOTES,
-            nickname = "getGatewaysCredentialIdForWorkspace")
-    PlatformGatewaysResponse getGatewaysCredentialId(@QueryParam("credentialName") String credentialName, @QueryParam("region") String region,
-            @QueryParam("platformVariant") String platformVariant, @QueryParam("availabilityZone") String availabilityZone);
+            nickname = "getGatewaysCredentialId")
+    PlatformGatewaysResponse getGatewaysCredentialId(
+            @QueryParam("credentialName") String credentialName,
+            @QueryParam("credentialCrn") String credentialCrn,
+            @QueryParam("region") String region,
+            @QueryParam("platformVariant") String platformVariant,
+            @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("encryption_keys")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OpDescription.GET_ENCRYPTIONKEYS, produces = PlatformResourceModelDescription.JSON_CONTENT_TYPE, notes = CONNECTOR_NOTES,
-            nickname = "getEncryptionKeysForWorkspace")
-    PlatformEncryptionKeysResponse getEncryptionKeys(@QueryParam("credentialName") String credentialName, @QueryParam("region") String region,
-            @QueryParam("platformVariant") String platformVariant, @QueryParam("availabilityZone") String availabilityZone);
+            nickname = "getEncryptionKeys")
+    PlatformEncryptionKeysResponse getEncryptionKeys(
+            @QueryParam("credentialName") String credentialName,
+            @QueryParam("credentialCrn") String credentialCrn,
+            @QueryParam("region") String region,
+            @QueryParam("platformVariant") String platformVariant,
+            @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("security_groups")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OpDescription.GET_SECURITYGROUPS, produces = PlatformResourceModelDescription.JSON_CONTENT_TYPE, notes = CONNECTOR_NOTES,
-            nickname = "getPlatformSecurityGroupsForWorkspace")
-    PlatformSecurityGroupsResponse getSecurityGroups(@QueryParam("credentialName") String credentialName, @QueryParam("region") String region,
-            @QueryParam("platformVariant") String platformVariant, @QueryParam("availabilityZone") String availabilityZone);
+            nickname = "getPlatformSecurityGroups")
+    PlatformSecurityGroupsResponse getSecurityGroups(
+            @QueryParam("credentialName") String credentialName,
+            @QueryParam("credentialCrn") String credentialCrn,
+            @QueryParam("region") String region,
+            @QueryParam("platformVariant") String platformVariant,
+            @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("ssh_keys")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OpDescription.GET_SSHKEYS, produces = PlatformResourceModelDescription.JSON_CONTENT_TYPE, notes = CONNECTOR_NOTES,
-            nickname = "getPlatformSShKeysForWorkspace")
-    PlatformSshKeysResponse getCloudSshKeys(@QueryParam("credentialName") String credentialName, @QueryParam("region") String region,
-            @QueryParam("platformVariant") String platformVariant, @QueryParam("availabilityZone") String availabilityZone);
+            nickname = "getPlatformSShKeys")
+    PlatformSshKeysResponse getCloudSshKeys(
+            @QueryParam("credentialName") String credentialName,
+            @QueryParam("credentialCrn") String credentialCrn,
+            @QueryParam("region") String region,
+            @QueryParam("platformVariant") String platformVariant,
+            @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("access_configs")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OpDescription.GET_ACCESSCONFIGS, produces = PlatformResourceModelDescription.JSON_CONTENT_TYPE, notes = CONNECTOR_NOTES,
-            nickname = "getAccessConfigsForWorkspace")
-    PlatformAccessConfigsResponse getAccessConfigs(@QueryParam("credentialName") String credentialName, @QueryParam("region") String region,
-            @QueryParam("platformVariant") String platformVariant, @QueryParam("availabilityZone") String availabilityZone);
+            nickname = "getAccessConfigs")
+    PlatformAccessConfigsResponse getAccessConfigs(
+            @QueryParam("credentialName") String credentialName,
+            @QueryParam("credentialCrn") String credentialCrn,
+            @QueryParam("region") String region,
+            @QueryParam("platformVariant") String platformVariant,
+            @QueryParam("availabilityZone") String availabilityZone);
 
     @GET
     @Path("tag_specifications")

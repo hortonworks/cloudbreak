@@ -156,8 +156,8 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
         return null;
     }
 
-    private void checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(InstanceGroupV4Request instanceGroupRequest, String credentialName,
-            String region, ValidationResultBuilder validationBuilder) {
+    private void checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(InstanceGroupV4Request instanceGroupRequest,
+        String credentialName, String region, ValidationResultBuilder validationBuilder) {
         Optional<CloudEncryptionKeys> keys = getEncryptionKeysWithExceptionHandling(credentialName, region);
         if (keys.isPresent() && !keys.get().getCloudEncryptionKeys().isEmpty()) {
             if (getEncryptionKey(instanceGroupRequest.getTemplate()) == null) {

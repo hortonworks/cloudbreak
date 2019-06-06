@@ -132,7 +132,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
 
     private BaseFileSystemConfigurationsView getFileSystemConfigurationView(Stack source, FileSystem fileSystem) throws IOException {
         BaseFileSystemConfigurationsView fileSystemConfigurationView = null;
-        Credential credentialResponse = credentialClientService.get(source.getCredentialCrn());
+        Credential credentialResponse = credentialClientService.getByCrn(source.getCredentialCrn());
         if (source.getCluster().getFileSystem() != null) {
             fileSystemConfigurationView = fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source, credentialResponse.getAttributes());
         }
