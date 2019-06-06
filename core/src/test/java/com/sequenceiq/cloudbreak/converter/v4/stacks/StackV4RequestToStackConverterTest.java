@@ -156,7 +156,8 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         StackV4Request request = getRequest("stack.json");
 
         given(defaultCostTaggingService.prepareDefaultTags(any(CloudbreakUser.class), anyMap(), anyString())).willReturn(new HashMap<>());
-        given(credentialClientService.get(anyString())).willReturn(credential);
+        given(credentialClientService.getByCrn(anyString())).willReturn(credential);
+        given(credentialClientService.getByName(anyString())).willReturn(credential);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
         given(conversionService.convert(any(ClusterV4Request.class), eq(Cluster.class))).willReturn(new Cluster());
         // WHEN
@@ -181,7 +182,8 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
 
         Map<String, String> defaultTags = Map.of(CB_USER_NAME.key(), "test", CB_VERSION.key(), "test", OWNER.key(), "test", CB_CREATION_TIMESTAMP.key(), "test");
         given(defaultCostTaggingService.prepareDefaultTags(any(CloudbreakUser.class), anyMap(), anyString())).willReturn(defaultTags);
-        given(credentialClientService.get(anyString())).willReturn(credential);
+        given(credentialClientService.getByName(anyString())).willReturn(credential);
+        given(credentialClientService.getByCrn(anyString())).willReturn(credential);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
         given(conversionService.convert(any(ClusterV4Request.class), eq(Cluster.class))).willReturn(new Cluster());
         // WHEN
@@ -239,7 +241,8 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
 
         //GIVEN
-        given(credentialClientService.get(anyString())).willReturn(credential);
+        given(credentialClientService.getByName(anyString())).willReturn(credential);
+        given(credentialClientService.getByCrn(anyString())).willReturn(credential);
         given(conversionService.convert(any(InstanceGroupV4Request.class), eq(InstanceGroup.class))).willReturn(instanceGroup);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
         given(conversionService.convert(any(ClusterV4Request.class), eq(Cluster.class))).willReturn(new Cluster());
@@ -257,7 +260,8 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         StackV4Request request = getRequest("stack-with-shared-service.json");
 
         //GIVEN
-        given(credentialClientService.get(anyString())).willReturn(credential);
+        given(credentialClientService.getByName(anyString())).willReturn(credential);
+        given(credentialClientService.getByCrn(anyString())).willReturn(credential);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
         given(conversionService.convert(any(ClusterV4Request.class), eq(Cluster.class))).willReturn(new Cluster());
         DatalakeResources datalakeResources = new DatalakeResources();
