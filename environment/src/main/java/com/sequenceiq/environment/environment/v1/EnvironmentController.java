@@ -61,7 +61,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @Override
     public DetailedEnvironmentResponse post(@Valid EnvironmentRequest request) {
         EnvironmentCreationDto environmentCreationDto = environmentApiConverter.initCreationDto(request);
-        EnvironmentDto envDto = environmentCreationService.create(environmentCreationDto);
+        String accountId = threadBasedUserCrnProvider.getAccountId();
+        EnvironmentDto envDto = environmentCreationService.create(environmentCreationDto, accountId);
         environmentCreationService.triggerCreationFlow(envDto.getId(), envDto.getName());
         return environmentApiConverter.dtoToDetailedResponse(envDto);
     }

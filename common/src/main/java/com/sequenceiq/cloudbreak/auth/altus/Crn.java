@@ -238,6 +238,7 @@ public class Crn {
         DATABASE("database"),
         DATABASE_SERVER("databaseServer"),
         CREDENTIAL("credential"),
+        NETWORK("network"),
         LDAP("ldap"),
         KERBEROS("kerberos"),
         FREEIPA("freeipa");
