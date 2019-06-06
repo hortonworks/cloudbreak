@@ -17,6 +17,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         EnvironmentView environmentView = convertEnvToView(environment);
         result.setEnvironments(Set.of(environmentView));
         result.setSubnetIds(network.getSubnetIds());
+        result.setResourceCrn(network.getResourceCrn());
         return result;
     }
 
