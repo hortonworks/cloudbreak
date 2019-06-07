@@ -4,7 +4,7 @@ import java.util.Set;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.environment.api.GeneralCollectionV1Response;
-import com.sequenceiq.environment.api.proxy.doc.ProxyConfigDescription;
+import com.sequenceiq.environment.api.doc.proxy.ProxyConfigDescription;
 
 import io.swagger.annotations.ApiModel;
 

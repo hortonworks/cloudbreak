@@ -12,7 +12,7 @@ import io.swagger.annotations.ApiModel;
 public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
     public static final class Builder {
-        private String id;
+        private String crn;
 
         private String name;
 
@@ -37,8 +37,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return new Builder();
         }
 
-        public Builder withId(String id) {
-            this.id = id;
+        public Builder withCrn(String id) {
+            this.crn = id;
             return this;
         }
 
@@ -84,7 +84,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         public DetailedEnvironmentResponse build() {
             DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
-            detailedEnvironmentResponse.setId(id);
+            detailedEnvironmentResponse.setCrn(crn);
             detailedEnvironmentResponse.setName(name);
             detailedEnvironmentResponse.setDescription(description);
             detailedEnvironmentResponse.setRegions(regions);
