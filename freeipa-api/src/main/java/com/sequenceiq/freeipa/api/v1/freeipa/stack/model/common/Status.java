@@ -30,6 +30,11 @@ public enum Status {
                 DELETE_COMPLETED, STOPPED, START_FAILED, STOP_FAILED).contains(valueOf(name()));
     }
 
+    public boolean isFailed() {
+        return Arrays.asList(UPDATE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED, START_FAILED, STOP_FAILED)
+                .contains(valueOf(name()));
+    }
+
     public boolean isAvailable() {
         return Arrays.asList(AVAILABLE, MAINTENANCE_MODE_ENABLED).contains(valueOf(name()));
     }
