@@ -24,7 +24,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
     @Override
     public EnvironmentNetworkResponse convert(BaseNetwork source) {
         EnvironmentNetworkResponse result = new EnvironmentNetworkResponse();
-        result.setId(source.getResourceCrn());
+        result.setCrn(source.getResourceCrn());
         result.setName(source.getName());
         result.setSubnetIds(source.getSubnetIdsSet());
         result = setProviderSpecificFields(result, source);
@@ -34,7 +34,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
     @Override
     public NetworkDto convertToDto(BaseNetwork source) {
         EnvironmentNetworkResponse result = new EnvironmentNetworkResponse();
-        result.setId(source.getResourceCrn());
+        result.setCrn(source.getResourceCrn());
         result.setName(source.getName());
         result.setSubnetIds(source.getSubnetIdsSet());
         NetworkDto.NetworkDtoBuilder builder = NetworkDto.NetworkDtoBuilder.aNetworkDto()
