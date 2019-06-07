@@ -3,6 +3,7 @@ package com.sequenceiq.environment.api.doc.environment;
 public class EnvironmentModelDescription {
 
     public static final String SUBNET_IDS = "Subnet ids of the specified networks";
+    public static final String SUBNET_METAS = "Subnet metadata of the specified networks";
     public static final String AWS_SPECIFIC_PARAMETERS = "Subnet ids of the specified networks";
     public static final String AZURE_SPECIFIC_PARAMETERS = "Subnet ids of the specified networks";
     public static final String AWS_VPC_ID = "Subnet ids of the specified networks";
