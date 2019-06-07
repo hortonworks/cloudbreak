@@ -57,6 +57,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes.Volume;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.type.CommonStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -85,7 +86,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     @Inject
     private AwsClient awsClient;
 
-    private Function<VolumeSetAttributes.Volume, InstanceBlockDeviceMappingSpecification> toInstanceBlockDeviceMappingSpecification = volume -> {
+    private Function<Volume, InstanceBlockDeviceMappingSpecification> toInstanceBlockDeviceMappingSpecification = volume -> {
         EbsInstanceBlockDeviceSpecification device = new EbsInstanceBlockDeviceSpecification()
                 .withVolumeId(volume.getId())
                 .withDeleteOnTermination(Boolean.TRUE);
@@ -98,6 +99,14 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     @Override
     public List<CloudResource> create(AwsContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
         LOGGER.debug("Create volume resources");
+
+        CloudInstance instance = group.getReferenceInstanceConfiguration();
+        InstanceTemplate template = instance.getTemplate();
+        if (CollectionUtils.isEmpty(template.getVolumes())) {
+            LOGGER.debug("No volume requested");
+            return List.of();
+        }
+
         List<CloudResource> computeResources = context.getComputeResources(privateId);
         Optional<CloudResource> reattachableVolumeSet = computeResources.stream()
                 .filter(resource -> ResourceType.AWS_VOLUMESET.equals(resource.getType()))
@@ -131,7 +140,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                             .withDeleteOnTermination(Boolean.TRUE)
                             .withVolumes(template.getVolumes().stream()
                                     .filter(vol -> !AwsDiskType.Ephemeral.value().equalsIgnoreCase(vol.getType()))
-                                    .map(vol -> new VolumeSetAttributes.Volume(null, null, vol.getSize(), vol.getType()))
+                                    .map(vol -> new Volume(null, null, vol.getSize(), vol.getType()))
                                     .collect(Collectors.toList()))
                             .build()))
                     .build();
@@ -155,7 +164,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         LOGGER.debug("Create volumes on provider");
         AmazonEC2Client client = getAmazonEC2Client(auth);
 
-        Map<String, List<VolumeSetAttributes.Volume>> volumeSetMap = Collections.synchronizedMap(new HashMap<>());
+        Map<String, List<Volume>> volumeSetMap = Collections.synchronizedMap(new HashMap<>());
 
         List<Future<?>> futures = new ArrayList<>();
         String snapshotId = getEbsSnapshotIdIfNeeded(auth, cloudStack, group);
@@ -176,8 +185,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                     .map(request -> intermediateBuilderExecutor.submit(() -> {
                         CreateVolumeResult result = client.createVolume(request);
                         String volumeId = result.getVolume().getVolumeId();
-                        VolumeSetAttributes.Volume volume =
-                                new VolumeSetAttributes.Volume(volumeId, generator.next(), request.getSize(), request.getVolumeType());
+                        Volume volume = new Volume(volumeId, generator.next(), request.getSize(), request.getVolumeType());
                         volumeSetMap.get(resource.getName()).add(volume);
                     }))
                     .collect(Collectors.toList()));
@@ -189,7 +197,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
         return buildableResource.stream()
                 .peek(resource -> {
-                    List<VolumeSetAttributes.Volume> volumes = volumeSetMap.get(resource.getName());
+                    List<Volume> volumes = volumeSetMap.get(resource.getName());
                     if (!CollectionUtils.isEmpty(volumes)) {
                         resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class).setVolumes(volumes);
                     }
