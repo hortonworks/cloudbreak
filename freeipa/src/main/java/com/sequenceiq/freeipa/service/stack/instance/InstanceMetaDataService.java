@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.stack;
+package com.sequenceiq.freeipa.service.stack.instance;
 
 import java.util.List;
 import java.util.Set;
