@@ -19,8 +19,13 @@ public interface EnvironmentRepository extends JpaRepository<Environment, Long> 
 
     Set<Environment> findByNameInAndAccountId(Set<String> names, String accountId);
 
-    @Query("SELECT e FROM Environment e WHERE e.accountId = :accountId AND (e.name = :name OR e.resourceCrn = :name)")
+    Set<Environment> findByResourceCrnInAndAccountId(Set<String> resourceCrns, String accountId);
+
+    @Query("SELECT e FROM Environment e WHERE e.accountId = :accountId AND e.name = :name")
     Optional<Environment> findByNameAndAccountId(@Param("name") String name, @Param("accountId") String accountId);
+
+    @Query("SELECT e FROM Environment e WHERE e.accountId = :accountId AND e.resourceCrn = :resourceCrn")
+    Optional<Environment> findByResourceCrnAndAccountId(@Param("resourceCrn") String resourceCrn, @Param("accountId") String accountId);
 
     @Query("SELECT COUNT(e)>0 FROM Environment e WHERE e.name = :name AND e.accountId = :accountId")
     boolean existsWithNameInAccount(@Param("name") String name, @Param("accountId") String accountId);
