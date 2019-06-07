@@ -2,6 +2,7 @@ package com.sequenceiq.environment.configuration;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -58,14 +59,14 @@ public class AppConfig {
     public Map<CloudPlatform, EnvironmentNetworkValidator> environmentNetworkValidatorsByCloudPlatform() {
         return environmentNetworkValidators
                 .stream()
-                .collect(Collectors.toMap(EnvironmentNetworkValidator::getCloudPlatform, x -> x));
+                .collect(Collectors.toMap(EnvironmentNetworkValidator::getCloudPlatform, Function.identity()));
     }
 
     @Bean
     public Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConvertersByCloudPlatform() {
         return environmentNetworkConverters
                 .stream()
-                .collect(Collectors.toMap(EnvironmentNetworkConverter::getCloudPlatform, x -> x));
+                .collect(Collectors.toMap(EnvironmentNetworkConverter::getCloudPlatform, Function.identity()));
     }
 
     @Bean

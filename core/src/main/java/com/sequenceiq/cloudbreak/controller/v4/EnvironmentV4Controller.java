@@ -45,7 +45,7 @@ public class EnvironmentV4Controller implements EnvironmentV4Endpoint {
 
     @Override
     public DetailedEnvironmentResponse get(Long workspaceId, String environmentCrn) {
-        return environmentClientService.get(environmentCrn);
+        return environmentClientService.getByCrn(environmentCrn);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class EnvironmentV4Controller implements EnvironmentV4Endpoint {
 
     @Override
     public DetailedEnvironmentResponse edit(Long workspaceId, String environmentCrn, @NotNull EnvironmentEditRequest request) {
-        return environmentClientService.edit(environmentCrn, request);
+        throw new UnsupportedOperationException("Editing an environment is not supported anymore!");
     }
 
     @Override

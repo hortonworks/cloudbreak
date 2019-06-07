@@ -89,7 +89,7 @@ public class StackValidationV4RequestToStackValidationConverter extends Abstract
                 () -> validateBlueprint(stackValidationRequest, stackValidation, workspace),
                 "blueprint", stackValidationRequest.getBlueprintName()
         );
-        DetailedEnvironmentResponse environment = environmentClientService.get(stackValidation.getEnvironmentCrn());
+        DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stackValidation.getEnvironmentCrn());
         formatAccessDeniedMessage(
                 () -> validateCredential(stackValidation, environment.getCredentialName()),
                 "credential", environment.getCredentialName()
