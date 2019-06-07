@@ -2,12 +2,18 @@ package com.sequenceiq.freeipa.api.v1.freeipa.stack.model;
 
 import javax.validation.constraints.NotNull;
 
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.FreeIpaServerSettingsModelDescriptions;
+
+import io.swagger.annotations.ApiModelProperty;
+
 public abstract class FreeIpaServerBase {
 
     @NotNull
+    @ApiModelProperty(FreeIpaServerSettingsModelDescriptions.DOMAIN)
     private String domain;
 
     @NotNull
+    @ApiModelProperty(FreeIpaServerSettingsModelDescriptions.HOSTNAME)
     private String hostname;
 
     public String getDomain() {

@@ -74,4 +74,10 @@ public class FreeIpaModelDescriptions {
         public static final String OPEN_STACK_PARAMETERS = "provider specific parameters of the specified network";
         public static final String SUBNET_CIDR = "the subnet definition of the network in CIDR format";
     }
+
+    public static class FreeIpaServerSettingsModelDescriptions {
+        public static final String SERVER_IP = "FreeIPA servers IP address";
+        public static final String DOMAIN = "Domain name associated to the FreeIPA";
+        public static final String HOSTNAME = "Base hostname for FreeIPA servers";
+    }
 }
