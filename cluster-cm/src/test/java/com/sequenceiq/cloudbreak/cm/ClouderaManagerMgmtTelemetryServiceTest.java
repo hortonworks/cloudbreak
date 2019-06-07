@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
 import com.sequenceiq.cloudbreak.cloud.model.WorkloadAnalytics;
+import com.sequenceiq.cloudbreak.cloud.model.WorkloadAnalyticsAttributesHolder;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
@@ -194,10 +195,10 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
     public void testEnrichWithSdxDataWithProvidedSdxData() {
         // GIVEN
         Map<String, String> safetyValveMap = new HashMap<>();
-        Map<String, Object> sdxDataMap = new HashMap<>();
-        sdxDataMap.put("sdxId", "mySdxId");
-        sdxDataMap.put("sdxName", "mySdxName");
-        WorkloadAnalytics wa = new WorkloadAnalytics(true, "customEndpoint", null, null, sdxDataMap);
+        WorkloadAnalyticsAttributesHolder attributesHolder = new WorkloadAnalyticsAttributesHolder();
+        attributesHolder.setSdxId("mySdxId");
+        attributesHolder.setSdxName("mySdxName");
+        WorkloadAnalytics wa = new WorkloadAnalytics(true, "customEndpoint", null, null, attributesHolder);
         // WHEN
         underTest.enrichWithSdxData(null, null, wa, safetyValveMap);
         // THEN

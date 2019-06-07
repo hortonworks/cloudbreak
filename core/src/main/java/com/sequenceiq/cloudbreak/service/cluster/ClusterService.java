@@ -593,11 +593,15 @@ public class ClusterService {
         try {
             transactionService.required(() -> {
                 Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-                Telemetry telemetry = componentConfigProviderService.getTelemetry(stackId);
-                try {
-                    clusterApiConnectors.getConnector(stack).clusterModificationService().cleanupCluster(telemetry);
-                } catch (Exception e) {
-                    LOGGER.error("Cluster specific cleanup failed.", e);
+                if (StringUtils.isEmpty(stack.getCluster().getAmbariIp())) {
+                    LOGGER.debug("Cluster server IP was not set before, cleanup cluster operation can be skipped.");
+                } else {
+                    Telemetry telemetry = componentConfigProviderService.getTelemetry(stackId);
+                    try {
+                        clusterApiConnectors.getConnector(stack).clusterModificationService().cleanupCluster(telemetry);
+                    } catch (CloudbreakException e) {
+                        LOGGER.error("Cluster specific cleanup failed.", e);
+                    }
                 }
                 return stack;
             });
