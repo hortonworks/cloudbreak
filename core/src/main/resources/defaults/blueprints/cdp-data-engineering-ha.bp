@@ -68,8 +68,32 @@
         ]
       },
       {
-        "refName": "hive",
+        "refName": "hms",
         "serviceType": "HIVE",
+        "displayName": "Hive Metastore",
+        "roleConfigGroups": [
+          {
+            "refName": "hms-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "hms-HIVEMETASTORE-BASE",
+            "roleType": "HIVEMETASTORE",
+            "configs": [
+              {
+                "name": "metastore_canary_health_enabled",
+                "value": "false"
+              }
+            ],
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hive",
+        "serviceType": "HIVE_ON_TEZ",
+        "displayName": "Hive",
         "roleConfigGroups": [
           {
             "refName": "hive-GATEWAY-BASE",
@@ -79,23 +103,6 @@
           {
             "refName": "hive-HIVESERVER2-BASE",
             "roleType": "HIVESERVER2",
-            "configs": [
-              {
-                "name": "hs2_execution_engine",
-                "value": "spark"
-              }
-            ],
-            "base": true
-          },
-          {
-            "refName": "hive-HIVEMETASTORE-BASE",
-            "roleType": "HIVEMETASTORE",
-            "configs": [
-              {
-                "name": "metastore_canary_health_enabled",
-                "value": "false"
-              }
-            ],
             "base": true
           }
         ]
@@ -159,6 +166,23 @@
         ]
       },
       {
+        "refName": "tez",
+        "serviceType": "TEZ",
+        "serviceConfigs": [
+          {
+            "name": "yarn_service",
+            "ref": "yarn"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "tez-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          }
+        ]
+      },
+      {
         "refName": "zeppelin",
         "serviceType": "ZEPPELIN",
         "serviceConfigs": [
@@ -191,8 +215,10 @@
         "roleConfigGroupsRefNames": [
           "hdfs-BALANCER-BASE",
           "hive-GATEWAY-BASE",
+          "hms-GATEWAY-BASE",
           "livy-LIVY_SERVER-BASE",
           "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+          "tez-GATEWAY-BASE",
           "yarn-JOBHISTORY-BASE",
           "zeppelin-ZEPPELIN_SERVER-BASE"
         ]
@@ -204,10 +230,12 @@
           "hdfs-FAILOVERCONTROLLER-BASE",
           "hdfs-NAMENODE-BASE",
           "hive-GATEWAY-BASE",
-          "hive-HIVEMETASTORE-BASE",
           "hive-HIVESERVER2-BASE",
+          "hms-GATEWAY-BASE",
+          "hms-HIVEMETASTORE-BASE",
           "livy-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",
+          "tez-GATEWAY-BASE",
           "yarn-RESOURCEMANAGER-BASE"
         ]
       },
@@ -217,8 +245,10 @@
         "roleConfigGroupsRefNames": [
           "hdfs-DATANODE-BASE",
           "hive-GATEWAY-BASE",
+          "hms-GATEWAY-BASE",
           "livy-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",
+          "tez-GATEWAY-BASE",
           "yarn-NODEMANAGER-WORKER"
         ]
       },
@@ -227,8 +257,10 @@
         "cardinality": 0,
         "roleConfigGroupsRefNames": [
           "hive-GATEWAY-BASE",
+          "hms-GATEWAY-BASE",
           "livy-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",
+          "tez-GATEWAY-BASE",
           "yarn-NODEMANAGER-COMPUTE"
         ]
       },
