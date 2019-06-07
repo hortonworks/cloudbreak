@@ -595,7 +595,7 @@ public class ClusterService {
                 Telemetry telemetry = componentConfigProviderService.getTelemetry(stackId);
                 try {
                     clusterApiConnectors.getConnector(stack).clusterModificationService().cleanupCluster(telemetry);
-                } catch (CloudbreakException e) {
+                } catch (Exception e) {
                     LOGGER.error("Cluster specific cleanup failed.", e);
                 }
                 return stack;
