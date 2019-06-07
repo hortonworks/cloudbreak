@@ -40,10 +40,10 @@ public class ClusterCreationEnvironmentValidator {
 
     public ValidationResult validate(ClusterV4Request clusterRequest, Stack stack, User user, DetailedEnvironmentResponse environment) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        if (environment != null && !CollectionUtils.isEmpty(environment.getRegions().getRegions())
-                && environment.getRegions().getRegions().stream().noneMatch(region -> region.equals(stack.getRegion()))) {
+        if (environment != null && !CollectionUtils.isEmpty(environment.getRegions().getNames())
+                && environment.getRegions().getNames().stream().noneMatch(region -> region.equals(stack.getRegion()))) {
             resultBuilder.error(String.format("[%s] region is not enabled in [%s] environment. Enabled regions: [%s]", stack.getRegion(),
-                    environment.getName(), environment.getRegions().getRegions().stream().sorted().collect(Collectors.joining(","))));
+                    environment.getName(), environment.getRegions().getNames().stream().sorted().collect(Collectors.joining(","))));
         }
         Long workspaceId = stack.getWorkspace().getId();
         validateConfigByName(

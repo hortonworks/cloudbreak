@@ -128,7 +128,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
 
     private PlacementSettingsV4Request getPlacement(DetailedEnvironmentResponse environment) {
         PlacementSettingsV4Request placementSettings = new PlacementSettingsV4Request();
-        String region = environment.getRegions().getRegions().stream().findFirst().orElse(null);
+        String region = environment.getRegions().getNames().stream().findFirst().orElse(null);
         placementSettings.setRegion(region);
         placementSettings.setAvailabilityZone(region + 'a');
         return placementSettings;

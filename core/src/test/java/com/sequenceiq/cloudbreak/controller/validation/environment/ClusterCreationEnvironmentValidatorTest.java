@@ -72,7 +72,7 @@ public class ClusterCreationEnvironmentValidatorTest {
         environmentResponse.setCloudPlatform("AWS");
         environmentResponse.setCredentialName("cred");
         CompactRegionResponse compactRegionResponse = new CompactRegionResponse();
-        compactRegionResponse.setRegions(Set.of("region1"));
+        compactRegionResponse.setNames(Set.of("region1"));
         environmentResponse.setRegions(compactRegionResponse);
         return environmentResponse;
     }
@@ -115,7 +115,7 @@ public class ClusterCreationEnvironmentValidatorTest {
         ProxyConfig proxyConfig = createProxyConfig("proxy");
         clusterRequest.setProxyConfigCrn(proxyConfig.getName());
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
-        environment.getRegions().setRegions(Set.of("region1", "region2"));
+        environment.getRegions().setNames(Set.of("region1", "region2"));
         environment.setName("env1");
         // WHEN
         ValidationResult actualResult = underTest.validate(clusterRequest, stack, user, environment);
