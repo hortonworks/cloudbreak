@@ -102,6 +102,7 @@ public class EnvironmentApiConverter {
         return EnvironmentNetworkResponse.EnvironmentNetworkResponseBuilder.anEnvironmentNetworkResponse()
                 .withCrn(network.getResourceCrn())
                 .withSubnetIds(network.getSubnetIds())
+                .withSubnetMetas(network.getSubnetMetas())
                 .withAws(EnvironmentNetworkAwsParams.EnvironmentNetworkAwsParamsBuilder.anEnvironmentNetworkAwsParams()
                         .withVpcId(getIfNotNull(network.getAws(), AwsParams::getVpcId))
                         .build())

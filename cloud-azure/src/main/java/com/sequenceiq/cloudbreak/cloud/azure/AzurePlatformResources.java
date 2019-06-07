@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroup;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -114,9 +115,9 @@ public class AzurePlatformResources implements PlatformResources {
         for (Network network : client.getNetworks()) {
             String actualRegion = network.region().label();
             if (regionMatch(actualRegion, region)) {
-                Map<String, String> subnets = new HashMap<>();
+                Set<CloudSubnet> subnets = new HashSet<>();
                 for (Entry<String, Subnet> subnet : network.subnets().entrySet()) {
-                    subnets.put(subnet.getKey(), subnet.getKey());
+                    subnets.add(new CloudSubnet(subnet.getKey(), subnet.getKey()));
                 }
                 Map<String, Object> properties = new HashMap<>();
                 properties.put("addressSpaces", network.addressSpaces());
