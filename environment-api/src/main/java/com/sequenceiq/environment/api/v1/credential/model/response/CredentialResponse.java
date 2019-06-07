@@ -1,16 +1,14 @@
 package com.sequenceiq.environment.api.v1.credential.model.response;
 
 import static com.sequenceiq.environment.api.doc.ModelDescriptions.CRN;
-import static com.sequenceiq.environment.api.doc.ModelDescriptions.ID;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.environment.api.doc.credential.CredentialDescriptor;
 import com.sequenceiq.environment.api.doc.credential.CredentialModelDescription;
-import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialResponseParameters;
 import com.sequenceiq.environment.api.v1.credential.model.CredentialBase;
-import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialResponseParameters;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -19,9 +17,6 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class CredentialResponse extends CredentialBase {
 
-    @ApiModelProperty(ID)
-    private Long id;
-
     @ApiModelProperty(CredentialModelDescription.ATTRIBUTES)
     private SecretResponse attributes;
 
@@ -29,7 +24,7 @@ public class CredentialResponse extends CredentialBase {
     private AzureCredentialResponseParameters azure;
 
     @ApiModelProperty(CRN)
-    private String resourceCrn;
+    private String crn;
 
     public AzureCredentialResponseParameters getAzure() {
         return azure;
@@ -37,15 +32,6 @@ public class CredentialResponse extends CredentialBase {
 
     public void setAzure(AzureCredentialResponseParameters azure) {
         this.azure = azure;
-    }
-
-    @JsonProperty("id")
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public SecretResponse getAttributes() {
@@ -56,11 +42,11 @@ public class CredentialResponse extends CredentialBase {
         this.attributes = attributes;
     }
 
-    public String getResourceCrn() {
-        return resourceCrn;
+    public String getCrn() {
+        return crn;
     }
 
-    public void setResourceCrn(String resourceCrn) {
-        this.resourceCrn = resourceCrn;
+    public void setCrn(String crn) {
+        this.crn = crn;
     }
 }

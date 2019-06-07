@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(subTypes = {DetailedEnvironmentResponse.class, SimpleEnvironmentResponse.class})
 public abstract class EnvironmentBaseResponse {
     @ApiModelProperty(ModelDescriptions.ID)
-    private String id;
+    private String crn;
 
     @ApiModelProperty(ModelDescriptions.NAME)
     private String name;
@@ -35,12 +35,12 @@ public abstract class EnvironmentBaseResponse {
     @ApiModelProperty(EnvironmentModelDescription.STATUS)
     private EnvironmentStatus environmentStatus;
 
-    public String getId() {
-        return id;
+    public String getCrn() {
+        return crn;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setCrn(String crn) {
+        this.crn = crn;
     }
 
     public String getName() {

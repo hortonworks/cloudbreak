@@ -59,7 +59,6 @@ public class CredentialToCredentialV1ResponseConverter {
 
     public CredentialResponse convert(Credential source) {
         CredentialResponse response = new CredentialResponse();
-        response.setId(source.getId());
         credentialValidator.validateCredentialCloudPlatform(source.getCloudPlatform());
         response.setCloudPlatform(source.getCloudPlatform());
         response.setName(source.getName());
@@ -69,7 +68,7 @@ public class CredentialToCredentialV1ResponseConverter {
                 response.getAws().setGovCloud(source.getGovCloud());
             }
             response.setAttributes(secretConverter.convert(source.getAttributesSecret()));
-            response.setResourceCrn(source.getResourceCrn());
+            response.setCrn(source.getResourceCrn());
         }
         response.setDescription(source.getDescription() == null ? "" : source.getDescription());
         return response;

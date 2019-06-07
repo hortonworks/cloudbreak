@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.api.proxy.doc;
+package com.sequenceiq.environment.api.doc.proxy;
 
 public class ProxyConfigDescription {
     public static final String LIST = "list proxy configurations";
