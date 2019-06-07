@@ -55,6 +55,10 @@ environment:
     url: http://localhost:9091/cb
   redbeams:
     url: http://localhost:8087/redbeams
+    support: AWS,AZURE
+  freeipa:
+    url: http://localhost:8090/freeipa
+    support: AWS,AZURE
   db:
     host: localhost
     port: 5432

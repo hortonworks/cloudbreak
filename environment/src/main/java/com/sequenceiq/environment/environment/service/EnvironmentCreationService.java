@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_NETWORK_CREATION_EVENT;
 
+import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
@@ -9,6 +10,7 @@ import javax.ws.rs.BadRequestException;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
@@ -19,7 +21,10 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
+import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
+
+import reactor.bus.Event;
 
 @Service
 public class EnvironmentCreationService {
@@ -34,13 +39,21 @@ public class EnvironmentCreationService {
 
     private final EnvironmentDtoConverter environmentDtoConverter;
 
-    public EnvironmentCreationService(EnvironmentService environmentService, EnvironmentValidatorService validatorService,
-            EnvironmentResourceService environmentResourceService, EventSender eventSender, EnvironmentDtoConverter environmentDtoConverter) {
+    private final ThreadBasedUserCrnProvider authenticatedUserService;
+
+    public EnvironmentCreationService(
+            EnvironmentService environmentService,
+            EnvironmentValidatorService validatorService,
+            EnvironmentResourceService environmentResourceService,
+            EventSender eventSender,
+            EnvironmentDtoConverter environmentDtoConverter,
+            ThreadBasedUserCrnProvider authenticatedUserService) {
         this.environmentService = environmentService;
         this.validatorService = validatorService;
         this.environmentResourceService = environmentResourceService;
         this.eventSender = eventSender;
         this.environmentDtoConverter = environmentDtoConverter;
+        this.authenticatedUserService = authenticatedUserService;
     }
 
     // TODO: trigger creation properly
@@ -50,7 +63,9 @@ public class EnvironmentCreationService {
                 .withResourceId(envId)
                 .withResourceName(envName)
                 .build();
-        eventSender.sendEvent(envCreationEvent);
+        String userCrn = authenticatedUserService.getUserCrn();
+        Map<String, Object> flowTriggerUsercrn = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
+        eventSender.sendEvent(envCreationEvent, new Event.Headers(flowTriggerUsercrn));
     }
 
     public EnvironmentDto create(EnvironmentCreationDto creationDto, String accountId) {
