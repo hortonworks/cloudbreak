@@ -4,7 +4,6 @@ import javax.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions.FileSystem;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.storage.parameter.AdlsCloudStorageV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.storage.parameter.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.storage.parameter.S3CloudStorageV1Parameters;
@@ -14,9 +13,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class CloudStorageV1Base implements JsonEntity {
-
-    @ApiModelProperty(FileSystem.DEFAULT)
-    private boolean defaultFs;
 
     @Valid
     @ApiModelProperty
@@ -33,14 +29,6 @@ public abstract class CloudStorageV1Base implements JsonEntity {
     @Valid
     @ApiModelProperty
     private AdlsGen2CloudStorageV1Parameters adlsGen2;
-
-    public boolean isDefaultFs() {
-        return defaultFs;
-    }
-
-    public void setDefaultFs(boolean defaultFs) {
-        this.defaultFs = defaultFs;
-    }
 
     public AdlsCloudStorageV1Parameters getAdls() {
         return adls;

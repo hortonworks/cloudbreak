@@ -175,11 +175,4 @@ public class ClusterDetails implements Serializable {
         this.fileSystemType = fileSystemType;
     }
 
-    public Boolean getDefaultFileSystem() {
-        return defaultFileSystem;
-    }
-
-    public void setDefaultFileSystem(Boolean defaultFileSystem) {
-        this.defaultFileSystem = defaultFileSystem;
-    }
 }

@@ -40,7 +40,7 @@ public class FileSystemToSpiFileSystemConverter extends AbstractConversionServic
         } catch (IOException e) {
             LOGGER.warn("Error occurred when tried to convert filesystem object: {}", e.getMessage());
         }
-        return new SpiFileSystem(source.getName(), source.getType(), source.isDefaultFs(), cloudFileSystemView);
+        return new SpiFileSystem(source.getName(), source.getType(), cloudFileSystemView);
     }
 
 }

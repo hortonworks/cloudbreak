@@ -46,19 +46,19 @@ public class FileSystemConfigurationsViewProvider {
         BaseFileSystemConfigurationsView fileSystemConfigurationsView = null;
         if (source.getType().isAdls()) {
             fileSystemConfigurationsView =
-                    new AdlsFileSystemConfigurationsView(source.getConfigurations().get(AdlsFileSystem.class), locations, source.isDefaultFs());
+                    new AdlsFileSystemConfigurationsView(source.getConfigurations().get(AdlsFileSystem.class), locations, false);
         } else if (source.getType().isGcs()) {
             fileSystemConfigurationsView =
-                    new GcsFileSystemConfigurationsView(source.getConfigurations().get(GcsFileSystem.class), locations, source.isDefaultFs());
+                    new GcsFileSystemConfigurationsView(source.getConfigurations().get(GcsFileSystem.class), locations, false);
         } else if (source.getType().isS3()) {
             fileSystemConfigurationsView =
-                    new S3FileSystemConfigurationsView(source.getConfigurations().get(S3FileSystem.class), locations, source.isDefaultFs());
+                    new S3FileSystemConfigurationsView(source.getConfigurations().get(S3FileSystem.class), locations, false);
         } else if (source.getType().isWasb()) {
             fileSystemConfigurationsView =
-                    new WasbFileSystemConfigurationsView(source.getConfigurations().get(WasbFileSystem.class), locations, source.isDefaultFs());
+                    new WasbFileSystemConfigurationsView(source.getConfigurations().get(WasbFileSystem.class), locations, false);
         } else if (source.getType().isAdlsGen2()) {
             fileSystemConfigurationsView =
-                    new AdlsGen2FileSystemConfigurationsView(source.getConfigurations().get(AdlsGen2FileSystem.class), locations, source.isDefaultFs());
+                    new AdlsGen2FileSystemConfigurationsView(source.getConfigurations().get(AdlsGen2FileSystem.class), locations, false);
         }
         return fileSystemConfigurationsView;
     }

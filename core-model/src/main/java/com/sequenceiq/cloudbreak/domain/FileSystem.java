@@ -36,8 +36,6 @@ public class FileSystem implements ProvisionEntity, WorkspaceAwareResource {
     @Enumerated(EnumType.STRING)
     private FileSystemType type;
 
-    private boolean defaultFs;
-
     @Column(nullable = false)
     private String description;
 
@@ -87,14 +85,6 @@ public class FileSystem implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setType(FileSystemType type) {
         this.type = type;
-    }
-
-    public boolean isDefaultFs() {
-        return defaultFs;
-    }
-
-    public void setDefaultFs(boolean defaultFs) {
-        this.defaultFs = defaultFs;
     }
 
     public String getDescription() {

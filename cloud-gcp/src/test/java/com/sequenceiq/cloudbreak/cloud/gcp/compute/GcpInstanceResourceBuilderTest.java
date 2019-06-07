@@ -264,7 +264,7 @@ public class GcpInstanceResourceBuilderTest {
 
         CloudStack cloudStack = new CloudStack(Collections.emptyList(), new Network(null), image,
                 emptyMap(), emptyMap(), null, null, null, null,
-                new SpiFileSystem("test", FileSystemType.GCS, false, cloudGcsView));
+                new SpiFileSystem("test", FileSystemType.GCS, cloudGcsView));
 
         // WHEN
         when(compute.instances()).thenReturn(instances);

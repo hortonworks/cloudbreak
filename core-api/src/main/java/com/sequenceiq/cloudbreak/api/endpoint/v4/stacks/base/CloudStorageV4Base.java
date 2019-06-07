@@ -9,15 +9,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.A
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.GcsCloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.S3CloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.WasbCloudStorageV4Parameters;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions.FileSystem;
 
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class CloudStorageV4Base implements JsonEntity {
-
-    @ApiModelProperty(FileSystem.DEFAULT)
-    private boolean defaultFs;
 
     @Valid
     @ApiModelProperty
@@ -38,14 +34,6 @@ public abstract class CloudStorageV4Base implements JsonEntity {
     @Valid
     @ApiModelProperty
     private AdlsGen2CloudStorageV4Parameters adlsGen2;
-
-    public boolean isDefaultFs() {
-        return defaultFs;
-    }
-
-    public void setDefaultFs(boolean defaultFs) {
-        this.defaultFs = defaultFs;
-    }
 
     public AdlsCloudStorageV4Parameters getAdls() {
         return adls;

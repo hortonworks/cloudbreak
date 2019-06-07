@@ -31,6 +31,6 @@ public class FileSystemValidationV4RequestToSpiFileSystemConverter
         } else if (source.getAdlsGen2() != null) {
             baseFileSystem = getConversionService().convert(source.getAdlsGen2(), CloudAdlsGen2View.class);
         }
-        return new SpiFileSystem(source.getName(), FileSystemType.valueOf(source.getType()), source.isDefaultFs(), baseFileSystem);
+        return new SpiFileSystem(source.getName(), FileSystemType.valueOf(source.getType()), baseFileSystem);
     }
 }
