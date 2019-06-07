@@ -6,7 +6,6 @@ import static java.lang.String.format;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import javax.inject.Inject;
@@ -15,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -80,7 +80,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
             for (ComputeResourceBuilder<ResourceBuilderContext> builder : compute) {
                 LOGGER.info("Building {} resources of {} instance group", builder.resourceType(), group.getName());
                 List<CloudResource> cloudResources = builder.create(context, privateId, auth, group, cloudStack.getImage());
-                if (Objects.nonNull(cloudResources) && !cloudResources.isEmpty()) {
+                if (!CollectionUtils.isEmpty(cloudResources)) {
                     buildableResources.addAll(cloudResources);
                     createResource(auth, cloudResources);
 
