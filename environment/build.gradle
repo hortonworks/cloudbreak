@@ -46,6 +46,7 @@ dependencies {
   implementation (project (":redbeams-api")) {
 //    exclude module: 'core-api'
   }
+  implementation (project (":freeipa-api"))
 
   compile     group: 'io.springfox',              name: 'springfox-swagger2'
   compile     group: 'io.springfox',              name: 'springfox-core'

@@ -55,6 +55,12 @@ public class AppConfig {
     @Named("redbeamsServerUrl")
     private String redbeamsServerUrl;
 
+    @Value("${environment.redbeams.support:}")
+    private String supportedRedbeamsPlatforms;
+
+    @Value("${environment.freeipa.support:}")
+    private String supportedFreeIpaPlatforms;
+
     @Bean
     public Map<CloudPlatform, EnvironmentNetworkValidator> environmentNetworkValidatorsByCloudPlatform() {
         return environmentNetworkValidators
@@ -93,6 +99,13 @@ public class AppConfig {
     @Bean
     public RedbeamsApiClientParams redbeamsApiClientParams() {
         return new RedbeamsApiClientParams(restDebug, certificateValidation, ignorePreValidation, redbeamsServerUrl);
+    }
+
+    @Bean
+    public SupportedPlatfroms supportedFreeIpaPlatforms() {
+        return new SupportedPlatfroms(
+                supportedFreeIpaPlatforms.split(","),
+                supportedRedbeamsPlatforms.split(","));
     }
 
 }
