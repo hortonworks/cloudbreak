@@ -47,7 +47,7 @@ public class MDCContextFilter extends OncePerRequestFilter {
             Crn crn = Crn.safeFromString(threadBaseUserCrnProvider.getUserCrn());
             MDCBuilder.buildMdcContextFromCrn(crn);
         } catch (Exception e) {
-            LOGGER.debug("Couldn't setup MDCContext from Crn", e);
+            LOGGER.debug("Couldn't setup MDCContext from Crn");
         }
         filterChain.doFilter(wrapper, response);
     }
