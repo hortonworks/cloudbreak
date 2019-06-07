@@ -38,9 +38,8 @@ public class CloudPlatformRequest<T> implements Selectable {
     public Long getResourceId() {
         if (cloudContext != null) {
             return cloudContext.getId();
-        } else {
-            return null;
         }
+        return null;
     }
 
     public CloudContext getCloudContext() {
