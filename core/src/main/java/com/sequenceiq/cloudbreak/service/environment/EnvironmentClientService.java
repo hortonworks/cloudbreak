@@ -25,9 +25,19 @@ public class EnvironmentClientService {
     @Inject
     private EnvironmentEndpoint environmentEndpoint;
 
-    public DetailedEnvironmentResponse get(String environmentCrn) {
+    public DetailedEnvironmentResponse getByName(String name) {
         try {
-            return environmentEndpoint.get(environmentCrn);
+            return environmentEndpoint.getByName(name);
+        } catch (WebApplicationException e) {
+            String message = String.format("Failed to GET Environment due to: '%s' ", e.getMessage());
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
+
+    public DetailedEnvironmentResponse getByCrn(String crn) {
+        try {
+            return environmentEndpoint.getByCrn(crn);
         } catch (WebApplicationException e) {
             String message = String.format("Failed to GET Environment due to: '%s' ", e.getMessage());
             LOGGER.error(message, e);
@@ -57,7 +67,7 @@ public class EnvironmentClientService {
 
     public DetailedEnvironmentResponse edit(String environmentCrn, @NotNull EnvironmentEditRequest request) {
         try {
-            return environmentEndpoint.edit(environmentCrn, request);
+            return environmentEndpoint.editByCrn(environmentCrn, request);
         } catch (WebApplicationException e) {
             String message = String.format("Failed to EDIT Environment due to: '%s' ", e.getMessage());
             LOGGER.error(message, e);
@@ -65,9 +75,9 @@ public class EnvironmentClientService {
         }
     }
 
-    public SimpleEnvironmentResponse delete(String environmentCrn) {
+    public SimpleEnvironmentResponse delete(String name) {
         try {
-            return environmentEndpoint.delete(environmentCrn);
+            return environmentEndpoint.deleteByName(name);
         } catch (WebApplicationException e) {
             String message = String.format("Failed to DELETE Environment due to: '%s' ", e.getMessage());
             LOGGER.error(message, e);

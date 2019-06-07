@@ -33,6 +33,10 @@ public class EnvironmentViewService {
         return CollectionUtils.isEmpty(names) ? new HashSet<>() : environmentViewRepository.findAllByNameInAndAccountId(names, accountid);
     }
 
+    public Set<EnvironmentView> findByResourceCrnsInAccount(Set<String> resourceCrns, @NotNull String accountid) {
+        return CollectionUtils.isEmpty(resourceCrns) ? new HashSet<>() : environmentViewRepository.findAllByResourceCrnInAndAccountId(resourceCrns, accountid);
+    }
+
     public Set<SimpleEnvironmentResponse> listByAccountId(String accountId) {
         return findAllByAccountId(accountId).stream()
                 .map(env -> conversionService.convert(env, SimpleEnvironmentResponse.class))
@@ -50,5 +54,10 @@ public class EnvironmentViewService {
     public Long getIdByName(String environmentName, String accountId) {
         return Optional.ofNullable(environmentViewRepository.getIdByNameAndAccountId(environmentName, accountId))
                 .orElseThrow(notFound("Environment with name", environmentName));
+    }
+
+    public Long getIdByCrn(String crn, String accountId) {
+        return Optional.ofNullable(environmentViewRepository.getIdByResourceCrnAndAccountId(crn, accountId))
+                .orElseThrow(notFound("Environment with CRN", crn));
     }
 }
