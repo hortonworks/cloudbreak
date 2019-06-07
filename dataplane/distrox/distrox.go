@@ -105,17 +105,17 @@ func assembleDistroXRequest(c *cli.Context) *model.DistroXV1Request {
 
 	name := c.String(fl.FlName.Name)
 	if len(name) != 0 {
-		req.Name = name
+		req.Name = &name
 		if req.InstanceGroups != nil {
 			for _, ig := range req.InstanceGroups {
 				if ig.Azure != nil && ig.Azure.AvailabilitySet != nil {
 					as := ig.Azure.AvailabilitySet
-					as.Name = fmt.Sprintf("%s-%s-as", req.Name, req.Name)
+					as.Name = fmt.Sprintf("%s-%s-as", *req.Name, *req.Name)
 				}
 			}
 		}
 	}
-	if &req.Name == nil || len(req.Name) == 0 {
+	if &req.Name == nil || len(*req.Name) == 0 {
 		commonutils.LogErrorMessageAndExit("Name of the DistroX must be set either in the template or with the --name command line option.")
 	}
 
@@ -204,22 +204,21 @@ func CreateDistroX(c *cli.Context) {
 	utils.CheckClientVersion(dxClient.Cloudbreak.V4utils, common.Version)
 	dxClient.createDistroX(req)
 	if c.Bool(fl.FlWaitOptional.Name) {
-		dxClient.WaitForDistroXOperationToFinish(req.Name, AVAILABLE, AVAILABLE)
+		dxClient.WaitForDistroXOperationToFinish(*req.Name, AVAILABLE, AVAILABLE)
 	}
 }
 
 func ChangeImage(c *cli.Context) {
-	dxClient := oauth.NewCloudbreakHTTPClientFromContext(c)
-
-	imageId := c.String(fl.FlImageId.Name)
-	imageCatalogName := c.String(fl.FlImageCatalog.Name)
-	dxName := c.String(fl.FlName.Name)
-	log.Infof("[ChangeImage] changing image for DistroX, name: %s, imageid: %s, imageCatalog: %s", dxName, imageId, imageCatalogName)
-	req := model.DistroXImageChangeV1Request{ImageCatalogName: imageCatalogName, ImageID: &imageId}
-	err := dxClient.Cloudbreak.V1distrox.ChangeImageDistroXV1(v1distrox.NewChangeImageDistroXV1Params().WithName(dxName).WithBody(&req))
-	if err != nil {
-		commonutils.LogErrorAndExit(err)
-	}
+	//dxClient := oauth.NewCloudbreakHTTPClientFromContext(c)
+	//imageId := c.String(fl.FlImageId.Name)
+	//imageCatalogName := c.String(fl.FlImageCatalog.Name)
+	//dxName := c.String(fl.FlName.Name)
+	//log.Infof("[ChangeImage] changing image for DistroX, name: %s, imageid: %s, imageCatalog: %s", dxName, imageId, imageCatalogName)
+	//req := model.DistroXImageChangeV1Request{ImageCatalogName: imageCatalogName, ImageID: &imageId}
+	//err := dxClient.Cloudbreak.V1distrox.ChangeImageDistroXV1(v1distrox.NewChangeImageDistroXV1Params().WithName(dxName).WithBody(&req))
+	//if err != nil {
+	//	commonutils.LogErrorAndExit(err)
+	//}
 }
 
 func DescribeDistroX(c *cli.Context) {

@@ -31,8 +31,8 @@ type DistroXV1Request struct {
 	// cluster
 	Cluster *DistroXClusterV1Request `json:"cluster,omitempty"`
 
-	// environment crn
-	EnvironmentCrn string `json:"environmentCrn,omitempty"`
+	// environment name
+	EnvironmentName string `json:"environmentName,omitempty"`
 
 	// image
 	Image *DistroXImageV1Request `json:"image,omitempty"`
@@ -45,7 +45,11 @@ type DistroXV1Request struct {
 	InstanceGroups []*InstanceGroupV1Request `json:"instanceGroups"`
 
 	// name
-	Name string `json:"name,omitempty"`
+	// Required: true
+	// Max Length: 40
+	// Min Length: 5
+	// Pattern: (^[a-z][-a-z0-9]*[a-z0-9]$)
+	Name *string `json:"name"`
 
 	// network
 	Network *NetworkV1Request `json:"network,omitempty"`
@@ -78,6 +82,10 @@ func (m *DistroXV1Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateInstanceGroups(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateName(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -195,6 +203,27 @@ func (m *DistroXV1Request) validateInstanceGroups(formats strfmt.Registry) error
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (m *DistroXV1Request) validateName(formats strfmt.Registry) error {
+
+	if err := validate.Required("name", "body", m.Name); err != nil {
+		return err
+	}
+
+	if err := validate.MinLength("name", "body", string(*m.Name), 5); err != nil {
+		return err
+	}
+
+	if err := validate.MaxLength("name", "body", string(*m.Name), 40); err != nil {
+		return err
+	}
+
+	if err := validate.Pattern("name", "body", string(*m.Name), `(^[a-z][-a-z0-9]*[a-z0-9]$)`); err != nil {
+		return err
 	}
 
 	return nil

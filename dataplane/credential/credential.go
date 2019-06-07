@@ -154,7 +154,7 @@ func modifyCredential(c *cli.Context, govCloud bool) {
 }
 
 type modifyCredentialClient interface {
-	GetCredentialV1(params *v1cred.GetCredentialV1Params) (*v1cred.GetCredentialV1OK, error)
+	GetCredentialByNameV1(params *v1cred.GetCredentialByNameV1Params) (*v1cred.GetCredentialByNameV1OK, error)
 	PutCredentialV1(params *v1cred.PutCredentialV1Params) (*v1cred.PutCredentialV1OK, error)
 }
 
@@ -189,7 +189,7 @@ func getCredential(name string, client modifyCredentialClient) *model.Credential
 	defer utils.TimeTrack(time.Now(), "get credential")
 
 	log.Infof("[getCredential] get credential by name: %s", name)
-	response, err := client.GetCredentialV1(v1cred.NewGetCredentialV1Params().WithName(name))
+	response, err := client.GetCredentialByNameV1(v1cred.NewGetCredentialByNameV1Params().WithName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -251,7 +251,7 @@ func DescribeCredential(c *cli.Context) {
 
 	envClient := oauth.NewEnvironmentClientFromContext(c)
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
-	resp, err := envClient.Environment.V1credentials.GetCredentialV1(v1cred.NewGetCredentialV1Params().WithName(c.String(fl.FlName.Name)))
+	resp, err := envClient.Environment.V1credentials.GetCredentialByNameV1(v1cred.NewGetCredentialByNameV1Params().WithName(c.String(fl.FlName.Name)))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

@@ -145,32 +145,62 @@ func (a *Client) CreateCredentialV1(params *CreateCredentialV1Params) (*CreateCr
 }
 
 /*
-DeleteCredentialV1 deletes credential by name
+DeleteCredentialByNameV1 deletes credential by name
 
 Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
 */
-func (a *Client) DeleteCredentialV1(params *DeleteCredentialV1Params) (*DeleteCredentialV1OK, error) {
+func (a *Client) DeleteCredentialByNameV1(params *DeleteCredentialByNameV1Params) (*DeleteCredentialByNameV1OK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteCredentialV1Params()
+		params = NewDeleteCredentialByNameV1Params()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "deleteCredentialV1",
+		ID:                 "deleteCredentialByNameV1",
 		Method:             "DELETE",
-		PathPattern:        "/v1/credentials/{name}",
+		PathPattern:        "/v1/credentials/name/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteCredentialV1Reader{formats: a.formats},
+		Reader:             &DeleteCredentialByNameV1Reader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*DeleteCredentialV1OK), nil
+	return result.(*DeleteCredentialByNameV1OK), nil
+
+}
+
+/*
+DeleteCredentialByResourceCrnV1 deletes credential by crn
+
+Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
+*/
+func (a *Client) DeleteCredentialByResourceCrnV1(params *DeleteCredentialByResourceCrnV1Params) (*DeleteCredentialByResourceCrnV1OK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteCredentialByResourceCrnV1Params()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteCredentialByResourceCrnV1",
+		Method:             "DELETE",
+		PathPattern:        "/v1/credentials/crn/{crn}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteCredentialByResourceCrnV1Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DeleteCredentialByResourceCrnV1OK), nil
 
 }
 
@@ -205,32 +235,62 @@ func (a *Client) DeleteCredentialsV1(params *DeleteCredentialsV1Params) (*Delete
 }
 
 /*
-GetCredentialV1 gets credential by name
+GetCredentialByNameV1 gets credential by name
 
 Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
 */
-func (a *Client) GetCredentialV1(params *GetCredentialV1Params) (*GetCredentialV1OK, error) {
+func (a *Client) GetCredentialByNameV1(params *GetCredentialByNameV1Params) (*GetCredentialByNameV1OK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetCredentialV1Params()
+		params = NewGetCredentialByNameV1Params()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getCredentialV1",
+		ID:                 "getCredentialByNameV1",
 		Method:             "GET",
-		PathPattern:        "/v1/credentials/{name}",
+		PathPattern:        "/v1/credentials/name/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetCredentialV1Reader{formats: a.formats},
+		Reader:             &GetCredentialByNameV1Reader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetCredentialV1OK), nil
+	return result.(*GetCredentialByNameV1OK), nil
+
+}
+
+/*
+GetCredentialByResourceCrnV1 gets credential by crn
+
+Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
+*/
+func (a *Client) GetCredentialByResourceCrnV1(params *GetCredentialByResourceCrnV1Params) (*GetCredentialByResourceCrnV1OK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetCredentialByResourceCrnV1Params()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getCredentialByResourceCrnV1",
+		Method:             "GET",
+		PathPattern:        "/v1/credentials/crn/{crn}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetCredentialByResourceCrnV1Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetCredentialByResourceCrnV1OK), nil
 
 }
 

@@ -55,32 +55,62 @@ func (a *Client) CreateProxyConfigV1(params *CreateProxyConfigV1Params) (*Create
 }
 
 /*
-DeleteProxyConfigV1 deletes proxy configuration by name
+DeleteProxyConfigByCrnV1 deletes proxy configuration by crn
 
 An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
 */
-func (a *Client) DeleteProxyConfigV1(params *DeleteProxyConfigV1Params) (*DeleteProxyConfigV1OK, error) {
+func (a *Client) DeleteProxyConfigByCrnV1(params *DeleteProxyConfigByCrnV1Params) (*DeleteProxyConfigByCrnV1OK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteProxyConfigV1Params()
+		params = NewDeleteProxyConfigByCrnV1Params()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "deleteProxyConfigV1",
+		ID:                 "deleteProxyConfigByCrnV1",
 		Method:             "DELETE",
-		PathPattern:        "/v1/proxies/{name}",
+		PathPattern:        "/v1/proxies/crn/{crn}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteProxyConfigV1Reader{formats: a.formats},
+		Reader:             &DeleteProxyConfigByCrnV1Reader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*DeleteProxyConfigV1OK), nil
+	return result.(*DeleteProxyConfigByCrnV1OK), nil
+
+}
+
+/*
+DeleteProxyConfigByNameV1 deletes proxy configuration by name
+
+An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
+*/
+func (a *Client) DeleteProxyConfigByNameV1(params *DeleteProxyConfigByNameV1Params) (*DeleteProxyConfigByNameV1OK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteProxyConfigByNameV1Params()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteProxyConfigByNameV1",
+		Method:             "DELETE",
+		PathPattern:        "/v1/proxies/name/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteProxyConfigByNameV1Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DeleteProxyConfigByNameV1OK), nil
 
 }
 
@@ -115,32 +145,62 @@ func (a *Client) DeleteProxyConfigsV1(params *DeleteProxyConfigsV1Params) (*Dele
 }
 
 /*
-GetProxyConfigV1 gets proxy configuration
+GetProxyConfigByCrnV1 gets proxy configuration
 
 An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
 */
-func (a *Client) GetProxyConfigV1(params *GetProxyConfigV1Params) (*GetProxyConfigV1OK, error) {
+func (a *Client) GetProxyConfigByCrnV1(params *GetProxyConfigByCrnV1Params) (*GetProxyConfigByCrnV1OK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetProxyConfigV1Params()
+		params = NewGetProxyConfigByCrnV1Params()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getProxyConfigV1",
+		ID:                 "getProxyConfigByCrnV1",
 		Method:             "GET",
-		PathPattern:        "/v1/proxies/{name}",
+		PathPattern:        "/v1/proxies/crn/{crn}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetProxyConfigV1Reader{formats: a.formats},
+		Reader:             &GetProxyConfigByCrnV1Reader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetProxyConfigV1OK), nil
+	return result.(*GetProxyConfigByCrnV1OK), nil
+
+}
+
+/*
+GetProxyConfigByNameV1 gets proxy configuration
+
+An proxy Configuration describe a connection to an external proxy server which provides internet access cluster members. It's applied for package manager and Ambari too
+*/
+func (a *Client) GetProxyConfigByNameV1(params *GetProxyConfigByNameV1Params) (*GetProxyConfigByNameV1OK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetProxyConfigByNameV1Params()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getProxyConfigByNameV1",
+		Method:             "GET",
+		PathPattern:        "/v1/proxies/name/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetProxyConfigByNameV1Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetProxyConfigByNameV1OK), nil
 
 }
 

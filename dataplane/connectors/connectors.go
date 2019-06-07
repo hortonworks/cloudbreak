@@ -124,20 +124,20 @@ func ListInstanceTypes(c *cli.Context) {
 }
 
 type getConnectorsClient interface {
-	GetRegionsByCredentialAndWorkspace(*v1pr.GetRegionsByCredentialAndWorkspaceParams) (*v1pr.GetRegionsByCredentialAndWorkspaceOK, error)
+	GetRegionsByCredential(params *v1pr.GetRegionsByCredentialParams) (*v1pr.GetRegionsByCredentialOK, error)
 }
 
 type getDiskTypesClient interface {
-	GetDisktypesForWorkspace(*v1pr.GetDisktypesForWorkspaceParams) (*v1pr.GetDisktypesForWorkspaceOK, error)
+	GetDisktypes(params *v1pr.GetDisktypesParams) (*v1pr.GetDisktypesOK, error)
 }
 
 type getInstanceTypesClient interface {
-	GetVMTypesByCredentialAndWorkspace(*v1pr.GetVMTypesByCredentialAndWorkspaceParams) (*v1pr.GetVMTypesByCredentialAndWorkspaceOK, error)
+	GetVMTypesByCredential(params *v1pr.GetVMTypesByCredentialParams) (*v1pr.GetVMTypesByCredentialOK, error)
 }
 
 func listRegionsImpl(client getConnectorsClient, writer func([]string, []utils.Row), credentialName string) {
 	log.Infof("[listRegionsImpl] sending regions list request")
-	regionsResp, err := client.GetRegionsByCredentialAndWorkspace(v1pr.NewGetRegionsByCredentialAndWorkspaceParams().WithCredentialName(&credentialName))
+	regionsResp, err := client.GetRegionsByCredential(v1pr.NewGetRegionsByCredentialParams().WithCredentialName(&credentialName))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -152,7 +152,7 @@ func listRegionsImpl(client getConnectorsClient, writer func([]string, []utils.R
 
 func listAvailabilityZonesImpl(client getConnectorsClient, writer func([]string, []utils.Row), credentialName string, region string) {
 	log.Infof("[listAvailabilityZonesImpl] sending availability zones list request")
-	regionsResp, err := client.GetRegionsByCredentialAndWorkspace(v1pr.NewGetRegionsByCredentialAndWorkspaceParams().WithCredentialName(&credentialName))
+	regionsResp, err := client.GetRegionsByCredential(v1pr.NewGetRegionsByCredentialParams().WithCredentialName(&credentialName))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -168,7 +168,7 @@ func listAvailabilityZonesImpl(client getConnectorsClient, writer func([]string,
 func listVolumeTypesImpl(client getDiskTypesClient, writer func([]string, []utils.Row)) {
 	log.Infof("[listVolumeTypesImpl] sending volume type list request")
 	provider := cloud.GetProvider().GetName()
-	volumeResp, err := client.GetDisktypesForWorkspace(v1pr.NewGetDisktypesForWorkspaceParams())
+	volumeResp, err := client.GetDisktypes(v1pr.NewGetDisktypesParams())
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -182,7 +182,7 @@ func listVolumeTypesImpl(client getDiskTypesClient, writer func([]string, []util
 
 func listInstanceTypesImpl(client getInstanceTypesClient, writer func([]string, []utils.Row), credentialName string, region string, avzone string) {
 	log.Infof("[listInstanceTypesImpl] sending instance type list request")
-	instanceResp, err := client.GetVMTypesByCredentialAndWorkspace(v1pr.NewGetVMTypesByCredentialAndWorkspaceParams().WithCredentialName(&credentialName).WithRegion(&region))
+	instanceResp, err := client.GetVMTypesByCredential(v1pr.NewGetVMTypesByCredentialParams().WithCredentialName(&credentialName).WithRegion(&region))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

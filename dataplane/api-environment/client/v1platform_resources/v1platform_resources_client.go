@@ -25,272 +25,272 @@ type Client struct {
 }
 
 /*
-GetAccessConfigsForWorkspace retrives access configs with properties
+GetAccessConfigs retrives access configs with properties
 
 Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
 */
-func (a *Client) GetAccessConfigsForWorkspace(params *GetAccessConfigsForWorkspaceParams) (*GetAccessConfigsForWorkspaceOK, error) {
+func (a *Client) GetAccessConfigs(params *GetAccessConfigsParams) (*GetAccessConfigsOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetAccessConfigsForWorkspaceParams()
+		params = NewGetAccessConfigsParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getAccessConfigsForWorkspace",
+		ID:                 "getAccessConfigs",
 		Method:             "GET",
 		PathPattern:        "/v1/platform_resources/access_configs",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetAccessConfigsForWorkspaceReader{formats: a.formats},
+		Reader:             &GetAccessConfigsReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetAccessConfigsForWorkspaceOK), nil
+	return result.(*GetAccessConfigsOK), nil
 
 }
 
 /*
-GetDisktypesForWorkspace retrives available disk types
+GetDisktypes retrives available disk types
 
 Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
 */
-func (a *Client) GetDisktypesForWorkspace(params *GetDisktypesForWorkspaceParams) (*GetDisktypesForWorkspaceOK, error) {
+func (a *Client) GetDisktypes(params *GetDisktypesParams) (*GetDisktypesOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetDisktypesForWorkspaceParams()
+		params = NewGetDisktypesParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getDisktypesForWorkspace",
+		ID:                 "getDisktypes",
 		Method:             "GET",
 		PathPattern:        "/v1/platform_resources/disk_types",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetDisktypesForWorkspaceReader{formats: a.formats},
+		Reader:             &GetDisktypesReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetDisktypesForWorkspaceOK), nil
+	return result.(*GetDisktypesOK), nil
 
 }
 
 /*
-GetEncryptionKeysForWorkspace retrives encryption keys with properties
+GetEncryptionKeys retrives encryption keys with properties
 
 Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
 */
-func (a *Client) GetEncryptionKeysForWorkspace(params *GetEncryptionKeysForWorkspaceParams) (*GetEncryptionKeysForWorkspaceOK, error) {
+func (a *Client) GetEncryptionKeys(params *GetEncryptionKeysParams) (*GetEncryptionKeysOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetEncryptionKeysForWorkspaceParams()
+		params = NewGetEncryptionKeysParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getEncryptionKeysForWorkspace",
+		ID:                 "getEncryptionKeys",
 		Method:             "GET",
 		PathPattern:        "/v1/platform_resources/encryption_keys",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetEncryptionKeysForWorkspaceReader{formats: a.formats},
+		Reader:             &GetEncryptionKeysReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetEncryptionKeysForWorkspaceOK), nil
+	return result.(*GetEncryptionKeysOK), nil
 
 }
 
 /*
-GetGatewaysCredentialIDForWorkspace retrives gateways with properties
+GetGatewaysCredentialID retrives gateways with properties
 
 Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
 */
-func (a *Client) GetGatewaysCredentialIDForWorkspace(params *GetGatewaysCredentialIDForWorkspaceParams) (*GetGatewaysCredentialIDForWorkspaceOK, error) {
+func (a *Client) GetGatewaysCredentialID(params *GetGatewaysCredentialIDParams) (*GetGatewaysCredentialIDOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetGatewaysCredentialIDForWorkspaceParams()
+		params = NewGetGatewaysCredentialIDParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getGatewaysCredentialIdForWorkspace",
+		ID:                 "getGatewaysCredentialId",
 		Method:             "GET",
 		PathPattern:        "/v1/platform_resources/gateways",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetGatewaysCredentialIDForWorkspaceReader{formats: a.formats},
+		Reader:             &GetGatewaysCredentialIDReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetGatewaysCredentialIDForWorkspaceOK), nil
+	return result.(*GetGatewaysCredentialIDOK), nil
 
 }
 
 /*
-GetIPPoolsCredentialIDForWorkspace retrives ip pools with properties
+GetIPPoolsCredentialID retrives ip pools with properties
 
 Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
 */
-func (a *Client) GetIPPoolsCredentialIDForWorkspace(params *GetIPPoolsCredentialIDForWorkspaceParams) (*GetIPPoolsCredentialIDForWorkspaceOK, error) {
+func (a *Client) GetIPPoolsCredentialID(params *GetIPPoolsCredentialIDParams) (*GetIPPoolsCredentialIDOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetIPPoolsCredentialIDForWorkspaceParams()
+		params = NewGetIPPoolsCredentialIDParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getIpPoolsCredentialIdForWorkspace",
+		ID:                 "getIpPoolsCredentialId",
 		Method:             "GET",
 		PathPattern:        "/v1/platform_resources/ip_pools",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetIPPoolsCredentialIDForWorkspaceReader{formats: a.formats},
+		Reader:             &GetIPPoolsCredentialIDReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetIPPoolsCredentialIDForWorkspaceOK), nil
+	return result.(*GetIPPoolsCredentialIDOK), nil
 
 }
 
 /*
-GetPlatformNetworksForWorkspace retrives network properties
+GetPlatformNetworks retrives network properties
 
 Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
 */
-func (a *Client) GetPlatformNetworksForWorkspace(params *GetPlatformNetworksForWorkspaceParams) (*GetPlatformNetworksForWorkspaceOK, error) {
+func (a *Client) GetPlatformNetworks(params *GetPlatformNetworksParams) (*GetPlatformNetworksOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetPlatformNetworksForWorkspaceParams()
+		params = NewGetPlatformNetworksParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getPlatformNetworksForWorkspace",
+		ID:                 "getPlatformNetworks",
 		Method:             "GET",
 		PathPattern:        "/v1/platform_resources/networks",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetPlatformNetworksForWorkspaceReader{formats: a.formats},
+		Reader:             &GetPlatformNetworksReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetPlatformNetworksForWorkspaceOK), nil
+	return result.(*GetPlatformNetworksOK), nil
 
 }
 
 /*
-GetPlatformSShKeysForWorkspace retrives sshkeys properties
+GetPlatformSShKeys retrives sshkeys properties
 
 Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
 */
-func (a *Client) GetPlatformSShKeysForWorkspace(params *GetPlatformSShKeysForWorkspaceParams) (*GetPlatformSShKeysForWorkspaceOK, error) {
+func (a *Client) GetPlatformSShKeys(params *GetPlatformSShKeysParams) (*GetPlatformSShKeysOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetPlatformSShKeysForWorkspaceParams()
+		params = NewGetPlatformSShKeysParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getPlatformSShKeysForWorkspace",
+		ID:                 "getPlatformSShKeys",
 		Method:             "GET",
 		PathPattern:        "/v1/platform_resources/ssh_keys",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetPlatformSShKeysForWorkspaceReader{formats: a.formats},
+		Reader:             &GetPlatformSShKeysReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetPlatformSShKeysForWorkspaceOK), nil
+	return result.(*GetPlatformSShKeysOK), nil
 
 }
 
 /*
-GetPlatformSecurityGroupsForWorkspace retrives securitygroups properties
+GetPlatformSecurityGroups retrives securitygroups properties
 
 Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
 */
-func (a *Client) GetPlatformSecurityGroupsForWorkspace(params *GetPlatformSecurityGroupsForWorkspaceParams) (*GetPlatformSecurityGroupsForWorkspaceOK, error) {
+func (a *Client) GetPlatformSecurityGroups(params *GetPlatformSecurityGroupsParams) (*GetPlatformSecurityGroupsOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetPlatformSecurityGroupsForWorkspaceParams()
+		params = NewGetPlatformSecurityGroupsParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getPlatformSecurityGroupsForWorkspace",
+		ID:                 "getPlatformSecurityGroups",
 		Method:             "GET",
 		PathPattern:        "/v1/platform_resources/security_groups",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetPlatformSecurityGroupsForWorkspaceReader{formats: a.formats},
+		Reader:             &GetPlatformSecurityGroupsReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetPlatformSecurityGroupsForWorkspaceOK), nil
+	return result.(*GetPlatformSecurityGroupsOK), nil
 
 }
 
 /*
-GetRegionsByCredentialAndWorkspace retrives regions by type
+GetRegionsByCredential retrives regions by type
 
 Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
 */
-func (a *Client) GetRegionsByCredentialAndWorkspace(params *GetRegionsByCredentialAndWorkspaceParams) (*GetRegionsByCredentialAndWorkspaceOK, error) {
+func (a *Client) GetRegionsByCredential(params *GetRegionsByCredentialParams) (*GetRegionsByCredentialOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetRegionsByCredentialAndWorkspaceParams()
+		params = NewGetRegionsByCredentialParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getRegionsByCredentialAndWorkspace",
+		ID:                 "getRegionsByCredential",
 		Method:             "GET",
 		PathPattern:        "/v1/platform_resources/regions",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetRegionsByCredentialAndWorkspaceReader{formats: a.formats},
+		Reader:             &GetRegionsByCredentialReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetRegionsByCredentialAndWorkspaceOK), nil
+	return result.(*GetRegionsByCredentialOK), nil
 
 }
 
@@ -325,32 +325,32 @@ func (a *Client) GetTagSpecifications(params *GetTagSpecificationsParams) (*GetT
 }
 
 /*
-GetVMTypesByCredentialAndWorkspace retrives vmtype properties by credential
+GetVMTypesByCredential retrives vmtype properties by credential
 
 Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
 */
-func (a *Client) GetVMTypesByCredentialAndWorkspace(params *GetVMTypesByCredentialAndWorkspaceParams) (*GetVMTypesByCredentialAndWorkspaceOK, error) {
+func (a *Client) GetVMTypesByCredential(params *GetVMTypesByCredentialParams) (*GetVMTypesByCredentialOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetVMTypesByCredentialAndWorkspaceParams()
+		params = NewGetVMTypesByCredentialParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getVmTypesByCredentialAndWorkspace",
+		ID:                 "getVmTypesByCredential",
 		Method:             "GET",
 		PathPattern:        "/v1/platform_resources/machine_types",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetVMTypesByCredentialAndWorkspaceReader{formats: a.formats},
+		Reader:             &GetVMTypesByCredentialReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetVMTypesByCredentialAndWorkspaceOK), nil
+	return result.(*GetVMTypesByCredentialOK), nil
 
 }
 

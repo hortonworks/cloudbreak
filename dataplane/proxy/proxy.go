@@ -114,7 +114,7 @@ func DeleteProxy(c *cli.Context) error {
 
 	envClient := oauth.NewEnvironmentClientFromContext(c)
 
-	if _, err := envClient.Environment.V1proxies.DeleteProxyConfigV1(v1Proxy.NewDeleteProxyConfigV1Params().WithName(proxyName)); err != nil {
+	if _, err := envClient.Environment.V1proxies.DeleteProxyConfigByNameV1(v1Proxy.NewDeleteProxyConfigByNameV1Params().WithName(proxyName)); err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	log.Infof("[DeleteProxy] proxy config deleted: %s", proxyName)

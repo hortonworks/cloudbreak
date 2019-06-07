@@ -9,7 +9,7 @@ import (
 
 	"errors"
 
-	model "github.com/hortonworks/cb-cli/dataplane/api-environment/model"
+	"github.com/hortonworks/cb-cli/dataplane/api-environment/model"
 	"github.com/hortonworks/cb-cli/dataplane/cloud"
 	_ "github.com/hortonworks/cb-cli/dataplane/cloud/aws"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
@@ -120,12 +120,12 @@ func (m *mockCredentialModifyClient) PutCredentialV1(params *v1cred.PutCredentia
 	}, nil
 }
 
-func (m *mockCredentialModifyClient) GetCredentialV1(params *v1cred.GetCredentialV1Params) (*v1cred.GetCredentialV1OK, error) {
+func (m *mockCredentialModifyClient) GetCredentialByNameV1(params *v1cred.GetCredentialByNameV1Params) (*v1cred.GetCredentialByNameV1OK, error) {
 	if strings.Contains(params.Name, "invalid") {
 		return nil, errors.New("credential does not exist")
 	}
 
-	return &v1cred.GetCredentialV1OK{Payload: &model.CredentialV1Response{
+	return &v1cred.GetCredentialByNameV1OK{Payload: &model.CredentialV1Response{
 		ID: int64(1),
 		CredentialBase: model.CredentialBase{
 			Name:          &(&types.S{S: "name"}).S,

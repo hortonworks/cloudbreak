@@ -19,7 +19,7 @@ import (
 type mockConnectorsClient struct {
 }
 
-func (*mockConnectorsClient) GetRegionsByCredentialAndWorkspace(params *v1pr.GetRegionsByCredentialAndWorkspaceParams) (*v1pr.GetRegionsByCredentialAndWorkspaceOK, error) {
+func (*mockConnectorsClient) GetRegionsByCredential(params *v1pr.GetRegionsByCredentialParams) (*v1pr.GetRegionsByCredentialOK, error) {
 	resp := &model.CompactRegionV1Response{
 		DisplayNames: map[string]string{
 			"region": "region-name",
@@ -28,7 +28,7 @@ func (*mockConnectorsClient) GetRegionsByCredentialAndWorkspace(params *v1pr.Get
 			"region": {"av0", "av1"},
 		},
 	}
-	return &v1pr.GetRegionsByCredentialAndWorkspaceOK{Payload: resp}, nil
+	return &v1pr.GetRegionsByCredentialOK{Payload: resp}, nil
 }
 
 func TestListRegionsImpl(t *testing.T) {
@@ -66,7 +66,7 @@ func TestListAvailabilityZonesImpl(t *testing.T) {
 type mockDiskTypesClient struct {
 }
 
-func (*mockDiskTypesClient) GetDisktypesForWorkspace(params *v1pr.GetDisktypesForWorkspaceParams) (*v1pr.GetDisktypesForWorkspaceOK, error) {
+func (*mockDiskTypesClient) GetDisktypes(params *v1pr.GetDisktypesParams) (*v1pr.GetDisktypesOK, error) {
 	resp := &model.PlatformDisksResponse{
 		DisplayNames: map[string]map[string]string{
 			"AWS": {
@@ -74,7 +74,7 @@ func (*mockDiskTypesClient) GetDisktypesForWorkspace(params *v1pr.GetDisktypesFo
 			},
 		},
 	}
-	return &v1pr.GetDisktypesForWorkspaceOK{Payload: resp}, nil
+	return &v1pr.GetDisktypesOK{Payload: resp}, nil
 }
 
 func TestListVolumeTypesImpl(t *testing.T) {
@@ -96,7 +96,7 @@ func TestListVolumeTypesImpl(t *testing.T) {
 type mockInstanceTypesClient struct {
 }
 
-func (*mockInstanceTypesClient) GetVMTypesByCredentialAndWorkspace(*v1pr.GetVMTypesByCredentialAndWorkspaceParams) (*v1pr.GetVMTypesByCredentialAndWorkspaceOK, error) {
+func (*mockInstanceTypesClient) GetVMTypesByCredential(params *v1pr.GetVMTypesByCredentialParams) (*v1pr.GetVMTypesByCredentialOK, error) {
 	resp := &model.PlatformVmtypesResponse{
 		VMTypes: map[string]model.VirtualMachinesResponse{
 			"region-a": {
@@ -114,7 +114,7 @@ func (*mockInstanceTypesClient) GetVMTypesByCredentialAndWorkspace(*v1pr.GetVMTy
 			},
 		},
 	}
-	return &v1pr.GetVMTypesByCredentialAndWorkspaceOK{Payload: resp}, nil
+	return &v1pr.GetVMTypesByCredentialOK{Payload: resp}, nil
 }
 
 func TestListInstanceTypesImpl(t *testing.T) {

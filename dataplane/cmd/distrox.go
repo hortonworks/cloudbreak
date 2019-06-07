@@ -35,6 +35,7 @@ func init() {
 				Before: cf.CheckConfigAndCommandFlags,
 				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlImageId, fl.FlImageCatalogOptional).AddAuthenticationFlags().Build(),
 				Action: distrox.ChangeImage,
+				Hidden: true,
 				BashComplete: func(c *cli.Context) {
 					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName, fl.FlImageId).AddAuthenticationFlags().Build() {
 						fl.PrintFlagCompletion(f)

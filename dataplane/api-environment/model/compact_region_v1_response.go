@@ -32,7 +32,7 @@ type CompactRegionV1Response struct {
 
 	// Regions of the environment.
 	// Unique: true
-	Regions []string `json:"regions"`
+	Names []string `json:"names"`
 }
 
 // Validate validates this compact region v1 response
@@ -43,7 +43,7 @@ func (m *CompactRegionV1Response) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateRegions(formats); err != nil {
+	if err := m.validateNames(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -66,13 +66,13 @@ func (m *CompactRegionV1Response) validateLocations(formats strfmt.Registry) err
 	return nil
 }
 
-func (m *CompactRegionV1Response) validateRegions(formats strfmt.Registry) error {
+func (m *CompactRegionV1Response) validateNames(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Regions) { // not required
+	if swag.IsZero(m.Names) { // not required
 		return nil
 	}
 
-	if err := validate.UniqueItems("regions", "body", m.Regions); err != nil {
+	if err := validate.UniqueItems("names", "body", m.Names); err != nil {
 		return err
 	}
 
