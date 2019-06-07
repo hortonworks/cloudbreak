@@ -49,7 +49,7 @@ public class ProxyConfigDtoService {
 
     private ProxyResponse getProxyConfig(String resourceCrn, ProxyEndpoint proxyEndpoint) {
         try {
-            return proxyEndpoint.get(resourceCrn);
+            return proxyEndpoint.getByResourceCrn(resourceCrn);
         } catch (WebApplicationException e) {
             String message = String.format("Failed to get Proxy config from Environment service due to: '%s' ", e.getMessage());
             LOGGER.error(message, e);
