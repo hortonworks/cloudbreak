@@ -233,7 +233,7 @@ func DescribeDistroX(c *cli.Context) {
 	s := resp.Payload
 
 	envClient := oauth.Environment(*oauth.NewEnvironmentClientFromContext(c)).Environment
-	envResp, err := envClient.V1env.GetEnvironmentV1(v1env.NewGetEnvironmentV1Params().WithName(s.EnvironmentCrn))
+	envResp, err := envClient.V1env.GetEnvironmentV1ByCrn(v1env.NewGetEnvironmentV1ByCrnParams().WithCrn(s.EnvironmentCrn))
 	if err != nil {
 		commonutils.LogErrorAndExit(err)
 	}
@@ -259,7 +259,7 @@ func ListDistroXs(c *cli.Context) {
 
 	var tableRows []commonutils.Row
 	for _, stack := range resp.Payload.Responses {
-		envResp, err := envClient.V1env.GetEnvironmentV1(v1env.NewGetEnvironmentV1Params().WithName(stack.EnvironmentCrn))
+		envResp, err := envClient.V1env.GetEnvironmentV1ByCrn(v1env.NewGetEnvironmentV1ByCrnParams().WithCrn(stack.EnvironmentCrn))
 		if err != nil {
 			commonutils.LogErrorAndExit(err)
 		}

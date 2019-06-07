@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -168,7 +167,7 @@ func modifyCredentialImpl(stringFinder func(string) string, client modifyCredent
 		utils.LogErrorAndExit(errors.New("cloud provider cannot be modified"))
 	}
 
-	log.Infof("[modifyCredentialImpl] original credential found name: %s id: %d", name, credential.ID)
+	log.Infof("[modifyCredentialImpl] original credential found name: %s id: %s", name, credential.Crn)
 	credReq, err := provider.GetCredentialRequest(stringFinder, govCloud)
 	if err != nil {
 		utils.LogErrorAndExit(err)
@@ -233,17 +232,17 @@ func postCredential(client createCredentialClient, credReq *model.CredentialV1Re
 	}
 	credential = resp.Payload
 
-	log.Infof("[postCredential] credential created: %s (id: %d)", *credential.Name, credential.ID)
+	log.Infof("[postCredential] credential created: %s (id: %s)", *credential.Name, credential.Crn)
 	return credential
 }
 
 type credentialOutDescribe struct {
 	*common.CloudResourceOut
-	ID string `json:"ID" yaml:"ID"`
+	CRN string `json:"CRN" yaml:"CRN"`
 }
 
 func (c *credentialOutDescribe) DataAsStringArray() []string {
-	return append(c.CloudResourceOut.DataAsStringArray(), c.ID)
+	return append(c.CloudResourceOut.DataAsStringArray(), c.CRN)
 }
 
 func DescribeCredential(c *cli.Context) {
@@ -257,7 +256,7 @@ func DescribeCredential(c *cli.Context) {
 	}
 
 	cred := resp.Payload
-	output.Write(append(common.CloudResourceHeader, "ID"), &credentialOutDescribe{&common.CloudResourceOut{Name: *cred.Name, Description: *cred.Description, CloudPlatform: *cred.CloudPlatform}, strconv.FormatInt(cred.ID, 10)})
+	output.Write(append(common.CloudResourceHeader, "ID"), &credentialOutDescribe{&common.CloudResourceOut{Name: *cred.Name, Description: *cred.Description, CloudPlatform: *cred.CloudPlatform}, cred.Crn})
 }
 
 func DeleteCredential(c *cli.Context) {

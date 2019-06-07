@@ -23,11 +23,8 @@ type CredentialV1Response struct {
 	// custom parameters for Azure credential
 	Azure *AzureCredentialV1ResponseParameters `json:"azure,omitempty"`
 
-	// id of the resource
-	ID int64 `json:"id,omitempty"`
-
 	// global identifiers of the resource
-	ResourceCrn string `json:"resourceCrn,omitempty"`
+	Crn string `json:"crn,omitempty"`
 }
 
 // UnmarshalJSON unmarshals this object from a JSON structure
@@ -45,9 +42,7 @@ func (m *CredentialV1Response) UnmarshalJSON(raw []byte) error {
 
 		Azure *AzureCredentialV1ResponseParameters `json:"azure,omitempty"`
 
-		ID int64 `json:"id,omitempty"`
-
-		ResourceCrn string `json:"resourceCrn,omitempty"`
+		Crn string `json:"crn,omitempty"`
 	}
 	if err := swag.ReadJSON(raw, &dataAO1); err != nil {
 		return err
@@ -57,9 +52,7 @@ func (m *CredentialV1Response) UnmarshalJSON(raw []byte) error {
 
 	m.Azure = dataAO1.Azure
 
-	m.ID = dataAO1.ID
-
-	m.ResourceCrn = dataAO1.ResourceCrn
+	m.Crn = dataAO1.Crn
 
 	return nil
 }
@@ -79,18 +72,14 @@ func (m CredentialV1Response) MarshalJSON() ([]byte, error) {
 
 		Azure *AzureCredentialV1ResponseParameters `json:"azure,omitempty"`
 
-		ID int64 `json:"id,omitempty"`
-
-		ResourceCrn string `json:"resourceCrn,omitempty"`
+		Crn string `json:"crn,omitempty"`
 	}
 
 	dataAO1.Attributes = m.Attributes
 
 	dataAO1.Azure = m.Azure
 
-	dataAO1.ID = m.ID
-
-	dataAO1.ResourceCrn = m.ResourceCrn
+	dataAO1.Crn = m.Crn
 
 	jsonDataAO1, errAO1 := swag.WriteJSON(dataAO1)
 	if errAO1 != nil {

@@ -24,7 +24,7 @@ type EnvironmentNetworkV1Response struct {
 	Azure *EnvironmentNetworkAzureV1Params `json:"azure,omitempty"`
 
 	// id of the resource
-	ID string `json:"id,omitempty"`
+	Crn string `json:"crn,omitempty"`
 
 	// name of the resource
 	// Required: true

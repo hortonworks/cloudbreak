@@ -11,14 +11,14 @@ import (
 
 func GetEnvirontmentCrnByName(c *cli.Context, environment string) string {
 	envClient := oauth.Environment(*oauth.NewEnvironmentClientFromContext(c)).Environment
-	resp, err := envClient.V1env.GetEnvironmentV1(v1env.NewGetEnvironmentV1Params().WithName(environment))
+	resp, err := envClient.V1env.GetEnvironmentV1ByName(v1env.NewGetEnvironmentV1ByNameParams().WithName(environment))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	environmentDetails := resp.Payload
-	if len(environmentDetails.ID) == 0 {
+	if len(environmentDetails.Crn) == 0 {
 		errmsg := fmt.Sprintf("Failed to get the CRN of environment: %s", environment)
 		utils.LogErrorMessageAndExit(errmsg)
 	}
-	return environmentDetails.ID
+	return environmentDetails.Crn
 }

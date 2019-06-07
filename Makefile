@@ -139,7 +139,7 @@ _init-swagger-generation-environment:
 generate-swagger: _init-swagger-generation
 	swagger generate client -f build/swagger.json -c client -m model -t dataplane/api
 
-generate-swagger-dp: 
+generate-swagger-dp:
 	rm -rf dataplane/oauthapi/client dataplane/oauthapi/model
 	swagger generate client -f http://$(DP_IP):$(DP_PORT)/spec/api-docs/swagger.json -c client -m model -t dataplane/oauthapi
 

@@ -16,17 +16,17 @@ import (
 	model "github.com/hortonworks/cb-cli/dataplane/api-environment/model"
 )
 
-// DeleteEnvironmentsReader is a Reader for the DeleteEnvironments structure.
-type DeleteEnvironmentsReader struct {
+// DeleteEnvironmentsByNameReader is a Reader for the DeleteEnvironmentsByName structure.
+type DeleteEnvironmentsByNameReader struct {
 	formats strfmt.Registry
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *DeleteEnvironmentsReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *DeleteEnvironmentsByNameReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 
 	case 200:
-		result := NewDeleteEnvironmentsOK()
+		result := NewDeleteEnvironmentsByNameOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -37,24 +37,24 @@ func (o *DeleteEnvironmentsReader) ReadResponse(response runtime.ClientResponse,
 	}
 }
 
-// NewDeleteEnvironmentsOK creates a DeleteEnvironmentsOK with default headers values
-func NewDeleteEnvironmentsOK() *DeleteEnvironmentsOK {
-	return &DeleteEnvironmentsOK{}
+// NewDeleteEnvironmentsByNameOK creates a DeleteEnvironmentsByNameOK with default headers values
+func NewDeleteEnvironmentsByNameOK() *DeleteEnvironmentsByNameOK {
+	return &DeleteEnvironmentsByNameOK{}
 }
 
-/*DeleteEnvironmentsOK handles this case with default header values.
+/*DeleteEnvironmentsByNameOK handles this case with default header values.
 
 successful operation
 */
-type DeleteEnvironmentsOK struct {
+type DeleteEnvironmentsByNameOK struct {
 	Payload *model.SimpleEnvironmentV1Responses
 }
 
-func (o *DeleteEnvironmentsOK) Error() string {
-	return fmt.Sprintf("[DELETE /v1/env][%d] deleteEnvironmentsOK  %+v", 200, o.Payload)
+func (o *DeleteEnvironmentsByNameOK) Error() string {
+	return fmt.Sprintf("[DELETE /v1/env/name][%d] deleteEnvironmentsByNameOK  %+v", 200, o.Payload)
 }
 
-func (o *DeleteEnvironmentsOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *DeleteEnvironmentsByNameOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(model.SimpleEnvironmentV1Responses)
 

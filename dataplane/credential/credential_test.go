@@ -28,7 +28,7 @@ type mockCredentialCreate struct {
 func (m *mockCredentialCreate) CreateCredentialV1(params *v1cred.CreateCredentialV1Params) (*v1cred.CreateCredentialV1OK, error) {
 	m.request <- params.Body
 	defer close(m.request)
-	return &v1cred.CreateCredentialV1OK{Payload: &model.CredentialV1Response{ID: int64(1), CredentialBase: model.CredentialBase{Name: &(&types.S{S: ""}).S}}}, nil
+	return &v1cred.CreateCredentialV1OK{Payload: &model.CredentialV1Response{Crn: "crn", CredentialBase: model.CredentialBase{Name: &(&types.S{S: ""}).S}}}, nil
 }
 
 func TestCreateCredentialPublic(t *testing.T) {
@@ -105,7 +105,7 @@ type mockCredentialModifyClient struct {
 
 func (m *mockCredentialModifyClient) PutCredentialV1(params *v1cred.PutCredentialV1Params) (*v1cred.PutCredentialV1OK, error) {
 	return &v1cred.PutCredentialV1OK{Payload: &model.CredentialV1Response{
-		ID: int64(1),
+		Crn: "crn",
 		CredentialBase: model.CredentialBase{
 			Name:          params.Body.Name,
 			Description:   params.Body.Description,
@@ -126,7 +126,7 @@ func (m *mockCredentialModifyClient) GetCredentialByNameV1(params *v1cred.GetCre
 	}
 
 	return &v1cred.GetCredentialByNameV1OK{Payload: &model.CredentialV1Response{
-		ID: int64(1),
+		Crn: "crn",
 		CredentialBase: model.CredentialBase{
 			Name:          &(&types.S{S: "name"}).S,
 			Description:   &(&types.S{S: "default description"}).S,

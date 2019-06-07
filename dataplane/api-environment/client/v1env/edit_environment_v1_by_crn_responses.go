@@ -16,17 +16,17 @@ import (
 	model "github.com/hortonworks/cb-cli/dataplane/api-environment/model"
 )
 
-// EditEnvironmentV1Reader is a Reader for the EditEnvironmentV1 structure.
-type EditEnvironmentV1Reader struct {
+// EditEnvironmentV1ByCrnReader is a Reader for the EditEnvironmentV1ByCrn structure.
+type EditEnvironmentV1ByCrnReader struct {
 	formats strfmt.Registry
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *EditEnvironmentV1Reader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *EditEnvironmentV1ByCrnReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 
 	case 200:
-		result := NewEditEnvironmentV1OK()
+		result := NewEditEnvironmentV1ByCrnOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -37,24 +37,24 @@ func (o *EditEnvironmentV1Reader) ReadResponse(response runtime.ClientResponse, 
 	}
 }
 
-// NewEditEnvironmentV1OK creates a EditEnvironmentV1OK with default headers values
-func NewEditEnvironmentV1OK() *EditEnvironmentV1OK {
-	return &EditEnvironmentV1OK{}
+// NewEditEnvironmentV1ByCrnOK creates a EditEnvironmentV1ByCrnOK with default headers values
+func NewEditEnvironmentV1ByCrnOK() *EditEnvironmentV1ByCrnOK {
+	return &EditEnvironmentV1ByCrnOK{}
 }
 
-/*EditEnvironmentV1OK handles this case with default header values.
+/*EditEnvironmentV1ByCrnOK handles this case with default header values.
 
 successful operation
 */
-type EditEnvironmentV1OK struct {
+type EditEnvironmentV1ByCrnOK struct {
 	Payload *model.DetailedEnvironmentV1Response
 }
 
-func (o *EditEnvironmentV1OK) Error() string {
-	return fmt.Sprintf("[PUT /v1/env/name/{name}][%d] editEnvironmentV1OK  %+v", 200, o.Payload)
+func (o *EditEnvironmentV1ByCrnOK) Error() string {
+	return fmt.Sprintf("[PUT /v1/env/crn/{crn}][%d] editEnvironmentV1ByCrnOK  %+v", 200, o.Payload)
 }
 
-func (o *EditEnvironmentV1OK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *EditEnvironmentV1ByCrnOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(model.DetailedEnvironmentV1Response)
 

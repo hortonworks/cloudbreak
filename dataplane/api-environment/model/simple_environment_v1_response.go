@@ -25,15 +25,15 @@ type SimpleEnvironmentV1Response struct {
 	// Name of the credential of the environment.
 	CredentialName string `json:"credentialName,omitempty"`
 
+	// id of the resource
+	Crn string `json:"crn,omitempty"`
+
 	// description of the resource
 	Description string `json:"description,omitempty"`
 
 	// Status of the environment.
 	// Enum: [CREATION_INITIATED NETWORK_CREATION_IN_PROGRESS RDBMS_CREATION_IN_PROGRESS FREEIPA_CREATION_IN_PROGRESS AVAILABLE ARCHIVED CORRUPTED]
 	EnvironmentStatus string `json:"environmentStatus,omitempty"`
-
-	// id of the resource
-	ID string `json:"id,omitempty"`
 
 	// Location of the environment.
 	Location *LocationV1Response `json:"location,omitempty"`

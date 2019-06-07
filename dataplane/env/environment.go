@@ -134,7 +134,7 @@ func EditEnvironmentFromTemplate(c *cli.Context) {
 	}
 	environment := resp.Payload
 
-	log.Infof("[EditEnvironmentFromTemplate] environment has edited with name: %s, crn: %s", environment.Name, environment.ID)
+	log.Infof("[EditEnvironmentFromTemplate] environment has edited with name: %s, crn: %s", environment.Name, environment.Crn)
 }
 
 func createEnvironmentImpl(c *cli.Context, EnvironmentV1Request *model.EnvironmentV1Request) {
@@ -147,7 +147,7 @@ func createEnvironmentImpl(c *cli.Context, EnvironmentV1Request *model.Environme
 	}
 	environment := resp.Payload
 
-	log.Infof("[createEnvironmentImpl] environment created with name: %s, id: %s", *EnvironmentV1Request.Name, environment.ID)
+	log.Infof("[createEnvironmentImpl] environment created with name: %s, id: %s", *EnvironmentV1Request.Name, environment.Crn)
 }
 
 func GenerateAwsEnvironmentTemplate(c *cli.Context) error {
@@ -232,7 +232,7 @@ func listEnvironmentsImpl(envClient environmentClient, output utils.Output) erro
 			LocationName:  e.Location.Name,
 			Longitude:     e.Location.Longitude,
 			Latitude:      e.Location.Latitude,
-			Crn:           e.ID,
+			Crn:           e.Crn,
 		}
 
 		if output.Format != "table" && output.Format != "yaml" && e.Network != nil {
@@ -261,7 +261,7 @@ func DescribeEnvironment(c *cli.Context) {
 	log.Infof("[DescribeEnvironment] describe environment by name: %s", envName)
 	envClient := oauth.NewEnvironmentClientFromContext(c)
 
-	resp, err := envClient.Environment.V1env.GetEnvironmentV1(v1env.NewGetEnvironmentV1Params().WithName(envName))
+	resp, err := envClient.Environment.V1env.GetEnvironmentV1ByName(v1env.NewGetEnvironmentV1ByNameParams().WithName(envName))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -281,7 +281,7 @@ func DeleteEnvironment(c *cli.Context) {
 	envNames := strings.Split(val[1:len(val)-1], ",")
 	envClient := oauth.NewEnvironmentClientFromContext(c)
 	log.Infof("[DeleteEnvironment] delete environment(s) by names: %s", envNames)
-	_, err := envClient.Environment.V1env.DeleteEnvironments(v1env.NewDeleteEnvironmentsParams().WithBody(envNames))
+	_, err := envClient.Environment.V1env.DeleteEnvironmentsByName(v1env.NewDeleteEnvironmentsByNameParams().WithBody(envNames))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -345,7 +345,7 @@ func convertResponseToTableOutput(env *model.DetailedEnvironmentV1Response) *env
 			LocationName:  env.Location.Name,
 			Longitude:     env.Location.Longitude,
 			Latitude:      env.Location.Latitude,
-			Crn:           env.ID,
+			Crn:           env.Crn,
 		},
 	}
 }
@@ -362,7 +362,7 @@ func convertResponseToJsonOutput(env *model.DetailedEnvironmentV1Response) *envi
 			LocationName:  env.Location.Name,
 			Longitude:     env.Location.Longitude,
 			Latitude:      env.Location.Latitude,
-			Crn:           env.ID,
+			Crn:           env.Crn,
 		},
 	}
 	if env.Network != nil {

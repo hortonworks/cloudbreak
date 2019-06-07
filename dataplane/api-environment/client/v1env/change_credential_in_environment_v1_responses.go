@@ -51,7 +51,7 @@ type ChangeCredentialInEnvironmentV1OK struct {
 }
 
 func (o *ChangeCredentialInEnvironmentV1OK) Error() string {
-	return fmt.Sprintf("[PUT /v1/env/{name}/change_credential][%d] changeCredentialInEnvironmentV1OK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[PUT /v1/env/name/{name}/change_credential][%d] changeCredentialInEnvironmentV1OK  %+v", 200, o.Payload)
 }
 
 func (o *ChangeCredentialInEnvironmentV1OK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

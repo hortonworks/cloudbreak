@@ -16,17 +16,17 @@ import (
 	model "github.com/hortonworks/cb-cli/dataplane/api-environment/model"
 )
 
-// EditEnvironmentV1Reader is a Reader for the EditEnvironmentV1 structure.
-type EditEnvironmentV1Reader struct {
+// GetEnvironmentV1ByNameReader is a Reader for the GetEnvironmentV1ByName structure.
+type GetEnvironmentV1ByNameReader struct {
 	formats strfmt.Registry
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *EditEnvironmentV1Reader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *GetEnvironmentV1ByNameReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 
 	case 200:
-		result := NewEditEnvironmentV1OK()
+		result := NewGetEnvironmentV1ByNameOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -37,24 +37,24 @@ func (o *EditEnvironmentV1Reader) ReadResponse(response runtime.ClientResponse, 
 	}
 }
 
-// NewEditEnvironmentV1OK creates a EditEnvironmentV1OK with default headers values
-func NewEditEnvironmentV1OK() *EditEnvironmentV1OK {
-	return &EditEnvironmentV1OK{}
+// NewGetEnvironmentV1ByNameOK creates a GetEnvironmentV1ByNameOK with default headers values
+func NewGetEnvironmentV1ByNameOK() *GetEnvironmentV1ByNameOK {
+	return &GetEnvironmentV1ByNameOK{}
 }
 
-/*EditEnvironmentV1OK handles this case with default header values.
+/*GetEnvironmentV1ByNameOK handles this case with default header values.
 
 successful operation
 */
-type EditEnvironmentV1OK struct {
+type GetEnvironmentV1ByNameOK struct {
 	Payload *model.DetailedEnvironmentV1Response
 }
 
-func (o *EditEnvironmentV1OK) Error() string {
-	return fmt.Sprintf("[PUT /v1/env/name/{name}][%d] editEnvironmentV1OK  %+v", 200, o.Payload)
+func (o *GetEnvironmentV1ByNameOK) Error() string {
+	return fmt.Sprintf("[GET /v1/env/name/{name}][%d] getEnvironmentV1ByNameOK  %+v", 200, o.Payload)
 }
 
-func (o *EditEnvironmentV1OK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *GetEnvironmentV1ByNameOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(model.DetailedEnvironmentV1Response)
 

@@ -16,17 +16,17 @@ import (
 	model "github.com/hortonworks/cb-cli/dataplane/api-environment/model"
 )
 
-// DeleteEnvironmentV1Reader is a Reader for the DeleteEnvironmentV1 structure.
-type DeleteEnvironmentV1Reader struct {
+// DeleteEnvironmentV1ByNameReader is a Reader for the DeleteEnvironmentV1ByName structure.
+type DeleteEnvironmentV1ByNameReader struct {
 	formats strfmt.Registry
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *DeleteEnvironmentV1Reader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *DeleteEnvironmentV1ByNameReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 
 	case 200:
-		result := NewDeleteEnvironmentV1OK()
+		result := NewDeleteEnvironmentV1ByNameOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -37,24 +37,24 @@ func (o *DeleteEnvironmentV1Reader) ReadResponse(response runtime.ClientResponse
 	}
 }
 
-// NewDeleteEnvironmentV1OK creates a DeleteEnvironmentV1OK with default headers values
-func NewDeleteEnvironmentV1OK() *DeleteEnvironmentV1OK {
-	return &DeleteEnvironmentV1OK{}
+// NewDeleteEnvironmentV1ByNameOK creates a DeleteEnvironmentV1ByNameOK with default headers values
+func NewDeleteEnvironmentV1ByNameOK() *DeleteEnvironmentV1ByNameOK {
+	return &DeleteEnvironmentV1ByNameOK{}
 }
 
-/*DeleteEnvironmentV1OK handles this case with default header values.
+/*DeleteEnvironmentV1ByNameOK handles this case with default header values.
 
 successful operation
 */
-type DeleteEnvironmentV1OK struct {
+type DeleteEnvironmentV1ByNameOK struct {
 	Payload *model.SimpleEnvironmentV1Response
 }
 
-func (o *DeleteEnvironmentV1OK) Error() string {
-	return fmt.Sprintf("[DELETE /v1/env/{name}][%d] deleteEnvironmentV1OK  %+v", 200, o.Payload)
+func (o *DeleteEnvironmentV1ByNameOK) Error() string {
+	return fmt.Sprintf("[DELETE /v1/env/name/{name}][%d] deleteEnvironmentV1ByNameOK  %+v", 200, o.Payload)
 }
 
-func (o *DeleteEnvironmentV1OK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *DeleteEnvironmentV1ByNameOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(model.SimpleEnvironmentV1Response)
 

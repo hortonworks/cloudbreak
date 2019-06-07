@@ -25,7 +25,7 @@ type Client struct {
 }
 
 /*
-ChangeCredentialInEnvironmentV1 changes the credential of the environment and the clusters in the environment
+ChangeCredentialInEnvironmentV1 changes the credential of the environment and the clusters in the environment of a given name
 
 Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.
 */
@@ -38,7 +38,7 @@ func (a *Client) ChangeCredentialInEnvironmentV1(params *ChangeCredentialInEnvir
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "changeCredentialInEnvironmentV1",
 		Method:             "PUT",
-		PathPattern:        "/v1/env/{name}/change_credential",
+		PathPattern:        "/v1/env/name/{name}/change_credential",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -51,6 +51,36 @@ func (a *Client) ChangeCredentialInEnvironmentV1(params *ChangeCredentialInEnvir
 		return nil, err
 	}
 	return result.(*ChangeCredentialInEnvironmentV1OK), nil
+
+}
+
+/*
+ChangeCredentialInEnvironmentV1ByCrn changes the credential of the environment and the clusters in the environment of a given c r n
+
+Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.
+*/
+func (a *Client) ChangeCredentialInEnvironmentV1ByCrn(params *ChangeCredentialInEnvironmentV1ByCrnParams) (*ChangeCredentialInEnvironmentV1ByCrnOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewChangeCredentialInEnvironmentV1ByCrnParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "changeCredentialInEnvironmentV1ByCrn",
+		Method:             "PUT",
+		PathPattern:        "/v1/env/crn/{crn}/change_credential",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &ChangeCredentialInEnvironmentV1ByCrnReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*ChangeCredentialInEnvironmentV1ByCrnOK), nil
 
 }
 
@@ -85,67 +115,127 @@ func (a *Client) CreateEnvironmentV1(params *CreateEnvironmentV1Params) (*Create
 }
 
 /*
-DeleteEnvironmentV1 deletes an environment only possible if no cluster is running in the environment
+DeleteEnvironmentV1ByCrn deletes an environment by c r n only possible if no cluster is running in the environment
 
 Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.
 */
-func (a *Client) DeleteEnvironmentV1(params *DeleteEnvironmentV1Params) (*DeleteEnvironmentV1OK, error) {
+func (a *Client) DeleteEnvironmentV1ByCrn(params *DeleteEnvironmentV1ByCrnParams) (*DeleteEnvironmentV1ByCrnOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteEnvironmentV1Params()
+		params = NewDeleteEnvironmentV1ByCrnParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "deleteEnvironmentV1",
+		ID:                 "deleteEnvironmentV1ByCrn",
 		Method:             "DELETE",
-		PathPattern:        "/v1/env/{name}",
+		PathPattern:        "/v1/env/crn/{crn}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteEnvironmentV1Reader{formats: a.formats},
+		Reader:             &DeleteEnvironmentV1ByCrnReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*DeleteEnvironmentV1OK), nil
+	return result.(*DeleteEnvironmentV1ByCrnOK), nil
 
 }
 
 /*
-DeleteEnvironments deletes multiple environment only possible if no cluster is running in the environments
+DeleteEnvironmentV1ByName deletes an environment by name only possible if no cluster is running in the environment
 
 Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.
 */
-func (a *Client) DeleteEnvironments(params *DeleteEnvironmentsParams) (*DeleteEnvironmentsOK, error) {
+func (a *Client) DeleteEnvironmentV1ByName(params *DeleteEnvironmentV1ByNameParams) (*DeleteEnvironmentV1ByNameOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteEnvironmentsParams()
+		params = NewDeleteEnvironmentV1ByNameParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "deleteEnvironments",
+		ID:                 "deleteEnvironmentV1ByName",
 		Method:             "DELETE",
-		PathPattern:        "/v1/env",
+		PathPattern:        "/v1/env/name/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteEnvironmentsReader{formats: a.formats},
+		Reader:             &DeleteEnvironmentV1ByNameReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*DeleteEnvironmentsOK), nil
+	return result.(*DeleteEnvironmentV1ByNameOK), nil
 
 }
 
 /*
-EditEnvironmentV1 edits and environment location regions and description can be changed
+DeleteEnvironmentsByCrn deletes multiple environment by c r ns only possible if no cluster is running in the environments
+
+Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.
+*/
+func (a *Client) DeleteEnvironmentsByCrn(params *DeleteEnvironmentsByCrnParams) (*DeleteEnvironmentsByCrnOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteEnvironmentsByCrnParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteEnvironmentsByCrn",
+		Method:             "DELETE",
+		PathPattern:        "/v1/env/crn",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteEnvironmentsByCrnReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DeleteEnvironmentsByCrnOK), nil
+
+}
+
+/*
+DeleteEnvironmentsByName deletes multiple environment by namns only possible if no cluster is running in the environments
+
+Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.
+*/
+func (a *Client) DeleteEnvironmentsByName(params *DeleteEnvironmentsByNameParams) (*DeleteEnvironmentsByNameOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteEnvironmentsByNameParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteEnvironmentsByName",
+		Method:             "DELETE",
+		PathPattern:        "/v1/env/name",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteEnvironmentsByNameReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DeleteEnvironmentsByNameOK), nil
+
+}
+
+/*
+EditEnvironmentV1 edits an environment by name location regions and description can be changed
 
 Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.
 */
@@ -158,7 +248,7 @@ func (a *Client) EditEnvironmentV1(params *EditEnvironmentV1Params) (*EditEnviro
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "editEnvironmentV1",
 		Method:             "PUT",
-		PathPattern:        "/v1/env/{name}",
+		PathPattern:        "/v1/env/name/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -175,32 +265,92 @@ func (a *Client) EditEnvironmentV1(params *EditEnvironmentV1Params) (*EditEnviro
 }
 
 /*
-GetEnvironmentV1 gets an environment
+EditEnvironmentV1ByCrn edits an environment by c r n location regions and description can be changed
 
 Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.
 */
-func (a *Client) GetEnvironmentV1(params *GetEnvironmentV1Params) (*GetEnvironmentV1OK, error) {
+func (a *Client) EditEnvironmentV1ByCrn(params *EditEnvironmentV1ByCrnParams) (*EditEnvironmentV1ByCrnOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetEnvironmentV1Params()
+		params = NewEditEnvironmentV1ByCrnParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getEnvironmentV1",
-		Method:             "GET",
-		PathPattern:        "/v1/env/{name}",
+		ID:                 "editEnvironmentV1ByCrn",
+		Method:             "PUT",
+		PathPattern:        "/v1/env/crn/{crn}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetEnvironmentV1Reader{formats: a.formats},
+		Reader:             &EditEnvironmentV1ByCrnReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetEnvironmentV1OK), nil
+	return result.(*EditEnvironmentV1ByCrnOK), nil
+
+}
+
+/*
+GetEnvironmentV1ByCrn gets an environment by c r n
+
+Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.
+*/
+func (a *Client) GetEnvironmentV1ByCrn(params *GetEnvironmentV1ByCrnParams) (*GetEnvironmentV1ByCrnOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetEnvironmentV1ByCrnParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getEnvironmentV1ByCrn",
+		Method:             "GET",
+		PathPattern:        "/v1/env/crn/{crn}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetEnvironmentV1ByCrnReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetEnvironmentV1ByCrnOK), nil
+
+}
+
+/*
+GetEnvironmentV1ByName gets an environment by name
+
+Environment consists of a credential and various other resources and enables users to quickly create clusters in given regions in a given cloud provider.
+*/
+func (a *Client) GetEnvironmentV1ByName(params *GetEnvironmentV1ByNameParams) (*GetEnvironmentV1ByNameOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetEnvironmentV1ByNameParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getEnvironmentV1ByName",
+		Method:             "GET",
+		PathPattern:        "/v1/env/name/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetEnvironmentV1ByNameReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetEnvironmentV1ByNameOK), nil
 
 }
 
