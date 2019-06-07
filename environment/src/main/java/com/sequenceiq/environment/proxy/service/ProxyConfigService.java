@@ -30,9 +30,17 @@ public class ProxyConfigService  {
         return proxyConfigRepository.findById(id).orElseThrow(notFound("Proxy configuration", id));
     }
 
-    public ProxyConfig deleteInAccount(String name, String accountId) {
-        ProxyConfig proxyConfig = proxyConfigRepository.findByNameOrResourceCrnInAccount(name, accountId)
+    public ProxyConfig deleteByNameInAccount(String name, String accountId) {
+        ProxyConfig proxyConfig = proxyConfigRepository.findByNameInAccount(name, accountId)
                 .orElseThrow(notFound("Proxy config with name:", name));
+        MDCBuilder.buildMdcContext(proxyConfig);
+        proxyConfigRepository.delete(proxyConfig);
+        return proxyConfig;
+    }
+
+    public ProxyConfig deleteByCrnInAccount(String crn, String accountId) {
+        ProxyConfig proxyConfig = proxyConfigRepository.findByResourceCrnInAccount(crn, accountId)
+                .orElseThrow(notFound("Proxy config with crn:", crn));
         MDCBuilder.buildMdcContext(proxyConfig);
         proxyConfigRepository.delete(proxyConfig);
         return proxyConfig;
@@ -40,9 +48,8 @@ public class ProxyConfigService  {
 
     public Set<ProxyConfig> deleteMultipleInAccount(Set<String> names, String accountId) {
         Set<ProxyConfig> toBeDeleted = getByNamesForAccountId(names, accountId);
-        return toBeDeleted.stream()
-                .map(credential -> deleteInAccount(credential.getName(), accountId))
-                .collect(Collectors.toSet());
+        proxyConfigRepository.deleteAll(toBeDeleted);
+        return toBeDeleted;
     }
 
     private Set<ProxyConfig> getByNamesForAccountId(Set<String> names, String accountId) {
@@ -59,8 +66,13 @@ public class ProxyConfigService  {
     }
 
     public ProxyConfig getByNameForAccountId(String name, String accountId) {
-        return proxyConfigRepository.findByNameOrResourceCrnInAccount(name, accountId)
+        return proxyConfigRepository.findByNameInAccount(name, accountId)
                 .orElseThrow(notFound("No proxy config found with name", name));
+    }
+
+    public ProxyConfig getByCrnForAccountId(String crn, String accountId) {
+        return proxyConfigRepository.findByResourceCrnInAccount(crn, accountId)
+                .orElseThrow(notFound("No proxy config found with crn", crn));
     }
 
     public Set<ProxyConfig> listInAccount(String accountId) {
