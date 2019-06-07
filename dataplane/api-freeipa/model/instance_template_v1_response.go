@@ -21,7 +21,7 @@ type InstanceTemplateV1Response struct {
 
 	// attached volumes
 	// Unique: true
-	AttachedVolumes []*VolumeV1Request `json:"attachedVolumes"`
+	AttachedVolumes []*VolumeV1Response `json:"attachedVolumes"`
 
 	// type of the instance
 	InstanceType string `json:"instanceType,omitempty"`

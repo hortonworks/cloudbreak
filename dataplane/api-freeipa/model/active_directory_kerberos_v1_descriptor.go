@@ -17,9 +17,6 @@ import (
 // swagger:model ActiveDirectoryKerberosV1Descriptor
 type ActiveDirectoryKerberosV1Descriptor struct {
 
-	// kerberos admin user
-	Admin string `json:"admin,omitempty"`
-
 	// kerberos admin server URL
 	// Required: true
 	AdminURL *string `json:"adminUrl"`

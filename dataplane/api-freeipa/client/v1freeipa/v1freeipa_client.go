@@ -114,6 +114,36 @@ func (a *Client) GetFreeIpaByEnvironmentV1(params *GetFreeIpaByEnvironmentV1Para
 
 }
 
+/*
+GetFreeIpaRootCertificateByEnvironmentV1 gets free IP a root certificate by envid
+
+FreeIPA is an integrated Identity and Authentication solution that can be used for any of CM, CDP services.
+*/
+func (a *Client) GetFreeIpaRootCertificateByEnvironmentV1(params *GetFreeIpaRootCertificateByEnvironmentV1Params) (*GetFreeIpaRootCertificateByEnvironmentV1OK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetFreeIpaRootCertificateByEnvironmentV1Params()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getFreeIpaRootCertificateByEnvironmentV1",
+		Method:             "GET",
+		PathPattern:        "/v1/freeipa/ca.crt",
+		ProducesMediaTypes: []string{"text/plain"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetFreeIpaRootCertificateByEnvironmentV1Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetFreeIpaRootCertificateByEnvironmentV1OK), nil
+
+}
+
 // SetTransport changes the transport on the client
 func (a *Client) SetTransport(transport runtime.ClientTransport) {
 	a.transport = transport

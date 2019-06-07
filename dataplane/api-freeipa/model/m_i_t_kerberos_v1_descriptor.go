@@ -17,9 +17,6 @@ import (
 // swagger:model MITKerberosV1Descriptor
 type MITKerberosV1Descriptor struct {
 
-	// kerberos admin user
-	Admin string `json:"admin,omitempty"`
-
 	// kerberos admin server URL
 	// Required: true
 	AdminURL *string `json:"adminUrl"`

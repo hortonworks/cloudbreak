@@ -11,21 +11,21 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// SynchronizeUsersV1Status synchronize users v1 status
-// swagger:model SynchronizeUsersV1Status
-type SynchronizeUsersV1Status struct {
+// CreateUsersV1Response create users v1 response
+// swagger:model CreateUsersV1Response
+type CreateUsersV1Response struct {
 
 	// value
 	Value string `json:"value,omitempty"`
 }
 
-// Validate validates this synchronize users v1 status
-func (m *SynchronizeUsersV1Status) Validate(formats strfmt.Registry) error {
+// Validate validates this create users v1 response
+func (m *CreateUsersV1Response) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (m *SynchronizeUsersV1Status) MarshalBinary() ([]byte, error) {
+func (m *CreateUsersV1Response) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -33,8 +33,8 @@ func (m *SynchronizeUsersV1Status) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *SynchronizeUsersV1Status) UnmarshalBinary(b []byte) error {
-	var res SynchronizeUsersV1Status
+func (m *CreateUsersV1Response) UnmarshalBinary(b []byte) error {
+	var res CreateUsersV1Response
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

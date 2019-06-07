@@ -25,6 +25,10 @@ type CreateKerberosConfigV1Request struct {
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
 
+	// The crn of the environment
+	// Required: true
+	EnvironmentCrn *string `json:"environmentCrn"`
+
 	// free ipa
 	FreeIpa *FreeIPAKerberosV1Descriptor `json:"freeIpa,omitempty"`
 
@@ -45,6 +49,10 @@ func (m *CreateKerberosConfigV1Request) Validate(formats strfmt.Registry) error 
 	}
 
 	if err := m.validateDescription(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateEnvironmentCrn(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -95,6 +103,15 @@ func (m *CreateKerberosConfigV1Request) validateDescription(formats strfmt.Regis
 	}
 
 	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *CreateKerberosConfigV1Request) validateEnvironmentCrn(formats strfmt.Registry) error {
+
+	if err := validate.Required("environmentCrn", "body", m.EnvironmentCrn); err != nil {
 		return err
 	}
 

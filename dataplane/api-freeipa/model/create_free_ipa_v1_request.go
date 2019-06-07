@@ -27,9 +27,9 @@ type CreateFreeIpaV1Request struct {
 	// Required: true
 	Credential *CredentialRequest `json:"credential"`
 
-	// environment of the freeipa stack
+	// The crn of the environment
 	// Required: true
-	EnvironmentID *string `json:"environmentId"`
+	EnvironmentCrn *string `json:"environmentCrn"`
 
 	// settings for freeipa server
 	// Required: true
@@ -66,7 +66,7 @@ func (m *CreateFreeIpaV1Request) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateEnvironmentID(formats); err != nil {
+	if err := m.validateEnvironmentCrn(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -136,9 +136,9 @@ func (m *CreateFreeIpaV1Request) validateCredential(formats strfmt.Registry) err
 	return nil
 }
 
-func (m *CreateFreeIpaV1Request) validateEnvironmentID(formats strfmt.Registry) error {
+func (m *CreateFreeIpaV1Request) validateEnvironmentCrn(formats strfmt.Registry) error {
 
-	if err := validate.Required("environmentId", "body", m.EnvironmentID); err != nil {
+	if err := validate.Required("environmentCrn", "body", m.EnvironmentCrn); err != nil {
 		return err
 	}
 

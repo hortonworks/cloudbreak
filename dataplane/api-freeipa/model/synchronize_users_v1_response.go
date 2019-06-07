@@ -6,21 +6,105 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+
 	strfmt "github.com/go-openapi/strfmt"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // SynchronizeUsersV1Response synchronize users v1 response
 // swagger:model SynchronizeUsersV1Response
 type SynchronizeUsersV1Response struct {
 
-	// value
-	Value string `json:"value,omitempty"`
+	// User synchronization operation end time
+	EndTime string `json:"endTime,omitempty"`
+
+	// User synchronization operation id
+	// Required: true
+	ID *string `json:"id"`
+
+	// User synchronization operation start time
+	StartTime string `json:"startTime,omitempty"`
+
+	// User synchronization operation status
+	// Required: true
+	// Enum: [RUNNING COMPLETED FAILED]
+	Status *string `json:"status"`
 }
 
 // Validate validates this synchronize users v1 response
 func (m *SynchronizeUsersV1Response) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateID(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateStatus(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *SynchronizeUsersV1Response) validateID(formats strfmt.Registry) error {
+
+	if err := validate.Required("id", "body", m.ID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var synchronizeUsersV1ResponseTypeStatusPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["RUNNING","COMPLETED","FAILED"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		synchronizeUsersV1ResponseTypeStatusPropEnum = append(synchronizeUsersV1ResponseTypeStatusPropEnum, v)
+	}
+}
+
+const (
+
+	// SynchronizeUsersV1ResponseStatusRUNNING captures enum value "RUNNING"
+	SynchronizeUsersV1ResponseStatusRUNNING string = "RUNNING"
+
+	// SynchronizeUsersV1ResponseStatusCOMPLETED captures enum value "COMPLETED"
+	SynchronizeUsersV1ResponseStatusCOMPLETED string = "COMPLETED"
+
+	// SynchronizeUsersV1ResponseStatusFAILED captures enum value "FAILED"
+	SynchronizeUsersV1ResponseStatusFAILED string = "FAILED"
+)
+
+// prop value enum
+func (m *SynchronizeUsersV1Response) validateStatusEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, synchronizeUsersV1ResponseTypeStatusPropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *SynchronizeUsersV1Response) validateStatus(formats strfmt.Registry) error {
+
+	if err := validate.Required("status", "body", m.Status); err != nil {
+		return err
+	}
+
+	// value enum
+	if err := m.validateStatusEnum("status", "body", *m.Status); err != nil {
+		return err
+	}
+
 	return nil
 }
 

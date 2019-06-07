@@ -19,14 +19,14 @@ import (
 // swagger:model DescribeKerberosConfigV1Response
 type DescribeKerberosConfigV1Response struct {
 
-	// kerberos admin user
-	Admin *SecretResponse `json:"admin,omitempty"`
-
 	// kerberos admin server URL
 	AdminURL string `json:"adminUrl,omitempty"`
 
 	// container dn
 	ContainerDn string `json:"containerDn,omitempty"`
+
+	// crn
+	Crn string `json:"crn,omitempty"`
 
 	// description of the resource
 	// Max Length: 1000
@@ -39,8 +39,9 @@ type DescribeKerberosConfigV1Response struct {
 	// cluster instances will set this as the domain part of their hostname
 	Domain string `json:"domain,omitempty"`
 
-	// id
-	ID int64 `json:"id,omitempty"`
+	// The crn of the environment
+	// Required: true
+	EnvironmentCrn *string `json:"environmentCrn"`
 
 	// Ambari kerberos krb5.conf template
 	Krb5Conf *SecretResponse `json:"krb5Conf,omitempty"`
@@ -83,15 +84,15 @@ type DescribeKerberosConfigV1Response struct {
 func (m *DescribeKerberosConfigV1Response) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateAdmin(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validateDescription(formats); err != nil {
 		res = append(res, err)
 	}
 
 	if err := m.validateDescriptor(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateEnvironmentCrn(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -118,24 +119,6 @@ func (m *DescribeKerberosConfigV1Response) Validate(formats strfmt.Registry) err
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *DescribeKerberosConfigV1Response) validateAdmin(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Admin) { // not required
-		return nil
-	}
-
-	if m.Admin != nil {
-		if err := m.Admin.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("admin")
-			}
-			return err
-		}
-	}
-
 	return nil
 }
 
@@ -169,6 +152,15 @@ func (m *DescribeKerberosConfigV1Response) validateDescriptor(formats strfmt.Reg
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *DescribeKerberosConfigV1Response) validateEnvironmentCrn(formats strfmt.Registry) error {
+
+	if err := validate.Required("environmentCrn", "body", m.EnvironmentCrn); err != nil {
+		return err
 	}
 
 	return nil

@@ -21,7 +21,7 @@ type UserV1 struct {
 	// Required: true
 	FirstName *string `json:"firstName"`
 
-	// groups to sync
+	// the user's groups
 	// Unique: true
 	Groups []string `json:"groups"`
 
@@ -32,9 +32,6 @@ type UserV1 struct {
 	// name of the user
 	// Required: true
 	Name *string `json:"name"`
-
-	// the user's password
-	Password string `json:"password,omitempty"`
 }
 
 // Validate validates this user v1

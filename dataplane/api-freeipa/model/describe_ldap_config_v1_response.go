@@ -31,6 +31,9 @@ type DescribeLdapConfigV1Response struct {
 	// Self-signed certificate of LDAPS server
 	Certificate string `json:"certificate,omitempty"`
 
+	// CRN of the resource
+	Crn string `json:"crn,omitempty"`
+
 	// description of the resource
 	// Max Length: 1000
 	// Min Length: 0
@@ -43,9 +46,9 @@ type DescribeLdapConfigV1Response struct {
 	// domain in LDAP server (e.g. ad.seq.com).
 	Domain string `json:"domain,omitempty"`
 
-	// Environments of the resource
-	// Unique: true
-	Environments []string `json:"environments"`
+	// The crn of the environment
+	// Required: true
+	EnvironmentCrn *string `json:"environmentCrn"`
 
 	// Group Member Attribute (defaults to member)
 	GroupMemberAttribute string `json:"groupMemberAttribute,omitempty"`
@@ -62,9 +65,6 @@ type DescribeLdapConfigV1Response struct {
 	// public host or IP address of LDAP server
 	// Required: true
 	Host *string `json:"host"`
-
-	// id of the resource
-	ID int64 `json:"id,omitempty"`
 
 	// name of the resource
 	// Required: true
@@ -117,7 +117,7 @@ func (m *DescribeLdapConfigV1Response) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateEnvironments(formats); err != nil {
+	if err := m.validateEnvironmentCrn(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -243,13 +243,9 @@ func (m *DescribeLdapConfigV1Response) validateDirectoryType(formats strfmt.Regi
 	return nil
 }
 
-func (m *DescribeLdapConfigV1Response) validateEnvironments(formats strfmt.Registry) error {
+func (m *DescribeLdapConfigV1Response) validateEnvironmentCrn(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Environments) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("environments", "body", m.Environments); err != nil {
+	if err := validate.Required("environmentCrn", "body", m.EnvironmentCrn); err != nil {
 		return err
 	}
 

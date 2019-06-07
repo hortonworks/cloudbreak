@@ -45,9 +45,9 @@ type CreateLdapConfigV1Request struct {
 	// domain in LDAP server (e.g. ad.seq.com).
 	Domain string `json:"domain,omitempty"`
 
-	// Environments of the resource
-	// Unique: true
-	Environments []string `json:"environments"`
+	// The crn of the environment
+	// Required: true
+	EnvironmentCrn *string `json:"environmentCrn"`
 
 	// Group Member Attribute (defaults to member)
 	GroupMemberAttribute string `json:"groupMemberAttribute,omitempty"`
@@ -116,7 +116,7 @@ func (m *CreateLdapConfigV1Request) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateEnvironments(formats); err != nil {
+	if err := m.validateEnvironmentCrn(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -224,13 +224,9 @@ func (m *CreateLdapConfigV1Request) validateDirectoryType(formats strfmt.Registr
 	return nil
 }
 
-func (m *CreateLdapConfigV1Request) validateEnvironments(formats strfmt.Registry) error {
+func (m *CreateLdapConfigV1Request) validateEnvironmentCrn(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Environments) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("environments", "body", m.Environments); err != nil {
+	if err := validate.Required("environmentCrn", "body", m.EnvironmentCrn); err != nil {
 		return err
 	}
 

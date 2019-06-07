@@ -6,8 +6,6 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"strconv"
-
 	strfmt "github.com/go-openapi/strfmt"
 
 	"github.com/go-openapi/errors"
@@ -19,36 +17,20 @@ import (
 // swagger:model SynchronizeUsersV1Request
 type SynchronizeUsersV1Request struct {
 
-	// name of the environment
-	// Required: true
-	EnvironmentName *string `json:"environmentName"`
-
-	// groups to sync
+	// Optional environments to sync
 	// Unique: true
-	Groups []*GroupV1 `json:"groups"`
+	Environments []string `json:"environments"`
 
-	// name of the stack
-	// Required: true
-	Name *string `json:"name"`
-
-	// users to sync
+	// Optional users to sync
 	// Unique: true
-	Users []*UserV1 `json:"users"`
+	Users []string `json:"users"`
 }
 
 // Validate validates this synchronize users v1 request
 func (m *SynchronizeUsersV1Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateEnvironmentName(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateGroups(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateName(formats); err != nil {
+	if err := m.validateEnvironments(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -62,47 +44,13 @@ func (m *SynchronizeUsersV1Request) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *SynchronizeUsersV1Request) validateEnvironmentName(formats strfmt.Registry) error {
+func (m *SynchronizeUsersV1Request) validateEnvironments(formats strfmt.Registry) error {
 
-	if err := validate.Required("environmentName", "body", m.EnvironmentName); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *SynchronizeUsersV1Request) validateGroups(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Groups) { // not required
+	if swag.IsZero(m.Environments) { // not required
 		return nil
 	}
 
-	if err := validate.UniqueItems("groups", "body", m.Groups); err != nil {
-		return err
-	}
-
-	for i := 0; i < len(m.Groups); i++ {
-		if swag.IsZero(m.Groups[i]) { // not required
-			continue
-		}
-
-		if m.Groups[i] != nil {
-			if err := m.Groups[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("groups" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
-	}
-
-	return nil
-}
-
-func (m *SynchronizeUsersV1Request) validateName(formats strfmt.Registry) error {
-
-	if err := validate.Required("name", "body", m.Name); err != nil {
+	if err := validate.UniqueItems("environments", "body", m.Environments); err != nil {
 		return err
 	}
 
@@ -117,22 +65,6 @@ func (m *SynchronizeUsersV1Request) validateUsers(formats strfmt.Registry) error
 
 	if err := validate.UniqueItems("users", "body", m.Users); err != nil {
 		return err
-	}
-
-	for i := 0; i < len(m.Users); i++ {
-		if swag.IsZero(m.Users[i]) { // not required
-			continue
-		}
-
-		if m.Users[i] != nil {
-			if err := m.Users[i].Validate(formats); err != nil {
-				if ve, ok := err.(*errors.Validation); ok {
-					return ve.ValidateName("users" + "." + strconv.Itoa(i))
-				}
-				return err
-			}
-		}
-
 	}
 
 	return nil

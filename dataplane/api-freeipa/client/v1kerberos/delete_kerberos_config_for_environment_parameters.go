@@ -62,8 +62,8 @@ for the delete kerberos config for environment operation typically these are wri
 */
 type DeleteKerberosConfigForEnvironmentParams struct {
 
-	/*Environment*/
-	Environment *string
+	/*EnvironmentCrn*/
+	EnvironmentCrn *string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -103,15 +103,15 @@ func (o *DeleteKerberosConfigForEnvironmentParams) SetHTTPClient(client *http.Cl
 	o.HTTPClient = client
 }
 
-// WithEnvironment adds the environment to the delete kerberos config for environment params
-func (o *DeleteKerberosConfigForEnvironmentParams) WithEnvironment(environment *string) *DeleteKerberosConfigForEnvironmentParams {
-	o.SetEnvironment(environment)
+// WithEnvironmentCrn adds the environmentCrn to the delete kerberos config for environment params
+func (o *DeleteKerberosConfigForEnvironmentParams) WithEnvironmentCrn(environmentCrn *string) *DeleteKerberosConfigForEnvironmentParams {
+	o.SetEnvironmentCrn(environmentCrn)
 	return o
 }
 
-// SetEnvironment adds the environment to the delete kerberos config for environment params
-func (o *DeleteKerberosConfigForEnvironmentParams) SetEnvironment(environment *string) {
-	o.Environment = environment
+// SetEnvironmentCrn adds the environmentCrn to the delete kerberos config for environment params
+func (o *DeleteKerberosConfigForEnvironmentParams) SetEnvironmentCrn(environmentCrn *string) {
+	o.EnvironmentCrn = environmentCrn
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -122,16 +122,16 @@ func (o *DeleteKerberosConfigForEnvironmentParams) WriteToRequest(r runtime.Clie
 	}
 	var res []error
 
-	if o.Environment != nil {
+	if o.EnvironmentCrn != nil {
 
-		// query param environment
-		var qrEnvironment string
-		if o.Environment != nil {
-			qrEnvironment = *o.Environment
+		// query param environmentCrn
+		var qrEnvironmentCrn string
+		if o.EnvironmentCrn != nil {
+			qrEnvironmentCrn = *o.EnvironmentCrn
 		}
-		qEnvironment := qrEnvironment
-		if qEnvironment != "" {
-			if err := r.SetQueryParam("environment", qEnvironment); err != nil {
+		qEnvironmentCrn := qrEnvironmentCrn
+		if qEnvironmentCrn != "" {
+			if err := r.SetQueryParam("environmentCrn", qEnvironmentCrn); err != nil {
 				return err
 			}
 		}

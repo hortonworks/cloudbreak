@@ -25,7 +25,7 @@ type Client struct {
 }
 
 /*
-UserShowV1 creates free IP a instance
+UserShowV1 retrieves user information
 */
 func (a *Client) UserShowV1(params *UserShowV1Params) (*UserShowV1OK, error) {
 	// TODO: Validate the params before sending

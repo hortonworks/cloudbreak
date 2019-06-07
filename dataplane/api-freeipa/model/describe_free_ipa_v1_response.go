@@ -6,6 +6,7 @@ package model
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"strconv"
 
 	strfmt "github.com/go-openapi/strfmt"
@@ -23,9 +24,13 @@ type DescribeFreeIpaV1Response struct {
 	// Required: true
 	Authentication *StackAuthenticationV1Response `json:"authentication"`
 
-	// environment of the freeipa stack
+	// crn
 	// Required: true
-	EnvironmentID *string `json:"environmentId"`
+	Crn *string `json:"crn"`
+
+	// The crn of the environment
+	// Required: true
+	EnvironmentCrn *string `json:"environmentCrn"`
 
 	// settings for freeipa server
 	// Required: true
@@ -48,6 +53,13 @@ type DescribeFreeIpaV1Response struct {
 	// placement configuration parameters for a cluster (e.g. 'region', 'availabilityZone')
 	// Required: true
 	Placement *PlacementV1Response `json:"placement"`
+
+	// status
+	// Enum: [REQUESTED CREATE_IN_PROGRESS AVAILABLE UPDATE_IN_PROGRESS UPDATE_REQUESTED UPDATE_FAILED CREATE_FAILED ENABLE_SECURITY_FAILED PRE_DELETE_IN_PROGRESS DELETE_IN_PROGRESS DELETE_FAILED DELETE_COMPLETED STOPPED STOP_REQUESTED START_REQUESTED STOP_IN_PROGRESS START_IN_PROGRESS START_FAILED STOP_FAILED WAIT_FOR_SYNC MAINTENANCE_MODE_ENABLED]
+	Status string `json:"status,omitempty"`
+
+	// status reason
+	StatusReason string `json:"statusReason,omitempty"`
 }
 
 // Validate validates this describe free ipa v1 response
@@ -58,7 +70,11 @@ func (m *DescribeFreeIpaV1Response) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateEnvironmentID(formats); err != nil {
+	if err := m.validateCrn(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateEnvironmentCrn(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -86,6 +102,10 @@ func (m *DescribeFreeIpaV1Response) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateStatus(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
@@ -110,9 +130,18 @@ func (m *DescribeFreeIpaV1Response) validateAuthentication(formats strfmt.Regist
 	return nil
 }
 
-func (m *DescribeFreeIpaV1Response) validateEnvironmentID(formats strfmt.Registry) error {
+func (m *DescribeFreeIpaV1Response) validateCrn(formats strfmt.Registry) error {
 
-	if err := validate.Required("environmentId", "body", m.EnvironmentID); err != nil {
+	if err := validate.Required("crn", "body", m.Crn); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *DescribeFreeIpaV1Response) validateEnvironmentCrn(formats strfmt.Registry) error {
+
+	if err := validate.Required("environmentCrn", "body", m.EnvironmentCrn); err != nil {
 		return err
 	}
 
@@ -220,6 +249,106 @@ func (m *DescribeFreeIpaV1Response) validatePlacement(formats strfmt.Registry) e
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+var describeFreeIpaV1ResponseTypeStatusPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["REQUESTED","CREATE_IN_PROGRESS","AVAILABLE","UPDATE_IN_PROGRESS","UPDATE_REQUESTED","UPDATE_FAILED","CREATE_FAILED","ENABLE_SECURITY_FAILED","PRE_DELETE_IN_PROGRESS","DELETE_IN_PROGRESS","DELETE_FAILED","DELETE_COMPLETED","STOPPED","STOP_REQUESTED","START_REQUESTED","STOP_IN_PROGRESS","START_IN_PROGRESS","START_FAILED","STOP_FAILED","WAIT_FOR_SYNC","MAINTENANCE_MODE_ENABLED"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		describeFreeIpaV1ResponseTypeStatusPropEnum = append(describeFreeIpaV1ResponseTypeStatusPropEnum, v)
+	}
+}
+
+const (
+
+	// DescribeFreeIpaV1ResponseStatusREQUESTED captures enum value "REQUESTED"
+	DescribeFreeIpaV1ResponseStatusREQUESTED string = "REQUESTED"
+
+	// DescribeFreeIpaV1ResponseStatusCREATEINPROGRESS captures enum value "CREATE_IN_PROGRESS"
+	DescribeFreeIpaV1ResponseStatusCREATEINPROGRESS string = "CREATE_IN_PROGRESS"
+
+	// DescribeFreeIpaV1ResponseStatusAVAILABLE captures enum value "AVAILABLE"
+	DescribeFreeIpaV1ResponseStatusAVAILABLE string = "AVAILABLE"
+
+	// DescribeFreeIpaV1ResponseStatusUPDATEINPROGRESS captures enum value "UPDATE_IN_PROGRESS"
+	DescribeFreeIpaV1ResponseStatusUPDATEINPROGRESS string = "UPDATE_IN_PROGRESS"
+
+	// DescribeFreeIpaV1ResponseStatusUPDATEREQUESTED captures enum value "UPDATE_REQUESTED"
+	DescribeFreeIpaV1ResponseStatusUPDATEREQUESTED string = "UPDATE_REQUESTED"
+
+	// DescribeFreeIpaV1ResponseStatusUPDATEFAILED captures enum value "UPDATE_FAILED"
+	DescribeFreeIpaV1ResponseStatusUPDATEFAILED string = "UPDATE_FAILED"
+
+	// DescribeFreeIpaV1ResponseStatusCREATEFAILED captures enum value "CREATE_FAILED"
+	DescribeFreeIpaV1ResponseStatusCREATEFAILED string = "CREATE_FAILED"
+
+	// DescribeFreeIpaV1ResponseStatusENABLESECURITYFAILED captures enum value "ENABLE_SECURITY_FAILED"
+	DescribeFreeIpaV1ResponseStatusENABLESECURITYFAILED string = "ENABLE_SECURITY_FAILED"
+
+	// DescribeFreeIpaV1ResponseStatusPREDELETEINPROGRESS captures enum value "PRE_DELETE_IN_PROGRESS"
+	DescribeFreeIpaV1ResponseStatusPREDELETEINPROGRESS string = "PRE_DELETE_IN_PROGRESS"
+
+	// DescribeFreeIpaV1ResponseStatusDELETEINPROGRESS captures enum value "DELETE_IN_PROGRESS"
+	DescribeFreeIpaV1ResponseStatusDELETEINPROGRESS string = "DELETE_IN_PROGRESS"
+
+	// DescribeFreeIpaV1ResponseStatusDELETEFAILED captures enum value "DELETE_FAILED"
+	DescribeFreeIpaV1ResponseStatusDELETEFAILED string = "DELETE_FAILED"
+
+	// DescribeFreeIpaV1ResponseStatusDELETECOMPLETED captures enum value "DELETE_COMPLETED"
+	DescribeFreeIpaV1ResponseStatusDELETECOMPLETED string = "DELETE_COMPLETED"
+
+	// DescribeFreeIpaV1ResponseStatusSTOPPED captures enum value "STOPPED"
+	DescribeFreeIpaV1ResponseStatusSTOPPED string = "STOPPED"
+
+	// DescribeFreeIpaV1ResponseStatusSTOPREQUESTED captures enum value "STOP_REQUESTED"
+	DescribeFreeIpaV1ResponseStatusSTOPREQUESTED string = "STOP_REQUESTED"
+
+	// DescribeFreeIpaV1ResponseStatusSTARTREQUESTED captures enum value "START_REQUESTED"
+	DescribeFreeIpaV1ResponseStatusSTARTREQUESTED string = "START_REQUESTED"
+
+	// DescribeFreeIpaV1ResponseStatusSTOPINPROGRESS captures enum value "STOP_IN_PROGRESS"
+	DescribeFreeIpaV1ResponseStatusSTOPINPROGRESS string = "STOP_IN_PROGRESS"
+
+	// DescribeFreeIpaV1ResponseStatusSTARTINPROGRESS captures enum value "START_IN_PROGRESS"
+	DescribeFreeIpaV1ResponseStatusSTARTINPROGRESS string = "START_IN_PROGRESS"
+
+	// DescribeFreeIpaV1ResponseStatusSTARTFAILED captures enum value "START_FAILED"
+	DescribeFreeIpaV1ResponseStatusSTARTFAILED string = "START_FAILED"
+
+	// DescribeFreeIpaV1ResponseStatusSTOPFAILED captures enum value "STOP_FAILED"
+	DescribeFreeIpaV1ResponseStatusSTOPFAILED string = "STOP_FAILED"
+
+	// DescribeFreeIpaV1ResponseStatusWAITFORSYNC captures enum value "WAIT_FOR_SYNC"
+	DescribeFreeIpaV1ResponseStatusWAITFORSYNC string = "WAIT_FOR_SYNC"
+
+	// DescribeFreeIpaV1ResponseStatusMAINTENANCEMODEENABLED captures enum value "MAINTENANCE_MODE_ENABLED"
+	DescribeFreeIpaV1ResponseStatusMAINTENANCEMODEENABLED string = "MAINTENANCE_MODE_ENABLED"
+)
+
+// prop value enum
+func (m *DescribeFreeIpaV1Response) validateStatusEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, describeFreeIpaV1ResponseTypeStatusPropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *DescribeFreeIpaV1Response) validateStatus(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Status) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateStatusEnum("status", "body", m.Status); err != nil {
+		return err
 	}
 
 	return nil

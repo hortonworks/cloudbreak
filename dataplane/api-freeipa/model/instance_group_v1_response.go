@@ -7,6 +7,7 @@ package model
 
 import (
 	"encoding/json"
+	"strconv"
 
 	strfmt "github.com/go-openapi/strfmt"
 
@@ -22,6 +23,10 @@ type InstanceGroupV1Response struct {
 	// instancegroup related template
 	// Required: true
 	InstanceTemplate *InstanceTemplateV1Response `json:"instanceTemplate"`
+
+	// meta data
+	// Unique: true
+	MetaData []*InstanceMetaDataV1Response `json:"metaData"`
 
 	// name of the instance group
 	// Required: true
@@ -46,6 +51,10 @@ func (m *InstanceGroupV1Response) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateInstanceTemplate(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateMetaData(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -84,6 +93,35 @@ func (m *InstanceGroupV1Response) validateInstanceTemplate(formats strfmt.Regist
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *InstanceGroupV1Response) validateMetaData(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.MetaData) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("metaData", "body", m.MetaData); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.MetaData); i++ {
+		if swag.IsZero(m.MetaData[i]) { // not required
+			continue
+		}
+
+		if m.MetaData[i] != nil {
+			if err := m.MetaData[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("metaData" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil
