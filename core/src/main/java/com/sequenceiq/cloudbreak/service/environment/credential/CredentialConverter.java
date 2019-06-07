@@ -44,7 +44,7 @@ public class CredentialConverter {
         Credential.Builder builder = Credential.builder()
                 .aws(getIfNotNull(source.getAws(), this::aws))
                 .azure(getIfNotNull(source.getAzure(), this::azure))
-                .crn(source.getResourceCrn())
+                .crn(source.getCrn())
                 .description(source.getDescription())
                 .name(source.getName())
                 .cloudPlatform(source.getCloudPlatform());
