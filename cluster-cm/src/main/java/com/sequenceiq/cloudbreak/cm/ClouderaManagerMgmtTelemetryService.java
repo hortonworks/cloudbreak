@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Telemetry;
 import com.sequenceiq.cloudbreak.cloud.model.WorkloadAnalytics;
+import com.sequenceiq.cloudbreak.cloud.model.WorkloadAnalyticsAttributesHolder;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @Service
@@ -69,10 +70,6 @@ public class ClouderaManagerMgmtTelemetryService {
     private static final String TELEMETRY_UPLOAD_LOGS = "telemetry.upload.job.logs";
 
     private static final String TELEMETRY_WA_DEFAULT_CLUSTER_TYPE = "DISTROX";
-
-    private static final String ATTRIBUE_SDX_ID = "sdxId";
-
-    private static final String ATTRIBUTE_SDX_NAME = "sdxName";
 
     @Value("${altus.databus.endpoint:}")
     private String databusEndpoint;
@@ -167,11 +164,10 @@ public class ClouderaManagerMgmtTelemetryService {
     void enrichWithSdxData(String sdxContext, Stack stack, WorkloadAnalytics wa, Map<String, String> telemetrySafetyValveMap) {
         final String sdxId;
         final String sdxName;
-        Map<String, Object> attributes = wa.getAttributes();
-        if (attributes != null && attributes.get(ATTRIBUE_SDX_ID) != null
-                && attributes.get(ATTRIBUTE_SDX_NAME) != null) {
-            sdxId = attributes.get(ATTRIBUE_SDX_ID).toString();
-            sdxName = attributes.get(ATTRIBUTE_SDX_NAME).toString();
+        WorkloadAnalyticsAttributesHolder attributes = wa.getAttributes();
+        if (attributes != null && StringUtils.isNoneEmpty(attributes.getSdxId(), attributes.getSdxName())) {
+            sdxId = attributes.getSdxId();
+            sdxName = attributes.getSdxName();
         } else {
             sdxName = String.format("%s-%s", stack.getCluster().getName(), stack.getCluster().getId().toString());
             sdxId = UUID.nameUUIDFromBytes(sdxName.getBytes()).toString();

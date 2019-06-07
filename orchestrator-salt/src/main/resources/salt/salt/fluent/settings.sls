@@ -11,6 +11,9 @@
 {% endif %}
 {% set fluent_user = salt['pillar.get']('fluent:user') %}
 {% set fluent_group = salt['pillar.get']('fluent:group') %}
+{% set server_log_folder_prefix = salt['pillar.get']('fluent:serverLogFolderPrefix') %}
+{% set agent_log_folder_prefix = salt['pillar.get']('fluent:agentLogFolderPrefix') %}
+{% set service_log_folder_prefix = salt['pillar.get']('fluent:serviceLogFolderPrefix') %}
 {% set provider_prefix = salt['pillar.get']('fluent:providerPrefix') %}
 {% set s3_log_bucket = salt['pillar.get']('fluent:s3LogArchiveBucketName') %}
 {% set s3_log_folder = salt['pillar.get']('fluent:s3LogFolderName') %}
@@ -18,6 +21,9 @@
 
 {% do fluent.update({
     "is_systemd" : is_systemd,
+    "serverLogFolderPrefix": server_log_folder_prefix,
+    "agentLogFolderPrefix": agent_log_folder_prefix,
+    "serviceLogFolderPrefix": service_log_folder_prefix,
     "enabled": fluent_enabled,
     "user": fluent_user,
     "group": fluent_group,

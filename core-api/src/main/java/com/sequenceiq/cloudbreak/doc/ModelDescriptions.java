@@ -192,7 +192,7 @@ public class ModelDescriptions {
         public static final String TELEMETRY = "stack related telemetry settings";
         public static final String TELEMETRY_LOGGING = "stack related telemetry - logging settings";
         public static final String TELEMETRY_COMPONENT_ENABLED = "enable telemetry component";
-        public static final String TELEMETRY_COMPONENT_ATTRIBUTES = "stack related telemetry dynamic component settings";
+        public static final String TELEMETRY_COMPONENT_ATTRIBUTES = "stack related telemetry component attributes";
         public static final String TELEMETRY_LOGGING_OUTPUT_TYPE = "telemetry - logging output type";
         public static final String TELEMETRY_WA = "stack related telemetry - workload analytics settings";
         public static final String TELEMETRY_WA_DATABUS_ENDPOINT = "telemetry - workload altus service (databus) endpoint url";

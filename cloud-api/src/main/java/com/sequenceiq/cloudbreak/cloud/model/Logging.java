@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.cloud.model;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -17,11 +15,11 @@ public class Logging {
 
     private final LoggingOutputType outputType;
 
-    private final Map<String, Object> attributes;
+    private final LoggingAttributesHolder attributes;
 
     public Logging(@JsonProperty("enabled") boolean enabled,
             @JsonProperty("output") LoggingOutputType outputType,
-            @JsonProperty("attributes") Map<String, Object> attributes) {
+            @JsonProperty("attributes") LoggingAttributesHolder attributes) {
         this.enabled = enabled;
         this.outputType = outputType;
         this.attributes = attributes;
@@ -35,7 +33,7 @@ public class Logging {
         return outputType;
     }
 
-    public Map<String, Object> getAttributes() {
+    public LoggingAttributesHolder getAttributes() {
         return attributes;
     }
 }

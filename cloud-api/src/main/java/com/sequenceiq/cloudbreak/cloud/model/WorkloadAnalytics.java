@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.cloud.model;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -22,13 +20,13 @@ public class WorkloadAnalytics {
 
     private final String privateKey;
 
-    private final Map<String, Object> attributes;
+    private final WorkloadAnalyticsAttributesHolder attributes;
 
     public WorkloadAnalytics(@JsonProperty("enabled") boolean enabled,
             @JsonProperty("databusEndpoint") String databusEndpoint,
             @JsonProperty("accessKey") String accessKey,
             @JsonProperty("privateKey") String privateKey,
-            @JsonProperty("attributes") Map<String, Object> attributes) {
+            @JsonProperty("attributes") WorkloadAnalyticsAttributesHolder attributes) {
         this.enabled = enabled;
         this.databusEndpoint = databusEndpoint;
         this.accessKey = accessKey;
@@ -52,7 +50,7 @@ public class WorkloadAnalytics {
         return privateKey;
     }
 
-    public Map<String, Object> getAttributes() {
+    public WorkloadAnalyticsAttributesHolder getAttributes() {
         return attributes;
     }
 }

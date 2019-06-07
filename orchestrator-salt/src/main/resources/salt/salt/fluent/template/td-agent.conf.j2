@@ -27,7 +27,7 @@
 <source>
   @type tail
   format none
-  path /var/log/cloudera-scm-server/cloudera-scm-server.log
+  path {{fluent.serverLogFolderPrefix}}/cloudera-scm-server/cloudera-scm-server.log
   pos_file /var/log/td-agent/pos/cloudera-scm-server.log.pos
   tag {{fluent.providerPrefix}}.cloudera-scm-server-log
   read_from_head true
@@ -35,7 +35,7 @@
 <source>
   @type tail
   format none
-  path /var/log/cloudera-scm-server/cloudera-scm-server.out
+  path {{fluent.serverLogFolderPrefix}}/cloudera-scm-server/cloudera-scm-server.out
   pos_file /var/log/td-agent/pos/cloudera-scm-server-out.log.pos
   tag {{fluent.providerPrefix}}.cloudera-scm-server-out
   read_from_head true
@@ -43,7 +43,7 @@
 <source>
   @type tail
   format none
-  path /var/log/cloudera-scm-agent/cloudera-scm-agent.log
+  path {{fluent.agentLogFolderPrefix}}/cloudera-scm-agent/cloudera-scm-agent.log
   pos_file /var/log/td-agent/pos/cloudera-scm-agent.log.pos
   tag {{fluent.providerPrefix}}.cloudera-scm-agent-log
   read_from_head true
@@ -51,7 +51,7 @@
 <source>
   @type tail
   format none
-  path /var/log/cloudera-scm-agent/cloudera-scm-agent*.out
+  path {{fluent.agentLogFolderPrefix}}/cloudera-scm-agent/cloudera-scm-agent*.out
   pos_file /var/log/td-agent/pos/cloudera-scm-agent-out.log.pos
   tag {{fluent.providerPrefix}}.cloudera-scm-agent-out
   read_from_head true
@@ -123,7 +123,7 @@
 <source>
   @type tail
   format none
-  path /var/log/*/*cmf*-YARN*-NODEMANAGER*.log.out
+  path /var/log/*/*cmf*-yarn*-NODEMANAGER*.log.out
   pos_file /var/log/td-agent/pos/cmf-yarn-nodemanager-out.log.pos
   tag {{fluent.providerPrefix}}.YARN-NODEMANAGER
   read_from_head true
