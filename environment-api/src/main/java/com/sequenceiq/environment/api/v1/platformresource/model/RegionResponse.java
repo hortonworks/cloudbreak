@@ -29,14 +29,14 @@ public class RegionResponse extends CompactRegionResponse {
         locations = new HashSet<>();
     }
 
-    @JsonProperty("regions")
-    public Set<String> getRegions() {
-        return super.getRegions();
+    @JsonProperty("names")
+    public Set<String> getNames() {
+        return super.getNames();
     }
 
-    @JsonProperty("regions")
-    public void setRegions(Set<String> regions) {
-        super.setRegions(regions);
+    @JsonProperty("names")
+    public void setNames(Set<String> names) {
+        super.setNames(names);
     }
 
     public Map<String, Collection<String>> getAvailabilityZones() {
