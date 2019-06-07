@@ -17,22 +17,22 @@ import io.swagger.annotations.ApiModelProperty;
 public class CompactRegionResponse implements Serializable {
 
     @ApiModelProperty(EnvironmentModelDescription.REGIONS)
-    private Set<String> regions;
+    private Set<String> names;
 
     @ApiModelProperty(EnvironmentModelDescription.REGION_DISPLAYNAMES)
     private Map<String, String> displayNames;
 
     public CompactRegionResponse() {
-        regions = new HashSet<>();
+        names = new HashSet<>();
         displayNames = new HashMap<>();
     }
 
-    public Set<String> getRegions() {
-        return regions;
+    public Set<String> getNames() {
+        return names;
     }
 
-    public void setRegions(Set<String> regions) {
-        this.regions = regions;
+    public void setNames(Set<String> names) {
+        this.names = names;
     }
 
     public Map<String, String> getDisplayNames() {
