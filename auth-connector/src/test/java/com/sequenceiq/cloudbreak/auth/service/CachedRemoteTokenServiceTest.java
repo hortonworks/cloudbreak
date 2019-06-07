@@ -19,6 +19,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.altus.exception.UmsAuthenticationException;
 import com.sequenceiq.cloudbreak.auth.uaa.IdentityClient;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -44,7 +45,7 @@ public class CachedRemoteTokenServiceTest {
 
     @Test
     public void whenInvalidCrnIsProvidedThrowInvalidTokenException() {
-        when(umsClient.getUserDetails(anyString(), anyString(), any(Optional.class))).thenThrow(new NullPointerException());
+        when(umsClient.getUserDetails(anyString(), anyString(), any(Optional.class))).thenThrow(new UmsAuthenticationException("Invalid CRN provided"));
         thrown.expect(InvalidTokenException.class);
         thrown.expectMessage("Invalid CRN provided");
         CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret",
@@ -77,7 +78,7 @@ public class CachedRemoteTokenServiceTest {
     public void testCrnBasedAuth() {
         when(umsClient.getUserDetails(anyString(), anyString(), any(Optional.class))).thenThrow(new NullPointerException());
         thrown.expect(InvalidTokenException.class);
-        thrown.expectMessage("Invalid CRN provided");
+        thrown.expectMessage("Cannot authenticate, please check logs for further details!");
         CachedRemoteTokenService tokenService = new CachedRemoteTokenService("clientId", "clientSecret",
                 "http://localhost:8089", umsClient, identityClient);
         tokenService.loadAuthentication(crn);
