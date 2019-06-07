@@ -36,7 +36,6 @@ public class CreateFreeIpaRequest {
     @ApiModelProperty(FreeIpaModelDescriptions.PLACEMENT_SETTINGS)
     private PlacementRequest placement;
 
-    @NotNull
     @Valid
     @ApiModelProperty(value = FreeIpaModelDescriptions.INSTANCE_GROUPS, required = true)
     private List<InstanceGroupRequest> instanceGroups;
