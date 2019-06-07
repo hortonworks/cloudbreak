@@ -47,6 +47,9 @@ dependencies {
 //    exclude module: 'core-api'
   }
 
+  compile     group: 'io.springfox',              name: 'springfox-swagger2'
+  compile     group: 'io.springfox',              name: 'springfox-core'
+  compile     group: 'io.springfox',              name: 'springfox-swagger-ui'
   compile     group: 'com.google.code.gson',      name: 'gson'
   compile     group: 'dnsjava',                   name: 'dnsjava'
   compile     group: 'io.micrometer',             name: 'micrometer-core'
