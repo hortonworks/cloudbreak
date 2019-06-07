@@ -211,6 +211,12 @@ public class StackService {
         return stackRepository.findNamesOfAliveOnesByWorkspaceAndEnvironment(environment.getWorkspace().getId(), environment.getId());
     }
 
+    public void disconnectStacksInEnvironment(Environment environment) {
+        Set<Stack> stacks = stackRepository.findTerminatedByWorkspaceIdAndEnvironmentId(environment.getWorkspace().getId(), environment.getId());
+        stacks.forEach(s -> s.setEnvironment(null));
+        stackRepository.saveAll(stacks);
+    }
+
     public Set<StackV4Response> retrieveStacksByWorkspaceId(Long workspaceId) {
         try {
             return transactionService.required(() ->

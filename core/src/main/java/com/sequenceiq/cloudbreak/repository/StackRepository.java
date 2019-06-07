@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import static com.sequenceiq.cloudbreak.workspace.resource.ResourceAction.READ;
 import static com.sequenceiq.cloudbreak.repository.snippets.ShowTerminatedClustersSnippets.SHOW_TERMINATED_CLUSTERS_IF_REQUESTED;
+import static com.sequenceiq.cloudbreak.workspace.resource.ResourceAction.READ;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +13,11 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.DisableHasPermission;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
@@ -23,11 +28,6 @@ import com.sequenceiq.cloudbreak.workspace.repository.check.DisableCheckPermissi
 import com.sequenceiq.cloudbreak.workspace.repository.check.WorkspaceResourceType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @DisableHasPermission
 @EntityType(entityClass = Stack.class)
@@ -183,6 +183,12 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "AND s.terminated = null "
             + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
     List<String> findNamesOfAliveOnesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("environmentId") Long environmentId);
+
+    @CheckPermissionsByWorkspaceId
+    @Query("SELECT s FROM Stack s WHERE s.workspace.id = :workspaceId AND s.environment.id = :environmentId "
+            + "AND s.terminated IS NOT null "
+            + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
+    Set<Stack> findTerminatedByWorkspaceIdAndEnvironmentId(@Param("workspaceId") Long workspaceId, @Param("environmentId") Long environmentId);
 
     @DisableCheckPermissions
     @Query("SELECT s.workspace.id FROM Stack s where s.id = :id")

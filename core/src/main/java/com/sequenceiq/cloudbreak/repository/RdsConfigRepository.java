@@ -31,7 +31,7 @@ public interface RdsConfigRepository extends WorkspaceResourceRepository<RDSConf
 
     @Override
     @CheckPermissionsByWorkspaceId(action = READ)
-    @Query("SELECT r FROM RDSConfig r LEFT JOIN FETCH r.clusters WHERE r.workspace.id = :workspaceId AND r.status = 'USER_MANAGED'")
+    @Query("SELECT r FROM RDSConfig r WHERE r.workspace.id = :workspaceId AND r.status = 'USER_MANAGED'")
     Set<RDSConfig> findAllByWorkspaceId(@Param("workspaceId") Long workspaceId);
 
     @Override

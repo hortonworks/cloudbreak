@@ -1164,6 +1164,19 @@ public class ClusterService {
         return clusterApiConnectors.getConnector(stack).clusterStatusService().getHostStatusesRaw();
     }
 
+    public void disconnectTerminatedClustersInEnvironment(Environment environment) {
+        Set<Cluster> terminatedClusters =
+                repository.findByWorkspaceIdAndEnvironmentIdAndStatus(environment.getWorkspace().getId(), environment.getId(), Status.DELETE_COMPLETED);
+        terminatedClusters.forEach(c -> {
+            c.setEnvironment(null);
+            c.setStack(null);
+            c.setRdsConfigs(Set.of());
+            c.setLdapConfig(null);
+            c.setKerberosConfig(null);
+        });
+        repository.saveAll(terminatedClusters);
+    }
+
     public Set<Cluster> findByBlueprint(Blueprint blueprint) {
         return repository.findByBlueprint(blueprint);
     }
@@ -1194,6 +1207,10 @@ public class ClusterService {
 
     public Set<Cluster> findByRdsConfig(Long rdsConfigId) {
         return repository.findByRdsConfig(rdsConfigId);
+    }
+
+    public Set<String> findNamesByRdsConfig(Long rdsConfigId) {
+        return repository.findNamesByRdsConfig(rdsConfigId);
     }
 
     public Set<Cluster> findAllClustersByRdsConfigInEnvironment(RDSConfig rdsConfig, Long environmentId) {
