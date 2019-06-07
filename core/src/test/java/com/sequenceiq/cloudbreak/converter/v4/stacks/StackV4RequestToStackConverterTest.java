@@ -142,7 +142,8 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCredentialName("credential");
         environmentResponse.setCloudPlatform("AWS");
-        when(environmentClientService.get(anyString())).thenReturn(environmentResponse);
+        when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
+        when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
 
         credential = Credential.builder()
                 .cloudPlatform("AWS")

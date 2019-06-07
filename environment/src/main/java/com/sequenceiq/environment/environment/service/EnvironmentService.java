@@ -58,8 +58,13 @@ public class EnvironmentService {
         return environmentRepository.save(environment);
     }
 
-    public DetailedEnvironmentResponse get(String environmentName, String accountId) {
+    public DetailedEnvironmentResponse getByName(String environmentName, String accountId) {
         Environment environment = getByNameForAccountId(environmentName, accountId);
+        return conversionService.convert(environment, DetailedEnvironmentResponse.class);
+    }
+
+    public DetailedEnvironmentResponse getByCrn(String crn, String accountId) {
+        Environment environment = getByCrnForAccountId(crn, accountId);
         return conversionService.convert(environment, DetailedEnvironmentResponse.class);
     }
 
@@ -69,8 +74,21 @@ public class EnvironmentService {
         return object.get();
     }
 
-    public SimpleEnvironmentResponse delete(String environmentName, String accountId) {
+    public Environment getByCrnForAccountId(String crn, String accountId) {
+        Optional<Environment> object = environmentRepository.findByResourceCrnAndAccountId(crn, accountId);
+        MDCBuilder.buildMdcContext(object.orElseThrow(() -> new NotFoundException(String.format("No environment found with resource CRN '%s'", crn))));
+        return object.get();
+    }
+
+    public SimpleEnvironmentResponse deleteByName(String environmentName, String accountId) {
         Environment environment = getByNameForAccountId(environmentName, accountId);
+        LOGGER.debug(String.format("Starting to archive environment [name: %s]", environment.getName()));
+        delete(environment);
+        return conversionService.convert(environment, SimpleEnvironmentResponse.class);
+    }
+
+    public SimpleEnvironmentResponse deleteByCrn(String crn, String accountId) {
+        Environment environment = getByCrnForAccountId(crn, accountId);
         LOGGER.debug(String.format("Starting to archive environment [name: %s]", environment.getName()));
         delete(environment);
         return conversionService.convert(environment, SimpleEnvironmentResponse.class);
@@ -83,11 +101,22 @@ public class EnvironmentService {
         return resource;
     }
 
-    public SimpleEnvironmentResponses deleteMultiple(Set<String> environmentNames, String accountId) {
+    public SimpleEnvironmentResponses deleteMultipleByNames(Set<String> environmentNames, String accountId) {
         Set<SimpleEnvironmentResponse> responses = new HashSet<>();
         for (String environmentName : environmentNames) {
             Environment environment = getByNameForAccountId(environmentName, accountId);
             LOGGER.debug(String.format("Starting to archive environment [name: %s]", environment.getName()));
+            delete(environment);
+            responses.add(conversionService.convert(environment, SimpleEnvironmentResponse.class));
+        }
+        return new SimpleEnvironmentResponses(responses);
+    }
+
+    public SimpleEnvironmentResponses deleteMultipleByCrns(Set<String> crns, String accountId) {
+        Set<SimpleEnvironmentResponse> responses = new HashSet<>();
+        for (String crn : crns) {
+            Environment environment = getByCrnForAccountId(crn, accountId);
+            LOGGER.debug(String.format("Starting to archive environment [CRN: %s]", environment.getName()));
             delete(environment);
             responses.add(conversionService.convert(environment, SimpleEnvironmentResponse.class));
         }

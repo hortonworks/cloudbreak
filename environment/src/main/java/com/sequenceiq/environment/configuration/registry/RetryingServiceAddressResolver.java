@@ -2,6 +2,8 @@ package com.sequenceiq.environment.configuration.registry;
 
 import static com.sequenceiq.environment.util.Validation.notNull;
 
+import java.util.function.Supplier;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,32 +29,26 @@ public class RetryingServiceAddressResolver implements ServiceAddressResolver {
 
     @Override
     public String resolveUrl(String serverUrl, String protocol, String serviceId) {
-        int attemptCount = 0;
-        String resolvedAddress = null;
-        while (resolvedAddress == null && attemptCount < maxRetryCount) {
-            try {
-                resolvedAddress = serviceAddressResolver.resolveUrl(serverUrl, protocol, serviceId);
-            } catch (ServiceAddressResolvingException e) {
-                handleException(e, attemptCount);
-            }
-            attemptCount++;
-        }
-        return resolvedAddress;
+        return retrySupplier(() -> serviceAddressResolver.resolveUrl(serverUrl, protocol, serviceId));
     }
 
     @Override
     public String resolveHostPort(String host, String port, String serviceId) {
+        return retrySupplier(() -> serviceAddressResolver.resolveHostPort(host, port, serviceId));
+    }
+
+    private <T> T retrySupplier(Supplier<T> supplier) {
+        T retVal = null;
         int attemptCount = 0;
-        String resolvedAddress = null;
-        while (resolvedAddress == null && attemptCount < maxRetryCount) {
+        while (retVal == null && attemptCount < maxRetryCount) {
             try {
-                resolvedAddress = serviceAddressResolver.resolveHostPort(host, port, serviceId);
+                retVal = supplier.get();
             } catch (ServiceAddressResolvingException e) {
                 handleException(e, attemptCount);
             }
             attemptCount++;
         }
-        return resolvedAddress;
+        return retVal;
     }
 
     private void handleException(ServiceAddressResolvingException e, int attemptCount) {

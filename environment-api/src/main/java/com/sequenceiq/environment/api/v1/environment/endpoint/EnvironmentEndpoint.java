@@ -46,29 +46,31 @@ public interface EnvironmentEndpoint {
     DetailedEnvironmentResponse post(@Valid EnvironmentRequest request);
 
     @GET
-    @Path("/{name}")
+    @Path("/name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = EnvironmentOpDescription.GET, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES, nickname = "getEnvironmentV1")
-    DetailedEnvironmentResponse get(@PathParam("name") String environmentName);
+    @ApiOperation(value = EnvironmentOpDescription.GET_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES, nickname = "getEnvironmentV1")
+    DetailedEnvironmentResponse getByName(@PathParam("name") String environmentName);
 
     @DELETE
-    @Path("/{name}")
+    @Path("/name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = EnvironmentOpDescription.DELETE, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironmentV1")
-    SimpleEnvironmentResponse delete(@PathParam("name") String environmentName);
+    @ApiOperation(value = EnvironmentOpDescription.DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON,
+            notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironmentV1")
+    SimpleEnvironmentResponse deleteByName(@PathParam("name") String environmentName);
 
     @DELETE
-    @Path("")
+    @Path("/name")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.DELETE_MULTIPLE_BY_NAME, produces = MediaType.APPLICATION_JSON,
             notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironments", httpMethod = "DELETE")
-    SimpleEnvironmentResponses deleteMultiple(Set<String> names);
+    SimpleEnvironmentResponses deleteMultipleByNames(Set<String> names);
 
     @PUT
-    @Path("/{name}")
+    @Path("/name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = EnvironmentOpDescription.EDIT, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES, nickname = "editEnvironmentV1")
-    DetailedEnvironmentResponse edit(@PathParam("name") String environmentName, @NotNull EnvironmentEditRequest request);
+    @ApiOperation(value = EnvironmentOpDescription.EDIT_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "editEnvironmentV1")
+    DetailedEnvironmentResponse editByName(@PathParam("name") String environmentName, @NotNull EnvironmentEditRequest request);
 
     @GET
     @Path("")
@@ -77,10 +79,43 @@ public interface EnvironmentEndpoint {
     SimpleEnvironmentResponses list();
 
     @PUT
-    @Path("/{name}/change_credential")
+    @Path("/name/{name}/change_credential")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = EnvironmentOpDescription.CHANGE_CREDENTIAL, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+    @ApiOperation(value = EnvironmentOpDescription.CHANGE_CREDENTIAL_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "changeCredentialInEnvironmentV1")
-    DetailedEnvironmentResponse changeCredential(@PathParam("name") String environmentName, @Valid EnvironmentChangeCredentialRequest request);
+    DetailedEnvironmentResponse changeCredentialByEnvironmentName(@PathParam("name") String environmentName, @Valid EnvironmentChangeCredentialRequest request);
 
+    @GET
+    @Path("/crn/{crn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.GET_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES, nickname = "getEnvironmentV1")
+    DetailedEnvironmentResponse getByCrn(@PathParam("crn") String crn);
+
+    @DELETE
+    @Path("/crn/{crn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.DELETE_BY_CRN, produces = MediaType.APPLICATION_JSON,
+            notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironmentV1")
+    SimpleEnvironmentResponse deleteByCrn(@PathParam("crn") String crn);
+
+    @DELETE
+    @Path("/crn")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.DELETE_MULTIPLE_BY_CRN, produces = MediaType.APPLICATION_JSON,
+            notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironments", httpMethod = "DELETE")
+    SimpleEnvironmentResponses deleteMultipleByCrns(Set<String> crns);
+
+    @PUT
+    @Path("/crn/{crn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.EDIT_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "editEnvironmentV1")
+    DetailedEnvironmentResponse editByCrn(@PathParam("crn") String crn, @NotNull EnvironmentEditRequest request);
+
+    @PUT
+    @Path("/crn/{crn}/change_credential")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.CHANGE_CREDENTIAL_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "changeCredentialInEnvironmentV1")
+    DetailedEnvironmentResponse changeCredentialByEnvironmentCrn(@PathParam("crn") String crn, @Valid EnvironmentChangeCredentialRequest request);
 }

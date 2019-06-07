@@ -26,8 +26,13 @@ public class EnvironmentAttachService {
         this.conversionService = conversionService;
     }
 
-    public DetailedEnvironmentResponse attachResources(String environmentName, EnvironmentAttachRequest request) {
+    public DetailedEnvironmentResponse attachResourcesByName(String environmentName, EnvironmentAttachRequest request) {
         Environment environment = environmentService.getByNameForAccountId(environmentName, TEMP_ACCOUNT_ID);
+        return conversionService.convert(environment, DetailedEnvironmentResponse.class);
+    }
+
+    public DetailedEnvironmentResponse attachResourcesByEnvironmentCrn(String environmentCrn, EnvironmentAttachRequest request) {
+        Environment environment = environmentService.getByCrnForAccountId(environmentCrn, TEMP_ACCOUNT_ID);
         return conversionService.convert(environment, DetailedEnvironmentResponse.class);
     }
 }

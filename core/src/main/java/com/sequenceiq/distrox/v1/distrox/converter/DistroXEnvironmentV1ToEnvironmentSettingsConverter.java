@@ -20,7 +20,7 @@ public class DistroXEnvironmentV1ToEnvironmentSettingsConverter {
     private WorkspaceService workspaceService;
 
     public EnvironmentSettingsV4Request convert(DistroXEnvironmentV1Request source) {
-        DetailedEnvironmentResponse environment = environmentClientService.get(source.getName());
+        DetailedEnvironmentResponse environment = environmentClientService.getByName(source.getName());
         EnvironmentSettingsV4Request response = new EnvironmentSettingsV4Request();
         response.setCredentialName(environment.getCredentialName());
         response.setName(source.getName());
