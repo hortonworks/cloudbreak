@@ -20,7 +20,7 @@ public class RegionConverter {
             values.add(region.getName());
             displayNames.put(region.getName(), region.getDisplayName());
         }
-        compactRegionResponse.setRegions(values);
+        compactRegionResponse.setNames(values);
         compactRegionResponse.setDisplayNames(displayNames);
         return compactRegionResponse;
     }

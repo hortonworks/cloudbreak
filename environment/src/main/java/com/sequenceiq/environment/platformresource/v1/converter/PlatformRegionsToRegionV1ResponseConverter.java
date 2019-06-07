@@ -50,7 +50,7 @@ public class PlatformRegionsToRegionV1ResponseConverter extends AbstractConversi
             displayNames.put(coordinateEntry.getKey().getRegionName(), coordinateEntry.getValue().getDisplayName());
         }
 
-        json.setRegions(regions);
+        json.setNames(regions);
         json.setAvailabilityZones(availabilityZones);
         json.setDefaultRegion(source.getDefaultRegion());
         json.setDisplayNames(displayNames);
