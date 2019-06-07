@@ -183,7 +183,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
     }
 
     private Credential getCredential(StackV4Request source) {
-        DetailedEnvironmentResponse environment = environmentClientService.get(source.getEnvironmentCrn());
+        DetailedEnvironmentResponse environment = environmentClientService.getByCrn(source.getEnvironmentCrn());
         return credentialClientService.getByName(environment.getCredentialName());
     }
 

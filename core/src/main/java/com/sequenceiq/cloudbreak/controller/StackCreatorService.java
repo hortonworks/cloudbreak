@@ -204,7 +204,7 @@ public class StackCreatorService {
                     fileSystemValidator.validateFileSystem(stackValidation.getCredential().cloudPlatform(), cloudCredential,
                             stackValidationRequest.getFileSystem(), stack.getCreator().getUserId(), stack.getWorkspace().getId());
 
-                    DetailedEnvironmentResponse environment = environmentClientService.get(stackRequest.getEnvironmentCrn());
+                    DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stackRequest.getEnvironmentCrn());
                     clusterCreationService.validate(stackRequest.getCluster(), cloudCredential, stack, user, workspace, environment);
                 }
 
