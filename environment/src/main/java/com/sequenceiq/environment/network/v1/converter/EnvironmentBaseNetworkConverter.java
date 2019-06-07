@@ -17,6 +17,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         EnvironmentView environmentView = convertEnvToView(environment);
         result.setEnvironments(Set.of(environmentView));
         result.setSubnetIds(network.getSubnetIds());
+        result.setSubnetMetas(network.getSubnetMetas());
         result.setResourceCrn(network.getResourceCrn());
         return result;
     }
@@ -27,6 +28,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         result.setCrn(source.getResourceCrn());
         result.setName(source.getName());
         result.setSubnetIds(source.getSubnetIdsSet());
+        result.setSubnetMetas(source.getSubnetMetasMap());
         result = setProviderSpecificFields(result, source);
         return result;
     }
@@ -37,9 +39,11 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         result.setCrn(source.getResourceCrn());
         result.setName(source.getName());
         result.setSubnetIds(source.getSubnetIdsSet());
+        result.setSubnetMetas(source.getSubnetMetasMap());
         NetworkDto.NetworkDtoBuilder builder = NetworkDto.NetworkDtoBuilder.aNetworkDto()
                 .withId(source.getId())
                 .withSubnetIds(source.getSubnetIdsSet())
+                .withSubnetMetas(source.getSubnetMetasMap())
                 .withResourceCrn(source.getResourceCrn());
         return setProviderSpecificFields(builder, source);
     }

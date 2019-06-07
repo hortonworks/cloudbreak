@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroup;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -130,11 +131,11 @@ public class GcpPlatformResources implements PlatformResources {
             properties.put("IPv4Range", Strings.nullToEmpty(network.getIPv4Range()));
             properties.put("creationTimestamp", Strings.nullToEmpty(network.getCreationTimestamp()));
 
-            Map<String, String> subnets = new HashMap<>();
+            Set<CloudSubnet> subnets = new HashSet<>();
             if (subnetworkList != null && network.getSubnetworks() != null) {
                 for (Subnetwork subnetwork : subnetworkList) {
                     if (network.getSubnetworks().contains(subnetwork.getSelfLink())) {
-                        subnets.put(subnetwork.getName(), subnetwork.getName());
+                        subnets.add(new CloudSubnet(subnetwork.getId().toString(), subnetwork.getName()));
                     }
                 }
             }
