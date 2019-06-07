@@ -56,7 +56,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.Cluster
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
-import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -111,6 +110,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintValidatorFactory;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.constraint.ConstraintService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
@@ -123,6 +123,7 @@ import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.template.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
@@ -163,7 +164,7 @@ public class ClusterService {
     private ReactorFlowManager flowManager;
 
     @Inject
-    private AmbariBlueprintValidator ambariBlueprintValidator;
+    private BlueprintValidatorFactory blueprintValidatorFactory;
 
     @Inject
     private CloudbreakEventService eventService;
@@ -909,7 +910,8 @@ public class ClusterService {
                         + "and then create it using DDL scripts from /var/lib/ambari-server/resources");
             }
             if (validateBlueprint) {
-                ambariBlueprintValidator.validateBlueprintForStack(cluster, blueprint, hostGroups, stackWithLists.getInstanceGroups());
+                BlueprintValidator blueprintValidator = blueprintValidatorFactory.createBlueprintValidator(blueprint);
+                blueprintValidator.validateBlueprintForStack(blueprint, hostGroups, stackWithLists.getInstanceGroups());
             }
             boolean containerOrchestrator;
             try {
@@ -1069,7 +1071,8 @@ public class ClusterService {
         }
         Blueprint clusterDefinition = stack.getCluster().getBlueprint();
         if (blueprintService.isAmbariBlueprint(clusterDefinition)) {
-            ambariBlueprintValidator.validateHostGroupScalingRequest(stack.getCluster().getBlueprint(), hostGroup, scalingAdjustment);
+            BlueprintValidator blueprintValidator = blueprintValidatorFactory.createBlueprintValidator(clusterDefinition);
+            blueprintValidator.validateHostGroupScalingRequest(stack.getCluster().getBlueprint(), hostGroup, scalingAdjustment);
         }
         if (!downScale && hostGroup.getConstraint().getInstanceGroup() != null) {
             validateUnusedHosts(hostGroup.getConstraint().getInstanceGroup(), scalingAdjustment);

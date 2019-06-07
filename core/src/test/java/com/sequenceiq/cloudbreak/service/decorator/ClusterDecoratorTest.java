@@ -22,15 +22,16 @@ import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidato
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.service.AmbariHaComponentFilter;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintValidatorFactory;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 public class ClusterDecoratorTest {
 
@@ -39,6 +40,9 @@ public class ClusterDecoratorTest {
 
     @Mock
     private BlueprintService blueprintService;
+
+    @Mock
+    private BlueprintValidatorFactory blueprintValidatorFactory;
 
     @Mock
     private AmbariBlueprintValidator ambariBlueprintValidator;
@@ -73,6 +77,7 @@ public class ClusterDecoratorTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        when(blueprintValidatorFactory.createBlueprintValidator(any())).thenReturn(ambariBlueprintValidator);
     }
 
     @Test

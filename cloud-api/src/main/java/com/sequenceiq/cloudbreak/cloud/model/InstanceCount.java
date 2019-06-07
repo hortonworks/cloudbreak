@@ -69,4 +69,18 @@ public class InstanceCount {
         }
         return minimumCount + "-" + maximumCount;
     }
+
+    public boolean isAcceptable(int count) {
+        return minimumCount <= count && count <= maximumCount;
+    }
+
+    /**
+     * Logic from UI.
+     */
+    public static InstanceCount fallbackInstanceCountRecommendation(String hostGroup) {
+        return hostGroup.contains("compute")
+                ? ZERO_OR_MORE
+                : ONE_OR_MORE;
+    }
+
 }

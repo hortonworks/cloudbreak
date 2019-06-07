@@ -104,7 +104,7 @@ public class AmbariBlueprintValidatorTest {
         JsonNode blueprintJsonTree = createJsonTree();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         thrown.expect(BlueprintValidationException.class);
-        thrown.expectMessage(Matchers.startsWith("The host groups in the validation"));
+        thrown.expectMessage(Matchers.containsString("host groups are missing"));
         // WHEN
         underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
         // THEN throw exception
@@ -132,11 +132,11 @@ public class AmbariBlueprintValidatorTest {
         Blueprint blueprint = createBlueprint();
         Set<InstanceGroup> instanceGroups = createInstanceGroups();
         Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
-        instanceGroups.add(createInstanceGroup("gateway", 0L, 1));
+        hostGroups.add(createHostGroup(GROUP4, createInstanceGroup(GROUP4, 0L, 1)));
         JsonNode blueprintJsonTree = createJsonTreeWithTooMuchGroup();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         thrown.expect(BlueprintValidationException.class);
-        thrown.expectMessage(Matchers.startsWith("The host groups in the validation"));
+        thrown.expectMessage(Matchers.containsString("Each host group must have"));
         // WHEN
         underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
         // THEN throw exception
@@ -151,7 +151,7 @@ public class AmbariBlueprintValidatorTest {
         JsonNode blueprintJsonTree = createJsonTreeWithNotEnoughGroup();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         thrown.expect(BlueprintValidationException.class);
-        thrown.expectMessage(Matchers.startsWith("The host groups in the validation"));
+        thrown.expectMessage(Matchers.startsWith("Unknown host groups are present"));
         // WHEN
         underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
         // THEN throw exception
@@ -307,7 +307,7 @@ public class AmbariBlueprintValidatorTest {
         return groups;
     }
 
-    private HostGroup createHostGroup(String groupName, InstanceGroup instanceGroup) {
+    public static HostGroup createHostGroup(String groupName, InstanceGroup instanceGroup) {
         HostGroup group = new HostGroup();
         group.setName(groupName);
         Constraint constraint = new Constraint();

@@ -23,10 +23,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.AmbariKerbero
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.FreeIPAKerberosDescriptor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.MITKerberosDescriptor;
+import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
+import com.sequenceiq.it.cloudbreak.context.Description;
+import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
+import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.dto.AmbariTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
@@ -34,13 +38,8 @@ import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
 import com.sequenceiq.it.cloudbreak.mock.model.SaltMock;
-import com.sequenceiq.it.cloudbreak.assertion.Assertion;
-import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
-import com.sequenceiq.it.cloudbreak.context.Description;
-import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
+import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
 import spark.Route;
 
@@ -49,14 +48,6 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
     private static final String LDAP_SYNC_PATH = "/api/v1/ldap_sync_events";
 
     private static final String SALT_HIGHSTATE = "state.highstate";
-
-    private static final String BLUEPRINT_TEXT = "{\"Blueprints\":{\"blueprint_name\":\"ownbp\",\"stack_name\":\"HDF\",\"stack_version\":\"3.2\"},"
-            + "\"settings\":[{\"recovery_settings\":[]},{\"service_settings\":[]},{\"component_settings\":[]}],\"configurations\":[],\"host_groups\":[{\"name\""
-            + ":\"master\",\"configurations\":[],\"components\":[{\"name\":\"METRICS_MONITOR\"},{\"name\":\"METRICS_COLLECTOR\"},{\"name\":"
-            + "\"ZOOKEEPER_CLIENT\"}],\"cardinality\":\"1\"}]}";
-
-    @Inject
-    private BlueprintTestClient blueprintTestClient;
 
     @Inject
     private KerberosTestClient kerberosTestClient;
@@ -86,7 +77,7 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
                 .given(ClusterTestDto.class)
                 .withKerberos(request.getName())
                 .given(StackTestDto.class)
-                .withInstanceGroups("master")
+                .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(testContext))
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .then(testData.getAssertions())
@@ -107,7 +98,7 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
                 .given(ClusterTestDto.class)
                 .withKerberos(null)
                 .given(StackTestDto.class)
-                .withInstanceGroups("master")
+                .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(testContext))
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .validate();
@@ -134,7 +125,7 @@ public class KerberosConfigTest extends AbstractIntegrationTest {
                 .withKerberos("")
                 .withAmbari(testContext.given(AmbariTestDto.class))
                 .given(StackTestDto.class)
-                .withInstanceGroups("master")
+                .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(testContext))
                 .when(stackTestClient.createV4(), key("badRequest"))
                 .expect(BadRequestException.class, key("badRequest"))
                 .validate();

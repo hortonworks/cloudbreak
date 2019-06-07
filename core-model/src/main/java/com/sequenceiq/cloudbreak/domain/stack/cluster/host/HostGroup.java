@@ -139,4 +139,8 @@ public class HostGroup implements ProvisionEntity {
         }
         return hostNames;
     }
+
+    public int getHostCount() {
+        return getConstraint().getHostCount();
+    }
 }
