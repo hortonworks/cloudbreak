@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -61,10 +62,15 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
                 .findFirst()
                 .orElseThrow(() -> new AwsResourceException("Instance resource not found"));
 
-        CloudResource volumeSet = buildableResource.stream()
+        Optional<CloudResource> volumeSetOpt = buildableResource.stream()
                 .filter(cloudResource -> cloudResource.getType().equals(ResourceType.AWS_VOLUMESET))
-                .findFirst()
-                .orElseThrow(() -> new AwsResourceException("Volume set resource not found"));
+                .findFirst();
+
+        if (volumeSetOpt.isEmpty()) {
+            LOGGER.debug("No volumes to attach");
+            return List.of();
+        }
+        CloudResource volumeSet = volumeSetOpt.get();
 
         AwsCredentialView credentialView = new AwsCredentialView(auth.getCloudCredential());
         String regionName = auth.getCloudContext().getLocation().getRegion().value();
