@@ -83,9 +83,6 @@ public class FileSystemToCloudStorageV4ResponseConverterTest {
         CloudStorageV4Response result = underTest.convert(fileSystem);
 
         assertEquals(FILE_SYSTEM_ID, result.getId());
-//        assertEquals(FILE_SYSTEM_NAME, result.getName());
-//        assertEquals(EXAMPLE_FILE_SYSTEM_TYPE.name(), result.getType());
-        assertEquals(EXAMPLE_IS_DEFAULT_FS_VALUE, result.isDefaultFs());
     }
 
     @Test
@@ -261,7 +258,6 @@ public class FileSystemToCloudStorageV4ResponseConverterTest {
         fileSystem.setId(FILE_SYSTEM_ID);
         fileSystem.setName(FILE_SYSTEM_NAME);
         fileSystem.setType(EXAMPLE_FILE_SYSTEM_TYPE);
-        fileSystem.setDefaultFs(EXAMPLE_IS_DEFAULT_FS_VALUE);
         fileSystem.setConfigurations(new Json(new AdlsFileSystem()));
         return fileSystem;
     }

@@ -33,9 +33,6 @@ public class FileSystemValidationV4Request implements JsonEntity {
     @ApiModelProperty(value = FileSystem.TYPE, required = true)
     private String type;
 
-    @ApiModelProperty(FileSystem.DEFAULT)
-    private boolean defaultFs;
-
     @Valid
     @ApiModelProperty
     private AdlsCloudStorageV4Parameters adls;
@@ -78,14 +75,6 @@ public class FileSystemValidationV4Request implements JsonEntity {
 
     public void setType(String type) {
         this.type = type;
-    }
-
-    public boolean isDefaultFs() {
-        return defaultFs;
-    }
-
-    public void setDefaultFs(boolean defaultFs) {
-        this.defaultFs = defaultFs;
     }
 
     public AdlsCloudStorageV4Parameters getAdls() {

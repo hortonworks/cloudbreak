@@ -36,6 +36,6 @@ public class CloudStorageV4RequestToSpiFileSystemConverter extends AbstractConve
             baseFileSystem = getConversionService().convert(source.getAdlsGen2(), CloudAdlsGen2View.class);
             type = FileSystemType.ADLS_GEN_2;
         }
-        return new SpiFileSystem("", type, source.isDefaultFs(), baseFileSystem);
+        return new SpiFileSystem("", type, baseFileSystem);
     }
 }

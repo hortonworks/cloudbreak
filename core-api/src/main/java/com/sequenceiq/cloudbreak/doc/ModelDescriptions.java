@@ -406,7 +406,6 @@ public class ModelDescriptions {
     public static class FileSystem {
         public static final String NAME = "name of the filesystem";
         public static final String TYPE = "type of the filesystem";
-        public static final String DEFAULT = "true if fs.defaultFS should point to this filesystem";
         public static final String PROPERTIES = "configuration of the filesystem access as key-value pairs";
         public static final String LOCATIONS = "configuration of the filesystem location";
     }

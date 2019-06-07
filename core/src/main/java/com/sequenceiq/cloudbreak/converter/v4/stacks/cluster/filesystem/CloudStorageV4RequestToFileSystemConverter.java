@@ -40,7 +40,6 @@ public class CloudStorageV4RequestToFileSystemConverter extends AbstractConversi
     public FileSystem convert(CloudStorageV4Request source) {
         FileSystem fileSystem = new FileSystem();
         fileSystem.setName(nameGenerator.generateName(FILESYSTEM));
-        fileSystem.setDefaultFs(false);
         CloudStorageV4Parameters cloudStorageParameters = fileSystemResolver.propagateConfiguration(source);
         fileSystem.setType(cloudStorageParameters.getType());
 

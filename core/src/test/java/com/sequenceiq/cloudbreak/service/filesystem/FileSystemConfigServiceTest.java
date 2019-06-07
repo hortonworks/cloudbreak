@@ -91,7 +91,6 @@ public class FileSystemConfigServiceTest {
     private FileSystem createFileSystem(String namePostFix) {
         FileSystem fileSystem = new FileSystem();
         fileSystem.setDescription("some description");
-        fileSystem.setDefaultFs(true);
         return fileSystem;
     }
 

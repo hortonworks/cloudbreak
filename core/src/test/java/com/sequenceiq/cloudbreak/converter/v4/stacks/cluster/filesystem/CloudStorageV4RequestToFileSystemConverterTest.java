@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.filesystem;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -24,16 +23,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.A
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.GcsCloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.storage.WasbCloudStorageV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage.CloudStorageV4Request;
-import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
-import com.sequenceiq.cloudbreak.service.filesystem.FileSystemResolver;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsFileSystem;
 import com.sequenceiq.cloudbreak.common.type.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.common.type.filesystem.GcsFileSystem;
 import com.sequenceiq.cloudbreak.common.type.filesystem.WasbFileSystem;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.service.filesystem.FileSystemResolver;
 
 public class CloudStorageV4RequestToFileSystemConverterTest {
 
@@ -166,7 +165,6 @@ public class CloudStorageV4RequestToFileSystemConverterTest {
     }
 
     private void checkWhetherTheBasicDataHasPassedOrNot(FileSystem fileSystem) {
-        assertFalse(fileSystem.isDefaultFs());
         assertNotNull(fileSystem.getName());
     }
 

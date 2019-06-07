@@ -35,7 +35,6 @@ public class FileSystemToCloudStorageV4ResponseConverter extends AbstractConvers
         CloudStorageV4Response response = new CloudStorageV4Response();
         response.setId(source.getId());
         response.setName(source.getName());
-        response.setDefaultFs(source.isDefaultFs());
         response.setLocations(getStorageLocationRequests(source));
         try {
             if (source.getType().isAdls()) {

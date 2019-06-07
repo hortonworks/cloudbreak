@@ -10,14 +10,11 @@ public class SpiFileSystem extends DynamicModel {
 
     private FileSystemType type;
 
-    private boolean defaultFs;
-
     private CloudFileSystemView cloudFileSystem;
 
-    public SpiFileSystem(String name, FileSystemType type, boolean defaultFs, CloudFileSystemView cloudFileSystem) {
+    public SpiFileSystem(String name, FileSystemType type, CloudFileSystemView cloudFileSystem) {
         this.name = name;
         this.type = type;
-        this.defaultFs = defaultFs;
         this.cloudFileSystem = cloudFileSystem;
     }
 
@@ -37,14 +34,6 @@ public class SpiFileSystem extends DynamicModel {
         this.type = type;
     }
 
-    public boolean isDefaultFs() {
-        return defaultFs;
-    }
-
-    public void setDefaultFs(boolean defaultFs) {
-        this.defaultFs = defaultFs;
-    }
-
     public CloudFileSystemView getCloudFileSystem() {
         return cloudFileSystem;
     }
@@ -58,7 +47,6 @@ public class SpiFileSystem extends DynamicModel {
         StringBuilder sb = new StringBuilder("FileSystem{");
         sb.append("name='").append(name).append('\'');
         sb.append(", type='").append(type).append('\'');
-        sb.append(", defaultFs=").append(defaultFs);
         sb.append('}');
         return sb.toString();
     }
