@@ -65,6 +65,13 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     Set<Cluster> findByRdsConfig(@Param("id") Long rdsConfigId);
 
     @CheckPermissionsByReturnValue
+    Set<Cluster> findByWorkspaceIdAndEnvironmentIdAndStatus(Long workspaceId, Long environmentId, Status status);
+
+    @CheckPermissionsByReturnValue
+    @Query("SELECT c.name FROM Cluster c INNER JOIN c.rdsConfigs rc WHERE rc.id= :id AND c.status != 'DELETE_COMPLETED'")
+    Set<String> findNamesByRdsConfig(@Param("id") Long rdsConfigId);
+
+    @CheckPermissionsByReturnValue
     @Query("SELECT c FROM Cluster c INNER JOIN c.rdsConfigs rc WHERE c.environment.id = :environmentId AND rc.id= :id AND c.status != 'DELETE_COMPLETED'")
     Set<Cluster> findByRdsConfigAndEnvironment(@Param("id") Long rdsConfigId, @Param("environmentId") Long environmentId);
 
@@ -80,4 +87,10 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     @Query("SELECT name FROM Cluster c WHERE c.workspace.id = :workspaceId AND c.environment.id = :environmentId "
             + "AND c.status != 'DELETE_COMPLETED'")
     List<String> getNameOfAliveOnesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("environmentId") Long environmentId);
+
+    @CheckPermissionsByWorkspaceId
+    @Query("SELECT c FROM Cluster c WHERE c.workspace.id = :workspaceId AND c.environment.id = :environmentId "
+            + "AND c.status = 'DELETE_COMPLETED'")
+    List<Cluster> getAllTerminatedOnesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("environmentId") Long environmentId);
+
 }

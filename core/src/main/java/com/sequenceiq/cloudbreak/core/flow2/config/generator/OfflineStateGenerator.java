@@ -401,6 +401,11 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public Set<Stack> findTerminatedByWorkspaceIdAndEnvironmentId(Long workspaceId, Long environmentId) {
+            return null;
+        }
+
+        @Override
         public Long findWorkspaceIdById(Long id) {
             return null;
         }

@@ -415,6 +415,8 @@ public class EnvironmentService extends AbstractArchivistService<Environment> {
                     + String.join(", ", aliveClusters) + "."
             );
         }
+        clusterService.disconnectTerminatedClustersInEnvironment(environment);
+        stackService.disconnectStacksInEnvironment(environment);
     }
 
     @Override
