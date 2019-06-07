@@ -18,8 +18,8 @@ import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.termination.TerminationFailedException;
-import com.sequenceiq.freeipa.service.stack.InstanceGroupService;
-import com.sequenceiq.freeipa.service.stack.InstanceMetaDataService;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
