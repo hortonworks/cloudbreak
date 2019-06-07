@@ -12,10 +12,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @Component
 public class BlueprintUtils {
@@ -59,6 +60,10 @@ public class BlueprintUtils {
 
     public boolean isValidHostGroupName(String hostGroupName) {
         return StringUtils.isNotEmpty(hostGroupName) && validHostGroupNamePattern.matcher(hostGroupName).matches();
+    }
+
+    public String getBlueprintVariant(String blueprint) {
+        return isAmbariBlueprint(blueprint) ? ClusterApi.AMBARI : ClusterApi.CLOUDERA_MANAGER;
     }
 
     public boolean isClouderaManagerClusterTemplate(String text) {

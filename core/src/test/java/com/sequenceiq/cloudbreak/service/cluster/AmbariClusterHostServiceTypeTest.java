@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintValidatorFactory;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -76,6 +77,9 @@ public class AmbariClusterHostServiceTypeTest {
     private StatusToPollGroupConverter statusToPollGroupConverter;
 
     @Mock
+    private BlueprintValidatorFactory blueprintValidatorFactory;
+
+    @Mock
     private AmbariBlueprintValidator ambariBlueprintValidator;
 
     @Mock
@@ -93,6 +97,7 @@ public class AmbariClusterHostServiceTypeTest {
         when(stackService.getById(anyLong())).thenReturn(stack);
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
         when(blueprintService.isAmbariBlueprint(any(Blueprint.class))).thenReturn(Boolean.TRUE);
+        when(blueprintValidatorFactory.createBlueprintValidator(any())).thenReturn(ambariBlueprintValidator);
     }
 
     @Test

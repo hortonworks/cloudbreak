@@ -132,8 +132,9 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     public Map<String, InstanceCount> getCardinalityByHostGroup() {
         Map<String, InstanceCount> result = new TreeMap<>();
         for (ApiClusterTemplateHostTemplate group : Optional.ofNullable(cmTemplate.getHostTemplates()).orElse(List.of())) {
-            recommendInstanceCount(group.getRefName(), group.getCardinality())
-                    .ifPresent(recommendedCount -> result.put(group.getRefName(), recommendedCount));
+            InstanceCount recommendedCount = recommendInstanceCount(group.getRefName(), group.getCardinality())
+                    .orElse(InstanceCount.fallbackInstanceCountRecommendation(group.getRefName()));
+            result.put(group.getRefName(), recommendedCount);
         }
         return result;
     }

@@ -405,6 +405,15 @@ public class CmTemplateProcessorTest {
         );
         assertEquals(expected, underTest.getCardinalityByHostGroup());
 
+        underTest = new CmTemplateProcessor(getBlueprintText("input/cdp-data-mart.bp"));
+
+        expected = Map.of(
+                "master", InstanceCount.EXACTLY_ONE,
+                "worker", InstanceCount.ONE_OR_MORE,
+                "compute", InstanceCount.ZERO_OR_MORE
+        );
+        assertEquals(expected, underTest.getCardinalityByHostGroup());
+
         underTest = new CmTemplateProcessor(getBlueprintText("input/namenode-ha.bp"));
 
         expected = Map.of(

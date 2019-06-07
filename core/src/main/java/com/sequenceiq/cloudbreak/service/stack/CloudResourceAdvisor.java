@@ -144,18 +144,9 @@ public class CloudResourceAdvisor {
     private Map<String, InstanceCount> recommendInstanceCounts(BlueprintTextProcessor blueprintProcessor) {
         Map<String, InstanceCount> cardinality = new TreeMap<>(blueprintProcessor.getCardinalityByHostGroup());
         for (String hostGroup : blueprintProcessor.getComponentsByHostGroup().keySet()) {
-            cardinality.computeIfAbsent(hostGroup, this::fallbackInstanceCountRecommendation);
+            cardinality.computeIfAbsent(hostGroup, InstanceCount::fallbackInstanceCountRecommendation);
         }
         return cardinality;
-    }
-
-    /**
-     * Logic from UI.
-     */
-    private InstanceCount fallbackInstanceCountRecommendation(String hostGroup) {
-        return hostGroup.contains("compute")
-                ? InstanceCount.ZERO_OR_MORE
-                : InstanceCount.ONE_OR_MORE;
     }
 
     private Blueprint getBlueprint(String blueprintName, Long workspaceId) {

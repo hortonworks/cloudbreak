@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -16,7 +14,6 @@ import com.sequenceiq.it.cloudbreak.client.DatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
-import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -65,7 +62,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
             given = "Create datalake cluster and then delete",
             when = "create cluster and if available then delete",
             then = "the cluster should work")
-    public void testCreateDalalakeDelete(TestContext testContext) {
+    public void testCreateDatalakeDelete(TestContext testContext) {
         String hivedb = resourcePropertyProvider().getName();
         String rangerdb = resourcePropertyProvider().getName();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
@@ -81,7 +78,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
                 .given(StackTestDto.class).withPlacement("placement")
                 .withEnvironment(EnvironmentTestDto.class)
-                .withInstanceGroupsEntity(setInstanceGroup(testContext))
+                .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(testContext))
 
                 .when(stackTestClient.createV4())
                 .when(stackTestClient.deleteV4(), RunningParameter.withoutLogError())
@@ -99,7 +96,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
             given = "Create datalake cluster and then delete resources",
             when = "create cluster and then delete resources",
             then = "the resource deletion does not work because the resources attached to the cluster")
-    public void testCreateDalalakeDeleteFails(TestContext testContext) {
+    public void testCreateDatalakeDeleteFails(TestContext testContext) {
         String forbiddenKey = resourcePropertyProvider().getName();
         String hivedb = resourcePropertyProvider().getName();
         String rangerdb = resourcePropertyProvider().getName();
@@ -114,7 +111,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .given("placement", PlacementSettingsTestDto.class)
                 .given(StackTestDto.class).withPlacement("placement")
                 .withEnvironment(EnvironmentTestDto.class)
-                .withInstanceGroupsEntity(setInstanceGroup(testContext))
+                .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(testContext))
                 .when(stackTestClient.createV4())
                 .deleteGiven(LdapTestDto.class, ldapTestClient.deleteV4(), RunningParameter.key(forbiddenKey))
                 .deleteGiven(DatabaseTestDto.class, databaseTestClient.deleteV4(), RunningParameter.key(forbiddenKey))
@@ -167,7 +164,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "Create datalake cluster and workload",
-            when = "call create cluster with datalake and wiht workload config",
+            when = "call create cluster with datalake and with workload config",
             then = "will work fine")
     public void testSameEnvironmentInDatalakeAndWorkload(TestContext testContext) {
         String dlName = resourcePropertyProvider().getName();
@@ -195,7 +192,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withName(resourcePropertyProvider().getName())
                 .withPlacement("placement")
                 .withEnvironment(EnvironmentTestDto.class)
-                .withInstanceGroupsEntity(setInstanceGroup(testContext))
+                .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(testContext))
                 .when(stackTestClient.createV4())
                 .validate();
     }
@@ -214,12 +211,5 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         rdsSet.add(hiveDb);
         rdsSet.add(rangerDb);
         return rdsSet;
-    }
-
-    private Collection<InstanceGroupTestDto> setInstanceGroup(TestContext testContext) {
-        Collection<InstanceGroupTestDto> instanceGroupTestDto = new ArrayList<>();
-        InstanceGroupTestDto ig = InstanceGroupTestDto.hostGroup(testContext, HostGroupType.MASTER);
-        instanceGroupTestDto.add(ig);
-        return instanceGroupTestDto;
     }
 }

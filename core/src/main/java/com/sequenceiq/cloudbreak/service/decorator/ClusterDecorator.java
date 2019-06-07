@@ -19,10 +19,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.ExposedService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
-import com.sequenceiq.cloudbreak.blueprint.validation.AmbariBlueprintValidator;
+import com.sequenceiq.cloudbreak.template.validation.BlueprintValidator;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.AmbariHaComponentFilter;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintValidatorFactory;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
@@ -45,7 +46,7 @@ public class ClusterDecorator {
     private BlueprintService blueprintService;
 
     @Inject
-    private AmbariBlueprintValidator ambariBlueprintValidator;
+    private BlueprintValidatorFactory blueprintValidatorFactory;
 
     @Inject
     private RdsConfigService rdsConfigService;
@@ -78,8 +79,9 @@ public class ClusterDecorator {
     }
 
     private void validateBlueprintIfRequired(Cluster subject, ClusterV4Request request, Stack stack) {
-        if (blueprintService.isAmbariBlueprint(subject.getBlueprint()) && request.getValidateBlueprint()) {
-            ambariBlueprintValidator.validateBlueprintForStack(subject, subject.getBlueprint(), subject.getHostGroups(), stack.getInstanceGroups());
+        if (request.getValidateBlueprint()) {
+            BlueprintValidator blueprintValidator = blueprintValidatorFactory.createBlueprintValidator(subject.getBlueprint());
+            blueprintValidator.validateBlueprintForStack(subject.getBlueprint(), subject.getHostGroups(), stack.getInstanceGroups());
         }
     }
 
