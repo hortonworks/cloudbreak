@@ -58,9 +58,16 @@ public class ProxyController extends NotificationController implements ProxyEndp
     }
 
     @Override
-    public ProxyResponse get(String name) {
+    public ProxyResponse getByName(String name) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
         ProxyConfig config = proxyConfigService.getByNameForAccountId(name, accountId);
+        return proxyConfigToProxyResponseConverter.convert(config);
+    }
+
+    @Override
+    public ProxyResponse getByResourceCrn(String crn) {
+        String accountId = threadBasedUserCrnProvider.getAccountId();
+        ProxyConfig config = proxyConfigService.getByCrnForAccountId(crn, accountId);
         return proxyConfigToProxyResponseConverter.convert(config);
     }
 
@@ -74,9 +81,19 @@ public class ProxyController extends NotificationController implements ProxyEndp
     }
 
     @Override
-    public ProxyResponse delete(String name) {
+    public ProxyResponse deleteByName(String name) {
+        ProxyResponse proxyResponse = proxyConfigToProxyResponseConverter.convert(
+                proxyConfigService.deleteByNameInAccount(name, threadBasedUserCrnProvider.getAccountId()));
         notify(ResourceEvent.PROXY_CONFIG_DELETED);
-        return proxyConfigToProxyResponseConverter.convert(proxyConfigService.deleteInAccount(name, threadBasedUserCrnProvider.getAccountId()));
+        return proxyResponse;
+    }
+
+    @Override
+    public ProxyResponse deleteByCrn(String crn) {
+        ProxyResponse proxyResponse = proxyConfigToProxyResponseConverter.convert(
+                proxyConfigService.deleteByCrnInAccount(crn, threadBasedUserCrnProvider.getAccountId()));
+        notify(ResourceEvent.PROXY_CONFIG_DELETED);
+        return proxyResponse;
     }
 
     @Override

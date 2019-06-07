@@ -33,11 +33,18 @@ public interface ProxyEndpoint {
     ProxyResponses list();
 
     @GET
-    @Path("{name}")
+    @Path("name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ProxyConfigDescription.GET_BY_NAME, produces = MediaType.APPLICATION_JSON,
-            notes = ProxyConfigDescription.PROXY_CONFIG_NOTES, nickname = "getProxyConfigV1")
-    ProxyResponse get(@PathParam("name") String name);
+            notes = ProxyConfigDescription.PROXY_CONFIG_NOTES, nickname = "getProxyConfigByNameV1")
+    ProxyResponse getByName(@PathParam("name") String name);
+
+    @GET
+    @Path("crn/{crn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ProxyConfigDescription.GET_BY_CRN, produces = MediaType.APPLICATION_JSON,
+            notes = ProxyConfigDescription.PROXY_CONFIG_NOTES, nickname = "getProxyConfigByCrnV1")
+    ProxyResponse getByResourceCrn(@PathParam("crn") String crn);
 
     @POST
     @Path("")
@@ -47,11 +54,18 @@ public interface ProxyEndpoint {
     ProxyResponse post(@Valid ProxyRequest request);
 
     @DELETE
-    @Path("{name}")
+    @Path("name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ProxyConfigDescription.DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON,
-            notes = ProxyConfigDescription.PROXY_CONFIG_NOTES, nickname = "deleteProxyConfigV1")
-    ProxyResponse delete(@PathParam("name") String name);
+            notes = ProxyConfigDescription.PROXY_CONFIG_NOTES, nickname = "deleteProxyConfigByNameV1")
+    ProxyResponse deleteByName(@PathParam("name") String name);
+
+    @DELETE
+    @Path("crn/{crn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ProxyConfigDescription.DELETE_BY_CRN, produces = MediaType.APPLICATION_JSON,
+            notes = ProxyConfigDescription.PROXY_CONFIG_NOTES, nickname = "deleteProxyConfigByCrnV1")
+    ProxyResponse deleteByCrn(@PathParam("crn") String crn);
 
     @DELETE
     @Path("")

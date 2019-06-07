@@ -62,7 +62,7 @@ class ProxyConfigDtoServiceTest {
         proxyResponse.setPassword(secretResponse);
 
         when(environmentServiceClient.withCrn(anyString()).proxyV1Endpoint()).thenReturn(proxyEndpoint);
-        when(proxyEndpoint.get(anyString())).thenReturn(proxyResponse);
+        when(proxyEndpoint.getByResourceCrn(anyString())).thenReturn(proxyResponse);
         when(secretService.getByResponse(any(SecretResponse.class))).thenReturn(decryptedSecretValue);
 
         ProxyConfig proxyConfig = underTest.get("crn:altus:environments:us-west-1:cloudera:proxyconfig:a2f0bee2-059e-433f-a9d0-2893c53419ad", "cloudera",
@@ -81,7 +81,7 @@ class ProxyConfigDtoServiceTest {
         SecretResponse secretResponse = new SecretResponse();
 
         when(environmentServiceClient.withCrn(anyString()).proxyV1Endpoint()).thenReturn(proxyEndpoint);
-        when(proxyEndpoint.get(anyString())).thenThrow(new NotFoundException("The proxy config could not be found!"));
+        when(proxyEndpoint.getByResourceCrn(anyString())).thenThrow(new NotFoundException("The proxy config could not be found!"));
 
 
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.get(
@@ -108,7 +108,7 @@ class ProxyConfigDtoServiceTest {
         proxyResponse.setPassword(secretResponse);
 
         when(environmentServiceClient.withCrn(anyString()).proxyV1Endpoint()).thenReturn(proxyEndpoint);
-        when(proxyEndpoint.get(anyString())).thenReturn(proxyResponse);
+        when(proxyEndpoint.getByResourceCrn(anyString())).thenReturn(proxyResponse);
         when(secretService.getByResponse(any(SecretResponse.class))).thenThrow(new VaultException("Vault token is invalid!"));
 
 
