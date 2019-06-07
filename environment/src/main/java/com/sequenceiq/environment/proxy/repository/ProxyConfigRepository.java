@@ -18,9 +18,13 @@ public interface ProxyConfigRepository extends JpaRepository<ProxyConfig, Long> 
     @Query("SELECT p FROM ProxyConfig p WHERE p.accountId = :accountId")
     Set<ProxyConfig> findAllInAccount(@Param("accountId") String accountId);
 
-    @Query("SELECT p FROM ProxyConfig p WHERE p.accountId= :accountId AND (p.name= :name OR p.resourceCrn= :name) "
+    @Query("SELECT p FROM ProxyConfig p WHERE p.accountId= :accountId AND p.name= :name "
             + "AND p.archived IS FALSE")
-    Optional<ProxyConfig> findByNameOrResourceCrnInAccount(@Param("name") String name, @Param("accountId") String accountId);
+    Optional<ProxyConfig> findByNameInAccount(@Param("name") String name, @Param("accountId") String accountId);
+
+    @Query("SELECT p FROM ProxyConfig p WHERE p.accountId= :accountId AND p.resourceCrn= :crn "
+            + "AND p.archived IS FALSE")
+    Optional<ProxyConfig> findByResourceCrnInAccount(@Param("crn") String crn, @Param("accountId") String accountId);
 
     @Query("SELECT p FROM ProxyConfig p WHERE p.accountId= :accountId AND (p.name IN :nameList OR p.resourceCrn IN :nameList) "
             + "AND p.archived IS FALSE")
