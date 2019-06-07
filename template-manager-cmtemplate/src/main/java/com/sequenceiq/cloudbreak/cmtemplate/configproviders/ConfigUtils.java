@@ -7,8 +7,11 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
 
 public class ConfigUtils {
+
+    private static final String CM_SAFETY_VALVE_PROPERTY_FORMAT = "<property><name>%s</name><value>%s</value></property>";
 
     private ConfigUtils() { }
 
@@ -51,4 +54,14 @@ public class ConfigUtils {
                 .findFirst();
     }
 
+    public static Optional<StorageLocationView> getStorageLocationForServiceProperty(TemplatePreparationObject source, String serviceProperty) {
+        return source.getFileSystemConfigurationView()
+                .get().getLocations().stream()
+                .filter(s -> s.getProperty().equalsIgnoreCase(serviceProperty))
+                .findFirst();
+    }
+
+    public static String getSafetyValveProperty(String key, String value) {
+        return String.format(CM_SAFETY_VALVE_PROPERTY_FORMAT, key, value);
+    }
 }

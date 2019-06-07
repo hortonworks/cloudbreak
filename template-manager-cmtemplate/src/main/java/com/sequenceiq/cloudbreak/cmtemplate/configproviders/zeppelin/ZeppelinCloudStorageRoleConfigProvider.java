@@ -1,0 +1,52 @@
+package com.sequenceiq.cloudbreak.cmtemplate.configproviders.zeppelin;
+
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.zeppelin.ZeppelinRoles.ZEPPELIN_SERVER;
+
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
+import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
+import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
+import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.views.HostgroupView;
+
+@Component
+public class ZeppelinCloudStorageRoleConfigProvider extends AbstractRoleConfigConfigProvider {
+
+    private static final String ZEPPELIN_NOTEBOOK_DIR = "zeppelin.notebook.dir";
+
+    @Override
+    protected List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView, TemplatePreparationObject templatePreparationObject) {
+        switch (roleType) {
+
+            case ZEPPELIN_SERVER:
+                return ConfigUtils.getStorageLocationForServiceProperty(templatePreparationObject, ZEPPELIN_NOTEBOOK_DIR)
+                        .map(location -> List.of(config(ZEPPELIN_NOTEBOOK_DIR, location.getValue())))
+                        .orElseGet(List::of);
+            default:
+                return List.of();
+        }
+    }
+
+    @Override
+    public String getServiceType() {
+        return ZeppelinRoles.ZEPPELIN;
+    }
+
+    @Override
+    public List<String> getRoleTypes() {
+        return List.of(ZEPPELIN_SERVER);
+    }
+
+    @Override
+    public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
+        return source.getFileSystemConfigurationView().isPresent()
+                && !source.getFileSystemConfigurationView().get().getType().equals(FileSystemType.S3.name())
+                && cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes());
+    }
+}
