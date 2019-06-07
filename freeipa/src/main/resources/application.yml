@@ -36,6 +36,12 @@ freeipa:
     url: https://cloudbreak-imagecatalog.s3.amazonaws.com/freeipa-image-catalog.json
     default.os: redhat7
     cache.ttl: 15
+  platform.default.instanceType:
+    AWS: m5.xlarge
+    AZURE: Standard_D3_v2
+  security.default:
+    ports: 22,443,9443
+    cidr: 0.0.0.0/0
 
 info:
   app:
