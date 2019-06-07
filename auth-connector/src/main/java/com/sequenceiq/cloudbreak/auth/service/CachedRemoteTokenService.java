@@ -22,6 +22,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.altus.exception.UmsAuthenticationException;
 import com.sequenceiq.cloudbreak.auth.security.authentication.UmsAuthenticationService;
 import com.sequenceiq.cloudbreak.auth.uaa.IdentityClient;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
@@ -73,8 +74,12 @@ public class CachedRemoteTokenService implements ResourceServerTokenServices {
         if (Crn.isCrn(accessToken)) {
             try {
                 return getUmsAuthentication(accessToken);
-            } catch (RuntimeException e) {
+            } catch (UmsAuthenticationException e) {
+                LOGGER.error("Invalid CRN provided", e);
                 throw new InvalidTokenException("Invalid CRN provided", e);
+            } catch (RuntimeException e) {
+                LOGGER.error("Cannot authenticate", e);
+                throw new InvalidTokenException("Cannot authenticate, please check logs for further details!", e);
             }
         }
         return extractJwtAuthentication(accessToken);
