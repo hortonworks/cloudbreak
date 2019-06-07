@@ -1,13 +1,13 @@
 package com.sequenceiq.environment.client;
 
 public class EnvironmentApiClientParams {
-    private boolean restDebug;
+    private final boolean restDebug;
 
-    private boolean certificateValidation;
+    private final boolean certificateValidation;
 
-    private boolean ignorePreValidation;
+    private final boolean ignorePreValidation;
 
-    private String environmentServerUrl;
+    private final String environmentServerUrl;
 
     public EnvironmentApiClientParams(boolean restDebug, boolean certificateValidation, boolean ignorePreValidation, String environmentServerUrl) {
         this.restDebug = restDebug;

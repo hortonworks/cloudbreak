@@ -167,7 +167,8 @@ public class StackDecoratorTest {
         when(sharedServiceValidator.checkSharedServiceStackRequirements(any(StackV4Request.class), any(Workspace.class))).thenReturn(validationResult);
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCredentialName(credentialName);
-        when(environmentClientService.get(anyString())).thenReturn(environmentResponse);
+        when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
+        when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         when(credentialClientService.getByCrn(anyString())).thenReturn(Credential.builder().cloudPlatform(CloudPlatform.MOCK.name()).build());
         when(credentialClientService.getByName(anyString())).thenReturn(Credential.builder().cloudPlatform(CloudPlatform.MOCK.name()).build());
     }

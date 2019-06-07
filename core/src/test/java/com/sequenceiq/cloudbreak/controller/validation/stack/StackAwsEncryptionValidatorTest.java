@@ -120,7 +120,8 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
         when(clusterRequest.getBlueprintName()).thenReturn("dummy");
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCredentialName(CREDENTIAL_NAME);
-        when(environmentClientService.get(anyString())).thenReturn(environmentResponse);
+        when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
+        when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
     }
 
     @Test

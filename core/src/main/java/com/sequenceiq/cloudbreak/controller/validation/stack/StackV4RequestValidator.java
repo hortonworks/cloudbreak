@@ -133,7 +133,7 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
     }
 
     private void validateEncryptionKey(StackV4Request stackRequest, ValidationResultBuilder validationBuilder) {
-        DetailedEnvironmentResponse environment = environmentClientService.get(stackRequest.getEnvironmentCrn());
+        DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stackRequest.getEnvironmentCrn());
         stackRequest.getInstanceGroups().stream()
                 .filter(request -> isEncryptionTypeSetUp(request.getTemplate()))
                 .filter(request -> {
