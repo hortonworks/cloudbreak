@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class CloudNetwork {
 
@@ -8,11 +10,11 @@ public class CloudNetwork {
 
     private String id;
 
-    private Map<String, String> subnets;
+    private Set<CloudSubnet> subnets;
 
     private Map<String, Object> properties;
 
-    public CloudNetwork(String name, String id, Map<String, String> subnets, Map<String, Object> properties) {
+    public CloudNetwork(String name, String id, Set<CloudSubnet> subnets, Map<String, Object> properties) {
         this.name = name;
         this.id = id;
         this.subnets = subnets;
@@ -36,11 +38,11 @@ public class CloudNetwork {
     }
 
     public Map<String, String> getSubnets() {
-        return subnets;
+        return subnets.stream().collect(Collectors.toMap(s -> s.getId(), s -> s.getName()));
     }
 
-    public void setSubnets(Map<String, String> subnets) {
-        this.subnets = subnets;
+    public Set<CloudSubnet> getSubnetsMeta() {
+        return subnets;
     }
 
     public Map<String, Object> getProperties() {

@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroup;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -126,14 +127,14 @@ public class OpenStackPlatformResources implements PlatformResources {
             properties.put("providerSegID", network.getProviderSegID());
             properties.put("tenantId", network.getTenantId());
 
-            Map<String, String> subnets = new HashMap<>();
+            Set<CloudSubnet> subnets = new HashSet<>();
 
             List<? extends Subnet> neutronSubnets = network.getNeutronSubnets();
             LOGGER.debug("Neutron subnets for {}: {}", network.getName(), neutronSubnets);
             if (neutronSubnets != null) {
                 for (Subnet neutronSubnet : neutronSubnets) {
                     if (neutronSubnet != null) {
-                        subnets.put(neutronSubnet.getId(), neutronSubnet.getName());
+                        subnets.add(new CloudSubnet(neutronSubnet.getId(), neutronSubnet.getName()));
                     }
                 }
             }

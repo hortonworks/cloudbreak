@@ -1,6 +1,8 @@
 package com.sequenceiq.environment.network.domain;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -20,6 +22,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -52,6 +55,10 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
     @Column(columnDefinition = "TEXT", nullable = false)
     private Json subnetIds;
 
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private Json subnetMetas;
+
     @Column(nullable = false)
     private String accountId;
 
@@ -60,6 +67,7 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
 
     public BaseNetwork() {
         subnetIds = new Json(new HashSet<String>());
+        subnetMetas = new Json(new HashMap<String, CloudSubnet>());
     }
 
     @Override
@@ -109,6 +117,19 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
 
     public void setSubnetIds(Set<String> subnetIds) {
         this.subnetIds = new Json(subnetIds);
+    }
+
+    public Json getSubnetMetas() {
+        return subnetMetas;
+    }
+
+    public void setSubnetMetas(Map<String, CloudSubnet> subnetMetas) {
+        this.subnetMetas = new Json(subnetMetas);
+    }
+
+    public Map<String, CloudSubnet> getSubnetMetasMap() {
+        return JsonUtil.jsonToType(subnetMetas.getValue(), new TypeReference<>() {
+        });
     }
 
     public Set<String> getSubnetIdsSet() {

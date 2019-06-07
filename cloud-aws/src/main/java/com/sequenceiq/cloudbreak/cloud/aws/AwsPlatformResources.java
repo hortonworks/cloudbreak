@@ -82,6 +82,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroup;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ConfigSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
@@ -262,8 +263,8 @@ public class AwsPlatformResources implements PlatformResources {
             describeVpcsRequest.withVpcIds(filter.getVpcId());
         }
         for (Vpc vpc : ec2Client.describeVpcs(describeVpcsRequest).getVpcs()) {
-            Map<String, String> subnetMap = new HashMap<>();
-            List<Subnet> subnets = ec2Client.describeSubnets(createVpcDescribeRequest(vpc)).getSubnets();
+            Set<CloudSubnet> subnets = new HashSet<>();
+            List<Subnet> awsSubnets = ec2Client.describeSubnets(createVpcDescribeRequest(vpc)).getSubnets();
             Map<String, Object> properties = new HashMap<>();
             properties.put("cidrBlock", vpc.getCidrBlock());
             properties.put("default", vpc.getIsDefault());
@@ -271,16 +272,16 @@ public class AwsPlatformResources implements PlatformResources {
             properties.put("instanceTenancy", vpc.getInstanceTenancy());
             properties.put("state", vpc.getState());
 
-            for (Subnet subnet : subnets) {
+            for (Subnet subnet : awsSubnets) {
                 Optional<String> subnetName = getName(subnet.getTags());
-                subnetMap.put(subnet.getSubnetId(), subnetName.isPresent() ? subnetName.get() : subnet.getSubnetId());
+                subnets.add(new CloudSubnet(subnet.getSubnetId(), subnetName.orElse(subnet.getSubnetId()), subnet.getAvailabilityZone()));
             }
 
             Optional<String> name = getName(vpc.getTags());
             if (name.isPresent()) {
-                cloudNetworks.add(new CloudNetwork(name.get(), vpc.getVpcId(), subnetMap, properties));
+                cloudNetworks.add(new CloudNetwork(name.get(), vpc.getVpcId(), subnets, properties));
             } else {
-                cloudNetworks.add(new CloudNetwork(vpc.getVpcId(), vpc.getVpcId(), subnetMap, properties));
+                cloudNetworks.add(new CloudNetwork(vpc.getVpcId(), vpc.getVpcId(), subnets, properties));
             }
         }
         result.put(region.value(), cloudNetworks);
