@@ -38,8 +38,8 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.service.TlsSetupService;
 import com.sequenceiq.freeipa.service.image.ImageService;
-import com.sequenceiq.freeipa.service.stack.InstanceMetaDataService;
-import com.sequenceiq.freeipa.service.stack.MetadataSetupService;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
+import com.sequenceiq.freeipa.service.stack.instance.MetadataSetupService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 

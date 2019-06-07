@@ -35,6 +35,7 @@ import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.service.CostTaggingService;
+import com.sequenceiq.freeipa.service.stack.instance.DefaultInstanceGroupProvider;
 
 @Component
 public class CreateFreeIpaRequestToStackConverter {
@@ -55,6 +56,9 @@ public class CreateFreeIpaRequestToStackConverter {
 
     @Inject
     private CredentialRequestToCredentialConverter credentialConverter;
+
+    @Inject
+    private DefaultInstanceGroupProvider defaultInstanceGroupProvider;
 
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
@@ -134,13 +138,13 @@ public class CreateFreeIpaRequestToStackConverter {
 
     private Set<InstanceGroup> convertInstanceGroups(CreateFreeIpaRequest source, Stack stack) {
         if (source.getInstanceGroups() == null) {
-            return null;
+            Set<InstanceGroup> defaultInstanceGroups = defaultInstanceGroupProvider.createDefaultInstanceGroups(source.getCredential().getCloudPlatform());
+            defaultInstanceGroups.forEach(instanceGroup -> instanceGroup.setStack(stack));
+            return defaultInstanceGroups;
         }
         Set<InstanceGroup> convertedSet = new HashSet<>();
         source.getInstanceGroups().stream()
-                .map(ig -> {
-                    return instanceGroupConverter.convert(ig, source.getCredential().getCloudPlatform());
-                })
+                .map(ig -> instanceGroupConverter.convert(ig, source.getCredential().getCloudPlatform()))
                 .forEach(ig -> {
                     ig.setStack(stack);
                     convertedSet.add(ig);
