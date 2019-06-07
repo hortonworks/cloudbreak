@@ -13,17 +13,17 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(value = "EnvironmentNetworkV1Response")
 public class EnvironmentNetworkResponse extends EnvironmentNetworkRequest {
     @ApiModelProperty(ModelDescriptions.ID)
-    private String id;
+    private String crn;
 
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
 
-    public String getId() {
-        return id;
+    public String getCrn() {
+        return crn;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setCrn(String crn) {
+        this.crn = crn;
     }
 
     public String getName() {
@@ -35,7 +35,7 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkRequest {
     }
 
     public static final class EnvironmentNetworkResponseBuilder {
-        private String id;
+        private String crn;
 
         private String name;
 
@@ -52,8 +52,8 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkRequest {
             return new EnvironmentNetworkResponseBuilder();
         }
 
-        public EnvironmentNetworkResponseBuilder withId(String id) {
-            this.id = id;
+        public EnvironmentNetworkResponseBuilder withCrn(String id) {
+            this.crn = id;
             return this;
         }
 
@@ -79,7 +79,7 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkRequest {
 
         public EnvironmentNetworkResponse build() {
             EnvironmentNetworkResponse environmentNetworkResponse = new EnvironmentNetworkResponse();
-            environmentNetworkResponse.setId(id);
+            environmentNetworkResponse.setCrn(crn);
             environmentNetworkResponse.setName(name);
             environmentNetworkResponse.setSubnetIds(subnetIds);
             environmentNetworkResponse.setAws(aws);

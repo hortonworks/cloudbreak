@@ -85,7 +85,7 @@ public class EnvironmentApiConverter {
 
     public DetailedEnvironmentResponse dtoToDetailedResponse(EnvironmentDto environmentDto) {
         DetailedEnvironmentResponse.Builder builder = DetailedEnvironmentResponse.Builder.aDetailedEnvironmentResponse()
-                .withId(environmentDto.getResourceCrn())
+                .withCrn(environmentDto.getResourceCrn())
                 .withName(environmentDto.getName())
                 .withDescription(environmentDto.getDescription())
                 .withCloudPlatform(environmentDto.getCloudPlatform())
@@ -100,7 +100,7 @@ public class EnvironmentApiConverter {
 
     public EnvironmentNetworkResponse networkDtoToResponse(NetworkDto network) {
         return EnvironmentNetworkResponse.EnvironmentNetworkResponseBuilder.anEnvironmentNetworkResponse()
-                .withId(network.getResourceCrn())
+                .withCrn(network.getResourceCrn())
                 .withSubnetIds(network.getSubnetIds())
                 .withAws(EnvironmentNetworkAwsParams.EnvironmentNetworkAwsParamsBuilder.anEnvironmentNetworkAwsParams()
                         .withVpcId(getIfNotNull(network.getAws(), AwsParams::getVpcId))

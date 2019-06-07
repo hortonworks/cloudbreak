@@ -34,7 +34,7 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
     @Override
     public DetailedEnvironmentResponse convert(Environment source) {
         DetailedEnvironmentResponse response = new DetailedEnvironmentResponse();
-        response.setId(source.getResourceCrn());
+        response.setCrn(source.getResourceCrn());
         response.setName(source.getName());
         response.setDescription(source.getDescription());
         response.setRegions(regionConverter.convertRegions(source.getRegionSet()));
