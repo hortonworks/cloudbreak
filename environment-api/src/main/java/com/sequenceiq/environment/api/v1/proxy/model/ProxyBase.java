@@ -10,7 +10,7 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
-import com.sequenceiq.environment.api.proxy.doc.ProxyConfigDescription;
+import com.sequenceiq.environment.api.doc.proxy.ProxyConfigDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 

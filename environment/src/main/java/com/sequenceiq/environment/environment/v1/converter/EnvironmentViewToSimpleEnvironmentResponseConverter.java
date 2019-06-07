@@ -35,7 +35,7 @@ public class EnvironmentViewToSimpleEnvironmentResponseConverter extends
     @Override
     public SimpleEnvironmentResponse convert(EnvironmentView source) {
         SimpleEnvironmentResponse response = new SimpleEnvironmentResponse();
-        response.setId(source.getResourceCrn());
+        response.setCrn(source.getResourceCrn());
         response.setName(source.getName());
         response.setDescription(source.getDescription());
         response.setRegions(regionConverter.convertRegions(source.getRegionSet()));
