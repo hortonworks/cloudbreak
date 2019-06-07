@@ -7,9 +7,11 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.AwsNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.AzureNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
 @Component
 public class NetworkV1ToNetworkV4Converter {
@@ -18,6 +20,31 @@ public class NetworkV1ToNetworkV4Converter {
         NetworkV4Request response = new NetworkV4Request();
         response.setAws(getIfNotNull(network.getAws(), this::convert));
         response.setAzure(getIfNotNull(network.getAzure(), this::convert));
+        return response;
+    }
+
+    public NetworkV4Request convert(EnvironmentNetworkResponse network) {
+        NetworkV4Request response = new NetworkV4Request();
+        response.setAws(getIfNotNull(network.getAws(), aws -> convertToAwsNetwork(network)));
+        response.setAzure(getIfNotNull(network.getAzure(), azure -> convertToAzureNetwork(network)));
+        return response;
+    }
+
+    private AzureNetworkV4Parameters convertToAzureNetwork(EnvironmentNetworkResponse source) {
+        AzureNetworkV4Parameters response = new AzureNetworkV4Parameters();
+        response.setNetworkId(source.getAzure().getNetworkId());
+        response.setNoFirewallRules(source.getAzure().getNoFirewallRules());
+        response.setNoPublicIp(source.getAzure().getNoPublicIp());
+        response.setResourceGroupName(source.getAzure().getResourceGroupName());
+        response.setSubnetId(source.getSubnetIds().stream().findFirst().orElseThrow(() -> new BadRequestException("No subnet id for this environment")));
+        return response;
+    }
+
+    private AwsNetworkV4Parameters convertToAwsNetwork(EnvironmentNetworkResponse source) {
+        AwsNetworkV4Parameters response = new AwsNetworkV4Parameters();
+        response.setSubnetId(source.getSubnetIds().stream().findFirst().orElseThrow(() -> new BadRequestException("No subnet id for this environment")));
+        response.setVpcId(source.getAws().getVpcId());
+        response.setInternetGatewayId(source.getAws().getVpcId());
         return response;
     }
 
