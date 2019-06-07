@@ -148,7 +148,7 @@ public class StackDecorator {
     }
 
     private Credential prepareCredential(Stack subject) {
-        DetailedEnvironmentResponse environment = environmentClientService.get(subject.getEnvironmentCrn());
+        DetailedEnvironmentResponse environment = environmentClientService.getByCrn(subject.getEnvironmentCrn());
         String credentialName = environment.getCredentialName();
         return credentialClientService.getByName(credentialName);
     }

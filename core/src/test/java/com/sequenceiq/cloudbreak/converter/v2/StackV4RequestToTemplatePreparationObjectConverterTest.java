@@ -183,7 +183,8 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(cloudbreakUser.getEmail()).thenReturn("test@hortonworks.com");
         when(workspaceService.get(anyLong(), eq(user))).thenReturn(workspace);
         when(environmentResponse.getCredentialName()).thenReturn(TEST_CREDENTIAL_NAME);
-        when(environmentClientService.get(anyString())).thenReturn(environmentResponse);
+        when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
+        when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         when(credentialClientService.getByName(TEST_CREDENTIAL_NAME)).thenReturn(credential);
         when(credentialClientService.getByCrn(TEST_CREDENTIAL_NAME)).thenReturn(credential);
         when(credential.getName()).thenReturn(TEST_CREDENTIAL_NAME);

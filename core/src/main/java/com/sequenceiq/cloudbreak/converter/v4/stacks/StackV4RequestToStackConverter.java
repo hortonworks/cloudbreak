@@ -111,7 +111,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
 
         Stack stack = new Stack();
-        DetailedEnvironmentResponse environment = environmentClientService.get(source.getEnvironmentCrn());
+        DetailedEnvironmentResponse environment = environmentClientService.getByCrn(source.getEnvironmentCrn());
 
         if (isTemplate(source)) {
             convertAsStackTemplate(source, stack, workspace, environment);

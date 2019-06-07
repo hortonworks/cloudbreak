@@ -13,14 +13,18 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 
 @Transactional(TxType.REQUIRED)
-public interface  EnvironmentViewRepository extends JpaRepository<EnvironmentView, Long> {
+public interface EnvironmentViewRepository extends JpaRepository<EnvironmentView, Long> {
 
     @Query("SELECT ev FROM EnvironmentView ev LEFT JOIN FETCH ev.credential WHERE ev.accountId= :accountId")
     Set<EnvironmentView> findAllByAccountId(@Param("accountId") String accountId);
 
     Set<EnvironmentView> findAllByNameInAndAccountId(Collection<String> names, String accountId);
 
+    Set<EnvironmentView> findAllByResourceCrnInAndAccountId(Collection<String> resourceCrns, String accountId);
+
     Set<EnvironmentView> findAllByCredentialId(Long credentialId);
 
     Long getIdByNameAndAccountId(String name, String accountId);
+
+    Long getIdByResourceCrnAndAccountId(String resourceCrn, String accountId);
 }

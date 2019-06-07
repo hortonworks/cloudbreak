@@ -19,6 +19,8 @@ public interface EnvironmentResourceRepository<T extends EnvironmentAwareResourc
 
     T getByNameAndAccountId(String name, String accountId);
 
+    T getByResourceCrnAndAccountId(String resourceCrn, String accountId);
+
     Set<T> findAllByAccountIdAndEnvironments(String accountId, EnvironmentView environment);
 
     Set<T> findAllByAccountIdAndEnvironmentsIsNull(String accountId);
@@ -26,4 +28,6 @@ public interface EnvironmentResourceRepository<T extends EnvironmentAwareResourc
     Set<T> findAllByAccountIdAndEnvironmentsIsNotNull(String accountId);
 
     Set<T> findAllByNameInAndAccountId(Collection<String> names, String accountId);
+
+    Set<T> findAllByResourceCrnInAndAccountId(Collection<String> resourceCrns, String accountId);
 }

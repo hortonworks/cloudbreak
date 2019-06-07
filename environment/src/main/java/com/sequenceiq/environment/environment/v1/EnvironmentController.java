@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.v1;
 import java.util.Set;
 
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -26,7 +27,7 @@ import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentViewService;
 
 @Controller
-@Transactional(Transactional.TxType.NEVER)
+@Transactional(TxType.NEVER)
 public class EnvironmentController implements EnvironmentEndpoint {
 
     private final EnvironmentApiConverter environmentApiConverter;
@@ -68,27 +69,52 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
-    public DetailedEnvironmentResponse get(String environmentName) {
+    public DetailedEnvironmentResponse getByName(String environmentName) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
-        return environmentService.get(environmentName, accountId);
+        return environmentService.getByName(environmentName, accountId);
     }
 
     @Override
-    public SimpleEnvironmentResponse delete(String environmentName) {
+    public DetailedEnvironmentResponse getByCrn(String crn) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
-        return environmentService.delete(environmentName, accountId);
+        return environmentService.getByCrn(crn, accountId);
     }
 
     @Override
-    public SimpleEnvironmentResponses deleteMultiple(Set<String> environmentNames) {
+    public SimpleEnvironmentResponse deleteByName(String environmentName) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
-        return environmentService.deleteMultiple(environmentNames, accountId);
+        return environmentService.deleteByName(environmentName, accountId);
     }
 
     @Override
-    public DetailedEnvironmentResponse edit(String environmentName, @NotNull EnvironmentEditRequest request) {
+    public SimpleEnvironmentResponse deleteByCrn(String crn) {
+        String accountId = threadBasedUserCrnProvider.getAccountId();
+        return environmentService.deleteByCrn(crn, accountId);
+    }
+
+    @Override
+    public SimpleEnvironmentResponses deleteMultipleByNames(Set<String> environmentNames) {
+        String accountId = threadBasedUserCrnProvider.getAccountId();
+        return environmentService.deleteMultipleByNames(environmentNames, accountId);
+    }
+
+    @Override
+    public SimpleEnvironmentResponses deleteMultipleByCrns(Set<String> crns) {
+        String accountId = threadBasedUserCrnProvider.getAccountId();
+        return environmentService.deleteMultipleByCrns(crns, accountId);
+    }
+
+    @Override
+    public DetailedEnvironmentResponse editByName(String environmentName, @NotNull EnvironmentEditRequest request) {
         EnvironmentEditDto editDto = environmentApiConverter.initEditDto(request);
-        EnvironmentDto result = environmentModificationService.edit(environmentName, editDto);
+        EnvironmentDto result = environmentModificationService.editByName(environmentName, editDto);
+        return environmentApiConverter.dtoToDetailedResponse(result);
+    }
+
+    @Override
+    public DetailedEnvironmentResponse editByCrn(String crn, @NotNull EnvironmentEditRequest request) {
+        EnvironmentEditDto editDto = environmentApiConverter.initEditDto(request);
+        EnvironmentDto result = environmentModificationService.editByCrn(crn, editDto);
         return environmentApiConverter.dtoToDetailedResponse(result);
     }
 
@@ -99,11 +125,18 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
-    public DetailedEnvironmentResponse changeCredential(String environmentName, @Valid EnvironmentChangeCredentialRequest request) {
+    public DetailedEnvironmentResponse changeCredentialByEnvironmentName(String environmentName, @Valid EnvironmentChangeCredentialRequest request) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
-        EnvironmentDto result = environmentModificationService.changeCredential(accountId, environmentName,
+        EnvironmentDto result = environmentModificationService.changeCredentialByEnvironmentName(accountId, environmentName,
                 environmentApiConverter.convertEnvironmentChangeCredentialDto(request));
         return environmentApiConverter.dtoToDetailedResponse(result);
     }
 
+    @Override
+    public DetailedEnvironmentResponse changeCredentialByEnvironmentCrn(String crn, @Valid EnvironmentChangeCredentialRequest request) {
+        String accountId = threadBasedUserCrnProvider.getAccountId();
+        EnvironmentDto result = environmentModificationService.changeCredentialByEnvironmentCrn(accountId, crn,
+                environmentApiConverter.convertEnvironmentChangeCredentialDto(request));
+        return environmentApiConverter.dtoToDetailedResponse(result);
+    }
 }

@@ -16,6 +16,7 @@ import org.springframework.util.CollectionUtils;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
+import com.sequenceiq.cloudbreak.util.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
@@ -55,8 +56,29 @@ public class EnvironmentModificationService {
         this.networkService = networkService;
     }
 
-    public EnvironmentDto edit(String environmentName, EnvironmentEditDto editDto) {
+    public EnvironmentDto editByName(String environmentName, EnvironmentEditDto editDto) {
         Environment env = environmentService.getByNameForAccountId(environmentName, editDto.getAccountId());
+        return edit(editDto, env);
+    }
+
+    public EnvironmentDto editByCrn(String crn, EnvironmentEditDto editDto) {
+        Environment env = environmentService.getByCrnForAccountId(crn, editDto.getAccountId());
+        return edit(editDto, env);
+    }
+
+    public EnvironmentDto changeCredentialByEnvironmentName(String accountId, String environmentName, EnvironmentChangeCredentialDto dto) {
+        Environment environment = environmentRepository.findByNameAndAccountId(environmentName, accountId)
+                .orElseThrow(() -> new NotFoundException(String.format("No environment found with name '%s'", environmentName)));
+        return changeCredential(accountId, environmentName, dto, environment);
+    }
+
+    public EnvironmentDto changeCredentialByEnvironmentCrn(String accountId, String crn, EnvironmentChangeCredentialDto dto) {
+        Environment environment = environmentRepository.findByResourceCrnAndAccountId(crn, accountId)
+                .orElseThrow(() -> new NotFoundException(String.format("No environment found with CRN '%s'", crn)));
+        return changeCredential(accountId, crn, dto, environment);
+    }
+
+    private EnvironmentDto edit(EnvironmentEditDto editDto, Environment env) {
         editDescriptionIfChanged(env, editDto);
         editLocationAndRegionsIfChanged(env, editDto);
         editNetworkIfChanged(env, editDto);
@@ -64,9 +86,7 @@ public class EnvironmentModificationService {
         return environmentDtoConverter.environmentToDto(saved);
     }
 
-    public EnvironmentDto changeCredential(String accountId, String environmentName, EnvironmentChangeCredentialDto dto) {
-        Environment environment = environmentRepository.findByNameAndAccountId(environmentName, accountId)
-                .orElseThrow(() -> new NotFoundException(String.format("No environment found with name '%s'", environmentName)));
+    private EnvironmentDto changeCredential(String accountId, String environmentName, EnvironmentChangeCredentialDto dto, Environment environment) {
         //CHECKSTYLE:OFF
         // TODO: 2019. 06. 03. also we have to check for SDXs and DistroXs what uses the given credential. If there is at least one, we have to update the crn reference through the other services
         //CHECKSTYLE:ON
@@ -141,7 +161,7 @@ public class EnvironmentModificationService {
 
     private void validateRegionAndLocation(LocationDto location, Set<String> requestedRegions,
             CloudRegions cloudRegions, Environment environment) {
-        ValidationResult.ValidationResultBuilder validationResultBuilder = environmentService.getValidatorService().validateRegions(requestedRegions,
+        ValidationResultBuilder validationResultBuilder = environmentService.getValidatorService().validateRegions(requestedRegions,
                 cloudRegions, environment.getCloudPlatform(), ValidationResult.builder());
         environmentService.getValidatorService().validateLocation(location, requestedRegions, environment, validationResultBuilder);
         ValidationResult validationResult = validationResultBuilder.build();
