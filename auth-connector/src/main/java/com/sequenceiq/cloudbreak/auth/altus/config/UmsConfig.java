@@ -9,10 +9,10 @@ import io.netty.util.internal.StringUtil;
 @Configuration
 public class UmsConfig {
 
-    @Value("${altus.ums.host:}")
+    @Value("${global.ums.host:}")
     private String endpoint;
 
-    @Value("${altus.ums.port:8982}")
+    @Value("${cdpdemoapp.env.ums.port:8982}")
     private int port;
 
     public String getEndpoint() {
