@@ -20,13 +20,13 @@ public class FixedSizePreloadCacheTest {
     }
 
     @Test
-    public void testPopWhenReplacementNeeded() throws InterruptedException {
+    public void testPopWhenReplacementNeeded() {
         Iterator<String> items = Arrays.asList("a", "b", "c").iterator();
         FixedSizePreloadCache<String> cache = new FixedSizePreloadCache<>(1, items::next);
 
         assertEquals("a", cache.pop());
         Awaitility.await()
-                .atMost(1, TimeUnit.SECONDS)
+                .atMost(10, TimeUnit.SECONDS)
                 .until(() -> cache.size() == 1);
         assertEquals("b", cache.pop());
     }
