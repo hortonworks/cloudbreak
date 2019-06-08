@@ -124,6 +124,17 @@
         ]
       },
       {
+        "refName": "oozie",
+        "serviceType": "OOZIE",
+        "roleConfigGroups": [
+          {
+            "refName": "oozie-OOZIE_SERVER-BASE",
+            "roleType": "OOZIE_SERVER",
+            "base": true
+          }
+        ]
+      },
+      {
         "refName": "spark_on_yarn",
         "serviceType": "SPARK_ON_YARN",
         "roleConfigGroups": [
@@ -217,6 +228,7 @@
           "hive-GATEWAY-BASE",
           "hms-GATEWAY-BASE",
           "livy-LIVY_SERVER-BASE",
+          "oozie-OOZIE_SERVER-BASE",
           "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
           "tez-GATEWAY-BASE",
           "yarn-JOBHISTORY-BASE",
