@@ -2,7 +2,7 @@
   "tags": {
     "shared_services_ready": true
   },
-  "description": "CDP 1.0 Shared Data Experience template with Atlas, HMS, Ranger and other services they are dependent on",
+  "description": "CDP 1.0 SDX template with Atlas, HMS, Ranger and other services they are dependent on",
   "blueprint": {
     "cdhVersion": "7.0.0",
     "displayName": "datalake",
