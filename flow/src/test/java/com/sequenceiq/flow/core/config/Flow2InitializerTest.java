@@ -15,7 +15,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.flow.core.Flow2Handler;
-import com.sequenceiq.flow.core.helloworld.HelloWorldFlowConfig;
+import com.sequenceiq.flow.core.helloworld.config.HelloWorldFlowConfig;
 
 import reactor.bus.EventBus;
 import reactor.bus.selector.Selector;

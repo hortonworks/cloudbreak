@@ -49,7 +49,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.flow.core.chain.FlowChainHandler;
 import com.sequenceiq.flow.core.chain.FlowChains;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
-import com.sequenceiq.flow.core.helloworld.HelloWorldFlowConfig;
+import com.sequenceiq.flow.core.helloworld.config.HelloWorldFlowConfig;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;

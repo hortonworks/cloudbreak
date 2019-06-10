@@ -1,4 +1,4 @@
-package com.sequenceiq.flow.core.helloworld;
+package com.sequenceiq.flow.core.helloworld.config;
 
 import com.sequenceiq.flow.core.FlowState;
 
