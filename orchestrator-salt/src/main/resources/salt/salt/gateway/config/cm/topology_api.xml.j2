@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<topology>
+    <name>{{ topology_name }}_api</name>
+    <gateway>
+
+        <!-- {{ exposed }} -->
+
+        <provider>
+           <role>authentication</role>
+           <name>ShiroProvider</name>
+           <enabled>true</enabled>
+           <param>
+              <name>sessionTimeout</name>
+              <value>30</value>
+           </param>
+           <param>
+              <name>main.pamRealm</name>
+              <value>org.apache.hadoop.gateway.shirorealm.KnoxPamRealm</value>
+           </param>
+           <param>
+              <name>main.pamRealm.service</name>
+              <value>login</value>
+           </param>
+           <param>
+              <name>urls./**</name>
+              <value>authcBasic</value>
+           </param>
+        </provider>
+
+        <provider>
+            <role>identity-assertion</role>
+            <name>Default</name>
+            <enabled>true</enabled>
+        </provider>
+
+        <provider>
+            <role>ha</role>
+            <name>HaProvider</name>
+            <enabled>true</enabled>
+            {% if 'ATLAS-API' in exposed -%}
+            <param>
+                <name>ATLAS-API</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'CM-API' in exposed -%}
+            <param>
+                <name>CM-API</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'HIVE' in exposed -%}
+            <param>
+                <name>HIVE</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'LIVYSERVER1' in exposed -%}
+            <param>
+                <name>LIVYSERVER</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'NAMENODE' in exposed -%}
+            <param>
+                <name>NAMENODE</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'OOZIE' in exposed -%}
+            <param>
+                <name>OOZIE</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'RANGER' in exposed -%}
+            <param>
+                <name>RANGER</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'RESOURCEMANAGER' in exposed -%}
+            <param>
+                <name>RESOURCEMANAGER</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'SOLR' in exposed -%}
+            <param>
+                <name>SOLR</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'WEBHBASE' in exposed -%}
+            <param>
+                <name>WEBHBASE</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'WEBHDFS' in exposed -%}
+            <param>
+                <name>WEBHDFS</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+        </provider>
+    </gateway>
+
+    {% if 'ATLAS_SERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'ATLAS' in exposed -%}
+    <service>
+        <role>ATLAS-API</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['ATLAS_SERVER'] -%}
+        <url>http://{{ hostloc }}:{{ ports['ATLAS'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'CM-API' in salt['pillar.get']('gateway:location') -%}
+    {% if 'CM-API' in exposed -%}
+    <service>
+        <role>CM-API</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['CM-API'] -%}
+        <url>http://{{ hostloc }}:{{ ports['CM-API'] }}/api</url>
+        <param>
+            <name>httpclient.connectionTimeout</name>
+            <value>5m</value>
+        </param>
+        <param>
+            <name>httpclient.socketTimeout</name>
+            <value>5m</value>
+        </param>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'HIVESERVER2' in salt['pillar.get']('gateway:location') -%}
+    {% if 'HIVE' in exposed -%}
+    <service>
+        <role>HIVE</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['HIVESERVER2'] -%}
+        <url>http://{{ hostloc }}:{{ ports['HIVE'] }}/cliservice</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'LIVY_SERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'LIVYSERVER1' in exposed -%}
+    <service>
+        <role>LIVYSERVER</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['LIVY_SERVER'] -%}
+        <url>http://{{ hostloc }}:{{ ports['LIVYSERVER1'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    <!-- TODO - NAMENODE -->
+    <!-- TODO - OOZIE -->
+
+    {% if 'RANGER_ADMIN' in salt['pillar.get']('gateway:location') -%}
+    {% if 'RANGER' in exposed -%}
+    <service>
+        <role>RANGER</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['RANGER_ADMIN'] -%}
+        <url>http://{{ hostloc }}:{{ ports['RANGER'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    <!-- TODO - RESOURCEMANAGER -->
+    <!-- TODO - SOLR -->
+    <!-- TODO - WEBHBASE -->
+
+    {% if 'NAMENODE' in salt['pillar.get']('gateway:location') -%}
+    {% if 'WEBHDFS' in exposed -%}
+    <service>
+        <role>WEBHDFS</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['NAMENODE'] -%}
+        <url>http://{{ hostloc }}:{{ ports['WEBHDFS'] }}/webhdfs</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+</topology>
