@@ -18,7 +18,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.flow.core.helloworld.HelloWorldFlowConfig;
+import com.sequenceiq.flow.core.helloworld.config.HelloWorldEvent;
+import com.sequenceiq.flow.core.helloworld.config.HelloWorldFlowConfig;
 
 public class Flow2ConfigTest {
     @Rule
@@ -54,7 +55,7 @@ public class Flow2ConfigTest {
         flowConfigs.add(helloWorldFlowConfig);
         given(this.flowConfigs.iterator()).willReturn(flowConfigs.iterator());
         thrown.expect(UnsupportedOperationException.class);
-        thrown.expectMessage("Event already registered: START_HELLO_WORLD_EVENT");
+        thrown.expectMessage("Event already registered: " + HelloWorldEvent.HELLOWORLD_TRIGGER_EVENT.event());
         underTest.flowConfigurationMap();
     }
 
