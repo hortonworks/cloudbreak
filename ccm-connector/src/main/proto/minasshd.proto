@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package minasshd;
+
+option java_package = "com.cloudera.thunderhead.service.minasshd";
+option java_outer_classname = "MinaSshdProto";
+
+import "version.proto";
+
+// For future compatibility, all rpcs must take a request and return a response
+// even if there is initially no content for these messages.
+service MinaSshd {
+  // Get the service version.
+  rpc GetVersion (version.VersionRequest)
+    returns (version.VersionResponse) {}
+
+  // Get service endpoints.
+  rpc GetServiceEndpoint (GetServiceEndpointRequest)
+    returns (GetServiceEndpointResponse) {}
+}
+
+message GetServiceEndpointRequest {
+  // The instanceId which has started remote port forwarding.
+  string instanceId = 1;
+  // The service which has started remote port forwarding.
+  EndpointService.Value endpointService = 2;
+}
+
+message GetServiceEndpointResponse {
+  ServiceEndpoint serviceEndpoint = 1;
+}
+
+message ServiceEndpoint {
+  // The hostname where the forwarded port is listening on.
+  string hostName = 1;
+  // The port number of the forwarded port.
+  int32 port = 2;
+}
+
+// The SSH endpoint service types
+// Note: ssh client is using string value of those enums, so don't change the names
+message EndpointService {
+  enum Value {
+    UNSET = 0;
+    SSH = 1;
+    HUE = 2;
+    KNOX = 3;
+    GATEWAY = 4;
+  }
+}
