@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.service.dbserverconfig;
 
+import static com.sequenceiq.redbeams.service.RedbeamsConstants.DATABASE_TEST_RESULT_SUCCESS;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -165,7 +167,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         MapBindingResult errors = new MapBindingResult(new HashMap(), "databaseServer");
         connectionValidator.validate(resource, errors);
         if (!errors.hasErrors()) {
-            return "success";
+            return DATABASE_TEST_RESULT_SUCCESS;
         }
         return errors.getAllErrors().stream()
             .map(e -> (e instanceof FieldError ? ((FieldError) e).getField() + ": " : "") + e.getDefaultMessage())

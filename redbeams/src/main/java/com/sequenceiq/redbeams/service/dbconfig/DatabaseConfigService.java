@@ -1,8 +1,11 @@
 package com.sequenceiq.redbeams.service.dbconfig;
 
+import static com.sequenceiq.redbeams.service.RedbeamsConstants.DATABASE_TEST_RESULT_SUCCESS;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +21,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.MapBindingResult;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -37,6 +42,7 @@ import com.sequenceiq.redbeams.repository.DatabaseConfigRepository;
 import com.sequenceiq.redbeams.repository.DatabaseServerConfigRepository;
 import com.sequenceiq.redbeams.service.crn.CrnService;
 import com.sequenceiq.redbeams.service.drivers.DriverFunctions;
+import com.sequenceiq.redbeams.service.validation.DatabaseConnectionValidator;
 
 @Service
 public class DatabaseConfigService extends AbstractArchivistService<DatabaseConfig> {
@@ -63,6 +69,9 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
 
     @Inject
     private TransactionService transactionService;
+
+    @Inject
+    private DatabaseConnectionValidator connectionValidator;
 
     public Set<DatabaseConfig> findAll(String environmentId) {
         return repository.findByEnvironmentId(environmentId);
@@ -114,13 +123,29 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
                     String.format("Database(s) for %s not found in environment %s", String.join(", ", notFoundDatabaseConfigs), environmentId));
         }
         return foundDatabaseConfigs.stream()
-            .map(this::deleteOne)
-            .collect(Collectors.toSet());
+                .map(this::deleteOne)
+                .collect(Collectors.toSet());
     }
 
     public DatabaseConfig delete(String name, String environmentId) {
         DatabaseConfig resource = get(name, environmentId);
         return deleteOne(resource);
+    }
+
+    public String testConnection(String databaseConfigName, String environmentId) {
+        DatabaseConfig databaseConfig = get(databaseConfigName, environmentId);
+        return testConnection(databaseConfig);
+    }
+
+    public String testConnection(DatabaseConfig config) {
+        MapBindingResult errors = new MapBindingResult(new HashMap(), "database");
+        connectionValidator.validate(config, errors);
+        if (!errors.hasErrors()) {
+            return DATABASE_TEST_RESULT_SUCCESS;
+        }
+        return errors.getAllErrors().stream()
+                .map(e -> (e instanceof FieldError ? ((FieldError) e).getField() + ": " : "") + e.getDefaultMessage())
+                .collect(Collectors.joining("; "));
     }
 
     private DatabaseConfig deleteOne(DatabaseConfig databaseConfig) {

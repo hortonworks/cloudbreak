@@ -1,12 +1,14 @@
 package com.sequenceiq.redbeams.service.dbconfig;
 
 import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,7 +20,6 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import org.hamcrest.core.Every;
-import org.hamcrest.core.Is;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.Before;
 import org.junit.Rule;
@@ -30,6 +31,8 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.validation.MapBindingResult;
+import org.springframework.validation.ObjectError;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
@@ -44,6 +47,7 @@ import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.repository.DatabaseConfigRepository;
 import com.sequenceiq.redbeams.service.crn.CrnService;
 import com.sequenceiq.redbeams.service.drivers.DriverFunctions;
+import com.sequenceiq.redbeams.service.validation.DatabaseConnectionValidator;
 
 public class DatabaseConfigServiceTest {
 
@@ -58,6 +62,8 @@ public class DatabaseConfigServiceTest {
     private static final String DATABASE_USER_NAME = "databaseUserName";
 
     private static final String ENVIRONMENT_CRN = "environmentCrn";
+
+    private static final String ERROR_MESSAGE = "error message";
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -79,6 +85,9 @@ public class DatabaseConfigServiceTest {
 
     @Mock
     private TransactionService transactionService;
+
+    @Mock
+    private DatabaseConnectionValidator connectionValidator;
 
     @InjectMocks
     private DatabaseConfigService underTest;
@@ -172,7 +181,7 @@ public class DatabaseConfigServiceTest {
 
         underTest.delete(databasesToDelete, ENVIRONMENT_CRN);
 
-        assertThat(databaseConfigs, Every.everyItem(hasProperty("archived", Is.is(true))));
+        assertThat(databaseConfigs, Every.everyItem(hasProperty("archived", is(true))));
     }
 
     @Test
@@ -222,6 +231,58 @@ public class DatabaseConfigServiceTest {
         when(repository.save(configToRegister)).thenThrow(new AccessDeniedException("User has no right to access resource"));
 
         underTest.register(configToRegister);
+    }
+
+    @Test
+    public void testTestNewConnectionSucceed() {
+        DatabaseConfig newConfig = new DatabaseConfig();
+
+        String result = underTest.testConnection(newConfig);
+
+        assertEquals("success", result);
+        verify(connectionValidator).validate(eq(newConfig), any());
+    }
+
+    @Test
+    public void testTestNewConnectionFails() {
+        DatabaseConfig newConfig = new DatabaseConfig();
+        doAnswer((Answer) invocation -> {
+            MapBindingResult errors = invocation.getArgument(1, MapBindingResult.class);
+            errors.addError(new ObjectError("failed", ERROR_MESSAGE));
+            return null;
+        }).when(connectionValidator).validate(any(), any());
+
+        String result = underTest.testConnection(newConfig);
+
+        assertEquals(ERROR_MESSAGE, result);
+        verify(connectionValidator).validate(eq(newConfig), any());
+    }
+
+    @Test
+    public void testExistingConnectionSucceed() {
+        DatabaseConfig existingDatabaseConfig = new DatabaseConfig();
+        when(repository.findByEnvironmentIdAndName(ENVIRONMENT_CRN, DATABASE_NAME)).thenReturn(Optional.of(existingDatabaseConfig));
+
+        String result = underTest.testConnection(DATABASE_NAME, ENVIRONMENT_CRN);
+
+        assertEquals("success", result);
+        verify(connectionValidator).validate(eq(existingDatabaseConfig), any());
+    }
+
+    @Test
+    public void testExistingConnectionFails() {
+        DatabaseConfig existingDatabaseConfig = new DatabaseConfig();
+        when(repository.findByEnvironmentIdAndName(ENVIRONMENT_CRN, DATABASE_NAME)).thenReturn(Optional.of(existingDatabaseConfig));
+        doAnswer((Answer) invocation -> {
+            MapBindingResult errors = invocation.getArgument(1, MapBindingResult.class);
+            errors.addError(new ObjectError("failed", ERROR_MESSAGE));
+            return null;
+        }).when(connectionValidator).validate(any(), any());
+
+        String result = underTest.testConnection(DATABASE_NAME, ENVIRONMENT_CRN);
+
+        assertEquals(ERROR_MESSAGE, result);
+        verify(connectionValidator).validate(eq(existingDatabaseConfig), any());
     }
 
     private <T> void setupTransactionServiceRequired(T supplierReturnType) throws TransactionService.TransactionExecutionException {
