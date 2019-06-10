@@ -16,3 +16,4 @@ curl_config_admin_user
 startit.sh
 build/
 test-output/
+**/generated/
