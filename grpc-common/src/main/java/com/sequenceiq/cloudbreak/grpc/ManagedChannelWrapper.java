@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.auth.altus;
+package com.sequenceiq.cloudbreak.grpc;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
