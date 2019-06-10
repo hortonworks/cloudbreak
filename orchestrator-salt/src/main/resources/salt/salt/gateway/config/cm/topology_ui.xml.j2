@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<topology>
+    <name>{{ topology_name }}_ui</name>
+    <gateway>
+
+        <!-- {{ exposed }} -->
+
+        <provider>
+           <role>federation</role>
+           <name>SSOCookieProvider</name>
+           <enabled>true</enabled>
+           <param>
+              <name>sso.authentication.provider.url</name>
+              <value>/{{ salt['pillar.get']('gateway:path') }}/sso/api/v1/websso</value>
+           </param>
+        </provider>
+
+        <provider>
+            <role>identity-assertion</role>
+            <name>Default</name>
+            <enabled>true</enabled>
+        </provider>
+
+        <provider>
+            <role>ha</role>
+            <name>HaProvider</name>
+            <enabled>true</enabled>
+            {% if 'ATLAS' in exposed -%}
+            <param>
+                <name>ATLAS</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            <param>
+                <name>ATLAS-API</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'HBASE' in exposed -%}
+            <param>
+                <name>HBASEUI</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'HDFS' in exposed -%}
+            <!-- HDFSUI doesn't support HAProvider
+            <param>
+                <name>HDFSUI</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            -->
+            {%- endif %}
+            {% if 'JOBHISTORYUI' in exposed -%}
+            <param>
+                <name>JOBHISTORYUI</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'LIVYSERVER1' in exposed -%}
+            <param>
+                <name>LIVYSERVER</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'OOZIE' in exposed -%}
+            <param>
+                <name>OOZIEUI</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'RANGER' in exposed -%}
+            <param>
+                <name>RANGER</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            <param>
+                <name>RANGERUI</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'SPARKHISTORYUI' in exposed -%}
+            <param>
+                <name>SPARKHISTORYUI</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'SOLR' in exposed -%}
+            <param>
+                <name>SOLR</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'YARN' in exposed -%}
+            <param>
+                <name>YARNUI</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'YARNUIV2' in exposed -%}
+            <param>
+                <name>YARNUIV2</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'ZEPPELIN' in exposed -%}
+            <param>
+                <name>ZEPPELINUI</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            <param>
+                <name>ZEPPELINWS</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
+            </param>
+            {%- endif %}
+        </provider>
+    </gateway>
+
+    {% if 'ATLAS_SERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'ATLAS' in exposed -%}
+    <service>
+        <role>ATLAS</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['ATLAS_SERVER'] -%}
+        <url>http://{{ hostloc }}:{{ ports['ATLAS'] }}</url>
+        {%- endfor %}
+    </service>
+    <service>
+        <role>ATLAS-API</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['ATLAS_SERVER'] -%}
+        <url>http://{{ hostloc }}:{{ ports['ATLAS'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    <!-- TODO - HBASEUI -->
+
+    {% if 'JOBHISTORY' in salt['pillar.get']('gateway:location') -%}
+    {% if 'JOBHISTORYUI' in exposed -%}
+    <service>
+        <role>JOBHISTORYUI</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['JOBHISTORY'] -%}
+        <url>http://{{ hostloc }}:{{ ports['JOBHISTORYUI'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'LIVY_SERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'LIVYSERVER1' in exposed -%}
+    <service>
+        <role>LIVYSERVER</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['LIVY_SERVER'] -%}
+        <url>http://{{ hostloc }}:{{ ports['LIVYSERVER1'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    <!-- TODO - OOZIE -->
+
+    {% if 'RANGER_ADMIN' in salt['pillar.get']('gateway:location') -%}
+    {% if 'RANGER' in exposed -%}
+    <service>
+        <role>RANGER</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['RANGER_ADMIN'] -%}
+        <url>http://{{ hostloc }}:{{ ports['RANGER'] }}</url>
+        {%- endfor %}
+    </service>
+    <service>
+        <role>RANGERUI</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['RANGER_ADMIN'] -%}
+        <url>http://{{ hostloc }}:{{ ports['RANGER'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'SPARK_YARN_HISTORY_SERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'SPARKHISTORYUI' in exposed -%}
+    <service>
+        <role>SPARKHISTORYUI</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['SPARK_YARN_HISTORY_SERVER'] -%}
+        <url>http://{{ hostloc }}:{{ ports['SPARKHISTORYUI'] }}/</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    <!-- TODO - SOLR -->
+
+    {% if 'RESOURCEMANAGER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'YARNUI' in exposed -%}
+    <service>
+        <role>YARNUI</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['RESOURCEMANAGER'] -%}
+        <url>http://{{ hostloc }}:{{ ports['YARNUI'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+
+    {% if 'YARNUIV2' in exposed -%}
+    <service>
+        <role>YARNUIV2</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['RESOURCEMANAGER'] -%}
+        <url>http://{{ hostloc }}:{{ ports['YARNUIV2'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'ZEPPELIN_MASTER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'ZEPPELIN' in exposed -%}
+    <service>
+        <role>ZEPPELINUI</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['ZEPPELIN_MASTER'] -%}
+        <url>http://{{ hostloc }}:{{ ports['ZEPPELIN'] }}</url>
+        {%- endfor %}
+    </service>
+    <service>
+        <role>ZEPPELINWS</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['ZEPPELIN_MASTER'] -%}
+        <url>ws://{{ hostloc }}:9995/ws</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+</topology>
