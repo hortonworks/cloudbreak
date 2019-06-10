@@ -39,7 +39,7 @@
         <Package name="~com\.cloudera\.thunderhead\.service\.usermanagement.*"/>
     </Match>
     <Match>
-        <Package name="~com\.cloudera\.thunderhead\.service\.authorization.*"/>
+        <Package name="~com\.cloudera\.thunderhead\.service\.minasshd.*"/>
     </Match>
     <Match>
         <Package name="~com\.cloudera\.thunderhead\.service\.common.*"/>
