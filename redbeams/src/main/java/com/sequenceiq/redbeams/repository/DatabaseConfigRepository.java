@@ -7,6 +7,7 @@ import javax.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.redbeams.authorization.CheckPermissionsByReturnValue;
@@ -19,16 +20,14 @@ public interface DatabaseConfigRepository extends JpaRepository<DatabaseConfig, 
 
     @CheckPermissionsByReturnValue(action = ResourceAction.READ)
     @Query("SELECT d FROM DatabaseConfig d WHERE d.environmentId = :environmentId "
-        + "AND (d.name = :name OR d.resourceCrn = :name)")
-    Optional<DatabaseConfig> findByEnvironmentIdAndName(String environmentId, String name);
+            + "AND (d.name = :name OR d.resourceCrn = :name)")
+    Optional<DatabaseConfig> findByEnvironmentIdAndName(@Param("environmentId") String environmentId, @Param("name") String name);
 
     @CheckPermissionsByReturnValue(action = ResourceAction.READ)
     Set<DatabaseConfig> findByEnvironmentId(String environmentId);
 
     @CheckPermissionsByReturnValue(action = ResourceAction.READ)
     @Query("SELECT d FROM DatabaseConfig d WHERE d.environmentId = :environmentId "
-        + "AND (d.name IN :names OR d.resourceCrn IN :names)")
-    Set<DatabaseConfig> findAllByEnvironmentIdAndNameIn(String environmentId, Set<String> names);
-
-    // save does not require a permission check
+            + "AND (d.name IN :names OR d.resourceCrn IN :names)")
+    Set<DatabaseConfig> findAllByEnvironmentIdAndNameIn(@Param("environmentId") String environmentId, @Param("names") Set<String> names);
 }

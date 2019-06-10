@@ -35,7 +35,7 @@ public class DatabaseV4Controller implements DatabaseV4Endpoint {
     @Override
     public DatabaseV4Responses list(String environmentId) {
         return new DatabaseV4Responses(redbeamsConverterUtil.convertAllAsSet(databaseConfigService.findAll(environmentId),
-                        DatabaseV4Response.class));
+                DatabaseV4Response.class));
     }
 
     @Override
@@ -72,7 +72,16 @@ public class DatabaseV4Controller implements DatabaseV4Endpoint {
 
     @Override
     public DatabaseTestV4Response test(@Valid DatabaseTestV4Request databaseTestV4Request) {
-        return new DatabaseTestV4Response();
+        String result = "";
+        if (databaseTestV4Request.getExistingDatabase() != null) {
+            result = databaseConfigService.testConnection(
+                    databaseTestV4Request.getExistingDatabase().getName(),
+                    databaseTestV4Request.getExistingDatabase().getEnvironmentId()
+            );
+        } else {
+            DatabaseConfig databaseConfig = redbeamsConverterUtil.convert(databaseTestV4Request.getDatabase(), DatabaseConfig.class);
+            result = databaseConfigService.testConnection(databaseConfig);
+        }
+        return new DatabaseTestV4Response(result);
     }
-
 }
