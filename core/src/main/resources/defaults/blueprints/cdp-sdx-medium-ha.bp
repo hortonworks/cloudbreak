@@ -10,45 +10,57 @@
       {
         "refName": "master",
         "roleConfigGroupsRefNames": [
-          "atlas-ATLAS_SERVER-BASE",
-          "hbase-MASTER-BASE",
           "hbase-REGIONSERVER-BASE",
+          "hbase-MASTER-BASE",
           "hdfs-DATANODE-BASE",
           "hdfs-FAILOVERCONTROLLER-BASE",
           "hdfs-JOURNALNODE-BASE",
           "hdfs-NAMENODE-1",
           "hive-HIVEMETASTORE-BASE",
-          "kafka-GATEWAY-BASE",
-          "kafka-KAFKA_BROKER-BASE",
-          "ranger-RANGER_ADMIN-BASE",
-          "ranger-RANGER_USERSYNC-BASE",
           "solr-SOLR_SERVER-BASE",
+          "zookeeper-SERVER-BASE"
+        ]
+      },
+      {
+        "refName": "master2",
+        "roleConfigGroupsRefNames": [
+          "hdfs-BALANCER-BASE",
+          "hbase-REGIONSERVER-BASE",
+          "hbase-MASTER-BASE",
+          "hdfs-DATANODE-BASE",
+          "hdfs-FAILOVERCONTROLLER-BASE",
+          "hdfs-JOURNALNODE-BASE",
+          "hdfs-NAMENODE-2",
           "zookeeper-SERVER-BASE"
         ]
       },
       {
         "refName": "alpha",
         "roleConfigGroupsRefNames": [
+          "ranger-RANGER_ADMIN-BASE",
+          "ranger-RANGER_USERSYNC-BASE",
           "atlas-ATLAS_SERVER-1",
-          "hbase-MASTER-BASE",
-          "hbase-REGIONSERVER-BASE",
           "hdfs-DATANODE-BASE",
-          "hdfs-JOURNALNODE-BASE",
           "knox-KNOX_GATEWAY-BASE",
           "ranger-RANGER_TAGSYNC-BASE",
+          "kafka-KAFKA_BROKER-BASE",
+          "zookeeper-SERVER-BASE",
+          "hdfs-JOURNALNODE-BASE"
+        ]
+      },
+      {
+        "refName": "alpha2",
+        "roleConfigGroupsRefNames": [
+          "kafka-GATEWAY-BASE",
+          "atlas-ATLAS_SERVER-BASE",
+          "kafka-KAFKA_BROKER-BASE",
           "zookeeper-SERVER-BASE"
         ]
       },
       {
         "refName": "beta",
         "roleConfigGroupsRefNames": [
-          "hbase-MASTER-BASE",
-          "hbase-REGIONSERVER-BASE",
-          "hdfs-BALANCER-BASE",
           "hdfs-DATANODE-BASE",
-          "hdfs-FAILOVERCONTROLLER-BASE",
-          "hdfs-JOURNALNODE-BASE",
-          "hdfs-NAMENODE-2",
           "zookeeper-SERVER-BASE"
         ]
       },
@@ -72,7 +84,7 @@
             "configs": [
               {
                 "name": "atlas_kafka_bootstrap_servers",
-                "value": "{{{format-join host_groups.master format='%s:9092' }}}"
+                "value": "{{{ format-join host_groups.alpha format='%s:9092' }}},{{{ format-join host_groups.alpha2 format='%s:9092' }}}"
               }
             ]
           },
@@ -83,7 +95,7 @@
             "configs": [
               {
                 "name": "atlas_kafka_bootstrap_servers",
-                "value": "{{{format-join host_groups.master format='%s:9092' }}}"
+                "value": "{{{ format-join host_groups.alpha format='%s:9092' }}},{{{ format-join host_groups.alpha2 format='%s:9092' }}}"
               }
             ]
           }
@@ -194,7 +206,7 @@
               },
               {
                 "name": "namenode_config_safety_valve",
-                "value": "\n        <property>\n          <name>dfs.namenode.redundancy.considerLoad</name>\n          <value>false</value>\n        </property>"
+                "value": "\n <property>\n <name>dfs.namenode.redundancy.considerLoad</name>\n <value>false</value>\n </property>"
               },
               {
                 "name": "dfs_https_port",
@@ -390,12 +402,24 @@
           {
             "base": true,
             "refName": "knox-KNOX_GATEWAY-BASE",
-            "roleType": "KNOX_GATEWAY"
+            "roleType": "KNOX_GATEWAY",
+            "configs": [
+              {
+                "name": "gateway_master_secret",
+                "value": "cloudera1"
+              }
+            ]
           },
           {
+            "base": true,
+            "configs": [
+              {
+                "name": "idbroker_master_secret",
+                "value": "cloudera1"
+              }
+            ],
             "refName": "knox-IDBROKER-BASE",
-            "roleType": "IDBROKER",
-            "base": true
+            "roleType": "IDBROKER"
           }
         ]
       }
