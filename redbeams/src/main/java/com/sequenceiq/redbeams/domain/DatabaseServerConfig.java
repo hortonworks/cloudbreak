@@ -274,9 +274,12 @@ public class DatabaseServerConfig implements ArchivableResource, CrnResource {
      * @param databaseName the name of the database
      * @param type         the type of the database
      * @param status       the resource status of the database
+     * @param userName     the username for the user associated with the database
+     * @param password     the password for the user associated with the database
      * @return a DatabaseConfig
      */
-    public DatabaseConfig createDatabaseConfig(String databaseName, String type, ResourceStatus status) {
+    public DatabaseConfig createDatabaseConfig(String databaseName, String type, ResourceStatus status,
+        String userName, String password) {
         DatabaseConfig databaseConfig = new DatabaseConfig();
 
         databaseConfig.setDatabaseVendor(databaseVendor);
@@ -285,8 +288,8 @@ public class DatabaseServerConfig implements ArchivableResource, CrnResource {
         databaseConfig.setConnectionURL(new DatabaseCommon().getJdbcConnectionUrl(databaseVendor.jdbcUrlDriverId(),
             host, port, Optional.of(databaseName)));
         databaseConfig.setConnectionDriver(connectionDriver);
-        databaseConfig.setConnectionUserName(connectionUserName.getRaw());
-        databaseConfig.setConnectionPassword(connectionPassword.getRaw());
+        databaseConfig.setConnectionUserName(userName);
+        databaseConfig.setConnectionPassword(password);
         databaseConfig.setStatus(status);
         databaseConfig.setType(type);
         databaseConfig.setConnectorJarUrl(connectorJarUrl);

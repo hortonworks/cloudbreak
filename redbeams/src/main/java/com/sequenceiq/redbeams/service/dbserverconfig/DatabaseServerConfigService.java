@@ -4,8 +4,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -26,7 +29,10 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
+import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -34,6 +40,7 @@ import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
+import com.sequenceiq.redbeams.exception.RedbeamsException;
 import com.sequenceiq.redbeams.repository.DatabaseServerConfigRepository;
 import com.sequenceiq.redbeams.service.crn.CrnService;
 import com.sequenceiq.redbeams.service.dbconfig.DatabaseConfigService;
@@ -47,6 +54,10 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
 
     private static final Pattern VALID_DATABASE_NAME = Pattern.compile("^[\\p{Alnum}_][\\p{Alnum}_-]*$");
 
+    private static final int MAX_RANDOM_INT_FOR_CHARACTER = 26;
+
+    private static final int USER_NAME_LENGTH = 10;
+
     @Inject
     private DatabaseServerConfigRepository repository;
 
@@ -57,10 +68,16 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
     private DriverFunctions driverFunctions;
 
     @Inject
+    private DatabaseCommon databaseCommon;
+
+    @Inject
     private DatabaseServerConnectionValidator connectionValidator;
 
     @Inject
     private Clock clock;
+
+    @Inject
+    private TransactionService transactionService;
 
     @Inject
     private CrnService crnService;
@@ -164,30 +181,53 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
             throw new IllegalArgumentException("The database must contain only alphanumeric characters or underscores");
         }
 
+        LOGGER.info("Creating database with name: {}", databaseName);
+
         DatabaseServerConfig databaseServerConfig = getByName(workspaceId, environmentId, serverName);
-        StringBuilder createResult = new StringBuilder();
 
-        driverFunctions.execWithDatabaseDriver(databaseServerConfig, driver -> {
-            try (Connection conn = driver.connect(databaseServerConfig); Statement statement = conn.createStatement()) {
+        String databaseUserName = generateDatabaseUserName();
+        String databasePassword = generateDatabasePassword();
+        List<String> sqlStrings = List.of(
+            "CREATE DATABASE " + databaseName,
+            "CREATE USER " + databaseUserName + " WITH ENCRYPTED PASSWORD '" + databasePassword + "'",
+            "GRANT ALL PRIVILEGES ON DATABASE " + databaseName + " TO " + databaseUserName
+        );
 
-                LOGGER.info("Creating database {}", databaseName);
-                if (!statement.execute("CREATE DATABASE " + databaseName)) {
-                    createResult.append("created");
+        try {
+            transactionService.required(() -> {
+                driverFunctions.execWithDatabaseDriver(databaseServerConfig, driver -> {
+                    try (Connection conn = driver.connect(databaseServerConfig); Statement statement = conn.createStatement()) {
+                        databaseCommon.executeUpdates(statement, sqlStrings);
+                    } catch (SQLException e) {
+                        throw new RedbeamsException("Failed to create database " + databaseName, e);
+                    }
+                });
+                return true;
+            });
+        } catch (TransactionExecutionException e) {
+            LOGGER.error("Error / transaction failure while creating database on server", e);
+            String message = Throwables.getCausalChain(e).stream().map(th -> th.getMessage()).collect(Collectors.joining("; "));
+            return "Error / transaction failure while creating database on server: " + message;
+        }
 
-                    DatabaseConfig newDatabaseConfig =
-                            databaseServerConfig.createDatabaseConfig(databaseName, databaseType, ResourceStatus.SERVICE_MANAGED);
-                    databaseConfigService.register(newDatabaseConfig);
+        // Only record database on server if successfully created on server
+        DatabaseConfig newDatabaseConfig =
+            databaseServerConfig.createDatabaseConfig(databaseName, databaseType, ResourceStatus.SERVICE_MANAGED,
+                databaseUserName, databasePassword);
+        databaseConfigService.register(newDatabaseConfig);
 
-                } else {
-                    createResult.append("failed");
-                }
+        return "created";
+    }
 
-            } catch (SQLException e) {
-                createResult.append("error when creating database: ").append(e.getMessage());
-            }
-        });
+    private String generateDatabaseUserName() {
+        return ThreadLocalRandom.current().ints(0, MAX_RANDOM_INT_FOR_CHARACTER)
+            .limit(USER_NAME_LENGTH).boxed()
+            .map(i -> Character.toString((char) ('a' + i)))
+            .collect(Collectors.joining());
+    }
 
-        return createResult.toString();
+    private String generateDatabasePassword() {
+        return UUID.randomUUID().toString();
     }
 
     public WorkspaceResource resource() {

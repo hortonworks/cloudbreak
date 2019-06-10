@@ -3,6 +3,8 @@ package com.sequenceiq.redbeams.service.dbconfig;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -20,8 +22,10 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
+import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -47,6 +51,9 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
 
     @Inject
     private DriverFunctions driverFunctions;
+
+    @Inject
+    private DatabaseCommon databaseCommon;
 
     @Inject
     private Clock clock;
@@ -117,38 +124,51 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
     }
 
     private DatabaseConfig deleteOne(DatabaseConfig databaseConfig) {
-        LOGGER.debug("Deleting database with name: {}", databaseConfig.getName());
-        try {
-            // FIXME this can take a while and trigger logging that the transaction took too long
-            return transactionService.required(() -> {
-                if (databaseConfig.getStatus() == ResourceStatus.SERVICE_MANAGED) {
-                    return deleteServiceManagedDatabase(databaseConfig);
-                } else {
-                    return delete(databaseConfig);
-                }
-            });
-        } catch (TransactionService.TransactionExecutionException e) {
-            throw new RuntimeException("Transaction failed", e);
+        LOGGER.info("Deleting database with name: {}", databaseConfig.getName());
+
+        DatabaseConfig deletedConfig = delete(databaseConfig);
+
+        // Only delete database from server if successfully removed from redbeams
+        if (databaseConfig.getStatus() == ResourceStatus.SERVICE_MANAGED) {
+            deleteServiceManagedDatabase(databaseConfig);
         }
+
+        return deletedConfig;
     }
 
-    private DatabaseConfig deleteServiceManagedDatabase(DatabaseConfig databaseConfig) {
+    private void deleteServiceManagedDatabase(DatabaseConfig databaseConfig) {
         String databaseName = databaseConfig.getName();
+        String databaseUserName = databaseConfig.getConnectionUserName().getRaw();
         DatabaseServerConfig databaseServerConfig = databaseConfig.getServer();
         if (databaseServerConfig == null) {
-            throw new RedbeamsException("Cannot delete database " + databaseName + ", server not known");
+            LOGGER.error("Cannot delete database " + databaseName + " from server, server not known");
+            return;
         }
 
-        driverFunctions.execWithDatabaseDriver(databaseServerConfig, driver -> {
-            try (Connection conn = driver.connect(databaseServerConfig); Statement statement = conn.createStatement()) {
-                LOGGER.info("Deleting database {}", databaseName);
-                statement.executeUpdate("DROP DATABASE " + databaseName);
-            } catch (SQLException e) {
-                throw new RedbeamsException("Failed to drop database " + databaseName, e);
-            }
-        });
+        List<String> sqlStrings = new ArrayList<>();
+        boolean distinctDbUser = !databaseUserName.equals(databaseServerConfig.getConnectionUserName());
+        if (distinctDbUser) {
+            sqlStrings.add("REVOKE ALL PRIVILEGES ON DATABASE " + databaseName + " FROM " + databaseUserName);
+        }
+        sqlStrings.add("DROP DATABASE " + databaseName);
+        if (distinctDbUser) {
+            sqlStrings.add("DROP USER " + databaseUserName);
+        }
 
-        return delete(databaseConfig);
+        try {
+            transactionService.required(() -> {
+                driverFunctions.execWithDatabaseDriver(databaseServerConfig, driver -> {
+                    try (Connection conn = driver.connect(databaseServerConfig); Statement statement = conn.createStatement()) {
+                        databaseCommon.executeUpdates(statement, sqlStrings);
+                    } catch (SQLException e) {
+                        throw new RedbeamsException("Failed to drop database " + databaseName, e);
+                    }
+                });
+                return true;
+            });
+        } catch (TransactionExecutionException e) {
+            LOGGER.error("Error / transaction failure while deleting database from server", e);
+        }
     }
 
     @Override

@@ -1,11 +1,19 @@
 package com.sequenceiq.cloudbreak.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon.JdbcConnectionUrlFields;
 
+import java.util.List;
 import java.util.Optional;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -174,5 +182,33 @@ public class DatabaseCommonTest {
     public void testPortCheck() {
         thrown.expect(IllegalArgumentException.class);
         new JdbcConnectionUrlFields("postgresql", "test.eu-west-1.rds.amazonaws.com", -1, Optional.empty());
+    }
+
+    @Test
+    public void testExecuteUpdates() throws SQLException {
+        Statement statement = mock(Statement.class);
+        when(statement.executeUpdate(any(String.class))).thenReturn(1);
+        List<String> sqlStrings = List.of("sql1", "sql2");
+
+        List<Integer> rowCounts = databaseCommon.executeUpdates(statement, sqlStrings);
+
+        assertThat(rowCounts).isEqualTo(List.of(1, 1));
+        verify(statement).executeUpdate("sql1");
+        verify(statement).executeUpdate("sql2");
+    }
+
+    @Test
+    public void testExecuteUpdatesFail() throws SQLException {
+        thrown.expect(SQLException.class);
+        Statement statement = mock(Statement.class);
+        when(statement.executeUpdate("sql1")).thenThrow(new SQLException("fail"));
+        List<String> sqlStrings = List.of("sql1", "sql2");
+
+        try {
+            databaseCommon.executeUpdates(statement, sqlStrings);
+        } finally {
+            verify(statement).executeUpdate("sql1");
+            verify(statement, never()).executeUpdate("sql2");
+        }
     }
 }
