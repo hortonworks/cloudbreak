@@ -5,6 +5,8 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.core.Every.everyItem;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
@@ -22,12 +24,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
@@ -35,15 +39,21 @@ import org.mockito.stubbing.Answer;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.Errors;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
+import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.redbeams.TestData;
+import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.repository.DatabaseServerConfigRepository;
 import com.sequenceiq.redbeams.service.crn.CrnService;
+import com.sequenceiq.redbeams.service.dbconfig.DatabaseConfigService;
+import com.sequenceiq.redbeams.service.drivers.DriverFunctions;
 import com.sequenceiq.redbeams.service.validation.DatabaseServerConnectionValidator;
 
 public class DatabaseServerConfigServiceTest {
@@ -58,6 +68,15 @@ public class DatabaseServerConfigServiceTest {
     private DatabaseServerConfigRepository repository;
 
     @Mock
+    private DatabaseConfigService databaseConfigService;
+
+    @Mock
+    private DriverFunctions driverFunctions;
+
+    @Mock
+    private DatabaseCommon databaseCommon;
+
+    @Mock
     private DatabaseServerConnectionValidator connectionValidator;
 
     @Mock
@@ -65,6 +84,9 @@ public class DatabaseServerConfigServiceTest {
 
     @Mock
     private CrnService crnService;
+
+    @Mock
+    private TransactionService transactionService;
 
     private DatabaseServerConfig server;
 
@@ -265,5 +287,45 @@ public class DatabaseServerConfigServiceTest {
         assertThat(underTest.validateDatabaseName("bad##name"), is(false));
         assertThat(underTest.validateDatabaseName("_bad##name"), is(false));
         assertThat(underTest.validateDatabaseName("-bad_name"), is(false));
+    }
+
+    @Test
+    public void testCreateDatabaseOnServer() throws TransactionService.TransactionExecutionException {
+        when(repository.findByNameAndWorkspaceIdAndEnvironmentId(server.getName(), 0L, "myenv")).thenReturn(Optional.of(server));
+        setupTransactionServiceRequired(Boolean.class);
+        when(databaseConfigService.register(any(DatabaseConfig.class)))
+            .thenAnswer((Answer<DatabaseConfig>) invocation -> {
+                return invocation.getArgument(0, DatabaseConfig.class);
+            });
+
+        server.setDatabaseVendor(DatabaseVendor.POSTGRES);
+        server.setHost("myhost");
+        server.setPort(5432);
+        server.setConnectionUserName("root");
+        server.setConnectionPassword("rootpassword");
+        String databaseName = "mydb";
+        String databaseType = "hive";
+        String result = underTest.createDatabaseOnServer(0L, "myenv", server.getName(), databaseName, databaseType);
+
+        assertEquals("created", result);
+
+        verify(driverFunctions).execWithDatabaseDriver(eq(server), any());
+
+        ArgumentCaptor<DatabaseConfig> captor = ArgumentCaptor.forClass(DatabaseConfig.class);
+        verify(databaseConfigService).register(captor.capture());
+        DatabaseConfig db = captor.getValue();
+        assertEquals(databaseName, db.getName());
+        assertEquals(databaseType, db.getType());
+
+        String databaseUserName = db.getConnectionUserName().getRaw();
+        assertNotNull(databaseUserName);
+        assertNotEquals(server.getConnectionUserName(), databaseUserName);
+    }
+
+    private <T> void setupTransactionServiceRequired(T supplierReturnType) throws TransactionService.TransactionExecutionException {
+        when(transactionService.required(any())).thenAnswer((Answer<T>) invocation -> {
+            Supplier<T> supplier = invocation.getArgument(0, Supplier.class);
+            return supplier.get();
+        });
     }
 }

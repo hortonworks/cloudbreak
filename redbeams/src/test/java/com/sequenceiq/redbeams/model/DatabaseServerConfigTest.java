@@ -4,15 +4,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Optional;
+
 import org.hibernate.annotations.Where;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.redbeams.TestData;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
+import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 
 public class DatabaseServerConfigTest {
@@ -94,5 +98,46 @@ public class DatabaseServerConfigTest {
 
         assertNotNull(whereAnnotation);
         assertEquals("archived = false", whereAnnotation.clause());
+    }
+
+    @Test
+    public void testCreateDatabaseConfig() {
+        config.setId(1L);
+        config.setAccountId("myaccount");
+        Crn crn = TestData.getTestCrn("databaseServer", "myserver");
+        config.setResourceCrn(crn);
+        config.setWorkspaceId(0L);
+        config.setName("myserver");
+        config.setDescription("mine not yours");
+        config.setHost("myserver.db.example.com");
+        config.setPort(5432);
+        config.setDatabaseVendor(DatabaseVendor.POSTGRES);
+        config.setConnectionDriver("postgresql.jar");
+        config.setConnectionUserName("root");
+        config.setConnectionPassword("cloudera");
+        long now = System.currentTimeMillis();
+        config.setCreationDate(now);
+        config.setResourceStatus(ResourceStatus.SERVICE_MANAGED);
+        config.setConnectorJarUrl("http://drivers.example.com/postgresql.jar");
+        config.setDeletionTimestamp(2L);
+        config.setArchived(true);
+        config.setEnvironmentId("myenvironment");
+
+        DatabaseConfig db = config.createDatabaseConfig("mydb", "hive", ResourceStatus.USER_MANAGED, "dbuser", "dbpass");
+
+        assertEquals(config.getDatabaseVendor(), db.getDatabaseVendor());
+        assertEquals("mydb", db.getName());
+        assertEquals(config.getDescription(), db.getDescription());
+        String connectionUrl = new DatabaseCommon().getJdbcConnectionUrl(config.getDatabaseVendor().jdbcUrlDriverId(),
+            config.getHost(), config.getPort(), Optional.of("mydb"));
+        assertEquals(connectionUrl, db.getConnectionURL());
+        assertEquals(config.getConnectionDriver(), db.getConnectionDriver());
+        assertEquals("dbuser", db.getConnectionUserName().getRaw());
+        assertEquals("dbpass", db.getConnectionPassword().getRaw());
+        assertEquals(ResourceStatus.USER_MANAGED, db.getStatus());
+        assertEquals("hive", db.getType());
+        assertEquals(config.getConnectorJarUrl(), db.getConnectorJarUrl());
+        assertEquals(config.getEnvironmentId(), db.getEnvironmentId());
+        assertEquals(config, db.getServer());
     }
 }

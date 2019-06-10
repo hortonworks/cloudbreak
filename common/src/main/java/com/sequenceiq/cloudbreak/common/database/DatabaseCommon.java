@@ -2,6 +2,10 @@ package com.sequenceiq.cloudbreak.common.database;
 
 import static java.util.Objects.requireNonNull;
 
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -103,6 +107,23 @@ public class DatabaseCommon {
                 throw new UnsupportedOperationException("Don't know how to form a connection URL for JDBC driver " + fields.getVendorDriverId());
         }
         return url;
+    }
+
+    /**
+     * Executes several SQL statements. Statements are not wrapped in a
+     * transaction, so do that if it's important.
+     *
+     * @param  statement    SQL statement for working with a database
+     * @param  sqlStrings   list of SQL statements to execute
+     * @return              corresponding list of update counts
+     * @throws SQLException if any statement fails
+     */
+    public List<Integer> executeUpdates(Statement statement, List<String> sqlStrings) throws SQLException {
+        List<Integer> rowCounts = new ArrayList<>(sqlStrings.size());
+        for (String sqlString : sqlStrings) {
+            rowCounts.add(statement.executeUpdate(sqlString));
+        }
+        return rowCounts;
     }
 
     public static class JdbcConnectionUrlFields {

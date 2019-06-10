@@ -32,6 +32,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
@@ -54,6 +55,8 @@ public class DatabaseConfigServiceTest {
 
     private static final String DATABASE_NAME2 = "databaseName2";
 
+    private static final String DATABASE_USER_NAME = "databaseUserName";
+
     private static final String ENVIRONMENT_CRN = "environmentCrn";
 
     @Rule
@@ -64,6 +67,9 @@ public class DatabaseConfigServiceTest {
 
     @Mock
     private DriverFunctions driverFunctions;
+
+    @Mock
+    private DatabaseCommon databaseCommon;
 
     @Mock
     private Clock clock;
@@ -121,7 +127,6 @@ public class DatabaseConfigServiceTest {
     public void testDeleteRegisteredDatabase() throws TransactionService.TransactionExecutionException {
         DatabaseConfig databaseConfig = getDatabaseConfig(ResourceStatus.USER_MANAGED, DATABASE_NAME);
         when(repository.findByEnvironmentIdAndName(ENVIRONMENT_CRN, DATABASE_NAME)).thenReturn(Optional.of(databaseConfig));
-        setupTransactionServiceRequired();
 
         underTest.delete(DATABASE_NAME, ENVIRONMENT_CRN);
 
@@ -146,7 +151,7 @@ public class DatabaseConfigServiceTest {
         DatabaseConfig databaseConfig = getDatabaseConfig(ResourceStatus.SERVICE_MANAGED, DATABASE_NAME);
         databaseConfig.setServer(server);
         when(repository.findByEnvironmentIdAndName(ENVIRONMENT_CRN, DATABASE_NAME)).thenReturn(Optional.of(databaseConfig));
-        setupTransactionServiceRequired();
+        setupTransactionServiceRequired(Boolean.class);
 
         underTest.delete(DATABASE_NAME, ENVIRONMENT_CRN);
 
@@ -163,7 +168,7 @@ public class DatabaseConfigServiceTest {
         databaseConfigs.add(getDatabaseConfig(ResourceStatus.USER_MANAGED, DATABASE_NAME2));
         Set<String> databasesToDelete = Set.of(DATABASE_NAME, DATABASE_NAME2);
         when(repository.findAllByEnvironmentIdAndNameIn(ENVIRONMENT_CRN, databasesToDelete)).thenReturn(databaseConfigs);
-        setupTransactionServiceRequired();
+        setupTransactionServiceRequired(DatabaseConfig.class);
 
         underTest.delete(databasesToDelete, ENVIRONMENT_CRN);
 
@@ -177,7 +182,7 @@ public class DatabaseConfigServiceTest {
         DatabaseConfig databaseConfig = getDatabaseConfig(ResourceStatus.SERVICE_MANAGED, DATABASE_NAME);
         Set<String> databasesToDelete = Set.of(DATABASE_NAME, DATABASE_NAME2);
         when(repository.findAllByEnvironmentIdAndNameIn(ENVIRONMENT_CRN, databasesToDelete)).thenReturn(Set.of(databaseConfig));
-        setupTransactionServiceRequired();
+        setupTransactionServiceRequired(DatabaseConfig.class);
 
         underTest.delete(databasesToDelete, ENVIRONMENT_CRN);
 
@@ -200,6 +205,7 @@ public class DatabaseConfigServiceTest {
         DatabaseConfig databaseConfig = new DatabaseConfig();
         databaseConfig.setStatus(resourceStatus);
         databaseConfig.setName(DATABASE_NAME);
+        databaseConfig.setConnectionUserName(DATABASE_USER_NAME);
         return databaseConfig;
     }
 
@@ -218,9 +224,9 @@ public class DatabaseConfigServiceTest {
         underTest.register(configToRegister);
     }
 
-    private void setupTransactionServiceRequired() throws TransactionService.TransactionExecutionException {
-        when(transactionService.required(any())).thenAnswer((Answer<DatabaseConfig>) invocation -> {
-            Supplier<DatabaseConfig> supplier = invocation.getArgument(0, Supplier.class);
+    private <T> void setupTransactionServiceRequired(T supplierReturnType) throws TransactionService.TransactionExecutionException {
+        when(transactionService.required(any())).thenAnswer((Answer<T>) invocation -> {
+            Supplier<T> supplier = invocation.getArgument(0, Supplier.class);
             return supplier.get();
         });
     }
