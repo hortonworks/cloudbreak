@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
+import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
@@ -51,6 +52,7 @@ import com.sequenceiq.cloudbreak.service.stack.SharedServiceValidator;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 public class StackDecoratorTest {
@@ -145,6 +147,12 @@ public class StackDecoratorTest {
     @Mock
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
+    @Mock
+    private CredentialResponse credentialResponse;
+
+    @Mock
+    private CredentialConverter credentialConverter;
+
     @Before
     public void setUp() {
         String credentialName = "credentialName";
@@ -166,11 +174,13 @@ public class StackDecoratorTest {
         when(environmentSettingsRequest.getCredentialName()).thenReturn(credentialName);
         when(sharedServiceValidator.checkSharedServiceStackRequirements(any(StackV4Request.class), any(Workspace.class))).thenReturn(validationResult);
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
-        environmentResponse.setCredentialName(credentialName);
+        environmentResponse.setCredential(credentialResponse);
         when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
-        when(credentialClientService.getByCrn(anyString())).thenReturn(Credential.builder().cloudPlatform(CloudPlatform.MOCK.name()).build());
-        when(credentialClientService.getByName(anyString())).thenReturn(Credential.builder().cloudPlatform(CloudPlatform.MOCK.name()).build());
+        Credential credential = Credential.builder().cloudPlatform(CloudPlatform.MOCK.name()).build();
+        when(credentialClientService.getByCrn(anyString())).thenReturn(credential);
+        when(credentialClientService.getByName(anyString())).thenReturn(credential);
+        when(credentialConverter.convert(credentialResponse)).thenReturn(credential);
     }
 
     @Test

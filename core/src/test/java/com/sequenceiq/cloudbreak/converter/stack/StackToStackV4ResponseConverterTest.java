@@ -65,6 +65,7 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 
 public class StackToStackV4ResponseConverterTest extends AbstractEntityConverterTest<Stack> {
 
@@ -95,6 +96,8 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
     @Mock
     private EnvironmentClientService environmentClientService;
 
+    private CredentialResponse credentialResponse;
+
     @Before
     public void setUp() throws CloudbreakImageNotFoundException {
         underTest = new StackToStackV4ResponseConverter();
@@ -111,6 +114,8 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         DatalakeResources datalakeResources = new DatalakeResources();
         datalakeResources.setName("name");
         when(datalakeResourcesService.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
+        credentialResponse = new CredentialResponse();
+        credentialResponse.setName("cred-name");
     }
 
     @Test
@@ -130,7 +135,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         given(conversionService.convert(any(), eq(TelemetryV4Response.class))).willReturn(new TelemetryV4Response());
         given(converterUtil.convertAll(source.getInstanceGroups(), InstanceGroupV4Response.class)).willReturn(new ArrayList<>());
         given(environmentClientService.getByCrn(anyString())).willReturn(aDetailedEnvironmentResponse()
-                .withCredentialName("cred-name")
+                .withCredential(credentialResponse)
                 .withName("env-name")
                 .build());
         // WHEN
@@ -154,7 +159,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         given(conversionService.convert(any(), eq(PlacementSettingsV4Response.class))).willReturn(new PlacementSettingsV4Response());
         given(conversionService.convert(any(), eq(TelemetryV4Response.class))).willReturn(new TelemetryV4Response());
         given(environmentClientService.getByCrn(anyString())).willReturn(aDetailedEnvironmentResponse()
-                .withCredentialName("cred-name")
+                .withCredential(credentialResponse)
                 .withName("env-name")
                 .build());
         given(converterUtil.convertAll(source.getInstanceGroups(), InstanceGroupV4Response.class)).willReturn(new ArrayList<>());
@@ -181,7 +186,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         given(conversionService.convert(any(), eq(PlacementSettingsV4Response.class))).willReturn(new PlacementSettingsV4Response());
         given(conversionService.convert(any(), eq(TelemetryV4Response.class))).willReturn(new TelemetryV4Response());
         given(environmentClientService.getByCrn(anyString())).willReturn(aDetailedEnvironmentResponse()
-                .withCredentialName("cred-name")
+                .withCredential(credentialResponse)
                 .withName("env-name")
                 .build());
         given(converterUtil.convertAll(source.getInstanceGroups(), InstanceGroupV4Response.class)).willReturn(new ArrayList<>());

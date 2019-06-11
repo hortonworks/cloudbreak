@@ -58,15 +58,16 @@ import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
-import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<StackV4Request> {
@@ -134,6 +135,9 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
     @Mock
     private KerberosConfigService kerberosConfigService;
 
+    @Mock
+    private CredentialResponse credentialResponse;
+
     private Credential credential;
 
     @Before
@@ -145,7 +149,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         when(workspaceService.get(1L, user)).thenReturn(workspace);
         when(workspace.getId()).thenReturn(1L);
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
-        environmentResponse.setCredentialName("credential");
+        environmentResponse.setCredential(credentialResponse);
         environmentResponse.setCloudPlatform("AWS");
         when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
