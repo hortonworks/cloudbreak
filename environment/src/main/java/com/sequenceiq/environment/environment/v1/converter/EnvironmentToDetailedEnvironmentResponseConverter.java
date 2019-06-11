@@ -42,6 +42,7 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
         response.setCredentialName(source.getCredential().getName());
         response.setLocation(getConversionService().convert(source, LocationResponse.class));
         response.setEnvironmentStatus(environmentApiConverter.convertEnvStatus(source.getStatus()));
+        response.setCreator(source.getCreator());
         setNetworkIfPossible(response, source);
         return response;
     }
