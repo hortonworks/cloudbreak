@@ -227,7 +227,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         if (source.getEnvironmentCrn() != null) {
             updateEnvironment(stack, environment);
             updateCloudPlatformAndRelatedFields(source, stack, workspace, environment);
-            stack.setAvailabilityZone(source.getPlacement().getAvailabilityZone());
+            stack.setAvailabilityZone(getAvailabilityZone(Optional.ofNullable(source.getPlacement())));
         }
         stack.setType(StackType.TEMPLATE);
         stack.setName(UUID.randomUUID().toString());
