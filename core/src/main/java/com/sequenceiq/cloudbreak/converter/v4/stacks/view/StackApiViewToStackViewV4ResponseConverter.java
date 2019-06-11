@@ -40,7 +40,7 @@ public class StackApiViewToStackViewV4ResponseConverter extends AbstractConversi
         stackViewResponse.setEnvironmentCrn(source.getEnvironmentCrn());
         DetailedEnvironmentResponse environmentResponse = environmentClientService.getByCrn(source.getEnvironmentCrn());
         stackViewResponse.setEnvironmentName(environmentResponse.getName());
-        stackViewResponse.setCredentialName(environmentResponse.getCredentialName());
+        stackViewResponse.setCredentialName(environmentResponse.getCredential().getName());
         return stackViewResponse;
     }
 

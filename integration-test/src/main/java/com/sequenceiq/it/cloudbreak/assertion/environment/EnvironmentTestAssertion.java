@@ -15,7 +15,7 @@ public class EnvironmentTestAssertion implements Assertion<EnvironmentTestDto, C
 
     @Override
     public EnvironmentTestDto doAssertion(TestContext testContext, EnvironmentTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
-        String credentialName = testDto.getResponse().getCredentialName();
+        String credentialName = testDto.getResponse().getCredential().getName();
         if (!credentialName.equals(expectedCredentialName)) {
             throw new TestFailException("Credential is not attached to environment");
         }

@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegionResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -70,7 +71,7 @@ public class ClusterCreationEnvironmentValidatorTest {
     private DetailedEnvironmentResponse getEnvironmentResponse() {
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCloudPlatform("AWS");
-        environmentResponse.setCredentialName("cred");
+        environmentResponse.setCredential(new CredentialResponse());
         CompactRegionResponse compactRegionResponse = new CompactRegionResponse();
         compactRegionResponse.setNames(Set.of("region1"));
         environmentResponse.setRegions(compactRegionResponse);

@@ -28,18 +28,20 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackValidationV4RequestToStackValidationConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
+import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -85,6 +87,12 @@ public class StackValidationRequestToStackValidationConverterTest {
     @Mock
     private EnvironmentClientService environmentClientService;
 
+    @Mock
+    private CredentialResponse credentialResponse;
+
+    @Mock
+    private CredentialConverter credentialConverter;
+
     @InjectMocks
     private StackValidationV4RequestToStackValidationConverter underTest;
 
@@ -103,11 +111,12 @@ public class StackValidationRequestToStackValidationConverterTest {
         mockUserRelated();
         mockBlueprintsInWorkspace();
         environment = new DetailedEnvironmentResponse();
-        environment.setCredentialName(credential.getName());
+        environment.setCredential(credentialResponse);
         when(environmentClientService.getByName(anyString())).thenReturn(environment);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environment);
         when(credentialClientService.getByCrn(anyString())).thenReturn(credential);
         when(credentialClientService.getByName(anyString())).thenReturn(credential);
+        when(credentialConverter.convert(credentialResponse)).thenReturn(credential);
     }
 
     @Test
@@ -141,7 +150,7 @@ public class StackValidationRequestToStackValidationConverterTest {
         // GIVEN
         validationRequest.setNetworkId(442L);
         validationRequest.setBlueprintName(BP_NAME);
-        environment.setCredentialName(null);
+        environment.setCredential(null);
 
         expectedEx.expect(BadRequestException.class);
         expectedEx.expectMessage("Credential is not configured for the validation request!");

@@ -2,6 +2,7 @@ package com.sequenceiq.environment.api.v1.environment.model.response;
 
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -23,8 +24,8 @@ public abstract class EnvironmentBaseResponse {
     @ApiModelProperty(EnvironmentModelDescription.CLOUD_PLATFORM)
     private String cloudPlatform;
 
-    @ApiModelProperty(EnvironmentModelDescription.CREDENTIAL_NAME_RESPONSE)
-    private String credentialName;
+    @ApiModelProperty(EnvironmentModelDescription.CREDENTIAL_RESPONSE)
+    private CredentialResponse credential;
 
     @ApiModelProperty(EnvironmentModelDescription.LOCATION)
     private LocationResponse location;
@@ -75,12 +76,12 @@ public abstract class EnvironmentBaseResponse {
         this.cloudPlatform = cloudPlatform;
     }
 
-    public String getCredentialName() {
-        return credentialName;
+    public CredentialResponse getCredential() {
+        return credential;
     }
 
-    public void setCredentialName(String credentialName) {
-        this.credentialName = credentialName;
+    public void setCredential(CredentialResponse credential) {
+        this.credential = credential;
     }
 
     public LocationResponse getLocation() {
