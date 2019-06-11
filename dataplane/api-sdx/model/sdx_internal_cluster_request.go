@@ -30,8 +30,7 @@ type SdxInternalClusterRequest struct {
 	Environment *string `json:"environment"`
 
 	// stack v4 request
-	// Required: true
-	StackV4Request *StackV4Request `json:"stackV4Request"`
+	StackV4Request *StackV4Request `json:"stackV4Request,omitempty"`
 
 	// tags
 	Tags map[string]string `json:"tags,omitempty"`
@@ -92,8 +91,8 @@ func (m *SdxInternalClusterRequest) validateEnvironment(formats strfmt.Registry)
 
 func (m *SdxInternalClusterRequest) validateStackV4Request(formats strfmt.Registry) error {
 
-	if err := validate.Required("stackV4Request", "body", m.StackV4Request); err != nil {
-		return err
+	if swag.IsZero(m.StackV4Request) { // not required
+		return nil
 	}
 
 	if m.StackV4Request != nil {

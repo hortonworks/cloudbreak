@@ -65,8 +65,8 @@ type CreateInternalSdxParams struct {
 
 	/*Body*/
 	Body *model.SdxInternalClusterRequest
-	/*SdxName*/
-	SdxName string
+	/*Name*/
+	Name string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -117,15 +117,15 @@ func (o *CreateInternalSdxParams) SetBody(body *model.SdxInternalClusterRequest)
 	o.Body = body
 }
 
-// WithSdxName adds the sdxName to the create internal sdx params
-func (o *CreateInternalSdxParams) WithSdxName(sdxName string) *CreateInternalSdxParams {
-	o.SetSdxName(sdxName)
+// WithName adds the name to the create internal sdx params
+func (o *CreateInternalSdxParams) WithName(name string) *CreateInternalSdxParams {
+	o.SetName(name)
 	return o
 }
 
-// SetSdxName adds the sdxName to the create internal sdx params
-func (o *CreateInternalSdxParams) SetSdxName(sdxName string) {
-	o.SdxName = sdxName
+// SetName adds the name to the create internal sdx params
+func (o *CreateInternalSdxParams) SetName(name string) {
+	o.Name = name
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -142,8 +142,8 @@ func (o *CreateInternalSdxParams) WriteToRequest(r runtime.ClientRequest, reg st
 		}
 	}
 
-	// path param sdxName
-	if err := r.SetPathParam("sdxName", o.SdxName); err != nil {
+	// path param name
+	if err := r.SetPathParam("name", o.Name); err != nil {
 		return err
 	}
 

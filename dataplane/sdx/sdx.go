@@ -88,7 +88,7 @@ func createSdx(cidr string, clusterShape string, envName string, c *cli.Context,
 		Tags:         nil,
 	}
 	sdxClient := ClientSdx(*oauth.NewSDXClientFromContext(c)).Sdx
-	resp, err := sdxClient.Sdx.CreateSdx(sdx.NewCreateSdxParams().WithSdxName(name).WithBody(SdxRequest))
+	resp, err := sdxClient.Sdx.CreateSdx(sdx.NewCreateSdxParams().WithName(name).WithBody(SdxRequest))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -105,7 +105,7 @@ func createInternalSdx(cidr string, clusterShape string, envName string, inputJs
 		StackV4Request: inputJson,
 	}
 	sdxClient := ClientSdx(*oauth.NewSDXClientFromContext(c)).Sdx
-	resp, err := sdxClient.Internalsdx.CreateInternalSdx(internalsdx.NewCreateInternalSdxParams().WithSdxName(name).WithBody(SdxInternalRequest))
+	resp, err := sdxClient.Internalsdx.CreateInternalSdx(internalsdx.NewCreateInternalSdxParams().WithName(name).WithBody(SdxInternalRequest))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -118,7 +118,7 @@ func DeleteSdx(c *cli.Context) {
 	name := c.String(fl.FlName.Name)
 
 	sdxClient := ClientSdx(*oauth.NewSDXClientFromContext(c)).Sdx
-	err := sdxClient.Sdx.DeleteSdx(sdx.NewDeleteSdxParams().WithSdxName(name))
+	err := sdxClient.Sdx.DeleteSdx(sdx.NewDeleteSdxParams().WithName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -153,7 +153,7 @@ func DescribeSdx(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "describe sdx cluster")
 	name := c.String(fl.FlName.Name)
 	sdxClient := ClientSdx(*oauth.NewSDXClientFromContext(c)).Sdx.Sdx
-	resp, err := sdxClient.GetSdx(sdx.NewGetSdxParams().WithSdxName(name))
+	resp, err := sdxClient.GetSdx(sdx.NewGetSdxParams().WithName(name))
 
 	if err != nil {
 		utils.LogErrorAndExit(err)

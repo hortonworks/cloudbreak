@@ -61,8 +61,8 @@ for the delete sdx operation typically these are written to a http.Request
 */
 type DeleteSdxParams struct {
 
-	/*SdxName*/
-	SdxName string
+	/*Name*/
+	Name string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -102,15 +102,15 @@ func (o *DeleteSdxParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithSdxName adds the sdxName to the delete sdx params
-func (o *DeleteSdxParams) WithSdxName(sdxName string) *DeleteSdxParams {
-	o.SetSdxName(sdxName)
+// WithName adds the name to the delete sdx params
+func (o *DeleteSdxParams) WithName(name string) *DeleteSdxParams {
+	o.SetName(name)
 	return o
 }
 
-// SetSdxName adds the sdxName to the delete sdx params
-func (o *DeleteSdxParams) SetSdxName(sdxName string) {
-	o.SdxName = sdxName
+// SetName adds the name to the delete sdx params
+func (o *DeleteSdxParams) SetName(name string) {
+	o.Name = name
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -121,8 +121,8 @@ func (o *DeleteSdxParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Reg
 	}
 	var res []error
 
-	// path param sdxName
-	if err := r.SetPathParam("sdxName", o.SdxName); err != nil {
+	// path param name
+	if err := r.SetPathParam("name", o.Name); err != nil {
 		return err
 	}
 

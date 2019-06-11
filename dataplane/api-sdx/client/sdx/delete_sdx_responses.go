@@ -53,7 +53,7 @@ func (o *DeleteSdxDefault) Code() int {
 }
 
 func (o *DeleteSdxDefault) Error() string {
-	return fmt.Sprintf("[DELETE /sdx/{sdxName}][%d] deleteSdx default ", o._statusCode)
+	return fmt.Sprintf("[DELETE /sdx/{name}][%d] deleteSdx default ", o._statusCode)
 }
 
 func (o *DeleteSdxDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

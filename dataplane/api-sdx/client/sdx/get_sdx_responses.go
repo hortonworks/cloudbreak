@@ -51,7 +51,7 @@ type GetSdxOK struct {
 }
 
 func (o *GetSdxOK) Error() string {
-	return fmt.Sprintf("[GET /sdx/{sdxName}][%d] getSdxOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /sdx/{name}][%d] getSdxOK  %+v", 200, o.Payload)
 }
 
 func (o *GetSdxOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

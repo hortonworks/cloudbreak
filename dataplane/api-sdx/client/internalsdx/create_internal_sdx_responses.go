@@ -51,7 +51,7 @@ type CreateInternalSdxOK struct {
 }
 
 func (o *CreateInternalSdxOK) Error() string {
-	return fmt.Sprintf("[POST /internal/sdx/{sdxName}][%d] createInternalSdxOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[POST /internal/sdx/{name}][%d] createInternalSdxOK  %+v", 200, o.Payload)
 }
 
 func (o *CreateInternalSdxOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

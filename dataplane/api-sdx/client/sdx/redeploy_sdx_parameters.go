@@ -65,8 +65,8 @@ type RedeploySdxParams struct {
 
 	/*Body*/
 	Body model.RedeploySdxClusterRequest
-	/*SdxName*/
-	SdxName string
+	/*Name*/
+	Name string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -117,15 +117,15 @@ func (o *RedeploySdxParams) SetBody(body model.RedeploySdxClusterRequest) {
 	o.Body = body
 }
 
-// WithSdxName adds the sdxName to the redeploy sdx params
-func (o *RedeploySdxParams) WithSdxName(sdxName string) *RedeploySdxParams {
-	o.SetSdxName(sdxName)
+// WithName adds the name to the redeploy sdx params
+func (o *RedeploySdxParams) WithName(name string) *RedeploySdxParams {
+	o.SetName(name)
 	return o
 }
 
-// SetSdxName adds the sdxName to the redeploy sdx params
-func (o *RedeploySdxParams) SetSdxName(sdxName string) {
-	o.SdxName = sdxName
+// SetName adds the name to the redeploy sdx params
+func (o *RedeploySdxParams) SetName(name string) {
+	o.Name = name
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -142,8 +142,8 @@ func (o *RedeploySdxParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.R
 		}
 	}
 
-	// path param sdxName
-	if err := r.SetPathParam("sdxName", o.SdxName); err != nil {
+	// path param name
+	if err := r.SetPathParam("name", o.Name); err != nil {
 		return err
 	}
 

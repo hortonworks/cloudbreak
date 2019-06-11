@@ -36,7 +36,7 @@ func (a *Client) CreateInternalSdx(params *CreateInternalSdxParams) (*CreateInte
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "createInternalSdx",
 		Method:             "POST",
-		PathPattern:        "/internal/sdx/{sdxName}",
+		PathPattern:        "/internal/sdx/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},

@@ -61,8 +61,8 @@ for the get sdx operation typically these are written to a http.Request
 */
 type GetSdxParams struct {
 
-	/*SdxName*/
-	SdxName string
+	/*Name*/
+	Name string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -102,15 +102,15 @@ func (o *GetSdxParams) SetHTTPClient(client *http.Client) {
 	o.HTTPClient = client
 }
 
-// WithSdxName adds the sdxName to the get sdx params
-func (o *GetSdxParams) WithSdxName(sdxName string) *GetSdxParams {
-	o.SetSdxName(sdxName)
+// WithName adds the name to the get sdx params
+func (o *GetSdxParams) WithName(name string) *GetSdxParams {
+	o.SetName(name)
 	return o
 }
 
-// SetSdxName adds the sdxName to the get sdx params
-func (o *GetSdxParams) SetSdxName(sdxName string) {
-	o.SdxName = sdxName
+// SetName adds the name to the get sdx params
+func (o *GetSdxParams) SetName(name string) {
+	o.Name = name
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -121,8 +121,8 @@ func (o *GetSdxParams) WriteToRequest(r runtime.ClientRequest, reg strfmt.Regist
 	}
 	var res []error
 
-	// path param sdxName
-	if err := r.SetPathParam("sdxName", o.SdxName); err != nil {
+	// path param name
+	if err := r.SetPathParam("name", o.Name); err != nil {
 		return err
 	}
 

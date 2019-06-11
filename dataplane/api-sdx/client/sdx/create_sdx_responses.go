@@ -51,7 +51,7 @@ type CreateSdxOK struct {
 }
 
 func (o *CreateSdxOK) Error() string {
-	return fmt.Sprintf("[POST /sdx/{sdxName}][%d] createSdxOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[POST /sdx/{name}][%d] createSdxOK  %+v", 200, o.Payload)
 }
 
 func (o *CreateSdxOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

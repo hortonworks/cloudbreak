@@ -19,6 +19,12 @@ import (
 // swagger:model SdxClusterResponse
 type SdxClusterResponse struct {
 
+	// environment crn
+	EnvironmentCrn string `json:"environmentCrn,omitempty"`
+
+	// environment name
+	EnvironmentName string `json:"environmentName,omitempty"`
+
 	// sdx crn
 	SdxCrn string `json:"sdxCrn,omitempty"`
 
