@@ -11,7 +11,6 @@ import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
-import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
@@ -119,11 +118,6 @@ public class OpenStackNativeConnector implements CloudConnector<List<CloudResour
     @Override
     public CloudConstant cloudConstant() {
         return openStackConstants;
-    }
-
-    @Override
-    public NetworkConnector networkConnector() {
-        return null;
     }
 
 }

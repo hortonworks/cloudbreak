@@ -55,7 +55,7 @@ public class AwsLaunchService {
 
     private static final String CREATED_VPC = "CreatedVpc";
 
-    private static final String CREATED_SUBNET = "CloudSubnet";
+    private static final String CREATED_SUBNET = "CreatedSubnet";
 
     @Inject
     private CloudFormationStackUtil cfStackUtil;

@@ -79,11 +79,4 @@ public interface CloudConnector<R> extends CloudPlatformAware {
      */
     CloudConstant cloudConstant();
 
-    /**
-     * Access to the {@link NetworkConnector} object.
-     *
-     * @return the {@link NetworkConnector} object
-     */
-    NetworkConnector networkConnector();
-
 }

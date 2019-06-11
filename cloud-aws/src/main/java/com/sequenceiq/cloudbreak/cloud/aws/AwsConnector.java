@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
-import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
@@ -59,9 +58,6 @@ public class AwsConnector implements CloudConnector<Object> {
     @Inject
     private AwsConstants awsConstants;
 
-    @Inject
-    private AwsNetworkConnector awsNetworkConnector;
-
     @Override
     public Platform platform() {
         return AwsConstants.AWS_PLATFORM;
@@ -105,11 +101,6 @@ public class AwsConnector implements CloudConnector<Object> {
     @Override
     public CloudConstant cloudConstant() {
         return awsConstants;
-    }
-
-    @Override
-    public NetworkConnector networkConnector() {
-        return awsNetworkConnector;
     }
 
     @Override
