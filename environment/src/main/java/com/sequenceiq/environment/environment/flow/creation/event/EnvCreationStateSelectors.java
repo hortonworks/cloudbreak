@@ -4,7 +4,6 @@ import com.sequenceiq.flow.core.FlowEvent;
 
 public enum EnvCreationStateSelectors implements FlowEvent {
     START_NETWORK_CREATION_EVENT,
-    START_RDBMS_CREATION_EVENT,
     START_FREEIPA_CREATION_EVENT,
     FINISH_ENV_CREATION_EVENT,
     FINALIZE_ENV_CREATION_EVENT,

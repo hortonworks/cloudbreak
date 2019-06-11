@@ -16,7 +16,6 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRe
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto;
@@ -97,7 +96,7 @@ public class EnvironmentApiConverter {
                 .withDescription(environmentDto.getDescription())
                 .withCloudPlatform(environmentDto.getCloudPlatform())
                 .withCredential(credentialConverter.convert(environmentDto.getCredential()))
-                .withEnvironmentStatus(convertEnvStatus(environmentDto.getEnvironmentStatus()))
+                .withEnvironmentStatus(environmentDto.getEnvironmentStatus().getResponseStatus())
                 .withLocation(locationDtoToResponse(environmentDto.getLocation()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()));
 
@@ -129,26 +128,6 @@ public class EnvironmentApiConverter {
                 .withLatitude(locationDto.getLatitude())
                 .withLongitude(locationDto.getLongitude())
                 .build();
-    }
-
-    public EnvironmentStatus convertEnvStatus(com.sequenceiq.environment.environment.EnvironmentStatus environmentStatus) {
-        switch (environmentStatus) {
-            case ARCHIVED:
-                return EnvironmentStatus.ARCHIVED;
-            case AVAILABLE:
-                return EnvironmentStatus.AVAILABLE;
-            case CORRUPTED:
-                return EnvironmentStatus.CORRUPTED;
-            case CREATION_INITIATED:
-                return EnvironmentStatus.CREATION_INITIATED;
-            case RDBMS_CREATION_IN_PROGRESS:
-                return EnvironmentStatus.RDBMS_CREATION_IN_PROGRESS;
-            case FREEIPA_CREATION_IN_PROGRESS:
-                return EnvironmentStatus.FREEIPA_CREATION_IN_PROGRESS;
-            default:
-            case NETWORK_CREATION_IN_PROGRESS:
-                return EnvironmentStatus.NETWORK_CREATION_IN_PROGRESS;
-        }
     }
 
     public EnvironmentEditDto initEditDto(EnvironmentEditRequest request) {

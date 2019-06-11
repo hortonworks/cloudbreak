@@ -22,6 +22,7 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
@@ -74,26 +75,16 @@ public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentD
                 Environment environment = environmentOptional.get();
                 if (supportedPlatfroms.supportedPlatformForFreeIpa(environment.getCloudPlatform())) {
 
+                    updateStatus(environment);
+
+                    PlacementRequest placementRequest = createPlacementRequest(environment);
+
                     CreateFreeIpaRequest createFreeIpaRequest = new CreateFreeIpaRequest();
                     createFreeIpaRequest.setEnvironmentCrn(environment.getResourceCrn());
                     createFreeIpaRequest.setName(environment.getName() + "-freeipa");
-
-                    FreeIpaServerRequest freeIpaServerRequest = new FreeIpaServerRequest();
-                    freeIpaServerRequest.setAdminPassword(PasswordUtil.generatePassword());
-                    freeIpaServerRequest.setDomain("cdp.site");
-                    freeIpaServerRequest.setHostname("ipaserver");
-                    createFreeIpaRequest.setFreeIpa(freeIpaServerRequest);
-
-                    PlacementRequest placementRequest = new PlacementRequest();
-                    placementRequest.setRegion(environment.getRegionSet().iterator().next().getName());
+                    createFreeIpaRequest.setFreeIpa(createFreeIpaServerRequest());
                     createFreeIpaRequest.setPlacement(placementRequest);
-
-                    StackAuthenticationRequest stackAuthenticationRequest = new StackAuthenticationRequest();
-                    stackAuthenticationRequest.setLoginUserName("cloudbreak");
-                    KeyPair keyPair = PkiUtil.generateKeypair();
-                    stackAuthenticationRequest.setPublicKey(PkiUtil.convertOpenSshPublicKey(keyPair.getPublic()));
-                    createFreeIpaRequest.setAuthentication(stackAuthenticationRequest);
-
+                    createFreeIpaRequest.setAuthentication(createStackAuthenticationRequest());
 
                     FreeIpaNetworkProvider freeIpaNetworkProvider = freeIpaNetworkProviderMapByCloudPlatform
                             .get(CloudPlatform.valueOf(environment.getCloudPlatform()));
@@ -105,9 +96,6 @@ public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentD
                     }
 
                     freeIpaV1Endpoint.create(createFreeIpaRequest);
-
-                    environment.setStatus(EnvironmentStatus.FREEIPA_CREATION_IN_PROGRESS);
-                    environmentService.save(environment);
 
                     PollingResult result = freeIpaPollingService.pollWithTimeoutSingleFailure(
                             new FreeIpaCreationRetrievalTask(),
@@ -135,8 +123,36 @@ public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentD
                 .build();
     }
 
+    private void updateStatus(Environment environment) {
+        environment.setStatus(EnvironmentStatus.FREEIPA_CREATION_IN_PROGRESS);
+        environmentService.save(environment);
+    }
+
+    private FreeIpaServerRequest createFreeIpaServerRequest() {
+        FreeIpaServerRequest request = new FreeIpaServerRequest();
+        request.setAdminPassword(PasswordUtil.generatePassword());
+        request.setDomain("cdp.site");
+        request.setHostname("ipaserver");
+        return request;
+    }
+
+    private PlacementRequest createPlacementRequest(Environment env) {
+        PlacementRequest request = new PlacementRequest();
+        request.setRegion(env.getRegionSet().iterator().next().getName());
+        return request;
+    }
+
+    private StackAuthenticationRequest createStackAuthenticationRequest() {
+        StackAuthenticationRequest request = new StackAuthenticationRequest();
+        request.setLoginUserName("cloudbreak");
+        KeyPair keyPair = PkiUtil.generateKeypair();
+        request.setPublicKey(PkiUtil.convertOpenSshPublicKey(keyPair.getPublic()));
+        return request;
+    }
+
     @Override
     public String selector() {
         return CREATE_FREEIPA_EVENT.selector();
     }
+
 }

@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.environment.flow.creation.handler;
 
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_NETWORK_EVENT;
-import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_RDBMS_CREATION_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_FREEIPA_CREATION_EVENT;
 
 import java.util.Map;
 import java.util.Optional;
@@ -55,18 +55,16 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
     @Override
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
-        // TODO: create network
         environmentService.findById(environmentDto.getId()).ifPresent(environment -> {
             environment.setStatus(EnvironmentStatus.NETWORK_CREATION_IN_PROGRESS);
             networkService.decorateNetworkWithSubnetMeta(environment.getNetwork().getId(),
                     getSubnetMetas(environmentDtoConverter.environmentToDto(environment)));
             environmentService.save(environment);
         });
-        sleepForTestPurpose();
 
         EnvCreationEvent envCreationEvent = EnvCreationEvent.EnvCreationEventBuilder.anEnvCreationEvent()
                 .withResourceId(environmentDto.getResourceId())
-                .withSelector(START_RDBMS_CREATION_EVENT.selector())
+                .withSelector(START_FREEIPA_CREATION_EVENT.selector())
                 .build();
         eventSender().sendEvent(envCreationEvent, environmentDtoEvent.getHeaders());
     }
