@@ -20,9 +20,9 @@ import io.swagger.annotations.ApiOperation;
 public interface SdxInternalEndpoint {
 
     @POST
-    @Path("{sdxName}")
+    @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "create internal SDX cluster", produces = "application/json", nickname = "createInternalSdx")
-    SdxClusterResponse create(@PathParam("sdxName") String sdxName, @Valid SdxInternalClusterRequest createSdxClusterRequest);
+    SdxClusterResponse create(@PathParam("name") String name, @Valid SdxInternalClusterRequest createSdxClusterRequest);
 
 }

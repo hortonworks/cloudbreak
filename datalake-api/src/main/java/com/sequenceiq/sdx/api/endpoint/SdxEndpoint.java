@@ -26,28 +26,28 @@ import io.swagger.annotations.ApiOperation;
 public interface SdxEndpoint {
 
     @POST
-    @Path("{sdxName}")
+    @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "create SDX cluster", produces = "application/json", nickname = "createSdx")
-    SdxClusterResponse create(@PathParam("sdxName") String sdxName, @Valid SdxClusterRequest createSdxClusterRequest);
+    SdxClusterResponse create(@PathParam("name") String name, @Valid SdxClusterRequest createSdxClusterRequest);
 
     @DELETE
-    @Path("{sdxName}")
+    @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "delete SDX cluster", produces = "application/json", nickname = "deleteSdx")
-    void delete(@PathParam("sdxName") String sdxName);
+    void delete(@PathParam("name") String name);
 
     @POST
-    @Path("{sdxName}/redeploy")
+    @Path("{name}/redeploy")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "redeploy SDX cluster", produces = "application/json", nickname = "redeploySdx")
-    void redeploy(@PathParam("sdxName") String sdxName, @Valid RedeploySdxClusterRequest redeploySdxClusterRequest);
+    void redeploy(@PathParam("name") String name, @Valid RedeploySdxClusterRequest redeploySdxClusterRequest);
 
     @GET
-    @Path("{sdxName}")
+    @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "get SDX cluster", produces = "application/json", nickname = "getSdx")
-    SdxClusterResponse get(@PathParam("sdxName") String sdxName);
+    SdxClusterResponse get(@PathParam("name") String name);
 
     @GET
     @Path("list")
