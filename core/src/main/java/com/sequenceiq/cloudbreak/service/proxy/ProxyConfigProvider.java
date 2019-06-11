@@ -27,8 +27,7 @@ public class ProxyConfigProvider {
     public void decoratePillarWithProxyDataIfNeeded(Map<String, SaltPillarProperties> servicePillar, Cluster cluster) {
         String proxyConfigCrn = cluster.getProxyConfigCrn();
         if (StringUtils.isNotEmpty(proxyConfigCrn)) {
-            String userCrn = cluster.getStack().getCreator().getUserCrn();
-            ProxyConfig proxyConfig = proxyConfigDtoService.get(proxyConfigCrn, cluster.getWorkspace().getTenant().getName(), userCrn);
+            ProxyConfig proxyConfig = proxyConfigDtoService.getByCrn(proxyConfigCrn);
             Map<String, Object> proxy = new HashMap<>();
             proxy.put("host", proxyConfig.getServerHost());
             proxy.put("port", proxyConfig.getServerPort());

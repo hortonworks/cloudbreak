@@ -114,7 +114,7 @@ public class ClusterCreationSetupService {
                 stack.getCreator().getUserId(), stack.getWorkspace().getId());
         mpackValidator.validateMpacks(request.getAmbari(), workspace);
         rdsConfigValidator.validateRdsConfigs(request, user, workspace);
-        ValidationResult environmentValidationResult = environmentValidator.validate(request, stack, user, environment);
+        ValidationResult environmentValidationResult = environmentValidator.validate(request, stack, environment);
         if (environmentValidationResult.hasError()) {
             throw new BadRequestException(environmentValidationResult.getFormattedErrors());
         }
