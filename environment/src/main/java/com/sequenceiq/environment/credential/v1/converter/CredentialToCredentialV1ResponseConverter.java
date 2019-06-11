@@ -70,6 +70,7 @@ public class CredentialToCredentialV1ResponseConverter {
             response.setAttributes(secretConverter.convert(source.getAttributesSecret()));
             response.setCrn(source.getResourceCrn());
         }
+        response.setCreator(source.getCreator());
         response.setDescription(source.getDescription() == null ? "" : source.getDescription());
         return response;
     }

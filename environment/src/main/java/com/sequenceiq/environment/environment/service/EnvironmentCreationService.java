@@ -57,23 +57,26 @@ public class EnvironmentCreationService {
     }
 
     // TODO: trigger creation properly
-    public void triggerCreationFlow(long envId, String envName) {
+    public void triggerCreationFlow(long envId, String envName, String accountId) {
         EnvCreationEvent envCreationEvent = EnvCreationEvent.EnvCreationEventBuilder.anEnvCreationEvent()
                 .withSelector(START_NETWORK_CREATION_EVENT.selector())
                 .withResourceId(envId)
                 .withResourceName(envName)
                 .build();
         String userCrn = authenticatedUserService.getUserCrn();
+        if (userCrn == null) {
+            userCrn = environmentService.getByName(envName, accountId).getCreator();
+        }
         Map<String, Object> flowTriggerUsercrn = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
         eventSender.sendEvent(envCreationEvent, new Event.Headers(flowTriggerUsercrn));
     }
 
-    public EnvironmentDto create(EnvironmentCreationDto creationDto, String accountId) {
+    public EnvironmentDto create(EnvironmentCreationDto creationDto, String accountId, String creator) {
         if (environmentService.isNameOccupied(creationDto.getName(), creationDto.getAccountId())) {
             throw new BadRequestException(String.format("Environment with name '%s' already exists in account '%s'.",
                     creationDto.getName(), creationDto.getAccountId()));
         }
-        Environment environment = initializeEnvironment(creationDto);
+        Environment environment = initializeEnvironment(creationDto, creator);
         CloudRegions cloudRegions = setLocationAndRegions(creationDto, environment);
         validateCreation(creationDto, environment, cloudRegions);
         environment = environmentService.save(environment);
@@ -81,11 +84,12 @@ public class EnvironmentCreationService {
         return environmentDtoConverter.environmentToDto(environment);
     }
 
-    private Environment initializeEnvironment(EnvironmentCreationDto creationDto) {
+    private Environment initializeEnvironment(EnvironmentCreationDto creationDto, String creator) {
         Environment environment = environmentDtoConverter.creationDtoToEnvironment(creationDto);
         environment.setResourceCrn(createCrn(creationDto.getAccountId()));
+        environment.setCreator(creator);
         Credential credential = environmentResourceService
-                .getCredentialFromRequest(creationDto.getCredential(), creationDto.getAccountId());
+                .getCredentialFromRequest(creationDto.getCredential(), creationDto.getAccountId(), creator);
         environment.setCredential(credential);
         environment.setCloudPlatform(credential.getCloudPlatform());
         return environment;
