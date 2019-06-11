@@ -3,10 +3,11 @@ package com.sequenceiq.environment.platformresource.v1.converter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
@@ -20,7 +21,7 @@ public class PlatformDisksToPlatformDisksV1ResponseConverter extends AbstractCon
     @Override
     public PlatformDisksResponse convert(PlatformDisks source) {
         PlatformDisksResponse json = new PlatformDisksResponse();
-        json.setDefaultDisks(source.getDefaultDisks().entrySet().stream().collect(Collectors.toMap(String::valueOf, String::valueOf)));
+        json.setDefaultDisks(convertDefaults(source.getDefaultDisks()));
         json.setDiskTypes(PlatformConverterUtil.convertPlatformMap(source.getDiskTypes()));
         json.setDiskMappings(diskMappingsConvert(source.getDiskMappings()));
         json.setDisplayNames(PlatformConverterUtil.convertDisplayNameMap(source.getDiskDisplayNames()));
@@ -37,6 +38,14 @@ public class PlatformDisksToPlatformDisksV1ResponseConverter extends AbstractCon
             map.put(platformMapEntry.getKey().value(), map1);
         }
         return map;
+    }
+
+    public Map<String, String> convertDefaults(Map<Platform, DiskType> vms) {
+        Map<String, String> result = Maps.newHashMap();
+        for (Entry<Platform, DiskType> entry : vms.entrySet()) {
+            result.put(entry.getKey().value(), entry.getValue().value());
+        }
+        return result;
     }
 
 }

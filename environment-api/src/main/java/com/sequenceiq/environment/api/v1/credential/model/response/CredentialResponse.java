@@ -26,6 +26,9 @@ public class CredentialResponse extends CredentialBase {
     @ApiModelProperty(CRN)
     private String crn;
 
+    @ApiModelProperty(CredentialModelDescription.CREATOR)
+    private String creator;
+
     public AzureCredentialResponseParameters getAzure() {
         return azure;
     }
@@ -48,5 +51,13 @@ public class CredentialResponse extends CredentialBase {
 
     public void setCrn(String crn) {
         this.crn = crn;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
     }
 }
