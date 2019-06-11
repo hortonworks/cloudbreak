@@ -4,8 +4,10 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.stereotype.Component;
 
 @Provider
+@Component
 public class DefaultExceptionMapper extends BaseExceptionMapper<Exception> {
 
     @Override
