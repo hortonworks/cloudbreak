@@ -8,6 +8,7 @@ package model
 import (
 	strfmt "github.com/go-openapi/strfmt"
 
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
 )
 
@@ -18,8 +19,8 @@ type WorkloadAnalyticsV1Request struct {
 	// telemetry - workload altus access key - for non-production usage only
 	AccessKey string `json:"accessKey,omitempty"`
 
-	// stack related telemetry dynamic component settings
-	Attributes map[string]interface{} `json:"attributes,omitempty"`
+	// stack related telemetry component attributes
+	Attributes *WorkloadAnalyticsAttributesHolder `json:"attributes,omitempty"`
 
 	// telemetry - workload altus service (databus) endpoint url
 	DatabusEndpoint string `json:"databusEndpoint,omitempty"`
@@ -33,6 +34,33 @@ type WorkloadAnalyticsV1Request struct {
 
 // Validate validates this workload analytics v1 request
 func (m *WorkloadAnalyticsV1Request) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateAttributes(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *WorkloadAnalyticsV1Request) validateAttributes(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Attributes) { // not required
+		return nil
+	}
+
+	if m.Attributes != nil {
+		if err := m.Attributes.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("attributes")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 
