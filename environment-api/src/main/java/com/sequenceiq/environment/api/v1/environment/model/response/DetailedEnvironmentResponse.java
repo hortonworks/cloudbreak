@@ -3,6 +3,7 @@ package com.sequenceiq.environment.api.v1.environment.model.response;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 
 import io.swagger.annotations.ApiModel;
 
@@ -22,7 +23,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private String cloudPlatform;
 
-        private String credentialName;
+        private CredentialResponse credential;
 
         private LocationResponse location;
 
@@ -62,8 +63,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
-        public Builder withCredentialName(String credentialName) {
-            this.credentialName = credentialName;
+        public Builder withCredential(CredentialResponse credential) {
+            this.credential = credential;
             return this;
         }
 
@@ -89,7 +90,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setDescription(description);
             detailedEnvironmentResponse.setRegions(regions);
             detailedEnvironmentResponse.setCloudPlatform(cloudPlatform);
-            detailedEnvironmentResponse.setCredentialName(credentialName);
+            detailedEnvironmentResponse.setCredential(credential);
             detailedEnvironmentResponse.setLocation(location);
             detailedEnvironmentResponse.setNetwork(network);
             detailedEnvironmentResponse.setEnvironmentStatus(environmentStatus);

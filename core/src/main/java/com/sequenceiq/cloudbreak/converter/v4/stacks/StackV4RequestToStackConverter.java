@@ -58,14 +58,13 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
-import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
-import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.type.KerberosType;
@@ -317,8 +316,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     }
 
     private void updateEnvironment(Stack stack, DetailedEnvironmentResponse environment) {
-        Credential credential = credentialClientService.getByName(environment.getCredentialName());
-        stack.setCredentialCrn(credential.getCrn());
+        stack.setCredentialCrn(environment.getCredential().getCrn());
     }
 
     private Set<InstanceGroup> convertInstanceGroups(StackV4Request source, Stack stack) {
