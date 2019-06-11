@@ -29,18 +29,18 @@ public class SdxController implements SdxEndpoint {
     private SdxClusterConverter sdxClusterConverter;
 
     @Override
-    public SdxClusterResponse create(String sdxName, @Valid SdxClusterRequest createSdxClusterRequest) {
+    public SdxClusterResponse create(String name, @Valid SdxClusterRequest createSdxClusterRequest) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
-        SdxCluster sdxCluster = sdxService.createSdx(userCrn, sdxName, createSdxClusterRequest, null);
+        SdxCluster sdxCluster = sdxService.createSdx(userCrn, name, createSdxClusterRequest, null);
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
         sdxClusterResponse.setSdxName(sdxCluster.getClusterName());
         return sdxClusterResponse;
     }
 
     @Override
-    public void delete(String sdxName) {
+    public void delete(String name) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
-        sdxService.deleteSdx(userCrn, sdxName);
+        sdxService.deleteSdx(userCrn, name);
     }
 
     @Override
@@ -49,9 +49,9 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    public SdxClusterResponse get(String sdxName) {
+    public SdxClusterResponse get(String name) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
-        SdxCluster sdxCluster = sdxService.getByAccountIdAndSdxName(userCrn, sdxName);
+        SdxCluster sdxCluster = sdxService.getByAccountIdAndSdxName(userCrn, name);
         return sdxClusterConverter.sdxClusterToResponse(sdxCluster);
     }
 

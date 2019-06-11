@@ -25,9 +25,9 @@ public class SdxInternalController implements SdxInternalEndpoint {
     private SdxClusterConverter sdxClusterConverter;
 
     @Override
-    public SdxClusterResponse create(String sdxName, @Valid SdxInternalClusterRequest createSdxClusterRequest) {
+    public SdxClusterResponse create(String name, @Valid SdxInternalClusterRequest createSdxClusterRequest) {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
-        SdxCluster sdxCluster = sdxService.createSdx(userCrn, sdxName, createSdxClusterRequest, createSdxClusterRequest.getStackV4Request());
+        SdxCluster sdxCluster = sdxService.createSdx(userCrn, name, createSdxClusterRequest, createSdxClusterRequest.getStackV4Request());
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
         sdxClusterResponse.setSdxName(sdxCluster.getClusterName());
         return sdxClusterResponse;
