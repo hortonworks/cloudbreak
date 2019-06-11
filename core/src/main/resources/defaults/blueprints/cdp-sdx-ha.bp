@@ -390,24 +390,12 @@
           {
             "base": true,
             "refName": "knox-KNOX_GATEWAY-BASE",
-            "roleType": "KNOX_GATEWAY",
-            "configs": [
-              {
-                "name": "gateway_master_secret",
-                "value": "cloudera1"
-              }
-            ]
+            "roleType": "KNOX_GATEWAY"
           },
           {
             "refName": "knox-IDBROKER-BASE",
             "roleType": "IDBROKER",
-            "base": true,
-            "configs": [
-              {
-                "name": "idbroker_master_secret",
-                "value": "cloudera1"
-              }
-            ]
+            "base": true
           }
         ]
       }

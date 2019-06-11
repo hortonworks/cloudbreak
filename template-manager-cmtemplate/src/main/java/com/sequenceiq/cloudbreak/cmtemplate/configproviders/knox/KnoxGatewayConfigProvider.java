@@ -23,10 +23,6 @@ import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 @Component
 public class KnoxGatewayConfigProvider extends AbstractRoleConfigConfigProvider {
 
-    private static final String KNOX_ROLE = "KNOX_GATEWAY";
-
-    private static final String KNOX_SERVICE_TYPE = "KNOX";
-
     private static final String KNOX_SERVICE_REF_NAME = "knox";
 
     private static final String KNOX_GATEWAY_REF_NAME = "knox-KNOX_GATEWAY-BASE";
@@ -37,17 +33,19 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigConfigProvider 
 
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
+        GatewayView gateway = source.getGatewayView();
+        String masterSecret = gateway != null ? gateway.getMasterSecret() : source.getGeneralClusterConfigs().getPassword();
+
         switch (roleType) {
-            case "KNOX_GATEWAY":
+            case KnoxRoles.KNOX_GATEWAY:
                 List<ApiClusterTemplateConfig> config = new ArrayList<>();
-                GatewayView gateway = source.getGatewayView();
+                config.add(config(KNOX_MASTER_SECRET, masterSecret));
                 if (gateway != null) {
-                    config.add(config(KNOX_MASTER_SECRET, gateway.getMasterSecret()));
                     config.add(config(GATEWAY_PATH, gateway.getPath()));
-                } else {
-                    config.add(config(KNOX_MASTER_SECRET, source.getGeneralClusterConfigs().getPassword()));
                 }
                 return config;
+            case KnoxRoles.IDBROKER:
+                return List.of(config("idbroker_master_secret", masterSecret));
             default:
                 return List.of();
         }
@@ -55,7 +53,7 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigConfigProvider 
 
     @Override
     public Map<String, ApiClusterTemplateService> getAdditionalServices(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        if (source.getGatewayView() != null && cmTemplateProcessor.getServiceByType(KNOX_SERVICE_TYPE).isEmpty()) {
+        if (source.getGatewayView() != null && cmTemplateProcessor.getServiceByType(KnoxRoles.KNOX).isEmpty()) {
             ApiClusterTemplateService knox = createBaseKnoxService();
             Set<HostgroupView> hostgroupViews = source.getHostgroupViews();
             return hostgroupViews.stream()
@@ -66,20 +64,20 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigConfigProvider 
     }
 
     private ApiClusterTemplateService createBaseKnoxService() {
-        ApiClusterTemplateService knox = new ApiClusterTemplateService().serviceType(KNOX_SERVICE_TYPE).refName(KNOX_SERVICE_REF_NAME);
+        ApiClusterTemplateService knox = new ApiClusterTemplateService().serviceType(KnoxRoles.KNOX).refName(KNOX_SERVICE_REF_NAME);
         ApiClusterTemplateRoleConfigGroup knoxGateway = new ApiClusterTemplateRoleConfigGroup()
-                .roleType(KNOX_ROLE).base(true).refName(KNOX_GATEWAY_REF_NAME);
+                .roleType(KnoxRoles.KNOX_GATEWAY).base(true).refName(KNOX_GATEWAY_REF_NAME);
         knox.roleConfigGroups(List.of(knoxGateway));
         return knox;
     }
 
     @Override
     public String getServiceType() {
-        return KNOX_SERVICE_TYPE;
+        return KnoxRoles.KNOX;
     }
 
     @Override
     public List<String> getRoleTypes() {
-        return List.of(KNOX_ROLE);
+        return List.of(KnoxRoles.KNOX_GATEWAY, KnoxRoles.IDBROKER);
     }
 }
