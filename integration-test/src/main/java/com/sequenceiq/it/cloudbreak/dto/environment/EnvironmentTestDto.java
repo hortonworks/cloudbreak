@@ -51,7 +51,7 @@ public class EnvironmentTestDto extends DeletableTestDto<EnvironmentRequest, Det
         return getCloudProvider()
                 .environment(withName(resourceProperyProvider().getName())
                         .withDescription(resourceProperyProvider().getDescription("environment")));
-//                .withCredentialName(getTestContext().get(CredentialTestDto.class).getName()));
+//                .withCredential(getTestContext().get(CredentialTestDto.class).getName()));
     }
 
     public EnvironmentTestDto withName(String name) {

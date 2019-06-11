@@ -2,6 +2,8 @@ package com.sequenceiq.environment.environment.v1.converter;
 
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -9,6 +11,7 @@ import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
+import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.v1.EnvironmentApiConverter;
 import com.sequenceiq.environment.network.domain.BaseNetwork;
@@ -22,6 +25,9 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
     private final EnvironmentApiConverter environmentApiConverter;
 
     private final Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap;
+
+    @Inject
+    private CredentialToCredentialV1ResponseConverter credentialConverter;
 
     public EnvironmentToDetailedEnvironmentResponseConverter(RegionConverter regionConverter,
             EnvironmentApiConverter environmentApiConverter,
@@ -39,7 +45,7 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
         response.setDescription(source.getDescription());
         response.setRegions(regionConverter.convertRegions(source.getRegionSet()));
         response.setCloudPlatform(source.getCloudPlatform());
-        response.setCredentialName(source.getCredential().getName());
+        response.setCredential(credentialConverter.convert(source.getCredential()));
         response.setLocation(getConversionService().convert(source, LocationResponse.class));
         response.setEnvironmentStatus(environmentApiConverter.convertEnvStatus(source.getStatus()));
         setNetworkIfPossible(response, source);

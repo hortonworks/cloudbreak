@@ -105,7 +105,7 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
         response.setEnvironmentCrn(source.getEnvironmentCrn());
         DetailedEnvironmentResponse environmentResponse = environmentClientService.getByCrn(source.getEnvironmentCrn());
         response.setEnvironmentName(environmentResponse.getName());
-        response.setCredentialName(environmentResponse.getCredentialName());
+        response.setCredentialName(environmentResponse.getCredential().getName());
         response.setCloudPlatform(CloudPlatform.valueOf(source.getCloudPlatform()));
         response.setPlacement(getConversionService().convert(source, PlacementSettingsV4Response.class));
         response.setStatus(source.getStatus());

@@ -28,7 +28,6 @@ public class EnvironmentModelDescription {
     public static final String LOCATION_DISPLAY_NAME = "Display name of the location of the environment.";
     public static final String NETWORK = "Network related specifics of the environment.";
 
-    public static final String CREDENTIAL_NAME_RESPONSE = "Name of the credential of the environment.";
     public static final String CREDENTIAL_RESPONSE = "Credential of the environment.";
     public static final String PROXY_CONFIGS_RESPONSE = "Proxy configurations in the environment.";
     public static final String CLOUD_PLATFORM = "Cloud platform of the environment.";

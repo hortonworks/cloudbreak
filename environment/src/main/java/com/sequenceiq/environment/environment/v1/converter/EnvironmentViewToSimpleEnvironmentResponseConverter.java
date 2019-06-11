@@ -9,6 +9,7 @@ import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
+import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.v1.EnvironmentApiConverter;
 import com.sequenceiq.environment.network.domain.BaseNetwork;
@@ -24,12 +25,16 @@ public class EnvironmentViewToSimpleEnvironmentResponseConverter extends
 
     private final Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap;
 
+    private final CredentialToCredentialV1ResponseConverter credentialConverter;
+
     public EnvironmentViewToSimpleEnvironmentResponseConverter(RegionConverter regionConverter,
             EnvironmentApiConverter environmentApiConverter,
-            Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap) {
+            Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap,
+            CredentialToCredentialV1ResponseConverter credentialConverter) {
         this.regionConverter = regionConverter;
         this.environmentApiConverter = environmentApiConverter;
         this.environmentNetworkConverterMap = environmentNetworkConverterMap;
+        this.credentialConverter = credentialConverter;
     }
 
     @Override
@@ -40,7 +45,7 @@ public class EnvironmentViewToSimpleEnvironmentResponseConverter extends
         response.setDescription(source.getDescription());
         response.setRegions(regionConverter.convertRegions(source.getRegionSet()));
         response.setCloudPlatform(source.getCloudPlatform());
-        response.setCredentialName(source.getCredential().getName());
+        response.setCredential(credentialConverter.convert(source.getCredential()));
         response.setLocation(getConversionService().convert(source, LocationResponse.class));
         response.setEnvironmentStatus(environmentApiConverter.convertEnvStatus(source.getStatus()));
         setNetworkIfPossible(response, source);
