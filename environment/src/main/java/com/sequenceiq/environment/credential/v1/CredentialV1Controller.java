@@ -71,9 +71,10 @@ public class CredentialV1Controller extends NotificationController implements Cr
     @Override
     public CredentialResponse post(@Valid CredentialRequest request) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
+        String creator = threadBasedUserCrnProvider.getUserCrn();
         Credential credential = credentialConverter.convert(request);
         notify(ResourceEvent.CREDENTIAL_CREATED);
-        return credentialConverter.convert(credentialService.create(credential, accountId));
+        return credentialConverter.convert(credentialService.create(credential, accountId, creator));
     }
 
     @Override

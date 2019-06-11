@@ -36,6 +36,9 @@ public abstract class EnvironmentBaseResponse {
     @ApiModelProperty(EnvironmentModelDescription.STATUS)
     private EnvironmentStatus environmentStatus;
 
+    @ApiModelProperty(ModelDescriptions.CREATOR)
+    private String creator;
+
     public String getCrn() {
         return crn;
     }
@@ -106,5 +109,13 @@ public abstract class EnvironmentBaseResponse {
 
     public void setEnvironmentStatus(EnvironmentStatus environmentStatus) {
         this.environmentStatus = environmentStatus;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
     }
 }

@@ -58,6 +58,9 @@ public class ProxyConfig implements Serializable, AuthResource {
     @Column(nullable = false)
     private String resourceCrn;
 
+    @Column(nullable = false)
+    private String creator;
+
     private boolean archived;
 
     private Long deletionTimestamp = -1L;
@@ -177,5 +180,13 @@ public class ProxyConfig implements Serializable, AuthResource {
     @Override
     public void setResourceCrn(String resourceCrn) {
         this.resourceCrn = resourceCrn;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
     }
 }
