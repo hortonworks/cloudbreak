@@ -2,7 +2,6 @@ package com.sequenceiq.environment.environment.flow.creation;
 
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_NETWORK_EVENT;
-import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_RDBMS_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINALIZE_ENV_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.HANDLED_FAILED_ENV_CREATION_EVENT;
 
@@ -46,19 +45,6 @@ public class EnvCreationActions {
                 envDto.setId(payload.getResourceId());
                 LOGGER.info("NETWORK_CREATION_STARTED_STATE");
                 sendEvent(context, CREATE_NETWORK_EVENT.selector(), envDto);
-            }
-        };
-    }
-
-    @Bean(name = "RDBMS_CREATION_STARTED_STATE")
-    public Action<?, ?> rdbmsCreationAction() {
-        return new AbstractVpcCreateAction<>(EnvCreationEvent.class) {
-            @Override
-            protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
-                EnvironmentDto envDto = new EnvironmentDto();
-                envDto.setId(payload.getResourceId());
-                LOGGER.info("RDBMS_CREATION_STARTED_STATE");
-                sendEvent(context, CREATE_RDBMS_EVENT.selector(), envDto);
             }
         };
     }

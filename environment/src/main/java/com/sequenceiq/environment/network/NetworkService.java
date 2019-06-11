@@ -55,6 +55,10 @@ public class NetworkService {
         return n;
     }
 
+    public void delete(BaseNetwork network) {
+        networkRepository.delete(network);
+    }
+
     @SuppressWarnings("unchecked")
     public <T extends BaseNetwork> Optional<T> findByEnvironment(Long environmentId) {
         return networkRepository.findByEnvironmentId(environmentId);

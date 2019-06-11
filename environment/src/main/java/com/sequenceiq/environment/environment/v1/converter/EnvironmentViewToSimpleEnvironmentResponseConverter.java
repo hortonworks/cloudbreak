@@ -11,7 +11,6 @@ import com.sequenceiq.environment.api.v1.environment.model.response.LocationResp
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
-import com.sequenceiq.environment.environment.v1.EnvironmentApiConverter;
 import com.sequenceiq.environment.network.domain.BaseNetwork;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 
@@ -21,18 +20,13 @@ public class EnvironmentViewToSimpleEnvironmentResponseConverter extends
 
     private final RegionConverter regionConverter;
 
-    private final EnvironmentApiConverter environmentApiConverter;
-
     private final Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap;
 
     private final CredentialToCredentialV1ResponseConverter credentialConverter;
 
     public EnvironmentViewToSimpleEnvironmentResponseConverter(RegionConverter regionConverter,
-            EnvironmentApiConverter environmentApiConverter,
-            Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap,
-            CredentialToCredentialV1ResponseConverter credentialConverter) {
+            Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap, CredentialToCredentialV1ResponseConverter credentialConverter) {
         this.regionConverter = regionConverter;
-        this.environmentApiConverter = environmentApiConverter;
         this.environmentNetworkConverterMap = environmentNetworkConverterMap;
         this.credentialConverter = credentialConverter;
     }
@@ -47,7 +41,7 @@ public class EnvironmentViewToSimpleEnvironmentResponseConverter extends
         response.setCloudPlatform(source.getCloudPlatform());
         response.setCredential(credentialConverter.convert(source.getCredential()));
         response.setLocation(getConversionService().convert(source, LocationResponse.class));
-        response.setEnvironmentStatus(environmentApiConverter.convertEnvStatus(source.getStatus()));
+        response.setEnvironmentStatus(source.getStatus().getResponseStatus());
         setNetworkIfPossible(response, source);
         return response;
     }
