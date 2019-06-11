@@ -71,15 +71,10 @@ public class DistroXClusterToClusterConverter {
     }
 
     private String getProxyCrnByName(String proxyName) {
-        String accountId = threadBasedUserCrnProvider.getAccountId();
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
-        return proxyConfigDtoService.get(proxyName, accountId, userCrn).getName();
+        return proxyConfigDtoService.getByName(proxyName).getCrn();
     }
 
     private String getProxyNameByCrn(String proxyCrn) {
-        String accountId = threadBasedUserCrnProvider.getAccountId();
-        String userCrn = threadBasedUserCrnProvider.getUserCrn();
-        //TODO use the dedicated endpoint when name and crn will be break down on the API level
-        return proxyConfigDtoService.get(proxyCrn, accountId, userCrn).getCrn();
+        return proxyConfigDtoService.getByCrn(proxyCrn).getName();
     }
 }

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.proxy;
 
+import java.util.function.Function;
+
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 
@@ -14,7 +16,6 @@ import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
 import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyResponse;
-import com.sequenceiq.environment.client.EnvironmentServiceClient;
 
 @Service
 public class ProxyConfigDtoService {
@@ -22,23 +23,23 @@ public class ProxyConfigDtoService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyConfigDtoService.class);
 
     @Inject
-    private EnvironmentServiceClient environmentServiceClient;
+    private ProxyEndpoint proxyEndpoint;
 
     @Inject
     private SecretService secretService;
 
-    public ProxyConfig get(String resourceCrn, String accountId, String userCrn) {
-        ProxyEndpoint proxyEndpoint = environmentServiceClient
-                .withCrn(userCrn)
-                .proxyV1Endpoint();
+    public ProxyConfig getByName(String resourceName) {
+        return convert(getProxyConfig(resourceName, proxyEndpoint::getByName));
+    }
 
-        ProxyResponse proxyResponse = getProxyConfig(resourceCrn, proxyEndpoint);
+    public ProxyConfig getByCrn(String resourceCrn) {
+        return convert(getProxyConfig(resourceCrn, proxyEndpoint::getByResourceCrn));
+    }
 
+    private ProxyConfig convert(ProxyResponse proxyResponse) {
         return ProxyConfig.builder()
                 .withName(proxyResponse.getName())
                 .withCrn(proxyResponse.getCrn())
-                .withUserCrn(userCrn)
-                .withAccountId(accountId)
                 .withProtocol(proxyResponse.getProtocol())
                 .withServerHost(proxyResponse.getHost())
                 .withServerPort(proxyResponse.getPort())
@@ -47,9 +48,9 @@ public class ProxyConfigDtoService {
                 .build();
     }
 
-    private ProxyResponse getProxyConfig(String resourceCrn, ProxyEndpoint proxyEndpoint) {
+    private ProxyResponse getProxyConfig(String value, Function<String, ProxyResponse> function) {
         try {
-            return proxyEndpoint.getByResourceCrn(resourceCrn);
+            return function.apply(value);
         } catch (WebApplicationException e) {
             String message = String.format("Failed to get Proxy config from Environment service due to: '%s' ", e.getMessage());
             LOGGER.error(message, e);

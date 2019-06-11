@@ -62,7 +62,7 @@ public class ClusterCreationEnvironmentValidatorTest {
         ClusterV4Request clusterRequest = new ClusterV4Request();
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, user, environment);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);
         // THEN
         assertFalse(actualResult.hasError());
     }
@@ -87,7 +87,7 @@ public class ClusterCreationEnvironmentValidatorTest {
         clusterRequest.setProxyConfigCrn(proxyConfig.getName());
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, user, environment);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);
         // THEN
         assertFalse(actualResult.hasError());
     }
@@ -101,7 +101,7 @@ public class ClusterCreationEnvironmentValidatorTest {
         clusterRequest.setProxyConfigCrn(proxyConfig.getName());
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, user, environment);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);
         // THEN
         assertFalse(actualResult.hasError());
     }
@@ -118,7 +118,7 @@ public class ClusterCreationEnvironmentValidatorTest {
         environment.getRegions().setNames(Set.of("region1", "region2"));
         environment.setName("env1");
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, user, environment);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);
         // THEN
         Assert.assertTrue(actualResult.hasError());
         Assert.assertEquals(1, actualResult.getErrors().size());
@@ -140,7 +140,7 @@ public class ClusterCreationEnvironmentValidatorTest {
         clusterRequest.setDatabases(Set.of(rdsName));
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, user, environment);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);
         // THEN
         assertFalse(actualResult.hasError());
     }
@@ -153,7 +153,7 @@ public class ClusterCreationEnvironmentValidatorTest {
         ClusterV4Request clusterRequest = new ClusterV4Request();
         ProxyConfig proxyConfig = createProxyConfig("proxy");
         clusterRequest.setProxyConfigCrn(proxyConfig.getName());
-        when(proxyConfigDtoService.get(anyString(), anyString(), anyString())).thenThrow(new CloudbreakServiceException("Some reason"));
+        when(proxyConfigDtoService.getByCrn(anyString())).thenThrow(new CloudbreakServiceException("Some reason"));
         String rdsName = "anrds";
         RDSConfig rdsConfig = createRdsConfig(rdsName);
         when(rdsConfigService.getByNamesForWorkspaceId(Set.of(rdsConfig.getName()), stack.getWorkspace().getId())).thenReturn(Set.of(rdsConfig));
@@ -161,7 +161,7 @@ public class ClusterCreationEnvironmentValidatorTest {
         when(user.getUserCrn()).thenReturn("aUserCRN");
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, user, environment);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);
         // THEN
         assertTrue(actualResult.hasError());
         Assert.assertEquals(1, actualResult.getErrors().size());
@@ -183,7 +183,7 @@ public class ClusterCreationEnvironmentValidatorTest {
         clusterRequest.setDatabases(Set.of(rdsName, rdsName2));
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, user, environment);
+        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment);
         // THEN
         assertTrue(actualResult.hasError());
         Assert.assertEquals(2, actualResult.getErrors().size());
