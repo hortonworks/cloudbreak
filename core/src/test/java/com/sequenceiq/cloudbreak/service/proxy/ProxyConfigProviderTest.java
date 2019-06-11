@@ -106,7 +106,7 @@ public class ProxyConfigProviderTest {
         proxyConfigBuilder.withServerPort(3128);
         proxyConfigBuilder.withProtocol("http");
         cluster.setProxyConfigCrn("ANY_CRN");
-        when(proxyConfigDtoService.get(anyString(), anyString(), anyString())).thenReturn(proxyConfigBuilder.build());
+        when(proxyConfigDtoService.getByCrn(anyString())).thenReturn(proxyConfigBuilder.build());
         proxyConfigProvider.decoratePillarWithProxyDataIfNeeded(servicePillar, cluster);
         SaltPillarProperties pillarProperties = servicePillar.get(ProxyConfigProvider.PROXY_KEY);
         assertNotNull(pillarProperties);
