@@ -135,7 +135,7 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
                     return EncryptionType.CUSTOM.equals(valueForTypeKey);
                 })
                 .forEach(request -> {
-                    checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(request, environment.getCredentialName(),
+                    checkEncryptionKeyValidityForInstanceGroupWhenKeysAreListable(request, environment.getCredential().getName(),
                             stackRequest.getPlacement().getRegion(), validationBuilder);
                 });
     }
