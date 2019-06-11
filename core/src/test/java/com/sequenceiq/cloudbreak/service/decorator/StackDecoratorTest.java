@@ -13,6 +13,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.assertj.core.util.Maps;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -21,12 +22,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -53,7 +56,9 @@ import com.sequenceiq.cloudbreak.service.template.TemplateService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegionResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
 public class StackDecoratorTest {
 
@@ -175,6 +180,13 @@ public class StackDecoratorTest {
         when(sharedServiceValidator.checkSharedServiceStackRequirements(any(StackV4Request.class), any(Workspace.class))).thenReturn(validationResult);
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCredential(credentialResponse);
+        CompactRegionResponse crr = new CompactRegionResponse();
+        crr.setNames(Sets.newHashSet("region"));
+        environmentResponse.setRegions(crr);
+        EnvironmentNetworkResponse enr = new EnvironmentNetworkResponse();
+        Map<String, CloudSubnet> subnetmetas = Maps.newHashMap("subnet", new CloudSubnet("id", "name", "availabilityzone"));
+        enr.setSubnetMetas(subnetmetas);
+        environmentResponse.setNetwork(enr);
         when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         Credential credential = Credential.builder().cloudPlatform(CloudPlatform.MOCK.name()).build();
