@@ -40,7 +40,7 @@ public class EnvironmentResourceService {
         return network;
     }
 
-    public Credential getCredentialFromRequest(CredentialAwareEnvRequest request, String accountId) {
+    public Credential getCredentialFromRequest(CredentialAwareEnvRequest request, String accountId, String creator) {
         Credential credential;
         if (StringUtils.isNotEmpty(request.getCredentialName())) {
             try {
@@ -51,12 +51,12 @@ public class EnvironmentResourceService {
             }
         } else {
             Credential converted = conversionService.convert(request.getCredential(), Credential.class);
-            credential = credentialService.create(converted, accountId);
+            credential = credentialService.create(converted, accountId, creator);
         }
         return credential;
     }
 
-    public Credential validatePlatformAndGetCredential(CredentialAwareEnvRequest request, Environment environment, String accountId) {
+    public Credential validatePlatformAndGetCredential(CredentialAwareEnvRequest request, Environment environment, String accountId, String creator) {
         String requestedPlatform;
         if (StringUtils.isNotEmpty(request.getCredentialName())) {
             Credential credential = credentialService.getByNameForAccountId(request.getCredentialName(), accountId);
@@ -67,7 +67,7 @@ public class EnvironmentResourceService {
             requestedPlatform = request.getCredential().getCloudPlatform();
             validatePlatform(environment, requestedPlatform);
             Credential converted = conversionService.convert(request.getCredential(), Credential.class);
-            return credentialService.create(converted, accountId);
+            return credentialService.create(converted, accountId, creator);
         }
     }
 

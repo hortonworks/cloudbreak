@@ -19,6 +19,7 @@ public class ProxyConfigToProxyResponseConverter extends AbstractConversionServi
         response.setProtocol(source.getProtocol());
         response.setUserName(getConversionService().convert(source.getUserNameSecret(), SecretResponse.class));
         response.setPassword(getConversionService().convert(source.getPasswordSecret(), SecretResponse.class));
+        response.setCreator(source.getCreator());
         response.setHost(source.getServerHost());
         response.setPort(source.getServerPort());
 

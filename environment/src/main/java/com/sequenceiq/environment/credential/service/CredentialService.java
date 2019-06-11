@@ -99,14 +99,15 @@ public class CredentialService extends AbstractCredentialService {
     }
 
     @Retryable(value = BadRequestException.class, maxAttempts = 30, backoff = @Backoff(delay = 2000))
-    public void createWithRetry(Credential credential, String accountId) {
-        create(credential, accountId);
+    public void createWithRetry(Credential credential, String accountId, String creator) {
+        create(credential, accountId, creator);
     }
 
-    public Credential create(Credential credential, @Nonnull String accountId) {
+    public Credential create(Credential credential, @Nonnull String accountId, @Nonnull String creator) {
         credentialValidator.validateCredentialCloudPlatform(credential.getCloudPlatform());
         credentialValidator.validateParameters(Platform.platform(credential.getCloudPlatform()), new Json(credential.getAttributes()));
         credential.setResourceCrn(createCRN(accountId));
+        credential.setCreator(creator);
         credential.setAccountId(accountId);
         Credential created = repository.save(credentialAdapter.verify(credential, accountId));
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_CREATED);

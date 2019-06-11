@@ -22,6 +22,9 @@ public class ProxyResponse extends ProxyBase {
     @ApiModelProperty(ProxyConfigDescription.PASSWORD)
     private SecretResponse password;
 
+    @ApiModelProperty(ProxyConfigDescription.CREATOR)
+    private String creator;
+
     public String getCrn() {
         return crn;
     }
@@ -44,5 +47,13 @@ public class ProxyResponse extends ProxyBase {
 
     public void setPassword(SecretResponse password) {
         this.password = password;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
     }
 }
