@@ -27,11 +27,20 @@ public class ServiceEndpointConfig {
     @Value("${datalake.cloudbreak.url:}")
     private String cloudbreakUrl;
 
+    @Value("${datalake.cloudbreak.serviceid:}")
+    private String cloudbreakServiceId;
+
     @Value("${datalake.cloudbreak.server.contextPath:/cb}")
     private String cbRootContextPath;
 
-    @Value("${datalake.cloudbreak.serviceid:}")
-    private String cloudbreakServiceId;
+    @Value("${datalake.environmentservice.serviceid:}")
+    private String environmentServiceId;
+
+    @Value("${datalake.environmentservice.url:}")
+    private String environmentServerUrl;
+
+    @Value("${datalake.environmentservice.server.contextPath:/environmentservice}")
+    private String environmentRootContextPath;
 
     @Bean
     public ServiceAddressResolver serviceAddressResolver() {
@@ -48,5 +57,11 @@ public class ServiceEndpointConfig {
     @DependsOn("serviceAddressResolver")
     public String cloudbreakUrl(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
         return serviceAddressResolver.resolveUrl(cloudbreakUrl + cbRootContextPath, "http", cloudbreakServiceId);
+    }
+
+    @Bean
+    @DependsOn("serviceAddressResolver")
+    public String environmentServerUrl(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
+        return serviceAddressResolver.resolveUrl(environmentServerUrl + environmentRootContextPath, "http", environmentServiceId);
     }
 }
