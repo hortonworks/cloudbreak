@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterResponse;
 import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
@@ -107,8 +108,14 @@ public class StackDecorator {
     public Stack decorate(@Nonnull Stack subject, @Nonnull StackV4Request request, User user, Workspace workspace) {
         String stackName = request.getName();
 
-        Credential credential = measure(() -> prepareCredential(subject),
+        DetailedEnvironmentResponse environment = measure(() -> environmentClientService.getByCrn(subject.getEnvironmentCrn()),
+                LOGGER, "Environment properties were queried under {} ms for environment {}", request.getEnvironmentCrn());
+
+        Credential credential = measure(() -> prepareCredential(environment),
                 LOGGER, "Credential was prepared under {} ms for stack {}", stackName);
+
+        measure(() -> preparePlacement(subject, request, environment),
+                LOGGER, "Placement was prepared under {} ms for stack {}, stackName");
 
         measure(() -> prepareDomainIfDefined(subject, request, user, workspace, credential),
                 LOGGER, "Domain was prepared under {} ms for stack {}", stackName);
@@ -150,8 +157,28 @@ public class StackDecorator {
         return subject;
     }
 
-    private Credential prepareCredential(Stack subject) {
-        DetailedEnvironmentResponse environment = environmentClientService.getByCrn(subject.getEnvironmentCrn());
+    private void preparePlacement(Stack subject, StackV4Request request, DetailedEnvironmentResponse environment) {
+        if (request.getPlacement() == null) {
+            subject.setRegion(getRegionFromEnv(environment));
+            subject.setAvailabilityZone(getAvailabilityZoneFromEnv(environment));
+        }
+    }
+
+    private String getRegionFromEnv(DetailedEnvironmentResponse environment) {
+        return environment.getRegions().getNames().stream()
+                .findFirst()
+                .orElse(null);
+    }
+
+    private String getAvailabilityZoneFromEnv(DetailedEnvironmentResponse environment) {
+        return environment.getNetwork().getSubnetMetas().entrySet().stream()
+                .findFirst()
+                .map(Map.Entry::getValue)
+                .map(CloudSubnet::getAvailabilityZone)
+                .orElse(null);
+    }
+
+    private Credential prepareCredential(DetailedEnvironmentResponse environment) {
         return credentialConverter.convert(environment.getCredential());
     }
 
@@ -167,8 +194,8 @@ public class StackDecorator {
                 if (template.getId() == null) {
                     template.setCloudPlatform(credential.cloudPlatform());
                     PlacementSettingsV4Request placement = request.getPlacement();
-                    String availabilityZone = placement != null ? placement.getAvailabilityZone() : null;
-                    String region = placement != null ? placement.getRegion() : null;
+                    String availabilityZone = placement != null ? placement.getAvailabilityZone() : subject.getAvailabilityZone();
+                    String region = placement != null ? placement.getRegion() : subject.getRegion();
 
                     templateValidator.validateTemplateRequest(credential, template, region, availabilityZone, subject.getPlatformVariant());
                     template = templateDecorator.decorate(credential, template, region, availabilityZone, subject.getPlatformVariant());

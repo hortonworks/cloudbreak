@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -61,7 +60,6 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setType(StackType.WORKLOAD);
         DetailedEnvironmentResponse environment = environmentClientService.getByName(source.getEnvironmentName());
         request.setCloudPlatform(getCloudPlatform(environment));
-        request.setPlacement(getPlacement(environment));
         request.setEnvironmentCrn(environment.getCrn());
         request.setTelemetry(getIfNotNull(source.getTelemetry(), telemetryConverter::convert));
         request.setAuthentication(getIfNotNull(source.getAuthentication(), authenticationConverter::convert));
@@ -71,7 +69,6 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setNetwork(getNetwork(source.getNetwork(), environment));
         request.setAws(getIfNotNull(source.getAws(), stackParameterConverter::convert));
         request.setAzure(getIfNotNull(source.getAzure(), stackParameterConverter::convert));
-        request.setPlacement(getPlacement(environment));
         request.setInputs(source.getInputs());
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
         request.setSharedService(getIfNotNull(source.getSdx(), this::getSharedService));
@@ -169,13 +166,5 @@ public class DistroXV1RequestToStackV4RequestConverter {
         SdxV1Request sdx = new SdxV1Request();
         sdx.setName(sharedServiceV4Request.getDatalakeName());
         return sdx;
-    }
-
-    private PlacementSettingsV4Request getPlacement(DetailedEnvironmentResponse environment) {
-        PlacementSettingsV4Request placementSettings = new PlacementSettingsV4Request();
-        String region = environment.getRegions().getNames().stream().findFirst().orElse(null);
-        placementSettings.setRegion(region);
-        placementSettings.setAvailabilityZone(region + 'a');
-        return placementSettings;
     }
 }
