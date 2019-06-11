@@ -141,8 +141,14 @@ public class EnvironmentApiConverter {
                 return EnvironmentStatus.CORRUPTED;
             case CREATION_INITIATED:
                 return EnvironmentStatus.CREATION_INITIATED;
-            case RDBMS_CREATION_IN_PROGRESS:
-                return EnvironmentStatus.RDBMS_CREATION_IN_PROGRESS;
+            case DELETE_INITIATED:
+                return EnvironmentStatus.DELETE_INITIATED;
+            case RDBMS_DELETE_IN_PROGRESS:
+                return EnvironmentStatus.RDBMS_DELETE_IN_PROGRESS;
+            case FREEIPA_DELETE_IN_PROGRESS:
+                return EnvironmentStatus.FREEIPA_DELETE_IN_PROGRESS;
+            case NETWORK_DELETE_IN_PROGRESS:
+                return EnvironmentStatus.NETWORK_DELETE_IN_PROGRESS;
             case FREEIPA_CREATION_IN_PROGRESS:
                 return EnvironmentStatus.FREEIPA_CREATION_IN_PROGRESS;
             default:

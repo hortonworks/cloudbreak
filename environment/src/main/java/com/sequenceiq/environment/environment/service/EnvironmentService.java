@@ -45,18 +45,15 @@ public class EnvironmentService {
 
     private final EnvironmentResourceDeletionService environmentResourceDeletionService;
 
-    public EnvironmentService(
-            EnvironmentValidatorService validatorService,
-            EnvironmentRepository environmentRepository,
-            ConversionService conversionService,
-            PlatformParameterService platformParameterService,
-            EnvironmentResourceDeletionService environmentResourceDeletionService) {
+    public EnvironmentService(EnvironmentValidatorService validatorService, EnvironmentRepository environmentRepository, ConversionService conversionService,
+            PlatformParameterService platformParameterService, EnvironmentResourceDeletionService environmentResourceDeletionService) {
         this.validatorService = validatorService;
         this.environmentRepository = environmentRepository;
         this.conversionService = conversionService;
         this.platformParameterService = platformParameterService;
         this.environmentResourceDeletionService = environmentResourceDeletionService;
     }
+
 
     public Environment save(Environment environment) {
         return environmentRepository.save(environment);
@@ -99,15 +96,10 @@ public class EnvironmentService {
     }
 
     public Environment delete(Environment environment) {
+        checkForDeletePermit(environment);
         MDCBuilder.buildMdcContext(environment);
         LOGGER.debug("Deleting environment with name: {}", environment.getName());
-        Set<String> sdxNames = environmentResourceDeletionService.getAttachedSdxClusterNames(environment);
-        if (!sdxNames.isEmpty()) {
-            throw new BadRequestException(String.format("The following cluster(s) must be terminated before Environment deletion [%s]",
-                    String.join(", ", sdxNames)));
-        }
-        environmentResourceDeletionService.deleteResources(environment);
-//        environmentRepository.delete(environment);
+        environmentResourceDeletionService.triggerDeleteFlow(environment);
         return environment;
     }
 
@@ -185,6 +177,15 @@ public class EnvironmentService {
         platformResourceRequest.setCredential(environment.getCredential());
         platformResourceRequest.setCloudPlatform(environment.getCloudPlatform());
         return platformParameterService.getRegionsByCredential(platformResourceRequest);
+    }
+
+    private void checkForDeletePermit(Environment env) {
+        LOGGER.debug("Checking if environment [name: {}] is deletable", env.getName());
+        Set<String> sdxNames = environmentResourceDeletionService.getAttachedSdxClusterNames(env);
+        if (!sdxNames.isEmpty()) {
+            throw new BadRequestException(String.format("The following cluster(s) must be terminated before Environment deletion [%s]",
+                    String.join(", ", sdxNames)));
+        }
     }
 
 }
