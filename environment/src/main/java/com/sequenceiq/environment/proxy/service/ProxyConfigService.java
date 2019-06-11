@@ -79,8 +79,9 @@ public class ProxyConfigService  {
         return proxyConfigRepository.findAllInAccount(accountId);
     }
 
-    public ProxyConfig create(ProxyConfig proxyConfig, String accountId) {
+    public ProxyConfig create(ProxyConfig proxyConfig, String accountId, String creator) {
         proxyConfig.setResourceCrn(createCRN(accountId));
+        proxyConfig.setCreator(creator);
         proxyConfig.setAccountId(accountId);
         try {
             return proxyConfigRepository.save(proxyConfig);

@@ -70,6 +70,9 @@ public class Environment implements AuthResource {
 
     private boolean archived;
 
+    @Column(nullable = false)
+    private String creator;
+
     private Long deletionTimestamp = -1L;
 
     @OneToOne(mappedBy = "environment", cascade = CascadeType.REMOVE, orphanRemoval = true)
@@ -227,5 +230,13 @@ public class Environment implements AuthResource {
 
     public void setStatus(EnvironmentStatus status) {
         this.status = status;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
     }
 }

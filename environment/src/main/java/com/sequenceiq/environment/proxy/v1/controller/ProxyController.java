@@ -74,10 +74,11 @@ public class ProxyController extends NotificationController implements ProxyEndp
     @Override
     public ProxyResponse post(ProxyRequest request) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
+        String creator = threadBasedUserCrnProvider.getUserCrn();
         ProxyConfig proxyConfig = proxyRequestToProxyConfigConverter.convert(request);
         notify(ResourceEvent.PROXY_CONFIG_CREATED);
         return proxyConfigToProxyResponseConverter
-                .convert(proxyConfigService.create(proxyConfig, accountId));
+                .convert(proxyConfigService.create(proxyConfig, accountId, creator));
     }
 
     @Override
