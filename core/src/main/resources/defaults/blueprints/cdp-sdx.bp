@@ -251,22 +251,10 @@
           {
             "base": true,
             "refName": "knox-KNOX_GATEWAY-BASE",
-            "roleType": "KNOX_GATEWAY",
-            "configs": [
-              {
-                "name": "gateway_master_secret",
-                "value": "{{{ general.password }}}"
-              }
-            ]
+            "roleType": "KNOX_GATEWAY"
           },
           {
             "base": true,
-            "configs": [
-              {
-                "name": "idbroker_master_secret",
-                "value": "{{{ general.password }}}"
-              }
-            ],
             "refName": "knox-IDBROKER-BASE",
             "roleType": "IDBROKER"
           }
