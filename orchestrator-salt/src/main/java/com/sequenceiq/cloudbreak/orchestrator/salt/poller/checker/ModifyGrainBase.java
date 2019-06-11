@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.StreamSupport;
@@ -17,6 +18,10 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 
 public abstract class ModifyGrainBase extends BaseSaltJobRunner {
+
+    private static final int RETRY_LIMIT = 10;
+
+    private static final int RETRY_BACKOFF_MILLIS = 10_000;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ModifyGrainBase.class);
 
@@ -39,29 +44,105 @@ public abstract class ModifyGrainBase extends BaseSaltJobRunner {
     @Override
     public String submit(SaltConnector saltConnector) throws SaltJobFailedException {
         Compound target = new Compound(getTarget(), compoundType);
-        ApplyResponse response = addGrain ? SaltStates.addGrain(saltConnector, target, key, value)
-                : SaltStates.removeGrain(saltConnector, target, key, value);
-        Set<String> missingIps = collectMissingNodes(collectNodes(response));
+        LOGGER.info("Starting salt modify grain process. {}", this);
+        ApplyResponse response = modifyGrain(saltConnector, target);
         Map<String, JsonNode> grains = SaltStates.getGrains(saltConnector, target, key);
+        if (isModificationFailed(grains)) {
+            LOGGER.info("Modify grain process failed. Starting to retry. {}", this);
+            response = retryModification(saltConnector, target, response);
+        }
+        Set<String> missingIps = collectMissingNodes(collectNodes(response));
+        setTarget(missingIps);
+        return missingIps.toString();
+    }
+
+    private ApplyResponse retryModification(SaltConnector saltConnector, Compound target, ApplyResponse response) throws SaltJobFailedException {
+        boolean modificationFailed = true;
+        Map<String, JsonNode> grains = new HashMap<>();
+        int retryCounter;
+        for (retryCounter = 0; retryCounter < RETRY_LIMIT && modificationFailed; retryCounter++) {
+            backoff();
+            LOGGER.info("Retry #{} for salt modify grain process. {}", retryCounter, this);
+            response = modifyGrain(saltConnector, target);
+            grains = SaltStates.getGrains(saltConnector, target, key);
+            modificationFailed = isModificationFailed(grains);
+        }
+        if (modificationFailed) {
+            LOGGER.info("Salt modify grain process failed after {} retries. {}", RETRY_LIMIT, this);
+            checkFinalModification(grains);
+        } else {
+            LOGGER.info("Salt modify grain process succeeded for retry #{}. {}", retryCounter, this);
+        }
+        return response;
+    }
+
+    private ApplyResponse modifyGrain(SaltConnector saltConnector, Compound target) {
+        return addGrain ? SaltStates.addGrain(saltConnector, target, key, value)
+                : SaltStates.removeGrain(saltConnector, target, key, value);
+    }
+
+    private boolean isModificationFailed(Map<String, JsonNode> grains) throws SaltJobFailedException {
+        boolean modificationFailed = false;
         for (Node node : getAllNode()) {
             if (getTarget().contains(node.getPrivateIp())) {
                 if (!grains.containsKey(node.getHostname())) {
-                    throw new SaltJobFailedException("Can not find node in grains result. target=" + node.getHostname() + ", key=" + key + ", value=" + value);
+                    throw new SaltJobFailedException("Can not find node in grains result. target="
+                            + node.getHostname() + ", key=" + key + ", value=" + value);
                 } else {
-                    Iterable<JsonNode> elements = () -> grains.get(node.getHostname()).elements();
-                    boolean foundGrain = StreamSupport.stream(elements.spliterator(), false)
-                            .anyMatch(element -> value.equals(element.asText()));
-                    if (addGrain && !foundGrain) {
+                    boolean foundGrain = isGrainFound(grains, node);
+                    if (isAddGrainFailed(foundGrain)) {
+                        modificationFailed = true;
+                    }
+                    if (isRemoveGrainFailed(foundGrain)) {
+                        modificationFailed = true;
+                    }
+                }
+            }
+        }
+        return modificationFailed;
+    }
+
+    private boolean isGrainFound(Map<String, JsonNode> finalGrains, Node node) {
+        Iterable<JsonNode> elements = () -> finalGrains.get(node.getHostname()).elements();
+        return StreamSupport.stream(elements.spliterator(), false)
+                .anyMatch(element -> value.equals(element.asText()));
+    }
+
+    private void backoff() {
+        try {
+            LOGGER.info("Backing off in the modify grain process for {}ms. {}", RETRY_BACKOFF_MILLIS, this);
+            Thread.sleep(RETRY_BACKOFF_MILLIS);
+        } catch (InterruptedException e) {
+            throw new IllegalStateException("Sleeping was interrupted.", e);
+        }
+    }
+
+    private void checkFinalModification(Map<String, JsonNode> grains) throws SaltJobFailedException {
+        final Map<String, JsonNode> finalGrains = new HashMap<>(grains);
+        for (Node node : getAllNode()) {
+            if (getTarget().contains(node.getPrivateIp())) {
+                if (!finalGrains.containsKey(node.getHostname())) {
+                    throw new SaltJobFailedException("Can not find node in grains result. target="
+                            + node.getHostname() + ", key=" + key + ", value=" + value);
+                } else {
+                    boolean foundGrain = isGrainFound(finalGrains, node);
+                    if (isAddGrainFailed(foundGrain)) {
                         throw new SaltJobFailedException("Grain append was unsuccessful. key=" + key + ", value=" + value);
                     }
-                    if (!addGrain && foundGrain) {
+                    if (isRemoveGrainFailed(foundGrain)) {
                         throw new SaltJobFailedException("Grain value removal was unsuccessful. key=" + key + ", value=" + value);
                     }
                 }
             }
         }
-        setTarget(missingIps);
-        return missingIps.toString();
+    }
+
+    private boolean isAddGrainFailed(boolean foundGrain) {
+        return addGrain && !foundGrain;
+    }
+
+    private boolean isRemoveGrainFailed(boolean foundGrain) {
+        return !addGrain && foundGrain;
     }
 
     @Override
