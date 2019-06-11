@@ -59,6 +59,8 @@ environment:
   freeipa:
     url: http://localhost:8090
     support: AWS,AZURE
+  sdx:
+    url: http://localhost:8086/dl
   db:
     host: localhost
     port: 5432

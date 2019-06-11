@@ -9,12 +9,11 @@ import javax.ws.rs.ext.ExceptionMapper;
 import org.springframework.stereotype.Component;
 
 @Component
-public class WebApplicaitonExceptionMapper implements ExceptionMapper<WebApplicationException> {
+public class WebApplicationExceptionMapper implements ExceptionMapper<WebApplicationException> {
 
     @Override
     public Response toResponse(WebApplicationException exception) {
         notNull(exception, "exception");
         return exception.getResponse();
     }
-
 }
