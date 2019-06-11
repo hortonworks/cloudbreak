@@ -43,6 +43,9 @@ public class SdxCluster {
     private String envName;
 
     @NotNull
+    private String envCrn;
+
+    @NotNull
     private String accessCidr;
 
     @NotNull
@@ -131,6 +134,14 @@ public class SdxCluster {
 
     public void setEnvName(String envName) {
         this.envName = envName;
+    }
+
+    public String getEnvCrn() {
+        return envCrn;
+    }
+
+    public void setEnvCrn(String envCrn) {
+        this.envCrn = envCrn;
     }
 
     public String getAccessCidr() {
