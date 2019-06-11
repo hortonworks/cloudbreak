@@ -24,6 +24,8 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.client.EnvironmentServiceClient;
 
 @Service
 public class SdxService {
@@ -35,6 +37,9 @@ public class SdxService {
 
     @Inject
     private SdxReactorFlowManager sdxReactorFlowManager;
+
+    @Inject
+    private EnvironmentServiceClient environmentServiceClient;
 
     public SdxCluster getById(Long id) {
         Optional<SdxCluster> sdxClusters = sdxClusterRepository.findById(id);
@@ -86,7 +91,10 @@ public class SdxService {
             throw new BadRequestException("Can not convert tags", e);
         }
         sdxCluster.setInitiatorUserCrn(userCrn);
-        sdxCluster.setEnvName(sdxClusterRequest.getEnvironment());
+
+        DetailedEnvironmentResponse environment = getEnvironment(userCrn, sdxClusterRequest);
+        sdxCluster.setEnvName(environment.getName());
+        sdxCluster.setEnvCrn(environment.getCrn());
 
         sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(sdxCluster.getAccountId(), sdxCluster.getClusterName())
                 .ifPresent(foundSdx -> {
@@ -95,8 +103,8 @@ public class SdxService {
 
         sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(sdxCluster.getAccountId(), sdxCluster.getEnvName()).stream().findFirst()
                 .ifPresent(existedSdx -> {
-            throw new BadRequestException("SDX cluster exists for environment name: " + existedSdx.getEnvName());
-        });
+                    throw new BadRequestException("SDX cluster exists for environment name: " + existedSdx.getEnvName());
+                });
 
         sdxCluster = sdxClusterRepository.save(sdxCluster);
 
@@ -146,5 +154,12 @@ public class SdxService {
         } catch (NullPointerException | CrnParseException e) {
             throw new BadRequestException("Can not parse CRN to find account ID: " + userCrn);
         }
+    }
+
+    private DetailedEnvironmentResponse getEnvironment(String userCrn, SdxClusterRequest sdxClusterRequest) {
+        return environmentServiceClient
+                .withCrn(userCrn)
+                .environmentV1Endpoint()
+                .getByName(sdxClusterRequest.getEnvironment());
     }
 }

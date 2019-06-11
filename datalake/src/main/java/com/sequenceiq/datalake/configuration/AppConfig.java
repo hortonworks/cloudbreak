@@ -11,6 +11,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
+import com.sequenceiq.environment.client.EnvironmentServiceClient;
+import com.sequenceiq.environment.client.EnvironmentServiceClientBuilder;
 
 @Configuration
 @EnableAsync
@@ -21,6 +23,10 @@ public class AppConfig implements AsyncConfigurer {
     @Named("cloudbreakUrl")
     private String cloudbreakUrl;
 
+    @Inject
+    @Named("environmentServerUrl")
+    private String environmentServerUrl;
+
     @Bean
     public CloudbreakUserCrnClient cloudbreakClient() {
         return new CloudbreakUserCrnClientBuilder(cloudbreakUrl)
@@ -30,4 +36,14 @@ public class AppConfig implements AsyncConfigurer {
                 .build();
 
     }
+
+    @Bean
+    public EnvironmentServiceClient environmentServiceClient() {
+        return new EnvironmentServiceClientBuilder(environmentServerUrl)
+                .withCertificateValidation(false)
+                .withIgnorePreValidation(true)
+                .withDebug(true)
+                .build();
+    }
+
 }

@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +26,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.client.EnvironmentServiceClient;
+import com.sequenceiq.environment.client.EnvironmentServiceEndpoints;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -44,6 +50,15 @@ public class SdxServiceTest {
 
     @Mock
     private SdxReactorFlowManager sdxReactorFlowManager;
+
+    @Mock
+    private EnvironmentServiceClient environmentServiceClient;
+
+    @Mock
+    private EnvironmentServiceEndpoints environmentServiceEndpoints;
+
+    @Mock
+    private EnvironmentEndpoint environmentEndpoint;
 
     @InjectMocks
     private SdxService sdxService;
@@ -91,6 +106,7 @@ public class SdxServiceTest {
         tags.put("mytag", "tagecske");
         sdxClusterRequest.setTags(tags);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Collections.singletonList(new SdxCluster()));
+        mockEnvironmentCall(sdxClusterRequest);
         Assertions.assertThrows(BadRequestException.class,
                 () -> sdxService.createSdx(CRN, "test-sdx-cluster", sdxClusterRequest, null), "SDX cluster exists for environment name");
     }
@@ -111,6 +127,7 @@ public class SdxServiceTest {
             sdxWithId.setId(id);
             return sdxWithId;
         });
+        mockEnvironmentCall(sdxClusterRequest);
         String sdxName = "test-sdx-cluster";
         SdxCluster createdSdxCluster = sdxService.createSdx(CRN, sdxName, sdxClusterRequest, null);
         Assertions.assertEquals(id, createdSdxCluster.getId());
@@ -126,6 +143,20 @@ public class SdxServiceTest {
         Assertions.assertEquals(CRN, capturedSdx.getInitiatorUserCrn());
         Assertions.assertEquals(SdxClusterStatus.REQUESTED, capturedSdx.getStatus());
         verify(sdxReactorFlowManager).triggerSdxCreation(id);
+    }
+
+    private void mockEnvironmentCall(SdxClusterRequest sdxClusterRequest) {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setName(sdxClusterRequest.getEnvironment());
+        detailedEnvironmentResponse.setCrn(Crn.builder()
+                .setService(Crn.Service.ENVIRONMENTS)
+                .setResourceType(Crn.ResourceType.ENVIRONMENT)
+                .setResource(UUID.randomUUID().toString())
+                .setAccountId(UUID.randomUUID().toString())
+                .build().toString());
+        when(environmentServiceClient.withCrn(anyString())).thenReturn(environmentServiceEndpoints);
+        when(environmentServiceEndpoints.environmentV1Endpoint()).thenReturn(environmentEndpoint);
+        when(environmentEndpoint.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
     }
 
     @Test

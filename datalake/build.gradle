@@ -23,6 +23,7 @@ dependencies {
   compile project(':flow')
   compile project(':datalake-api')
   compile project(':secret-engine')
+  compile project(':environment-api')
 
   implementation     group: 'com.google.code.gson',      name: 'gson',                            version: '2.6.2'
   implementation     group: 'dnsjava',                   name: 'dnsjava',                         version: '2.1.7'
