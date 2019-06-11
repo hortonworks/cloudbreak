@@ -31,15 +31,17 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
+import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
@@ -75,6 +77,9 @@ public class StackValidationV4RequestToStackValidationConverter extends Abstract
     @Inject
     private Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap;
 
+    @Inject
+    private CredentialConverter credentialConverter;
+
     @Override
     public StackValidation convert(StackValidationV4Request stackValidationRequest) {
         StackValidation stackValidation = new StackValidation();
@@ -90,9 +95,10 @@ public class StackValidationV4RequestToStackValidationConverter extends Abstract
                 "blueprint", stackValidationRequest.getBlueprintName()
         );
         DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stackValidation.getEnvironmentCrn());
+        CredentialResponse credentialResponse = environment.getCredential();
         formatAccessDeniedMessage(
-                () -> validateCredential(stackValidation, environment.getCredentialName()),
-                "credential", environment.getCredentialName()
+                () -> validateCredential(stackValidation, credentialResponse),
+                "credential", Optional.ofNullable(credentialResponse).map(CredentialResponse::getName).orElse("NULL")
         );
         formatAccessDeniedMessage(
                 () -> validateNetwork(stackValidationRequest.getNetworkId(), stackValidationRequest.getNetwork(), stackValidation, environment),
@@ -112,9 +118,9 @@ public class StackValidationV4RequestToStackValidationConverter extends Abstract
         }
     }
 
-    private void validateCredential(StackValidation stackValidation, String credentialName) {
-        if (credentialName != null) {
-            Credential credential = credentialClientService.getByName(credentialName);
+    private void validateCredential(StackValidation stackValidation, CredentialResponse credentialResponse) {
+        if (credentialResponse != null) {
+            Credential credential = credentialConverter.convert(credentialResponse);
             stackValidation.setCredential(credential);
         } else if (stackValidation.getCredential() == null) {
             throw new BadRequestException("Credential is not configured for the validation request!");

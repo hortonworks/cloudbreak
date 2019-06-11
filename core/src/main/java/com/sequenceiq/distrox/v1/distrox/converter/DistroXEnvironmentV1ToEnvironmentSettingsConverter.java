@@ -22,7 +22,7 @@ public class DistroXEnvironmentV1ToEnvironmentSettingsConverter {
     public EnvironmentSettingsV4Request convert(DistroXEnvironmentV1Request source) {
         DetailedEnvironmentResponse environment = environmentClientService.getByName(source.getName());
         EnvironmentSettingsV4Request response = new EnvironmentSettingsV4Request();
-        response.setCredentialName(environment.getCredentialName());
+        response.setCredentialName(environment.getCredential().getName());
         response.setName(source.getName());
         return response;
     }

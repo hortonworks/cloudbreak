@@ -18,6 +18,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
+import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -35,9 +36,15 @@ public class EnvironmentApiConverter {
 
     private final RegionConverter regionConverter;
 
-    public EnvironmentApiConverter(ThreadBasedUserCrnProvider threadBasedUserCrnProvider, RegionConverter regionConverter) {
+    private final CredentialToCredentialV1ResponseConverter credentialConverter;
+
+    public EnvironmentApiConverter(ThreadBasedUserCrnProvider threadBasedUserCrnProvider,
+            RegionConverter regionConverter,
+            CredentialToCredentialV1ResponseConverter credentialConverter
+    ) {
         this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
         this.regionConverter = regionConverter;
+        this.credentialConverter = credentialConverter;
     }
 
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
@@ -89,7 +96,7 @@ public class EnvironmentApiConverter {
                 .withName(environmentDto.getName())
                 .withDescription(environmentDto.getDescription())
                 .withCloudPlatform(environmentDto.getCloudPlatform())
-                .withCredentialName(environmentDto.getCredential().getName())
+                .withCredential(credentialConverter.convert(environmentDto.getCredential()))
                 .withEnvironmentStatus(convertEnvStatus(environmentDto.getEnvironmentStatus()))
                 .withLocation(locationDtoToResponse(environmentDto.getLocation()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()));

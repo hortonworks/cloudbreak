@@ -57,6 +57,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
+import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -68,6 +69,7 @@ import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 public class StackV4RequestToTemplatePreparationObjectConverterTest {
@@ -166,6 +168,12 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     @Mock
     private DetailedEnvironmentResponse environmentResponse;
 
+    @Mock
+    private CredentialConverter credentialConverter;
+
+    @Mock
+    private CredentialResponse credentialResponse;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -182,7 +190,8 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(userService.getOrCreate(eq(cloudbreakUser))).thenReturn(user);
         when(cloudbreakUser.getEmail()).thenReturn("test@hortonworks.com");
         when(workspaceService.get(anyLong(), eq(user))).thenReturn(workspace);
-        when(environmentResponse.getCredentialName()).thenReturn(TEST_CREDENTIAL_NAME);
+        when(credentialConverter.convert(credentialResponse)).thenReturn(credential);
+        when(environmentResponse.getCredential()).thenReturn(credentialResponse);
         when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         when(credentialClientService.getByName(TEST_CREDENTIAL_NAME)).thenReturn(credential);

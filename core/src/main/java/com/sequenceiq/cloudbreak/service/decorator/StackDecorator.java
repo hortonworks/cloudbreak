@@ -39,9 +39,10 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
+import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
@@ -99,6 +100,9 @@ public class StackDecorator {
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
+    @Inject
+    private CredentialConverter credentialConverter;
+
     @Measure(StackDecorator.class)
     public Stack decorate(@Nonnull Stack subject, @Nonnull StackV4Request request, User user, Workspace workspace) {
         String stackName = request.getName();
@@ -148,8 +152,7 @@ public class StackDecorator {
 
     private Credential prepareCredential(Stack subject) {
         DetailedEnvironmentResponse environment = environmentClientService.getByCrn(subject.getEnvironmentCrn());
-        String credentialName = environment.getCredentialName();
-        return credentialClientService.getByName(credentialName);
+        return credentialConverter.convert(environment.getCredential());
     }
 
     private void prepareInstanceGroups(Stack subject, StackV4Request request, Credential credential, User user) {
