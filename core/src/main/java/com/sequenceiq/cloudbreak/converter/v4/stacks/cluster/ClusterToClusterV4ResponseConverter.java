@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -62,6 +63,9 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
 
     @Inject
     private ConverterUtil converterUtil;
+
+    @Inject
+    private ProxyConfigDtoService proxyConfigDtoService;
 
     @Value("${cb.disable.show.blueprint:false}")
     private boolean disableShowBlueprint;
@@ -182,6 +186,7 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
         String proxyConfigCrn = source.getProxyConfigCrn();
         if (StringUtils.isNotEmpty(proxyConfigCrn)) {
             clusterResponse.setProxyConfigCrn(proxyConfigCrn);
+            clusterResponse.setProxyConfigName(proxyConfigDtoService.getByCrn(proxyConfigCrn).getName());
         }
     }
 

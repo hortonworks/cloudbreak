@@ -61,6 +61,8 @@ public class ClusterV4Response implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.PROXY_CRN)
     private String proxyConfigCrn;
 
+    private String proxyConfigName;
+
     @ApiModelProperty(ClusterModelDescription.FILESYSTEM)
     private CloudStorageV4Response cloudStorage;
 
@@ -328,5 +330,13 @@ public class ClusterV4Response implements JsonEntity {
 
     public void setServerUrl(String serverUrl) {
         this.serverUrl = serverUrl;
+    }
+
+    public String getProxyConfigName() {
+        return proxyConfigName;
+    }
+
+    public void setProxyConfigName(String proxyConfigName) {
+        this.proxyConfigName = proxyConfigName;
     }
 }

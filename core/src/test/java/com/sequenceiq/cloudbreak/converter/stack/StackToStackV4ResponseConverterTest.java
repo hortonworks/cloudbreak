@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.converter.stack;
 
+import static com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse.Builder.aDetailedEnvironmentResponse;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
@@ -57,6 +59,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 
 public class StackToStackV4ResponseConverterTest extends AbstractEntityConverterTest<Stack> {
@@ -84,6 +87,9 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
 
     @Mock
     private DatalakeResourcesService datalakeResourcesService;
+
+    @Mock
+    private EnvironmentClientService environmentClientService;
 
     @Before
     public void setUp() throws CloudbreakImageNotFoundException {
@@ -115,6 +121,10 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         given(conversionService.convert(any(), eq(CloudbreakDetailsV4Response.class))).willReturn(new CloudbreakDetailsV4Response());
         given(conversionService.convert(any(), eq(PlacementSettingsV4Response.class))).willReturn(new PlacementSettingsV4Response());
         given(converterUtil.convertAll(source.getInstanceGroups(), InstanceGroupV4Response.class)).willReturn(new ArrayList<>());
+        given(environmentClientService.getByCrn(anyString())).willReturn(aDetailedEnvironmentResponse()
+                .withCredentialName("cred-name")
+                .withName("env-name")
+                .build());
         // WHEN
         StackV4Response result = underTest.convert(source);
         // THEN
@@ -134,6 +144,10 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         given(conversionService.convert(any(), eq(WorkspaceResourceV4Response.class))).willReturn(new WorkspaceResourceV4Response());
         given(conversionService.convert(any(), eq(CloudbreakDetailsV4Response.class))).willReturn(new CloudbreakDetailsV4Response());
         given(conversionService.convert(any(), eq(PlacementSettingsV4Response.class))).willReturn(new PlacementSettingsV4Response());
+        given(environmentClientService.getByCrn(anyString())).willReturn(aDetailedEnvironmentResponse()
+                .withCredentialName("cred-name")
+                .withName("env-name")
+                .build());
         given(converterUtil.convertAll(source.getInstanceGroups(), InstanceGroupV4Response.class)).willReturn(new ArrayList<>());
         // WHEN
         StackV4Response result = underTest.convert(source);
@@ -156,6 +170,10 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         given(conversionService.convert(any(), eq(WorkspaceResourceV4Response.class))).willReturn(new WorkspaceResourceV4Response());
         given(conversionService.convert(any(), eq(CloudbreakDetailsV4Response.class))).willReturn(new CloudbreakDetailsV4Response());
         given(conversionService.convert(any(), eq(PlacementSettingsV4Response.class))).willReturn(new PlacementSettingsV4Response());
+        given(environmentClientService.getByCrn(anyString())).willReturn(aDetailedEnvironmentResponse()
+                .withCredentialName("cred-name")
+                .withName("env-name")
+                .build());
         given(converterUtil.convertAll(source.getInstanceGroups(), InstanceGroupV4Response.class)).willReturn(new ArrayList<>());
         // WHEN
         StackV4Response result = underTest.convert(source);
