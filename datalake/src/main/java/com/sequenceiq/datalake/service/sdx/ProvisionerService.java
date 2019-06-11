@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,9 +19,12 @@ import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
@@ -31,6 +36,9 @@ import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
+import com.sequenceiq.environment.client.EnvironmentServiceClient;
 
 @Service
 public class ProvisionerService {
@@ -44,6 +52,9 @@ public class ProvisionerService {
 
     @Inject
     private CloudbreakUserCrnClient cloudbreakClient;
+
+    @Inject
+    private EnvironmentServiceClient environmentServiceClient;
 
     @Inject
     private SdxClusterRepository sdxClusterRepository;
@@ -174,15 +185,50 @@ public class ProvisionerService {
                 throw new BadRequestException("can not convert from json to tags");
             }
             stackRequest.setTags(tags);
-            // TODO: env crn pls
-            stackRequest.setEnvironmentCrn(sdxCluster.getEnvName());
+            stackRequest.setEnvironmentCrn(sdxCluster.getEnvCrn());
             setupAuthentication(stackRequest);
             setupClusterRequest(stackRequest);
+            setupNetwork(sdxCluster, stackRequest);
             return stackRequest;
         } catch (IOException e) {
             LOGGER.error("Can not parse json to stack request");
             throw new IllegalStateException("Can not parse json to stack request", e);
         }
+    }
+
+    private void setupNetwork(SdxCluster sdxCluster, StackV4Request stackRequest) {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = environmentServiceClient
+                .withCrn(sdxCluster.getInitiatorUserCrn())
+                .environmentV1Endpoint()
+                .getByCrn(sdxCluster.getEnvCrn());
+        stackRequest.setNetwork(convertNetwork(detailedEnvironmentResponse.getNetwork()));
+    }
+
+    public NetworkV4Request convertNetwork(EnvironmentNetworkResponse network) {
+        NetworkV4Request response = new NetworkV4Request();
+        response.setAws(getIfNotNull(network.getAws(), aws -> convertToAwsNetwork(network)));
+        response.setAzure(getIfNotNull(network.getAzure(), azure -> convertToAzureNetwork(network)));
+        return response;
+    }
+
+    private AzureNetworkV4Parameters convertToAzureNetwork(EnvironmentNetworkResponse source) {
+        AzureNetworkV4Parameters response = new AzureNetworkV4Parameters();
+        response.setNetworkId(source.getAzure().getNetworkId());
+        response.setNoFirewallRules(source.getAzure().getNoFirewallRules());
+        response.setNoPublicIp(source.getAzure().getNoPublicIp());
+        response.setResourceGroupName(source.getAzure().getResourceGroupName());
+        response.setSubnetId(source.getSubnetIds().stream().findFirst().orElseThrow(()
+                -> new com.sequenceiq.cloudbreak.exception.BadRequestException("No subnet id for this environment")));
+        return response;
+    }
+
+    private AwsNetworkV4Parameters convertToAwsNetwork(EnvironmentNetworkResponse source) {
+        AwsNetworkV4Parameters response = new AwsNetworkV4Parameters();
+        response.setSubnetId(source.getSubnetIds().stream().findFirst().orElseThrow(()
+                -> new com.sequenceiq.cloudbreak.exception.BadRequestException("No subnet id for this environment")));
+        response.setVpcId(source.getAws().getVpcId());
+        response.setInternetGatewayId(source.getAws().getVpcId());
+        return response;
     }
 
     private void setupAuthentication(StackV4Request stackRequest) {

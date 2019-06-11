@@ -194,8 +194,9 @@ After importing the cloudbreak repo root, launch the Datalake application by exe
 
 ````
 -Dserver.port=8086
--Ddatalake.db.env.address=localhost
+-Ddatalake.db.port.5432.tcp.addr=localhost
 -Ddatalake.cloudbreak.url=http://localhost:8080
+-Ddatalake.environmentservice.url=http://localhost:8080
 -Dvault.addr=localhost
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
 ````

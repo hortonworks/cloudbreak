@@ -1,11 +1,13 @@
 package com.sequenceiq.datalake.controller.mapper;
 
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.ext.Provider;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 
+@Provider
 @Component
 public class SpringBadRequestExceptionMapper extends BaseExceptionMapper<BadRequestException> {
 
