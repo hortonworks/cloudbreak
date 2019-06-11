@@ -34,7 +34,6 @@ public class AppConfig implements AsyncConfigurer {
                 .withIgnorePreValidation(true)
                 .withDebug(true)
                 .build();
-
     }
 
     @Bean
