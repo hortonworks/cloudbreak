@@ -702,9 +702,7 @@ public class ModelDescriptions {
     }
 
     public static class EnvironmentNetworkDescription {
-        public static final String NETWORK_ID = "The id of the specified network";
         public static final String SUBNET_IDS = "Subnet ids of the specified networks";
-        public static final String NETWORK_CIDR = "Network CIDR of the specified networks";
         public static final String AWS_SPECIFIC_PARAMETERS = "Subnet ids of the specified networks";
         public static final String AZURE_SPECIFIC_PARAMETERS = "Subnet ids of the specified networks";
         public static final String AWS_VPC_ID = "Subnet ids of the specified networks";

@@ -15,11 +15,8 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EnvironmentNetworkV4Request {
-    @ApiModelProperty(value = ModelDescriptions.EnvironmentNetworkDescription.SUBNET_IDS)
+    @ApiModelProperty(value = ModelDescriptions.EnvironmentNetworkDescription.SUBNET_IDS, required = true)
     private Set<String> subnetIds;
-
-    @ApiModelProperty(value = ModelDescriptions.EnvironmentNetworkDescription.NETWORK_CIDR)
-    private String networkCidr;
 
     @ApiModelProperty(value = ModelDescriptions.EnvironmentNetworkDescription.AWS_SPECIFIC_PARAMETERS)
     private EnvironmentNetworkAwsV4Params aws;
@@ -49,13 +46,5 @@ public class EnvironmentNetworkV4Request {
 
     public void setAzure(EnvironmentNetworkAzureV4Params azure) {
         this.azure = azure;
-    }
-
-    public String getNetworkCidr() {
-        return networkCidr;
-    }
-
-    public void setNetworkCidr(String networkCidr) {
-        this.networkCidr = networkCidr;
     }
 }
