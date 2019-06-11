@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -37,7 +36,7 @@ public class ClusterCreationEnvironmentValidator {
     @Inject
     private KerberosConfigService kerberosConfigService;
 
-    public ValidationResult validate(ClusterV4Request clusterRequest, Stack stack, User user, DetailedEnvironmentResponse environment) {
+    public ValidationResult validate(ClusterV4Request clusterRequest, Stack stack, DetailedEnvironmentResponse environment) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
         if (environment != null && !CollectionUtils.isEmpty(environment.getRegions().getNames())
                 && environment.getRegions().getNames().stream().noneMatch(region -> region.equals(stack.getRegion()))) {
@@ -46,7 +45,7 @@ public class ClusterCreationEnvironmentValidator {
         }
         Long workspaceId = stack.getWorkspace().getId();
         validateRdsConfigNames(clusterRequest.getDatabases(), resultBuilder, workspaceId);
-        validateProxyConfig(clusterRequest.getProxyConfigCrn(), stack.getWorkspace().getTenant().getName(), resultBuilder, user.getUserCrn());
+        validateProxyConfig(clusterRequest.getProxyConfigCrn(), resultBuilder);
         return resultBuilder.build();
     }
 
@@ -80,10 +79,10 @@ public class ClusterCreationEnvironmentValidator {
         }
     }
 
-    private void validateProxyConfig(String resourceCrn, String accountId, ValidationResultBuilder resultBuilder, String userCrn) {
+    private void validateProxyConfig(String resourceCrn, ValidationResultBuilder resultBuilder) {
         if (StringUtils.isNotEmpty(resourceCrn)) {
             try {
-                proxyConfigDtoService.get(resourceCrn, accountId, userCrn);
+                proxyConfigDtoService.getByCrn(resourceCrn);
             } catch (CloudbreakServiceException ex) {
                 resultBuilder.error(String.format("The specified '%s' Proxy config resource couldn't be used: %s.", resourceCrn, ex.getMessage()));
             }
