@@ -43,15 +43,19 @@ public class EnvironmentService {
 
     private final PlatformParameterService platformParameterService;
 
+    private final EnvironmentResourceDeletionService environmentResourceDeletionService;
+
     public EnvironmentService(
             EnvironmentValidatorService validatorService,
             EnvironmentRepository environmentRepository,
             ConversionService conversionService,
-            PlatformParameterService platformParameterService) {
+            PlatformParameterService platformParameterService,
+            EnvironmentResourceDeletionService environmentResourceDeletionService) {
         this.validatorService = validatorService;
         this.environmentRepository = environmentRepository;
         this.conversionService = conversionService;
         this.platformParameterService = platformParameterService;
+        this.environmentResourceDeletionService = environmentResourceDeletionService;
     }
 
     public Environment save(Environment environment) {
@@ -94,11 +98,17 @@ public class EnvironmentService {
         return conversionService.convert(environment, SimpleEnvironmentResponse.class);
     }
 
-    public Environment delete(Environment resource) {
-        MDCBuilder.buildMdcContext(resource);
-        LOGGER.debug("Deleting environment with name: {}", resource.getName());
-        environmentRepository.delete(resource);
-        return resource;
+    public Environment delete(Environment environment) {
+        MDCBuilder.buildMdcContext(environment);
+        LOGGER.debug("Deleting environment with name: {}", environment.getName());
+        Set<String> sdxNames = environmentResourceDeletionService.getAttachedSdxClusterNames(environment);
+        if (!sdxNames.isEmpty()) {
+            throw new BadRequestException(String.format("The following cluster(s) must be terminated before Environment deletion [%s]",
+                    String.join(", ", sdxNames)));
+        }
+        environmentResourceDeletionService.deleteResources(environment);
+//        environmentRepository.delete(environment);
+        return environment;
     }
 
     public SimpleEnvironmentResponses deleteMultipleByNames(Set<String> environmentNames, String accountId) {
