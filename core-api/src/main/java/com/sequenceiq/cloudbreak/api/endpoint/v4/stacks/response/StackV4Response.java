@@ -44,6 +44,10 @@ public class StackV4Response extends StackV4Base {
 
     private String environmentCrn;
 
+    private String environmentName;
+
+    private String credentialName;
+
     @ApiModelProperty(StackModelDescription.STACK_STATUS)
     private Status status;
 
@@ -281,5 +285,21 @@ public class StackV4Response extends StackV4Base {
 
     public void setCloudPlatform(CloudPlatform cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
+    }
+
+    public String getEnvironmentName() {
+        return environmentName;
+    }
+
+    public void setEnvironmentName(String environmentName) {
+        this.environmentName = environmentName;
+    }
+
+    public String getCredentialName() {
+        return credentialName;
+    }
+
+    public void setCredentialName(String credentialName) {
+        this.credentialName = credentialName;
     }
 }

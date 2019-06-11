@@ -45,6 +45,10 @@ public class StackViewV4Response implements JsonEntity {
     @ApiModelProperty(StackModelDescription.ENVIRONMENT_CRN)
     private String environmentCrn;
 
+    private String environmentName;
+
+    private String credentialName;
+
     @ApiModelProperty(StackModelDescription.CLOUD_PLATFORM)
     private String cloudPlatform;
 
@@ -134,5 +138,21 @@ public class StackViewV4Response implements JsonEntity {
 
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
+    }
+
+    public String getEnvironmentName() {
+        return environmentName;
+    }
+
+    public void setEnvironmentName(String environmentName) {
+        this.environmentName = environmentName;
+    }
+
+    public String getCredentialName() {
+        return credentialName;
+    }
+
+    public void setCredentialName(String credentialName) {
+        this.credentialName = credentialName;
     }
 }

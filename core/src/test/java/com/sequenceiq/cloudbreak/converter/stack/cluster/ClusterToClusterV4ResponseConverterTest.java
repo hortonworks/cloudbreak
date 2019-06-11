@@ -36,8 +36,10 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -63,6 +65,9 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     @Mock
     private ConverterUtil converterUtil;
 
+    @Mock
+    private ProxyConfigDtoService proxyConfigDtoService;
+
     @Before
     public void setUp() {
         given(conversionService.convert(any(Workspace.class), eq(WorkspaceResourceV4Response.class)))
@@ -85,6 +90,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         when(conversionService.convert("secret/path", SecretResponse.class)).thenReturn(new SecretResponse("kv", "pass"));
         when(conversionService.convert(getSource().getBlueprint(), BlueprintV4Response.class)).thenReturn(new BlueprintV4Response());
         when(serviceEndpointCollector.getManagerServerUrl(any(Cluster.class), anyString())).thenReturn("http://server/");
+        given(proxyConfigDtoService.getByCrn(anyString())).willReturn(ProxyConfig.builder().withCrn("crn").withName("name").build());
         // WHEN
         ClusterV4Response result = underTest.convert(source);
         // THEN
@@ -98,6 +104,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     @Test
     public void testConvertWithoutUpSinceField() {
         // GIVEN
+        given(proxyConfigDtoService.getByCrn(anyString())).willReturn(ProxyConfig.builder().withCrn("crn").withName("name").build());
         getSource().setUpSince(null);
         // WHEN
         ClusterV4Response result = underTest.convert(getSource());
@@ -108,6 +115,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     @Test
     public void testConvertWithoutMasterComponent() {
         // GIVEN
+        given(proxyConfigDtoService.getByCrn(anyString())).willReturn(ProxyConfig.builder().withCrn("crn").withName("name").build());
         // WHEN
         ClusterV4Response result = underTest.convert(getSource());
         // THEN
@@ -119,6 +127,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         Map<String, Collection<ClusterExposedServiceV4Response>> exposedServiceResponseMap = new HashMap<>();
         exposedServiceResponseMap.put("topology1", getExpiosedServices());
         given(serviceEndpointCollector.prepareClusterExposedServices(any(), anyString())).willReturn(exposedServiceResponseMap);
+        given(proxyConfigDtoService.getByCrn(anyString())).willReturn(ProxyConfig.builder().withCrn("crn").withName("name").build());
 
         given(stackUtil.extractClusterManagerIp(any(Stack.class))).willReturn("10.0.0.1");
         ClusterV4Response clusterResponse = underTest.convert(getSource());
