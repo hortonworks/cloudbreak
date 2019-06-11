@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.InternalServerErrorException;
@@ -32,11 +33,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.Clock;
@@ -44,6 +47,12 @@ import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
+import com.sequenceiq.environment.client.EnvironmentServiceClient;
+import com.sequenceiq.environment.client.EnvironmentServiceEndpoints;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("SDX provisioner service tests")
@@ -59,6 +68,15 @@ class ProvisionerServiceTest {
 
     @Mock
     private Clock clock;
+
+    @Mock
+    private EnvironmentServiceClient environmentServiceClient;
+
+    @Mock
+    private EnvironmentServiceEndpoints environmentServiceEndpoints;
+
+    @Mock
+    private EnvironmentEndpoint environmentEndpoint;
 
     @InjectMocks
     private ProvisionerService provisionerService;
@@ -80,6 +98,7 @@ class ProvisionerServiceTest {
         sdxCluster.setAccessCidr("0.0.0.0/0");
         sdxCluster.setAccountId("hortonworks");
         sdxCluster.setTags(Json.silent(new HashMap<>()));
+        sdxCluster.setEnvCrn("");
 
         CloudbreakUserCrnClient.CloudbreakEndpoint cbEndpointMock = mock(CloudbreakUserCrnClient.CloudbreakEndpoint.class);
         StackV4Endpoint stackEndpointMock = mock(StackV4Endpoint.class);
@@ -90,6 +109,7 @@ class ProvisionerServiceTest {
         when(cbEndpointMock.stackV4Endpoint()).thenReturn(stackEndpointMock);
         when(cloudbreakClient.withCrn(anyString())).thenReturn(cbEndpointMock);
         when(sdxClusterRepository.findById(id)).thenReturn(Optional.of(sdxCluster));
+        mockEnvironmentCall();
         provisionerService.startStackProvisioning(id);
         final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
@@ -399,5 +419,31 @@ class ProvisionerServiceTest {
         SdxCluster postedSdxCluster = captor.getValue();
 
         Assertions.assertEquals(SdxClusterStatus.DELETED, postedSdxCluster.getStatus());
+    }
+
+    private void mockEnvironmentCall() {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setName("env");
+        detailedEnvironmentResponse.setCrn(Crn.builder()
+                .setService(Crn.Service.ENVIRONMENTS)
+                .setResourceType(Crn.ResourceType.ENVIRONMENT)
+                .setResource(UUID.randomUUID().toString())
+                .setAccountId(UUID.randomUUID().toString())
+                .build().toString());
+        EnvironmentNetworkResponse network = new EnvironmentNetworkResponse();
+        network.setCrn(Crn.builder()
+                .setService(Crn.Service.ENVIRONMENTS)
+                .setResourceType(Crn.ResourceType.NETWORK)
+                .setResource(UUID.randomUUID().toString())
+                .setAccountId(UUID.randomUUID().toString())
+                .build().toString());
+        EnvironmentNetworkAwsParams environmentNetworkAwsParams = new EnvironmentNetworkAwsParams();
+        environmentNetworkAwsParams.setVpcId("vpc");
+        network.setAws(environmentNetworkAwsParams);
+        network.setSubnetIds(Sets.newHashSet("subnet"));
+        detailedEnvironmentResponse.setNetwork(network);
+        when(environmentServiceClient.withCrn(anyString())).thenReturn(environmentServiceEndpoints);
+        when(environmentServiceEndpoints.environmentV1Endpoint()).thenReturn(environmentEndpoint);
+        when(environmentEndpoint.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
     }
 }

@@ -59,4 +59,5 @@ autoscale-log/
 environment-log/
 core/cloudbreak-log/
 freeipa-log/
+sdx-log/
 .deps/

@@ -17,6 +17,7 @@ public class SdxClusterConverter {
         sdxClusterResponse.setName(sdxCluster.getClusterName());
         sdxClusterResponse.setCrn(sdxCluster.getCrn());
         sdxClusterResponse.setEnvironmentName(sdxCluster.getEnvName());
+        sdxClusterResponse.setEnvironmentCrn(sdxCluster.getEnvCrn());
         return sdxClusterResponse;
     }
 }
