@@ -14,17 +14,18 @@ import com.sequenceiq.notification.ResourceEvent;
 
 public abstract class AbstractCredentialService {
 
-    protected static final Set<String> ENABLED_PLATFORMS = Set.of("AWS", "AZURE");
-
     protected static final String NOT_FOUND_FORMAT_MESS_NAME = "Credential with name:";
+
+    private final Set<String> enabledPlatforms;
 
     private final NotificationSender notificationSender;
 
     private final CloudbreakMessagesService messagesService;
 
-    protected AbstractCredentialService(NotificationSender notificationSender, CloudbreakMessagesService messagesService) {
+    protected AbstractCredentialService(NotificationSender notificationSender, CloudbreakMessagesService messagesService, Set<String> enabledPlatforms) {
         this.notificationSender = notificationSender;
         this.messagesService = messagesService;
+        this.enabledPlatforms = enabledPlatforms;
     }
 
     protected void sendCredentialNotification(Credential credential, ResourceEvent resourceEvent) {
@@ -36,4 +37,7 @@ public abstract class AbstractCredentialService {
         notificationSender.send(new Notification<>(notification), Collections.emptyList(), RestClientUtil.get());
     }
 
+    protected Set<String> getEnabledPlatforms() {
+        return enabledPlatforms;
+    }
 }
