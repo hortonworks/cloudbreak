@@ -71,7 +71,7 @@
             "configs": [
               {
                 "name": "hs2_execution_engine",
-                "value": "mr"
+                "value": "spark"
               }
             ],
             "base": true
@@ -111,6 +111,22 @@
         ]
       },
       {
+        "refName": "spark_on_yarn",
+        "serviceType": "SPARK_ON_YARN",
+        "roleConfigGroups": [
+          {
+            "refName": "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+            "roleType": "SPARK_YARN_HISTORY_SERVER",
+            "base": true
+          },
+          {
+            "refName": "spark_on_yarn-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          }
+        ]
+      },
+      {
         "refName": "impala",
         "serviceType": "IMPALA",
         "roleConfigGroups": [
@@ -135,6 +151,7 @@
     "hostTemplates": [
       {
         "refName": "master",
+        "cardinality": 1,
         "roleConfigGroupsRefNames": [
           "hdfs-BALANCER-BASE",
           "hdfs-NAMENODE-BASE",
@@ -147,23 +164,28 @@
           "impala-CATALOGSERVER-BASE",
           "impala-STATESTORE-BASE",
           "oozie-OOZIE_SERVER-BASE",
+          "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
           "yarn-JOBHISTORY-BASE",
           "yarn-RESOURCEMANAGER-BASE"
         ]
       },
       {
         "refName": "worker",
+        "cardinality": 1,
         "roleConfigGroupsRefNames": [
           "hdfs-DATANODE-BASE",
           "hive-GATEWAY-BASE",
           "impala-IMPALAD-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
           "yarn-NODEMANAGER-WORKER"
         ]
       },
       {
         "refName": "compute",
+        "cardinality": 0,
         "roleConfigGroupsRefNames": [
           "hive-GATEWAY-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
           "yarn-NODEMANAGER-COMPUTE"
         ]
       }
