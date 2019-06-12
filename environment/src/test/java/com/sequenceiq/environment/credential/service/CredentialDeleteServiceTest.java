@@ -59,7 +59,7 @@ public class CredentialDeleteServiceTest {
     @Before
     public void setUp() {
             MockitoAnnotations.initMocks(this);
-            underTest = new CredentialDeleteService(repository, notificationSender, messagesService, environmentViewService);
+            underTest = new CredentialDeleteService(repository, notificationSender, messagesService, environmentViewService, Set.of("AWS", "AZURE", "YARN"));
     }
 
     @Test
