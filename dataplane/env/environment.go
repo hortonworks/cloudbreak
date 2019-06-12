@@ -150,52 +150,6 @@ func createEnvironmentImpl(c *cli.Context, EnvironmentV1Request *model.Environme
 	log.Infof("[createEnvironmentImpl] environment created with name: %s, id: %s", *EnvironmentV1Request.Name, environment.Crn)
 }
 
-func GenerateAwsEnvironmentTemplate(c *cli.Context) error {
-	template := createEnvironmentWithNetwork(c)
-	template.Network.Aws = &model.EnvironmentNetworkAwsV1Params{
-		VpcID: new(string),
-	}
-	return printTemplate(template)
-}
-
-func GenerateAzureEnvironmentTemplate(c *cli.Context) error {
-	template := createEnvironmentWithNetwork(c)
-	template.Network.Azure = &model.EnvironmentNetworkAzureV1Params{
-		NetworkID:         new(string),
-		NoFirewallRules:   new(bool),
-		NoPublicIP:        new(bool),
-		ResourceGroupName: new(string),
-	}
-	return printTemplate(template)
-}
-
-func createEnvironmentWithNetwork(c *cli.Context) model.EnvironmentV1Request {
-	template := model.EnvironmentV1Request{
-		Name:           new(string),
-		Description:    new(string),
-		CredentialName: "____",
-		Regions:        make([]string, 0),
-		Location: &model.LocationV1Request{
-			Name:      new(string),
-			Longitude: 0,
-			Latitude:  0,
-		},
-		Network: &model.EnvironmentNetworkV1Request{
-			SubnetIds: make([]string, 0),
-		},
-	}
-	if credName := c.String(fl.FlEnvironmentCredentialOptional.Name); len(credName) != 0 {
-		template.CredentialName = credName
-	}
-	if locationName := c.String(fl.FlEnvironmentLocationNameOptional.Name); len(locationName) != 0 {
-		template.Location.Name = &locationName
-	}
-	if regions := utils.DelimitedStringToArray(c.String(fl.FlEnvironmentRegions.Name), ","); len(regions) != 0 {
-		template.Regions = regions
-	}
-	return template
-}
-
 func printTemplate(template model.EnvironmentV1Request) error {
 	resp, err := json.MarshalIndent(template, "", "\t")
 	if err != nil {

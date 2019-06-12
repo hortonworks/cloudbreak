@@ -15,57 +15,15 @@ func init() {
 			{
 				Name:  "create",
 				Usage: "creates a new Environment",
-				Flags: fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlEnvironmentCredential, fl.FlEnvironmentRegions, fl.FlProxyNamesOptional, fl.FlEnvironmentLocationName,
-					fl.FlEnvironmentLongitudeOptional, fl.FlEnvironmentLatitudeOptional).AddAuthenticationFlags().Build(),
-				Before: cf.CheckConfigAndCommandFlags,
-				Action: env.CreateEnvironment,
-				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlEnvironmentCredential, fl.FlEnvironmentRegions,
-						fl.FlProxyNamesOptional, fl.FlEnvironmentLocationName, fl.FlEnvironmentLongitudeOptional, fl.FlEnvironmentLatitudeOptional).AddAuthenticationFlags().Build() {
-						fl.PrintFlagCompletion(f)
-					}
-				},
-			},
-			{
-				Name:   "from-file",
-				Usage:  "creates a new Environment from JSON template",
-				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentTemplateFile, fl.FlNameOptional).AddAuthenticationFlags().Build(),
-				Before: cf.CheckConfigAndCommandFlags,
-				Action: env.CreateEnvironmentFromTemplate,
-				BashComplete: func(c *cli.Context) {
-					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentTemplateFile, fl.FlNameOptional).AddAuthenticationFlags().Build() {
-						fl.PrintFlagCompletion(f)
-					}
-				},
-			},
-			{
-				Name:  "generate-template",
-				Usage: "creates an environment JSON template",
 				Subcommands: []cli.Command{
 					{
-						Name:  "aws",
-						Usage: "creates an aws specific environment JSON template",
-						Flags: fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCredentialOptional,
-							fl.FlEnvironmentLocationNameOptional, fl.FlEnvironmentRegions).AddAuthenticationFlags().Build(),
+						Name:   "from-file",
+						Usage:  "creates a new Environment from JSON template",
+						Flags:  fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentTemplateFile, fl.FlNameOptional).AddAuthenticationFlags().Build(),
 						Before: cf.CheckConfigAndCommandFlags,
-						Action: env.GenerateAwsEnvironmentTemplate,
+						Action: env.CreateEnvironmentFromTemplate,
 						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCredentialOptional,
-								fl.FlEnvironmentLocationNameOptional, fl.FlEnvironmentRegions).AddAuthenticationFlags().Build() {
-								fl.PrintFlagCompletion(f)
-							}
-						},
-					},
-					{
-						Name:  "azure",
-						Usage: "creates an azure specific environment JSON template",
-						Flags: fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCredentialOptional,
-							fl.FlEnvironmentLocationNameOptional, fl.FlEnvironmentRegions).AddAuthenticationFlags().Build(),
-						Before: cf.CheckConfigAndCommandFlags,
-						Action: env.GenerateAzureEnvironmentTemplate,
-						BashComplete: func(c *cli.Context) {
-							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentCredentialOptional,
-								fl.FlEnvironmentLocationNameOptional, fl.FlEnvironmentRegions).AddAuthenticationFlags().Build() {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlEnvironmentTemplateFile, fl.FlNameOptional).AddAuthenticationFlags().Build() {
 								fl.PrintFlagCompletion(f)
 							}
 						},
