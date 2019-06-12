@@ -1,0 +1,74 @@
+{
+  "entries": [
+    {
+      "propertyName": "zeppelin.notebook.s3.bucket",
+      "propertyFile": "zeppelin-site",
+      "description": "The directory where Zeppelin notebooks are saved",
+      "defaultPath": "{{{ defaultPath }}}/zeppelin/notebook",
+      "propertyDisplayName": "Zeppelin Notebooks Root Directory",
+      "relatedServices": ["ZEPPELIN_SERVER"],
+      "requiredForAttachedCluster": false,
+      "supportedStorages": ["S3"]
+    },
+    {
+      "propertyName": "zeppelin.notebook.dir",
+      "propertyFile": "zeppelin-site",
+      "description": "The directory where Zeppelin notebooks are saved",
+      "defaultPath": "{{{ defaultPath }}}/zeppelin/notebook",
+      "propertyDisplayName": "Zeppelin Notebooks Root Directory",
+      "relatedServices": ["ZEPPELIN_SERVER"],
+      "requiredForAttachedCluster": false,
+      "supportedStorages": ["ADLS", "WASB", "GCS", "ADLS_GEN_2"]
+    },
+    {
+      "propertyName": "yarn.nodemanager.remote-app-log-dir",
+      "propertyFile": "yarn-site",
+      "description": "This is the directory where aggregated application logs will be stored by YARN",
+      "defaultPath": "{{{ defaultPath }}}{{{#if-false datalakeCluster}}}{{{#if-false attachedCluster}}}/{{{ clusterName }}}{{{/if-false}}}{{{/if-false}}}/oplogs/yarn-app-logs",
+      "propertyDisplayName": "YARN Application Logs",
+      "relatedServices": ["RESOURCEMANAGER"],
+      "requiredForAttachedCluster": false,
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
+    },
+    {
+      "propertyName": "spark.sql.warehouse.dir",
+      "propertyFile": "spark2-defaults",
+      "description": "Spark SQL stores the table data for managed tables in the warehouse directory",
+      "defaultPath": "{{{ defaultPath }}}/warehouse/spark",
+      "propertyDisplayName": "Spark SQL Warehouse Directory",
+      "relatedServices": ["SPARK_ON_YARN"],
+      "requiredForAttachedCluster": false,
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
+    },
+    {
+      "propertyName": "hive.metastore.warehouse.dir",
+      "propertyFile": "hive-site",
+      "description": "Hive stores the table data for managed tables in the warehouse directory",
+      "defaultPath": "{{{ defaultPath }}}/warehouse/tablespace/managed/hive",
+      "propertyDisplayName": "Hive Warehouse Directory",
+      "relatedServices": ["HIVEMETASTORE"],
+      "requiredForAttachedCluster": false,
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
+    },
+    {
+      "propertyName": "hive.metastore.warehouse.external.dir",
+      "propertyFile": "hive-site",
+      "description": "Hive stores the table data for external tables in the warehouse directory",
+      "defaultPath": "{{{ defaultPath }}}/warehouse/tablespace/external/hive",
+      "propertyDisplayName": "Hive Warehouse Directory For External Tables",
+      "relatedServices": ["HIVEMETASTORE"],
+      "requiredForAttachedCluster": false,
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
+    },
+    {
+      "propertyName": "ranger_plugin_hdfs_audit_url",
+      "propertyFile": "ranger-audit",
+      "description": "This is the directory where audit logs will be stored by Ranger",
+      "defaultPath": "{{{ defaultPath }}}/ranger/audit",
+      "propertyDisplayName": "Ranger Audit Logs",
+      "relatedServices": ["RANGER_ADMIN"],
+      "requiredForAttachedCluster": false,
+      "supportedStorages": ["ADLS", "WASB", "S3", "GCS", "ADLS_GEN_2"]
+    }
+  ]
+}

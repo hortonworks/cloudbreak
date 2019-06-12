@@ -27,7 +27,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
 import com.sequenceiq.cloudbreak.blueprint.CentralBlueprintParameterQueryService;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.AmbariCloudStorageConfigDetails;
 import com.sequenceiq.cloudbreak.blueprint.utils.BlueprintUtils;
+import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigDetails;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -75,6 +77,12 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     @Inject
     private CentralBlueprintParameterQueryService centralBlueprintParameterQueryService;
+
+    @Inject
+    private AmbariCloudStorageConfigDetails ambariCloudStorageConfigDetails;
+
+    @Inject
+    private CmCloudStorageConfigDetails cmCloudStorageConfigDetails;
 
     @Inject
     private BlueprintLoaderService blueprintLoaderService;
@@ -291,6 +299,14 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                 .withSecure(secure)
                 .build();
 
-        return centralBlueprintParameterQueryService.queryFileSystemParameters(fileSystemConfigQueryObject);
+        Set<ConfigQueryEntry> result;
+
+        if (blueprintUtils.isClouderaManagerClusterTemplate(blueprintText)) {
+            result = cmCloudStorageConfigDetails.queryParameters(fileSystemConfigQueryObject);
+        } else {
+            result = ambariCloudStorageConfigDetails.queryParameters(fileSystemConfigQueryObject);
+        }
+
+        return result;
     }
 }
