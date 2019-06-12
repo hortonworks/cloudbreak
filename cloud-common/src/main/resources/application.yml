@@ -252,7 +252,7 @@ cb:
         version: 7.x.0
         repo:
           redhat7:
-            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1131535/cm7/7.x.0/redhat7/yum/
+            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1158264/cm7/7.x.0/redhat7/yum/
 
 
   cdh:
@@ -279,12 +279,12 @@ cb:
             repoid: CDH-6.2.0
             redhat7: https://archive.cloudera.com/cdh6/6.2.0/parcels/
       "[7.0.0]":
-        version: 7.0.0-1.cdh7.0.0.p0.21
+        version: 7.0.0-1.cdh7.0.0.p0.1166950
         minCM: 7.0
         repo:
           stack:
             repoid: CDH-7.0.0
-            redhat7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1105963/cdh/7.x/parcels/
+            redhat7: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1166950/cdh/7.x/parcels/
 
 
   ambari:
