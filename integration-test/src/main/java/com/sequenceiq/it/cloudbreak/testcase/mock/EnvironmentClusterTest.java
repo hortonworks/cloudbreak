@@ -13,14 +13,12 @@ import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
-import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.EnvironmentSettingsV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
@@ -49,33 +47,33 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         initializeDefaultBlueprints(testContext);
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    @Description(
-            given = "there is an environment with a attached shared resources and a running cluster that is using these resources",
-            when = "the resource delete endpoints and environment delete endpoints are called",
-            then = "non of the operations should succeed")
-    public void testCreateWlClusterDeleteFails(MockedTestContext testContext) {
-        createEnvWithResources(testContext);
-        createDefaultRdsConfig(testContext);
-        createDefaultLdapConfig(testContext);
-
-        testContext.given(StackTestDto.class)
-                .withEnvironment(EnvironmentTestDto.class)
-                .withCluster(
-                        setResources(
-                                testContext,
-                                testContext.get(DatabaseTestDto.class).getName(),
-                                testContext.get(LdapTestDto.class).getName()
-                        )
-                )
-                .when(stackTestClient.createV4())
-                .await(STACK_AVAILABLE)
-
-                .deleteGiven(LdapTestDto.class, ldapTestClient.deleteV4(), RunningParameter.key(FORBIDDEN_KEY))
-                .deleteGiven(DatabaseTestDto.class, databaseTestClient.deleteV4(), RunningParameter.key(FORBIDDEN_KEY))
-                .deleteGiven(EnvironmentTestDto.class, environmentTestClient.deleteV4(), RunningParameter.key(FORBIDDEN_KEY))
-                .validate();
-    }
+//    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+//    @Description(
+//            given = "there is an environment with a attached shared resources and a running cluster that is using these resources",
+//            when = "the resource delete endpoints and environment delete endpoints are called",
+//            then = "non of the operations should succeed")
+//    public void testCreateWlClusterDeleteFails(MockedTestContext testContext) {
+//        createEnvWithResources(testContext);
+//        createDefaultRdsConfig(testContext);
+//        createDefaultLdapConfig(testContext);
+//
+//        testContext.given(StackTestDto.class)
+//                .withEnvironment(EnvironmentTestDto.class)
+//                .withCluster(
+//                        setResources(
+//                                testContext,
+//                                testContext.get(DatabaseTestDto.class).getName(),
+//                                testContext.get(LdapTestDto.class).getName()
+//                        )
+//                )
+//                .when(stackTestClient.createV4())
+//                .await(STACK_AVAILABLE)
+//
+//                .deleteGiven(LdapTestDto.class, ldapTestClient.deleteV4(), RunningParameter.key(FORBIDDEN_KEY))
+//                .deleteGiven(DatabaseTestDto.class, databaseTestClient.deleteV4(), RunningParameter.key(FORBIDDEN_KEY))
+//                .deleteGiven(EnvironmentTestDto.class, environmentTestClient.deleteV4(), RunningParameter.key(FORBIDDEN_KEY))
+//                .validate();
+//    }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(

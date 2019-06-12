@@ -6,8 +6,6 @@ import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.ActiveDirectoryKerberosDescriptor;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.kerberos.requests.KerberosV4Request;
 import com.sequenceiq.it.cloudbreak.assertion.audit.AuditTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.AuditTestClient;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
@@ -27,7 +25,6 @@ import com.sequenceiq.it.cloudbreak.dto.audit.AuditTestDto;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
-import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kubernetes.KubernetesTestDto;
 import com.sequenceiq.it.cloudbreak.dto.mpack.MPackTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
@@ -211,38 +208,38 @@ public class AuditTest extends AbstractIntegrationTest {
 //                .validate();
 //    }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    @Description(
-            given = "there is a running cloudbreak",
-            when = "a Kerberos is created",
-            then = "and audit record must be available in the database")
-    public void createValidKerberosThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
-        String kerberosName = resourcePropertyProvider().getName();
-        KerberosV4Request request = new KerberosV4Request();
-        request.setName("adKerberos");
-        ActiveDirectoryKerberosDescriptor activeDirectory = new ActiveDirectoryKerberosDescriptor();
-        activeDirectory.setTcpAllowed(true);
-        activeDirectory.setPrincipal("admin/principal");
-        activeDirectory.setPassword("kerberosPassword");
-        activeDirectory.setUrl("someurl.com");
-        activeDirectory.setAdminUrl("admin.url.com");
-        activeDirectory.setRealm("realm");
-        activeDirectory.setLdapUrl("otherurl.com");
-        activeDirectory.setContainerDn("{}");
-        request.setActiveDirectory(activeDirectory);
-        testContext
-                .given(KerberosTestDto.class)
-                .withRequest(request)
-                .withName(kerberosName)
-                .when(kerberosTestClient.createV4(), key(kerberosName))
-                .select(env -> env.getResponse().getId(), key(kerberosName))
-                .given(AuditTestDto.class)
-                .withResourceIdByKey(kerberosName)
-                .withResourceType("kerberos")
-                .when(auditTestClient.listV4(), key(kerberosName))
-                .then(AuditTestAssertion.listContainsAtLeast(1), key(kerberosName))
-                .validate();
-    }
+//    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+//    @Description(
+//            given = "there is a running cloudbreak",
+//            when = "a Kerberos is created",
+//            then = "and audit record must be available in the database")
+//    public void createValidKerberosThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
+//        String kerberosName = resourcePropertyProvider().getName();
+//        KerberosV4Request request = new KerberosV4Request();
+//        request.setName("adKerberos");
+//        ActiveDirectoryKerberosDescriptor activeDirectory = new ActiveDirectoryKerberosDescriptor();
+//        activeDirectory.setTcpAllowed(true);
+//        activeDirectory.setPrincipal("admin/principal");
+//        activeDirectory.setPassword("kerberosPassword");
+//        activeDirectory.setUrl("someurl.com");
+//        activeDirectory.setAdminUrl("admin.url.com");
+//        activeDirectory.setRealm("realm");
+//        activeDirectory.setLdapUrl("otherurl.com");
+//        activeDirectory.setContainerDn("{}");
+//        request.setActiveDirectory(activeDirectory);
+//        testContext
+//                .given(KerberosTestDto.class)
+//                .withRequest(request)
+//                .withName(kerberosName)
+//                .when(kerberosTestClient.createV4(), key(kerberosName))
+//                .select(env -> env.getResponse().getId(), key(kerberosName))
+//                .given(AuditTestDto.class)
+//                .withResourceIdByKey(kerberosName)
+//                .withResourceType("kerberos")
+//                .when(auditTestClient.listV4(), key(kerberosName))
+//                .then(AuditTestAssertion.listContainsAtLeast(1), key(kerberosName))
+//                .validate();
+//    }
 
 //    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
 //    @Description(
