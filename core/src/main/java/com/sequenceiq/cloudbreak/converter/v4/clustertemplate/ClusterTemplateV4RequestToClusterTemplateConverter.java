@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequire
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.ClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -24,6 +25,7 @@ import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
 
 @Component
 public class ClusterTemplateV4RequestToClusterTemplateConverter extends AbstractConversionServiceAwareConverter<ClusterTemplateV4Request, ClusterTemplate> {
@@ -45,10 +47,13 @@ public class ClusterTemplateV4RequestToClusterTemplateConverter extends Abstract
     @Inject
     private CredentialClientService credentialClientService;
 
+    @Inject
+    private DistroXV1RequestToStackV4RequestConverter stackV4RequestConverter;
+
     @Override
     public ClusterTemplate convert(ClusterTemplateV4Request source) {
-        if (StringUtils.isEmpty(source.getStackTemplate().getEnvironmentCrn())) {
-            throw new BadRequestException("The environmentCrn cannot be null.");
+        if (StringUtils.isEmpty(source.getDistroXTemplate().getEnvironmentName())) {
+            throw new BadRequestException("The environmentName cannot be null.");
         }
 
         ClusterTemplate clusterTemplate = new ClusterTemplate();
@@ -56,8 +61,9 @@ public class ClusterTemplateV4RequestToClusterTemplateConverter extends Abstract
         User user = userService.getOrCreate(cloudbreakUser);
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         clusterTemplate.setWorkspace(workspace);
-        source.getStackTemplate().setType(StackType.TEMPLATE);
-        Stack stack = converterUtil.convert(source.getStackTemplate(), Stack.class);
+        StackV4Request stackV4Request = stackV4RequestConverter.convert(source.getDistroXTemplate());
+        stackV4Request.setType(StackType.TEMPLATE);
+        Stack stack = converterUtil.convert(stackV4Request, Stack.class);
         clusterTemplate.setStackTemplate(stack);
         clusterTemplate.setCloudPlatform(getCloudPlatform(source, stack));
         clusterTemplate.setName(source.getName());
