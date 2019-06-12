@@ -1,27 +1,20 @@
 package com.sequenceiq.it.cloudbreak.assertion.clustertemplate;
 
-import static com.google.common.collect.Sets.newHashSet;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type.OTHER;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequired.OPTIONAL;
 
 import java.security.InvalidParameterException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
-import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
-import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 
 public class ClusterTemplateTestAssertion {
 
@@ -41,9 +34,9 @@ public class ClusterTemplateTestAssertion {
 
             ClusterTemplateV4Response clusterTemplateV4Response = first.get();
 
-            if (clusterTemplateV4Response.getStackTemplate() == null) {
-                throw new IllegalArgumentException("Stack template is empty");
-            }
+//            if (clusterTemplateV4Response.getStackTemplate() == null) {
+//                throw new IllegalArgumentException("Stack template is empty");
+//            }
 
             if (!OTHER.equals(clusterTemplateV4Response.getType())) {
                 throw new IllegalArgumentException(String
@@ -100,7 +93,7 @@ public class ClusterTemplateTestAssertion {
 
             ClusterTemplateV4Response clusterTemplateV4Response = first.get();
 
-            StackV4Request stackTemplate = clusterTemplateV4Response.getStackTemplate();
+            /*StackV4Request stackTemplate = clusterTemplateV4Response.getStackTemplate();
             if (stackTemplate == null) {
                 throw new IllegalArgumentException("Stack template is empty");
             }
@@ -115,7 +108,7 @@ public class ClusterTemplateTestAssertion {
 
             if (!StringUtils.isEmpty(stackTemplate.getCluster().getUserName())) {
                 throw new IllegalArgumentException("Ambari username should be empty!");
-            }
+            }*/
 
             return entity;
         };
@@ -131,7 +124,7 @@ public class ClusterTemplateTestAssertion {
 
             ClusterTemplateV4Response clusterTemplateV4Response = first.get();
 
-            StackV4Request stackTemplate = clusterTemplateV4Response.getStackTemplate();
+            /*StackV4Request stackTemplate = clusterTemplateV4Response.getStackTemplate();
             if (stackTemplate == null) {
                 throw new IllegalArgumentException("Stack template is empty");
             }
@@ -189,7 +182,7 @@ public class ClusterTemplateTestAssertion {
 
             if (!org.springframework.util.StringUtils.isEmpty(stackTemplate.getCluster().getUserName())) {
                 throw new IllegalArgumentException("Username should be empty!");
-            }
+            }*/
 
             return entity;
         };
