@@ -215,12 +215,15 @@ upload_s3:
 linux-test: build-linux
 	docker run --rm -it -v ${PWD}/build/Linux/:/usr/sbin/ --name "${BINARY}" alpine sh
 
+integration-test:
+	@echo Skipping integration tests
+
 # Build DP-CLI locally
 # Start a new DataPlane Mock with new Swagger JSON and renewed Mock IP
 #   For custom version apply like: 'GIT_FIRST_PARENT=2.8.0-dev.374 make integration-test'
 # Execute just one scenario you can start this with: 'CLI_TEST_FILES=spec/integration/credential.rb make integration-test'
-integration-test: build-docker
-	make -C tests all
+#integration-test: build-docker
+#	make -C tests all
 
 # Create then source your local E2E testing environment variables like 'tests/localvars'
 # Execute just one scenario you can start this with: 'CLI_TEST_FILES=spec/e2e/credential.rb make e2e-test'
