@@ -12,6 +12,6 @@ public class SdxServiceClient extends AbstractUserCrnServiceClient<SdxServiceEnd
 
     @Override
     public SdxServiceEndpoints withCrn(String crn) {
-        return null;
+        return new SdxServiceEndpoints(getWebTarget(), crn);
     }
 }
