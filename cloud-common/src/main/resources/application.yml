@@ -1,15 +1,5 @@
 server.servlet.context-path: "/cb"
 
-logging:
-  level:
-    org:
-      hibernate:
-        SQL: DEBUG
-        type:
-          descriptor:
-            sql:
-              BasicBinder: TRACE
-
 management:
   endpoints:
     web:
