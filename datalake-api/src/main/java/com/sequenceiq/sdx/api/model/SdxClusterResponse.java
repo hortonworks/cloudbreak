@@ -2,9 +2,9 @@ package com.sequenceiq.sdx.api.model;
 
 public class SdxClusterResponse {
 
-    private String sdxCrn;
+    private String crn;
 
-    private String sdxName;
+    private String name;
 
     private SdxClusterStatusResponse status;
 
@@ -12,12 +12,12 @@ public class SdxClusterResponse {
 
     private String environmentCrn;
 
-    public String getSdxCrn() {
-        return sdxCrn;
+    public String getCrn() {
+        return crn;
     }
 
-    public void setSdxCrn(String sdxCrn) {
-        this.sdxCrn = sdxCrn;
+    public void setCrn(String crn) {
+        this.crn = crn;
     }
 
     public SdxClusterStatusResponse getStatus() {
@@ -28,12 +28,12 @@ public class SdxClusterResponse {
         this.status = status;
     }
 
-    public String getSdxName() {
-        return sdxName;
+    public String getName() {
+        return name;
     }
 
-    public void setSdxName(String sdxName) {
-        this.sdxName = sdxName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getEnvironmentName() {

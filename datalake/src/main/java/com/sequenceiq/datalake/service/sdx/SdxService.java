@@ -45,9 +45,9 @@ public class SdxService {
         }
     }
 
-    public SdxCluster getByAccountIdAndSdxName(String userCrn, String sdxName) {
+    public SdxCluster getByAccountIdAndSdxName(String userCrn, String name) {
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
-        Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, sdxName);
+        Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, name);
         if (sdxCluster.isPresent()) {
             return sdxCluster.get();
         } else {
@@ -63,10 +63,10 @@ public class SdxService {
         }, () -> LOGGER.info("Can not update sdx {} to {} status", id, sdxClusterStatus));
     }
 
-    public SdxCluster createSdx(final String userCrn, final String sdxName, final SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request) {
+    public SdxCluster createSdx(final String userCrn, final String name, final SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request) {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setCrn(createCrn(getAccountIdFromCrn(userCrn)));
-        sdxCluster.setClusterName(sdxName);
+        sdxCluster.setClusterName(name);
         sdxCluster.setAccountId(getAccountIdFromCrn(userCrn));
         sdxCluster.setClusterShape(sdxClusterRequest.getClusterShape());
         sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
@@ -90,7 +90,7 @@ public class SdxService {
 
         sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(sdxCluster.getAccountId(), sdxCluster.getClusterName())
                 .ifPresent(foundSdx -> {
-                    throw new BadRequestException("SDX cluster exists with this name: " + sdxName);
+                    throw new BadRequestException("SDX cluster exists with this name: " + name);
                 });
 
         sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(sdxCluster.getAccountId(), sdxCluster.getEnvName()).stream().findFirst()
@@ -115,10 +115,10 @@ public class SdxService {
         }
     }
 
-    public void deleteSdx(String userCrn, String sdxName) {
+    public void deleteSdx(String userCrn, String name) {
         LOGGER.info("Delete sdx");
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
-        sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, sdxName).ifPresentOrElse(sdxCluster -> {
+        sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, name).ifPresentOrElse(sdxCluster -> {
             sdxCluster.setStatus(SdxClusterStatus.DELETE_REQUESTED);
             sdxClusterRepository.save(sdxCluster);
             sdxReactorFlowManager.triggerSdxDeletion(sdxCluster.getId());
