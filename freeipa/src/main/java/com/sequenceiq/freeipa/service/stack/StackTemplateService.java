@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
+import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.FreeIpaFlowManager;
 
@@ -32,11 +33,11 @@ public class StackTemplateService {
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
 
-    public GetPlatformTemplateRequest triggerGetTemplate(Stack stack) {
+    public GetPlatformTemplateRequest triggerGetTemplate(Stack stack, Credential credential) {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getCloudPlatform(), stack.getCloudPlatform(),
                 location, stack.getOwner(), stack.getAccountId());
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
+        CloudCredential cloudCredential = credentialConverter.convert(credential);
         GetPlatformTemplateRequest getPlatformTemplateRequest = new GetPlatformTemplateRequest(cloudContext, cloudCredential);
         freeIpaFlowManager.notify(getPlatformTemplateRequest);
         return getPlatformTemplateRequest;

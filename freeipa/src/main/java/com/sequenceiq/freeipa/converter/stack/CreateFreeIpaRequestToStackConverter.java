@@ -28,7 +28,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.Placement
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.converter.authentication.StackAuthenticationRequestToStackAuthenticationConverter;
-import com.sequenceiq.freeipa.converter.credential.CredentialRequestToCredentialConverter;
 import com.sequenceiq.freeipa.converter.instance.InstanceGroupRequestToInstanceGroupConverter;
 import com.sequenceiq.freeipa.converter.network.NetworkRequestToNetworkConverter;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
@@ -55,9 +54,6 @@ public class CreateFreeIpaRequestToStackConverter {
     private NetworkRequestToNetworkConverter networkConverter;
 
     @Inject
-    private CredentialRequestToCredentialConverter credentialConverter;
-
-    @Inject
     private DefaultInstanceGroupProvider defaultInstanceGroupProvider;
 
     @Value("${cb.platform.default.regions:}")
@@ -66,7 +62,7 @@ public class CreateFreeIpaRequestToStackConverter {
     @Value("${cb.nginx.port:9443}")
     private Integer nginxPort;
 
-    public Stack convert(CreateFreeIpaRequest source, String accountId, String userId) {
+    public Stack convert(CreateFreeIpaRequest source, String accountId, String userId, String cloudPlatform) {
         Stack stack = new Stack();
         stack.setEnvironmentCrn(source.getEnvironmentCrn());
         stack.setAccountId(accountId);
@@ -75,20 +71,18 @@ public class CreateFreeIpaRequestToStackConverter {
         stack.setGatewayport(nginxPort);
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED));
         stack.setAvailabilityZone(Optional.ofNullable(source.getPlacement()).map(PlacementBase::getAvailabilityZone).orElse(null));
-        updateCloudPlatformAndRelatedFields(source, stack, accountId);
+        updateCloudPlatformAndRelatedFields(source, stack, accountId, cloudPlatform);
         stack.setStackAuthentication(stackAuthenticationConverter.convert(source.getAuthentication()));
         stack.setInstanceGroups(convertInstanceGroups(source, stack));
         if (source.getNetwork() != null) {
-            source.getNetwork().setCloudPlatform(CloudPlatform.valueOf(source.getCredential().getCloudPlatform()));
+            source.getNetwork().setCloudPlatform(CloudPlatform.valueOf(cloudPlatform));
             stack.setNetwork(networkConverter.convert(source.getNetwork()));
         }
-        stack.setCredential(credentialConverter.convert(source.getCredential()));
         stack.setOwner(Optional.of(userId).orElse(accountId));
         return stack;
     }
 
-    private void updateCloudPlatformAndRelatedFields(CreateFreeIpaRequest source, Stack stack, String owner) {
-        String cloudPlatform = source.getCredential().getCloudPlatform();
+    private void updateCloudPlatformAndRelatedFields(CreateFreeIpaRequest source, Stack stack, String owner, String cloudPlatform) {
         stack.setRegion(getRegion(source, cloudPlatform));
         stack.setCloudPlatform(cloudPlatform);
         stack.setTags(getTags(owner, cloudPlatform));
@@ -138,13 +132,13 @@ public class CreateFreeIpaRequestToStackConverter {
 
     private Set<InstanceGroup> convertInstanceGroups(CreateFreeIpaRequest source, Stack stack) {
         if (source.getInstanceGroups() == null) {
-            Set<InstanceGroup> defaultInstanceGroups = defaultInstanceGroupProvider.createDefaultInstanceGroups(source.getCredential().getCloudPlatform());
+            Set<InstanceGroup> defaultInstanceGroups = defaultInstanceGroupProvider.createDefaultInstanceGroups(stack.getCloudPlatform());
             defaultInstanceGroups.forEach(instanceGroup -> instanceGroup.setStack(stack));
             return defaultInstanceGroups;
         }
         Set<InstanceGroup> convertedSet = new HashSet<>();
         source.getInstanceGroups().stream()
-                .map(ig -> instanceGroupConverter.convert(ig, source.getCredential().getCloudPlatform()))
+                .map(ig -> instanceGroupConverter.convert(ig, stack.getCloudPlatform()))
                 .forEach(ig -> {
                     ig.setStack(stack);
                     convertedSet.add(ig);

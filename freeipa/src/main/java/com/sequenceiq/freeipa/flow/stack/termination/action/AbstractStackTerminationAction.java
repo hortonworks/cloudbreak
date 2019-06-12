@@ -22,6 +22,7 @@ import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
+import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackAction;
@@ -29,6 +30,7 @@ import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.termination.StackTerminationContext;
 import com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent;
 import com.sequenceiq.freeipa.flow.stack.termination.StackTerminationState;
+import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -39,6 +41,9 @@ abstract class AbstractStackTerminationAction<P extends Payload>
 
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
+
+    @Inject
+    private CredentialService credentialService;
 
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
@@ -61,7 +66,8 @@ abstract class AbstractStackTerminationAction<P extends Payload>
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getCloudPlatform(), stack.getCloudPlatform(),
                 location, stack.getOwner(), stack.getAccountId());
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
+        Credential credential = credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn());
+        CloudCredential cloudCredential = credentialConverter.convert(credential);
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         List<Resource> resourceList = resourceService.findAllByStackId(stack.getId());
         List<CloudResource> resources = resourceConverter.convert(resourceList);
