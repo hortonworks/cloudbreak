@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.authorization;
 
+import com.sequenceiq.redbeams.service.ThreadBasedRequestIdProvider;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
@@ -20,6 +22,9 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 public class PermissionCheckingUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PermissionCheckingUtils.class);
+
+    @Inject
+    private ThreadBasedRequestIdProvider threadBasedRequestIdProvider;
 
     @Inject
     private GrpcUmsClient grpcUmsClient;
@@ -49,7 +54,9 @@ public class PermissionCheckingUtils {
             String resourceCrn = ((CrnResource) resource).getResourceCrn().toString();
 
             LOGGER.info("Checking permissions on " + resourceCrn + " for user " + userCrn);
-            if (!grpcUmsClient.checkRight(userCrn, action.name(), resourceCrn, "notyet")) {
+            String requestId = threadBasedRequestIdProvider.getRequestId();
+            LOGGER.debug("- tracking with request ID {}", requestId);
+            if (!grpcUmsClient.checkRight(userCrn, action.name(), resourceCrn, requestId)) {
                 deniedResourceCrns.add(resourceCrn);
             }
         }
