@@ -4,22 +4,25 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.credential.CredentialRequest;
-import com.sequenceiq.freeipa.converter.credential.CredentialRequestToCredentialConverter;
-import com.sequenceiq.freeipa.entity.Credential;
-import com.sequenceiq.freeipa.repository.CredentialRepository;
+import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
+import com.sequenceiq.freeipa.dto.Credential;
 
 @Service
 public class CredentialService {
 
     @Inject
-    private CredentialRepository credentialRepository;
+    private CredentialEndpoint credentialEndpoint;
 
     @Inject
-    private CredentialRequestToCredentialConverter credentialConverter;
+    private SecretService secretService;
 
-    public Credential create(CredentialRequest request) {
-        Credential credential = credentialConverter.convert(request);
-        return credentialRepository.save(credential);
+    public Credential getCredentialByEnvCrn(String envCrn) {
+        CredentialResponse credentialResponse = credentialEndpoint.getByEnvCrn(envCrn);
+        SecretResponse secretResponse = credentialResponse.getAttributes();
+        String attributes = secretService.getByResponse(secretResponse);
+        return new Credential(credentialResponse.getCloudPlatform(), credentialResponse.getName(), attributes, credentialResponse.getCrn());
     }
 }
