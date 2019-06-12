@@ -175,10 +175,10 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     Long countAliveOnesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("environmentCrn") String environmentCrn);
 
     @CheckPermissionsByWorkspaceId
-    @Query("SELECT s FROM Stack s WHERE s.workspace.id = :workspaceId AND s.environment.id = :environmentId "
+    @Query("SELECT s FROM Stack s WHERE s.workspace.id = :workspaceId AND s.environmentCrn = :environmentCrn "
             + "AND s.terminated IS NOT null "
             + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
-    Set<Stack> findTerminatedByWorkspaceIdAndEnvironmentId(@Param("workspaceId") Long workspaceId, @Param("environmentId") Long environmentId);
+    Set<Stack> findTerminatedByWorkspaceIdAndEnvironmentId(@Param("workspaceId") Long workspaceId, @Param("environmentCrn") Long environmentCrn);
 
     @DisableCheckPermissions
     @Query("SELECT s.workspace.id FROM Stack s where s.id = :id")
