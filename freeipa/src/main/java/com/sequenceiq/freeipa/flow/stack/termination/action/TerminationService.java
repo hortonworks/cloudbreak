@@ -54,7 +54,6 @@ public class TerminationService {
         String terminatedName = stack.getName() + DELIMITER + now.getTime();
         try {
             transactionService.required(() -> {
-                stack.setCredential(null);
                 stack.setName(terminatedName);
                 stack.setTerminated(clock.getCurrentTimeMillis());
                 terminateInstanceGroups(stack);

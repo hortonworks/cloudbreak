@@ -24,6 +24,12 @@ public class ServiceEndpointConfig {
     @Value("${freeipa.db.serviceid:}")
     private String databaseId;
 
+    @Value("${freeipa.environment.url:}")
+    private String environmentServiceUrl;
+
+    @Value("${datalake.environmentservice.server.contextPath:/environmentservice}")
+    private String environmentRootContextPath;
+
     @Bean
     public ServiceAddressResolver serviceAddressResolver() {
         return new RetryingServiceAddressResolver(new DNSServiceAddressResolver(), resolvingTimeout);
@@ -33,5 +39,10 @@ public class ServiceEndpointConfig {
     @DependsOn("serviceAddressResolver")
     public String databaseAddress(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
         return serviceAddressResolver.resolveHostPort(dbHost, dbPort, databaseId);
+    }
+
+    @Bean
+    public String environmentServiceUrl() throws ServiceAddressResolvingException {
+        return serviceAddressResolver().resolveUrl(environmentServiceUrl + environmentRootContextPath, "", null);
     }
 }

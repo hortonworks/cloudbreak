@@ -29,7 +29,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.StackAuthenticationRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.credential.CredentialRequest;
 
 import reactor.bus.Event;
 
@@ -78,12 +77,6 @@ public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentD
                     CreateFreeIpaRequest createFreeIpaRequest = new CreateFreeIpaRequest();
                     createFreeIpaRequest.setEnvironmentCrn(environment.getResourceCrn());
                     createFreeIpaRequest.setName(environment.getName() + "-freeipa");
-
-                    CredentialRequest credentialRequest = new CredentialRequest();
-                    credentialRequest.setCloudPlatform(environment.getCloudPlatform());
-                    credentialRequest.setName(environment.getCredential().getName());
-                    credentialRequest.setSecret(secretConverter.convert(environment.getCredential().getAttributesSecret()));
-                    createFreeIpaRequest.setCredential(credentialRequest);
 
                     FreeIpaServerRequest freeIpaServerRequest = new FreeIpaServerRequest();
                     freeIpaServerRequest.setAdminPassword(PasswordUtil.generatePassword());

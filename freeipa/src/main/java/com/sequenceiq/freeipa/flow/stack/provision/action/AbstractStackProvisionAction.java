@@ -25,6 +25,7 @@ import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState;
+import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 public abstract class AbstractStackProvisionAction<P extends Payload> extends AbstractStackAction<StackProvisionState, StackProvisionEvent, StackContext, P> {
@@ -37,6 +38,9 @@ public abstract class AbstractStackProvisionAction<P extends Payload> extends Ab
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
 
+    @Inject
+    private CredentialService credentialService;
+
     protected AbstractStackProvisionAction(Class<P> payloadClass) {
         super(payloadClass);
     }
@@ -48,7 +52,7 @@ public abstract class AbstractStackProvisionAction<P extends Payload> extends Ab
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getCloudPlatform(), stack.getCloudPlatform(),
                 location, stack.getOwner(), stack.getOwner(), stack.getAccountId());
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
+        CloudCredential cloudCredential = credentialConverter.convert(credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn()));
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         return new StackContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack);
     }

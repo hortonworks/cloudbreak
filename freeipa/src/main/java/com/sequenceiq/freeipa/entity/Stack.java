@@ -72,9 +72,6 @@ public class Stack {
     @Column(columnDefinition = "TEXT")
     private Json tags;
 
-    @OneToOne(cascade = {CascadeType.ALL}, orphanRemoval = true, optional = false)
-    private Credential credential;
-
     @OneToOne(cascade = {CascadeType.ALL}, optional = false)
     private Network network;
 
@@ -195,14 +192,6 @@ public class Stack {
 
     public void setTags(Json tags) {
         this.tags = tags;
-    }
-
-    public Credential getCredential() {
-        return credential;
-    }
-
-    public void setCredential(Credential credential) {
-        this.credential = credential;
     }
 
     public Network getNetwork() {
