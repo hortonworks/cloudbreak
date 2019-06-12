@@ -52,12 +52,12 @@ environment:
     rest:
       enabled: false
   cloudbreak:
-    url: http://localhost:9091/cb
+    url: http://localhost:9091
   redbeams:
-    url: http://localhost:8087/redbeams
+    url: http://localhost:8087
     support: AWS,AZURE
   freeipa:
-    url: http://localhost:8090/freeipa
+    url: http://localhost:8090
     support: AWS,AZURE
   db:
     host: localhost
