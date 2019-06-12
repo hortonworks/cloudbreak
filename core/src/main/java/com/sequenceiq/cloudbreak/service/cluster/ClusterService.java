@@ -1167,10 +1167,6 @@ public class ClusterService {
         return repository.findNamesByRdsConfig(rdsConfigId);
     }
 
-    public Set<Cluster> findAllClustersByRdsConfigInEnvironment(RDSConfig rdsConfig, Long environmentId) {
-        return repository.findByRdsConfigAndEnvironment(rdsConfig.getId(), environmentId);
-    }
-
     public void updateAmbariRepoDetails(Long clusterId, StackRepositoryV4Request stackRepository) {
         if (Objects.isNull(stackRepository.getVersion()) || Objects.isNull(stackRepository.getRepository().getBaseUrl())) {
             throw new BadRequestException("Ambari repo details not complete.");
