@@ -27,17 +27,26 @@ public class ServiceEndpointConfig {
     @Value("${environment.cloudbreak.url:}")
     private String cloudbreakUrl;
 
+    @Value("${environment.cloudbreak.server.contextPath:/cb}")
+    private String cbRootContextPath;
+
     @Value("${environment.cloudbreak.serviceId:}")
     private String cloudbreakServiceId;
 
     @Value("${environment.redbeams.url:}")
     private String redbeamsServiceUrl;
 
+    @Value("${environment.redbeams.server.contextPath:/redbeams}")
+    private String redbeamsRootContextPath;
+
     @Value("${environment.redbeams.serviceId:}")
     private String redbeamsServiceId;
 
     @Value("${environment.freeipa.url:}")
     private String freeipaServiceUrl;
+
+    @Value("${environment.freeipa.server.contextPath:/freeipa}")
+    private String freeipaRootContextPath;
 
     @Value("${environment.freeipa.serviceId:}")
     private String freeipaServiceId;
@@ -54,16 +63,16 @@ public class ServiceEndpointConfig {
 
     @Bean
     public String cloudbreakUrl(ServiceAddressResolver serviceAddressResolver) {
-        return serviceAddressResolver.resolveUrl(cloudbreakUrl, "http", cloudbreakServiceId);
+        return serviceAddressResolver.resolveUrl(cloudbreakUrl + cbRootContextPath, "http", cloudbreakServiceId);
     }
 
     @Bean
     public String redbeamsServerUrl() throws ServiceAddressResolvingException {
-        return serviceAddressResolver().resolveUrl(redbeamsServiceUrl, "http", redbeamsServiceId);
+        return serviceAddressResolver().resolveUrl(redbeamsServiceUrl + redbeamsRootContextPath, "http", redbeamsServiceId);
     }
 
     @Bean
     public String freeIpaServerUrl() throws ServiceAddressResolvingException {
-        return serviceAddressResolver().resolveUrl(freeipaServiceUrl, "http", freeipaServiceId);
+        return serviceAddressResolver().resolveUrl(freeipaServiceUrl + freeipaRootContextPath, "http", freeipaServiceId);
     }
 }
