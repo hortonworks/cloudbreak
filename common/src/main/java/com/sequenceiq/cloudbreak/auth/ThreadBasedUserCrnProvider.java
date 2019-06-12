@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.auth;
 
 import java.util.Optional;
+import java.util.Stack;
 
 import javax.annotation.Nullable;
 
@@ -11,11 +12,12 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 @Service
 public class ThreadBasedUserCrnProvider {
 
-    private static final ThreadLocal<String> USER_CRN = new ThreadLocal<>();
+    private static final ThreadLocal<Stack<String>> USER_CRN = new ThreadLocal<>();
 
     @Nullable
     public String getUserCrn() {
-        return USER_CRN.get();
+        Stack<String> stack = USER_CRN.get();
+        return stack != null ? stack.peek() : null;
     }
 
     public String getAccountId() {
@@ -28,10 +30,21 @@ public class ThreadBasedUserCrnProvider {
     }
 
     public void setUserCrn(String userCrn) {
-        USER_CRN.set(userCrn);
+        Stack<String> stack = USER_CRN.get();
+        if (stack == null) {
+            stack = new Stack<>();
+            USER_CRN.set(stack);
+        }
+        stack.push(userCrn);
     }
 
     public void removeUserCrn() {
-        USER_CRN.remove();
+        Stack<String> stack = USER_CRN.get();
+        if (stack != null) {
+            stack.pop();
+            if (stack.isEmpty()) {
+                USER_CRN.remove();
+            }
+        }
     }
 }
