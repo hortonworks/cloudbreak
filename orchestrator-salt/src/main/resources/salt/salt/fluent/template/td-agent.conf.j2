@@ -187,6 +187,46 @@
 <source>
   @type tail
   format none
+  path /var/log/*/*cmf*-solr*-SOLR_SERVER*.log.out
+  pos_file /var/log/td-agent/pos/cmf-solr-server-out.log.pos
+  tag {{fluent.providerPrefix}}.SOLR-SOLR_SERVER
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path /var/log/atlas/application.log
+  pos_file /var/log/td-agent/pos/atlas-application.log.pos
+  tag {{fluent.providerPrefix}}.ATLAS-ATLAS_SERVER
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path /var/log/*/admin/ranger-admin-*-ranger.log
+  pos_file /var/log/td-agent/pos/ranger-admin.log.pos
+  tag {{fluent.providerPrefix}}.RANGER-RANGER_ADMIN
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path /var/log/*/tagsync/tagsync.log
+  pos_file /var/log/td-agent/pos/ranger-tagsync.log.pos
+  tag {{fluent.providerPrefix}}.RANGER-RANGER_TAGSYNC
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
+  path /var/log/*/usersync/usersync-*-ranger.log
+  pos_file /var/log/td-agent/pos/ranger-usersync.log.pos
+  tag {{fluent.providerPrefix}}.RANGER-RANGER_USERSYNC
+  read_from_head true
+</source>
+<source>
+  @type tail
+  format none
   path /var/log/*/*cmf*-oozie*-OOZIE_SERVER*.log.out
   pos_file /var/log/td-agent/pos/cmf-oozie-server-out.log.pos
   tag {{fluent.providerPrefix}}.OOZIE-OOZIE_SERVER
