@@ -1,7 +1,5 @@
 package com.sequenceiq.redbeams.authorization;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -10,6 +8,7 @@ import com.google.common.collect.ImmutableSet;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
+import com.sequenceiq.redbeams.service.ThreadBasedRequestIdProvider;
 
 import java.util.Optional;
 
@@ -25,11 +24,16 @@ public class PermissionCheckingUtilsTest {
 
     private static final String USER_CRN = "crn:altus:iam:us-west-1:cloudera:user:bob@cloudera.com";
 
+    private static final String REQUEST_ID = "requestId1";
+
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
     private PermissionCheckingUtils underTest;
+
+    @Mock
+    private ThreadBasedRequestIdProvider threadBasedRequestIdProvider;
 
     @Mock
     private GrpcUmsClient grpcUmsClient;
@@ -41,6 +45,8 @@ public class PermissionCheckingUtilsTest {
     @Before
     public void setUp() {
         initMocks(this);
+
+        when(threadBasedRequestIdProvider.getRequestId()).thenReturn(REQUEST_ID);
 
         db = new DatabaseConfig();
         db.setId(1L);
@@ -60,18 +66,18 @@ public class PermissionCheckingUtilsTest {
 
     @Test
     public void testCheckPermissionsByTargetSinglePass() {
-        when(grpcUmsClient.checkRight(eq(USER_CRN), eq(ResourceAction.READ.name()), eq(db.getResourceCrn().toString()), any(String.class)))
+        when(grpcUmsClient.checkRight(USER_CRN, ResourceAction.READ.name(), db.getResourceCrn().toString(), REQUEST_ID))
             .thenReturn(true);
 
         underTest.checkPermissionsByTarget(db, USER_CRN, ResourceAction.READ);
 
-        verify(grpcUmsClient).checkRight(eq(USER_CRN), eq(ResourceAction.READ.name()), eq(db.getResourceCrn().toString()), any(String.class));
+        verify(grpcUmsClient).checkRight(USER_CRN, ResourceAction.READ.name(), db.getResourceCrn().toString(), REQUEST_ID);
     }
 
     @Test
     public void testCheckPermissionsByTargetSingleFail() {
         thrown.expect(AccessDeniedException.class);
-        when(grpcUmsClient.checkRight(eq(USER_CRN), eq(ResourceAction.READ.name()), eq(db.getResourceCrn().toString()), any(String.class)))
+        when(grpcUmsClient.checkRight(USER_CRN, ResourceAction.READ.name(), db.getResourceCrn().toString(), REQUEST_ID))
             .thenReturn(false);
 
         underTest.checkPermissionsByTarget(db, USER_CRN, ResourceAction.READ);
@@ -79,18 +85,18 @@ public class PermissionCheckingUtilsTest {
 
     @Test
     public void testCheckPermissionsByTargetSingleOptionalPass() {
-        when(grpcUmsClient.checkRight(eq(USER_CRN), eq(ResourceAction.READ.name()), eq(db.getResourceCrn().toString()), any(String.class)))
+        when(grpcUmsClient.checkRight(USER_CRN, ResourceAction.READ.name(), db.getResourceCrn().toString(), REQUEST_ID))
             .thenReturn(true);
 
         underTest.checkPermissionsByTarget(Optional.of(db), USER_CRN, ResourceAction.READ);
 
-        verify(grpcUmsClient).checkRight(eq(USER_CRN), eq(ResourceAction.READ.name()), eq(db.getResourceCrn().toString()), any(String.class));
+        verify(grpcUmsClient).checkRight(USER_CRN, ResourceAction.READ.name(), db.getResourceCrn().toString(), REQUEST_ID);
     }
 
     @Test
     public void testCheckPermissionsByTargetSingleOptionalFail() {
         thrown.expect(AccessDeniedException.class);
-        when(grpcUmsClient.checkRight(eq(USER_CRN), eq(ResourceAction.READ.name()), eq(db.getResourceCrn().toString()), any(String.class)))
+        when(grpcUmsClient.checkRight(USER_CRN, ResourceAction.READ.name(), db.getResourceCrn().toString(), REQUEST_ID))
             .thenReturn(false);
 
         underTest.checkPermissionsByTarget(Optional.of(db), USER_CRN, ResourceAction.READ);
@@ -103,23 +109,23 @@ public class PermissionCheckingUtilsTest {
 
     @Test
     public void testCheckPermissionsByTargetLeelooDallasMultiPass() {
-        when(grpcUmsClient.checkRight(eq(USER_CRN), eq(ResourceAction.READ.name()), eq(db.getResourceCrn().toString()), any(String.class)))
+        when(grpcUmsClient.checkRight(USER_CRN, ResourceAction.READ.name(), db.getResourceCrn().toString(), REQUEST_ID))
             .thenReturn(true);
-        when(grpcUmsClient.checkRight(eq(USER_CRN), eq(ResourceAction.READ.name()), eq(db2.getResourceCrn().toString()), any(String.class)))
+        when(grpcUmsClient.checkRight(USER_CRN, ResourceAction.READ.name(), db2.getResourceCrn().toString(), REQUEST_ID))
             .thenReturn(true);
 
         underTest.checkPermissionsByTarget(ImmutableSet.of(db, db2), USER_CRN, ResourceAction.READ);
 
-        verify(grpcUmsClient).checkRight(eq(USER_CRN), eq(ResourceAction.READ.name()), eq(db.getResourceCrn().toString()), any(String.class));
-        verify(grpcUmsClient).checkRight(eq(USER_CRN), eq(ResourceAction.READ.name()), eq(db2.getResourceCrn().toString()), any(String.class));
+        verify(grpcUmsClient).checkRight(USER_CRN, ResourceAction.READ.name(), db.getResourceCrn().toString(), REQUEST_ID);
+        verify(grpcUmsClient).checkRight(USER_CRN, ResourceAction.READ.name(), db2.getResourceCrn().toString(), REQUEST_ID);
     }
 
     @Test
     public void testCheckPermissionsByTargetMultiFail() {
         thrown.expect(AccessDeniedException.class);
-        when(grpcUmsClient.checkRight(eq(USER_CRN), eq(ResourceAction.READ.name()), eq(db.getResourceCrn().toString()), any(String.class)))
+        when(grpcUmsClient.checkRight(USER_CRN, ResourceAction.READ.name(), db.getResourceCrn().toString(), REQUEST_ID))
             .thenReturn(false);
-        when(grpcUmsClient.checkRight(eq(USER_CRN), eq(ResourceAction.READ.name()), eq(db2.getResourceCrn().toString()), any(String.class)))
+        when(grpcUmsClient.checkRight(USER_CRN, ResourceAction.READ.name(), db2.getResourceCrn().toString(), REQUEST_ID))
             .thenReturn(true);
 
         underTest.checkPermissionsByTarget(ImmutableSet.of(db, db2), USER_CRN, ResourceAction.READ);
