@@ -27,9 +27,7 @@ import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.mock.model.SaltMock;
@@ -144,26 +142,26 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    @Description(
-            given = "a created cluster with post ambari install recipe and ldap attached to the cluster",
-            when = "creating cluster",
-            then = "the LDAP sync is hooked for this salt state in the top.sls")
-    public void testWhenThereIsNoRecipeButLdapHasAttachedThenThePostAmbariRecipeShouldRunWhichResultThreeHighStateCall(MockedTestContext testContext) {
-        testContext.getModel().getAmbariMock().postSyncLdap();
-        testContext.getModel().getAmbariMock().putConfigureLdap();
-        String ldapName = resourcePropertyProvider().getName();
-        testContext
-                .given(LdapTestDto.class)
-                .withName(ldapName)
-                .when(ldapTestClient.createV4())
-                .given(ClusterTestDto.class)
-                .given(StackTestDto.class)
-                .when(stackTestClient.createV4())
-                .await(STACK_AVAILABLE)
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(3))
-                .validate();
-    }
+//    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+//    @Description(
+//            given = "a created cluster with post ambari install recipe and ldap attached to the cluster",
+//            when = "creating cluster",
+//            then = "the LDAP sync is hooked for this salt state in the top.sls")
+//    public void testWhenThereIsNoRecipeButLdapHasAttachedThenThePostAmbariRecipeShouldRunWhichResultThreeHighStateCall(MockedTestContext testContext) {
+//        testContext.getModel().getAmbariMock().postSyncLdap();
+//        testContext.getModel().getAmbariMock().putConfigureLdap();
+//        String ldapName = resourcePropertyProvider().getName();
+//        testContext
+//                .given(LdapTestDto.class)
+//                .withName(ldapName)
+//                .when(ldapTestClient.createV4())
+//                .given(ClusterTestDto.class)
+//                .given(StackTestDto.class)
+//                .when(stackTestClient.createV4())
+//                .await(STACK_AVAILABLE)
+//                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(3))
+//                .validate();
+//    }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
