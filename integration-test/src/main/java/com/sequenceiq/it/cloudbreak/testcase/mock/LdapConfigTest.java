@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
-import static org.junit.Assert.assertNotNull;
-
 import java.util.UnknownFormatConversionException;
 
 import javax.inject.Inject;
@@ -9,7 +7,6 @@ import javax.ws.rs.BadRequestException;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -24,46 +21,46 @@ public class LdapConfigTest extends AbstractIntegrationTest {
     @Inject
     private LdapTestClient ldapTestClient;
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    @Description(
-            given = "a valid ldap request",
-            when = "calling create ldap",
-            then = "the ldap should be created")
-    public void testCreateValidLdap(TestContext testContext) {
-        String name = resourcePropertyProvider().getName();
-        testContext
-                .given(LdapTestDto.class)
-                .valid()
-                .withName(name)
-                .when(ldapTestClient.createV4())
-                .then((tc, entity, cc) -> {
-                    assertNotNull(entity);
-                    assertNotNull(entity.getResponse());
-                    return entity;
-                })
-                .validate();
-    }
+//    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+//    @Description(
+//            given = "a valid ldap request",
+//            when = "calling create ldap",
+//            then = "the ldap should be created")
+//    public void testCreateValidLdap(TestContext testContext) {
+//        String name = resourcePropertyProvider().getName();
+//        testContext
+//                .given(LdapTestDto.class)
+//                .valid()
+//                .withName(name)
+//                .when(ldapTestClient.createV4())
+//                .then((tc, entity, cc) -> {
+//                    assertNotNull(entity);
+//                    assertNotNull(entity.getResponse());
+//                    return entity;
+//                })
+//                .validate();
+//    }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    @Description(
-            given = "a valid active directory request",
-            when = "calling create ldap",
-            then = "the ldap should be created")
-    public void testCreateValidAd(TestContext testContext) {
-        String name = resourcePropertyProvider().getName();
-        testContext
-                .given(LdapTestDto.class)
-                .valid()
-                .withName(name)
-                .withDirectoryType(DirectoryType.ACTIVE_DIRECTORY)
-                .when(ldapTestClient.createV4())
-                .then((tc, entity, cc) -> {
-                    assertNotNull(entity);
-                    assertNotNull(entity.getResponse());
-                    return entity;
-                })
-                .validate();
-    }
+//    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+//    @Description(
+//            given = "a valid active directory request",
+//            when = "calling create ldap",
+//            then = "the ldap should be created")
+//    public void testCreateValidAd(TestContext testContext) {
+//        String name = resourcePropertyProvider().getName();
+//        testContext
+//                .given(LdapTestDto.class)
+//                .valid()
+//                .withName(name)
+//                .withDirectoryType(DirectoryType.ACTIVE_DIRECTORY)
+//                .when(ldapTestClient.createV4())
+//                .then((tc, entity, cc) -> {
+//                    assertNotNull(entity);
+//                    assertNotNull(entity.getResponse());
+//                    return entity;
+//                })
+//                .validate();
+//    }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
@@ -138,53 +135,53 @@ public class LdapConfigTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    @Description(
-            given = "a valid ldap request",
-            when = "calling create ldap and delete and create again with the same name",
-            then = "ldap should be created")
-    public void testCreateDeleteCreateAgain(TestContext testContext) {
-        String name = resourcePropertyProvider().getName();
-        testContext
-                .given(name, LdapTestDto.class)
-                .valid()
-                .withName(name)
-                .when(ldapTestClient.createV4(), RunningParameter.key(name))
-                .when(ldapTestClient.deleteV4(), RunningParameter.key(name))
-                .when(ldapTestClient.createV4(), RunningParameter.key(name))
-                .then((tc, entity, cc) -> {
-                    assertNotNull(entity);
-                    assertNotNull(entity.getResponse());
-                    return entity;
-                }, RunningParameter.key(name))
-                .validate();
-    }
+//    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+//    @Description(
+//            given = "a valid ldap request",
+//            when = "calling create ldap and delete and create again with the same name",
+//            then = "ldap should be created")
+//    public void testCreateDeleteCreateAgain(TestContext testContext) {
+//        String name = resourcePropertyProvider().getName();
+//        testContext
+//                .given(name, LdapTestDto.class)
+//                .valid()
+//                .withName(name)
+//                .when(ldapTestClient.createV4(), RunningParameter.key(name))
+//                .when(ldapTestClient.deleteV4(), RunningParameter.key(name))
+//                .when(ldapTestClient.createV4(), RunningParameter.key(name))
+//                .then((tc, entity, cc) -> {
+//                    assertNotNull(entity);
+//                    assertNotNull(entity.getResponse());
+//                    return entity;
+//                }, RunningParameter.key(name))
+//                .validate();
+//    }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    @Description(
-            given = "a valid ldap request",
-            when = "calling create ldap and create again with the same name",
-            then = "getting BadRequestException because only one ldap can exist with same name in a workspace at the same time")
-    public void testCreateLdapWithSameName(TestContext testContext) {
-        String name = resourcePropertyProvider().getName();
-        testContext
-                .given(name, LdapTestDto.class)
-                .valid()
-                .withName(name)
-                .when(ldapTestClient.createV4(), RunningParameter.key(name))
-                .then((tc, entity, cc) -> {
-                    assertNotNull(entity);
-                    assertNotNull(entity.getResponse());
-                    return entity;
-                }, RunningParameter.key(name))
-
-                .given(name, LdapTestDto.class)
-                .valid()
-                .withName(name)
-                .when(ldapTestClient.createV4(), RunningParameter.key(name))
-                .expect(BadRequestException.class,
-                        RunningParameter.expectedMessage("dap already exists with name")
-                                .withKey(name))
-                .validate();
-    }
+//    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+//    @Description(
+//            given = "a valid ldap request",
+//            when = "calling create ldap and create again with the same name",
+//            then = "getting BadRequestException because only one ldap can exist with same name in a workspace at the same time")
+//    public void testCreateLdapWithSameName(TestContext testContext) {
+//        String name = resourcePropertyProvider().getName();
+//        testContext
+//                .given(name, LdapTestDto.class)
+//                .valid()
+//                .withName(name)
+//                .when(ldapTestClient.createV4(), RunningParameter.key(name))
+//                .then((tc, entity, cc) -> {
+//                    assertNotNull(entity);
+//                    assertNotNull(entity.getResponse());
+//                    return entity;
+//                }, RunningParameter.key(name))
+//
+//                .given(name, LdapTestDto.class)
+//                .valid()
+//                .withName(name)
+//                .when(ldapTestClient.createV4(), RunningParameter.key(name))
+//                .expect(BadRequestException.class,
+//                        RunningParameter.expectedMessage("dap already exists with name")
+//                                .withKey(name))
+//                .validate();
+//    }
 }
