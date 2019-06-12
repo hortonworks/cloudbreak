@@ -34,6 +34,9 @@ type EnvironmentNetworkV1Response struct {
 	// Required: true
 	// Unique: true
 	SubnetIds []string `json:"subnetIds"`
+
+	// Subnet metadata of the specified networks
+	SubnetMetas map[string]CloudSubnet `json:"subnetMetas,omitempty"`
 }
 
 // Validate validates this environment network v1 response
@@ -53,6 +56,10 @@ func (m *EnvironmentNetworkV1Response) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateSubnetIds(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateSubnetMetas(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -115,6 +122,28 @@ func (m *EnvironmentNetworkV1Response) validateSubnetIds(formats strfmt.Registry
 
 	if err := validate.UniqueItems("subnetIds", "body", m.SubnetIds); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *EnvironmentNetworkV1Response) validateSubnetMetas(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.SubnetMetas) { // not required
+		return nil
+	}
+
+	for k := range m.SubnetMetas {
+
+		if err := validate.Required("subnetMetas"+"."+k, "body", m.SubnetMetas[k]); err != nil {
+			return err
+		}
+		if val, ok := m.SubnetMetas[k]; ok {
+			if err := val.Validate(formats); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	return nil
