@@ -17,13 +17,17 @@ import (
 // swagger:model FreeIpaServerV1Response
 type FreeIpaServerV1Response struct {
 
-	// domain
+	// Domain name associated to the FreeIPA
 	// Required: true
 	Domain *string `json:"domain"`
 
-	// hostname
+	// Base hostname for FreeIPA servers
 	// Required: true
 	Hostname *string `json:"hostname"`
+
+	// FreeIPA servers IP address
+	// Unique: true
+	ServerIP []string `json:"serverIp"`
 }
 
 // Validate validates this free ipa server v1 response
@@ -35,6 +39,10 @@ func (m *FreeIpaServerV1Response) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateHostname(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateServerIP(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -56,6 +64,19 @@ func (m *FreeIpaServerV1Response) validateDomain(formats strfmt.Registry) error 
 func (m *FreeIpaServerV1Response) validateHostname(formats strfmt.Registry) error {
 
 	if err := validate.Required("hostname", "body", m.Hostname); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *FreeIpaServerV1Response) validateServerIP(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ServerIP) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("serverIp", "body", m.ServerIP); err != nil {
 		return err
 	}
 

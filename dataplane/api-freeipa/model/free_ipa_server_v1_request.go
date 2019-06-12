@@ -21,11 +21,11 @@ type FreeIpaServerV1Request struct {
 	// Required: true
 	AdminPassword *string `json:"adminPassword"`
 
-	// domain
+	// Domain name associated to the FreeIPA
 	// Required: true
 	Domain *string `json:"domain"`
 
-	// hostname
+	// Base hostname for FreeIPA servers
 	// Required: true
 	Hostname *string `json:"hostname"`
 }
