@@ -71,9 +71,6 @@ type ClusterV4Response struct {
 	// id of the resource
 	ID int64 `json:"id,omitempty"`
 
-	// kerberos
-	Kerberos *KerberosV4Response `json:"kerberos,omitempty"`
-
 	// duration - how long the cluster is running in minutes (minus hours)
 	MinutesUp int32 `json:"minutesUp,omitempty"`
 
@@ -82,6 +79,9 @@ type ClusterV4Response struct {
 
 	// proxy CRN for the cluster
 	ProxyConfigCrn string `json:"proxyConfigCrn,omitempty"`
+
+	// proxy config name
+	ProxyConfigName string `json:"proxyConfigName,omitempty"`
 
 	// public ambari ip of the stack
 	ServerIP string `json:"serverIp,omitempty"`
@@ -144,10 +144,6 @@ func (m *ClusterV4Response) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateGateway(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateKerberos(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -354,24 +350,6 @@ func (m *ClusterV4Response) validateGateway(formats strfmt.Registry) error {
 		if err := m.Gateway.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("gateway")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *ClusterV4Response) validateKerberos(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Kerberos) { // not required
-		return nil
-	}
-
-	if m.Kerberos != nil {
-		if err := m.Kerberos.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("kerberos")
 			}
 			return err
 		}

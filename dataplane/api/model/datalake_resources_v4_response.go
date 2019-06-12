@@ -24,9 +24,6 @@ type DatalakeResourcesV4Response struct {
 	// Unique: true
 	DatabaseNames []string `json:"databaseNames"`
 
-	// Kerberos config name for the cluster
-	KerberosName string `json:"kerberosName,omitempty"`
-
 	// Descriptors of the datalake services
 	ServiceDescriptorMap map[string]ServiceDescriptorV4Response `json:"serviceDescriptorMap,omitempty"`
 }

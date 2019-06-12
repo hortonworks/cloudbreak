@@ -27,9 +27,6 @@ type ClusterDetails struct {
 	// database type
 	DatabaseType string `json:"databaseType,omitempty"`
 
-	// default file system
-	DefaultFileSystem bool `json:"defaultFileSystem,omitempty"`
-
 	// description
 	Description string `json:"description,omitempty"`
 

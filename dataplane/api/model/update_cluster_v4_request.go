@@ -30,14 +30,6 @@ type UpdateClusterV4Request struct {
 	// Unique: true
 	Hostgroups []*HostGroupV4Request `json:"hostgroups"`
 
-	// kerberos admin password
-	// Max Length: 50
-	// Min Length: 5
-	KerberosPassword string `json:"kerberosPassword,omitempty"`
-
-	// kerberos principal
-	KerberosPrincipal string `json:"kerberosPrincipal,omitempty"`
-
 	// details of the Ambari stack
 	StackRepository *StackRepositoryV4Request `json:"stackRepository,omitempty"`
 
@@ -61,10 +53,6 @@ func (m *UpdateClusterV4Request) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateHostgroups(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateKerberosPassword(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -128,23 +116,6 @@ func (m *UpdateClusterV4Request) validateHostgroups(formats strfmt.Registry) err
 			}
 		}
 
-	}
-
-	return nil
-}
-
-func (m *UpdateClusterV4Request) validateKerberosPassword(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.KerberosPassword) { // not required
-		return nil
-	}
-
-	if err := validate.MinLength("kerberosPassword", "body", string(m.KerberosPassword), 5); err != nil {
-		return err
-	}
-
-	if err := validate.MaxLength("kerberosPassword", "body", string(m.KerberosPassword), 50); err != nil {
-		return err
 	}
 
 	return nil

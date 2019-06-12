@@ -48,9 +48,6 @@ type ClusterV4Request struct {
 	// gateway
 	Gateway *GatewayV4Request `json:"gateway,omitempty"`
 
-	// kerberos name
-	KerberosName string `json:"kerberosName,omitempty"`
-
 	// ambari password
 	// Required: true
 	// Max Length: 100

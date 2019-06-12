@@ -25,9 +25,6 @@ type CloudStorageV1Request struct {
 	// adls gen2
 	AdlsGen2 *AdlsGen2CloudStorageV1Parameters `json:"adlsGen2,omitempty"`
 
-	// true if fs.defaultFS should point to this filesystem
-	DefaultFs bool `json:"defaultFs,omitempty"`
-
 	// cloud storage locations
 	// Unique: true
 	Locations []*StorageLocationV1Request `json:"locations"`

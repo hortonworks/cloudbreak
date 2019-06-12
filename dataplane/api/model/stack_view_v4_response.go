@@ -28,8 +28,14 @@ type StackViewV4Response struct {
 	// creation time of the stack in long
 	Created int64 `json:"created,omitempty"`
 
+	// credential name
+	CredentialName string `json:"credentialName,omitempty"`
+
 	// CRN of the environment which the stack is assigned to
 	EnvironmentCrn string `json:"environmentCrn,omitempty"`
+
+	// environment name
+	EnvironmentName string `json:"environmentName,omitempty"`
 
 	// specific version of HDP
 	HdpVersion string `json:"hdpVersion,omitempty"`

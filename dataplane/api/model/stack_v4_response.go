@@ -45,11 +45,17 @@ type StackV4Response struct {
 	// creation time of the stack in long
 	Created int64 `json:"created,omitempty"`
 
+	// credential name
+	CredentialName string `json:"credentialName,omitempty"`
+
 	// custom domains
 	CustomDomains *CustomDomainSettingsV4Response `json:"customDomains,omitempty"`
 
 	// environment crn
 	EnvironmentCrn string `json:"environmentCrn,omitempty"`
+
+	// environment name
+	EnvironmentName string `json:"environmentName,omitempty"`
 
 	// port of the gateway secured proxy
 	GatewayPort int32 `json:"gatewayPort,omitempty"`
