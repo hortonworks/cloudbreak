@@ -19,7 +19,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
+import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.FreeIpaFlowManager;
 
 @Service
@@ -31,14 +33,17 @@ public class PlatformParameterService {
     private CredentialToCloudCredentialConverter credentialConverter;
 
     @Inject
+    private CredentialService credentialService;
+
+    @Inject
     private FreeIpaFlowManager freeIpaFlowManager;
 
-    public PlatformParameters getPlatformParameters(Stack stack) {
+    public PlatformParameters getPlatformParameters(Stack stack, Credential credential) {
         LOGGER.debug("Get platform parameters for: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getCloudPlatform(), stack.getCloudPlatform(),
                 location, stack.getOwner(), stack.getAccountId());
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
+        CloudCredential cloudCredential = credentialConverter.convert(credential);
         PlatformParameterRequest parameterRequest = new PlatformParameterRequest(cloudContext, cloudCredential);
         freeIpaFlowManager.notify(parameterRequest);
         try {

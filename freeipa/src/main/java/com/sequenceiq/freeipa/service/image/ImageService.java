@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
+import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.Image;
 import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
@@ -65,8 +66,9 @@ public class ImageService {
     @Value("${freeipa.image.catalog.default.os}")
     private String defaultOs;
 
-    public Image create(Stack stack, ImageSettingsRequest imageRequest) {
-        Future<PlatformParameters> platformParametersFuture = intermediateBuilderExecutor.submit(() -> platformParameterService.getPlatformParameters(stack));
+    public Image create(Stack stack, ImageSettingsRequest imageRequest, Credential credential) {
+        Future<PlatformParameters> platformParametersFuture =
+                intermediateBuilderExecutor.submit(() -> platformParameterService.getPlatformParameters(stack, credential));
         String userData = createUserData(stack, platformParametersFuture);
         String region = stack.getRegion();
         String platformString = stack.getCloudPlatform().toLowerCase();
