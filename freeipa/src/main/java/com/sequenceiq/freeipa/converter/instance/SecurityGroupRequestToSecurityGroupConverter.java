@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.converter.instance;
 
+import static java.util.Optional.ofNullable;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -10,6 +12,7 @@ import javax.inject.Inject;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
@@ -39,14 +42,15 @@ public class SecurityGroupRequestToSecurityGroupConverter implements Converter<S
 
     private Set<String> convertSecurityGroupIdsToList(SecurityGroupRequest source) {
         Set<String> securityGroupIds = new HashSet<>();
-        if (source.getSecurityGroupIds() != null && !source.getSecurityGroupIds().isEmpty()) {
+        if (!CollectionUtils.isEmpty(source.getSecurityGroupIds())) {
             securityGroupIds.addAll(source.getSecurityGroupIds());
         }
         return securityGroupIds;
     }
 
     private Set<SecurityRule> convertSecurityRules(List<SecurityRuleRequest> securityRules, SecurityGroup securityGroup) {
-        Set<SecurityRule> convertedSet = securityRules.stream().map(rule -> securityRuleConverter.convert(rule)).collect(Collectors.toSet());
+        Set<SecurityRule> convertedSet = ofNullable(securityRules).orElse(List.of()).stream()
+                .map(rule -> securityRuleConverter.convert(rule)).collect(Collectors.toSet());
         for (SecurityRule securityRule : convertedSet) {
             securityRule.setSecurityGroup(securityGroup);
         }
