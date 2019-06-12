@@ -14,7 +14,7 @@ public class YarnConstants implements CloudConstant {
 
     public static final Variant YARN_VARIANT = Variant.variant(YARN);
 
-    public static final String YARN_ENDPOINT_PARAMETER = "yarnEndpoint";
+    public static final String YARN_ENDPOINT_PARAMETER = "endpoint";
 
     public static final String YARN_QUEUE_PARAMETER = "yarnQueue";
 

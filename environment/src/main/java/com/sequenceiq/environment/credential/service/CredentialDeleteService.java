@@ -11,6 +11,7 @@ import javax.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -33,8 +34,9 @@ public class CredentialDeleteService extends AbstractCredentialService {
     public CredentialDeleteService(CredentialRepository repository,
             NotificationSender notificationSender,
             CloudbreakMessagesService messagesService,
-            EnvironmentViewService environmentViewService) {
-        super(notificationSender, messagesService);
+            EnvironmentViewService environmentViewService,
+            @Value("${environment.enabledplatforms}") Set<String> enabledPlatforms) {
+        super(notificationSender, messagesService, enabledPlatforms);
         this.repository = repository;
         this.environmentViewService = environmentViewService;
     }
@@ -46,7 +48,7 @@ public class CredentialDeleteService extends AbstractCredentialService {
     }
 
     public Credential deleteByName(String name, String accountId) {
-        Credential credential = repository.findByNameAndAccountId(name, accountId, ENABLED_PLATFORMS)
+        Credential credential = repository.findByNameAndAccountId(name, accountId, getEnabledPlatforms())
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
         checkEnvironmentsForDeletion(credential);
         LOGGER.debug("About to archive credential: {}", name);
@@ -56,7 +58,7 @@ public class CredentialDeleteService extends AbstractCredentialService {
     }
 
     public Credential deleteByCrn(String crn, String accountId) {
-        Credential credential = repository.findByNameAndAccountId(crn, accountId, ENABLED_PLATFORMS)
+        Credential credential = repository.findByNameAndAccountId(crn, accountId, getEnabledPlatforms())
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, crn));
         checkEnvironmentsForDeletion(credential);
         LOGGER.debug("About to archive credential: {}", crn);

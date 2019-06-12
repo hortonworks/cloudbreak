@@ -18,6 +18,7 @@ import javax.ws.rs.BadRequestException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -45,8 +46,6 @@ public class CredentialService extends AbstractCredentialService {
 
     private static final String NOT_FOUND_FORMAT_MESS_NAME = "Credential with name:";
 
-    private static final Set<String> ENABLED_PLATFORMS = Set.of("AWS", "AZURE");
-
     @Inject
     private CredentialRepository repository;
 
@@ -62,24 +61,25 @@ public class CredentialService extends AbstractCredentialService {
     @Inject
     private SecretService secretService;
 
-    protected CredentialService(NotificationSender notificationSender, CloudbreakMessagesService messagesService) {
-        super(notificationSender, messagesService);
+    protected CredentialService(NotificationSender notificationSender, CloudbreakMessagesService messagesService,
+            @Value("${environment.enabledplatforms}") Set<String> enabledPlatforms) {
+        super(notificationSender, messagesService, enabledPlatforms);
     }
 
     public Set<Credential> listAvailablesByAccountId(String accountId) {
-        return repository.findAllByAccountId(accountId, ENABLED_PLATFORMS);
+        return repository.findAllByAccountId(accountId, getEnabledPlatforms());
     }
 
     public Credential getByNameForAccountId(String name, String accountId) {
-        return repository.findByNameAndAccountId(name, accountId, ENABLED_PLATFORMS).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
+        return repository.findByNameAndAccountId(name, accountId, getEnabledPlatforms()).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
     }
 
     public Credential getByCrnForAccountId(String crn, String accountId) {
-        return repository.findByCrnAndAccountId(crn, accountId, ENABLED_PLATFORMS).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, crn));
+        return repository.findByCrnAndAccountId(crn, accountId, getEnabledPlatforms()).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, crn));
     }
 
     public Credential getByEnvCrnForAccountId(String crn, String accountId) {
-        return repository.findByEnvCrnAndAccountId(crn, accountId, ENABLED_PLATFORMS).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, crn));
+        return repository.findByEnvCrnAndAccountId(crn, accountId, getEnabledPlatforms()).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, crn));
     }
 
     public Map<String, String> interactiveLogin(String accountId, Credential credential) {
@@ -88,7 +88,7 @@ public class CredentialService extends AbstractCredentialService {
     }
 
     public Credential updateByAccountId(Credential credential, String accountId) {
-        Credential original = repository.findByNameAndAccountId(credential.getName(), accountId, ENABLED_PLATFORMS)
+        Credential original = repository.findByNameAndAccountId(credential.getName(), accountId, getEnabledPlatforms())
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, credential.getName()));
         if (!Objects.equals(credential.getCloudPlatform(), original.getCloudPlatform())) {
             throw new BadRequestException("Modifying credential platform is forbidden");
@@ -108,6 +108,11 @@ public class CredentialService extends AbstractCredentialService {
     }
 
     public Credential create(Credential credential, @Nonnull String accountId, @Nonnull String creator) {
+        repository.findByNameAndAccountId(credential.getName(), accountId, getEnabledPlatforms())
+                .map(Credential::getName)
+                .ifPresent(name -> {
+                    throw new BadRequestException("Credential already exists with name: " + name);
+                });
         credentialValidator.validateCredentialCloudPlatform(credential.getCloudPlatform());
         credentialValidator.validateParameters(Platform.platform(credential.getCloudPlatform()), new Json(credential.getAttributes()));
         credential.setResourceCrn(createCRN(accountId));
@@ -134,7 +139,7 @@ public class CredentialService extends AbstractCredentialService {
     }
 
     public String initCodeGrantFlow(String accountId, String name) {
-        Credential original = repository.findByNameAndAccountId(name, accountId, ENABLED_PLATFORMS)
+        Credential original = repository.findByNameAndAccountId(name, accountId, getEnabledPlatforms())
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
         String originalAttributes = original.getAttributes();
         boolean codeGrantFlow = Boolean.valueOf(new Json(originalAttributes).getMap().get("codeGrantFlow").toString());
