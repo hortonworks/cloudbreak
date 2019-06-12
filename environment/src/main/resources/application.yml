@@ -74,6 +74,7 @@ environment:
       schema: public
       cert.file: database.crt
       ssl: false
+  enabledplatforms: AWS, AZURE, YARN
 
 cb:
   authentication:

@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
+import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
@@ -80,7 +81,9 @@ public class EnvironmentCreationService {
         CloudRegions cloudRegions = setLocationAndRegions(creationDto, environment);
         validateCreation(creationDto, environment, cloudRegions);
         environment = environmentService.save(environment);
-        environmentResourceService.createAndSetNetwork(environment, creationDto.getNetwork(), accountId);
+        if (!CloudPlatform.YARN.name().equals(environment.getCloudPlatform())) {
+            environmentResourceService.createAndSetNetwork(environment, creationDto.getNetwork(), accountId);
+        }
         return environmentDtoConverter.environmentToDto(environment);
     }
 

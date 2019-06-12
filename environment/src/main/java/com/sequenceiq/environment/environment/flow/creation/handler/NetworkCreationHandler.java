@@ -4,11 +4,13 @@ import static com.sequenceiq.environment.environment.flow.creation.event.EnvCrea
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_FREEIPA_CREATION_EVENT;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
@@ -40,22 +42,28 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final EnvironmentDtoConverter environmentDtoConverter;
 
+    private final Set<String> enabledPlatforms;
+
     protected NetworkCreationHandler(EventSender eventSender,
             EnvironmentService environmentService,
             PlatformParameterService platformParameterService,
             NetworkService networkService,
-            EnvironmentDtoConverter environmentDtoConverter) {
+            EnvironmentDtoConverter environmentDtoConverter,
+            @Value("${environment.enabledplatforms}") Set<String> enabledPlatforms) {
         super(eventSender);
         this.environmentService = environmentService;
         this.platformParameterService = platformParameterService;
         this.networkService = networkService;
         this.environmentDtoConverter = environmentDtoConverter;
+        this.enabledPlatforms = enabledPlatforms;
     }
 
     @Override
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
-        environmentService.findById(environmentDto.getId()).ifPresent(environment -> {
+        environmentService.findById(environmentDto.getId())
+                .filter(environment -> Objects.nonNull(environment.getNetwork()) && enabledPlatforms.contains(environment.getCloudPlatform()))
+                .ifPresent(environment -> {
             environment.setStatus(EnvironmentStatus.NETWORK_CREATION_IN_PROGRESS);
             networkService.decorateNetworkWithSubnetMeta(environment.getNetwork().getId(),
                     getSubnetMetas(environmentDtoConverter.environmentToDto(environment)));
