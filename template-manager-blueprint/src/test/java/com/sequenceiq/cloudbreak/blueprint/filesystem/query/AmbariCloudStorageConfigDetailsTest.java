@@ -20,17 +20,18 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.blueprint.filesystem.FileSystemConfigQueryService;
-import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
+import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.blueprint.filesystem.AmbariCloudStorageConfigDetails;
 import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
+import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
+import com.sequenceiq.cloudbreak.template.filesystem.CloudStorageConfigDetails;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @RunWith(MockitoJUnitRunner.class)
-public class FileSystemConfigQueryServiceTest {
+public class AmbariCloudStorageConfigDetailsTest {
 
     private static final String BLUEPRINT_TEXT = "testblueprint";
 
@@ -67,9 +68,11 @@ public class FileSystemConfigQueryServiceTest {
     @Mock
     private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
 
-    private final FileSystemConfigQueryService underTest = new FileSystemConfigQueryService();
+    private final AmbariCloudStorageConfigDetails underTest = new AmbariCloudStorageConfigDetails();
 
-    private final FileSystemConfigQueryService underTestPlaceholders = new FileSystemConfigQueryService();
+    private final AmbariCloudStorageConfigDetails underTestPlaceholders = new AmbariCloudStorageConfigDetails();
+
+    private CloudStorageConfigDetails cloudStorageConfigDetails = new CloudStorageConfigDetails();
 
     @Before
     public void before() throws IOException {
@@ -77,12 +80,14 @@ public class FileSystemConfigQueryServiceTest {
         when(cloudbreakResourceReaderService.resourceDefinition("cloud-storage-location-specification")).thenReturn(specifications);
         ReflectionTestUtils.setField(underTest, null, cloudbreakResourceReaderService, CloudbreakResourceReaderService.class);
         ReflectionTestUtils.setField(underTest, null, ambariBlueprintProcessorFactory, AmbariBlueprintProcessorFactory.class);
+        ReflectionTestUtils.setField(underTest, null, cloudStorageConfigDetails, CloudStorageConfigDetails.class);
         underTest.init();
 
         specifications = FileReaderUtils.readFileFromClasspath("filesystem-definitions/cloud-storage-location-specification-placeholders.json");
         when(cloudbreakResourceReaderServicePlaceholders.resourceDefinition("cloud-storage-location-specification")).thenReturn(specifications);
         ReflectionTestUtils.setField(underTestPlaceholders, null, cloudbreakResourceReaderServicePlaceholders, CloudbreakResourceReaderService.class);
         ReflectionTestUtils.setField(underTestPlaceholders, null, ambariBlueprintProcessorFactory, AmbariBlueprintProcessorFactory.class);
+        ReflectionTestUtils.setField(underTestPlaceholders, null, cloudStorageConfigDetails, CloudStorageConfigDetails.class);
         underTestPlaceholders.init();
     }
 

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.blueprint.filesystem;
+package com.sequenceiq.cloudbreak.template.filesystem;
 
 import java.io.IOException;
 import java.util.Comparator;
@@ -7,12 +7,8 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,49 +16,26 @@ import org.springframework.stereotype.Service;
 
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintProcessorFactory;
-import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.template.HandlebarTemplate;
 import com.sequenceiq.cloudbreak.template.HandlebarUtils;
-import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigQueryObject;
 import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntries;
 import com.sequenceiq.cloudbreak.template.filesystem.query.ConfigQueryEntry;
-import com.sequenceiq.cloudbreak.blueprint.AmbariBlueprintTextProcessor;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 
 @Service
-public class FileSystemConfigQueryService {
+public class CloudStorageConfigDetails {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileSystemConfigQueryService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudStorageConfigDetails.class);
 
     private final Handlebars handlebars = HandlebarUtils.handlebars();
 
-    @Inject
-    private CloudbreakResourceReaderService cloudbreakResourceReaderService;
+    public Set<ConfigQueryEntry> queryParameters(BlueprintTextProcessor blueprintTextProcessor,
+            ConfigQueryEntries configQueryEntries, FileSystemConfigQueryObject request) {
 
-    @Inject
-    private AmbariBlueprintProcessorFactory ambariBlueprintProcessorFactory;
-
-    private ConfigQueryEntries configQueryEntries;
-
-    @PostConstruct
-    public void init() {
-        String configDefinitions = cloudbreakResourceReaderService.resourceDefinition("cloud-storage-location-specification");
-        try {
-            configQueryEntries = JsonUtil.readValue(configDefinitions, ConfigQueryEntries.class);
-        } catch (IOException e) {
-            LOGGER.error("Cannot initialize configQueryEntries", e);
-            configQueryEntries = new ConfigQueryEntries();
-        }
-    }
-
-    public Set<ConfigQueryEntry> queryParameters(FileSystemConfigQueryObject request) {
         Set<ConfigQueryEntry> filtered = new HashSet<>();
-
-        AmbariBlueprintTextProcessor ambariBlueprintTextProcessor = ambariBlueprintProcessorFactory.get(request.getBlueprintText());
-        Map<String, Set<String>> componentsByHostGroup = ambariBlueprintTextProcessor.getComponentsByHostGroup();
-        for (Entry<String, Set<String>> serviceHostgroupEntry : componentsByHostGroup.entrySet()) {
+        Map<String, Set<String>> componentsByHostGroup = blueprintTextProcessor.getComponentsByHostGroup();
+        for (Map.Entry<String, Set<String>> serviceHostgroupEntry : componentsByHostGroup.entrySet()) {
             for (String service : serviceHostgroupEntry.getValue()) {
                 Set<ConfigQueryEntry> collectedEntries = configQueryEntries.getEntries()
                         .stream()
@@ -73,12 +46,15 @@ public class FileSystemConfigQueryService {
                 filtered.addAll(collectedEntries);
             }
         }
+
         boolean attachedCluster = request.isAttachedCluster();
+
         List<ConfigQueryEntry> collectedEntries = configQueryEntries.getEntries()
                 .stream()
                 .filter(configQueryEntry -> configQueryEntry.isRequiredForAttachedCluster() && attachedCluster)
                 .collect(Collectors.toList());
         filtered.addAll(collectedEntries);
+
         String fileSystemTypeRequest = request.getFileSystemType();
         FileSystemType fileSystemType = FileSystemType.valueOf(fileSystemTypeRequest);
         String protocol = fileSystemType.getProtocol();
