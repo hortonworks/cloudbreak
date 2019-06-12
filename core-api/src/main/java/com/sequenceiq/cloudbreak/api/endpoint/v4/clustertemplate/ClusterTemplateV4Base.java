@@ -5,9 +5,9 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.JsonEntity;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterTemplateModelDescription;
+import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -28,7 +28,7 @@ public abstract class ClusterTemplateV4Base implements JsonEntity {
 
     @ApiModelProperty(value = ClusterTemplateModelDescription.TEMPLATE, required = true)
     @NotNull
-    private StackV4Request stackTemplate;
+    private DistroXV1Request distroXTemplate;
 
     @ApiModelProperty(required = true, allowableValues = "SPARK,HIVE,DATASCIENCE,EDW,ETL,OTHER")
     private ClusterTemplateV4Type type = ClusterTemplateV4Type.OTHER;
@@ -52,12 +52,12 @@ public abstract class ClusterTemplateV4Base implements JsonEntity {
         this.description = description;
     }
 
-    public StackV4Request getStackTemplate() {
-        return stackTemplate;
+    public DistroXV1Request getDistroXTemplate() {
+        return distroXTemplate;
     }
 
-    public void setStackTemplate(StackV4Request stackTemplate) {
-        this.stackTemplate = stackTemplate;
+    public void setDistroXTemplate(DistroXV1Request distroXTemplate) {
+        this.distroXTemplate = distroXTemplate;
     }
 
     public String getCloudPlatform() {

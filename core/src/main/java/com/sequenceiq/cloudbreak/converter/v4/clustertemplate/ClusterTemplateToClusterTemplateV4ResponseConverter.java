@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConvert
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.service.stack.StackTemplateService;
+import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
 
 @Component
 public class ClusterTemplateToClusterTemplateV4ResponseConverter extends AbstractConversionServiceAwareConverter<ClusterTemplate, ClusterTemplateV4Response> {
@@ -21,13 +22,17 @@ public class ClusterTemplateToClusterTemplateV4ResponseConverter extends Abstrac
     @Inject
     private StackTemplateService stackTemplateService;
 
+    @Inject
+    private DistroXV1RequestToStackV4RequestConverter stackV4RequestConverter;
+
     @Override
     public ClusterTemplateV4Response convert(ClusterTemplate source) {
         ClusterTemplateV4Response clusterTemplateV4Response = new ClusterTemplateV4Response();
         clusterTemplateV4Response.setName(source.getName());
         clusterTemplateV4Response.setDescription(source.getDescription());
         Stack stack = stackTemplateService.getByIdWithLists(source.getStackTemplate().getId()).orElse(null);
-        clusterTemplateV4Response.setStackTemplate(converterUtil.convert(stack, StackV4Request.class));
+        StackV4Request stackV4Request = converterUtil.convert(stack, StackV4Request.class);
+        clusterTemplateV4Response.setDistroXTemplate(stackV4RequestConverter.convert(stackV4Request));
         clusterTemplateV4Response.setCloudPlatform(source.getCloudPlatform());
         clusterTemplateV4Response.setStatus(source.getStatus());
         clusterTemplateV4Response.setId(source.getId());
