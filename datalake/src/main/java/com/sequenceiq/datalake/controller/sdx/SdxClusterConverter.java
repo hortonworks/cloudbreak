@@ -14,8 +14,8 @@ public class SdxClusterConverter {
         if (sdxCluster.getStatus() != null) {
             sdxClusterResponse.setStatus(SdxClusterStatusResponse.valueOf(sdxCluster.getStatus().name()));
         }
-        sdxClusterResponse.setSdxName(sdxCluster.getClusterName());
-        sdxClusterResponse.setSdxCrn(sdxCluster.getCrn());
+        sdxClusterResponse.setName(sdxCluster.getClusterName());
+        sdxClusterResponse.setCrn(sdxCluster.getCrn());
         sdxClusterResponse.setEnvironmentName(sdxCluster.getEnvName());
         return sdxClusterResponse;
     }

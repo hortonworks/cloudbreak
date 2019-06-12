@@ -70,9 +70,9 @@ class SdxControllerTest {
         createSdxClusterRequest.setTags(tags);
         SdxClusterResponse sdxClusterResponse = sdxController.create("test-sdx-cluster", createSdxClusterRequest);
         verify(sdxService).createSdx(eq(USER_CRN), eq("test-sdx-cluster"), eq(createSdxClusterRequest), nullable(StackV4Request.class));
-        assertEquals("test-sdx-cluster", sdxClusterResponse.getSdxName());
+        assertEquals("test-sdx-cluster", sdxClusterResponse.getName());
         assertEquals("test-env", sdxClusterResponse.getEnvironmentName());
-        assertEquals("crn:sdxcluster", sdxClusterResponse.getSdxCrn());
+        assertEquals("crn:sdxcluster", sdxClusterResponse.getCrn());
         assertEquals(SdxClusterStatusResponse.REQUESTED, sdxClusterResponse.getStatus());
     }
 
@@ -88,9 +88,9 @@ class SdxControllerTest {
         when(sdxService.getByAccountIdAndSdxName(anyString(), anyString())).thenReturn(sdxCluster);
 
         SdxClusterResponse sdxClusterResponse = sdxController.get("test-sdx-cluster");
-        assertEquals("test-sdx-cluster", sdxClusterResponse.getSdxName());
+        assertEquals("test-sdx-cluster", sdxClusterResponse.getName());
         assertEquals("test-env", sdxClusterResponse.getEnvironmentName());
-        assertEquals("crn:sdxcluster", sdxClusterResponse.getSdxCrn());
+        assertEquals("crn:sdxcluster", sdxClusterResponse.getCrn());
         assertEquals(SdxClusterStatusResponse.REQUESTED, sdxClusterResponse.getStatus());
     }
 

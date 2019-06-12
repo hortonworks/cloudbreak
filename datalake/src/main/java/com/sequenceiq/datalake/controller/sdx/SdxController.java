@@ -33,7 +33,7 @@ public class SdxController implements SdxEndpoint {
         String userCrn = threadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.createSdx(userCrn, name, createSdxClusterRequest, null);
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
-        sdxClusterResponse.setSdxName(sdxCluster.getClusterName());
+        sdxClusterResponse.setName(sdxCluster.getClusterName());
         return sdxClusterResponse;
     }
 
