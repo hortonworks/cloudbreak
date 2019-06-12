@@ -26,7 +26,7 @@ public class LaunchClusterFromClusterTemplateAction implements Action<ClusterTem
 
     @Override
     public ClusterTemplateTestDto action(TestContext testContext, ClusterTemplateTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.logJSON(LOGGER, "Stack from template post request:\n", testDto.getRequest().getStackTemplate());
+//        Log.logJSON(LOGGER, "Stack from template post request:\n", testDto.getRequest().getStackTemplate());
         StackTemplateTestDto stackEntity = testContext.get(stackTemplateKey);
         stackEntity.setResponse(client.getCloudbreakClient()
                 .stackV4Endpoint()

@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.common.json.JsonUtil.writeValueAsStringS
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singleton;
-import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -22,15 +21,15 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXClusterV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterTemplateLoaderServiceTest {
@@ -151,13 +150,13 @@ public class ClusterTemplateLoaderServiceTest {
     private DefaultClusterTemplateV4Request clusterTemplateRequest(String templateName) {
         DefaultClusterTemplateV4Request clusterTemplate = new DefaultClusterTemplateV4Request();
         clusterTemplate.setName(templateName);
-        StackV4Request stack = new StackV4Request();
-        ClusterV4Request cluster = new ClusterV4Request();
-        stack.setCluster(cluster);
-        InstanceGroupV4Request instanceGroup = new InstanceGroupV4Request();
+        DistroXV1Request distrox = new DistroXV1Request();
+        DistroXClusterV1Request cluster = new DistroXClusterV1Request();
+        distrox.setCluster(cluster);
+        InstanceGroupV1Request instanceGroup = new InstanceGroupV1Request();
         instanceGroup.setName("master");
-        stack.setInstanceGroups(singletonList(instanceGroup));
-        clusterTemplate.setStackTemplate(stack);
+        distrox.setInstanceGroups(singleton(instanceGroup));
+        clusterTemplate.setDistroXTemplate(distrox);
         return clusterTemplate;
     }
 }

@@ -37,18 +37,18 @@ public class ClusterTemplateTestDto extends DeletableTestDto<ClusterTemplateV4Re
     }
 
     public ClusterTemplateTestDto withoutStackTemplate() {
-        getRequest().setStackTemplate(null);
+//        getRequest().setStackTemplate(null);
         return this;
     }
 
     public ClusterTemplateTestDto withStackTemplate(StackTemplateTestDto stackTemplate) {
-        getRequest().setStackTemplate(stackTemplate.getRequest());
+//        getRequest().setStackTemplate(stackTemplate.getRequest());
         return this;
     }
 
     public ClusterTemplateTestDto withStackTemplate(String key) {
-        StackTemplateTestDto stackTemplate = getTestContext().get(key);
-        getRequest().setStackTemplate(stackTemplate.getRequest());
+//        StackTemplateTestDto stackTemplate = getTestContext().get(key);
+//        getRequest().setStackTemplate(stackTemplate.getRequest());
         return this;
     }
 

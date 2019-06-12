@@ -11,19 +11,22 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
-import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
 
 @Component
 public class DefaultClusterTemplateV4RequestToClusterTemplateConverter
@@ -46,6 +49,9 @@ public class DefaultClusterTemplateV4RequestToClusterTemplateConverter
     @Inject
     private CredentialClientService credentialClientService;
 
+    @Inject
+    private DistroXV1RequestToStackV4RequestConverter stackV4RequestConverter;
+
     @Override
     public ClusterTemplate convert(DefaultClusterTemplateV4Request source) {
         ClusterTemplate clusterTemplate = new ClusterTemplate();
@@ -54,8 +60,10 @@ public class DefaultClusterTemplateV4RequestToClusterTemplateConverter
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         clusterTemplate.setWorkspace(workspace);
         clusterTemplate.setTemplateContent(Base64.getEncoder().encodeToString(JsonUtil.writeValueAsStringSilent(source).getBytes()));
-        source.getStackTemplate().setCloudPlatform(CloudPlatform.valueOf(source.getCloudPlatform()));
-        Stack stack = converterUtil.convert(source.getStackTemplate(), Stack.class);
+        StackV4Request stackV4Request = stackV4RequestConverter.convert(source.getDistroXTemplate());
+        stackV4Request.setType(StackType.TEMPLATE);
+        stackV4Request.setCloudPlatform(CloudPlatform.valueOf(source.getCloudPlatform()));
+        Stack stack = converterUtil.convert(stackV4Request, Stack.class);
         clusterTemplate.setStackTemplate(stack);
         clusterTemplate.setCloudPlatform(getCloudPlatform(source, stack));
         clusterTemplate.setName(source.getName());
