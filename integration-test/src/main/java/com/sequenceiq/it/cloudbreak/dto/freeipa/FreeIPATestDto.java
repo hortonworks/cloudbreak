@@ -180,7 +180,6 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
         secret.setEnginePath(credentialTestDto.getResponse().getAttributes().getEnginePath());
         secret.setSecretPath(credentialTestDto.getResponse().getAttributes().getSecretPath());
         credential.setSecret(secret);
-        getRequest().setCredential(credential);
         return this;
     }
 

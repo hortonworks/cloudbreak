@@ -18,6 +18,7 @@ import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.stack.CreateFreeIpaRequestToStackConverter;
 import com.sequenceiq.freeipa.converter.stack.StackToDescribeFreeIpaResponseConverter;
+import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Image;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
@@ -74,9 +75,10 @@ public class FreeIpaCreationService {
     public DescribeFreeIpaResponse launchFreeIpa(CreateFreeIpaRequest request, String accountId) {
         checkIfAlreadyExistsInEnvironment(request, accountId);
         String userId = crnService.getCurrentUserId();
-        Stack stack = stackConverter.convert(request, accountId, userId);
+        Credential credential = credentialService.getCredentialByEnvCrn(request.getEnvironmentCrn());
+        Stack stack = stackConverter.convert(request, accountId, userId, credential.getCloudPlatform());
         stack.setResourceCrn(crnService.createCrn(accountId, Crn.ResourceType.FREEIPA));
-        GetPlatformTemplateRequest getPlatformTemplateRequest = templateService.triggerGetTemplate(stack);
+        GetPlatformTemplateRequest getPlatformTemplateRequest = templateService.triggerGetTemplate(stack, credential);
 
         SecurityConfig securityConfig = tlsSecurityService.generateSecurityKeys();
         stack.setSecurityConfig(securityConfig);
@@ -87,7 +89,7 @@ public class FreeIpaCreationService {
         stack.setTemplate(template);
         stackService.save(stack);
         ImageSettingsRequest imageSettingsRequest = request.getImage();
-        Image image = imageService.create(stack, Objects.nonNull(imageSettingsRequest) ? imageSettingsRequest : new ImageSettingsRequest());
+        Image image = imageService.create(stack, Objects.nonNull(imageSettingsRequest) ? imageSettingsRequest : new ImageSettingsRequest(), credential);
         FreeIpa freeIpa = freeIpaService.create(stack, request.getFreeIpa());
         flowManager.notify(FlowChainTriggers.PROVISION_TRIGGER_EVENT, new StackEvent(FlowChainTriggers.PROVISION_TRIGGER_EVENT, stack.getId()));
         return stackToDescribeFreeIpaResponseConverter.convert(stack, image, freeIpa);

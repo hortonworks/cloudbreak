@@ -69,6 +69,12 @@ public class CredentialV1Controller extends NotificationController implements Cr
     }
 
     @Override
+    public CredentialResponse getByEnvCrn(String envCrn) {
+        String accountId = threadBasedUserCrnProvider.getAccountId();
+        return credentialConverter.convert(credentialService.getByEnvCrnForAccountId(envCrn, accountId));
+    }
+
+    @Override
     public CredentialResponse post(@Valid CredentialRequest request) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
         Credential credential = credentialConverter.convert(request);
