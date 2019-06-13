@@ -19,13 +19,15 @@ import (
 var sdxClusterHeader = []string{"Name"}
 
 type sdxClusterOutput struct {
-	Crn    string `json:"Crn" yaml:"Crn"`
-	Name   string `json:"Name" yaml:"Name"`
-	Status string `json:"Status" yaml:"Status"`
+	Crn            string `json:"Crn" yaml:"Crn"`
+	Name           string `json:"Name" yaml:"Name"`
+	Environment    string `json:"environmentName" yaml:"environmentName"`
+	EnvironmentCrn string `json:"environmentCrn" yaml:"environmentCrn"`
+	Status         string `json:"Status" yaml:"Status"`
 }
 
 func (r *sdxClusterOutput) DataAsStringArray() []string {
-	return []string{r.Name}
+	return []string{r.Crn, r.Name, r.Environment, r.EnvironmentCrn, r.Status}
 }
 
 type ClientSdx oauth.Sdx
@@ -143,7 +145,10 @@ func listSdxClusterImpl(client clientSdx, envName string, writer func([]string, 
 
 	var tableRows []utils.Row
 	for _, sdxCluster := range resp.Payload {
-		tableRows = append(tableRows, &sdxClusterOutput{sdxCluster.Crn, sdxCluster.Name, sdxCluster.Status})
+		tableRows = append(tableRows, &sdxClusterOutput{sdxCluster.Crn, sdxCluster.Name,
+			sdxCluster.EnvironmentName,
+			sdxCluster.EnvironmentCrn,
+			sdxCluster.Status})
 	}
 
 	writer(sdxClusterHeader, tableRows)
@@ -162,9 +167,15 @@ func DescribeSdx(c *cli.Context) {
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	sdxCluster := resp.Payload
 	if output.Format != "table" {
-		output.Write(append(sdxClusterHeader, "ContentAsBase64", "ID"), &sdxClusterOutput{sdxCluster.Crn, sdxCluster.Name, sdxCluster.Status})
+		output.Write(append(sdxClusterHeader, "ContentAsBase64", "ID"), &sdxClusterOutput{sdxCluster.Crn, sdxCluster.Name,
+			sdxCluster.EnvironmentName,
+			sdxCluster.EnvironmentCrn,
+			sdxCluster.Status})
 	} else {
-		output.Write(append(sdxClusterHeader, "ID"), &sdxClusterOutput{sdxCluster.Crn, sdxCluster.Name, sdxCluster.Status})
+		output.Write(append(sdxClusterHeader, "ID"), &sdxClusterOutput{sdxCluster.Crn, sdxCluster.Name,
+			sdxCluster.EnvironmentName,
+			sdxCluster.EnvironmentCrn,
+			sdxCluster.Status})
 	}
 	log.Infof("[DescribeSdx] Describe a particular SDX cluster")
 }
