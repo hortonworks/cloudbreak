@@ -24,10 +24,10 @@ public class ServiceEndpointConfig {
     @Value("${freeipa.db.serviceid:}")
     private String databaseId;
 
-    @Value("${freeipa.environment.url:}")
+    @Value("${freeipa.environment.url}")
     private String environmentServiceUrl;
 
-    @Value("${datalake.environmentservice.server.contextPath:/environmentservice}")
+    @Value("${freeipa.environment.contextPath}")
     private String environmentRootContextPath;
 
     @Bean
