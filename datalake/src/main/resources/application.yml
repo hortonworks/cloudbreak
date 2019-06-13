@@ -1,5 +1,7 @@
 server.servlet.context-path: "/dl"
 
+server.port: 8086
+
 management:
   endpoints:
     web:
@@ -33,8 +35,14 @@ datalake:
   structuredevent:
     rest:
       enabled: false
+  cloudbreak:
+    url: http://localhost:9091
+  environmentservice:
+    url: http://localhost:8088
   db:
-    port.5432.tcp.port: 5432
+    port.5432.tcp:
+      port: 5432
+      addr: localhost
     env:
       user: postgres
       pass:
