@@ -91,6 +91,11 @@ func CreateOpenstackCredential(c *cli.Context) {
 	createCredential(c, false)
 }
 
+func CreateYarnCredential(c *cli.Context) {
+	cloud.SetProviderType(cloud.YARN)
+	createCredential(c, false)
+}
+
 func ModifyOpenstackCredential(c *cli.Context) {
 	cloud.SetProviderType(cloud.OPENSTACK)
 	modifyCredential(c, false)

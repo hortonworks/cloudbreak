@@ -157,6 +157,18 @@ func init() {
 						},
 					},
 					{
+						Name:   "ycloud",
+						Usage:  "creates a new ycloud credential",
+						Before: cf.CheckConfigAndCommandFlags,
+						Flags:  fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlEndpoint).AddAuthenticationFlags().Build(),
+						Action: credential.CreateYarnCredential,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(fl.FlEndpoint).AddAuthenticationFlags().Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+					{
 						Name:   "from-file",
 						Usage:  "creates a new credential from input json file",
 						Flags:  fl.NewFlagBuilder().AddResourceFlagsWithOptionalName().AddFlags(fl.FlInputJson).AddAuthenticationFlags().Build(),
