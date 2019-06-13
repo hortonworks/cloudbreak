@@ -1,7 +1,5 @@
 server.servlet.context-path: "/dl"
 
-server.port: 8086
-
 management:
   endpoints:
     web:
