@@ -91,6 +91,6 @@ public interface DatabaseServerV4Endpoint {
     @Path("createDatabase")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.CREATE_DATABASE, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
-            nickname = "createDatabase")
+            nickname = "createDatabaseOnServer")
     CreateDatabaseV4Response createDatabase(@Valid CreateDatabaseV4Request request);
 }
