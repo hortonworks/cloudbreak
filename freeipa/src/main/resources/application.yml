@@ -42,6 +42,9 @@ freeipa:
   security.default:
     ports: 22,443,9443
     cidr: 0.0.0.0/0
+  environment:
+    url: http://localhost:8088
+    contextPath: /environmentservice
 
 info:
   app:
