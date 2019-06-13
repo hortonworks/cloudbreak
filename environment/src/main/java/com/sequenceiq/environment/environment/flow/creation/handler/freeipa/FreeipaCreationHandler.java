@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
-import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.configuration.SupportedPlatfroms;
@@ -21,6 +20,7 @@ import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
+import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
@@ -46,23 +46,19 @@ public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final PollingService<FreeIpaPollerObject> freeIpaPollingService;
 
-    private final StringToSecretResponseConverter secretConverter;
-
     protected FreeipaCreationHandler(
             EventSender eventSender,
             EnvironmentService environmentService,
             FreeIpaV1Endpoint freeIpaV1Endpoint,
             SupportedPlatfroms supportedPlatfroms,
             Map<CloudPlatform, FreeIpaNetworkProvider> freeIpaNetworkProviderMapByCloudPlatform,
-            PollingService<FreeIpaPollerObject> freeIpaPollingService,
-            StringToSecretResponseConverter secretConverter) {
+            PollingService<FreeIpaPollerObject> freeIpaPollingService) {
         super(eventSender);
         this.environmentService = environmentService;
         this.freeIpaV1Endpoint = freeIpaV1Endpoint;
         this.supportedPlatfroms = supportedPlatfroms;
         this.freeIpaNetworkProviderMapByCloudPlatform = freeIpaNetworkProviderMapByCloudPlatform;
         this.freeIpaPollingService = freeIpaPollingService;
-        this.secretConverter = secretConverter;
     }
 
     @Override
@@ -112,7 +108,8 @@ public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentD
                 }
             }
         } catch (Exception ex) {
-            throw new FreeIpaOperationFailedException("Failed to prepare FreeIpa!", ex);
+            EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(environmentDto.getId(), environmentDto.getName(), ex);
+            eventSender().sendEvent(failureEvent, environmentDtoEvent.getHeaders());
         }
     }
 
