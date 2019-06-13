@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.environment.flow.delete.handler.freeipa;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+
+import javax.ws.rs.NotFoundException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,9 +23,11 @@ public class FreeIpaDeleteRetrievalTask extends SimpleStatusCheckerTask<FreeIpaP
     public boolean checkStatus(FreeIpaPollerObject freeIpaPollerObject) {
         String environmentCrn = freeIpaPollerObject.getEnvironmentCrn();
         try {
-            if (freeIpaPollerObject.getFreeIpaV1Endpoint().describe(environmentCrn).getStatus().isAvailable()) {
+            if (getIfNotNull(freeIpaPollerObject.getFreeIpaV1Endpoint().describe(environmentCrn), response -> !response.getStatus().isSuccesfullyDeleted())) {
                 return false;
             }
+        } catch (NotFoundException nfe) {
+            return true;
         } catch (Exception e) {
             throw new FreeIpaOperationFailedException("FreeIpa delete operation failed", e);
         }
@@ -43,13 +49,11 @@ public class FreeIpaDeleteRetrievalTask extends SimpleStatusCheckerTask<FreeIpaP
     public boolean exitPolling(FreeIpaPollerObject freeIpaPollerObject) {
         try {
             String environmentCrn = freeIpaPollerObject.getEnvironmentCrn();
-            if (freeIpaPollerObject.getFreeIpaV1Endpoint().describe(environmentCrn).getStatus().isFailed()) {
-                LOGGER.debug("Stack is getting terminated, polling is cancelled.");
-                return true;
-            }
+            return freeIpaPollerObject.getFreeIpaV1Endpoint().describe(environmentCrn).getStatus().isFailed();
+        } catch (NotFoundException ex) {
+            LOGGER.info("FreeIPA does not exists", ex);
             return false;
-        } catch (Exception ex) {
-            LOGGER.info("Error occurred when check status checker exit criteria: ", ex);
+        } catch (Exception e) {
             return true;
         }
     }

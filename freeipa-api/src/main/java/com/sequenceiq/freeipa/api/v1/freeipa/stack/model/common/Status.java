@@ -39,6 +39,10 @@ public enum Status {
         return Arrays.asList(AVAILABLE, MAINTENANCE_MODE_ENABLED).contains(valueOf(name()));
     }
 
+    public boolean isSuccesfullyDeleted() {
+        return DELETE_COMPLETED.equals(valueOf(name()));
+    }
+
     public boolean isStopPhaseActive() {
         return name().contains("STOP");
     }
