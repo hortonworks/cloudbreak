@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
@@ -80,9 +81,9 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.environment.credential.OpenSshPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
+import com.sequenceiq.cloudbreak.service.environment.credential.OpenSshPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
@@ -326,29 +327,24 @@ public class StackService {
     }
 
     public StackStatus getCurrentStatusByStackId(long stackId) {
-        return stackStatusService.findFirstByStackIdOrderByCreatedDesc(stackId).orElseThrow(NotFoundException.notFound("stackStatus", stackId));
+        return stackStatusService.findFirstByStackIdOrderByCreatedDesc(stackId).orElseThrow(notFound("stackStatus", stackId));
     }
 
     public StackV4Response getByAmbariAddress(String ambariAddress) {
         try {
             return transactionService.required(() -> converterUtil.convert(stackRepository.findByAmbari(ambariAddress)
-                    .orElseThrow(NotFoundException.notFound("stack", ambariAddress)), StackV4Response.class));
+                    .orElseThrow(notFound("stack", ambariAddress)), StackV4Response.class));
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
     }
 
-    public StackV4Response getByNameInWorkspaceWithEntries(String name, Long workspaceId, Set<String> entries, User user) {
+    public StackV4Response getByNameInWorkspaceWithEntries(String name, Long workspaceId, Set<String> entries, User user, StackType stackType) {
         try {
             return transactionService.required(() -> {
                 Workspace workspace = workspaceService.get(workspaceId, user);
                 ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.get();
-                Optional<Stack> stack = stackRepository.findByNameAndWorkspaceIdWithLists(
-                        name,
-                        workspace.getId(),
-                        showTerminatedClustersAfterConfig.isActive(),
-                        showTerminatedClustersAfterConfig.showAfterMillisecs()
-                );
+                Optional<Stack> stack = findByNameAndWorkspaceIdWithLists(name, workspace.getId(), stackType, showTerminatedClustersAfterConfig);
                 if (stack.isEmpty()) {
                     throw new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name));
                 }
@@ -646,6 +642,12 @@ public class StackService {
         } else {
             LOGGER.debug("Stack is already deleted.");
         }
+    }
+
+    private Optional<Stack> findByNameAndWorkspaceIdWithLists(String name, Long workspaceId, StackType stackType, ShowTerminatedClustersAfterConfig config) {
+        return stackType == null
+                ? stackRepository.findByNameAndWorkspaceIdWithLists(name, workspaceId, config.isActive(), config.showAfterMillisecs())
+                : stackRepository.findByNameAndWorkspaceIdWithLists(name, stackType, workspaceId, config.isActive(), config.showAfterMillisecs());
     }
 
     private Optional<Stack> findByNameAndWorkspaceIdWithLists(String name, Long workspaceId) {
