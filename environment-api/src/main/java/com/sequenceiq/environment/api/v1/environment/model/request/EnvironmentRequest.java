@@ -7,7 +7,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
@@ -29,9 +28,6 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     @ApiModelProperty(EnvironmentModelDescription.CREDENTIAL_NAME_REQUEST)
     private String credentialName;
-
-    @ApiModelProperty(EnvironmentModelDescription.CREDENTIAL_REQUEST)
-    private CredentialRequest credential;
 
     @ApiModelProperty(EnvironmentModelDescription.REGIONS)
     private Set<String> regions = new HashSet<>();
@@ -70,16 +66,6 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @Override
     public void setCredentialName(String credentialName) {
         this.credentialName = credentialName;
-    }
-
-    @Override
-    public CredentialRequest getCredential() {
-        return credential;
-    }
-
-    @Override
-    public void setCredential(CredentialRequest credential) {
-        this.credential = credential;
     }
 
     public Set<String> getRegions() {
