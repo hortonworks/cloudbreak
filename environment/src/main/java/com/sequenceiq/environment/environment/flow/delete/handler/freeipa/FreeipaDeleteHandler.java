@@ -20,6 +20,7 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.handler.freeipa.FreeIpaPollerObject;
 import com.sequenceiq.environment.environment.flow.delete.event.EnvDeleteEvent;
+import com.sequenceiq.environment.environment.flow.delete.event.EnvDeleteFailedEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
@@ -72,7 +73,8 @@ public class FreeipaDeleteHandler extends EventSenderAwareHandler<EnvironmentDto
                 eventSender().sendEvent(getNextStepObject(environmentDto), environmentDtoEvent.getHeaders());
             }
         } catch (Exception ex) {
-            throw new FreeIpaOperationFailedException("Failed to delete FreeIpa!", ex);
+            EnvDeleteFailedEvent failedEvent = new EnvDeleteFailedEvent(environmentDto.getId(), environmentDto.getName(), ex);
+            eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
         }
     }
 

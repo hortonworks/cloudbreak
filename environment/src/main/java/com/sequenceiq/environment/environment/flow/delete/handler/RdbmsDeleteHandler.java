@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.delete.event.EnvDeleteEvent;
+import com.sequenceiq.environment.environment.flow.delete.event.EnvDeleteFailedEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
@@ -27,17 +28,22 @@ public class RdbmsDeleteHandler extends EventSenderAwareHandler<EnvironmentDto> 
     @Override
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
-        // TODO: delete rdbms
-        environmentService.findById(environmentDto.getId()).ifPresent(environment -> {
-            environment.setStatus(EnvironmentStatus.RDBMS_DELETE_IN_PROGRESS);
-            environmentService.save(environment);
-        });
-        sleepForTestPurpose();
-        EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.EnvDeleteEventBuilder.anEnvDeleteEvent()
-                .withResourceId(environmentDto.getResourceId())
-                .withSelector(START_FREEIPA_DELETE_EVENT.selector())
-                .build();
-        eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
+        try {
+            // TODO: delete rdbms
+            environmentService.findById(environmentDto.getId()).ifPresent(environment -> {
+                environment.setStatus(EnvironmentStatus.RDBMS_DELETE_IN_PROGRESS);
+                environmentService.save(environment);
+            });
+            sleepForTestPurpose();
+            EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.EnvDeleteEventBuilder.anEnvDeleteEvent()
+                    .withResourceId(environmentDto.getResourceId())
+                    .withSelector(START_FREEIPA_DELETE_EVENT.selector())
+                    .build();
+            eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
+        } catch (Exception e) {
+            EnvDeleteFailedEvent failedEvent = new EnvDeleteFailedEvent(environmentDto.getId(), environmentDto.getName(), e);
+            eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
+        }
     }
 
     @Override

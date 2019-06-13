@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.delete.event.EnvDeleteEvent;
+import com.sequenceiq.environment.environment.flow.delete.event.EnvDeleteFailedEvent;
 import com.sequenceiq.environment.environment.flow.delete.event.EnvDeleteStateSelectors;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.flow.core.AbstractAction;
@@ -100,9 +101,10 @@ public class EnvDeleteActions {
 
     @Bean(name = "ENV_DELETE_FAILED_STATE")
     public Action<?, ?> failedAction() {
-        return new AbstractVpcDeleteAction<>(Payload.class) {
+        return new AbstractVpcDeleteAction<>(EnvDeleteFailedEvent.class) {
             @Override
-            protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) {
+            protected void doExecute(CommonContext context, EnvDeleteFailedEvent payload, Map<Object, Object> variables) {
+                LOGGER.warn("Failed to delete environment", payload.getException());
                 environmentService
                         .findById(payload.getResourceId())
                         .ifPresent(environment -> {
