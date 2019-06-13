@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -41,6 +42,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
@@ -49,8 +51,10 @@ import com.sequenceiq.datalake.entity.SdxClusterStatus;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
+import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegionResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.client.EnvironmentServiceClient;
 import com.sequenceiq.environment.client.EnvironmentServiceEndpoints;
 
@@ -112,7 +116,7 @@ class ProvisionerServiceTest {
         mockEnvironmentCall();
         provisionerService.startStackProvisioning(id);
         final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
-        verify(sdxClusterRepository, times(1)).save(captor.capture());
+        verify(sdxClusterRepository, times(2)).save(captor.capture());
         SdxCluster postedSdxCluster = captor.getValue();
         Assertions.assertEquals(SdxClusterStatus.REQUESTED_FROM_CLOUDBREAK, postedSdxCluster.getStatus());
         Assertions.assertEquals(stackIdFromCB, postedSdxCluster.getStackId());
@@ -424,6 +428,11 @@ class ProvisionerServiceTest {
     private void mockEnvironmentCall() {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setName("env");
+        detailedEnvironmentResponse.setEnvironmentStatus(EnvironmentStatus.AVAILABLE);
+        CompactRegionResponse compactRegionResponse = new CompactRegionResponse();
+        compactRegionResponse.setNames(Sets.newHashSet("eu-west-1"));
+        compactRegionResponse.setDisplayNames(Map.of("eu-west-1", "ireland"));
+        detailedEnvironmentResponse.setRegions(compactRegionResponse);
         detailedEnvironmentResponse.setCrn(Crn.builder()
                 .setService(Crn.Service.ENVIRONMENTS)
                 .setResourceType(Crn.ResourceType.ENVIRONMENT)
@@ -441,6 +450,12 @@ class ProvisionerServiceTest {
         environmentNetworkAwsParams.setVpcId("vpc");
         network.setAws(environmentNetworkAwsParams);
         network.setSubnetIds(Sets.newHashSet("subnet"));
+        CloudSubnet cloudSubnet = new CloudSubnet();
+        cloudSubnet.setId("subnet");
+        cloudSubnet.setName("subnet");
+        cloudSubnet.setAvailabilityZone("eu-west-1a");
+        Map<String, CloudSubnet> cloudSubnetMap = Map.of("subnet",  cloudSubnet);
+        network.setSubnetMetas(cloudSubnetMap);
         detailedEnvironmentResponse.setNetwork(network);
         when(environmentServiceClient.withCrn(anyString())).thenReturn(environmentServiceEndpoints);
         when(environmentServiceEndpoints.environmentV1Endpoint()).thenReturn(environmentEndpoint);
