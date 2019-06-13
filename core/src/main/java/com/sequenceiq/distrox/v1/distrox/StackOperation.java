@@ -10,6 +10,7 @@ import javax.ws.rs.core.Response;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
@@ -66,9 +67,9 @@ public class StackOperation {
     @Inject
     private DefaultClouderaManagerRepoService defaultClouderaManagerRepoService;
 
-    public StackViewV4Responses list(Long workspaceId, String environmentCrn, Boolean onlyDatalakes) {
+    public StackViewV4Responses list(Long workspaceId, String environmentCrn, StackType stackType) {
         Set<StackViewV4Response> stackViewResponses = converterUtil.convertAllAsSet(
-                stackApiViewService.retrieveStackViewsByWorkspaceId(workspaceId, environmentCrn, onlyDatalakes),
+                stackApiViewService.retrieveStackViewsByWorkspaceId(workspaceId, environmentCrn, stackType),
                 StackViewV4Response.class
         );
         return new StackViewV4Responses(stackViewResponses);
@@ -81,8 +82,8 @@ public class StackOperation {
         return stackCommonService.createInWorkspace(request, user, workspace);
     }
 
-    public StackV4Response get(Long workspaceId, String name, Set<String> entries) {
-        return stackCommonService.findStackByNameAndWorkspaceId(name, workspaceId, entries);
+    public StackV4Response get(Long workspaceId, String name, Set<String> entries, StackType stackType) {
+        return stackCommonService.findStackByNameAndWorkspaceId(name, workspaceId, entries, stackType);
     }
 
     public void delete(Long workspaceId, String name, Boolean forced, Boolean deleteDependencies) {
