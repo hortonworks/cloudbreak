@@ -18,6 +18,30 @@
       "dependencies": ["ZOOKEEPER","HDFS", "YARN", "SPARK_ON_YARN", "HIVE"]
     },
     {
+      "name": "TEZ",
+      "displayName": "Tez",
+      "components": [
+        {
+          "name": "TEZ",
+          "groups": ["master"],
+          "base": true
+        }
+      ],
+      "dependencies": ["ZOOKEEPER","HDFS", "YARN", "HIVE"]
+    },
+    {
+      "name": "HIVE_ON_TEZ",
+      "displayName": "Hive on Tez",
+      "components": [
+        {
+          "name": "HIVE_ON_TEZ",
+          "groups": ["master"],
+          "base": true
+        }
+      ],
+      "dependencies": ["ZOOKEEPER","HDFS", "YARN", "HIVE", "TEZ"]
+    },
+    {
       "name": "LIVY",
       "displayName": "Livy",
       "components": [
