@@ -44,7 +44,6 @@ public class NetworkV1ToNetworkV4Converter {
         AwsNetworkV4Parameters response = new AwsNetworkV4Parameters();
         response.setSubnetId(source.getSubnetIds().stream().findFirst().orElseThrow(() -> new BadRequestException("No subnet id for this environment")));
         response.setVpcId(source.getAws().getVpcId());
-        response.setInternetGatewayId(source.getAws().getVpcId());
         return response;
     }
 
