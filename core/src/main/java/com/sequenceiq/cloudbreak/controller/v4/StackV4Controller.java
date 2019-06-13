@@ -9,6 +9,7 @@ import javax.ws.rs.core.Response;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV4Request;
@@ -34,7 +35,11 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     public StackViewV4Responses list(Long workspaceId, String environment, Boolean onlyDatalakes) {
-        return stackOperation.list(workspaceId, environment, onlyDatalakes);
+        StackType type = null;
+        if (onlyDatalakes) {
+            type = StackType.DATALAKE;
+        }
+        return stackOperation.list(workspaceId, environment, type);
     }
 
     @Override
@@ -44,7 +49,7 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     public StackV4Response get(Long workspaceId, String name, Set<String> entries) {
-        return stackOperation.get(workspaceId, name, entries);
+        return stackOperation.get(workspaceId, name, entries, null);
     }
 
     @Override

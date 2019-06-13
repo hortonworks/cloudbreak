@@ -28,6 +28,7 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.transition.Transition;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -292,6 +293,11 @@ public class OfflineStateGenerator {
         @Override
         public Set<Stack> findByNameInAndWorkspaceId(Set<String> name, Long workspaceId) {
             return null;
+        }
+
+        @Override
+        public Optional<Stack> findByNameAndWorkspaceIdWithLists(String name, StackType type, Long workspaceId, Boolean showTerminated, Long terminatedAfter) {
+            return Optional.empty();
         }
 
         @Override

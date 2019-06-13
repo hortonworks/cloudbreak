@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.AmbariAddressV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
@@ -118,9 +119,9 @@ public class StackCommonService {
         return stackService.getJsonById(id, entries);
     }
 
-    public StackV4Response findStackByNameAndWorkspaceId(String name, Long workspaceId, Set<String> entries) {
+    public StackV4Response findStackByNameAndWorkspaceId(String name, Long workspaceId, Set<String> entries, StackType stackType) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        return stackService.getByNameInWorkspaceWithEntries(name, workspaceId, entries, user);
+        return stackService.getByNameInWorkspaceWithEntries(name, workspaceId, entries, user, stackType);
     }
 
     public void putInDefaultWorkspace(Long id, UpdateStackV4Request updateRequest) {
