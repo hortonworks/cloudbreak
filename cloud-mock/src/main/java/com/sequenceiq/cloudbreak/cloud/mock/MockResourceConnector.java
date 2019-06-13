@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
@@ -47,6 +48,25 @@ public class MockResourceConnector implements ResourceConnector<Object> {
                 cloudResourceStatuses.add(new CloudResourceStatus(cloudResource, CREATED));
             }
         }
+        return cloudResourceStatuses;
+    }
+
+    @Override
+    public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+        PersistenceNotifier persistenceNotifier) {
+        List<CloudResourceStatus> cloudResourceStatuses = new ArrayList<>();
+        // for (Group group : stack.getGroups()) {
+        //     for (int i = 0; i < group.getInstancesSize(); i++) {
+        //         CloudResource cloudResource = new Builder()
+        //                 .type(ResourceType.MOCK_INSTANCE)
+        //                 .status(CommonStatus.CREATED)
+        //                 .name("cloudinstance" + cloudResourceStatuses.size())
+        //                 .reference("")
+        //                 .persistent(true)
+        //                 .build();
+        //         cloudResourceStatuses.add(new CloudResourceStatus(cloudResource, CREATED));
+        //     }
+        // }
         return cloudResourceStatuses;
     }
 
@@ -119,6 +139,11 @@ public class MockResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public String getStackTemplate() throws TemplatingDoesNotSupportedException {
+        throw new TemplatingDoesNotSupportedException();
+    }
+
+    @Override
+    public String getDBStackTemplate() throws TemplatingDoesNotSupportedException {
         throw new TemplatingDoesNotSupportedException();
     }
 }

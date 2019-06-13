@@ -44,11 +44,13 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStorageView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
@@ -155,6 +157,12 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         List<CloudResourceStatus> resources = check(ac, Collections.singletonList(cloudResource));
         LOGGER.debug("Launched resources: {}", resources);
         return resources;
+    }
+
+    @Override
+    public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+        PersistenceNotifier persistenceNotifier) {
+        throw new UnsupportedOperationException("Database server launch is not supported for " + getClass().getName());
     }
 
     @Override
@@ -438,6 +446,11 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     @Override
     public String getStackTemplate() {
         return azureTemplateBuilder.getTemplateString();
+    }
+
+    @Override
+    public String getDBStackTemplate() throws TemplatingDoesNotSupportedException {
+        throw new TemplatingDoesNotSupportedException();
     }
 
     private AzureStackView getAzureStack(AzureCredentialView azureCredentialView, CloudStack cloudStack,

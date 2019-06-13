@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
@@ -90,6 +91,12 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
         CloudResource yarnApplication = new Builder().type(YARN_APPLICATION).name(applicationName).build();
         persistenceNotifier.notifyAllocation(yarnApplication, authenticatedContext.getCloudContext());
         return check(authenticatedContext, Collections.singletonList(yarnApplication));
+    }
+
+    @Override
+    public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+        PersistenceNotifier persistenceNotifier) {
+        throw new UnsupportedOperationException("Database server launch is not supported for " + getClass().getName());
     }
 
     private void createApplication(YarnClient yarnClient, CreateApplicationRequest createApplicationRequest) throws MalformedURLException {
@@ -244,6 +251,11 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public String getStackTemplate() throws TemplatingDoesNotSupportedException {
+        throw new TemplatingDoesNotSupportedException();
+    }
+
+    @Override
+    public String getDBStackTemplate() throws TemplatingDoesNotSupportedException {
         throw new TemplatingDoesNotSupportedException();
     }
 

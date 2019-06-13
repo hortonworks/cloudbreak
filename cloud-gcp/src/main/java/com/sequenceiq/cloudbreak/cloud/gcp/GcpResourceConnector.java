@@ -59,6 +59,11 @@ public class GcpResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
+    public String getDBStackTemplate() throws TemplatingDoesNotSupportedException {
+        throw new TemplatingDoesNotSupportedException();
+    }
+
+    @Override
     public List<CloudResourceStatus> upscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources) {
         CloudContext cloudContext = auth.getCloudContext();
         Platform platform = cloudContext.getPlatform();

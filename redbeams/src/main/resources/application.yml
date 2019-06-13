@@ -105,6 +105,7 @@ cb:
     external.id: provision-ambari
     role.session.name: hadoop-provisioning
     cf.template.new.path: templates/aws-cf-stack.ftl
+    cf.template.newdb.path: templates/aws-cf-dbstack.ftl
     default.inbound.security.group:
     vpc:
 
@@ -519,4 +520,3 @@ cb:
         pkgName: ambari-agent
         prewarmed: true
 altus.ums.host: localhost
-

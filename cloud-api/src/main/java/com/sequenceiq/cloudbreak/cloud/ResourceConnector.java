@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
@@ -57,6 +58,26 @@ public interface ResourceConnector<R> {
      */
     List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier,
             AdjustmentType adjustmentType, Long threshold) throws Exception;
+
+    /**
+     * Launches a database stack on a cloud platform. The stack consists of the following resources:
+     * - a single database server instance
+     * - depending on the platform, other associated, required resources (e.g., a DB subnet group for RDS)
+     * <br>
+     * This method initiates infrastructure creation on the cloud platform and returns a list of
+     * {@link CloudResourceStatus} values, one for each created resource. The caller does not need
+     * to wait/block until infrastructure creation is finished, but can return immediately and use
+     * {@link #check(AuthenticatedContext, List)} method to check regularly whether the
+     * infrastructure and all resources have been created or not.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param stack                contains the full description of infrastructure
+     * @param persistenceNotifier  notifier for when a resource is allocated on the cloud platfrom
+     * @return the status of resources allocated on the cloud platform
+     * @throws Exception in case of any error
+     */
+    List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, PersistenceNotifier persistenceNotifier)
+            throws Exception;
 
     /**
      * Invoked to check whether the resources have already reached a StatusGroup.PERMANENT state.
@@ -155,4 +176,12 @@ public interface ResourceConnector<R> {
      * @throws TemplatingDoesNotSupportedException if template not supported by provider
      */
     String getStackTemplate() throws TemplatingDoesNotSupportedException;
+
+    /**
+     * Gets the cloud platform related database stack template.
+     *
+     * @return the platform related database stack template
+     * @throws TemplatingDoesNotSupportedException if templating is not supported by provider
+     */
+    String getDBStackTemplate() throws TemplatingDoesNotSupportedException;
 }
