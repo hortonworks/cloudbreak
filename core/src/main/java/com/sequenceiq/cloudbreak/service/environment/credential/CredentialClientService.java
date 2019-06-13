@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.environment.credential;
 
 import javax.inject.Inject;
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
@@ -29,11 +30,9 @@ public class CredentialClientService {
 
     public Credential getByName(String name) {
         try {
-            //TODO CloudPlatfrom needs to be part of the response
-            //TODO Revise paramaters because most of them should be a secret
             CredentialResponse credentialResponse = credentialEndpoint.getByName(name);
             return credentialConverter.convert(credentialResponse);
-        } catch (WebApplicationException e) {
+        } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to GET Credential due to: '%s' ", e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
@@ -42,11 +41,9 @@ public class CredentialClientService {
 
     public Credential getByCrn(String crn) {
         try {
-            //TODO CloudPlatfrom needs to be part of the response
-            //TODO Revise paramaters because most of them should be a secret
             CredentialResponse credentialResponse = credentialEndpoint.getByResourceCrn(crn);
             return credentialConverter.convert(credentialResponse);
-        } catch (WebApplicationException e) {
+        } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to GET Credential due to: '%s' ", e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
