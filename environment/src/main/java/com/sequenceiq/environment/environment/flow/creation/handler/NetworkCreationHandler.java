@@ -20,6 +20,7 @@ import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
+import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dto.AwsParams;
@@ -61,20 +62,25 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
     @Override
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
-        environmentService.findById(environmentDto.getId())
-                .filter(environment -> Objects.nonNull(environment.getNetwork()) && enabledPlatforms.contains(environment.getCloudPlatform()))
-                .ifPresent(environment -> {
-            environment.setStatus(EnvironmentStatus.NETWORK_CREATION_IN_PROGRESS);
-            networkService.decorateNetworkWithSubnetMeta(environment.getNetwork().getId(),
-                    getSubnetMetas(environmentDtoConverter.environmentToDto(environment)));
-            environmentService.save(environment);
-        });
+        try {
+            environmentService.findById(environmentDto.getId())
+                    .filter(environment -> Objects.nonNull(environment.getNetwork()) && enabledPlatforms.contains(environment.getCloudPlatform()))
+                    .ifPresent(environment -> {
+                        environment.setStatus(EnvironmentStatus.NETWORK_CREATION_IN_PROGRESS);
+                        networkService.decorateNetworkWithSubnetMeta(environment.getNetwork().getId(),
+                                getSubnetMetas(environmentDtoConverter.environmentToDto(environment)));
+                        environmentService.save(environment);
+                    });
 
-        EnvCreationEvent envCreationEvent = EnvCreationEvent.EnvCreationEventBuilder.anEnvCreationEvent()
-                .withResourceId(environmentDto.getResourceId())
-                .withSelector(START_FREEIPA_CREATION_EVENT.selector())
-                .build();
-        eventSender().sendEvent(envCreationEvent, environmentDtoEvent.getHeaders());
+            EnvCreationEvent envCreationEvent = EnvCreationEvent.EnvCreationEventBuilder.anEnvCreationEvent()
+                    .withResourceId(environmentDto.getResourceId())
+                    .withSelector(START_FREEIPA_CREATION_EVENT.selector())
+                    .build();
+            eventSender().sendEvent(envCreationEvent, environmentDtoEvent.getHeaders());
+        } catch (Exception e) {
+            EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(environmentDto.getId(), environmentDto.getName(), e);
+            eventSender().sendEvent(failureEvent, environmentDtoEvent.getHeaders());
+        }
     }
 
     private Map<String, CloudSubnet> getSubnetMetas(EnvironmentDto environmentDto) {
