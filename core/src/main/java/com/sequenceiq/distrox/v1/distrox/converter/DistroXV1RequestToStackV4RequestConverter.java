@@ -20,6 +20,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.sharedservice.SdxV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.tags.TagsV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 
 @Component
 public class DistroXV1RequestToStackV4RequestConverter {
@@ -55,10 +56,13 @@ public class DistroXV1RequestToStackV4RequestConverter {
     private WorkspaceService workspaceService;
 
     public StackV4Request convert(DistroXV1Request source) {
+        DetailedEnvironmentResponse environment = environmentClientService.getByName(source.getEnvironmentName());
+        if (environment.getEnvironmentStatus() != EnvironmentStatus.AVAILABLE) {
+            throw new BadRequestException(String.format("Environment state is %s instead of AVAILABLE", environment.getEnvironmentStatus()));
+        }
         StackV4Request request = new StackV4Request();
         request.setName(source.getName());
         request.setType(StackType.WORKLOAD);
-        DetailedEnvironmentResponse environment = environmentClientService.getByName(source.getEnvironmentName());
         request.setCloudPlatform(getCloudPlatform(environment));
         request.setEnvironmentCrn(environment.getCrn());
         request.setTelemetry(getIfNotNull(source.getTelemetry(), telemetryConverter::convert));
