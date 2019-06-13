@@ -85,11 +85,11 @@ cb:
   notification:
     endpoint: http://localhost:3000/notifications
   environment:
-    server:
-      url: http://localhost:8088/environmentservice
+    url: http://localhost:8088
+    contextPath: /environmentservice
   freeipa:
-    server:
-      url: http://localhost:8090/freeipa
+    url: http://localhost:8090
+    contextPath: /freeipa
 
   host.discovery.custom.hostname.enabled: false
 
