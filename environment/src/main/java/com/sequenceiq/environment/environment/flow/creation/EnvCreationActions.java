@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
+import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.flow.core.AbstractAction;
@@ -81,9 +82,10 @@ public class EnvCreationActions {
 
     @Bean(name = "ENV_CREATION_FAILED_STATE")
     public Action<?, ?> failedAction() {
-        return new AbstractVpcCreateAction<>(Payload.class) {
+        return new AbstractVpcCreateAction<>(EnvCreationFailureEvent.class) {
             @Override
-            protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) {
+            protected void doExecute(CommonContext context, EnvCreationFailureEvent payload, Map<Object, Object> variables) {
+                LOGGER.warn("Failed to create environment", payload.getException());
                 environmentService
                         .findById(payload.getResourceId())
                         .ifPresent(environment -> {
