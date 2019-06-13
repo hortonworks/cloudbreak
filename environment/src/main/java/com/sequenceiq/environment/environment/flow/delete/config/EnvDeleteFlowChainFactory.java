@@ -21,7 +21,7 @@ public class EnvDeleteFlowChainFactory implements FlowEventChainFactory<BaseFlow
     @Override
     public Queue<Selectable> createFlowTriggerEventQueue(BaseFlowEvent event) {
         Queue<Selectable> flowChainTriggers = new ConcurrentLinkedDeque<>();
-        flowChainTriggers.add(new BaseFlowEvent(EnvDeleteStateSelectors.START_NETWORK_DELETE_EVENT.event(), event.getResourceId(), event.accepted()));
+        flowChainTriggers.add(new BaseFlowEvent(EnvDeleteStateSelectors.START_FREEIPA_DELETE_EVENT.event(), event.getResourceId(), event.accepted()));
         return flowChainTriggers;
     }
 }
