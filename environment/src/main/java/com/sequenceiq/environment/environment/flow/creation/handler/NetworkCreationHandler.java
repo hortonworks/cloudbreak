@@ -16,13 +16,16 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
+import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.network.EnvironmentNetworkCreationService;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -44,6 +47,8 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final EnvironmentDtoConverter environmentDtoConverter;
 
+    private final EnvironmentNetworkCreationService environmentNetworkCreationService;
+
     private final Set<String> enabledPlatforms;
 
     protected NetworkCreationHandler(EventSender eventSender,
@@ -51,12 +56,14 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
             PlatformParameterService platformParameterService,
             NetworkService networkService,
             EnvironmentDtoConverter environmentDtoConverter,
+            EnvironmentNetworkCreationService environmentNetworkCreationService,
             @Value("${environment.enabledplatforms}") Set<String> enabledPlatforms) {
         super(eventSender);
         this.environmentService = environmentService;
         this.platformParameterService = platformParameterService;
         this.networkService = networkService;
         this.environmentDtoConverter = environmentDtoConverter;
+        this.environmentNetworkCreationService = environmentNetworkCreationService;
         this.enabledPlatforms = enabledPlatforms;
     }
 
@@ -64,14 +71,15 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            environmentService.findEnvironmentById(environmentDto.getId())
-                    .filter(environment -> Objects.nonNull(environment.getNetwork()) && enabledPlatforms.contains(environment.getCloudPlatform()))
-                    .ifPresent(environment -> {
-                        environment.setStatus(EnvironmentStatus.NETWORK_CREATION_IN_PROGRESS);
-                        Map<String, CloudSubnet> subnetMetadata = getSubnetMetadata(environmentDto);
-                        networkService.decorateNetworkWithSubnetMeta(environment.getNetwork().getId(), subnetMetadata);
-                        environmentService.save(environment);
-                    });
+            Optional<Environment> environment = getEnvironment(environmentDtoEvent);
+            environment.ifPresent(env -> {
+                EnvironmentDto envDto = populateEnvironmentDto(env);
+                env.setStatus(EnvironmentStatus.NETWORK_CREATION_IN_PROGRESS);
+                networkService.save(hasExistingNetwork(env)
+                        ? networkService.decorateNetworkWithSubnetMeta(env.getNetwork().getId(), getSubnetMetadata(envDto))
+                        : environmentNetworkCreationService.createNetwork(envDto, env.getNetwork()));
+                environmentService.save(env);
+            });
 
             EnvCreationEvent envCreationEvent = EnvCreationEvent.EnvCreationEventBuilder.anEnvCreationEvent()
                     .withResourceId(environmentDto.getResourceId())
@@ -82,6 +90,21 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
             EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(environmentDto.getId(), environmentDto.getName(), e);
             eventSender().sendEvent(failureEvent, environmentDtoEvent.getHeaders());
         }
+    }
+
+    private EnvironmentDto populateEnvironmentDto(Environment environment) {
+        return environmentDtoConverter.environmentToDto(environment);
+    }
+
+    private boolean hasExistingNetwork(Environment environment) {
+        return networkService.hasExistingNetwork(environment.getNetwork(), CloudPlatform.valueOf(environment.getCloudPlatform()));
+    }
+
+    private Optional<Environment> getEnvironment(Event<EnvironmentDto> environmentDtoEvent) {
+        EnvironmentDto environmentDto = environmentDtoEvent.getData();
+        return environmentService.findEnvironmentById(environmentDto.getId())
+                .filter(environment -> Objects.nonNull(environment.getNetwork())
+                        && enabledPlatforms.contains(environment.getCloudPlatform()));
     }
 
     private Map<String, CloudSubnet> getSubnetMetadata(EnvironmentDto environmentDto) {

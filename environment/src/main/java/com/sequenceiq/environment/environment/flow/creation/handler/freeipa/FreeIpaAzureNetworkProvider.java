@@ -19,7 +19,7 @@ public class FreeIpaAzureNetworkProvider implements FreeIpaNetworkProvider {
         azureNetworkParameters.setNoFirewallRules(azureParams.isNoFirewallRules());
         azureNetworkParameters.setNoPublicIp(azureParams.isNoPublicIp());
         azureNetworkParameters.setResourceGroupName(azureParams.getResourceGroupName());
-        azureNetworkParameters.setSubnetId(environment.getNetwork().getSubnetIds().iterator().next());
+        azureNetworkParameters.setSubnetId(environment.getNetwork().getSubnetMetas().keySet().iterator().next());
         networkRequest.setAzure(azureNetworkParameters);
         return networkRequest;
     }

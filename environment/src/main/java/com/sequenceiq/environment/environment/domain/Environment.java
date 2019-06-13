@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
-import com.sequenceiq.environment.network.domain.BaseNetwork;
+import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 
 @Entity
 @Table
@@ -78,7 +78,7 @@ public class Environment implements AuthResource {
 
     private Long deletionTimestamp = -1L;
 
-    @OneToOne(mappedBy = "environment", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToOne(mappedBy = "environment", cascade = CascadeType.ALL, orphanRemoval = true)
     private BaseNetwork network;
 
     @Column(nullable = false)

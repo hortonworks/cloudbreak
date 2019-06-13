@@ -6,13 +6,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.request.CredentialAwareEnvRequest;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.NetworkService;
-import com.sequenceiq.environment.network.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 @Service
@@ -43,8 +42,7 @@ public class EnvironmentResourceService {
     }
 
     BaseNetwork createAndSetNetwork(Environment environment, NetworkDto networkDto, String accountId) {
-        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
-        BaseNetwork network = networkService.createNetworkIfPossible(environment, networkDto, cloudPlatform, accountId);
+        BaseNetwork network = networkService.saveNetwork(environment, networkDto, accountId);
         if (network != null) {
             environment.setNetwork(network);
         }

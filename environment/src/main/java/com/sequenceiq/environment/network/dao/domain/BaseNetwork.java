@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.network.domain;
+package com.sequenceiq.environment.network.dao.domain;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,6 +9,8 @@ import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -51,13 +53,18 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
 
     private Long deletionTimestamp = -1L;
 
-    @Convert(converter = JsonToString.class)
-    @Column(columnDefinition = "TEXT", nullable = false)
-    private Json subnetIds;
+    private String networkCidr;
+
+    @Enumerated(EnumType.STRING)
+    private RegistrationType registrationType;
 
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT", nullable = false)
     private Json subnetMetas;
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private Json subnetIds;
 
     @Column(nullable = false)
     private String accountId;
@@ -115,12 +122,16 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
         return name;
     }
 
-    public Json getSubnetIds() {
-        return subnetIds;
+    public String getNetworkCidr() {
+        return networkCidr;
     }
 
-    public void setSubnetIds(Set<String> subnetIds) {
-        this.subnetIds = new Json(subnetIds);
+    public void setNetworkCidr(String networkCidr) {
+        this.networkCidr = networkCidr;
+    }
+
+    public RegistrationType getRegistrationType() {
+        return registrationType;
     }
 
     public Json getSubnetMetas() {
@@ -136,9 +147,21 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
         });
     }
 
+    public Json getSubnetIds() {
+        return subnetIds;
+    }
+
+    public void setSubnetIds(Set<String> subnetIds) {
+        this.subnetIds = new Json(subnetIds);
+    }
+
     public Set<String> getSubnetIdsSet() {
         return JsonUtil.jsonToType(subnetIds.getValue(), new TypeReference<>() {
         });
+    }
+
+    public void setRegistrationType(RegistrationType registrationType) {
+        this.registrationType = registrationType;
     }
 
     public boolean isArchived() {

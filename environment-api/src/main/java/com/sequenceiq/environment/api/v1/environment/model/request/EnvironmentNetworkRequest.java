@@ -19,6 +19,8 @@ public class EnvironmentNetworkRequest {
     @ApiModelProperty(value = EnvironmentModelDescription.SUBNET_IDS, required = true)
     private Set<String> subnetIds;
 
+    private String networkCidr;
+
     @ApiModelProperty(EnvironmentModelDescription.AWS_SPECIFIC_PARAMETERS)
     private EnvironmentNetworkAwsParams aws;
 
@@ -31,6 +33,14 @@ public class EnvironmentNetworkRequest {
 
     public void setSubnetIds(Set<String> subnetIds) {
         this.subnetIds = subnetIds;
+    }
+
+    public String getNetworkCidr() {
+        return networkCidr;
+    }
+
+    public void setNetworkCidr(String networkCidr) {
+        this.networkCidr = networkCidr;
     }
 
     public EnvironmentNetworkAwsParams getAws() {

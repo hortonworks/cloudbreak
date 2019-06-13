@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.cloudbreak.util.ValidationResult.ValidationResultBuilder;
-import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -30,7 +29,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.network.NetworkService;
-import com.sequenceiq.environment.network.domain.BaseNetwork;
+import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 @Service
@@ -128,9 +127,8 @@ public class EnvironmentModificationService {
         return editDto.getNetworkDto() != null;
     }
 
-    private BaseNetwork createAndSetNetwork(Environment environment, NetworkDto networkDto, String accountId) {
-        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
-        return networkService.createNetworkIfPossible(environment, networkDto, cloudPlatform, accountId);
+    private BaseNetwork createAndSetNetwork(Environment environment, NetworkDto networkCreationDto, String accountId) {
+        return networkService.saveNetwork(environment, networkCreationDto, accountId);
     }
 
     private void editDescriptionIfChanged(Environment environment, EnvironmentEditDto editDto) {

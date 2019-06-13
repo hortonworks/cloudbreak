@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
+import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
@@ -63,6 +64,9 @@ public class AzureConnector implements CloudConnector<Map<String, Map<String, Ob
 
     @Inject
     private AzureConstants azureConstants;
+
+    @Inject
+    private AzureNetworkConnector azureNetworkConnector;
 
     @Override
     public Authenticator authentication() {
@@ -122,5 +126,10 @@ public class AzureConnector implements CloudConnector<Map<String, Map<String, Ob
     @Override
     public Variant variant() {
         return AzureConstants.VARIANT;
+    }
+
+    @Override
+    public NetworkConnector networkConnector() {
+        return azureNetworkConnector;
     }
 }

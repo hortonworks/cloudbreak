@@ -24,32 +24,35 @@ public class NetworkDto {
 
     private final Set<String> subnetIds;
 
+    private final String networkCidr;
+
     private final Map<String, CloudSubnet> subnetMetas;
 
-    public NetworkDto(String resourceCrn, Long id, String name, AwsParams aws, AzureParams azure, Set<String> subnetIds, Map<String, CloudSubnet> subnetMetas) {
-        this.resourceCrn = resourceCrn;
-        this.id = id;
-        this.name = name;
-        this.aws = aws;
-        this.azure = azure;
-        if (CollectionUtils.isEmpty(subnetIds)) {
-            this.subnetIds = new HashSet<>();
-        } else {
-            this.subnetIds = subnetIds;
-        }
-        if (MapUtils.isEmpty(subnetMetas)) {
-            this.subnetMetas = new HashMap<>();
-        } else {
-            this.subnetMetas = subnetMetas;
-        }
+    public NetworkDto(Builder builder) {
+        this.id = builder.id;
+        this.resourceCrn = builder.resourceCrn;
+        this.name = builder.name;
+        this.aws = builder.aws;
+        this.azure = builder.azure;
+        this.subnetIds = CollectionUtils.isEmpty(builder.subnetIds) ? new HashSet<>() : builder.subnetIds;
+        this.subnetMetas = MapUtils.isEmpty(builder.subnetMetas) ? new HashMap<>() : builder.subnetMetas;
+        this.networkCidr = builder.networkCidr;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public void setId(Long id) {
         this.id = id;
     }
 
-    public Long getId() {
-        return id;
+    public String getNetworkName() {
+        return name;
+    }
+
+    public String getResourceCrn() {
+        return resourceCrn;
     }
 
     public AwsParams getAws() {
@@ -64,16 +67,12 @@ public class NetworkDto {
         return subnetIds;
     }
 
+    public String getNetworkCidr() {
+        return networkCidr;
+    }
+
     public Map<String, CloudSubnet> getSubnetMetas() {
         return subnetMetas;
-    }
-
-    public String getResourceCrn() {
-        return resourceCrn;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public static final class Builder {
@@ -90,6 +89,8 @@ public class NetworkDto {
         private Set<String> subnetIds;
 
         private Map<String, CloudSubnet> subnetMetas;
+
+        private String networkCidr;
 
         private Builder() {
         }
@@ -133,8 +134,13 @@ public class NetworkDto {
             return this;
         }
 
+        public Builder withNetworkCidr(String networkCidr) {
+            this.networkCidr = networkCidr;
+            return this;
+        }
+
         public NetworkDto build() {
-            return new NetworkDto(resourceCrn, id, name, aws, azure, subnetIds, subnetMetas);
+            return new NetworkDto(this);
         }
     }
 }

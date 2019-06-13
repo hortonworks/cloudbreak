@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
-import com.sequenceiq.environment.network.domain.BaseNetwork;
+import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 
 @Entity
 @Table(name = "Environment")

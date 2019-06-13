@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.validation.network;
 
-
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.network.dto.NetworkDto;
