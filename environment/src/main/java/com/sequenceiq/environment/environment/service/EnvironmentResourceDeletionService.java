@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -51,7 +52,7 @@ public class EnvironmentResourceDeletionService {
                     .map(SdxClusterResponse::getName)
                     .collect(Collectors.toSet());
             clusterNames.addAll(sdxClusterNames);
-        } catch (WebApplicationException e) {
+        } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to get SDX clusters from SDX service due to: '%s' ", e.getMessage());
             LOGGER.error(message, e);
             throw new EnvironmentServiceException(message, e);
