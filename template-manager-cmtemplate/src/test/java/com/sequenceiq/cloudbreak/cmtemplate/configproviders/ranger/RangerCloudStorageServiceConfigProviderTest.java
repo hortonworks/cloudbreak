@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Test;
@@ -18,6 +19,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
 import com.sequenceiq.cloudbreak.template.filesystem.s3.S3FileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -40,7 +42,7 @@ public class RangerCloudStorageServiceConfigProviderTest {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(false);
 
         List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(preparationObject);
-        assertEquals(0, serviceConfigs.size());
+        assertEquals(1, serviceConfigs.size());
     }
 
     private TemplatePreparationObject getTemplatePreparationObject(boolean includeLocations) {
@@ -55,9 +57,13 @@ public class RangerCloudStorageServiceConfigProviderTest {
         S3FileSystemConfigurationsView fileSystemConfigurationsView =
                 new S3FileSystemConfigurationsView(new S3FileSystem(), locations, false);
 
+        GeneralClusterConfigs generalClusterConfigs =  new GeneralClusterConfigs();
+        generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of("fqdn"));
 
-        return Builder.builder().withFileSystemConfigurationView(fileSystemConfigurationsView)
-                .withHostgroupViews(Set.of(master, worker)).build();
+        return Builder.builder()
+                .withFileSystemConfigurationView(fileSystemConfigurationsView)
+                .withHostgroupViews(Set.of(master, worker))
+                .withGeneralClusterConfigs(generalClusterConfigs).build();
     }
 
     protected StorageLocation getRangerAuditCloudStorageDir() {
