@@ -29,14 +29,20 @@ public class ServiceEndpointConfig {
     @Value("${cb.identity.serviceid:}")
     private String identityServiceId;
 
-    @Value("${cb.environment.server.url:}")
+    @Value("${cb.environment.url}")
     private String environmentServiceUrl;
+
+    @Value("${cb.environment.contextPath}")
+    private String environmentContextPath;
 
     @Value("${cb.environment.serviceid:}")
     private String environmentServiceId;
 
-    @Value("${cb.freeipa.server.url:}")
+    @Value("${cb.freeipa.url}")
     private String freeipaServiceUrl;
+
+    @Value("${cb.freeipa.contextPath}")
+    private String freeipaContextPath;
 
     @Value("${cb.freeipa.serviceid:}")
     private String freeipaServiceId;
@@ -58,11 +64,11 @@ public class ServiceEndpointConfig {
 
     @Bean
     public String environmentServerUrl()  throws ServiceAddressResolvingException {
-        return serviceAddressResolver().resolveUrl(environmentServiceUrl, "http", environmentServiceId);
+        return serviceAddressResolver().resolveUrl(environmentServiceUrl + environmentContextPath, "http", environmentServiceId);
     }
 
     @Bean
     public String freeIpaServerUrl()  throws ServiceAddressResolvingException {
-        return serviceAddressResolver().resolveUrl(freeipaServiceUrl, "http", freeipaServiceId);
+        return serviceAddressResolver().resolveUrl(freeipaServiceUrl + freeipaContextPath, "http", freeipaServiceId);
     }
 }
