@@ -3,7 +3,7 @@ package com.sequenceiq.environment.environment.flow.delete.handler.freeipa;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isSuccess;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static com.sequenceiq.environment.environment.flow.delete.event.EnvDeleteHandlerSelectors.DELETE_FREEIPA_EVENT;
-import static com.sequenceiq.environment.environment.flow.delete.event.EnvDeleteStateSelectors.FINISH_ENV_DELETE_EVENT;
+import static com.sequenceiq.environment.environment.flow.delete.event.EnvDeleteStateSelectors.START_RDBMS_DELETE_EVENT;
 
 import java.util.Optional;
 
@@ -86,7 +86,7 @@ public class FreeipaDeleteHandler extends EventSenderAwareHandler<EnvironmentDto
     private EnvDeleteEvent getNextStepObject(EnvironmentDto environmentDto) {
         return EnvDeleteEvent.EnvDeleteEventBuilder.anEnvDeleteEvent()
                 .withResourceId(environmentDto.getResourceId())
-                .withSelector(FINISH_ENV_DELETE_EVENT.selector())
+                .withSelector(START_RDBMS_DELETE_EVENT.selector())
                 .build();
     }
 

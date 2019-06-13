@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.environment.service;
 
-import static com.sequenceiq.environment.environment.flow.delete.event.EnvDeleteStateSelectors.START_NETWORK_DELETE_EVENT;
+import static com.sequenceiq.environment.environment.flow.delete.event.EnvDeleteStateSelectors.START_FREEIPA_DELETE_EVENT;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -62,7 +62,7 @@ public class EnvironmentResourceDeletionService {
 
     void triggerDeleteFlow(Environment environment) {
         EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.EnvDeleteEventBuilder.anEnvDeleteEvent()
-                .withSelector(START_NETWORK_DELETE_EVENT.selector())
+                .withSelector(START_FREEIPA_DELETE_EVENT.selector())
                 .withResourceId(environment.getId())
                 .withResourceName(environment.getName())
                 .build();
