@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
@@ -54,6 +55,9 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     @Value("${cb.aws.cf.template.new.path:}")
     private String awsCloudformationTemplatePath;
 
+    @Value("${cb.aws.cf.template.newdb.path:}")
+    private String awsDbCloudformationTemplatePath;
+
     @Inject
     private AwsLaunchService awsLaunchService;
 
@@ -73,6 +77,12 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
             AdjustmentType adjustmentType, Long threshold) throws Exception {
         return awsLaunchService.launch(ac, stack, resourceNotifier, adjustmentType, threshold);
+    }
+
+    @Override
+    public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+            PersistenceNotifier persistenceNotifier) {
+        throw new UnsupportedOperationException("Database server launch is not supported for " + getClass().getName());
     }
 
     private boolean deployingToSameVPC(AwsNetworkView awsNetworkView, boolean existingVPC) {
@@ -123,6 +133,15 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     public String getStackTemplate() {
         try {
             return freemarkerConfiguration.getTemplate(awsCloudformationTemplatePath, "UTF-8").toString();
+        } catch (IOException e) {
+            throw new CloudConnectorException("can't get freemarker template", e);
+        }
+    }
+
+    @Override
+    public String getDBStackTemplate() {
+        try {
+            return freemarkerConfiguration.getTemplate(awsDbCloudformationTemplatePath, "UTF-8").toString();
         } catch (IOException e) {
             throw new CloudConnectorException("can't get freemarker template", e);
         }

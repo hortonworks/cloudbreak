@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
@@ -65,6 +66,12 @@ public class CumulusYarnResourceConnector implements ResourceConnector<Object> {
         CloudResource yarnService = new Builder().type(CUMULUS_YARN_SERVICE).name(service.getName()).build();
         persistenceNotifier.notifyAllocation(yarnService, authenticatedContext.getCloudContext());
         return check(authenticatedContext, Collections.singletonList(yarnService));
+    }
+
+    @Override
+    public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+        PersistenceNotifier persistenceNotifier) {
+        throw new UnsupportedOperationException("Database server launch is not supported for " + getClass().getName());
     }
 
     @Override
@@ -206,6 +213,11 @@ public class CumulusYarnResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public String getStackTemplate() throws TemplatingDoesNotSupportedException {
+        throw new TemplatingDoesNotSupportedException();
+    }
+
+    @Override
+    public String getDBStackTemplate() throws TemplatingDoesNotSupportedException {
         throw new TemplatingDoesNotSupportedException();
     }
 }

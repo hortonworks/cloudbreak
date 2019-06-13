@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
@@ -72,6 +73,12 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
         cloudResourceStatuses.addAll(computeStatuses);
 
         return cloudResourceStatuses;
+    }
+
+    @Override
+    public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+        PersistenceNotifier persistenceNotifier) {
+        throw new UnsupportedOperationException("Database server launch is not supported for " + getClass().getName());
     }
 
     @Override

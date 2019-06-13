@@ -27,6 +27,11 @@ public class OpenStackNativeResourceConnector extends AbstractResourceConnector 
     }
 
     @Override
+    public String getDBStackTemplate() throws TemplatingDoesNotSupportedException {
+        throw new TemplatingDoesNotSupportedException();
+    }
+
+    @Override
     protected List<CloudResource> collectProviderSpecificResources(List<CloudResource> resources, List<CloudInstance> vms) {
         return Collections.emptyList();
     }

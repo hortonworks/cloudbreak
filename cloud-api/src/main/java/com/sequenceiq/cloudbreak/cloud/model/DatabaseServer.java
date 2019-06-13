@@ -36,6 +36,7 @@ public class DatabaseServer extends DynamicModel {
 
     public DatabaseServer(String serverId, String flavor, DatabaseEngine engine, String rootUserName, String rootPassword,
             long storageSize, Security security, InstanceStatus status, Map<String, Object> parameters) {
+        super(parameters);
         this.serverId = serverId;
         this.flavor = flavor;
         this.engine = engine;
