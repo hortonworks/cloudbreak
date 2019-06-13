@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.environment.flow.delete.handler;
 
 import static com.sequenceiq.environment.environment.flow.delete.event.EnvDeleteHandlerSelectors.DELETE_RDBMS_EVENT;
-import static com.sequenceiq.environment.environment.flow.delete.event.EnvDeleteStateSelectors.START_FREEIPA_DELETE_EVENT;
+import static com.sequenceiq.environment.environment.flow.delete.event.EnvDeleteStateSelectors.START_NETWORK_DELETE_EVENT;
 
 import org.springframework.stereotype.Component;
 
@@ -37,7 +37,7 @@ public class RdbmsDeleteHandler extends EventSenderAwareHandler<EnvironmentDto> 
             sleepForTestPurpose();
             EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.EnvDeleteEventBuilder.anEnvDeleteEvent()
                     .withResourceId(environmentDto.getResourceId())
-                    .withSelector(START_FREEIPA_DELETE_EVENT.selector())
+                    .withSelector(START_NETWORK_DELETE_EVENT.selector())
                     .build();
             eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {

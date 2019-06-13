@@ -30,16 +30,16 @@ public class EnvDeleteFlowConfig extends AbstractFlowConfiguration<EnvDeleteStat
     private static final List<Transition<EnvDeleteState, EnvDeleteStateSelectors>> TRANSITIONS
             = new Transition.Builder<EnvDeleteState, EnvDeleteStateSelectors>().defaultFailureEvent(EnvDeleteStateSelectors.FAILED_ENV_DELETE_EVENT)
 
-            .from(INIT_STATE).to(NETWORK_DELETE_STARTED_STATE)
-            .event(START_NETWORK_DELETE_EVENT).defaultFailureEvent()
-
-            .from(NETWORK_DELETE_STARTED_STATE).to(RDBMS_DELETE_STARTED_STATE)
-            .event(START_RDBMS_DELETE_EVENT).defaultFailureEvent()
-
-            .from(RDBMS_DELETE_STARTED_STATE).to(FREEIPA_DELETE_STARTED_STATE)
+            .from(INIT_STATE).to(FREEIPA_DELETE_STARTED_STATE)
             .event(START_FREEIPA_DELETE_EVENT).defaultFailureEvent()
 
-            .from(FREEIPA_DELETE_STARTED_STATE).to(ENV_DELETE_FINISHED_STATE)
+            .from(FREEIPA_DELETE_STARTED_STATE).to(RDBMS_DELETE_STARTED_STATE)
+            .event(START_RDBMS_DELETE_EVENT).defaultFailureEvent()
+
+            .from(RDBMS_DELETE_STARTED_STATE).to(NETWORK_DELETE_STARTED_STATE)
+            .event(START_NETWORK_DELETE_EVENT).defaultFailureEvent()
+
+            .from(NETWORK_DELETE_STARTED_STATE).to(ENV_DELETE_FINISHED_STATE)
             .event(FINISH_ENV_DELETE_EVENT).defaultFailureEvent()
 
             .from(ENV_DELETE_FINISHED_STATE).to(FINAL_STATE)
@@ -62,7 +62,7 @@ public class EnvDeleteFlowConfig extends AbstractFlowConfiguration<EnvDeleteStat
     @Override
     public EnvDeleteStateSelectors[] getInitEvents() {
         return new EnvDeleteStateSelectors[]{
-                START_NETWORK_DELETE_EVENT
+                START_FREEIPA_DELETE_EVENT
         };
     }
 
