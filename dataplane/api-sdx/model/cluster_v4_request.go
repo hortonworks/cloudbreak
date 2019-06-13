@@ -48,12 +48,6 @@ type ClusterV4Request struct {
 	// gateway
 	Gateway *GatewayV4Request `json:"gateway,omitempty"`
 
-	// kerberos name
-	KerberosName string `json:"kerberosName,omitempty"`
-
-	// LDAP config name for the cluster
-	LdapName string `json:"ldapName,omitempty"`
-
 	// ambari password
 	// Required: true
 	// Max Length: 100

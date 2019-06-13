@@ -19,13 +19,13 @@ import (
 var sdxClusterHeader = []string{"Name"}
 
 type sdxClusterOutput struct {
-	SdxCrn  string `json:"Crn" yaml:"Crn"`
-	SdxName string `json:"Name" yaml:"Name"`
-	Status  string `json:"Status" yaml:"Status"`
+	Crn    string `json:"Crn" yaml:"Crn"`
+	Name   string `json:"Name" yaml:"Name"`
+	Status string `json:"Status" yaml:"Status"`
 }
 
 func (r *sdxClusterOutput) DataAsStringArray() []string {
-	return []string{r.SdxName}
+	return []string{r.Name}
 }
 
 type ClientSdx oauth.Sdx
@@ -93,7 +93,7 @@ func createSdx(cidr string, clusterShape string, envName string, c *cli.Context,
 		utils.LogErrorAndExit(err)
 	}
 	sdxCluster := resp.Payload
-	log.Infof("[createSdx] SDX cluster created in environment: %s, with name: %s", envName, sdxCluster.SdxName)
+	log.Infof("[createSdx] SDX cluster created in environment: %s, with name: %s", envName, sdxCluster.Name)
 }
 
 func createInternalSdx(cidr string, clusterShape string, envName string, inputJson *sdxModel.StackV4Request, c *cli.Context, name string) {
@@ -110,7 +110,7 @@ func createInternalSdx(cidr string, clusterShape string, envName string, inputJs
 		utils.LogErrorAndExit(err)
 	}
 	sdxCluster := resp.Payload
-	log.Infof("[createInternalSdx] SDX cluster created in environment: %s, with name: %s", envName, sdxCluster.SdxName)
+	log.Infof("[createInternalSdx] SDX cluster created in environment: %s, with name: %s", envName, sdxCluster.Name)
 }
 
 func DeleteSdx(c *cli.Context) {
@@ -143,7 +143,7 @@ func listSdxClusterImpl(client clientSdx, envName string, writer func([]string, 
 
 	var tableRows []utils.Row
 	for _, sdxCluster := range resp.Payload {
-		tableRows = append(tableRows, &sdxClusterOutput{sdxCluster.SdxCrn, sdxCluster.SdxName, sdxCluster.Status})
+		tableRows = append(tableRows, &sdxClusterOutput{sdxCluster.Crn, sdxCluster.Name, sdxCluster.Status})
 	}
 
 	writer(sdxClusterHeader, tableRows)
@@ -162,9 +162,9 @@ func DescribeSdx(c *cli.Context) {
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	sdxCluster := resp.Payload
 	if output.Format != "table" {
-		output.Write(append(sdxClusterHeader, "ContentAsBase64", "ID"), &sdxClusterOutput{sdxCluster.SdxCrn, sdxCluster.SdxName, sdxCluster.Status})
+		output.Write(append(sdxClusterHeader, "ContentAsBase64", "ID"), &sdxClusterOutput{sdxCluster.Crn, sdxCluster.Name, sdxCluster.Status})
 	} else {
-		output.Write(append(sdxClusterHeader, "ID"), &sdxClusterOutput{sdxCluster.SdxCrn, sdxCluster.SdxName, sdxCluster.Status})
+		output.Write(append(sdxClusterHeader, "ID"), &sdxClusterOutput{sdxCluster.Crn, sdxCluster.Name, sdxCluster.Status})
 	}
 	log.Infof("[DescribeSdx] Describe a particular SDX cluster")
 }

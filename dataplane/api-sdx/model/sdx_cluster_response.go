@@ -19,17 +19,17 @@ import (
 // swagger:model SdxClusterResponse
 type SdxClusterResponse struct {
 
+	// crn
+	Crn string `json:"crn,omitempty"`
+
 	// environment crn
 	EnvironmentCrn string `json:"environmentCrn,omitempty"`
 
 	// environment name
 	EnvironmentName string `json:"environmentName,omitempty"`
 
-	// sdx crn
-	SdxCrn string `json:"sdxCrn,omitempty"`
-
-	// sdx name
-	SdxName string `json:"sdxName,omitempty"`
+	// name
+	Name string `json:"name,omitempty"`
 
 	// status
 	// Enum: [REQUESTED REQUESTED_FROM_CLOUDBREAK RUNNING PROVISIONING_FAILED DELETE_REQUESTED DELETED DELETE_FAILED]

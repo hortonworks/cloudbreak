@@ -14,8 +14,9 @@ type mockListSdxClustersClient struct {
 func (*mockListSdxClustersClient) ListSdx(params *sdx.ListSdxParams) (*sdx.ListSdxOK, error) {
 	resp := []*sdxModel.SdxClusterResponse{
 		{
-			SdxName: "ExampleClusterName",
-			Status:  "AVAILABLE",
+			Name:   "ExampleClusterName",
+			Crn:    "crn:altus:sdx:us-west-1:tenantName:sdxcluster:b8a64902-7765-4ddd-a4f3-df81ae585e10",
+			Status: "AVAILABLE",
 		},
 	}
 	return &sdx.ListSdxOK{Payload: resp}, nil
