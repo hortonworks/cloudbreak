@@ -60,7 +60,7 @@ environment:
     url: http://localhost:8090
     support: AWS,AZURE
   sdx:
-    url: http://localhost:8086/dl
+    url: http://localhost:8086
   db:
     host: localhost
     port: 5432

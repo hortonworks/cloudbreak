@@ -57,6 +57,9 @@ public class ServiceEndpointConfig {
     @Value("${environment.sdx.serviceId:}")
     private String sdxServiceId;
 
+    @Value("${environment.sdx.server.contextPath:/dl}")
+    private String sdxRootContextPath;
+
     @Bean
     public ServiceAddressResolver serviceAddressResolver() {
         return new RetryingServiceAddressResolver(new DNSServiceAddressResolver(), resolvingTimeout);
@@ -84,6 +87,6 @@ public class ServiceEndpointConfig {
 
     @Bean
     public String sdxServerUrl() throws ServiceAddressResolvingException {
-        return serviceAddressResolver().resolveUrl(sdxServiceUrl, "http", sdxServiceId);
+        return serviceAddressResolver().resolveUrl(sdxServiceUrl + sdxRootContextPath, "http", sdxServiceId);
     }
 }
