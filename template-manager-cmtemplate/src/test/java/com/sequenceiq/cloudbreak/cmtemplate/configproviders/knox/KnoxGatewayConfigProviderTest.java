@@ -124,7 +124,11 @@ public class KnoxGatewayConfigProviderTest {
         assertEquals(
                 List.of(
                         config("gateway_master_secret", gateway.getKnoxMasterSecret()),
-                        config("gateway_path", gateway.getPath())
+                        config("gateway_path", gateway.getPath()),
+                        config("gateway_signing_keystore_name", "signing.jks"),
+                        config("gateway_signing_keystore_type", "JKS"),
+                        config("gateway_signing_key_alias", "signing-identity"),
+                        config("gateway_dispatch_whitelist", "^*.*$")
                 ),
                 underTest.getRoleConfig(KnoxRoles.KNOX_GATEWAY, any, source)
         );
