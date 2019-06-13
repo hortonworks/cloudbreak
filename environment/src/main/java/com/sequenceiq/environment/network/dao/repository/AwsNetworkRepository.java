@@ -1,8 +1,8 @@
-package com.sequenceiq.environment.network.repository;
+package com.sequenceiq.environment.network.dao.repository;
 
 import javax.transaction.Transactional;
 
-import com.sequenceiq.environment.network.domain.AwsNetwork;
+import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
 
 @Transactional(Transactional.TxType.REQUIRED)
 public interface AwsNetworkRepository extends BaseNetworkRepository<AwsNetwork> {

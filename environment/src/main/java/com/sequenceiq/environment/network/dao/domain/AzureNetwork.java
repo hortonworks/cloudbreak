@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.network.domain;
+package com.sequenceiq.environment.network.dao.domain;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;

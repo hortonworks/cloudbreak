@@ -88,6 +88,7 @@ public class EnvironmentApiConverter {
         }
         return builder
                 .withSubnetIds(network.getSubnetIds())
+                .withNetworkCidr(network.getNetworkCidr())
                 .build();
     }
 

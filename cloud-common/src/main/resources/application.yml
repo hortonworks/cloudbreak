@@ -115,6 +115,7 @@ cb:
     external.id: provision-ambari
     role.session.name: hadoop-provisioning
     cf.template.new.path: templates/aws-cf-stack.ftl
+    cf.network.template.path: templates/aws-cf-network.ftl
     cf.template.newdb.path: templates/aws-cf-dbstack.ftl
     default.inbound.security.group:
     vpc:
@@ -175,6 +176,7 @@ cb:
 
   arm:
     template.path: templates/arm-v2.ftl
+    network.template.path: templates/arm-network.ftl
     parameter.path: templates/parameters.ftl
     app.creation.template:
       command.path: templates/app-creation-command.ftl

@@ -1,25 +1,30 @@
 package com.sequenceiq.environment.network.v1.converter;
 
+import java.util.Collections;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
-import com.sequenceiq.environment.network.domain.BaseNetwork;
+import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
+import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetworkConverter {
 
     @Override
-    public BaseNetwork convert(NetworkDto network, Environment environment) {
-        BaseNetwork result = createProviderSpecificNetwork(network);
-        result.setName(environment.getName());
-        EnvironmentView environmentView = convertEnvToView(environment);
-        result.setEnvironments(Set.of(environmentView));
-        result.setSubnetIds(network.getSubnetIds());
-        result.setSubnetMetas(network.getSubnetMetas());
-        result.setResourceCrn(network.getResourceCrn());
+    public BaseNetwork convert(Environment environment, NetworkDto creationDto) {
+        BaseNetwork result = createProviderSpecificNetwork(creationDto);
+        result.setName(creationDto.getNetworkName() != null ? creationDto.getNetworkName() : environment.getName());
+        result.setNetworkCidr(creationDto.getNetworkCidr());
+        result.setEnvironments(convertEnvToView(environment, result));
+        result.setRegistrationType(RegistrationType.EXISTING);
+        result.setSubnetIds(creationDto.getSubnetIds());
+        result.setSubnetMetas(creationDto.getSubnetIds().stream().collect(Collectors.toMap(Function.identity(), id -> new CloudSubnet(id, null))));
         return result;
     }
 
@@ -34,6 +39,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         result.setSubnetIds(network.getSubnetIds());
         result.setSubnetMetas(network.getSubnetMetas());
         result.setResourceCrn(network.getResourceCrn());
+        result.setAccountId(environmentDto.getAccountId());
         return result;
     }
 
@@ -42,7 +48,8 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         EnvironmentNetworkResponse result = new EnvironmentNetworkResponse();
         result.setCrn(source.getResourceCrn());
         result.setName(source.getName());
-        result.setSubnetIds(source.getSubnetIdsSet());
+        result.setNetworkCidr(source.getNetworkCidr());
+        result.setSubnetIds(source.getSubnetMetasMap().keySet());
         result.setSubnetMetas(source.getSubnetMetasMap());
         result = setProviderSpecificFields(result, source);
         return result;
@@ -50,21 +57,18 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
 
     @Override
     public NetworkDto convertToDto(BaseNetwork source) {
-        EnvironmentNetworkResponse result = new EnvironmentNetworkResponse();
-        result.setCrn(source.getResourceCrn());
-        result.setName(source.getName());
-        result.setSubnetIds(source.getSubnetIdsSet());
-        result.setSubnetMetas(source.getSubnetMetasMap());
         NetworkDto.Builder builder = NetworkDto.Builder.aNetworkDto()
                 .withId(source.getId())
                 .withName(source.getName())
-                .withSubnetIds(source.getSubnetIdsSet())
+                .withName(source.getName())
+                .withNetworkCidr(source.getNetworkCidr())
+                .withSubnetIds(source.getSubnetMetasMap().keySet())
                 .withSubnetMetas(source.getSubnetMetasMap())
                 .withResourceCrn(source.getResourceCrn());
         return setProviderSpecificFields(builder, source);
     }
 
-    private EnvironmentView convertEnvToView(Environment environment) {
+    private Set<EnvironmentView> convertEnvToView(Environment environment, BaseNetwork baseNetwork) {
         EnvironmentView environmentView = new EnvironmentView();
         environmentView.setId(environment.getId());
         environmentView.setAccountId(environment.getAccountId());
@@ -78,7 +82,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         environmentView.setNetwork(environment.getNetwork());
         environmentView.setRegions(environment.getRegions());
         environmentView.setName(environment.getName());
-        return environmentView;
+        return Collections.singleton(environmentView);
     }
 
     private EnvironmentView convertEnvironmentDtoToEnvironmentView(EnvironmentDto environmentDto) {

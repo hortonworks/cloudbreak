@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.validation.network;
 
-
 import static com.sequenceiq.environment.CloudPlatform.AWS;
 
 import org.apache.commons.lang3.StringUtils;
@@ -12,7 +11,6 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 
 @Component
 public class AwsEnvironmentNetworkValidator implements EnvironmentNetworkValidator {
-
     @Override
     public void validate(NetworkDto networkDto, ValidationResult.ValidationResultBuilder resultBuilder) {
         if (networkDto != null) {
@@ -30,4 +28,5 @@ public class AwsEnvironmentNetworkValidator implements EnvironmentNetworkValidat
     public CloudPlatform getCloudPlatform() {
         return AWS;
     }
+
 }

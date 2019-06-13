@@ -17,7 +17,7 @@ public class FreeIpaAwsNetworkProvider implements FreeIpaNetworkProvider {
         AwsParams awsParams = environment.getNetwork().getAws();
         AwsNetworkParameters awsNetworkParameters = new AwsNetworkParameters();
         awsNetworkParameters.setVpcId(awsParams.getVpcId());
-        awsNetworkParameters.setSubnetId(environment.getNetwork().getSubnetIds().iterator().next());
+        awsNetworkParameters.setSubnetId(environment.getNetwork().getSubnetMetas().keySet().iterator().next());
         networkRequest.setAws(awsNetworkParameters);
         return networkRequest;
     }
