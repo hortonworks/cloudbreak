@@ -14,6 +14,13 @@ public enum EnvironmentStatus {
     FREEIPA_DELETE_IN_PROGRESS,
     AVAILABLE,
     ARCHIVED,
-    CORRUPTED
+    CORRUPTED;
 
+    public boolean isAvailable() {
+        return equals(AVAILABLE);
+    }
+
+    public boolean isFailed() {
+        return equals(CORRUPTED);
+    }
 }
