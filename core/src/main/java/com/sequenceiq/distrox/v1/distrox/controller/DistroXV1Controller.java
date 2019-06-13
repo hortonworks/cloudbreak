@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
@@ -52,8 +53,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     private DistroXMaintenanceModeV1ToMainenanceModeV4Converter maintenanceModeConverter;
 
     @Override
-    public StackViewV4Responses list(String environment, Boolean onlyDatalakes) {
-        return stackOperation.list(workspaceService.getForCurrentUser().getId(), environment, onlyDatalakes);
+    public StackViewV4Responses list(String environment) {
+        return stackOperation.list(workspaceService.getForCurrentUser().getId(), environment, StackType.WORKLOAD);
     }
 
     @Override
@@ -63,7 +64,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     public StackV4Response get(String name, Set<String> entries) {
-        return stackOperation.get(workspaceService.getForCurrentUser().getId(), name, entries);
+        return stackOperation.get(workspaceService.getForCurrentUser().getId(), name, entries, StackType.WORKLOAD);
     }
 
     @Override

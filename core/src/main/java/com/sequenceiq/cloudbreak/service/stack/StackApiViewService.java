@@ -1,15 +1,16 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
@@ -56,12 +57,14 @@ public class StackApiViewService {
         return stackApiViewRepository.save(stackApiView);
     }
 
-    public Set<StackApiView> retrieveStackViewsByWorkspaceId(Long workspaceId, String environmentCrn, boolean dataLakeOnly) {
+    public Set<StackApiView> retrieveStackViewsByWorkspaceId(Long workspaceId, String environmentCrn, @Nullable StackType stackType) {
         ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.get();
         Set<StackApiView> stackViewResponses = StringUtils.isEmpty(environmentCrn)
                 ? getAllByWorkspace(workspaceId, showTerminatedClustersAfterConfig)
                 : getAllByWorkspaceAndEnvironment(workspaceId, environmentCrn, showTerminatedClustersAfterConfig);
-        stackViewResponses = filterDatalakes(dataLakeOnly, stackViewResponses);
+        if (stackType != null) {
+            stackViewResponses = filterByStackType(stackType, stackViewResponses);
+        }
         return stackViewResponses;
     }
 
@@ -76,14 +79,10 @@ public class StackApiViewService {
         }
     }
 
-    private Set<StackApiView> filterDatalakes(boolean dataLakeOnly, Set<StackApiView> stackViewResponses) {
-        if (dataLakeOnly) {
-            stackViewResponses = stackViewResponses.stream()
-                    .filter(stackViewResponse ->
-                            Boolean.TRUE.equals(stackViewResponse.getCluster().getBlueprint().getTags().getMap().get("shared_services_ready")))
-                    .collect(Collectors.toSet());
-        }
-        return new HashSet<>(stackViewResponses);
+    private Set<StackApiView> filterByStackType(StackType stackType, Set<StackApiView> stackViewResponses) {
+        return stackViewResponses.stream()
+                .filter(stackViewResponse -> stackType == stackViewResponse.getType())
+                .collect(Collectors.toSet());
     }
 
     private Set<StackApiView> getAllByWorkspaceAndEnvironment(Long workspaceId, String environmentCrn,
