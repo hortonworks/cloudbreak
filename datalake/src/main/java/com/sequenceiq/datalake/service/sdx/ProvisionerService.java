@@ -227,7 +227,6 @@ public class ProvisionerService {
         response.setSubnetId(source.getSubnetIds().stream().findFirst().orElseThrow(()
                 -> new com.sequenceiq.cloudbreak.exception.BadRequestException("No subnet id for this environment")));
         response.setVpcId(source.getAws().getVpcId());
-        response.setInternetGatewayId(source.getAws().getVpcId());
         return response;
     }
 
