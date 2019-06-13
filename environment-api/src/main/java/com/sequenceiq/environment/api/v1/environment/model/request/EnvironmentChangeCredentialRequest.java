@@ -25,12 +25,10 @@ public class EnvironmentChangeCredentialRequest implements CredentialAwareEnvReq
         this.credentialName = credentialName;
     }
 
-    @Override
     public CredentialRequest getCredential() {
         return credential;
     }
 
-    @Override
     public void setCredential(CredentialRequest credential) {
         this.credential = credential;
     }
