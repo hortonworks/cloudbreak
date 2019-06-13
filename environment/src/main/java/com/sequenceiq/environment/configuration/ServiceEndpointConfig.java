@@ -24,28 +24,28 @@ public class ServiceEndpointConfig {
     @Value("${environment.db.serviceId:}")
     private String databaseId;
 
-    @Value("${environment.cloudbreak.url:}")
+    @Value("${environment.cloudbreak.url}")
     private String cloudbreakUrl;
 
-    @Value("${environment.cloudbreak.server.contextPath:/cb}")
+    @Value("${environment.cloudbreak.contextPath}")
     private String cbRootContextPath;
 
     @Value("${environment.cloudbreak.serviceId:}")
     private String cloudbreakServiceId;
 
-    @Value("${environment.redbeams.url:}")
+    @Value("${environment.redbeams.url}")
     private String redbeamsServiceUrl;
 
-    @Value("${environment.redbeams.server.contextPath:/redbeams}")
+    @Value("${environment.redbeams.contextPath}")
     private String redbeamsRootContextPath;
 
     @Value("${environment.redbeams.serviceId:}")
     private String redbeamsServiceId;
 
-    @Value("${environment.freeipa.url:}")
+    @Value("${environment.freeipa.url}")
     private String freeipaServiceUrl;
 
-    @Value("${environment.freeipa.server.contextPath:/freeipa}")
+    @Value("${environment.freeipa.contextPath}")
     private String freeipaRootContextPath;
 
     @Value("${environment.freeipa.serviceId:}")
