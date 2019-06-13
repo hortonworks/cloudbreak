@@ -14,6 +14,8 @@ public enum ResourceType {
     AWS_LAUNCHCONFIGURATION,
     AWS_VOLUMESET,
     AWS_INSTANCE,
+    RDS_INSTANCE,
+    RDS_DB_SUBNET_GROUP,
 
     // OPENSTACK
     HEAT_STACK(CommonResourceType.TEMPLATE),
