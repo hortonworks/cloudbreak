@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.environment.flow.delete.handler.freeipa;
 
-import static com.sequenceiq.cloudbreak.polling.PollingResult.SUCCESS;
+import static com.sequenceiq.cloudbreak.polling.PollingResult.isSuccess;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static com.sequenceiq.environment.environment.flow.delete.event.EnvDeleteHandlerSelectors.DELETE_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.delete.event.EnvDeleteStateSelectors.FINISH_ENV_DELETE_EVENT;
@@ -63,7 +63,7 @@ public class FreeipaDeleteHandler extends EventSenderAwareHandler<EnvironmentDto
                         new FreeIpaPollerObject(env.get().getResourceCrn(), freeIpaV1Endpoint),
                         FreeIpaDeleteRetrievalTask.FREEIPA_RETRYING_INTERVAL,
                         FreeIpaDeleteRetrievalTask.FREEIPA_RETRYING_COUNT);
-                if (result == SUCCESS) {
+                if (isSuccess(result)) {
                     eventSender().sendEvent(getNextStepObject(environmentDto), environmentDtoEvent.getHeaders());
                 } else {
                     throw new FreeIpaOperationFailedException("Failed to delete FreeIpa! Result was " + getIfNotNull(result, Enum::name));
