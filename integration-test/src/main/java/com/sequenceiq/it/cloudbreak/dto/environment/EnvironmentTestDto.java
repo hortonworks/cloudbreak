@@ -9,7 +9,6 @@ import javax.ws.rs.WebApplicationException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.EnvironmentV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
-import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -78,9 +77,7 @@ public class EnvironmentTestDto extends DeletableTestDto<EnvironmentRequest, Det
     }
 
     public EnvironmentTestDto withCredentialName(String credentialName) {
-        CredentialRequest credentialRequest = new CredentialRequest();
-        credentialRequest.setName(credentialName);
-        getRequest().setCredential(credentialRequest);
+        getRequest().setCredentialName(credentialName);
         return this;
     }
 
