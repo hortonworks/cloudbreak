@@ -6,10 +6,6 @@
     "domainName": "sdx",
     "hostgroupNameAsHostname": true
   },
-  "placement": {
-    "region": "eu-west-1",
-    "availabilityZone": "eu-west-1b"
-  },
   "instanceGroups": [
     {
       "name": "master",
