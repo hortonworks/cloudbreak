@@ -14,7 +14,7 @@ CB_PORT = $(shell echo \${PORT})
 ifeq ($(CB_PORT),)
         CB_PORT = 9091
 endif
-
+SDX_IP = $(shell echo \${IP})
 ifeq ($(SDX_IP),)
         SDX_IP = localhost
 endif
@@ -22,13 +22,21 @@ SDX_PORT = $(shell echo \${PORT})
 ifeq ($(SDX_PORT),)
         SDX_PORT = 8086
 endif
-
+FREEIPA_IP = $(shell echo \${IP})
 ifeq ($(FREEIPA_IP),)
         FREEIPA_IP = localhost
 endif
 FREEIPA_PORT = $(shell echo \${PORT})
 ifeq ($(FREEIPA_PORT),)
         FREEIPA_PORT = 8090
+endif
+CB_IP = $(shell echo \${IP})
+ifeq ($(REDBEAMS_IP),)
+        REDBEAMS_IP = localhost
+endif
+REDBEAMS_PORT = $(shell echo \${PORT})
+ifeq ($(REDBEAMS_PORT),)
+        REDBEAMS_PORT = 8087
 endif
 
 deps: deps-errcheck
@@ -100,10 +108,20 @@ _init-swagger-generation:
 	rm -f build/swagger.json
 	curl -sL http://$(CB_IP):$(CB_PORT)/cb/api/swagger.json -o build/swagger.json
 
+_init-swagger-generation-sdx:
+	rm -rf dataplane/api-sdx/client dataplane/api-sdx/model
+	rm -f build/swagger.json
+	curl -sL http://$(SDX_IP):$(SDX_PORT)/dl/api/swagger.json -o build/swagger.json
+
 _init-swagger-generation-freeipa:
 	rm -rf dataplane/api-freeipa/client dataplane/api-freeipa/model
 	rm -f build/swagger.json
 	curl -sL http://$(FREEIPA_IP):$(FREEIPA_PORT)/freeipa/api/swagger.json -o build/swagger.json
+
+_init-swagger-generation-redbeams:
+	rm -rf dataplane/api-redbeams/client dataplane/api-redbeams/model
+	rm -f build/swagger.json
+	curl -sL http://$(REDBEAMS_IP):$(REDBEAMS_PORT)/redbeams/api/swagger.json -o build/swagger.json
 
 generate-swagger: _init-swagger-generation
 	swagger generate client -f build/swagger.json -c client -m model -t dataplane/api
@@ -120,13 +138,25 @@ generate-swagger-freeipa:
 	rm -rf dataplane/api-freeipa/client dataplane/api-freeipa/model
 	swagger generate client -f http://$(FREEIPA_IP):$(FREEIPA_PORT)/freeipa/api/swagger.json -c client -m model -t dataplane/api-freeipa
 
+generate-swagger-redbeams:
+	rm -rf dataplane/api-redbeams/client dataplane/api-redbeams/model
+	swagger generate client -f http://$(REDBEAMS_IP):$(REDBEAMS_PORT)/redbeams/api/swagger.json -c client -m model -t dataplane/api-redbeams
+
 generate-swagger-docker: _init-swagger-generation
 	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -v ${PWD}/build/swagger.json:${PWD}/build/swagger.json  -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:v0.17.2 \
 	generate client -f ${PWD}/build/swagger.json -c client -m model -t dataplane/api
 
+generate-swagger-sdx-docker: _init-swagger-generation-sdx
+	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -v ${PWD}/build/swagger.json:${PWD}/build/swagger.json  -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:v0.19.0 \
+	generate client -f ${PWD}/build/swagger.json -c client -m model -t dataplane/api-sdx
+
 generate-swagger-freeipa-docker: _init-swagger-generation-freeipa
 	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -v ${PWD}/build/swagger.json:${PWD}/build/swagger.json  -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:v0.17.2 \
 	generate client -f ${PWD}/build/swagger.json -c client -m model -t dataplane/api-freeipa
+
+generate-swagger-redbeams-docker: _init-swagger-generation-redbeams
+	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -v ${PWD}/build/swagger.json:${PWD}/build/swagger.json  -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:v0.19.0 \
+	generate client -f ${PWD}/build/swagger.json -c client -m model -t dataplane/api-redbeams
 
 release: build
 	rm -rf release
