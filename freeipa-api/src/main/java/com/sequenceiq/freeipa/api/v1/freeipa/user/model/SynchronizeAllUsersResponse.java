@@ -8,9 +8,9 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UserModelDescriptions;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("SynchronizeUsersV1Response")
+@ApiModel("SynchronizeAllUsersV1Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SynchronizeUsersResponse {
+public class SynchronizeAllUsersResponse {
     @ApiModelProperty(value = UserModelDescriptions.USERSYNC_ID, required = true)
     private final String id;
 
@@ -23,7 +23,7 @@ public class SynchronizeUsersResponse {
     @ApiModelProperty(value = UserModelDescriptions.USERSYNC_ENDTIME)
     private final String endTime;
 
-    public SynchronizeUsersResponse(String id, SynchronizationStatus status, String startTime, String endTime) {
+    public SynchronizeAllUsersResponse(String id, SynchronizationStatus status, String startTime, String endTime) {
         this.id = requireNonNull(id);
         this.status = requireNonNull(status);
         this.startTime = startTime;

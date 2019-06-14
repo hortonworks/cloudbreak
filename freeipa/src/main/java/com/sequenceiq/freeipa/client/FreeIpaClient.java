@@ -5,6 +5,7 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
@@ -40,6 +41,25 @@ public class FreeIpaClient {
         List<String> flags = List.of(user);
         Map<String, Object> params = Map.of();
         return (User) invoke("user_show", flags, params, User.class).getResult();
+    }
+
+    public Optional<User> userFind(String user) throws FreeIpaClientException {
+        List<String> flags = List.of(user);
+        Map<String, Object> params = Map.of(
+                "uid", user,
+                "all", true
+        );
+        ParameterizedType type = TypeUtils
+                .parameterize(List.class, User.class);
+        List<User> foundUsers = (List<User>) invoke("user_find", flags, params, type).getResult();
+        if (foundUsers.size() > 1) {
+            LOGGER.error("Found more than 1 user with uid {}.", user);
+        }
+        if (foundUsers.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(foundUsers.get(0));
+        }
     }
 
     public Set<User> userFindAll() throws FreeIpaClientException {
@@ -128,6 +148,14 @@ public class FreeIpaClient {
                 "user", users
         );
         return invoke("group_add_member", flags, params, Object.class);
+    }
+
+    public RPCResponse<Object> groupRemoveMembers(String group, Set<String> users) throws FreeIpaClientException {
+        List<String> flags = List.of(group);
+        Map<String, Object> params = Map.of(
+                "user", users
+        );
+        return invoke("group_remove_member", flags, params, Object.class);
     }
 
     public Set<Group> groupFindAll() throws FreeIpaClientException {

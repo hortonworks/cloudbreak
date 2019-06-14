@@ -12,8 +12,10 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.CreateUsersRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.CreateUsersResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SetPasswordRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SetPasswordResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUsersRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUsersResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUserRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUserResponse;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.service.user.PasswordService;
 import com.sequenceiq.freeipa.service.user.UserService;
@@ -37,24 +39,34 @@ public class UserV1Controller implements UserV1Endpoint {
     private ThreadBasedUserCrnProvider threadBaseUserCrnProvider;
 
     @Override
-    public SynchronizeUsersResponse synchronizeUsers(SynchronizeUsersRequest request) {
-        return userService.synchronizeUsers(request);
+    public SynchronizeUserResponse synchronizeUser(SynchronizeUserRequest request) {
+        String userCrn = checkUserCrn();
+        LOGGER.debug("synchronizeUser() requested for user {}", userCrn);
+
+        return userService.synchronizeUser(userCrn);
     }
 
     @Override
-    public SynchronizeUsersResponse getStatus(String syncId) {
+    public SynchronizeAllUsersResponse synchronizeAllUsers(SynchronizeAllUsersRequest request) {
+        return userService.synchronizeAllUsers(request);
+    }
+
+    @Override
+    public SynchronizeAllUsersResponse getSynchronizationStatus(String syncId) {
         return userService.getSynchronizeUsersStatus(syncId);
     }
 
     @Override
     public SetPasswordResponse setPassword(SetPasswordRequest request) {
-        String userCrn = threadBaseUserCrnProvider.getUserCrn();
-        if (userCrn == null) {
-            throw new BadRequestException("User CRN must be provided");
-        }
-        LOGGER.debug("setPassword() requested for user {}", userCrn);
+        try {
+            String userCrn = checkUserCrn();
+            LOGGER.debug("setPassword() requested for user {}", userCrn);
 
-        return passwordService.setPassword(userCrn, request.getPassword());
+            return passwordService.setPassword(userCrn, request.getPassword());
+        } catch (Exception e) {
+            LOGGER.error("setPassword caught exception. rethrowing", e);
+            throw e;
+        }
     }
 
     @Override
@@ -68,5 +80,13 @@ public class UserV1Controller implements UserV1Endpoint {
         }
 
         return new CreateUsersResponse("Hello createUsers()!");
+    }
+
+    private String checkUserCrn() {
+        String userCrn = threadBaseUserCrnProvider.getUserCrn();
+        if (userCrn == null) {
+            throw new BadRequestException("User CRN must be provided");
+        }
+        return userCrn;
     }
 }

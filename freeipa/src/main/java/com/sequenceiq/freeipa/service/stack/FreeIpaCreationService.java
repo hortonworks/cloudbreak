@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
@@ -73,6 +74,13 @@ public class FreeIpaCreationService {
     private CrnService crnService;
 
     public DescribeFreeIpaResponse launchFreeIpa(CreateFreeIpaRequest request, String accountId) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String requestJson = mapper.writeValueAsString(request);
+            LOGGER.info("create called with: {}", requestJson);
+        } catch (Exception e) {
+            LOGGER.error("failed to log the create json");
+        }
         checkIfAlreadyExistsInEnvironment(request, accountId);
         String userId = crnService.getCurrentUserId();
         Credential credential = credentialService.getCredentialByEnvCrn(request.getEnvironmentCrn());
