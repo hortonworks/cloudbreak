@@ -18,6 +18,7 @@ repositories {
 }
 
 dependencies {
+  compile            group: 'org.yaml',                  name: 'snakeyaml'
   implementation     group: 'com.google.guava',          name: 'guava'
   implementation     group: 'com.google.code.gson',      name: 'gson'
   implementation     group: 'dnsjava',                   name: 'dnsjava'
@@ -52,6 +53,7 @@ dependencies {
   testRuntime        group: 'org.junit.vintage',         name: 'junit-vintage-engine'
 
   constraints {
+    compile            group: 'org.yaml',                  name: 'snakeyaml',                      version: '1.23'
     implementation     group: 'com.google.guava',          name: 'guava',                          version: guavaVersion
     implementation     group: 'com.google.code.gson',      name: 'gson',                           version: '2.6.2'
     implementation     group: 'dnsjava',                   name: 'dnsjava',                        version: '2.1.7'
