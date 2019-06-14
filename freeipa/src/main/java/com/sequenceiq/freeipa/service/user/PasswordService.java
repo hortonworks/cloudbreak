@@ -1,7 +1,9 @@
 package com.sequenceiq.freeipa.service.user;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -56,7 +58,7 @@ public class PasswordService {
         }
 
         List<String> success = new ArrayList<>();
-        List<String> failure = new ArrayList<>();
+        Map<String, String> failure = new HashMap<>();
 
         for (SetPasswordRequest request : requests) {
             try {
@@ -64,7 +66,7 @@ public class PasswordService {
                 success.add(request.getEnvironment());
             } catch (OperationException e) {
                 LOGGER.debug("Failed to set password for user {} in environment {}", userCrn, request.getEnvironment());
-                failure.add(request.getEnvironment());
+                failure.put(request.getEnvironment(), e.getCause().getLocalizedMessage());
             } catch (InterruptedException e) {
                 LOGGER.error("Interrupted while setting passwords for user {} in account {}", userCrn, accountId);
                 throw new OperationException(e);
