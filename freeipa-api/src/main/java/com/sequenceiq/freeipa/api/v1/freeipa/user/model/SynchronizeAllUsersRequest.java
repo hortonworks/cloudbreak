@@ -9,9 +9,9 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UserModelDescriptions;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("SynchronizeUsersV1Request")
+@ApiModel("SynchronizeAllUsersV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SynchronizeUsersRequest {
+public class SynchronizeAllUsersRequest {
     @ApiModelProperty(value = UserModelDescriptions.USERSYNC_ENVIRONMENTS)
     private Set<String> environments = new HashSet<>();
 

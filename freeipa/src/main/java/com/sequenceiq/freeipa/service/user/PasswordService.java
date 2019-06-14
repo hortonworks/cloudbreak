@@ -78,7 +78,7 @@ public class PasswordService {
 
     private String getUserIdFromUserCrn(String userCrn) {
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User user = umsClient.getUserDetails(userCrn, userCrn, Optional.empty());
-        // TODO share this code with DISTX-126
+        // TODO replace this code with workloadUsername in DISTX-184
         return user.getEmail().split("@")[0];
     }
 
