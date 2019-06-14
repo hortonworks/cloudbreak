@@ -14,7 +14,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.CreateUsersRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SetPasswordRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUsersRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUserRequest;
 import com.sequenceiq.freeipa.service.user.PasswordService;
 import com.sequenceiq.freeipa.service.user.UserService;
 import com.sequenceiq.freeipa.util.CrnService;
@@ -42,19 +43,29 @@ public class UserV1ControllerTest {
     private ThreadBasedUserCrnProvider threadBaseUserCrnProvider;
 
     @Test
-    void synchronizeUsers() {
-        SynchronizeUsersRequest request = mock(SynchronizeUsersRequest.class);
+    void synchronizeUser() {
+        when(threadBaseUserCrnProvider.getUserCrn()).thenReturn(USER_CRN);
+        SynchronizeUserRequest request = mock(SynchronizeUserRequest.class);
 
-        underTest.synchronizeUsers(request);
+        underTest.synchronizeUser(request);
 
-        verify(userService, times(1)).synchronizeUsers(request);
+        verify(userService, times(1)).synchronizeUser(USER_CRN);
+    }
+
+    @Test
+    void synchronizeAllUsers() {
+        SynchronizeAllUsersRequest request = mock(SynchronizeAllUsersRequest.class);
+
+        underTest.synchronizeAllUsers(request);
+
+        verify(userService, times(1)).synchronizeAllUsers(request);
     }
 
     @Test
     void getStatus() {
         String syncId = "testId";
 
-        underTest.getStatus(syncId);
+        underTest.getSynchronizationStatus(syncId);
 
         verify(userService, times(1)).getSynchronizeUsersStatus(syncId);
     }

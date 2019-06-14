@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.user;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,11 +25,19 @@ public class FreeIpaUsersStateProvider {
     static final List<String> IPA_ONLY_USERS = List.of("admin");
 
     // TODO add other Cloudera-managed groups?
+    // TODO handle name conflicts between ipa and ums? e.g., should ums "admins" be ipa "admins"?
     @VisibleForTesting
     static final List<String> IPA_ONLY_GROUPS = List.of("admins", "editors", "ipausers", "trust admins");
 
     @Inject
     private FreeIpaClientFactory freeIpaClientFactory;
+
+    public Optional<User> getUser(String username, Stack stack) throws Exception {
+        FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
+        // TODO is an exception thrown if the user doesn't exist in ipa?
+        Optional<com.sequenceiq.freeipa.client.model.User> freeIpaUser = freeIpaClient.userFind(username);
+        return freeIpaUser.map(this::fromIpaUser);
+    }
 
     // TODO improve out exception handling
     public UsersState getUsersState(Stack stack) throws Exception {

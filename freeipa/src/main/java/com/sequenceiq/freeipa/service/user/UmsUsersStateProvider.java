@@ -34,6 +34,14 @@ public class UmsUsersStateProvider {
     @Inject
     private GrpcUmsClient umsClient;
 
+    public User getUser(String userCrn, String environmentCrn) {
+        final String actorCrn = threadBaseUserCrnProvider.getUserCrn();
+
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User user =
+                umsClient.getUserDetails(actorCrn, userCrn, Optional.empty());
+        return umsUserToUser(actorCrn, user, environmentCrn);
+    }
+
     public UsersState getUsersState(String environmentCrn) {
         final String actorCrn = threadBaseUserCrnProvider.getUserCrn();
         final String accountId = crnService.getCurrentAccountId();
@@ -88,6 +96,7 @@ public class UmsUsersStateProvider {
     }
 
     private String getUsernameFromEmail(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User umsUser) {
+        // TODO replace this code with workloadUsername in DISTX-184
         return umsUser.getEmail().split("@")[0];
     }
 

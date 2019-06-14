@@ -1,9 +1,11 @@
 package com.sequenceiq.freeipa.service.user;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -14,12 +16,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.CreateUsersRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.Group;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUsersRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUsersResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUserResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.User;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
@@ -54,7 +58,61 @@ public class UserService {
     @Inject
     private FreeIpaUsersStateProvider freeIpaUsersStateProvider;
 
-    public SynchronizeUsersResponse synchronizeUsers(SynchronizeUsersRequest request) {
+    public SynchronizeUserResponse synchronizeUser(String userCrn) {
+        String accountId = crnService.getCurrentAccountId();
+
+        LOGGER.debug("Syncing user {} in account {}", userCrn, accountId);
+
+        List<Stack> stacks = stackService.getAllByAccountId(accountId);
+
+        if (stacks.isEmpty()) {
+            throw new IllegalArgumentException("No stacks found for accountId " + accountId);
+        }
+
+        List<String> success = new ArrayList<>();
+        Map<String, String> failure = new HashMap<>();
+
+        for (Stack stack : stacks) {
+            try {
+                LOGGER.debug("Syncing {} to Environment {}", userCrn, stack.getEnvironmentCrn());
+                User umsUser = umsUsersStateProvider.getUser(userCrn, stack.getEnvironmentCrn());
+                Optional<User> ipaUserOptional = freeIpaUsersStateProvider.getUser(umsUser.getName(), stack);
+
+                FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
+
+                Set<String> groupsToAdd;
+                Set<String> groupsToRemove;
+
+                // TODO check rights and deactivate user if no rights for this environment
+                if (ipaUserOptional.isEmpty()) {
+                    addUsers(freeIpaClient, Set.of(umsUser));
+                    groupsToAdd = umsUser.getGroups();
+                    groupsToRemove = Set.of();
+                } else {
+                    User ipaUser = ipaUserOptional.get();
+                    groupsToAdd = Sets.difference(umsUser.getGroups(), ipaUser.getGroups());
+                    groupsToRemove = Sets.difference(ipaUser.getGroups(), umsUser.getGroups());
+                }
+
+                Set<String> usernameSet = Set.of(umsUser.getName());
+                Map<String, Set<String>> groupAddMapping = new HashMap<>(groupsToAdd.size());
+                groupsToAdd.forEach(g -> groupAddMapping.put(g, usernameSet));
+                addUsersToGroups(freeIpaClient, groupAddMapping);
+
+                Map<String, Set<String>> groupRemoveMapping = new HashMap<>(groupsToRemove.size());
+                groupsToRemove.forEach(g -> groupRemoveMapping.put(g, usernameSet));
+                removeUsersFromGroups(freeIpaClient, groupRemoveMapping);
+
+                success.add(stack.getEnvironmentCrn());
+            } catch (Exception e) {
+                LOGGER.warn("Failed to synchronize environment {}", stack.getEnvironmentCrn());
+                failure.put(stack.getEnvironmentCrn(), e.getLocalizedMessage());
+            }
+        }
+        return new SynchronizeUserResponse(success, failure);
+    }
+
+    public SynchronizeAllUsersResponse synchronizeAllUsers(SynchronizeAllUsersRequest request) {
         String accountId = crnService.getCurrentAccountId();
         List<Stack> stacks = stackService.getAllByAccountId(accountId);
         LOGGER.debug("Found {} stacks for account {}", stacks.size(), accountId);
@@ -82,21 +140,21 @@ public class UserService {
                 addUsers(freeIpaClient, stateDifference.getUsersToAdd());
                 // TODO remove/deactivate groups/users
             } catch (Exception e) {
-                LOGGER.warn("Failed to syncronize environment {}", stack.getEnvironmentCrn());
+                LOGGER.warn("Failed to synchronize environment {}", stack.getEnvironmentCrn());
             }
         }
 
-        return new SynchronizeUsersResponse(UUID.randomUUID().toString(), SynchronizationStatus.FAILED,
+        return new SynchronizeAllUsersResponse(UUID.randomUUID().toString(), SynchronizationStatus.FAILED,
                 null, null);
     }
 
-    public SynchronizeUsersResponse getSynchronizeUsersStatus(String syncId) {
-        return new SynchronizeUsersResponse(syncId, SynchronizationStatus.FAILED,
+    public SynchronizeAllUsersResponse getSynchronizeUsersStatus(String syncId) {
+        return new SynchronizeAllUsersResponse(syncId, SynchronizationStatus.FAILED,
                 null, null);
     }
 
     public void createUsers(CreateUsersRequest request, String accountId) throws Exception {
-        LOGGER.info("UserService.synchronizeUsers() called");
+        LOGGER.info("UserService.synchronizeAllUsers() called");
 
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(request.getEnvironmentCrn(), accountId);
 
@@ -159,6 +217,20 @@ public class UserService {
             } catch (FreeIpaClientException e) {
                 // TODO propagate this information out to API
                 LOGGER.error("Failed to add users {} to group {}", entry.getValue(), entry.getKey(), e);
+            }
+        }
+    }
+
+    private void removeUsersFromGroups(FreeIpaClient freeIpaClient, Map<String, Set<String>> groupMapping) throws FreeIpaClientException {
+        for (Map.Entry<String, Set<String>> entry : groupMapping.entrySet()) {
+            LOGGER.debug("removing users {} from group {}", entry.getValue(), entry.getKey());
+            try {
+                // TODO specialize response object
+                RPCResponse<Object> groupRemoveMember = freeIpaClient.groupRemoveMembers(entry.getKey(), entry.getValue());
+                LOGGER.debug("Success: {}", groupRemoveMember.getResult());
+            } catch (FreeIpaClientException e) {
+                // TODO propagate this information out to API
+                LOGGER.error("Failed to remove users {} from group {}", entry.getValue(), entry.getKey(), e);
             }
         }
     }
