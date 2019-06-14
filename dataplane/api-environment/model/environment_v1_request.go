@@ -20,9 +20,6 @@ type EnvironmentV1Request struct {
 	// Cloud platform of the environment.
 	CloudPlatform string `json:"cloudPlatform,omitempty"`
 
-	// If credentialName is not specified, the credential is used to create the new credential for the environment.
-	Credential *CredentialV1Request `json:"credential,omitempty"`
-
 	// Name of the credential of the environment. If the name is given, the detailed credential is ignored in the request.
 	CredentialName string `json:"credentialName,omitempty"`
 
@@ -54,10 +51,6 @@ type EnvironmentV1Request struct {
 func (m *EnvironmentV1Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateCredential(formats); err != nil {
-		res = append(res, err)
-	}
-
 	if err := m.validateDescription(formats); err != nil {
 		res = append(res, err)
 	}
@@ -81,24 +74,6 @@ func (m *EnvironmentV1Request) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *EnvironmentV1Request) validateCredential(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Credential) { // not required
-		return nil
-	}
-
-	if m.Credential != nil {
-		if err := m.Credential.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("credential")
-			}
-			return err
-		}
-	}
-
 	return nil
 }
 

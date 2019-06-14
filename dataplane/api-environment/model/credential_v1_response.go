@@ -23,6 +23,9 @@ type CredentialV1Response struct {
 	// custom parameters for Azure credential
 	Azure *AzureCredentialV1ResponseParameters `json:"azure,omitempty"`
 
+	// crn of the creator
+	Creator string `json:"creator,omitempty"`
+
 	// global identifiers of the resource
 	Crn string `json:"crn,omitempty"`
 }
@@ -42,6 +45,8 @@ func (m *CredentialV1Response) UnmarshalJSON(raw []byte) error {
 
 		Azure *AzureCredentialV1ResponseParameters `json:"azure,omitempty"`
 
+		Creator string `json:"creator,omitempty"`
+
 		Crn string `json:"crn,omitempty"`
 	}
 	if err := swag.ReadJSON(raw, &dataAO1); err != nil {
@@ -51,6 +56,8 @@ func (m *CredentialV1Response) UnmarshalJSON(raw []byte) error {
 	m.Attributes = dataAO1.Attributes
 
 	m.Azure = dataAO1.Azure
+
+	m.Creator = dataAO1.Creator
 
 	m.Crn = dataAO1.Crn
 
@@ -72,12 +79,16 @@ func (m CredentialV1Response) MarshalJSON() ([]byte, error) {
 
 		Azure *AzureCredentialV1ResponseParameters `json:"azure,omitempty"`
 
+		Creator string `json:"creator,omitempty"`
+
 		Crn string `json:"crn,omitempty"`
 	}
 
 	dataAO1.Attributes = m.Attributes
 
 	dataAO1.Azure = m.Azure
+
+	dataAO1.Creator = m.Creator
 
 	dataAO1.Crn = m.Crn
 

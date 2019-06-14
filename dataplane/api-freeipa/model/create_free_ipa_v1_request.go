@@ -23,10 +23,6 @@ type CreateFreeIpaV1Request struct {
 	// Required: true
 	Authentication *StackAuthenticationV1Request `json:"authentication"`
 
-	// Credential
-	// Required: true
-	Credential *CredentialRequest `json:"credential"`
-
 	// The crn of the environment
 	// Required: true
 	EnvironmentCrn *string `json:"environmentCrn"`
@@ -59,10 +55,6 @@ func (m *CreateFreeIpaV1Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAuthentication(formats); err != nil {
-		res = append(res, err)
-	}
-
-	if err := m.validateCredential(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -110,24 +102,6 @@ func (m *CreateFreeIpaV1Request) validateAuthentication(formats strfmt.Registry)
 		if err := m.Authentication.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("authentication")
-			}
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (m *CreateFreeIpaV1Request) validateCredential(formats strfmt.Registry) error {
-
-	if err := validate.Required("credential", "body", m.Credential); err != nil {
-		return err
-	}
-
-	if m.Credential != nil {
-		if err := m.Credential.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("credential")
 			}
 			return err
 		}

@@ -14,7 +14,6 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	cr "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/swag"
 
 	strfmt "github.com/go-openapi/strfmt"
 )
@@ -22,11 +21,8 @@ import (
 // NewListDistroXV1Params creates a new ListDistroXV1Params object
 // with the default values initialized.
 func NewListDistroXV1Params() *ListDistroXV1Params {
-	var (
-		onlyDatalakesDefault = bool(false)
-	)
+	var ()
 	return &ListDistroXV1Params{
-		OnlyDatalakes: &onlyDatalakesDefault,
 
 		timeout: cr.DefaultTimeout,
 	}
@@ -35,11 +31,8 @@ func NewListDistroXV1Params() *ListDistroXV1Params {
 // NewListDistroXV1ParamsWithTimeout creates a new ListDistroXV1Params object
 // with the default values initialized, and the ability to set a timeout on a request
 func NewListDistroXV1ParamsWithTimeout(timeout time.Duration) *ListDistroXV1Params {
-	var (
-		onlyDatalakesDefault = bool(false)
-	)
+	var ()
 	return &ListDistroXV1Params{
-		OnlyDatalakes: &onlyDatalakesDefault,
 
 		timeout: timeout,
 	}
@@ -48,11 +41,8 @@ func NewListDistroXV1ParamsWithTimeout(timeout time.Duration) *ListDistroXV1Para
 // NewListDistroXV1ParamsWithContext creates a new ListDistroXV1Params object
 // with the default values initialized, and the ability to set a context for a request
 func NewListDistroXV1ParamsWithContext(ctx context.Context) *ListDistroXV1Params {
-	var (
-		onlyDatalakesDefault = bool(false)
-	)
+	var ()
 	return &ListDistroXV1Params{
-		OnlyDatalakes: &onlyDatalakesDefault,
 
 		Context: ctx,
 	}
@@ -61,12 +51,9 @@ func NewListDistroXV1ParamsWithContext(ctx context.Context) *ListDistroXV1Params
 // NewListDistroXV1ParamsWithHTTPClient creates a new ListDistroXV1Params object
 // with the default values initialized, and the ability to set a custom HTTPClient for a request
 func NewListDistroXV1ParamsWithHTTPClient(client *http.Client) *ListDistroXV1Params {
-	var (
-		onlyDatalakesDefault = bool(false)
-	)
+	var ()
 	return &ListDistroXV1Params{
-		OnlyDatalakes: &onlyDatalakesDefault,
-		HTTPClient:    client,
+		HTTPClient: client,
 	}
 }
 
@@ -77,8 +64,6 @@ type ListDistroXV1Params struct {
 
 	/*Environment*/
 	Environment *string
-	/*OnlyDatalakes*/
-	OnlyDatalakes *bool
 
 	timeout    time.Duration
 	Context    context.Context
@@ -129,17 +114,6 @@ func (o *ListDistroXV1Params) SetEnvironment(environment *string) {
 	o.Environment = environment
 }
 
-// WithOnlyDatalakes adds the onlyDatalakes to the list distro x v1 params
-func (o *ListDistroXV1Params) WithOnlyDatalakes(onlyDatalakes *bool) *ListDistroXV1Params {
-	o.SetOnlyDatalakes(onlyDatalakes)
-	return o
-}
-
-// SetOnlyDatalakes adds the onlyDatalakes to the list distro x v1 params
-func (o *ListDistroXV1Params) SetOnlyDatalakes(onlyDatalakes *bool) {
-	o.OnlyDatalakes = onlyDatalakes
-}
-
 // WriteToRequest writes these params to a swagger request
 func (o *ListDistroXV1Params) WriteToRequest(r runtime.ClientRequest, reg strfmt.Registry) error {
 
@@ -158,22 +132,6 @@ func (o *ListDistroXV1Params) WriteToRequest(r runtime.ClientRequest, reg strfmt
 		qEnvironment := qrEnvironment
 		if qEnvironment != "" {
 			if err := r.SetQueryParam("environment", qEnvironment); err != nil {
-				return err
-			}
-		}
-
-	}
-
-	if o.OnlyDatalakes != nil {
-
-		// query param onlyDatalakes
-		var qrOnlyDatalakes bool
-		if o.OnlyDatalakes != nil {
-			qrOnlyDatalakes = *o.OnlyDatalakes
-		}
-		qOnlyDatalakes := swag.FormatBool(qrOnlyDatalakes)
-		if qOnlyDatalakes != "" {
-			if err := r.SetQueryParam("onlyDatalakes", qOnlyDatalakes); err != nil {
 				return err
 			}
 		}

@@ -27,16 +27,16 @@ type ClusterTemplateV4Request struct {
 	// Min Length: 0
 	Description *string `json:"description,omitempty"`
 
+	// stringified template JSON
+	// Required: true
+	DistroXTemplate *DistroXV1Request `json:"distroXTemplate"`
+
 	// name of the resource
 	// Required: true
 	// Max Length: 40
 	// Min Length: 5
 	// Pattern: ^[^;\/%]*$
 	Name *string `json:"name"`
-
-	// stringified template JSON
-	// Required: true
-	StackTemplate *StackV4Request `json:"stackTemplate"`
 
 	// type
 	// Required: true
@@ -52,11 +52,11 @@ func (m *ClusterTemplateV4Request) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateName(formats); err != nil {
+	if err := m.validateDistroXTemplate(formats); err != nil {
 		res = append(res, err)
 	}
 
-	if err := m.validateStackTemplate(formats); err != nil {
+	if err := m.validateName(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -87,6 +87,24 @@ func (m *ClusterTemplateV4Request) validateDescription(formats strfmt.Registry) 
 	return nil
 }
 
+func (m *ClusterTemplateV4Request) validateDistroXTemplate(formats strfmt.Registry) error {
+
+	if err := validate.Required("distroXTemplate", "body", m.DistroXTemplate); err != nil {
+		return err
+	}
+
+	if m.DistroXTemplate != nil {
+		if err := m.DistroXTemplate.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("distroXTemplate")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (m *ClusterTemplateV4Request) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Required("name", "body", m.Name); err != nil {
@@ -103,24 +121,6 @@ func (m *ClusterTemplateV4Request) validateName(formats strfmt.Registry) error {
 
 	if err := validate.Pattern("name", "body", string(*m.Name), `^[^;\/%]*$`); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (m *ClusterTemplateV4Request) validateStackTemplate(formats strfmt.Registry) error {
-
-	if err := validate.Required("stackTemplate", "body", m.StackTemplate); err != nil {
-		return err
-	}
-
-	if m.StackTemplate != nil {
-		if err := m.StackTemplate.Validate(formats); err != nil {
-			if ve, ok := err.(*errors.Validation); ok {
-				return ve.ValidateName("stackTemplate")
-			}
-			return err
-		}
 	}
 
 	return nil

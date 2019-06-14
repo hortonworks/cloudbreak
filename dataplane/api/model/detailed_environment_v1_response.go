@@ -22,8 +22,11 @@ type DetailedEnvironmentV1Response struct {
 	// Cloud platform of the environment.
 	CloudPlatform string `json:"cloudPlatform,omitempty"`
 
-	// Name of the credential of the environment.
-	CredentialName string `json:"credentialName,omitempty"`
+	// crn of the creator
+	Creator string `json:"creator,omitempty"`
+
+	// Credential of the environment.
+	Credential *CredentialV1Response `json:"credential,omitempty"`
 
 	// id of the resource
 	Crn string `json:"crn,omitempty"`
@@ -32,7 +35,7 @@ type DetailedEnvironmentV1Response struct {
 	Description string `json:"description,omitempty"`
 
 	// Status of the environment.
-	// Enum: [CREATION_INITIATED NETWORK_CREATION_IN_PROGRESS RDBMS_CREATION_IN_PROGRESS FREEIPA_CREATION_IN_PROGRESS AVAILABLE ARCHIVED CORRUPTED]
+	// Enum: [CREATION_INITIATED DELETE_INITIATED NETWORK_CREATION_IN_PROGRESS NETWORK_DELETE_IN_PROGRESS RDBMS_DELETE_IN_PROGRESS FREEIPA_CREATION_IN_PROGRESS FREEIPA_DELETE_IN_PROGRESS AVAILABLE ARCHIVED CORRUPTED]
 	EnvironmentStatus string `json:"environmentStatus,omitempty"`
 
 	// Location of the environment.
@@ -51,6 +54,10 @@ type DetailedEnvironmentV1Response struct {
 // Validate validates this detailed environment v1 response
 func (m *DetailedEnvironmentV1Response) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateCredential(formats); err != nil {
+		res = append(res, err)
+	}
 
 	if err := m.validateEnvironmentStatus(formats); err != nil {
 		res = append(res, err)
@@ -74,11 +81,29 @@ func (m *DetailedEnvironmentV1Response) Validate(formats strfmt.Registry) error 
 	return nil
 }
 
+func (m *DetailedEnvironmentV1Response) validateCredential(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Credential) { // not required
+		return nil
+	}
+
+	if m.Credential != nil {
+		if err := m.Credential.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("credential")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
 var detailedEnvironmentV1ResponseTypeEnvironmentStatusPropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["CREATION_INITIATED","NETWORK_CREATION_IN_PROGRESS","RDBMS_CREATION_IN_PROGRESS","FREEIPA_CREATION_IN_PROGRESS","AVAILABLE","ARCHIVED","CORRUPTED"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["CREATION_INITIATED","DELETE_INITIATED","NETWORK_CREATION_IN_PROGRESS","NETWORK_DELETE_IN_PROGRESS","RDBMS_DELETE_IN_PROGRESS","FREEIPA_CREATION_IN_PROGRESS","FREEIPA_DELETE_IN_PROGRESS","AVAILABLE","ARCHIVED","CORRUPTED"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -91,14 +116,23 @@ const (
 	// DetailedEnvironmentV1ResponseEnvironmentStatusCREATIONINITIATED captures enum value "CREATION_INITIATED"
 	DetailedEnvironmentV1ResponseEnvironmentStatusCREATIONINITIATED string = "CREATION_INITIATED"
 
+	// DetailedEnvironmentV1ResponseEnvironmentStatusDELETEINITIATED captures enum value "DELETE_INITIATED"
+	DetailedEnvironmentV1ResponseEnvironmentStatusDELETEINITIATED string = "DELETE_INITIATED"
+
 	// DetailedEnvironmentV1ResponseEnvironmentStatusNETWORKCREATIONINPROGRESS captures enum value "NETWORK_CREATION_IN_PROGRESS"
 	DetailedEnvironmentV1ResponseEnvironmentStatusNETWORKCREATIONINPROGRESS string = "NETWORK_CREATION_IN_PROGRESS"
 
-	// DetailedEnvironmentV1ResponseEnvironmentStatusRDBMSCREATIONINPROGRESS captures enum value "RDBMS_CREATION_IN_PROGRESS"
-	DetailedEnvironmentV1ResponseEnvironmentStatusRDBMSCREATIONINPROGRESS string = "RDBMS_CREATION_IN_PROGRESS"
+	// DetailedEnvironmentV1ResponseEnvironmentStatusNETWORKDELETEINPROGRESS captures enum value "NETWORK_DELETE_IN_PROGRESS"
+	DetailedEnvironmentV1ResponseEnvironmentStatusNETWORKDELETEINPROGRESS string = "NETWORK_DELETE_IN_PROGRESS"
+
+	// DetailedEnvironmentV1ResponseEnvironmentStatusRDBMSDELETEINPROGRESS captures enum value "RDBMS_DELETE_IN_PROGRESS"
+	DetailedEnvironmentV1ResponseEnvironmentStatusRDBMSDELETEINPROGRESS string = "RDBMS_DELETE_IN_PROGRESS"
 
 	// DetailedEnvironmentV1ResponseEnvironmentStatusFREEIPACREATIONINPROGRESS captures enum value "FREEIPA_CREATION_IN_PROGRESS"
 	DetailedEnvironmentV1ResponseEnvironmentStatusFREEIPACREATIONINPROGRESS string = "FREEIPA_CREATION_IN_PROGRESS"
+
+	// DetailedEnvironmentV1ResponseEnvironmentStatusFREEIPADELETEINPROGRESS captures enum value "FREEIPA_DELETE_IN_PROGRESS"
+	DetailedEnvironmentV1ResponseEnvironmentStatusFREEIPADELETEINPROGRESS string = "FREEIPA_DELETE_IN_PROGRESS"
 
 	// DetailedEnvironmentV1ResponseEnvironmentStatusAVAILABLE captures enum value "AVAILABLE"
 	DetailedEnvironmentV1ResponseEnvironmentStatusAVAILABLE string = "AVAILABLE"

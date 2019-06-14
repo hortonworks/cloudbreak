@@ -181,7 +181,7 @@ func listEnvironmentsImpl(envClient environmentClient, output utils.Output) erro
 			Description:   e.Description,
 			CloudPlatform: e.CloudPlatform,
 			Status:        e.EnvironmentStatus,
-			Credential:    e.CredentialName,
+			Credential:    *e.Credential.Name,
 			Regions:       getRegionNames(e.Regions),
 			LocationName:  e.Location.Name,
 			Longitude:     e.Location.Longitude,
@@ -256,7 +256,7 @@ func ChangeCredential(c *cli.Context) {
 		utils.LogErrorAndExit(err)
 	}
 	environment := resp.Payload
-	log.Infof("[ChangeCredential] credential of environment %s changed to: %s", environment.Name, environment.CredentialName)
+	log.Infof("[ChangeCredential] credential of environment %s changed to: %s", environment.Name, *environment.Credential.Name)
 }
 
 func EditEnvironment(c *cli.Context) {
@@ -294,7 +294,7 @@ func convertResponseToTableOutput(env *model.DetailedEnvironmentV1Response) *env
 			Description:   env.Description,
 			CloudPlatform: env.CloudPlatform,
 			Status:        env.EnvironmentStatus,
-			Credential:    env.CredentialName,
+			Credential:    *env.Credential.Name,
 			Regions:       getRegionNames(env.Regions),
 			LocationName:  env.Location.Name,
 			Longitude:     env.Location.Longitude,
@@ -311,7 +311,7 @@ func convertResponseToJsonOutput(env *model.DetailedEnvironmentV1Response) *envi
 			Description:   env.Description,
 			CloudPlatform: env.CloudPlatform,
 			Status:        env.EnvironmentStatus,
-			Credential:    env.CredentialName,
+			Credential:    *env.Credential.Name,
 			Regions:       getRegionNames(env.Regions),
 			LocationName:  env.Location.Name,
 			Longitude:     env.Location.Longitude,

@@ -17,6 +17,9 @@ import (
 // swagger:model ProxyResponse
 type ProxyResponse struct {
 
+	// crn of the creator
+	Creator string `json:"creator,omitempty"`
+
 	// proxy configuration id for the cluster
 	Crn string `json:"crn,omitempty"`
 
