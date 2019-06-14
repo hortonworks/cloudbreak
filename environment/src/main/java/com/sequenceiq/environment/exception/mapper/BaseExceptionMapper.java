@@ -63,7 +63,7 @@ abstract class BaseExceptionMapper<T extends Throwable> implements ExceptionMapp
 
     abstract Class<T> getExceptionType();
 
-    private String getErrorMessage(T throwable) {
+    protected String getErrorMessage(T throwable) {
         notNull(throwable, "throwable");
         String message = throwable.getMessage();
         LOGGER.debug("Exception text has been mapped: {}", message);
