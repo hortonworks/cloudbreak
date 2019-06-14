@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.AdjustmentType;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
@@ -158,7 +159,7 @@ public class StackDecorator {
     }
 
     private void preparePlacement(Stack subject, StackV4Request request, DetailedEnvironmentResponse environment) {
-        if (request.getPlacement() == null) {
+        if (request.getPlacement() == null && !CloudPlatform.YARN.name().equals(environment.getCloudPlatform())) {
             subject.setRegion(getRegionFromEnv(environment));
             subject.setAvailabilityZone(getAvailabilityZoneFromEnv(environment));
         }
