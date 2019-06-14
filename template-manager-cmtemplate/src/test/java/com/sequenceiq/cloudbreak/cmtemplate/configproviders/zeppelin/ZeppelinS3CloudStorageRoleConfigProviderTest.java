@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfiguration
 import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
 import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.s3.S3FileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -44,17 +45,14 @@ public class ZeppelinS3CloudStorageRoleConfigProviderTest {
         assertEquals(2, zeppelinStorageConfigs.size());
 
         assertEquals("zeppelin-conf/zeppelin-site.xml_role_safety_valve", zeppelinStorageConfigs.get(0).getName());
-        String expected = "<property><name>zeppelin.notebook.s3.bucket</name><value>"
-                + getZeppelinS3Bucket().getValue()
-                + "</value></property>"
-                + "<property><name>zeppelin.notebook.s3.user</name><value>"
-                + getZeppelinS3User().getValue() + "</value></property>";
+        String expected = "<property><name>zeppelin.notebook.s3.bucket</name><value>zeppelinbucket</value></property>"
+                + "<property><name>zeppelin.notebook.s3.user</name><value>testuser</value></property>";
         assertEquals(expected, zeppelinStorageConfigs.get(0).getValue());
         assertEquals("org.apache.zeppelin.notebook.repo.S3NotebookRepo", zeppelinStorageConfigs.get(1).getValue());
     }
 
     @Test
-    public void testGetZeppelinStorageRoleConfigsWhenDefaultUser() {
+    public void testGetZeppelinStorageRoleConfigsWithClusterName() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, false, true);
         String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
@@ -64,10 +62,8 @@ public class ZeppelinS3CloudStorageRoleConfigProviderTest {
         assertEquals(2, zeppelinStorageConfigs.size());
 
         assertEquals("zeppelin-conf/zeppelin-site.xml_role_safety_valve", zeppelinStorageConfigs.get(0).getName());
-        String expected = "<property><name>zeppelin.notebook.s3.bucket</name><value>"
-                + getZeppelinS3Bucket().getValue()
-                + "</value></property>"
-                + "<property><name>zeppelin.notebook.s3.user</name><value>zeppelin</value></property>";
+        String expected = "<property><name>zeppelin.notebook.s3.bucket</name><value>zeppelinbucket</value></property>"
+                + "<property><name>zeppelin.notebook.s3.user</name><value>zeppelincluster</value></property>";
         assertEquals(expected, zeppelinStorageConfigs.get(0).getValue());
 
         assertEquals("org.apache.zeppelin.notebook.repo.S3NotebookRepo", zeppelinStorageConfigs.get(1).getValue());
@@ -114,14 +110,16 @@ public class ZeppelinS3CloudStorageRoleConfigProviderTest {
                     new AdlsFileSystemConfigurationsView(new AdlsFileSystem(), locations, false);
         }
 
-        return Builder.builder().withFileSystemConfigurationView(fileSystemConfigurationsView)
+        GeneralClusterConfigs clusterConfigs = new GeneralClusterConfigs();
+        clusterConfigs.setClusterName("zeppelincluster");
+        return Builder.builder().withGeneralClusterConfigs(clusterConfigs).withFileSystemConfigurationView(fileSystemConfigurationsView)
                 .withHostgroupViews(Set.of(master, worker)).build();
     }
 
     protected StorageLocation getZeppelinS3Bucket() {
         StorageLocation zeppelinS3Bucket = new StorageLocation();
         zeppelinS3Bucket.setProperty("zeppelin.notebook.s3.bucket");
-        zeppelinS3Bucket.setValue("zeppelinbucket");
+        zeppelinS3Bucket.setValue("s3a://zeppelinbucket");
         return zeppelinS3Bucket;
     }
 
