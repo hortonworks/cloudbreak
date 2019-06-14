@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.zeppelin.ZeppelinRoles.ZEPPELIN_SERVER;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Component;
 
@@ -13,7 +14,6 @@ import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigCo
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
@@ -27,9 +27,9 @@ public class ZeppelinS3CloudStorageRoleConfigProvider extends AbstractRoleConfig
 
     private static final String ZEPPELIN_NOTEBOOK_S3_USER = "zeppelin.notebook.s3.user";
 
-    private static final String ZEPPELIN_DEFAULT_USER = "zeppelin";
-
     private static final String ZEPPELIN_S3_NOTEBOOK_REPO = "org.apache.zeppelin.notebook.repo.S3NotebookRepo";
+
+    private static final Pattern S3A_BUCKET_PATTERN = Pattern.compile(FileSystemType.S3.getProtocol() + "://([\\w.-]+)(?:/(.*))?");
 
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
@@ -62,15 +62,15 @@ public class ZeppelinS3CloudStorageRoleConfigProvider extends AbstractRoleConfig
     protected String getCloudStorageProperty(TemplatePreparationObject source) {
         StringBuilder hmsCloudStorage = new StringBuilder();
 
-        ConfigUtils.getStorageLocationForServiceProperty(source, ZEPPELIN_NOTEBOOK_S3_BUCKET).ifPresent(
-                storageLocation -> hmsCloudStorage.append(
-                        ConfigUtils.getSafetyValveProperty(ZEPPELIN_NOTEBOOK_S3_BUCKET, storageLocation.getValue()))
-        );
+        ConfigUtils.getStorageLocationForServiceProperty(source, ZEPPELIN_NOTEBOOK_S3_BUCKET)
+                .ifPresent(storageLocation -> {
+                    hmsCloudStorage.append(
+                            ConfigUtils.getSafetyValveProperty(ZEPPELIN_NOTEBOOK_S3_BUCKET,
+                                    S3A_BUCKET_PATTERN.matcher(storageLocation.getValue()).replaceAll("$1")));
 
-        String zeppelinUser = ConfigUtils.getStorageLocationForServiceProperty(source, ZEPPELIN_NOTEBOOK_S3_USER)
-                .map(StorageLocationView::getValue)
-                .orElse(ZEPPELIN_DEFAULT_USER);
-        hmsCloudStorage.append(ConfigUtils.getSafetyValveProperty(ZEPPELIN_NOTEBOOK_S3_USER, zeppelinUser));
+                    hmsCloudStorage.append(ConfigUtils.getSafetyValveProperty(ZEPPELIN_NOTEBOOK_S3_USER,
+                            S3A_BUCKET_PATTERN.matcher(storageLocation.getValue()).replaceAll("$2")));
+                });
 
         return hmsCloudStorage.toString();
     }
