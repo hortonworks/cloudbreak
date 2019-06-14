@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.Cluster
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
@@ -220,7 +221,7 @@ public class ProvisionerService {
             stackRequest.setEnvironmentCrn(sdxCluster.getEnvCrn());
             DetailedEnvironmentResponse environment = getEnvironment(sdxCluster.getId(), sdxCluster.getInitiatorUserCrn(), sdxCluster.getEnvCrn());
 
-            if (!environment.getNetwork().getSubnetMetas().isEmpty()) {
+            if (!CloudPlatform.YARN.name().equals(environment.getCloudPlatform()) && !environment.getNetwork().getSubnetMetas().isEmpty()) {
                 setupPlacement(environment, stackRequest);
                 setupNetwork(environment, stackRequest);
             }
