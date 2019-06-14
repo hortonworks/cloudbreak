@@ -1,4 +1,4 @@
-package com.sequenceiq.redbeams.model;
+package com.sequenceiq.redbeams.domain;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -16,8 +16,6 @@ import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.redbeams.TestData;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
-import com.sequenceiq.redbeams.domain.DatabaseConfig;
-import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 
 public class DatabaseServerConfigTest {
 
