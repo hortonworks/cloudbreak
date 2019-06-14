@@ -1,4 +1,4 @@
-package com.sequenceiq.redbeams.flow.stack;
+package com.sequenceiq.redbeams.flow.redbeams.provision;
 
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -44,4 +44,7 @@ public class RedbeamsEvent implements Selectable, Acceptable {
         return accepted;
     }
 
+    public String toString() {
+        return selector;
+    }
 }

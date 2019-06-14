@@ -12,19 +12,26 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.CreateDatabaseV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
+import com.sequenceiq.redbeams.api.model.describe.DatabaseServerAllocationOutcomeV4Response;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
+import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerRequest;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
+import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
 
 @Component
 @Transactional(TxType.NEVER)
 public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     static final Long DEFAULT_WORKSPACE = 0L;
+
+    @Inject
+    private RedbeamsCreationService redbeamsCreationService;
 
     @Inject
     private DatabaseServerConfigService databaseServerConfigService;
@@ -42,6 +49,12 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     public DatabaseServerV4Response get(String environmentId, String name) {
         DatabaseServerConfig server = databaseServerConfigService.getByName(DEFAULT_WORKSPACE, environmentId, name);
         return converterUtil.convert(server, DatabaseServerV4Response.class);
+    }
+
+    @Override
+    public DatabaseServerAllocationOutcomeV4Response create(AllocateDatabaseServerV4Request request) {
+        // Dummy launch database call
+        return redbeamsCreationService.launchDatabase(new AllocateDatabaseServerRequest(0L), "");
     }
 
     @Override

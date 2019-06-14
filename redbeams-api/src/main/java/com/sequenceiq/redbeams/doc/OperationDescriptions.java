@@ -20,6 +20,7 @@ public final class OperationDescriptions {
         public static final String TEST_CONNECTION = "test database server connectivity";
         public static final String LIST = "list database servers";
         public static final String GET_BY_NAME = "get a database server by name";
+        public static final String CREATE = "creates and registers a database server in a cloud provider";
         public static final String REGISTER = "register a database server";
         public static final String DELETE_BY_NAME = "deregister or terminate a database server by name";
         public static final String DELETE_MULTIPLE_BY_NAME = "deregister or terminate multiple database servers by name";

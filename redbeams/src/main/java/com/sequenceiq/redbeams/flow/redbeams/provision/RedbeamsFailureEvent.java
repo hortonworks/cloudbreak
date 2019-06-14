@@ -1,4 +1,4 @@
-package com.sequenceiq.redbeams.flow.stack;
+package com.sequenceiq.redbeams.flow.redbeams.provision;
 
 public class RedbeamsFailureEvent extends RedbeamsEvent {
 
