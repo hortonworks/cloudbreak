@@ -7,8 +7,6 @@ import java.util.Set;
 
 import javax.ws.rs.WebApplicationException;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.EnvironmentV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -17,7 +15,6 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.DeletableTestDto;
-import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 
 @Prototype
 public class EnvironmentTestDto extends DeletableTestDto<EnvironmentRequest, DetailedEnvironmentResponse, EnvironmentTestDto, SimpleEnvironmentResponse> {
@@ -26,7 +23,7 @@ public class EnvironmentTestDto extends DeletableTestDto<EnvironmentRequest, Det
 
     private Collection<SimpleEnvironmentResponse> response;
 
-    private SimpleEnvironmentV4Response simpleResponse;
+    private SimpleEnvironmentResponse simpleResponse;
 
     public EnvironmentTestDto(TestContext testContext) {
         super(new EnvironmentRequest(), testContext);
@@ -101,18 +98,18 @@ public class EnvironmentTestDto extends DeletableTestDto<EnvironmentRequest, Det
         this.response = response;
     }
 
-    public SimpleEnvironmentV4Response getResponseSimpleEnv() {
+    public SimpleEnvironmentResponse getResponseSimpleEnv() {
         return simpleResponse;
     }
 
-    public void setResponseSimpleEnv(SimpleEnvironmentV4Response simpleResponse) {
+    public void setResponseSimpleEnv(SimpleEnvironmentResponse simpleResponse) {
         this.simpleResponse = simpleResponse;
     }
 
     @Override
     public List<SimpleEnvironmentResponse> getAll(CloudbreakClient client) {
-        EnvironmentV4Endpoint environmentV4Endpoint = client.getCloudbreakClient().environmentV4Endpoint();
-        return new ArrayList<>(environmentV4Endpoint.list(client.getWorkspaceId()).getResponses());
+        //EnvironmentEndpoint environmentV4Endpoint = client.e().environmentV4Endpoint();
+        return new ArrayList<>();
     }
 
     @Override
@@ -122,11 +119,11 @@ public class EnvironmentTestDto extends DeletableTestDto<EnvironmentRequest, Det
 
     @Override
     public void delete(TestContext testContext, SimpleEnvironmentResponse entity, CloudbreakClient client) {
-        try {
-            client.getCloudbreakClient().environmentV4Endpoint().delete(client.getWorkspaceId(), entity.getName());
-        } catch (Exception e) {
-            LOGGER.warn("Something went wrong on {} ({}) purge. {}", entity.getName(), entity.getClass().getSimpleName(), ResponseUtil.getErrorMessage(e), e);
-        }
+//        try {
+//            client.getCloudbreakClient().environmentV4Endpoint().delete(client.getWorkspaceId(), entity.getName());
+//        } catch (Exception e) {
+//            LOGGER.warn("Something went wrong on {} ({}) purge. {}", entity.getName(), entity.getClass().getSimpleName(), ResponseUtil.getErrorMessage(e), e);
+//        }
     }
 
     @Override

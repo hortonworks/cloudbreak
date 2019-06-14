@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses;
+package com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses;
 
 import java.util.HashMap;
 import java.util.HashSet;

@@ -134,14 +134,11 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         given(conversionService.convert(any(), eq(PlacementSettingsV4Response.class))).willReturn(new PlacementSettingsV4Response());
         given(conversionService.convert(any(), eq(TelemetryV4Response.class))).willReturn(new TelemetryV4Response());
         given(converterUtil.convertAll(source.getInstanceGroups(), InstanceGroupV4Response.class)).willReturn(new ArrayList<>());
-        given(environmentClientService.getByCrn(anyString())).willReturn(aDetailedEnvironmentResponse()
-                .withCredential(credentialResponse)
-                .withName("env-name")
-                .build());
         // WHEN
         StackV4Response result = underTest.convert(source);
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("gcp", "mock", "openstack", "aws", "yarn", "azure"));
+        assertAllFieldsNotNull(result, Arrays.asList("gcp", "mock", "openstack", "aws", "yarn", "azure",
+                "environmentName", "credentialName"));
     }
 
     @Test
@@ -166,7 +163,8 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         // WHEN
         StackV4Response result = underTest.convert(source);
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("cluster", "gcp", "mock", "openstack", "aws", "yarn", "azure", "telemetry"));
+        assertAllFieldsNotNull(result, Arrays.asList("cluster", "gcp", "mock", "openstack", "aws", "yarn", "azure",
+                "telemetry", "environmentName", "credentialName"));
 
         assertNull(result.getCluster());
     }
@@ -193,7 +191,8 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         // WHEN
         StackV4Response result = underTest.convert(source);
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("network", "gcp", "mock", "openstack", "aws", "yarn", "azure", "telemetry"));
+        assertAllFieldsNotNull(result, Arrays.asList("network", "gcp", "mock", "openstack", "aws", "yarn", "azure",
+                "telemetry", "environmentName", "credentialName"));
 
         assertNull(result.getNetwork());
     }

@@ -3,14 +3,14 @@ package com.sequenceiq.it.cloudbreak.dto.connector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformAccessConfigsV4Response;
-import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformAccessConfigsResponse;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
 
 @Prototype
-public class PlatformAccessConfigsTestDto extends AbstractCloudbreakTestDto<Object, PlatformAccessConfigsV4Response, PlatformAccessConfigsTestDto> {
+public class PlatformAccessConfigsTestDto extends AbstractCloudbreakTestDto<Object, PlatformAccessConfigsResponse, PlatformAccessConfigsTestDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PlatformAccessConfigsTestDto.class);
 
