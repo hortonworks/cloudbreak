@@ -1,4 +1,4 @@
-package com.sequenceiq.redbeams.service;
+package com.sequenceiq.redbeams.flow;
 
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -7,6 +7,7 @@ import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -26,7 +27,7 @@ public class RedbeamsFlowManager {
     @Inject
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
-    private Random random = new Random();
+    private final Random random = ThreadLocalRandom.current();
 
     public void triggerHelloworld() {
         String selector = "HELLOWORLD_CHAIN_EVENT";

@@ -1,4 +1,4 @@
-package com.sequenceiq.redbeams.flow.stack;
+package com.sequenceiq.redbeams.flow.redbeams.provision;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;

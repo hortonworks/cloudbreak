@@ -1,10 +1,15 @@
 package com.sequenceiq.redbeams.service.stack;
 
-import com.sequenceiq.redbeams.api.model.describe.DescribeRedbeamsResponse;
+import com.sequenceiq.redbeams.api.model.describe.DatabaseServerAllocationOutcomeV4Response;
 import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConverter;
+import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsProvisionEvent;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerRequest;
-import com.sequenceiq.redbeams.service.RedbeamsFlowManager;
+import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsEvent;
+import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.service.crn.CrnService;
+
+import java.security.SecureRandom;
+import java.util.Random;
 
 import javax.inject.Inject;
 
@@ -26,22 +31,12 @@ public class RedbeamsCreationService {
     @Inject
     private CrnService crnService;
 
-    public DescribeRedbeamsResponse launchDatabase(AllocateDatabaseServerRequest request, String accountId) {
-        // TODO: Actually launch a database instance
-        /*
-        checkIfAlreadyExistsInEnvironment(request, accountId);
+    private final Random random = new SecureRandom();
 
-        String userId = crnService.getCurrentUserId();
-        Stack stack = stackConverter.convert(request, accountId, userId);
-        stack.setResourceCrn(crnService.createCrn(accountId, Crn.ResourceType.FREEIPA));
-
-        fillInstanceMetadata(stack);
-
-        String template = templateService.waitGetTemplate(stack, getPlatformTemplateRequest);
-        stack.setTemplate(template);
-        stackService.save(stack);
-        flowManager.notify(FlowChainTriggers.PROVISION_TRIGGER_EVENT, new RedbeamsEvent(FlowChainTriggers.PROVISION_TRIGGER_EVENT, stack.getId()));
-         */
-        return new DescribeRedbeamsResponse();
+    public DatabaseServerAllocationOutcomeV4Response launchDatabase(AllocateDatabaseServerRequest request, String accountId) {
+        // Replace resourceId with something non-random
+        flowManager.notify(RedbeamsProvisionEvent.REDBEAMS_PROVISION_EVENT.selector(),
+                new RedbeamsEvent(RedbeamsProvisionEvent.REDBEAMS_PROVISION_EVENT.selector(), random.nextLong()));
+        return new DatabaseServerAllocationOutcomeV4Response();
     }
 }

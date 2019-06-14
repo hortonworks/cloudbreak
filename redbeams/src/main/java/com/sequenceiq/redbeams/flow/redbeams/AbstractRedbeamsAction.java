@@ -1,4 +1,4 @@
-package com.sequenceiq.redbeams.flow.stack;
+package com.sequenceiq.redbeams.flow.redbeams;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.flow.core.AbstractAction;

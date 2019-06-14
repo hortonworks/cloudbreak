@@ -1,20 +1,17 @@
 package com.sequenceiq.redbeams.flow.redbeams.provision.action;
 
-import com.sequenceiq.flow.core.CommonContext;
-import com.sequenceiq.flow.core.FlowEvent;
-import com.sequenceiq.flow.core.FlowParameters;
-import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.redbeams.flow.redbeams.provision.AbstractRedbeamsProvisionAction;
+import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsProvisionEvent;
+import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerSuccess;
-import com.sequenceiq.redbeams.flow.stack.AbstractRedbeamsAction;
-import com.sequenceiq.redbeams.flow.stack.RedbeamsContext;
-import com.sequenceiq.redbeams.flow.stack.RedbeamsEvent;
-
-import java.util.Map;
-import java.util.Optional;
+import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsContext;
+import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsEvent;
+import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.RegisterDatabaseServerRequest;
+import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.RegisterDatabaseServerSuccess;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 @Configuration
@@ -22,44 +19,32 @@ public class RedbeamsProvisionActions {
 
     @Bean(name = "ALLOCATE_DATABASE_STATE")
     public Action<?, ?> allocateDatabase() {
-        return new AbstractRedbeamsAction<>(RedbeamsEvent.class) {
-            @Override
-            protected RedbeamsContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
-                                                        RedbeamsEvent payload) {
-                // Get the cloud context and the cloud credentials
-                return new RedbeamsContext(flowParameters, null, null);
-            }
+        return new AbstractRedbeamsProvisionAction<>(RedbeamsEvent.class) {
 
             @Override
-            protected void doExecute(CommonContext context, RedbeamsEvent payload, Map<Object, Object> variables) throws Exception {
-                sendEvent(context);
+            protected Selectable createRequest(RedbeamsContext context) {
+                return new AllocateDatabaseServerRequest(0L);
             }
+        };
+    }
+
+    @Bean(name = "REGISTER_DATABASE_STATE")
+    public Action<?, ?> registerDatabase() {
+        return new AbstractRedbeamsProvisionAction<>(AllocateDatabaseServerSuccess.class) {
 
             @Override
-            protected Object getFailurePayload(RedbeamsEvent payload, Optional<CommonContext> flowContext, Exception ex) {
-                return null;
+            protected Selectable createRequest(RedbeamsContext context) {
+                return new RegisterDatabaseServerRequest(0L);
             }
         };
     }
 
     @Bean(name = "REDBEAMS_PROVISION_FINISHED_STATE")
     public Action<?, ?> provisionFinished() {
-        return new AbstractRedbeamsAction<>(AllocateDatabaseServerSuccess.class) {
+        return new AbstractRedbeamsProvisionAction<>(RegisterDatabaseServerSuccess.class) {
             @Override
-            protected RedbeamsContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
-                                                        AllocateDatabaseServerSuccess payload) {
-                // Get the cloud context and the cloud credentials
-                return new RedbeamsContext(flowParameters, null, null);
-            }
-
-            @Override
-            protected void doExecute(CommonContext context, AllocateDatabaseServerSuccess payload, Map<Object, Object> variables) throws Exception {
-                sendEvent(context);
-            }
-
-            @Override
-            protected Object getFailurePayload(AllocateDatabaseServerSuccess payload, Optional<CommonContext> flowContext, Exception ex) {
-                return null;
+            protected Selectable createRequest(RedbeamsContext context) {
+                return new RedbeamsEvent(RedbeamsProvisionEvent.REDBEAMS_PROVISION_FINISHED_EVENT.name(), 0L);
             }
         };
     }
