@@ -21,6 +21,9 @@ public abstract class EnvironmentBaseResponse {
     @ApiModelProperty(EnvironmentModelDescription.REGIONS)
     private CompactRegionResponse regions;
 
+    @ApiModelProperty(EnvironmentModelDescription.CREATE_FREEIPA)
+    private Boolean createFreeIpa = Boolean.TRUE;
+
     @ApiModelProperty(EnvironmentModelDescription.CLOUD_PLATFORM)
     private String cloudPlatform;
 
@@ -117,5 +120,13 @@ public abstract class EnvironmentBaseResponse {
 
     public void setCreator(String creator) {
         this.creator = creator;
+    }
+
+    public Boolean getCreateFreeIpa() {
+        return createFreeIpa;
+    }
+
+    public void setCreateFreeIpa(Boolean createFreeIpa) {
+        this.createFreeIpa = createFreeIpa;
     }
 }

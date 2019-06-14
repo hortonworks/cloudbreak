@@ -42,6 +42,7 @@ public class EnvironmentToDetailedEnvironmentResponseConverter extends AbstractC
         response.setLocation(getConversionService().convert(source, LocationResponse.class));
         response.setEnvironmentStatus(source.getStatus().getResponseStatus());
         response.setCreator(source.getCreator());
+        response.setCreateFreeIpa(source.isCreateFreeIpa());
         setNetworkIfPossible(response, source);
         return response;
     }

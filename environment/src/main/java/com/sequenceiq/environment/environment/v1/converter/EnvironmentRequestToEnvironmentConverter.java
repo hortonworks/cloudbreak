@@ -13,6 +13,7 @@ public class EnvironmentRequestToEnvironmentConverter extends AbstractConversion
         Environment environment = new Environment();
         environment.setName(source.getName());
         environment.setDescription(source.getDescription());
+        environment.setCreateFreeIpa(source.getCreateFreeIpa() == null ? true : source.getCreateFreeIpa());
         return environment;
     }
 }

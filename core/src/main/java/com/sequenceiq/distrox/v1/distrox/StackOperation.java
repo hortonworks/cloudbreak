@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 
 @Service
 public class StackOperation {
@@ -67,11 +68,16 @@ public class StackOperation {
     @Inject
     private DefaultClouderaManagerRepoService defaultClouderaManagerRepoService;
 
+    @Inject
+    private EnvironmentServiceDecorator environmentServiceDecorator;
+
     public StackViewV4Responses list(Long workspaceId, String environmentCrn, StackType stackType) {
-        Set<StackViewV4Response> stackViewResponses = converterUtil.convertAllAsSet(
+        Set<StackViewV4Response> stackViewResponses;
+        stackViewResponses = converterUtil.convertAllAsSet(
                 stackApiViewService.retrieveStackViewsByWorkspaceId(workspaceId, environmentCrn, stackType),
-                StackViewV4Response.class
-        );
+                StackViewV4Response.class);
+        environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses);
+
         return new StackViewV4Responses(stackViewResponses);
     }
 
@@ -83,7 +89,9 @@ public class StackOperation {
     }
 
     public StackV4Response get(Long workspaceId, String name, Set<String> entries, StackType stackType) {
-        return stackCommonService.findStackByNameAndWorkspaceId(name, workspaceId, entries, stackType);
+        StackV4Response stackResponse = stackCommonService.findStackByNameAndWorkspaceId(name, workspaceId, entries, stackType);
+        environmentServiceDecorator.prepareEnvironmentAndCredentialName(stackResponse);
+        return stackResponse;
     }
 
     public void delete(Long workspaceId, String name, Boolean forced, Boolean deleteDependencies) {
@@ -171,4 +179,5 @@ public class StackOperation {
     public Stack getStackByName(String name) {
         return stackService.getByNameInWorkspace(name, workspaceService.getForCurrentUser().getId());
     }
+
 }

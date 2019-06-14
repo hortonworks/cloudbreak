@@ -29,6 +29,9 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @ApiModelProperty(EnvironmentModelDescription.CREDENTIAL_NAME_REQUEST)
     private String credentialName;
 
+    @ApiModelProperty(EnvironmentModelDescription.CREATE_FREEIPA)
+    private Boolean createFreeIpa = Boolean.TRUE;
+
     @ApiModelProperty(EnvironmentModelDescription.REGIONS)
     private Set<String> regions = new HashSet<>();
 
@@ -98,5 +101,13 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
+    }
+
+    public Boolean getCreateFreeIpa() {
+        return createFreeIpa;
+    }
+
+    public void setCreateFreeIpa(Boolean createFreeIpa) {
+        this.createFreeIpa = createFreeIpa;
     }
 }
