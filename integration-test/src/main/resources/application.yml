@@ -156,6 +156,10 @@ integrationtest:
   periscope:
       server:
 
+  # freeipa properties
+  freeipa:
+      server:
+
   # gcp credential details
   gcpcredential:
      name:
