@@ -115,7 +115,7 @@ func assembleDistroXRequest(c *cli.Context) *model.DistroXV1Request {
 			}
 		}
 	}
-	if &req.Name == nil || len(*req.Name) == 0 {
+	if req.Name == nil || len(*req.Name) == 0 {
 		commonutils.LogErrorMessageAndExit("Name of the DistroX must be set either in the template or with the --name command line option.")
 	}
 
