@@ -4,16 +4,13 @@ import static com.sequenceiq.cloudbreak.polling.PollingResult.SUCCESS;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINISH_ENV_CREATION_EVENT;
 
-import java.security.KeyPair;
 import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
-import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.configuration.SupportedPlatfroms;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -35,6 +32,11 @@ import reactor.bus.Event;
 
 @Component
 public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentDto> {
+
+    private String dummySshKey = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kc"
+            + "UEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpj"
+            + "T7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh"
+            + "centos";
 
     private final EnvironmentService environmentService;
 
@@ -67,7 +69,7 @@ public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         Optional<Environment> environmentOptional = environmentService.findById(environmentDto.getId());
 
         try {
-            if (environmentOptional.isPresent()) {
+            if (environmentOptional.isPresent() && environmentOptional.get().isCreateFreeIpa()) {
                 Environment environment = environmentOptional.get();
                 if (supportedPlatfroms.supportedPlatformForFreeIpa(environment.getCloudPlatform())) {
 
@@ -127,7 +129,7 @@ public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private FreeIpaServerRequest createFreeIpaServerRequest() {
         FreeIpaServerRequest request = new FreeIpaServerRequest();
-        request.setAdminPassword(PasswordUtil.generatePassword());
+        request.setAdminPassword("Admin123!");
         request.setDomain("cdp.site");
         request.setHostname("ipaserver");
         return request;
@@ -142,8 +144,7 @@ public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     private StackAuthenticationRequest createStackAuthenticationRequest() {
         StackAuthenticationRequest request = new StackAuthenticationRequest();
         request.setLoginUserName("cloudbreak");
-        KeyPair keyPair = PkiUtil.generateKeypair();
-        request.setPublicKey(PkiUtil.convertOpenSshPublicKey(keyPair.getPublic()));
+        request.setPublicKey(dummySshKey);
         return request;
     }
 

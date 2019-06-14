@@ -53,7 +53,6 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
-import com.sequenceiq.cloudbreak.controller.validation.environment.network.EnvironmentNetworkValidator;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteria;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ExecutorBasedParallelOrchestratorComponentRunner;
@@ -154,9 +153,6 @@ public class AppConfig implements ResourceLoaderAware {
 
     @Inject
     private List<EnvironmentNetworkConverter> environmentNetworkConverters;
-
-    @Inject
-    private List<EnvironmentNetworkValidator> environmentNetworkValidators;
 
     private ResourceLoader resourceLoader;
 
@@ -314,13 +310,6 @@ public class AppConfig implements ResourceLoaderAware {
         return environmentNetworkConverters
                 .stream()
                 .collect(Collectors.toMap(EnvironmentNetworkConverter::getCloudPlatform, x -> x));
-    }
-
-    @Bean
-    public Map<CloudPlatform, EnvironmentNetworkValidator> environmentNetworkValidatorsByCloudPlatform() {
-        return environmentNetworkValidators
-                .stream()
-                .collect(Collectors.toMap(EnvironmentNetworkValidator::getCloudPlatform, x -> x));
     }
 
     @Bean

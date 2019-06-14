@@ -55,10 +55,8 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
 public class StackToStackV4ResponseConverter extends AbstractConversionServiceAwareConverter<Stack, StackV4Response> {
@@ -86,9 +84,6 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
     @Inject
     private ResourceAttributeUtil resourceAttributeUtil;
 
-    @Inject
-    private EnvironmentClientService environmentClientService;
-
     @Override
     public StackV4Response convert(Stack source) {
         StackV4Response response = new StackV4Response();
@@ -103,9 +98,6 @@ public class StackToStackV4ResponseConverter extends AbstractConversionServiceAw
         response.setAuthentication(getConversionService().convert(source.getStackAuthentication(), StackAuthenticationV4Response.class));
         response.setId(source.getId());
         response.setEnvironmentCrn(source.getEnvironmentCrn());
-        DetailedEnvironmentResponse environmentResponse = environmentClientService.getByCrn(source.getEnvironmentCrn());
-        response.setEnvironmentName(environmentResponse.getName());
-        response.setCredentialName(environmentResponse.getCredential().getName());
         response.setCloudPlatform(CloudPlatform.valueOf(source.getCloudPlatform()));
         response.setPlacement(getConversionService().convert(source, PlacementSettingsV4Response.class));
         response.setStatus(source.getStatus());

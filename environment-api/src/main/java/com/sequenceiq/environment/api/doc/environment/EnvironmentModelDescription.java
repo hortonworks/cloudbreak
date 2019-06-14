@@ -11,6 +11,7 @@ public class EnvironmentModelDescription {
     public static final String AZURE_NETWORK_ID = "Subnet ids of the specified networks";
     public static final String AZURE_NO_PUBLIC_IP = "Subnet ids of the specified networks";
     public static final String AZURE_NO_FIREWALL_RULES = "Subnet ids of the specified networks";
+    public static final String CREATE_FREEIPA = "Create freeipa in environment";
 
     public static final String CREDENTIAL_NAME_REQUEST = "Name of the credential of the environment. If the name is given, "
             + "the detailed credential is ignored in the request.";

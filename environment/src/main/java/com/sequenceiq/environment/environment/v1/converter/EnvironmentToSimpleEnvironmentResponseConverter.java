@@ -29,6 +29,7 @@ public class EnvironmentToSimpleEnvironmentResponseConverter extends AbstractCon
         response.setCloudPlatform(source.getCloudPlatform());
         response.setLocation(getConversionService().convert(source, LocationResponse.class));
         response.setCredential(credentialConverter.convert(source.getCredential()));
+        response.setCreateFreeIpa(source.isCreateFreeIpa());
         return response;
     }
 }

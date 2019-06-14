@@ -60,6 +60,9 @@ public class Environment implements AuthResource {
     private String location;
 
     @Column(nullable = false)
+    private boolean createFreeIpa;
+
+    @Column(nullable = false)
     private String locationDisplayName;
 
     @Column(nullable = false)
@@ -238,5 +241,13 @@ public class Environment implements AuthResource {
 
     public void setCreator(String creator) {
         this.creator = creator;
+    }
+
+    public boolean isCreateFreeIpa() {
+        return createFreeIpa;
+    }
+
+    public void setCreateFreeIpa(boolean createFreeIpa) {
+        this.createFreeIpa = createFreeIpa;
     }
 }

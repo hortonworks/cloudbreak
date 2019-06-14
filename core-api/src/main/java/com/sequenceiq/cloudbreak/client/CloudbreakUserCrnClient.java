@@ -8,8 +8,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintUtilV4Endpoi
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.EnvironmentV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.events.EventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.info.CloudbreakInfoV4Endpoint;
@@ -55,14 +53,6 @@ public class CloudbreakUserCrnClient extends AbstractUserCrnServiceClient<Cloudb
 
         public BlueprintUtilV4Endpoint blueprintUtilV4Endpoint() {
             return getEndpoint(BlueprintUtilV4Endpoint.class);
-        }
-
-        public EnvironmentV4Endpoint environmentV4Endpoint() {
-            return getEndpoint(EnvironmentV4Endpoint.class);
-        }
-
-        public EventV4Endpoint eventV3Endpoint() {
-            return getEndpoint(EventV4Endpoint.class);
         }
 
         public ImageCatalogV4Endpoint imageCatalogV4Endpoint() {
