@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfiguration
 import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
 import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.s3.S3FileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -34,28 +35,24 @@ public class ZeppelinS3CloudStorageRoleConfigProviderTest {
     private final ZeppelinS3CloudStorageRoleConfigProvider underTest = new ZeppelinS3CloudStorageRoleConfigProvider();
 
     @Test
-    public void testGetZeppelinStorageRoleConfigs() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, true);
-        String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
-        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-        Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
-
-        List<ApiClusterTemplateConfig> zeppelinStorageConfigs = roleConfigs.get("zeppelin-ZEPPELIN_SERVER-BASE");
-        assertEquals(2, zeppelinStorageConfigs.size());
-
-        assertEquals("zeppelin-conf/zeppelin-site.xml_role_safety_valve", zeppelinStorageConfigs.get(0).getName());
-        String expected = "<property><name>zeppelin.notebook.s3.bucket</name><value>"
-                + getZeppelinS3Bucket().getValue()
-                + "</value></property>"
-                + "<property><name>zeppelin.notebook.s3.user</name><value>"
-                + getZeppelinS3User().getValue() + "</value></property>";
-        assertEquals(expected, zeppelinStorageConfigs.get(0).getValue());
-        assertEquals("org.apache.zeppelin.notebook.repo.S3NotebookRepo", zeppelinStorageConfigs.get(1).getValue());
+    public void testGetZeppelinStorageRoleConfigsWithVariousBucketValues() {
+        assertZeppelinStorageValues("s3a://testbucket/test-cluster/zep-pelin",
+                "testbucket", "test-cluster/zep-pelin");
+        assertZeppelinStorageValues("s3a://testbucket/basepath1/testcluster/zeppelin",
+                "testbucket", "basepath1/testcluster/zeppelin");
+        assertZeppelinStorageValues("s3a://testbucket/basepath1/basepath2/testcluster/zeppelin",
+                "testbucket", "basepath1/basepath2/testcluster/zeppelin");
+        assertZeppelinStorageValues("s3a://test-bucket/testcluster/zeppelin",
+                "test-bucket", "testcluster/zeppelin");
+        assertZeppelinStorageValues("s3a://test.bucket/testcluster/zeppelin",
+                "test.bucket", "testcluster/zeppelin");
+        assertZeppelinStorageValues("s3a://test-bucket",
+                "test-bucket", "");
     }
 
-    @Test
-    public void testGetZeppelinStorageRoleConfigsWhenDefaultUser() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, false, true);
+    protected void assertZeppelinStorageValues(String s3Path, String bucketName, String userPath) {
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, false,
+                true, s3Path);
         String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
@@ -64,10 +61,8 @@ public class ZeppelinS3CloudStorageRoleConfigProviderTest {
         assertEquals(2, zeppelinStorageConfigs.size());
 
         assertEquals("zeppelin-conf/zeppelin-site.xml_role_safety_valve", zeppelinStorageConfigs.get(0).getName());
-        String expected = "<property><name>zeppelin.notebook.s3.bucket</name><value>"
-                + getZeppelinS3Bucket().getValue()
-                + "</value></property>"
-                + "<property><name>zeppelin.notebook.s3.user</name><value>zeppelin</value></property>";
+        String expected = "<property><name>zeppelin.notebook.s3.bucket</name><value>" + bucketName + "</value></property>"
+                + "<property><name>zeppelin.notebook.s3.user</name><value>" + userPath + "</value></property>";
         assertEquals(expected, zeppelinStorageConfigs.get(0).getValue());
 
         assertEquals("org.apache.zeppelin.notebook.repo.S3NotebookRepo", zeppelinStorageConfigs.get(1).getValue());
@@ -75,7 +70,7 @@ public class ZeppelinS3CloudStorageRoleConfigProviderTest {
 
     @Test
     public void testIsConfigurationNeededWhenS3FileSystem() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, true);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, true, "");
         String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         boolean configurationNeeded = underTest.isConfigurationNeeded(cmTemplateProcessor, preparationObject);
@@ -84,25 +79,22 @@ public class ZeppelinS3CloudStorageRoleConfigProviderTest {
 
     @Test
     public void testIsConfigurationNeededWhenNotS3FileSystem() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, false);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, false, "");
         String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         boolean configurationNeeded = underTest.isConfigurationNeeded(cmTemplateProcessor, preparationObject);
         assertFalse(configurationNeeded);
     }
 
-    private TemplatePreparationObject getTemplatePreparationObject(boolean includeBucket, boolean includeUser, boolean useS3FileSystem) {
+    private TemplatePreparationObject getTemplatePreparationObject(boolean includeBucket, boolean includeUser,
+            boolean useS3FileSystem, String bucketLocation) {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
 
         List<StorageLocationView> locations = new ArrayList<>();
 
         if (includeBucket) {
-            locations.add(new StorageLocationView(getZeppelinS3Bucket()));
-        }
-
-        if (includeUser) {
-            locations.add(new StorageLocationView(getZeppelinS3User()));
+            locations.add(new StorageLocationView(getZeppelinS3Bucket(bucketLocation)));
         }
 
         BaseFileSystemConfigurationsView fileSystemConfigurationsView;
@@ -114,22 +106,17 @@ public class ZeppelinS3CloudStorageRoleConfigProviderTest {
                     new AdlsFileSystemConfigurationsView(new AdlsFileSystem(), locations, false);
         }
 
-        return Builder.builder().withFileSystemConfigurationView(fileSystemConfigurationsView)
+        GeneralClusterConfigs clusterConfigs = new GeneralClusterConfigs();
+        clusterConfigs.setClusterName("zeppelincluster");
+        return Builder.builder().withGeneralClusterConfigs(clusterConfigs).withFileSystemConfigurationView(fileSystemConfigurationsView)
                 .withHostgroupViews(Set.of(master, worker)).build();
     }
 
-    protected StorageLocation getZeppelinS3Bucket() {
+    protected StorageLocation getZeppelinS3Bucket(String bucketValue) {
         StorageLocation zeppelinS3Bucket = new StorageLocation();
         zeppelinS3Bucket.setProperty("zeppelin.notebook.s3.bucket");
-        zeppelinS3Bucket.setValue("zeppelinbucket");
+        zeppelinS3Bucket.setValue(bucketValue);
         return zeppelinS3Bucket;
-    }
-
-    protected StorageLocation getZeppelinS3User() {
-        StorageLocation zeppelinS3User = new StorageLocation();
-        zeppelinS3User.setProperty("zeppelin.notebook.s3.user");
-        zeppelinS3User.setValue("testuser");
-        return zeppelinS3User;
     }
 
     private String getBlueprintText(String path) {
