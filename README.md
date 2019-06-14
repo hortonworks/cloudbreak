@@ -193,6 +193,7 @@ Replace `<UAA_DEFAULT_SECRET>` with the value of UAA_DEFAULT_SECRET from the cdb
 After importing the cloudbreak repo root, launch the Datalake application by executing the com.sequenceiq.datalake.DatalakeApplication class with the following JVM options:
 
 ````
+-Dserver.port=8086
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
 ````
 
@@ -273,6 +274,7 @@ To run Datalake from the command line, run the following Gradle command:
 
 ````
 ./gradlew :datalake:bootRun -PjvmArgs="-Dvault.root.token=<VAULT_ROOT_TOKEN> \
+-Dserver.port=8086 \
 -Dspring.config.location=$(pwd)/datalake/src/main/resources/application.yml,$(pwd)/datalake/build/resources/main/application.properties"
 ````
 
