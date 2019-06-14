@@ -8,64 +8,45 @@
     "displayName": "ha-datalake",
     "hostTemplates": [
       {
+        "cardinality": 2,
         "refName": "master",
         "roleConfigGroupsRefNames": [
-          "hbase-REGIONSERVER-BASE",
-          "hbase-MASTER-BASE",
           "hdfs-DATANODE-BASE",
           "hdfs-FAILOVERCONTROLLER-BASE",
           "hdfs-JOURNALNODE-BASE",
-          "hdfs-NAMENODE-1",
+          "hdfs-NAMENODE-BASE",
           "hive-HIVEMETASTORE-BASE",
-          "solr-SOLR_SERVER-BASE",
-          "zookeeper-SERVER-BASE"
+          "zookeeper-SERVER-BASE",
+          "kafka-GATEWAY-BASE",
+          "kafka-KAFKA_BROKER-BASE",
+          "solr-SOLR_SERVER-BASE"
         ]
       },
       {
-        "refName": "master2",
-        "roleConfigGroupsRefNames": [
-          "hdfs-BALANCER-BASE",
-          "hbase-REGIONSERVER-BASE",
-          "hbase-MASTER-BASE",
-          "hdfs-DATANODE-BASE",
-          "hdfs-FAILOVERCONTROLLER-BASE",
-          "hdfs-JOURNALNODE-BASE",
-          "hdfs-NAMENODE-2",
-          "zookeeper-SERVER-BASE"
-        ]
-      },
-      {
+        "cardinality": 2,
         "refName": "alpha",
         "roleConfigGroupsRefNames": [
           "ranger-RANGER_ADMIN-BASE",
-          "ranger-RANGER_USERSYNC-BASE",
-          "atlas-ATLAS_SERVER-1",
           "hdfs-DATANODE-BASE",
           "knox-KNOX_GATEWAY-BASE",
-          "ranger-RANGER_TAGSYNC-BASE",
-          "kafka-KAFKA_BROKER-BASE",
-          "zookeeper-SERVER-BASE",
-          "hdfs-JOURNALNODE-BASE"
-        ]
-      },
-      {
-        "refName": "alpha2",
-        "roleConfigGroupsRefNames": [
-          "kafka-GATEWAY-BASE",
-          "atlas-ATLAS_SERVER-BASE",
-          "kafka-KAFKA_BROKER-BASE",
-          "zookeeper-SERVER-BASE"
-        ]
-      },
-      {
-        "refName": "beta",
-        "roleConfigGroupsRefNames": [
-          "hdfs-DATANODE-BASE",
-          "zookeeper-SERVER-BASE"
+          "hbase-REGIONSERVER-BASE",
+          "hbase-MASTER-BASE",
+          "atlas-ATLAS_SERVER-BASE"
         ]
       },
       {
         "cardinality": 1,
+        "refName": "gateway",
+        "roleConfigGroupsRefNames": [
+          "hdfs-BALANCER-BASE",
+          "hdfs-JOURNALNODE-BASE",
+          "ranger-RANGER_USERSYNC-BASE",
+          "ranger-RANGER_TAGSYNC-BASE",
+          "zookeeper-SERVER-BASE"
+        ]
+      },
+      {
+        "cardinality": 2,
         "refName": "idbroker",
         "roleConfigGroupsRefNames": [
           "knox-IDBROKER-BASE"
@@ -75,29 +56,17 @@
     "services": [
       {
         "refName": "atlas",
-        "serviceType": "ATLAS",
         "roleConfigGroups": [
           {
-            "refName": "atlas-ATLAS_SERVER-BASE",
-            "roleType": "ATLAS_SERVER",
             "base": true,
             "configs": [
               {
                 "name": "atlas_kafka_bootstrap_servers",
-                "value": "{{{ format-join host_groups.alpha format='%s:9092' }}},{{{ format-join host_groups.alpha2 format='%s:9092' }}}"
+                "value": "{{{format-join host_groups.master format='%s:9092' }}}"
               }
-            ]
-          },
-          {
-            "refName": "atlas-ATLAS_SERVER-1",
-            "roleType": "ATLAS_SERVER",
-            "base": false,
-            "configs": [
-              {
-                "name": "atlas_kafka_bootstrap_servers",
-                "value": "{{{ format-join host_groups.alpha format='%s:9092' }}},{{{ format-join host_groups.alpha2 format='%s:9092' }}}"
-              }
-            ]
+            ],
+            "refName": "atlas-ATLAS_SERVER-BASE",
+            "roleType": "ATLAS_SERVER"
           }
         ],
         "serviceConfigs": [
@@ -117,29 +86,13 @@
             "name": "hdfs_service",
             "ref": "hdfs"
           }
-        ]
+        ],
+        "serviceType": "ATLAS"
       },
       {
         "refName": "hbase",
-        "serviceType": "HBASE",
-        "serviceConfigs": [
-          {
-            "name": "hbase_enable_indexing",
-            "value": "true"
-          },
-          {
-            "name": "hbase_enable_replication",
-            "value": "true"
-          },
-          {
-            "name": "zookeeper_session_timeout",
-            "value": "30000"
-          }
-        ],
         "roleConfigGroups": [
           {
-            "refName": "hbase-MASTER-BASE",
-            "roleType": "MASTER",
             "base": true,
             "configs": [
               {
@@ -150,11 +103,11 @@
                 "name": "hbase_master_port",
                 "value": "22001"
               }
-            ]
+            ],
+            "refName": "hbase-MASTER-BASE",
+            "roleType": "MASTER"
           },
           {
-            "refName": "hbase-REGIONSERVER-BASE",
-            "roleType": "REGIONSERVER",
             "base": true,
             "configs": [
               {
@@ -169,81 +122,52 @@
                 "name": "hbase_regionserver_port",
                 "value": "22101"
               }
-            ]
+            ],
+            "refName": "hbase-REGIONSERVER-BASE",
+            "roleType": "REGIONSERVER"
           }
-        ]
+        ],
+        "serviceConfigs": [
+          {
+            "name": "hbase_enable_indexing",
+            "value": "true"
+          },
+          {
+            "name": "hbase_enable_replication",
+            "value": "true"
+          },
+          {
+            "name": "zookeeper_session_timeout",
+            "value": "30000"
+          }
+        ],
+        "serviceType": "HBASE"
       },
       {
         "refName": "hdfs",
-        "serviceType": "HDFS",
-        "serviceConfigs": [
-          {
-            "name": "dfs_replication",
-            "value": "3"
-          },
-          {
-            "name": "redaction_policy_enabled",
-            "value": "false"
-          }
-        ],
         "roleConfigGroups": [
           {
-            "refName": "hdfs-NAMENODE-1",
-            "roleType": "NAMENODE",
-            "base": false,
-            "configs": [
-              {
-                "name": "dfs_federation_namenode_nameservice",
-                "value": "nameservice1"
-              },
-              {
-                "name": "dfs_namenode_quorum_journal_name",
-                "value": "nameservice1"
-              },
-              {
-                "name": "dfs_http_port",
-                "value": "20101"
-              },
-              {
-                "name": "namenode_config_safety_valve",
-                "value": "\n <property>\n <name>dfs.namenode.redundancy.considerLoad</name>\n <value>false</value>\n </property>"
-              },
-              {
-                "name": "dfs_https_port",
-                "value": "20102"
-              }
-            ]
+            "base": true,
+            "refName": "hdfs-NAMENODE-BASE",
+            "roleType": "NAMENODE"
           },
           {
-            "refName": "hdfs-NAMENODE-2",
-            "roleType": "NAMENODE",
-            "base": false,
-            "configs": [
-              {
-                "name": "dfs_federation_namenode_nameservice",
-                "value": "nameservice1"
-              },
-              {
-                "name": "dfs_namenode_quorum_journal_name",
-                "value": "nameservice1"
-              },
-              {
-                "name": "autofailover_enabled",
-                "value": "true"
-              },
-              {
-                "name": "dfs_http_port",
-                "value": "20101"
-              },
-              {
-                "name": "dfs_https_port",
-                "value": "20102"
-              }
-            ]
+            "base": true,
+            "refName": "hdfs-FAILOVERCONTROLLER-BASE",
+            "roleType": "FAILOVERCONTROLLER"
           },
           {
-            "refName": "hdfs-DATANODE-BASE",
-            "roleType": "DATANODE",
+            "base": true,
+            "configs": [
+              {
+                "name": "dfs_journalnode_edits_dir",
+                "value": "/dfs/jn"
+              }
+            ],
+            "refName": "hdfs-JOURNALNODE-BASE",
+            "roleType": "JOURNALNODE"
+          },
+          {
             "base": true,
             "configs": [
               {
@@ -254,41 +178,45 @@
                 "name": "dfs_data_dir_list",
                 "value": "/dfs/dn"
               }
-            ]
+            ],
+            "refName": "hdfs-DATANODE-BASE",
+            "roleType": "DATANODE"
           },
           {
-            "refName": "hdfs-BALANCER-BASE",
-            "roleType": "BALANCER",
-            "base": true
-          },
-          {
-            "refName": "hdfs-FAILOVERCONTROLLER-BASE",
-            "roleType": "FAILOVERCONTROLLER",
-            "base": true
-          },
-          {
-            "refName": "hdfs-JOURNALNODE-BASE",
-            "roleType": "JOURNALNODE",
             "base": true,
             "configs": [
               {
-                "name": "dfs_journalnode_edits_dir",
-                "value": "/dfs/jn"
+                "name": "fs_checkpoint_dir_list",
+                "value": "/should_not_be_required_in_HA_setup"
               }
-            ]
+            ],
+            "refName": "hdfs-SECONDARYNAMENODE-BASE",
+            "roleType": "SECONDARYNAMENODE"
+          },
+          {
+            "base": true,
+            "refName": "hdfs-BALANCER-BASE",
+            "roleType": "BALANCER"
           }
-        ]
+        ],
+        "serviceConfigs": [
+          {
+            "name": "redaction_policy_enabled",
+            "value": "false"
+          }
+        ],
+        "serviceType": "HDFS"
       },
       {
         "refName": "hive",
-        "serviceType": "HIVE",
         "roleConfigGroups": [
           {
+            "base": true,
             "refName": "hive-HIVEMETASTORE-BASE",
-            "roleType": "HIVEMETASTORE",
-            "base": true
+            "roleType": "HIVEMETASTORE"
           }
-        ]
+        ],
+        "serviceType": "HIVE"
       },
       {
         "refName": "kafka",
@@ -367,9 +295,9 @@
         "refName": "solr",
         "roleConfigGroups": [
           {
+            "base": true,
             "refName": "solr-SOLR_SERVER-BASE",
-            "roleType": "SOLR_SERVER",
-            "base": true
+            "roleType": "SOLR_SERVER"
           }
         ],
         "serviceConfigs": [
@@ -386,29 +314,28 @@
       },
       {
         "refName": "zookeeper",
-        "serviceType": "ZOOKEEPER",
         "roleConfigGroups": [
           {
+            "base": true,
             "refName": "zookeeper-SERVER-BASE",
-            "roleType": "SERVER",
-            "base": true
+            "roleType": "SERVER"
           }
-        ]
+        ],
+        "serviceType": "ZOOKEEPER"
       },
       {
-        "serviceType": "KNOX",
         "refName": "knox",
         "roleConfigGroups": [
           {
             "base": true,
-            "refName": "knox-KNOX_GATEWAY-BASE",
-            "roleType": "KNOX_GATEWAY",
             "configs": [
               {
                 "name": "gateway_master_secret",
                 "value": "cloudera1"
               }
-            ]
+            ],
+            "refName": "knox-KNOX_GATEWAY-BASE",
+            "roleType": "KNOX_GATEWAY"
           },
           {
             "base": true,
@@ -421,7 +348,8 @@
             "refName": "knox-IDBROKER-BASE",
             "roleType": "IDBROKER"
           }
-        ]
+        ],
+        "serviceType": "KNOX"
       }
     ]
   }
