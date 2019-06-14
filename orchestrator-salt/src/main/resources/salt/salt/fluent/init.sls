@@ -62,9 +62,12 @@ warning_fluentd_os:
 {% endif %}
 install_fluentd_plugins:
   cmd.run:
-    - name: /opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-cloudwatch-logs
+    - names:
+      - /opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-cloudwatch-logs
+      - curl -L -o /tmp/fluent-plugin-databus-1.0.0.gem https://cloudera-service-delivery-cache.s3.amazonaws.com/fluent-plugin-databus-1.0.0.gem
+      - /opt/td-agent/embedded/bin/fluent-gem install /tmp/fluent-plugin-databus-1.0.0.gem
+      - rm -f /tmp/fluent-plugin-databus-1.0.0.gem
     - onlyif: test -d /opt/td-agent/embedded/bin/
-
 {% endif %}
 
 /etc/td-agent/pos:
