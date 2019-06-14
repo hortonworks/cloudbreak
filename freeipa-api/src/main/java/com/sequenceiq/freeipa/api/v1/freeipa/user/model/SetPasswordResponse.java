@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.user.model;
 
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UserModelDescriptions;
@@ -16,9 +17,9 @@ public class SetPasswordResponse {
     private final List<String> success;
 
     @ApiModelProperty(value = UserModelDescriptions.FAILURE_ENVIRONMENTNAME)
-    private final List<String> failure;
+    private final Map<String, String> failure;
 
-    public SetPasswordResponse(List<String> success, List<String> failure) {
+    public SetPasswordResponse(List<String> success, Map<String, String> failure) {
         this.success = success;
         this.failure = failure;
     }
@@ -27,7 +28,7 @@ public class SetPasswordResponse {
         return success;
     }
 
-    public List<String> getFailure() {
+    public Map<String, String> getFailure() {
         return failure;
     }
 }
