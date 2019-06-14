@@ -29,7 +29,7 @@ public interface DatalakeResourcesRepository extends WorkspaceResourceRepository
     Optional<DatalakeResources> findByDatalakeStackId(Long datalakeStackId);
 
     @CheckPermissionsByWorkspaceId
-    @Query("SELECT dr.name FROM DatalakeResources dr WHERE dr.workspace.id = :workspaceId AND dr.environmentCrn = :envCrn")
+    @Query("SELECT dr FROM DatalakeResources dr WHERE dr.workspace.id = :workspaceId AND dr.environmentCrn = :envCrn")
     Set<DatalakeResources> findDatalakeResourcesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("envCrn") String envCrn);
 
     @CheckPermissionsByWorkspaceId
