@@ -182,8 +182,9 @@ public class FreeIpaClient {
             LOGGER.debug("Response object: {}", response);
             return response;
         } catch (Throwable throwable) {
-            LOGGER.error("Invoke FreeIpa failed", throwable);
-            throw new FreeIpaClientException("Invoke FreeIpa failed", throwable);
+            String message = String.format("Invoke FreeIpa failed: %s", throwable.getLocalizedMessage());
+            LOGGER.error(message, throwable);
+            throw new FreeIpaClientException(message, throwable);
         }
     }
 }
