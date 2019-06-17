@@ -18,7 +18,6 @@ import javax.ws.rs.BadRequestException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -29,6 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.environment.configuration.EnabledPlatformProvider;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.exception.CredentialOperationException;
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
@@ -61,25 +61,30 @@ public class CredentialService extends AbstractCredentialService {
     @Inject
     private SecretService secretService;
 
-    protected CredentialService(NotificationSender notificationSender, CloudbreakMessagesService messagesService,
-            @Value("${environment.enabledplatforms}") Set<String> enabledPlatforms) {
-        super(notificationSender, messagesService, enabledPlatforms);
+    @Inject
+    private EnabledPlatformProvider enabledPlatformProvider;
+
+    protected CredentialService(NotificationSender notificationSender, CloudbreakMessagesService messagesService) {
+        super(notificationSender, messagesService);
     }
 
     public Set<Credential> listAvailablesByAccountId(String accountId) {
-        return repository.findAllByAccountId(accountId, getEnabledPlatforms());
+        return repository.findAllByAccountId(accountId, enabledPlatformProvider.enabledPlatforms());
     }
 
     public Credential getByNameForAccountId(String name, String accountId) {
-        return repository.findByNameAndAccountId(name, accountId, getEnabledPlatforms()).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
+        return repository.findByNameAndAccountId(name, accountId,
+                enabledPlatformProvider.enabledPlatforms()).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
     }
 
     public Credential getByCrnForAccountId(String crn, String accountId) {
-        return repository.findByCrnAndAccountId(crn, accountId, getEnabledPlatforms()).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, crn));
+        return repository.findByCrnAndAccountId(crn, accountId,
+                enabledPlatformProvider.enabledPlatforms()).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, crn));
     }
 
     public Credential getByEnvCrnForAccountId(String crn, String accountId) {
-        return repository.findByEnvCrnAndAccountId(crn, accountId, getEnabledPlatforms()).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, crn));
+        return repository.findByEnvCrnAndAccountId(crn, accountId,
+                enabledPlatformProvider.enabledPlatforms()).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, crn));
     }
 
     public Map<String, String> interactiveLogin(String accountId, Credential credential) {
@@ -88,7 +93,8 @@ public class CredentialService extends AbstractCredentialService {
     }
 
     public Credential updateByAccountId(Credential credential, String accountId) {
-        Credential original = repository.findByNameAndAccountId(credential.getName(), accountId, getEnabledPlatforms())
+        Credential original = repository.findByNameAndAccountId(credential.getName(), accountId,
+                enabledPlatformProvider.enabledPlatforms())
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, credential.getName()));
         if (!Objects.equals(credential.getCloudPlatform(), original.getCloudPlatform())) {
             throw new BadRequestException("Modifying credential platform is forbidden");
@@ -108,7 +114,8 @@ public class CredentialService extends AbstractCredentialService {
     }
 
     public Credential create(Credential credential, @Nonnull String accountId, @Nonnull String creator) {
-        repository.findByNameAndAccountId(credential.getName(), accountId, getEnabledPlatforms())
+        repository.findByNameAndAccountId(credential.getName(), accountId,
+                enabledPlatformProvider.enabledPlatforms())
                 .map(Credential::getName)
                 .ifPresent(name -> {
                     throw new BadRequestException("Credential already exists with name: " + name);
@@ -139,7 +146,8 @@ public class CredentialService extends AbstractCredentialService {
     }
 
     public String initCodeGrantFlow(String accountId, String name) {
-        Credential original = repository.findByNameAndAccountId(name, accountId, getEnabledPlatforms())
+        Credential original = repository.findByNameAndAccountId(name, accountId,
+                enabledPlatformProvider.enabledPlatforms())
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
         String originalAttributes = original.getAttributes();
         boolean codeGrantFlow = Boolean.valueOf(new Json(originalAttributes).getMap().get("codeGrantFlow").toString());

@@ -11,10 +11,10 @@ import javax.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.environment.configuration.EnabledPlatformProvider;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
@@ -31,24 +31,30 @@ public class CredentialDeleteService extends AbstractCredentialService {
 
     private EnvironmentViewService environmentViewService;
 
+    private EnabledPlatformProvider enabledPlatformProvider;
+
     public CredentialDeleteService(CredentialRepository repository,
             NotificationSender notificationSender,
             CloudbreakMessagesService messagesService,
             EnvironmentViewService environmentViewService,
-            @Value("${environment.enabledplatforms}") Set<String> enabledPlatforms) {
-        super(notificationSender, messagesService, enabledPlatforms);
+            EnabledPlatformProvider enabledPlatformProvider) {
+        super(notificationSender, messagesService);
         this.repository = repository;
         this.environmentViewService = environmentViewService;
+        this.enabledPlatformProvider = enabledPlatformProvider;
     }
 
     public Set<Credential> deleteMultiple(Set<String> names, String accountId) {
         Set<Credential> deletedOnes = new LinkedHashSet<>();
-        names.forEach(credentialName -> deletedOnes.add(deleteByName(credentialName, accountId)));
+        names.forEach(
+                credentialName -> deletedOnes.add(
+                        deleteByName(credentialName, accountId)));
         return deletedOnes;
     }
 
     public Credential deleteByName(String name, String accountId) {
-        Credential credential = repository.findByNameAndAccountId(name, accountId, getEnabledPlatforms())
+        Credential credential = repository.findByNameAndAccountId(name, accountId,
+                enabledPlatformProvider.enabledPlatforms())
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
         checkEnvironmentsForDeletion(credential);
         LOGGER.debug("About to archive credential: {}", name);
@@ -58,7 +64,8 @@ public class CredentialDeleteService extends AbstractCredentialService {
     }
 
     public Credential deleteByCrn(String crn, String accountId) {
-        Credential credential = repository.findByNameAndAccountId(crn, accountId, getEnabledPlatforms())
+        Credential credential = repository.findByNameAndAccountId(crn, accountId,
+                enabledPlatformProvider.enabledPlatforms())
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, crn));
         checkEnvironmentsForDeletion(credential);
         LOGGER.debug("About to archive credential: {}", crn);

@@ -61,7 +61,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         testContext.given(EnvironmentTestDto.class)
                 .withRegions(VALID_REGION)
                 .withLocation(VALID_LOCATION)
-                .when(environmentTestClient.createV4())
+                .when(environmentTestClient.create())
                 .given(ClusterTestDto.class).valid()
                 .withRdsConfigNames(rdsList)
                 .given("placement", PlacementSettingsTestDto.class)
@@ -77,7 +77,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .given(EnvironmentTestDto.class)
                 .withName(testContext.get(EnvironmentTestDto.class).getName())
 
-                .when(environmentTestClient.getV4())
+                .when(environmentTestClient.get())
                 .validate();
     }
 
@@ -94,7 +94,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         testContext.given(EnvironmentTestDto.class)
                 .withRegions(VALID_REGION)
                 .withLocation(VALID_LOCATION)
-                .when(environmentTestClient.createV4())
+                .when(environmentTestClient.create())
                 .given(ClusterTestDto.class).valid()
                 .withRdsConfigNames(rdsList)
                 .given("placement", PlacementSettingsTestDto.class)
@@ -104,7 +104,8 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .when(stackTestClient.createV4())
                 .deleteGiven(LdapTestDto.class, ldapTestClient.deleteV4(), RunningParameter.key(forbiddenKey))
                 .deleteGiven(DatabaseTestDto.class, databaseTestClient.deleteV4(), RunningParameter.key(forbiddenKey))
-                .deleteGiven(EnvironmentTestDto.class, environmentTestClient.deleteV4(), RunningParameter.key(forbiddenKey))
+                //.deleteGiven(EnvironmentTestDto.class, environmentTestClient.delete(), RunningParameter.key(forbiddenKey))
+                //TODO check env deletion
                 .validate();
     }
 
@@ -118,7 +119,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         String rangerdb = resourcePropertyProvider().getName();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentTestDto.class)
-                .when(environmentTestClient.createV4())
+                .when(environmentTestClient.create())
                 .validate();
         createDatalake(testContext, rdsList);
         createDatalake(testContext, rdsList);
@@ -135,7 +136,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         String rangerdb = resourcePropertyProvider().getName();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentTestDto.class)
-                .when(environmentTestClient.createV4())
+                .when(environmentTestClient.create())
                 .given("placement", PlacementSettingsTestDto.class)
                 .given(StackTestDto.class)
                 .withName(dlName)

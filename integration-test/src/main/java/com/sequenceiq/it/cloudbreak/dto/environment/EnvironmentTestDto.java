@@ -1,32 +1,31 @@
 package com.sequenceiq.it.cloudbreak.dto.environment;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
-import javax.ws.rs.WebApplicationException;
+import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.EnvironmentV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.environment.responses.SimpleEnvironmentV4Response;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 import com.sequenceiq.it.cloudbreak.Prototype;
+import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.DeletableTestDto;
-import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
+import com.sequenceiq.it.cloudbreak.dto.AbstractEnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 
 @Prototype
-public class EnvironmentTestDto extends DeletableTestDto<EnvironmentRequest, DetailedEnvironmentResponse, EnvironmentTestDto, SimpleEnvironmentResponse> {
+public class EnvironmentTestDto extends AbstractEnvironmentTestDto<EnvironmentRequest, DetailedEnvironmentResponse, EnvironmentTestDto>  {
 
     public static final String ENVIRONMENT = "ENVIRONMENT";
 
-    private Collection<SimpleEnvironmentResponse> response;
+    @Inject
+    private CredentialTestClient credentialTestClient;
 
-    private SimpleEnvironmentV4Response simpleResponse;
+    private SimpleEnvironmentResponses responses;
+
+    private SimpleEnvironmentResponse simpleResponse;
 
     public EnvironmentTestDto(TestContext testContext) {
         super(new EnvironmentRequest(), testContext);
@@ -36,8 +35,8 @@ public class EnvironmentTestDto extends DeletableTestDto<EnvironmentRequest, Det
         super(ENVIRONMENT);
     }
 
-    public EnvironmentTestDto(EnvironmentRequest environmentV4Request, TestContext testContext) {
-        super(environmentV4Request, testContext);
+    public EnvironmentTestDto(EnvironmentRequest environmentRequest, TestContext testContext) {
+        super(environmentRequest, testContext);
     }
 
     @Override
@@ -49,8 +48,8 @@ public class EnvironmentTestDto extends DeletableTestDto<EnvironmentRequest, Det
     public EnvironmentTestDto valid() {
         return getCloudProvider()
                 .environment(withName(resourceProperyProvider().getName())
-                        .withDescription(resourceProperyProvider().getDescription("environment")));
-//                .withCredential(getTestContext().get(CredentialTestDto.class).getName()));
+                        .withDescription(resourceProperyProvider().getDescription("environment")))
+                .withCredentialName(getTestContext().get(CredentialTestDto.class).getName());
     }
 
     public EnvironmentTestDto withName(String name) {
@@ -70,9 +69,9 @@ public class EnvironmentTestDto extends DeletableTestDto<EnvironmentRequest, Det
     }
 
     public EnvironmentTestDto withLocation(String location) {
-        LocationRequest locationV4Request = new LocationRequest();
-        locationV4Request.setName(location);
-        getRequest().setLocation(locationV4Request);
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setName(location);
+        getRequest().setLocation(locationRequest);
         return this;
     }
 
@@ -81,7 +80,7 @@ public class EnvironmentTestDto extends DeletableTestDto<EnvironmentRequest, Det
         return this;
     }
 
-    @Override
+/*    @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
         LOGGER.info("Cleaning up resource with name: {}", getName());
         try {
@@ -91,42 +90,22 @@ public class EnvironmentTestDto extends DeletableTestDto<EnvironmentRequest, Det
         } catch (WebApplicationException ignore) {
             LOGGER.info("Something happend.");
         }
+    }*/
+
+    public SimpleEnvironmentResponses getResponseSimpleEnvSet() {
+        return responses;
     }
 
-    public Collection<SimpleEnvironmentResponse> getResponseSimpleEnvSet() {
-        return response;
+    public void setResponseSimpleEnvSet(SimpleEnvironmentResponses responses) {
+        this.responses = responses;
     }
 
-    public void setResponseSimpleEnvSet(Collection<SimpleEnvironmentResponse> response) {
-        this.response = response;
-    }
-
-    public SimpleEnvironmentV4Response getResponseSimpleEnv() {
+    public SimpleEnvironmentResponse getResponseSimpleEnv() {
         return simpleResponse;
     }
 
-    public void setResponseSimpleEnv(SimpleEnvironmentV4Response simpleResponse) {
+    public void setResponseSimpleEnv(SimpleEnvironmentResponse simpleResponse) {
         this.simpleResponse = simpleResponse;
-    }
-
-    @Override
-    public List<SimpleEnvironmentResponse> getAll(CloudbreakClient client) {
-        EnvironmentV4Endpoint environmentV4Endpoint = client.getCloudbreakClient().environmentV4Endpoint();
-        return new ArrayList<>(environmentV4Endpoint.list(client.getWorkspaceId()).getResponses());
-    }
-
-    @Override
-    protected String name(SimpleEnvironmentResponse entity) {
-        return entity.getName();
-    }
-
-    @Override
-    public void delete(TestContext testContext, SimpleEnvironmentResponse entity, CloudbreakClient client) {
-        try {
-            client.getCloudbreakClient().environmentV4Endpoint().delete(client.getWorkspaceId(), entity.getName());
-        } catch (Exception e) {
-            LOGGER.warn("Something went wrong on {} ({}) purge. {}", entity.getName(), entity.getClass().getSimpleName(), ResponseUtil.getErrorMessage(e), e);
-        }
     }
 
     @Override

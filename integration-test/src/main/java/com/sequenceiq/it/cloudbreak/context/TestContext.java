@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.CloudbreakTest;
+import com.sequenceiq.it.cloudbreak.EnvironmentServiceClient;
 import com.sequenceiq.it.cloudbreak.FreeIPAClient;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
@@ -210,8 +211,9 @@ public abstract class TestContext implements ApplicationContextAware {
         if (clients.get(acting.getToken()) == null) {
             CloudbreakClient cloudbreakClient = CloudbreakClient.createProxyCloudbreakClient(testParameter, acting);
             FreeIPAClient freeIPAClient = FreeIPAClient.createProxyFreeIPAClient(testParameter, acting);
+            EnvironmentServiceClient environmentServiceClient = EnvironmentServiceClient.createProxyEnvironmentServiceClient(testParameter, acting);
             Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(CloudbreakClient.class, cloudbreakClient,
-                    FreeIPAClient.class, freeIPAClient);
+                    FreeIPAClient.class, freeIPAClient, EnvironmentServiceClient.class, environmentServiceClient);
             clients.put(acting.getToken(), clientMap);
             cloudbreakClient.setWorkspaceId(0L);
         }
@@ -490,6 +492,42 @@ public abstract class TestContext implements ApplicationContextAware {
         }
         return entity;
     }
+
+/*    public EnvironmentTestDto await(FreeIPATestDto entity, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status desiredStatuses,
+            RunningParameter runningParameter) {
+        return await(entity, desiredStatuses, runningParameter, -1);
+    }
+
+    public EnvironmentTestDto await(EnvironmentTestDto entity, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status desiredStatuses,
+            RunningParameter runningParameter, long pollingInterval) {
+        checkShutdown();
+
+        if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
+            LOGGER.info("Should be skipped beacause of previous error. await [{}]", desiredStatuses);
+            return entity;
+        }
+        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
+        FreeIPATestDto awaitEntity = get(key);
+        LOGGER.info("await {} for {}", key, desiredStatuses);
+        try {
+            if (awaitEntity == null) {
+                throw new RuntimeException("Key provided but no result in resource map, key=" + key);
+            }
+
+            FreeIPAClient freeIPAClient = getMicroserviceClient(FreeIPAClient.class, getWho(runningParameter));
+            String environmentCrn = awaitEntity.getRequest().getEnvironmentCrn();
+            statuses.putAll(waitUtilSingleStatus.waitAndCheckStatuses(freeIPAClient, environmentCrn, desiredStatuses, pollingInterval));
+            if (!desiredStatuses.equals(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED)) {
+                awaitEntity.refresh(this, null);
+            }
+        } catch (Exception e) {
+            if (runningParameter.isLogError()) {
+                LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}", entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName());
+            }
+            exceptionMap.put("await " + entity + " for desired statuses " + desiredStatuses, e);
+        }
+        return entity;
+    }*/
 
     public <E extends Exception, T extends CloudbreakTestDto> T expect(T entity, Class<E> expectedException, RunningParameter runningParameter) {
         checkShutdown();

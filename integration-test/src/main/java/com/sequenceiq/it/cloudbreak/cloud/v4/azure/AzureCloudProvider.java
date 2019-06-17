@@ -13,6 +13,7 @@ import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
+import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 
 @Component
@@ -75,6 +76,12 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AZURE;
+    }
+
+    @Override
+    public CredentialTestDto credential(CredentialTestDto credential) {
+        return null;
+        //TODO : valid azure credential for testing
     }
 
     @Override

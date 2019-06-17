@@ -2,17 +2,23 @@ package com.sequenceiq.it.cloudbreak.dto.credential;
 
 import java.util.Collection;
 
+import com.sequenceiq.environment.api.v1.credential.model.parameters.mock.MockParameters;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponses;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.DeletableTestDto;
+import com.sequenceiq.it.cloudbreak.dto.AbstractEnvironmentTestDto;
 
 @Prototype
-public class CredentialTestDto extends DeletableTestDto<CredentialRequest, CredentialResponse, CredentialTestDto, CredentialResponse> {
+public class CredentialTestDto extends AbstractEnvironmentTestDto<CredentialRequest, CredentialResponse, CredentialTestDto> {
 
     public static final String CREDENTIAL = "CREDENTIAL";
+
+    private String resourceCrn;
+
+    private CredentialResponses credentialResponses;
 
     public CredentialTestDto(TestContext testContext) {
         super(new CredentialRequest(), testContext);
@@ -26,8 +32,7 @@ public class CredentialTestDto extends DeletableTestDto<CredentialRequest, Crede
     public CredentialTestDto valid() {
         withName(resourceProperyProvider().getName());
         withDescription(resourceProperyProvider().getDescription("credential"));
-//        return getCloudProvider().credential(this);
-        return this;
+        return getCloudProvider().credential(this);
     }
 
     public CredentialTestDto withName(String name) {
@@ -41,11 +46,11 @@ public class CredentialTestDto extends DeletableTestDto<CredentialRequest, Crede
         return this;
     }
 
-//    public CredentialTestDto withCloudPlatform(String cloudPlatform) {
-//        getRequest().setCloudPlatform(cloudPlatform);
-//        return this;
-//    }
-//
+    public CredentialTestDto withCloudPlatform(String cloudPlatform) {
+        getRequest().setCloudPlatform(cloudPlatform);
+        return this;
+    }
+
 //    public CredentialTestDto withAwsParameters(AwsCredentialParameters awsParameters) {
 //        getRequest().setAws(awsParameters);
 //        return this;
@@ -75,12 +80,12 @@ public class CredentialTestDto extends DeletableTestDto<CredentialRequest, Crede
 //        getRequest().setCumulus(cumulusParameters);
 //        return this;
 //    }
-//
-//    public CredentialTestDto withMockParameters(MockParameters mockParameters) {
-//        getRequest().setMock(mockParameters);
-//        return this;
-//    }
-//
+
+    public CredentialTestDto withMockParameters(MockParameters mockParameters) {
+        getRequest().setMock(mockParameters);
+        return this;
+    }
+
 //    @Override
 //    public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
 //        LOGGER.info("Cleaning up resource with name: {}", getName());
@@ -111,18 +116,31 @@ public class CredentialTestDto extends DeletableTestDto<CredentialRequest, Crede
         return 1000;
     }
 
-    @Override
     protected String name(CredentialResponse entity) {
         return null;
     }
 
-    @Override
     public Collection<CredentialResponse> getAll(CloudbreakClient client) {
         return null;
     }
 
-    @Override
     public void delete(TestContext testContext, CredentialResponse entity, CloudbreakClient client) {
 
+    }
+
+    public String getResourceCrn() {
+        return resourceCrn;
+    }
+
+    public void setResourceCrn(String resourceCrn) {
+        this.resourceCrn = resourceCrn;
+    }
+
+    public CredentialResponses getCredentialResponses() {
+        return credentialResponses;
+    }
+
+    public void setCredentialResponses(CredentialResponses credentialResponses) {
+        this.credentialResponses = credentialResponses;
     }
 }

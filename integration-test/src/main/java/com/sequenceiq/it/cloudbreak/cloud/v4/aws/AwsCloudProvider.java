@@ -13,6 +13,7 @@ import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
+import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 
 @Component
@@ -79,6 +80,12 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AWS;
+    }
+
+    @Override
+    public CredentialTestDto credential(CredentialTestDto credential) {
+        return null;
+        //TODO: aws default valid credential for testing
     }
 
     @Override

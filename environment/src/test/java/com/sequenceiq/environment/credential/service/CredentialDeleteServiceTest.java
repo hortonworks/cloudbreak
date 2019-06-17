@@ -28,6 +28,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.environment.configuration.EnabledPlatformProvider;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
@@ -56,10 +57,13 @@ public class CredentialDeleteServiceTest {
     @Mock
     private EnvironmentViewService environmentViewService;
 
+    @Mock
+    private EnabledPlatformProvider enabledPlatformProvider;
+
     @Before
     public void setUp() {
             MockitoAnnotations.initMocks(this);
-            underTest = new CredentialDeleteService(repository, notificationSender, messagesService, environmentViewService, Set.of("AWS", "AZURE", "YARN"));
+            underTest = new CredentialDeleteService(repository, notificationSender, messagesService, environmentViewService, enabledPlatformProvider);
     }
 
     @Test
@@ -73,6 +77,8 @@ public class CredentialDeleteServiceTest {
         when(repository.findByNameAndAccountId(eq(secondCredentialName), eq(ACCOUNT_ID), any(Set.class))).thenReturn(Optional.of(secondCred));
         when(repository.save(firstCred)).thenReturn(firstCred);
         when(repository.save(secondCred)).thenReturn(secondCred);
+        //when(enabledPlatformProvider.enabledPlatforms()).thenReturn(Set.of("AWS","AZURE"));
+
 
         Set<Credential> result = underTest.deleteMultiple(names, ACCOUNT_ID);
 

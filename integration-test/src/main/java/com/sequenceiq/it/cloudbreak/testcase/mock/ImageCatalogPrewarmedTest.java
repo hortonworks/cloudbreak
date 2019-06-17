@@ -57,7 +57,7 @@ public class ImageCatalogPrewarmedTest extends AbstractIntegrationTest {
                 .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
                 .when(imageCatalogTestClient.setAsDefault(), key(imgCatalogName))
                 .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.createV4(), key(environmentName))
+                .when(environmentTestClient.create(), key(environmentName))
                 .given(StackTestDto.class)
                 .withCatalog(ImageCatalogTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)

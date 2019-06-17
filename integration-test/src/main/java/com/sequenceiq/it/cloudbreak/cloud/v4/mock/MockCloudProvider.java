@@ -5,11 +5,14 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.MockStackV4Parameters;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.mock.MockParameters;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
@@ -21,9 +24,11 @@ import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
+import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
+import com.sequenceiq.it.cloudbreak.log.Log;
 
 @Component
 public class MockCloudProvider extends AbstractCloudProvider {
@@ -58,12 +63,27 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     public static final String DEFAULT_CLUSTER_DEFINTION_NAME = "CDP 1.0 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie";
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MockCloudProvider.class);
+
     @Inject
     private ResourcePropertyProvider resourcePropertyProvider;
 
     @Override
     public StackTestDtoBase stack(StackTestDtoBase stack) {
         return stack.withMock(stackParameters());
+    }
+
+    @Override
+    public CredentialTestDto credential(CredentialTestDto credentialEntity) {
+        Log.log(LOGGER, "creating mock credential");
+
+        MockParameters mockParameters = new MockParameters();
+        MockedTestContext mockedTestContext = (MockedTestContext) credentialEntity.getTestContext();
+        mockParameters.setMockEndpoint(mockedTestContext.getSparkServer().getEndpoint());
+        return credentialEntity.withName(resourcePropertyProvider.getName())
+                .withDescription(commonCloudProperties().getDefaultCredentialDescription())
+                .withMockParameters(mockParameters)
+                .withCloudPlatform(MOCK_CAPITAL);
     }
 
     @Override

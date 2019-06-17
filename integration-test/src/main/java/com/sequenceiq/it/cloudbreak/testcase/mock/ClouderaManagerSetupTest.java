@@ -34,7 +34,7 @@ public class ClouderaManagerSetupTest extends AbstractIntegrationTest {
         testContext
                 .given(EnvironmentTestDto.class)
                 .withName(envName)
-                .when(environmentTestClient.createV4())
+                .when(environmentTestClient.create())
                 .given(StackTestDto.class)
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)

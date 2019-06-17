@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -14,11 +13,14 @@ import javax.ws.rs.NotFoundException;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
+import com.sequenceiq.it.cloudbreak.EnvironmentServiceClient;
+import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
@@ -30,22 +32,28 @@ public class EnvironmentTest extends AbstractIntegrationTest {
     @Inject
     private EnvironmentTestClient environmentTestClient;
 
+    @Inject
+    private CredentialTestClient credentialTestClient;
+
     @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running cloudbreak",
             when = "valid create environment request is sent",
             then = "environment should be created")
     public void testCreateEnvironment(TestContext testContext) {
         testContext
+                .given(CredentialTestDto.class)
+                .when(credentialTestClient.create())
                 .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.createV4())
-                .when(environmentTestClient.listV4())
+                .when(environmentTestClient.create())
+                .when(environmentTestClient.list())
+                //TODO: await for env creation
                 .then(this::checkEnvIsListed)
                 .validate();
     }
@@ -60,7 +68,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
         testContext
                 .init(EnvironmentTestDto.class)
                 .withRegions(INVALID_REGION)
-                .when(environmentTestClient.createV4(), RunningParameter.key(forbiddenKey))
+                .when(EnvironmentTestDto.class, environmentTestClient.create(), RunningParameter.key(forbiddenKey))
                 .expect(BadRequestException.class, RunningParameter.key(forbiddenKey))
                 .validate();
     }
@@ -75,7 +83,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
         testContext
                 .init(EnvironmentTestDto.class)
                 .withRegions(null)
-                .when(environmentTestClient.createV4(), RunningParameter.key(forbiddenKey))
+                .when(environmentTestClient.create(), RunningParameter.key(forbiddenKey))
                 .expect(BadRequestException.class, RunningParameter.key(forbiddenKey))
                 .validate();
     }
@@ -89,7 +97,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
         String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .init(EnvironmentTestDto.class)
-                .when(environmentTestClient.createV4(), RunningParameter.key(forbiddenKey))
+                .when(environmentTestClient.create(), RunningParameter.key(forbiddenKey))
                 .expect(BadRequestException.class, RunningParameter.key(forbiddenKey))
                 .validate();
     }
@@ -102,10 +110,10 @@ public class EnvironmentTest extends AbstractIntegrationTest {
     public void testDeleteEnvironment(TestContext testContext) {
         testContext
                 .init(EnvironmentTestDto.class)
-                .when(environmentTestClient.createV4())
-                .when(environmentTestClient.listV4())
+                .when(environmentTestClient.create())
+                .when(environmentTestClient.list())
                 .then(this::checkEnvIsListed)
-                .when(environmentTestClient.deleteV4())
+                .when(environmentTestClient.delete())
                 .validate();
     }
 
@@ -118,14 +126,14 @@ public class EnvironmentTest extends AbstractIntegrationTest {
         String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .init(EnvironmentTestDto.class)
-                .when(environmentTestClient.deleteV4(), RunningParameter.key(forbiddenKey))
+                .when(environmentTestClient.delete(), RunningParameter.key(forbiddenKey))
                 .expect(NotFoundException.class, RunningParameter.key(forbiddenKey))
                 .validate();
     }
 
-    private EnvironmentTestDto checkEnvIsListed(TestContext testContext, EnvironmentTestDto environment, CloudbreakClient cloudbreakClient) {
-        Collection<SimpleEnvironmentResponse> simpleEnvironmentV4Respons = environment.getResponseSimpleEnvSet();
-        List<SimpleEnvironmentResponse> result = simpleEnvironmentV4Respons.stream()
+    private EnvironmentTestDto checkEnvIsListed(TestContext testContext, EnvironmentTestDto environment, EnvironmentServiceClient client) {
+        SimpleEnvironmentResponses responses = environment.getResponseSimpleEnvSet();
+        List<SimpleEnvironmentResponse> result = responses.getResponses().stream()
                 .filter(env -> environment.getName().equals(env.getName()))
                 .collect(Collectors.toList());
         if (result.isEmpty()) {

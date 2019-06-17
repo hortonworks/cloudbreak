@@ -72,7 +72,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
 
         testContext
                 .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.createV4())
+                .when(environmentTestClient.create())
                 .given(stackTemplate, StackTemplateTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)
                 .given(ClusterTemplateTestDto.class)
@@ -100,7 +100,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .given(environment, EnvironmentTestDto.class)
                 .withRegions(MockCloudProvider.VALID_REGION)
                 .withLocation(MockCloudProvider.LONDON)
-                .when(environmentTestClient.createV4())
+                .when(environmentTestClient.create())
                 .given(stackTemplate, StackTemplateTestDto.class)
                 .withEnvironmentKey(environment)
                 .given(ClusterTemplateTestDto.class)
@@ -124,7 +124,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .given(EnvironmentTestDto.class)
                 .withRegions(MockCloudProvider.VALID_REGION)
                 .withLocation(MockCloudProvider.LONDON)
-                .when(environmentTestClient.createV4())
+                .when(environmentTestClient.create())
                 .given(StackTemplateTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)
                 .given(ClusterTemplateTestDto.class)
@@ -192,7 +192,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         testContext
 //                .given(LdapTestDto.class)
 //                .withName("mock-test-ldap")
-//                .when(ldapTestClient.createV4())
+//                .when(ldapTestClient.create())
 
                 .given(RecipeTestDto.class)
                 .withName("mock-test-recipe")
@@ -209,7 +209,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .given("environment", EnvironmentTestDto.class)
                 .withRegions(MockCloudProvider.VALID_REGION)
                 .withLocation(MockCloudProvider.LONDON)
-                .when(environmentTestClient.createV4())
+                .when(environmentTestClient.create())
 
                 .given(StackTemplateTestDto.class)
                 .withEnvironmentKey("environment")
@@ -263,7 +263,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
 
         testContext
                 .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.createV4(), RunningParameter.key(generatedKey))
+                .when(environmentTestClient.create(), RunningParameter.key(generatedKey))
                 .given(stackTemplate, StackTemplateTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)
                 .given(ClusterTemplateTestDto.class)
@@ -305,7 +305,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .given("environment", EnvironmentTestDto.class)
                 .withRegions(MockCloudProvider.VALID_REGION)
                 .withLocation(MockCloudProvider.LONDON)
-                .when(environmentTestClient.createV4(), RunningParameter.key(generatedKey))
+                .when(environmentTestClient.create(), RunningParameter.key(generatedKey))
                 .given("placementSettings", PlacementSettingsTestDto.class)
                 .withRegion(MockCloudProvider.EUROPE)
                 .given("stackTemplate", StackTemplateTestDto.class)
@@ -334,7 +334,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .given(environment, EnvironmentTestDto.class)
                 .withRegions(MockCloudProvider.VALID_REGION)
                 .withLocation(MockCloudProvider.LONDON)
-                .when(environmentTestClient.createV4(), RunningParameter.key(generatedKey))
+                .when(environmentTestClient.create(), RunningParameter.key(generatedKey))
                 .given(ClusterTemplateTestDto.class)
                 .withDescription(invalidLongDescripton)
                 .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey))

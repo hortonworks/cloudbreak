@@ -209,7 +209,7 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     protected void createDefaultEnvironment(TestContext testContext) {
         testContext.given(EnvironmentTestDto.class)
-                .when(environmentTestClient.createV4());
+                .when(environmentTestClient.create());
     }
 
     protected void createDefaultImageCatalog(TestContext testContext) {

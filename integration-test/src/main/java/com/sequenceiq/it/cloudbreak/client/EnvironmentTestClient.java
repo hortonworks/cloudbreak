@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.client;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.EnvironmentServiceClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteAction;
@@ -13,19 +13,19 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 @Service
 public class EnvironmentTestClient {
 
-    public Action<EnvironmentTestDto, CloudbreakClient> createV4() {
+    public Action<EnvironmentTestDto, EnvironmentServiceClient> create() {
         return new EnvironmentCreateAction();
     }
 
-    public Action<EnvironmentTestDto, CloudbreakClient> getV4() {
+    public Action<EnvironmentTestDto, EnvironmentServiceClient> get() {
         return new EnvironmentGetAction();
     }
 
-    public Action<EnvironmentTestDto, CloudbreakClient> listV4() {
+    public Action<EnvironmentTestDto, EnvironmentServiceClient> list() {
         return new EnvironmentListAction();
     }
 
-    public Action<EnvironmentTestDto, CloudbreakClient> deleteV4() {
+    public Action<EnvironmentTestDto, EnvironmentServiceClient> delete() {
         return new EnvironmentDeleteAction();
     }
 }
