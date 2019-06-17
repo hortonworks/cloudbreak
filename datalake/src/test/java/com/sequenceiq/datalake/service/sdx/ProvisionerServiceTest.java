@@ -45,7 +45,6 @@ import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
@@ -127,7 +126,8 @@ class ProvisionerServiceTest {
         long id = 2L;
 
         when(sdxClusterRepository.findById(id)).thenReturn(Optional.empty());
-        Assertions.assertThrows(BadRequestException.class, () -> provisionerService.startStackProvisioning(id), "Can not find SDX cluster by ID: 2");
+        Assertions.assertThrows(com.sequenceiq.cloudbreak.exception.NotFoundException.class,
+                () -> provisionerService.startStackProvisioning(id));
     }
 
     @Test
