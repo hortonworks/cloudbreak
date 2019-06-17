@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.init.clustertemplate;
 
-import static com.sequenceiq.cloudbreak.common.json.JsonUtil.writeValueAsStringSilent;
-
-import java.util.Base64;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -19,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -32,7 +28,7 @@ public class ClusterTemplateLoaderService {
     private DefaultClusterTemplateCache defaultClusterTemplateCache;
 
     public boolean isDefaultClusterTemplateUpdateNecessaryForUser(Collection<ClusterTemplate> clusterTemplates) {
-        Map<String, DefaultClusterTemplateV4Request> defaultTemplates = defaultClusterTemplateCache.defaultClusterTemplateRequests();
+        Map<String, String> defaultTemplates = defaultClusterTemplateCache.defaultClusterTemplateRequests();
         List<ClusterTemplate> defaultTemplatesInDb = filterTemplatesForDefaults(clusterTemplates);
         if (defaultTemplatesInDb.size() < defaultTemplates.size()) {
             LOGGER.debug("Default templates in DB [{}] less than default templates size [{}]", defaultTemplatesInDb.size(), defaultTemplates.size());
@@ -49,19 +45,19 @@ public class ClusterTemplateLoaderService {
                 .collect(Collectors.toList());
     }
 
-    private boolean isAllDefaultTemplateInDbHasTheSameContentAsCached(Map<String, DefaultClusterTemplateV4Request> defaultTemplates,
+    private boolean isAllDefaultTemplateInDbHasTheSameContentAsCached(Map<String, String> defaultTemplates,
             Collection<ClusterTemplate> defaultTemplatesInDb) {
         return defaultTemplatesInDb.stream().anyMatch(clusterTemplate -> {
-            DefaultClusterTemplateV4Request defaultTemplate = defaultTemplates.get(clusterTemplate.getName());
-            return isTemplatesContentDifferent(clusterTemplate, defaultTemplate);
+            String defaultTemplateBase64 = defaultTemplates.get(clusterTemplate.getName());
+            return isTemplatesContentDifferent(clusterTemplate, defaultTemplateBase64);
         });
     }
 
-    private boolean isTemplatesContentDifferent(ClusterTemplate clusterTemplate, DefaultClusterTemplateV4Request defaultTemplate) {
-        return !Base64.getEncoder().encodeToString(writeValueAsStringSilent(defaultTemplate).getBytes()).equals(clusterTemplate.getTemplateContent());
+    private boolean isTemplatesContentDifferent(ClusterTemplate clusterTemplate, String defaultTemplateBase64) {
+        return !defaultTemplateBase64.equals(clusterTemplate.getTemplateContent());
     }
 
-    private boolean isAllDefaultTemplateExistsInDbByName(Map<String, DefaultClusterTemplateV4Request> defaultTemplates,
+    private boolean isAllDefaultTemplateExistsInDbByName(Map<String, String> defaultTemplates,
             Collection<ClusterTemplate> defaultTemplatesInDb) {
         return defaultTemplatesInDb.stream().allMatch(s -> defaultTemplates.keySet().contains(s.getName()));
     }
@@ -110,12 +106,12 @@ public class ClusterTemplateLoaderService {
         return collectOutdatedTemplatesInDb(defaultClusterTemplateCache.defaultClusterTemplateRequests(), clusterTemplates);
     }
 
-    public Collection<ClusterTemplate> collectOutdatedTemplatesInDb(Map<String, DefaultClusterTemplateV4Request> defaultTemplates,
+    public Collection<ClusterTemplate> collectOutdatedTemplatesInDb(Map<String, String> defaultTemplates,
             Collection<ClusterTemplate> defaultTemplatesInDb) {
         Collection<ClusterTemplate> outdatedTemplates = new HashSet<>();
         for (ClusterTemplate template : defaultTemplatesInDb) {
-            DefaultClusterTemplateV4Request defaultTemplate = defaultTemplates.get(template.getName());
-            if (isTemplatesContentDifferent(template, defaultTemplate)) {
+            String defaultTemplateBase64 = defaultTemplates.get(template.getName());
+            if (isTemplatesContentDifferent(template, defaultTemplateBase64)) {
                 outdatedTemplates.add(template);
             }
         }

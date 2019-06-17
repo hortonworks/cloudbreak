@@ -67,7 +67,8 @@ public class ClusterTemplateLoaderServiceTest {
         DefaultClusterTemplateV4Request clusterTemplate = new DefaultClusterTemplateV4Request();
         clusterTemplate.setName("cluster-template");
 
-        Mockito.when(defaultClusterTemplateCache.defaultClusterTemplateRequests()).thenReturn(singletonMap(clusterTemplate.getName(), clusterTemplate));
+        Mockito.when(defaultClusterTemplateCache.defaultClusterTemplateRequests())
+                .thenReturn(singletonMap(clusterTemplate.getName(), encode(clusterTemplate)));
 
         boolean actual = underTest.isDefaultClusterTemplateUpdateNecessaryForUser(emptyList());
 
@@ -81,7 +82,7 @@ public class ClusterTemplateLoaderServiceTest {
         clusterTemplate.setTemplateContent(Base64.getEncoder().encodeToString(writeValueAsStringSilent(clusterTemplateFromDefault).getBytes()));
 
         Mockito.when(defaultClusterTemplateCache.defaultClusterTemplateRequests())
-                .thenReturn(singletonMap(clusterTemplateFromDefault.getName(), clusterTemplateFromDefault));
+                .thenReturn(singletonMap(clusterTemplateFromDefault.getName(), encode(clusterTemplateFromDefault)));
 
         boolean actual = underTest.isDefaultClusterTemplateUpdateNecessaryForUser(singleton(clusterTemplate));
 
@@ -94,7 +95,7 @@ public class ClusterTemplateLoaderServiceTest {
         ClusterTemplate clusterTemplateFromDB = clusterTemplate("cluster-template", "gcp", "hostgroup2", "worker");
 
         Mockito.when(defaultClusterTemplateCache.defaultClusterTemplateRequests())
-                .thenReturn(singletonMap(clusterTemplateFromDefault.getName(), clusterTemplateFromDefault));
+                .thenReturn(singletonMap(clusterTemplateFromDefault.getName(), encode(clusterTemplateFromDefault)));
 
         boolean actual = underTest.isDefaultClusterTemplateUpdateNecessaryForUser(singleton(clusterTemplateFromDB));
 
@@ -109,7 +110,8 @@ public class ClusterTemplateLoaderServiceTest {
         ClusterTemplate clusterTemplateFromDB2 = clusterTemplate("cluster-template2", "gcp", "hostgroup2", "worker");
 
         Mockito.when(defaultClusterTemplateCache.defaultClusterTemplateRequests()).thenReturn(
-                Map.of(clusterTemplateFromDefault1.getName(), clusterTemplateFromDefault1, clusterTemplateFromDefault2.getName(), clusterTemplateFromDefault2));
+                Map.of(clusterTemplateFromDefault1.getName(), encode(clusterTemplateFromDefault1),
+                        clusterTemplateFromDefault2.getName(), encode(clusterTemplateFromDefault2)));
 
         boolean actual = underTest.isDefaultClusterTemplateUpdateNecessaryForUser(Set.of(clusterTemplateFromDB1, clusterTemplateFromDB2));
 
@@ -158,5 +160,9 @@ public class ClusterTemplateLoaderServiceTest {
         distrox.setInstanceGroups(singleton(instanceGroup));
         clusterTemplate.setDistroXTemplate(distrox);
         return clusterTemplate;
+    }
+
+    private String encode(DefaultClusterTemplateV4Request s) {
+        return new String(Base64.getEncoder().encode(writeValueAsStringSilent(s).getBytes()));
     }
 }

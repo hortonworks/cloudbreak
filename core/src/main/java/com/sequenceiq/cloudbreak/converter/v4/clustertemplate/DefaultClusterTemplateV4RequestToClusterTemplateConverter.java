@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.v4.clustertemplate;
 
-import java.util.Base64;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -14,12 +12,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
+import com.sequenceiq.cloudbreak.init.clustertemplate.DefaultClusterTemplateCache;
 import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -52,6 +50,9 @@ public class DefaultClusterTemplateV4RequestToClusterTemplateConverter
     @Inject
     private DistroXV1RequestToStackV4RequestConverter stackV4RequestConverter;
 
+    @Inject
+    private DefaultClusterTemplateCache defaultClusterTemplateCache;
+
     @Override
     public ClusterTemplate convert(DefaultClusterTemplateV4Request source) {
         ClusterTemplate clusterTemplate = new ClusterTemplate();
@@ -59,8 +60,8 @@ public class DefaultClusterTemplateV4RequestToClusterTemplateConverter
         User user = userService.getOrCreate(cloudbreakUser);
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         clusterTemplate.setWorkspace(workspace);
-        clusterTemplate.setTemplateContent(Base64.getEncoder().encodeToString(JsonUtil.writeValueAsStringSilent(source).getBytes()));
-        StackV4Request stackV4Request = stackV4RequestConverter.convert(source.getDistroXTemplate());
+        clusterTemplate.setTemplateContent(defaultClusterTemplateCache.getByName(source.getName()));
+        StackV4Request stackV4Request = stackV4RequestConverter.convertAsTemplate(source.getDistroXTemplate());
         stackV4Request.setType(StackType.TEMPLATE);
         stackV4Request.setCloudPlatform(CloudPlatform.valueOf(source.getCloudPlatform()));
         Stack stack = converterUtil.convert(stackV4Request, Stack.class);

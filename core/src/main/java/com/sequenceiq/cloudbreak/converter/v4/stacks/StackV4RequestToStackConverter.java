@@ -120,11 +120,16 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
 
         Stack stack = new Stack();
-        DetailedEnvironmentResponse environment = environmentClientService.getByCrn(source.getEnvironmentCrn());
 
+        DetailedEnvironmentResponse environment = null;
         if (isTemplate(source)) {
+            if (source.getEnvironmentCrn() != null) {
+                environment = environmentClientService.getByCrn(source.getEnvironmentCrn());
+                updateCustomDomainOrKerberos(source, stack);
+            }
             convertAsStackTemplate(source, stack, workspace, environment);
         } else {
+            environment = environmentClientService.getByCrn(source.getEnvironmentCrn());
             convertAsStack(source, stack, workspace, environment);
         }
         updateCloudPlatformAndRelatedFields(source, stack, workspace, environment);
@@ -146,22 +151,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         updateCluster(source, stack, workspace);
         stack.getComponents().add(getTelemetryComponent(source, stack));
         setNetworkIfApplicable(source, stack, environment);
-        if (source.getCustomDomain() != null) {
-            stack.setCustomDomain(source.getCustomDomain().getDomainName());
-            stack.setCustomHostname(source.getCustomDomain().getHostname());
-            stack.setClusterNameAsSubdomain(source.getCustomDomain().isClusterNameAsSubdomain());
-            stack.setHostgroupNameAsHostname(source.getCustomDomain().isHostgroupNameAsHostname());
-        } else {
-            Optional<KerberosConfig> kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn());
-            kerberosConfig.ifPresent(kb -> {
-                if (kb.getType() == KerberosType.ACTIVE_DIRECTORY) {
-                    if (isEmpty(kb.getRealm())) {
-                        throw new BadRequestException("Realm cannot be null in case of ACTIVE_DIRECTORY");
-                    }
-                    stack.setCustomDomain(kb.getRealm().toLowerCase());
-                }
-            });
-        }
+
         stack.setGatewayPort(source.getGatewayPort());
         stack.setUuid(UUID.randomUUID().toString());
         stack.setType(source.getType());
@@ -187,6 +177,26 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setName(source.getName());
         stack.setAvailabilityZone(getAvailabilityZone(Optional.ofNullable(source.getPlacement())));
         stack.setOrchestrator(getOrchestrator());
+        updateCustomDomainOrKerberos(source, stack);
+    }
+
+    private void updateCustomDomainOrKerberos(StackV4Request source, Stack stack) {
+        if (source.getCustomDomain() != null) {
+            stack.setCustomDomain(source.getCustomDomain().getDomainName());
+            stack.setCustomHostname(source.getCustomDomain().getHostname());
+            stack.setClusterNameAsSubdomain(source.getCustomDomain().isClusterNameAsSubdomain());
+            stack.setHostgroupNameAsHostname(source.getCustomDomain().isHostgroupNameAsHostname());
+        } else {
+            Optional<KerberosConfig> kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn());
+            kerberosConfig.ifPresent(kb -> {
+                if (kb.getType() == KerberosType.ACTIVE_DIRECTORY) {
+                    if (isEmpty(kb.getRealm())) {
+                        throw new BadRequestException("Realm cannot be null in case of ACTIVE_DIRECTORY");
+                    }
+                    stack.setCustomDomain(kb.getRealm().toLowerCase());
+                }
+            });
+        }
     }
 
     private com.sequenceiq.cloudbreak.domain.stack.Component getTelemetryComponent(StackV4Request source, Stack stack) {
@@ -223,7 +233,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     }
 
     private void convertAsStackTemplate(StackV4Request source, Stack stack, Workspace workspace, DetailedEnvironmentResponse environment) {
-        if (source.getEnvironmentCrn() != null) {
+        if (environment != null) {
             updateCloudPlatformAndRelatedFields(source, stack, workspace, environment);
             stack.setAvailabilityZone(getAvailabilityZone(Optional.ofNullable(source.getPlacement())));
         }
