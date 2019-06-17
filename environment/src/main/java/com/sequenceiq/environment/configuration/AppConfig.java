@@ -55,10 +55,10 @@ public class AppConfig {
     @Named("redbeamsServerUrl")
     private String redbeamsServerUrl;
 
-    @Value("${environment.redbeams.support:}")
+    @Value("${environment.redbeams.supportedPlatforms:}")
     private String supportedRedbeamsPlatforms;
 
-    @Value("${environment.freeipa.support:}")
+    @Value("${environment.freeipa.supportedPlatforms:}")
     private String supportedFreeIpaPlatforms;
 
     @Bean
@@ -102,8 +102,8 @@ public class AppConfig {
     }
 
     @Bean
-    public SupportedPlatfroms supportedFreeIpaPlatforms() {
-        return new SupportedPlatfroms(
+    public SupportedPlatforms supportedFreeIpaPlatforms() {
+        return new SupportedPlatforms(
                 supportedFreeIpaPlatforms.split(","),
                 supportedRedbeamsPlatforms.split(","));
     }

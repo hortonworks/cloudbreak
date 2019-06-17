@@ -105,8 +105,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     @Column(name = "value", columnDefinition = "TEXT", length = 100000)
     private Map<String, String> parameters;
 
-    private String credentialCrn;
-
     @Column(columnDefinition = "TEXT")
     private String platformVariant;
 
@@ -224,14 +222,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setCluster(Cluster cluster) {
         this.cluster = cluster;
-    }
-
-    public String getCredentialCrn() {
-        return credentialCrn;
-    }
-
-    public void setCredentialCrn(String credentialCrn) {
-        this.credentialCrn = credentialCrn;
     }
 
     public StackStatus getStackStatus() {

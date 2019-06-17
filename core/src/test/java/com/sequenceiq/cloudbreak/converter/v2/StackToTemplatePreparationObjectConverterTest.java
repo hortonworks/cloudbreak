@@ -178,6 +178,7 @@ public class StackToTemplatePreparationObjectConverterTest {
                 .attributes(new Json(""))
                 .build();
         when(credentialClientService.getByCrn(anyString())).thenReturn(credential);
+        when(credentialClientService.getByEnvironmentCrn(anyString())).thenReturn(credential);
         when(credentialClientService.getByName(anyString())).thenReturn(credential);
 
         when(ldapConfigService.get(anyString())).thenReturn(Optional.empty());
@@ -208,7 +209,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         BaseFileSystemConfigurationsView expected = mock(BaseFileSystemConfigurationsView.class);
         when(sourceCluster.getFileSystem()).thenReturn(sourceFileSystem);
         when(cluster.getFileSystem()).thenReturn(clusterServiceFileSystem);
-        when(stackMock.getCredentialCrn()).thenReturn("aCredentialCRN");
+        when(stackMock.getEnvironmentCrn()).thenReturn("envCredentialCRN");
         when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, stackMock, new Json(""))).thenReturn(expected);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
@@ -241,7 +242,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         FileSystem clusterServiceFileSystem = new FileSystem();
         when(sourceCluster.getFileSystem()).thenReturn(sourceFileSystem);
         when(cluster.getFileSystem()).thenReturn(clusterServiceFileSystem);
-        when(stackMock.getCredentialCrn()).thenReturn("aCredentialCRN");
+        when(stackMock.getEnvironmentCrn()).thenReturn("envCredentialCRN");
         when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, stackMock, new Json(""))).thenThrow(invokedException);
 
         expectedException.expect(CloudbreakServiceException.class);

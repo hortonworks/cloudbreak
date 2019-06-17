@@ -49,4 +49,17 @@ public class CredentialClientService {
             throw new CloudbreakServiceException(message, e);
         }
     }
+
+    public Credential getByEnvironmentCrn(String envCrn) {
+        try {
+            //TODO CloudPlatfrom needs to be part of the response
+            //TODO Revise paramaters because most of them should be a secret
+            CredentialResponse credentialResponse = credentialEndpoint.getByEnvironmentCrn(envCrn);
+            return credentialConverter.convert(credentialResponse);
+        } catch (WebApplicationException e) {
+            String message = String.format("Failed to GET Credential due to: '%s' ", e.getMessage());
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
 }

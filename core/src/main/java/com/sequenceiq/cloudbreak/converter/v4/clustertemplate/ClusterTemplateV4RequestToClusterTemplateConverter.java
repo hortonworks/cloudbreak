@@ -79,6 +79,8 @@ public class ClusterTemplateV4RequestToClusterTemplateConverter extends Abstract
     }
 
     private String getCloudPlatform(ClusterTemplateV4Request source, Stack stack) {
-        return source.getCloudPlatform() != null ? source.getCloudPlatform() : credentialClientService.getByCrn(stack.getCredentialCrn()).cloudPlatform();
+        return source.getCloudPlatform() != null
+                ? source.getCloudPlatform()
+                : credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn()).cloudPlatform();
     }
 }

@@ -1,6 +1,8 @@
 package com.sequenceiq.environment.environment.v1;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
@@ -24,7 +26,6 @@ import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.service.EnvironmentCreationService;
 import com.sequenceiq.environment.environment.service.EnvironmentModificationService;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
-import com.sequenceiq.environment.environment.service.EnvironmentViewService;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -36,19 +37,16 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final EnvironmentCreationService environmentCreationService;
 
-    private final EnvironmentViewService environmentViewService;
-
     private final ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     private final EnvironmentModificationService environmentModificationService;
 
     public EnvironmentController(EnvironmentApiConverter environmentApiConverter, EnvironmentService environmentService,
-            EnvironmentCreationService environmentCreationService, EnvironmentViewService environmentViewService,
-            ThreadBasedUserCrnProvider threadBasedUserCrnProvider, EnvironmentModificationService environmentModificationService) {
+            EnvironmentCreationService environmentCreationService, ThreadBasedUserCrnProvider threadBasedUserCrnProvider,
+            EnvironmentModificationService environmentModificationService) {
         this.environmentApiConverter = environmentApiConverter;
         this.environmentService = environmentService;
         this.environmentCreationService = environmentCreationService;
-        this.environmentViewService = environmentViewService;
         this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
         this.environmentModificationService = environmentModificationService;
     }
@@ -72,37 +70,47 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @Override
     public DetailedEnvironmentResponse getByName(String environmentName) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
-        return environmentService.getByName(environmentName, accountId);
+        EnvironmentDto environmentDto = environmentService.getByNameAndAccountId(environmentName, accountId);
+        return environmentApiConverter.dtoToDetailedResponse(environmentDto);
     }
 
     @Override
     public DetailedEnvironmentResponse getByCrn(String crn) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
-        return environmentService.getByCrn(crn, accountId);
+        EnvironmentDto environmentDto = environmentService.getByCrnAndAccountId(crn, accountId);
+        return environmentApiConverter.dtoToDetailedResponse(environmentDto);
     }
 
     @Override
     public SimpleEnvironmentResponse deleteByName(String environmentName) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
-        return environmentService.deleteByName(environmentName, accountId);
+        EnvironmentDto environmentDto = environmentService.deleteByNameAndAccountId(environmentName, accountId);
+        return environmentApiConverter.dtoToSimpleResponse(environmentDto);
     }
 
     @Override
     public SimpleEnvironmentResponse deleteByCrn(String crn) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
-        return environmentService.deleteByCrn(crn, accountId);
+        EnvironmentDto environmentDto = environmentService.deleteByCrnAndAccountId(crn, accountId);
+        return environmentApiConverter.dtoToSimpleResponse(environmentDto);
     }
 
     @Override
     public SimpleEnvironmentResponses deleteMultipleByNames(Set<String> environmentNames) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
-        return environmentService.deleteMultipleByNames(environmentNames, accountId);
+        List<EnvironmentDto> environmentDtos = environmentService.deleteMultipleByNames(environmentNames, accountId);
+        Set<SimpleEnvironmentResponse> responses = environmentDtos.stream()
+                .map(environmentApiConverter::dtoToSimpleResponse).collect(Collectors.toSet());
+        return new SimpleEnvironmentResponses(responses);
     }
 
     @Override
     public SimpleEnvironmentResponses deleteMultipleByCrns(Set<String> crns) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
-        return environmentService.deleteMultipleByCrns(crns, accountId);
+        List<EnvironmentDto> environmentDtos = environmentService.deleteMultipleByCrns(crns, accountId);
+        Set<SimpleEnvironmentResponse> responses = environmentDtos.stream()
+                .map(environmentApiConverter::dtoToSimpleResponse).collect(Collectors.toSet());
+        return new SimpleEnvironmentResponses(responses);
     }
 
     @Override
@@ -122,7 +130,10 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @Override
     public SimpleEnvironmentResponses list() {
         String accountId = threadBasedUserCrnProvider.getAccountId();
-        return new SimpleEnvironmentResponses(environmentViewService.listByAccountId(accountId));
+        List<EnvironmentDto> environmentDtos = environmentService.listByAccountId(accountId);
+        List<SimpleEnvironmentResponse> responses = environmentDtos.stream().map(environmentApiConverter::dtoToSimpleResponse)
+                .collect(Collectors.toList());
+        return new SimpleEnvironmentResponses(responses);
     }
 
     @Override

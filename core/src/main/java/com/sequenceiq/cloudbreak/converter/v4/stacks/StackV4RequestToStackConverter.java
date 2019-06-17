@@ -184,7 +184,6 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
 
     private void convertAsStack(StackV4Request source, Stack stack, Workspace workspace, DetailedEnvironmentResponse environment) {
         validateStackAuthentication(source);
-        updateEnvironment(stack, environment);
         stack.setName(source.getName());
         stack.setAvailabilityZone(getAvailabilityZone(Optional.ofNullable(source.getPlacement())));
         stack.setOrchestrator(getOrchestrator());
@@ -225,7 +224,6 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
 
     private void convertAsStackTemplate(StackV4Request source, Stack stack, Workspace workspace, DetailedEnvironmentResponse environment) {
         if (source.getEnvironmentCrn() != null) {
-            updateEnvironment(stack, environment);
             updateCloudPlatformAndRelatedFields(source, stack, workspace, environment);
             stack.setAvailabilityZone(getAvailabilityZone(Optional.ofNullable(source.getPlacement())));
         }
@@ -313,10 +311,6 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         } else if (source.getAuthentication().getLoginUserName() != null) {
             throw new BadRequestException("You can not modify the default user!");
         }
-    }
-
-    private void updateEnvironment(Stack stack, DetailedEnvironmentResponse environment) {
-        stack.setCredentialCrn(environment.getCredential().getCrn());
     }
 
     private Set<InstanceGroup> convertInstanceGroups(StackV4Request source, Stack stack) {

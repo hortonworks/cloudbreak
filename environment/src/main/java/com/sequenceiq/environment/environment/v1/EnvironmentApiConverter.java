@@ -17,6 +17,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.LocationReque
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
@@ -47,13 +48,13 @@ public class EnvironmentApiConverter {
     }
 
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
-        EnvironmentCreationDto.EnvironmentCreationDtoBuilder builder = EnvironmentCreationDto.EnvironmentCreationDtoBuilder.anEnvironmentCreationDto()
+        EnvironmentCreationDto.Builder builder = EnvironmentCreationDto.Builder.anEnvironmentCreationDto()
                 .withAccountId(threadBasedUserCrnProvider.getAccountId())
                 .withName(request.getName())
                 .withDescription(request.getDescription())
                 .withCloudPlatform(request.getCloudPlatform())
                 .withCredential(request)
-                .withFreeIpaCreation(request.getCreateFreeIpa() == null ? true : request.getCreateFreeIpa())
+                .withCreateFreeIpa(request.getCreateFreeIpa() == null ? true : request.getCreateFreeIpa())
                 .withLocation(locationRequestToDto(request.getLocation()))
                 .withRegions(request.getRegions());
 
@@ -71,7 +72,7 @@ public class EnvironmentApiConverter {
     }
 
     public NetworkDto networkRequestToDto(EnvironmentNetworkRequest network) {
-        NetworkDto.NetworkDtoBuilder builder = NetworkDto.NetworkDtoBuilder.aNetworkDto();
+        NetworkDto.Builder builder = NetworkDto.Builder.aNetworkDto();
         if (network.getAws() != null) {
             AwsParams awsParams = new AwsParams();
             awsParams.setVpcId(network.getAws().getVpcId());
@@ -97,9 +98,25 @@ public class EnvironmentApiConverter {
                 .withDescription(environmentDto.getDescription())
                 .withCloudPlatform(environmentDto.getCloudPlatform())
                 .withCredential(credentialConverter.convert(environmentDto.getCredential()))
-                .withEnvironmentStatus(environmentDto.getEnvironmentStatus().getResponseStatus())
+                .withEnvironmentStatus(environmentDto.getStatus().getResponseStatus())
                 .withLocation(locationDtoToResponse(environmentDto.getLocation()))
-                .withFreeIpaCreation(environmentDto.isFreeIpaCreation())
+                .withCreateFreeIpa(environmentDto.isCreateFreeIpa())
+                .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()));
+
+        NullUtil.doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
+        return builder.build();
+    }
+
+    public SimpleEnvironmentResponse dtoToSimpleResponse(EnvironmentDto environmentDto) {
+        SimpleEnvironmentResponse.Builder builder = SimpleEnvironmentResponse.builder()
+                .withCrn(environmentDto.getResourceCrn())
+                .withName(environmentDto.getName())
+                .withDescription(environmentDto.getDescription())
+                .withCloudPlatform(environmentDto.getCloudPlatform())
+                .withCredential(credentialConverter.convert(environmentDto.getCredential()))
+                .withEnvironmentStatus(environmentDto.getStatus().getResponseStatus())
+                .withLocation(locationDtoToResponse(environmentDto.getLocation()))
+                .withCreateFreeIpa(environmentDto.isCreateFreeIpa())
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()));
 
         NullUtil.doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
@@ -147,5 +164,4 @@ public class EnvironmentApiConverter {
                 .withCredentialName(request.getCredential() != null ? request.getCredential().getName() : request.getCredentialName())
                 .build();
     }
-
 }

@@ -26,16 +26,16 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UnhealthyInstancesFinalizerTest {
 
     @Mock
-    private CredentialToCloudCredentialConverter credentialConverter;
+    private StackUtil stackUtil;
 
     @Mock
     private InstanceMetaDataToCloudInstanceConverter cloudInstanceConverter;
@@ -51,7 +51,7 @@ public class UnhealthyInstancesFinalizerTest {
         Stack stack = TestUtil.stack(Status.AVAILABLE, TestUtil.awsCredential());
 
         CloudCredential cloudCredential = mock(CloudCredential.class);
-        when(credentialConverter.convert(stack.getCredentialCrn())).thenReturn(cloudCredential);
+        when(stackUtil.getCloudCredential(stack)).thenReturn(cloudCredential);
 
         String instanceId1 = "i-0f1e0605506aaaaaa";
         String instanceId2 = "i-0f1e0605506bbbbbb";
@@ -82,7 +82,7 @@ public class UnhealthyInstancesFinalizerTest {
         Stack stack = TestUtil.stack(Status.AVAILABLE, TestUtil.awsCredential());
 
         CloudCredential cloudCredential = mock(CloudCredential.class);
-        when(credentialConverter.convert(stack.getCredentialCrn())).thenReturn(cloudCredential);
+        when(stackUtil.getCloudCredential(stack)).thenReturn(cloudCredential);
 
         String instanceId1 = "i-0f1e0605506aaaaaa";
         String instanceId2 = "i-0f1e0605506bbbbbb";

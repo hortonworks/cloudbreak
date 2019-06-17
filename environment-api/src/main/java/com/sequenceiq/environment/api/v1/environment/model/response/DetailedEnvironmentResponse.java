@@ -19,6 +19,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private String description;
 
+        private boolean createFreeIpa;
+
         private CompactRegionResponse regions;
 
         private boolean freeIpaCreation;
@@ -90,6 +92,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withCreateFreeIpa(boolean createFreeIpa) {
+            this.createFreeIpa = createFreeIpa;
+            return this;
+        }
+
         public DetailedEnvironmentResponse build() {
             DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
             detailedEnvironmentResponse.setCrn(crn);
@@ -102,6 +109,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setNetwork(network);
             detailedEnvironmentResponse.setCreateFreeIpa(freeIpaCreation);
             detailedEnvironmentResponse.setEnvironmentStatus(environmentStatus);
+            detailedEnvironmentResponse.setCreateFreeIpa(createFreeIpa);
             return detailedEnvironmentResponse;
         }
     }

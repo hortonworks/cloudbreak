@@ -44,7 +44,7 @@ public class CredentialService extends AbstractCredentialService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
 
-    private static final String NOT_FOUND_FORMAT_MESS_NAME = "Credential with name:";
+    private static final String NOT_FOUND_FORMAT_MESSAGE = "Credential with name:";
 
     @Inject
     private CredentialRepository repository;
@@ -71,15 +71,16 @@ public class CredentialService extends AbstractCredentialService {
     }
 
     public Credential getByNameForAccountId(String name, String accountId) {
-        return repository.findByNameAndAccountId(name, accountId, getEnabledPlatforms()).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
+        return repository.findByNameAndAccountId(name, accountId, getEnabledPlatforms()).orElseThrow(notFound(NOT_FOUND_FORMAT_MESSAGE, name));
     }
 
     public Credential getByCrnForAccountId(String crn, String accountId) {
         return repository.findByCrnAndAccountId(crn, accountId, getEnabledPlatforms()).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, crn));
     }
 
-    public Credential getByEnvCrnForAccountId(String crn, String accountId) {
-        return repository.findByEnvCrnAndAccountId(crn, accountId, getEnabledPlatforms()).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, crn));
+    public Credential getByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
+        return repository.findByEnvironmentCrnAndAccountId(environmentCrn, accountId, getEnabledPlatforms())
+                .orElseThrow(notFound("Credential with environmentCrn:", environmentCrn));
     }
 
     public Map<String, String> interactiveLogin(String accountId, Credential credential) {
@@ -89,7 +90,7 @@ public class CredentialService extends AbstractCredentialService {
 
     public Credential updateByAccountId(Credential credential, String accountId) {
         Credential original = repository.findByNameAndAccountId(credential.getName(), accountId, getEnabledPlatforms())
-                .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, credential.getName()));
+                .orElseThrow(notFound(NOT_FOUND_FORMAT_MESSAGE, credential.getName()));
         if (!Objects.equals(credential.getCloudPlatform(), original.getCloudPlatform())) {
             throw new BadRequestException("Modifying credential platform is forbidden");
         }
@@ -140,7 +141,7 @@ public class CredentialService extends AbstractCredentialService {
 
     public String initCodeGrantFlow(String accountId, String name) {
         Credential original = repository.findByNameAndAccountId(name, accountId, getEnabledPlatforms())
-                .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
+                .orElseThrow(notFound(NOT_FOUND_FORMAT_MESSAGE, name));
         String originalAttributes = original.getAttributes();
         boolean codeGrantFlow = Boolean.valueOf(new Json(originalAttributes).getMap().get("codeGrantFlow").toString());
         if (!codeGrantFlow) {
@@ -196,5 +197,4 @@ public class CredentialService extends AbstractCredentialService {
                 .build()
                 .toString();
     }
-
 }

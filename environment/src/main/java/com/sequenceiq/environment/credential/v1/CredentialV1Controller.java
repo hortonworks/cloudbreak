@@ -59,19 +59,21 @@ public class CredentialV1Controller extends NotificationController implements Cr
     @Override
     public CredentialResponse getByName(String credentialName) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
-        return credentialConverter.convert(credentialService.getByNameForAccountId(credentialName, accountId));
+        Credential credential = credentialService.getByNameForAccountId(credentialName, accountId);
+        return credentialConverter.convert(credential);
+    }
+
+    @Override
+    public CredentialResponse getByEnvironmentCrn(String environmentCrn) {
+        String accountId = threadBasedUserCrnProvider.getAccountId();
+        Credential credential = credentialService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
+        return credentialConverter.convert(credential);
     }
 
     @Override
     public CredentialResponse getByResourceCrn(String credentialCrn) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
         return credentialConverter.convert(credentialService.getByCrnForAccountId(credentialCrn, accountId));
-    }
-
-    @Override
-    public CredentialResponse getByEnvCrn(String envCrn) {
-        String accountId = threadBasedUserCrnProvider.getAccountId();
-        return credentialConverter.convert(credentialService.getByEnvCrnForAccountId(envCrn, accountId));
     }
 
     @Override
@@ -88,7 +90,8 @@ public class CredentialV1Controller extends NotificationController implements Cr
         String accountId = threadBasedUserCrnProvider.getAccountId();
         Credential deleted = credentialDeleteService.deleteByName(name, accountId);
         notify(ResourceEvent.CREDENTIAL_DELETED);
-        return credentialConverter.convert(deleted);    }
+        return credentialConverter.convert(deleted);
+    }
 
     @Override
     public CredentialResponse deleteByResourceCrn(String crn) {

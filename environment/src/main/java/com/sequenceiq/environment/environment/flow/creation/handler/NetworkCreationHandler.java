@@ -21,6 +21,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
+import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dto.AwsParams;
@@ -46,7 +47,7 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
     private final Set<String> enabledPlatforms;
 
     protected NetworkCreationHandler(EventSender eventSender,
-            EnvironmentService environmentService,
+            EnvironmentService environmentService, EnvironmentRepository environmentRepository,
             PlatformParameterService platformParameterService,
             NetworkService networkService,
             EnvironmentDtoConverter environmentDtoConverter,
@@ -63,12 +64,12 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            environmentService.findById(environmentDto.getId())
+            environmentService.findEnvironmentById(environmentDto.getId())
                     .filter(environment -> Objects.nonNull(environment.getNetwork()) && enabledPlatforms.contains(environment.getCloudPlatform()))
                     .ifPresent(environment -> {
                         environment.setStatus(EnvironmentStatus.NETWORK_CREATION_IN_PROGRESS);
-                        networkService.decorateNetworkWithSubnetMeta(environment.getNetwork().getId(),
-                                getSubnetMetas(environmentDtoConverter.environmentToDto(environment)));
+                        Map<String, CloudSubnet> subnetMetadata = getSubnetMetadata(environmentDto);
+                        networkService.decorateNetworkWithSubnetMeta(environment.getNetwork().getId(), subnetMetadata);
                         environmentService.save(environment);
                     });
 
@@ -83,7 +84,7 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
         }
     }
 
-    private Map<String, CloudSubnet> getSubnetMetas(EnvironmentDto environmentDto) {
+    private Map<String, CloudSubnet> getSubnetMetadata(EnvironmentDto environmentDto) {
         String regionName = environmentDto.getRegionSet().iterator().next().getName();
         PlatformResourceRequest prr = new PlatformResourceRequest();
         prr.setCredential(environmentDto.getCredential());

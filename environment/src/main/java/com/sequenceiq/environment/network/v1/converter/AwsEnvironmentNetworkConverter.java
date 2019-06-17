@@ -30,7 +30,7 @@ public class AwsEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
     }
 
     @Override
-    NetworkDto setProviderSpecificFields(NetworkDto.NetworkDtoBuilder builder, BaseNetwork network) {
+    NetworkDto setProviderSpecificFields(NetworkDto.Builder builder, BaseNetwork network) {
         AwsNetwork awsNetwork = (AwsNetwork) network;
         return builder.withAws(
                 AwsParams.AwsParamsBuilder.anAwsParams()

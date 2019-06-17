@@ -14,6 +14,8 @@ public class NetworkDto {
 
     private Long id;
 
+    private String name;
+
     private final String resourceCrn;
 
     private final AwsParams aws;
@@ -24,9 +26,10 @@ public class NetworkDto {
 
     private final Map<String, CloudSubnet> subnetMetas;
 
-    public NetworkDto(String resourceCrn, Long id, AwsParams aws, AzureParams azure, Set<String> subnetIds, Map<String, CloudSubnet> subnetMetas) {
+    public NetworkDto(String resourceCrn, Long id, String name, AwsParams aws, AzureParams azure, Set<String> subnetIds, Map<String, CloudSubnet> subnetMetas) {
         this.resourceCrn = resourceCrn;
         this.id = id;
+        this.name = name;
         this.aws = aws;
         this.azure = azure;
         if (CollectionUtils.isEmpty(subnetIds)) {
@@ -69,8 +72,14 @@ public class NetworkDto {
         return resourceCrn;
     }
 
-    public static final class NetworkDtoBuilder {
+    public String getName() {
+        return name;
+    }
+
+    public static final class Builder {
         private Long id;
+
+        private String name;
 
         private String resourceCrn;
 
@@ -82,45 +91,50 @@ public class NetworkDto {
 
         private Map<String, CloudSubnet> subnetMetas;
 
-        private NetworkDtoBuilder() {
+        private Builder() {
         }
 
-        public static NetworkDtoBuilder aNetworkDto() {
-            return new NetworkDtoBuilder();
+        public static Builder aNetworkDto() {
+            return new Builder();
         }
 
-        public NetworkDtoBuilder withId(Long id) {
+        public Builder withId(Long id) {
             this.id = id;
             return this;
         }
 
-        public NetworkDtoBuilder withAws(AwsParams aws) {
+        public Builder withName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder withAws(AwsParams aws) {
             this.aws = aws;
             return this;
         }
 
-        public NetworkDtoBuilder withAzure(AzureParams azure) {
+        public Builder withAzure(AzureParams azure) {
             this.azure = azure;
             return this;
         }
 
-        public NetworkDtoBuilder withSubnetIds(Set<String> subnetIds) {
+        public Builder withSubnetIds(Set<String> subnetIds) {
             this.subnetIds = subnetIds;
             return this;
         }
 
-        public NetworkDtoBuilder withSubnetMetas(Map<String, CloudSubnet> subnetMetas) {
+        public Builder withSubnetMetas(Map<String, CloudSubnet> subnetMetas) {
             this.subnetMetas = subnetMetas;
             return this;
         }
 
-        public NetworkDtoBuilder withResourceCrn(String resourceCrn) {
+        public Builder withResourceCrn(String resourceCrn) {
             this.resourceCrn = resourceCrn;
             return this;
         }
 
         public NetworkDto build() {
-            return new NetworkDto(resourceCrn, id, aws, azure, subnetIds, subnetMetas);
+            return new NetworkDto(resourceCrn, id, name, aws, azure, subnetIds, subnetMetas);
         }
     }
 }

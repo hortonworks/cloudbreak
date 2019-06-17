@@ -39,6 +39,7 @@ public class PlatformParameterService {
             String region,
             String platformVariant,
             String availabilityZone) {
+
         PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
 
         if (!Strings.isNullOrEmpty(credentialName)) {
