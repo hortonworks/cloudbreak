@@ -86,12 +86,9 @@ public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentD
                     CreateFreeIpaRequest createFreeIpaRequest = createFreeIpaRequest(environmentDto);
                     freeIpaV1Endpoint.create(createFreeIpaRequest);
                     awaitFreeIpaCreation(environmentDtoEvent, environmentDto);
-                } else {
-                    eventSender().sendEvent(getNextStepObject(environmentDto), environmentDtoEvent.getHeaders());
                 }
-            } else {
-                eventSender().sendEvent(getNextStepObject(environmentDto), environmentDtoEvent.getHeaders());
             }
+            eventSender().sendEvent(getNextStepObject(environmentDto), environmentDtoEvent.getHeaders());
         } catch (Exception ex) {
             EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(environmentDto.getId(), environmentDto.getName(), ex);
             eventSender().sendEvent(failureEvent, environmentDtoEvent.getHeaders());
