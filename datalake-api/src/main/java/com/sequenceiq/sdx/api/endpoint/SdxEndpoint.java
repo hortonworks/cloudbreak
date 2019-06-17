@@ -1,6 +1,7 @@
 package com.sequenceiq.sdx.api.endpoint;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -14,6 +15,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.sdx.api.model.RedeploySdxClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
@@ -48,6 +50,12 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "get SDX cluster", produces = "application/json", nickname = "getSdx")
     SdxClusterResponse get(@PathParam("name") String name);
+
+    @GET
+    @Path("{name}/detail")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "get SDX cluster detail", produces = "application/json", nickname = "getSdxDetail")
+    SdxClusterDetailResponse getDetail(@PathParam("name") String name, @QueryParam("entries") Set<String> entries);
 
     @GET
     @Path("list")

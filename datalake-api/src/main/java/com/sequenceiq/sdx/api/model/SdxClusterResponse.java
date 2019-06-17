@@ -12,6 +12,17 @@ public class SdxClusterResponse {
 
     private String environmentCrn;
 
+    public SdxClusterResponse() {
+    }
+
+    public SdxClusterResponse(String crn, String name, SdxClusterStatusResponse status, String environmentName, String environmentCrn) {
+        this.crn = crn;
+        this.name = name;
+        this.status = status;
+        this.environmentName = environmentName;
+        this.environmentCrn = environmentCrn;
+    }
+
     public String getCrn() {
         return crn;
     }

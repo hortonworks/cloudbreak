@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.service.sdx;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
@@ -13,8 +14,10 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
+import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
@@ -41,12 +44,24 @@ public class SdxService {
     @Inject
     private EnvironmentServiceClient environmentServiceClient;
 
+    @Inject
+    private CloudbreakUserCrnClient cloudbreakClient;
+
     public SdxCluster getById(Long id) {
         Optional<SdxCluster> sdxClusters = sdxClusterRepository.findById(id);
         if (sdxClusters.isPresent()) {
             return sdxClusters.get();
         } else {
             throw new NotFoundException("Sdx cluster not found by ID");
+        }
+    }
+
+    public StackV4Response getDetail(String userCrn, String name, Set<String> entries) {
+        try {
+            return cloudbreakClient.withCrn(userCrn).stackV4Endpoint().get(0L, name, entries);
+        } catch (javax.ws.rs.NotFoundException e) {
+            LOGGER.info("Sdx cluster not found on CB side", e);
+            throw new NotFoundException("Sdx cluster not found on CB side");
         }
     }
 
