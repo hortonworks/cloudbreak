@@ -9,6 +9,10 @@
         "cloudformation:DescribeStackResource",
         "cloudformation:DescribeStackResources",
         "cloudformation:DescribeStacks",
+        "cloudformation:CreateChangeSet",
+        "cloudformation:DescribeChangeSet",
+        "cloudformation:ExecuteChangeSet",
+        "cloudformation:DeleteChangeSet",
         "cloudformation:UpdateStack"
       ],
       "Effect": "Allow",
@@ -51,7 +55,12 @@
     {
       "Sid": "EnterpriseKubernetesServiceFull",
       "Action": [
-        "eks:DescribeCluster"
+        "eks:CreateCluster",
+        "eks:DeleteCluster",
+        "eks:ListClusters",
+        "eks:DescribeCluster",
+        "eks:DescribeUpdate",
+        "eks:UpdateClusterVersion"
       ],
       "Effect": "Allow",
       "Resource": [
