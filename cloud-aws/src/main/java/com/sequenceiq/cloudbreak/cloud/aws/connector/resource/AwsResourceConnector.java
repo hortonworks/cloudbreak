@@ -62,6 +62,9 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     private AwsLaunchService awsLaunchService;
 
     @Inject
+    private AwsRdsLaunchService awsRdsLaunchService;
+
+    @Inject
     private AwsTerminateService awsTerminateService;
 
     @Inject
@@ -80,9 +83,9 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
-    public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
-            PersistenceNotifier persistenceNotifier) {
-        throw new UnsupportedOperationException("Database server launch is not supported for " + getClass().getName());
+    public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext ac, DatabaseStack stack,
+            PersistenceNotifier persistenceNotifier) throws Exception {
+        return awsRdsLaunchService.launch(ac, stack, persistenceNotifier);
     }
 
     private boolean deployingToSameVPC(AwsNetworkView awsNetworkView, boolean existingVPC) {

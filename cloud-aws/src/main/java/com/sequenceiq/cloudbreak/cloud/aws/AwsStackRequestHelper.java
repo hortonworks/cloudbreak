@@ -5,6 +5,7 @@ import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -19,10 +20,13 @@ import com.amazonaws.services.ec2.model.DescribeImagesResult;
 import com.amazonaws.services.ec2.model.Image;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsDbSubnetGroupView;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 
 @Component
@@ -42,6 +46,16 @@ public class AwsStackRequestHelper {
                 .withTags(awsTagPreparationService.prepareCloudformationTags(ac, stack.getTags()))
                 .withCapabilities(CAPABILITY_IAM)
                 .withParameters(getStackParameters(ac, stack, cFStackName, subnet));
+    }
+
+    public CreateStackRequest createCreateStackRequest(AuthenticatedContext ac, DatabaseStack stack, String cFStackName, String cfTemplate) {
+        return new CreateStackRequest()
+                .withStackName(cFStackName)
+                .withOnFailure(OnFailure.DO_NOTHING)
+                .withTemplateBody(cfTemplate)
+                .withTags(awsTagPreparationService.prepareCloudformationTags(ac, stack.getTags()))
+                .withCapabilities(CAPABILITY_IAM)
+                .withParameters(getStackParameters(ac, stack));
     }
 
     private Collection<Parameter> getStackParameters(AuthenticatedContext ac, CloudStack stack, String stackName, String newSubnetCidr) {
@@ -94,5 +108,27 @@ public class AwsStackRequestHelper {
             throw new CloudConnectorException(String.format("Couldn't describe AMI '%s'.", cloudStack.getImage().getImageName()));
         }
         return image.getRootDeviceName();
+    }
+
+    private Collection<Parameter> getStackParameters(AuthenticatedContext ac, DatabaseStack stack) {
+        AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
+        AwsRdsInstanceView awsRdsInstanceView = new AwsRdsInstanceView(stack.getDatabaseServer());
+        AwsRdsDbSubnetGroupView awsRdsDbSubnetGroupView = new AwsRdsDbSubnetGroupView(stack.getDatabaseServer());
+        Collection<Parameter> parameters = new ArrayList<>(asList(
+                new Parameter().withParameterKey("AllocatedStorageParameter").withParameterValue(Objects.toString(awsRdsInstanceView.getAllocatedStorage())),
+                new Parameter().withParameterKey("BackupRetentionPeriodParameter")
+                    .withParameterValue(Objects.toString(awsRdsInstanceView.getBackupRetentionPeriod())),
+                new Parameter().withParameterKey("DBInstanceClassParameter").withParameterValue(awsRdsInstanceView.getDBInstanceClass()),
+                new Parameter().withParameterKey("DBInstanceIdentifierParameter").withParameterValue(awsRdsInstanceView.getDBInstanceIdentifier()),
+                new Parameter().withParameterKey("DBSubnetGroupNameParameter").withParameterValue(awsRdsDbSubnetGroupView.getDBSubnetGroupName()),
+                new Parameter().withParameterKey("DBSubnetGroupSubnetIdsParameter").withParameterValue(String.join(",", awsNetworkView.getSubnetList())),
+                new Parameter().withParameterKey("EngineParameter").withParameterValue(awsRdsInstanceView.getEngine()),
+                new Parameter().withParameterKey("EngineVersionParameter").withParameterValue(awsRdsInstanceView.getEngineVersion()),
+                new Parameter().withParameterKey("MasterUsernameParameter").withParameterValue(awsRdsInstanceView.getMasterUsername()),
+                new Parameter().withParameterKey("MasterUserPasswordParameter").withParameterValue(awsRdsInstanceView.getMasterUserPassword()),
+                new Parameter().withParameterKey("VPCSecurityGroupsParameter").withParameterValue(String.join(",", awsRdsInstanceView.getVPCSecurityGroups())),
+                new Parameter().withParameterKey("StackOwner").withParameterValue(String.valueOf(ac.getCloudContext().getUserName()))
+        ));
+        return parameters;
     }
 }

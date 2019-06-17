@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+// import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.common.service.DefaultCostTaggingService;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
@@ -83,6 +84,18 @@ public class CloudFormationTemplateBuilder {
         model.putAll(defaultCostTaggingService.prepareAllTagsForTemplate());
         try {
             String template = freeMarkerTemplateUtils.processTemplateIntoString(new Template("aws-template", context.template, freemarkerConfiguration), model);
+            return template.replaceAll("\\t|\\n| [\\s]+", "");
+        } catch (IOException | TemplateException e) {
+            throw new CloudConnectorException("Failed to process CloudFormation freemarker template", e);
+        }
+    }
+
+    public String build(RDSModelContext context) {
+        Map<String, Object> model = new HashMap<>();
+        model.putAll(defaultCostTaggingService.prepareAllTagsForTemplate());
+        try {
+            String template = freeMarkerTemplateUtils.processTemplateIntoString(new Template("aws-rds-template", context.template, freemarkerConfiguration),
+                                                                                model);
             return template.replaceAll("\\t|\\n| [\\s]+", "");
         } catch (IOException | TemplateException e) {
             throw new CloudConnectorException("Failed to process CloudFormation freemarker template", e);
@@ -193,6 +206,30 @@ public class CloudFormationTemplateBuilder {
 
         public ModelContext withEncryptedAMIByGroupName(Map<String, String> encryptedAMIByGroupName) {
             this.encryptedAMIByGroupName.putAll(encryptedAMIByGroupName);
+            return this;
+        }
+
+    }
+
+    public static class RDSModelContext {
+        // private AuthenticatedContext ac;
+
+        // private DatabaseStack stack;
+
+        private String template;
+
+        // public RDSModelContext withAuthenticatedContext(AuthenticatedContext ac) {
+        //     this.ac = ac;
+        //     return this;
+        // }
+
+        // public RDSModelContext withStack(DatabaseStack stack) {
+        //     this.stack = stack;
+        //     return this;
+        // }
+
+        public RDSModelContext withTemplate(String template) {
+            this.template = template;
             return this;
         }
 

@@ -2,19 +2,21 @@ package com.sequenceiq.cloudbreak.cloud.aws.view;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
-import java.util.Arrays;
 import java.util.List;
 
-import com.google.common.collect.Lists;
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 
 public class AwsNetworkView {
 
-    private static final String VPC = "vpcId";
+    @VisibleForTesting
+    static final String VPC = "vpcId";
 
-    private static final String IGW = "internetGatewayId";
+    @VisibleForTesting
+    static final String IGW = "internetGatewayId";
 
-    private static final String SUBNET = "subnetId";
+    @VisibleForTesting
+    static final String SUBNET = "subnetId";
 
     private final Network network;
 
@@ -39,11 +41,11 @@ public class AwsNetworkView {
     }
 
     public boolean isSubnetList() {
-        return getExistingSubnet().contains(",");
+        return isExistingSubnet() && getExistingSubnet().contains(",");
     }
 
     public List<String> getSubnetList() {
-        return isSubnetList() ? Arrays.asList(getExistingSubnet().split(",")) : Lists.newArrayList(getExistingSubnet());
+        return isSubnetList() ? List.of(getExistingSubnet().split(",")) : (isExistingSubnet() ? List.of(getExistingSubnet()) : List.of());
     }
 
     public String getExistingIGW() {
