@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
@@ -292,7 +293,7 @@ public class ProvisionerService {
             cluster.setUserName("admin");
         }
         if (cluster != null && cluster.getPassword() == null) {
-            cluster.setPassword("admin123");
+            cluster.setPassword(PasswordUtil.generatePassword());
         }
     }
 
