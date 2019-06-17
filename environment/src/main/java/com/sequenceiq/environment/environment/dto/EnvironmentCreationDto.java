@@ -22,6 +22,8 @@ public class EnvironmentCreationDto {
 
     private final NetworkDto network;
 
+    private boolean freeIpaCreation = true;
+
     private final CredentialAwareEnvRequest credential;
 
     private final Set<String> regions;
@@ -31,7 +33,7 @@ public class EnvironmentCreationDto {
     //CHECKSTYLE:OFF
     public EnvironmentCreationDto(String name, String description, String cloudPlatform, String accountId,
             LocationDto location, NetworkDto network, CredentialAwareEnvRequest credential,
-            Set<String> regions, Set<String> proxyNames) {
+            Set<String> regions, Set<String> proxyNames, boolean freeIpaCreation) {
         //CHECKSTYLE:ON
         this.name = name;
         this.description = description;
@@ -40,6 +42,7 @@ public class EnvironmentCreationDto {
         this.location = location;
         this.network = network;
         this.credential = credential;
+        this.freeIpaCreation = freeIpaCreation;
         if (CollectionUtils.isEmpty(regions)) {
             this.regions = new HashSet<>();
         } else {
@@ -80,6 +83,10 @@ public class EnvironmentCreationDto {
         return proxyNames;
     }
 
+    public boolean isFreeIpaCreation() {
+        return freeIpaCreation;
+    }
+
     public String getAccountId() {
         return accountId;
     }
@@ -96,6 +103,8 @@ public class EnvironmentCreationDto {
         private String cloudPlatform;
 
         private String accountId;
+
+        private boolean freeIpaCreation = true;
 
         private LocationDto location;
 
@@ -149,6 +158,11 @@ public class EnvironmentCreationDto {
             return this;
         }
 
+        public EnvironmentCreationDtoBuilder withFreeIpaCreation(boolean freeIpaCreation) {
+            this.freeIpaCreation = freeIpaCreation;
+            return this;
+        }
+
         public EnvironmentCreationDtoBuilder withRegions(Set<String> regions) {
             this.regions = regions;
             return this;
@@ -160,7 +174,8 @@ public class EnvironmentCreationDto {
         }
 
         public EnvironmentCreationDto build() {
-            return new EnvironmentCreationDto(name, description, cloudPlatform, accountId, location, network, credential, regions, proxyNames);
+            return new EnvironmentCreationDto(name, description, cloudPlatform, accountId, location, network,
+                    credential, regions, proxyNames, freeIpaCreation);
         }
     }
 }

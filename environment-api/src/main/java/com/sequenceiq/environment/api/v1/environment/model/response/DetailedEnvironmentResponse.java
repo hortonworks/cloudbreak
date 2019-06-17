@@ -21,6 +21,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private CompactRegionResponse regions;
 
+        private boolean freeIpaCreation;
+
         private String cloudPlatform;
 
         private CredentialResponse credential;
@@ -78,6 +80,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withFreeIpaCreation(boolean freeIpaCreation) {
+            this.freeIpaCreation = freeIpaCreation;
+            return this;
+        }
+
         public Builder withEnvironmentStatus(EnvironmentStatus environmentStatus) {
             this.environmentStatus = environmentStatus;
             return this;
@@ -93,6 +100,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setCredential(credential);
             detailedEnvironmentResponse.setLocation(location);
             detailedEnvironmentResponse.setNetwork(network);
+            detailedEnvironmentResponse.setCreateFreeIpa(freeIpaCreation);
             detailedEnvironmentResponse.setEnvironmentStatus(environmentStatus);
             return detailedEnvironmentResponse;
         }
