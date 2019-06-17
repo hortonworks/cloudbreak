@@ -53,6 +53,7 @@ public class EnvironmentApiConverter {
                 .withDescription(request.getDescription())
                 .withCloudPlatform(request.getCloudPlatform())
                 .withCredential(request)
+                .withFreeIpaCreation(request.getCreateFreeIpa() == null ? true : request.getCreateFreeIpa())
                 .withLocation(locationRequestToDto(request.getLocation()))
                 .withRegions(request.getRegions());
 
@@ -98,6 +99,7 @@ public class EnvironmentApiConverter {
                 .withCredential(credentialConverter.convert(environmentDto.getCredential()))
                 .withEnvironmentStatus(environmentDto.getEnvironmentStatus().getResponseStatus())
                 .withLocation(locationDtoToResponse(environmentDto.getLocation()))
+                .withFreeIpaCreation(environmentDto.isFreeIpaCreation())
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()));
 
         NullUtil.doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
