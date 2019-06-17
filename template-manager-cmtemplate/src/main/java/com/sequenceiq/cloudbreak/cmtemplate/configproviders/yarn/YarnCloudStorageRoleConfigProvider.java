@@ -8,20 +8,19 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
-public class YarnCloudStorageRoleConfigProvider extends AbstractRoleConfigConfigProvider {
+public class YarnCloudStorageRoleConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String NODEMANAGER_CONFIG_SAFETY_VALVE = "nodemanager_config_safety_valve";
 
     private static final String NODEMANAGER_REMOTE_APP_LOG_DIR = "yarn.nodemanager.remote-app-log-dir";
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         switch (roleType) {
             case YarnRoles.NODEMANAGER:
                 String cloudStorageProperty = getCloudStorageProperty(source);

@@ -35,10 +35,13 @@ public class CentralCmTemplateUpdater implements BlueprintUpdater {
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Inject
-    private CmTemplateComponentConfigProcessor cmTemplateComponentConfigProcessor;
+    private CmTemplateComponentConfigProviderProcessor cmTemplateComponentConfigProviderProcessor;
 
     @Inject
-    private CmTemplateConfigInjectors cmTemplateConfigInjectors;
+    private CmTemplateConfigInjectorProcessor cmTemplateConfigInjectorProcessor;
+
+    @Inject
+    private CmHostGroupRoleConfigProviderProcessor cmHostGroupRoleConfigProviderProcessor;
 
     public ApiClusterTemplate getCmTemplate(TemplatePreparationObject source, Map<String, List<Map<String, String>>> hostGroupMappings,
             ClouderaManagerRepo clouderaManagerRepoDetails, List<ClouderaManagerProduct> clouderaManagerProductDetails, String sdxContextName) {
@@ -77,8 +80,9 @@ public class CentralCmTemplateUpdater implements BlueprintUpdater {
             TemplatePreparationObject source, Map<String, List<Map<String, String>>> hostGroupMappings, String sdxContextName) {
         processor.addInstantiator(clouderaManagerRepoDetails, source, sdxContextName);
         processor.addHosts(hostGroupMappings);
-        cmTemplateComponentConfigProcessor.process(processor, source);
-        cmTemplateConfigInjectors.process(processor, source);
+        cmTemplateComponentConfigProviderProcessor.process(processor, source);
+        cmTemplateConfigInjectorProcessor.process(processor, source);
+        cmHostGroupRoleConfigProviderProcessor.process(processor, source);
     }
 
     private void updateCmTemplateRepoDetails(CmTemplateProcessor cmTemplateProcessor, ClouderaManagerRepo clouderaManagerRepoDetails,

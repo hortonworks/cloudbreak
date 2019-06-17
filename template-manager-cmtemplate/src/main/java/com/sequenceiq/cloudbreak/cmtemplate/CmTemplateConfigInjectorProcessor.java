@@ -13,7 +13,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @Component
-public class CmTemplateConfigInjectors {
+public class CmTemplateConfigInjectorProcessor {
 
     @Inject
     private List<CmTemplateConfigInjector> injectors;

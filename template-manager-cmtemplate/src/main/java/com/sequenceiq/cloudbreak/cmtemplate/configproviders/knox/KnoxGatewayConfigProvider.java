@@ -14,14 +14,14 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
-public class KnoxGatewayConfigProvider extends AbstractRoleConfigConfigProvider {
+public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String KNOX_SERVICE_REF_NAME = "knox";
 
@@ -32,7 +32,7 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigConfigProvider 
     private static final String GATEWAY_PATH = "gateway_path";
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         GatewayView gateway = source.getGatewayView();
         String masterSecret = gateway != null ? gateway.getMasterSecret() : source.getGeneralClusterConfigs().getPassword();
 

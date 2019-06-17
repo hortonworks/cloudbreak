@@ -30,13 +30,6 @@ public class RangerRoleConfigProviderTest {
     private final RangerRoleConfigProvider underTest = new RangerRoleConfigProvider();
 
     @Test
-    public void testGetRoleTypeVariableName() {
-        String variableName = underTest.getRoleTypeVariableName("master", "RANGER_ADMIN", "custom_property");
-
-        assertEquals("master_ranger_admin_custom_property", variableName);
-    }
-
-    @Test
     public void testGetRoleConfigsWithoutRanger() {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);

@@ -8,6 +8,11 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
+/**
+ * Generates config for services and components (roles).
+ * See {@link CmHostGroupRoleConfigProvider} for a generator that can create different configs depending on which host group the role is assigned to.
+ * See {@link CmTemplateConfigInjector} for a generator that can generate global configs (eg. for some or all of the services or roles).
+ */
 public interface CmTemplateComponentConfigProvider {
 
     String getServiceType();

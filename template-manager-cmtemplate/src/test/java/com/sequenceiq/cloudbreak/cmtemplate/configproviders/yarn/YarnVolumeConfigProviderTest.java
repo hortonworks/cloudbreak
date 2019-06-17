@@ -1,67 +1,49 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn;
 
-import static org.junit.Assert.assertEquals;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.VolumeConfigProviderTestHelper.preparatorWithHostGroups;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.VolumeConfigProviderTestHelper.hostGroupWithVolumeCount;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
-@RunWith(MockitoJUnitRunner.class)
-public class YarnVolumeConfigProviderTest {
+class YarnVolumeConfigProviderTest {
 
-    private final YarnRoleConfigConfigProvider underTest = new YarnRoleConfigConfigProvider();
+    private final YarnVolumeConfigProvider subject = new YarnVolumeConfigProvider();
 
     @Test
-    public void testGetRoleConfigsWithSingleRolesPerHostGroup() {
-        HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
-        HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
-        TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker)).build();
-        String inputJson = getBlueprintText("input/clouderamanager.bp");
-        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+    void getRoleConfigsWithMultipleVolumes() {
+        HostgroupView worker = hostGroupWithVolumeCount(2);
 
-        Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
+        List<ApiClusterTemplateConfig> roleConfigs = subject.getRoleConfigs(YarnRoles.NODEMANAGER, worker, preparatorWithHostGroups(worker));
 
-        List<ApiClusterTemplateConfig> workerNM = roleConfigs.get("yarn-NODEMANAGER-BASE");
-
-        assertEquals(2, workerNM.size());
-        assertEquals("yarn_nodemanager_local_dirs", workerNM.get(0).getName());
-        assertEquals("/hadoopfs/fs1/nodemanager,/hadoopfs/fs2/nodemanager", workerNM.get(0).getValue());
-        assertEquals("yarn_nodemanager_log_dirs", workerNM.get(1).getName());
-        assertEquals("/hadoopfs/fs1/nodemanager/log,/hadoopfs/fs2/nodemanager/log", workerNM.get(1).getValue());
+        assertEquals(
+                List.of(
+                        config("yarn_nodemanager_local_dirs", "/hadoopfs/fs1/nodemanager,/hadoopfs/fs2/nodemanager"),
+                        config("yarn_nodemanager_log_dirs", "/hadoopfs/fs1/nodemanager/log,/hadoopfs/fs2/nodemanager/log")
+                ),
+                roleConfigs
+        );
     }
 
     @Test
-    public void testGetRoleConfigsWithZeroDisks() {
-        HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.GATEWAY, 1);
-        HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, 2);
-        TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker)).build();
-        String inputJson = getBlueprintText("input/clouderamanager.bp");
-        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+    void getRoleConfigsWithoutVolumes() {
+        HostgroupView worker = hostGroupWithVolumeCount(0);
 
-        Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
+        List<ApiClusterTemplateConfig> roleConfigs = subject.getRoleConfigs(YarnRoles.NODEMANAGER, worker, preparatorWithHostGroups(worker));
 
-        List<ApiClusterTemplateConfig> workerNM = roleConfigs.get("yarn-NODEMANAGER-BASE");
-
-        assertEquals(2, workerNM.size());
-        assertEquals("yarn_nodemanager_local_dirs", workerNM.get(0).getName());
-        assertEquals("/hadoopfs/root1/nodemanager", workerNM.get(0).getValue());
-        assertEquals("yarn_nodemanager_log_dirs", workerNM.get(1).getName());
-        assertEquals("/hadoopfs/root1/nodemanager/log", workerNM.get(1).getValue());
+        assertEquals(
+                List.of(
+                        config("yarn_nodemanager_local_dirs", "/hadoopfs/root1/nodemanager"),
+                        config("yarn_nodemanager_log_dirs", "/hadoopfs/root1/nodemanager/log")
+                ),
+                roleConfigs
+        );
     }
 
-    private String getBlueprintText(String path) {
-        return FileReaderUtils.readFileFromClasspathQuietly(path);
-    }
 }
