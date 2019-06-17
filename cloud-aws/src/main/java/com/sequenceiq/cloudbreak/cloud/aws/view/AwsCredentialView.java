@@ -32,6 +32,11 @@ public class AwsCredentialView {
         return cloudCredential.getName();
     }
 
+    // This method is used in AwsSessionCredentialClient.java for caching
+    public String getId() {
+        return cloudCredential.getId();
+    }
+
     public String getRoleArn() {
         if (cloudCredential.hasParameter(AWS)) {
             Map<String, String> roleBased = getRoleBased();
