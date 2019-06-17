@@ -3,31 +3,31 @@ package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.CloudPlatform;
-import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.network.domain.AzureNetwork;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.AzureNetworkParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
 
 @Component
 public class FreeIpaAzureNetworkProvider implements FreeIpaNetworkProvider {
     @Override
-    public NetworkRequest provider(Environment environment) {
+    public NetworkRequest provider(EnvironmentDto environment) {
         NetworkRequest networkRequest = new NetworkRequest();
-        AzureNetwork network = (AzureNetwork) environment.getNetwork();
+        AzureParams azureParams = environment.getNetwork().getAzure();
         AzureNetworkParameters azureNetworkParameters = new AzureNetworkParameters();
-        azureNetworkParameters.setNetworkId(network.getNetworkId());
-        azureNetworkParameters.setNoFirewallRules(network.getNoFirewallRules());
-        azureNetworkParameters.setNoPublicIp(network.getNoFirewallRules());
-        azureNetworkParameters.setResourceGroupName(network.getResourceGroupName());
-        azureNetworkParameters.setSubnetId(network.getSubnetIdsSet().iterator().next());
+        azureNetworkParameters.setNetworkId(azureParams.getNetworkId());
+        azureNetworkParameters.setNoFirewallRules(azureParams.isNoFirewallRules());
+        azureNetworkParameters.setNoPublicIp(azureParams.isNoPublicIp());
+        azureNetworkParameters.setResourceGroupName(azureParams.getResourceGroupName());
+        azureNetworkParameters.setSubnetId(environment.getNetwork().getSubnetIds().iterator().next());
         networkRequest.setAzure(azureNetworkParameters);
         return networkRequest;
     }
 
     @Override
-    public String availabilityZone(NetworkRequest networkRequest, Environment environment) {
+    public String availabilityZone(NetworkRequest networkRequest, EnvironmentDto environment) {
         AzureNetworkParameters azureNetwork = networkRequest.getAzure();
-        return environment.getNetwork().getSubnetMetasMap().get(azureNetwork.getSubnetId()).getAvailabilityZone();
+        return environment.getNetwork().getSubnetMetas().get(azureNetwork.getSubnetId()).getAvailabilityZone();
     }
 
     @Override

@@ -21,16 +21,13 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
 public class UnhealthyInstancesFinalizer {
-
-    @Inject
-    private CredentialToCloudCredentialConverter credentialConverter;
 
     @Inject
     private InstanceMetaDataToCloudInstanceConverter cloudInstanceConverter;
@@ -38,11 +35,14 @@ public class UnhealthyInstancesFinalizer {
     @Inject
     private InstanceStateQuery instanceStateQuery;
 
+    @Inject
+    private StackUtil stackUtil;
+
     public Set<String> finalizeUnhealthyInstances(Stack stack, Iterable<InstanceMetaData> candidateUnhealthyInstances) {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(),
                 stack.getPlatformVariant(), location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredentialCrn());
+        CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
         List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(candidateUnhealthyInstances);
 
         List<CloudVmInstanceStatus> cloudVmInstanceStatuses = instanceStateQuery.getCloudVmInstanceStatuses(

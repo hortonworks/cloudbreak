@@ -52,9 +52,9 @@ public class StackPreTerminationAction extends AbstractStackTerminationAction<Te
     @Override
     protected void doExecute(StackTerminationContext context, TerminationEvent payload, Map<Object, Object> variables) {
         Stack stack = context.getStack();
-        if (stack == null || StringUtils.isEmpty(stack.getCredentialCrn())) {
+        if (stack == null || StringUtils.isEmpty(stack.getEnvironmentCrn())) {
             LOGGER.info("Could not trigger stack event on null, {}", payload);
-            String statusReason = "Stack or credential not found.";
+            String statusReason = "Stack or environment not found.";
             StackPreTerminationFailed terminateStackResult = new StackPreTerminationFailed(payload.getResourceId(), new IllegalArgumentException(statusReason));
             sendEvent(context, StackTerminationEvent.PRE_TERMINATION_FAILED_EVENT.event(), terminateStackResult);
         } else {

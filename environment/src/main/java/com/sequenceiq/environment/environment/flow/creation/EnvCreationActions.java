@@ -17,7 +17,6 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
-import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors;
@@ -42,10 +41,14 @@ public class EnvCreationActions {
         return new AbstractVpcCreateAction<>(EnvCreationEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
-                EnvironmentDto envDto = new EnvironmentDto();
-                envDto.setId(payload.getResourceId());
-                LOGGER.info("NETWORK_CREATION_STARTED_STATE");
-                sendEvent(context, CREATE_NETWORK_EVENT.selector(), envDto);
+                environmentService.findById(payload.getResourceId()).ifPresentOrElse(environmentDto -> {
+                    LOGGER.info("NETWORK_CREATION_STARTED_STATE");
+                    sendEvent(context, CREATE_NETWORK_EVENT.selector(), environmentDto);
+                }, () -> {
+                    EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(payload.getResourceId(), null, null);
+                    LOGGER.warn("Failed to create network for environment! No environment found with id '{}'.", payload.getResourceId());
+                    sendEvent(context, failureEvent);
+                });
             }
         };
     }
@@ -55,10 +58,14 @@ public class EnvCreationActions {
         return new AbstractVpcCreateAction<>(EnvCreationEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
-                EnvironmentDto envDto = new EnvironmentDto();
-                envDto.setId(payload.getResourceId());
-                LOGGER.info("FREEIPA_CREATION_STARTED_STATE");
-                sendEvent(context, CREATE_FREEIPA_EVENT.selector(), envDto);
+                environmentService.findById(payload.getResourceId()).ifPresentOrElse(environmentDto -> {
+                    LOGGER.info("FREEIPA_CREATION_STARTED_STATE");
+                    sendEvent(context, CREATE_FREEIPA_EVENT.selector(), environmentDto);
+                }, () -> {
+                    EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(payload.getResourceId(), null, null);
+                    LOGGER.warn("Failed to create freeipa for environment! No environment found with id '{}'.", payload.getResourceId());
+                    sendEvent(context, failureEvent);
+                });
             }
         };
     }
@@ -69,7 +76,7 @@ public class EnvCreationActions {
             @Override
             protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) {
                 environmentService
-                        .findById(payload.getResourceId())
+                        .findEnvironmentById(payload.getResourceId())
                         .ifPresent(environment -> {
                             environment.setStatus(EnvironmentStatus.AVAILABLE);
                             environmentService.save(environment);

@@ -66,7 +66,7 @@ public class EnvironmentCreationService {
                 .build();
         String userCrn = authenticatedUserService.getUserCrn();
         if (userCrn == null) {
-            userCrn = environmentService.getByName(envName, accountId).getCreator();
+            userCrn = environmentService.getByNameAndAccountId(envName, accountId).getCreator();
         }
         Map<String, Object> flowTriggerUsercrn = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
         eventSender.sendEvent(envCreationEvent, new Event.Headers(flowTriggerUsercrn));
@@ -83,6 +83,7 @@ public class EnvironmentCreationService {
         environment = environmentService.save(environment);
         if (!CloudPlatform.YARN.name().equals(environment.getCloudPlatform())) {
             environmentResourceService.createAndSetNetwork(environment, creationDto.getNetwork(), accountId);
+            environmentService.save(environment);
         }
         return environmentDtoConverter.environmentToDto(environment);
     }

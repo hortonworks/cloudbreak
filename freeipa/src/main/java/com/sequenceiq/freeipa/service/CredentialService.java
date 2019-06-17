@@ -20,7 +20,7 @@ public class CredentialService {
     private SecretService secretService;
 
     public Credential getCredentialByEnvCrn(String envCrn) {
-        CredentialResponse credentialResponse = credentialEndpoint.getByEnvCrn(envCrn);
+        CredentialResponse credentialResponse = credentialEndpoint.getByEnvironmentCrn(envCrn);
         SecretResponse secretResponse = credentialResponse.getAttributes();
         String attributes = secretService.getByResponse(secretResponse);
         return new Credential(credentialResponse.getCloudPlatform(), credentialResponse.getName(), attributes, credentialResponse.getCrn());

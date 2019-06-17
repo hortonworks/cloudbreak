@@ -11,11 +11,10 @@ import javax.inject.Inject;
 import org.springframework.statemachine.StateContext;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
+import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
@@ -25,6 +24,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.core.FlowParameters;
 
 public abstract class AbstractStackCreationAction<P extends Payload> extends AbstractStackAction<StackCreationState, StackCreationEvent, StackContext, P> {
@@ -35,7 +35,7 @@ public abstract class AbstractStackCreationAction<P extends Payload> extends Abs
     private StackToCloudStackConverter cloudStackConverter;
 
     @Inject
-    private CredentialToCloudCredentialConverter credentialConverter;
+    private StackUtil stackUtil;
 
     protected AbstractStackCreationAction(Class<P> payloadClass) {
         super(payloadClass);
@@ -48,7 +48,7 @@ public abstract class AbstractStackCreationAction<P extends Payload> extends Abs
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                 location, stack.getCreator().getUserId(), stack.getCreator().getUserName(), stack.getWorkspace().getId());
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredentialCrn());
+        CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         return new StackContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack);
     }

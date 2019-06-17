@@ -20,18 +20,18 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.core.FlowParameters;
 
 abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
@@ -44,9 +44,6 @@ abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
     private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
-    private CredentialToCloudCredentialConverter credentialConverter;
-
-    @Inject
     private StackToCloudStackConverter cloudStackConverter;
 
     @Inject
@@ -54,6 +51,9 @@ abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
 
     @Inject
     private InstanceMetaDataToCloudInstanceConverter metadataConverter;
+
+    @Inject
+    private StackUtil stackUtil;
 
     protected AbstractInstanceTerminationAction(Class<P> payloadClass) {
         super(payloadClass);
@@ -67,7 +67,7 @@ abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                 location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
-        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredentialCrn());
+        CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
         Set<String> instanceIds = payload.getInstanceIds();
         CloudStack cloudStack = cloudStackConverter.convert(stack, instanceIds);
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());

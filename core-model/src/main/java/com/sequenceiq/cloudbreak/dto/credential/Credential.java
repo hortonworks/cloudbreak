@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.dto.credential.azure.AzureCredentialAttributes;
 
 public class Credential implements Serializable {
 
-    private String cloudPlatform;
+    private final String cloudPlatform;
 
     private final String crn;
 

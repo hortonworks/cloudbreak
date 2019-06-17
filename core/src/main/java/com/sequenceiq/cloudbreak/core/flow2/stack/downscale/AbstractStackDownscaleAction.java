@@ -15,23 +15,21 @@ import javax.inject.Inject;
 import org.springframework.statemachine.StateContext;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
+import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.core.FlowParameters;
 
 public abstract class AbstractStackDownscaleAction<P extends Payload>
@@ -49,13 +47,10 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
     private StackToCloudStackConverter cloudStackConverter;
 
     @Inject
-    private CredentialToCloudCredentialConverter credentialConverter;
-
-    @Inject
     private StackScalingService stackScalingService;
 
     @Inject
-    private CredentialClientService credentialClientService;
+    private StackUtil stackUtil;
 
     protected AbstractStackDownscaleAction(Class<P> payloadClass) {
         super(payloadClass);
@@ -70,8 +65,7 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                 location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
-        Credential credential = credentialClientService.getByCrn(stack.getCredentialCrn());
-        CloudCredential cloudCredential = credentialConverter.convert(credential);
+        CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
         String instanceGroupName = extractInstanceGroupName(payload, variables);
         Set<String> instanceIds = extractInstanceIds(payload, variables, stack);
         Integer adjustment = extractAdjustment(payload, variables);

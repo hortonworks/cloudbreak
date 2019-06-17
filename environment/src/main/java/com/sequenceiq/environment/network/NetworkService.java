@@ -7,14 +7,15 @@ import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
+import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.network.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.repository.BaseNetworkRepository;
@@ -25,11 +26,14 @@ public class NetworkService {
 
     private final BaseNetworkRepository networkRepository;
 
+    private final EnvironmentRepository environmentRepository;
+
     private final Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap;
 
     public NetworkService(BaseNetworkRepository baseNetworkRepository,
-            Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap) {
+            EnvironmentRepository environmentRepository, Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap) {
         this.networkRepository = baseNetworkRepository;
+        this.environmentRepository = environmentRepository;
         this.environmentNetworkConverterMap = environmentNetworkConverterMap;
     }
 
@@ -50,9 +54,10 @@ public class NetworkService {
 
     @Transactional
     public BaseNetwork decorateNetworkWithSubnetMeta(Long id, Map<String, CloudSubnet> subnetMetas) {
-        BaseNetwork n = (BaseNetwork) networkRepository.getOne(id);
-        n.setSubnetMetas(subnetMetas);
-        return n;
+        BaseNetwork network = (BaseNetwork) networkRepository.getOne(id);
+        network.setSubnetMetas(subnetMetas);
+        networkRepository.save(network);
+        return network;
     }
 
     public void delete(BaseNetwork network) {

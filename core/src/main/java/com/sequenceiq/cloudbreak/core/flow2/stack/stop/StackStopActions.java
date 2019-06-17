@@ -20,15 +20,14 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.common.event.Payload;
-import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
+import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
@@ -42,6 +41,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
@@ -116,7 +116,7 @@ public class StackStopActions {
         private InstanceMetaDataService instanceMetaDataService;
 
         @Inject
-        private CredentialToCloudCredentialConverter credentialConverter;
+        private StackUtil stackUtil;
 
         protected AbstractStackStopAction(Class<P> payloadClass) {
             super(payloadClass);
@@ -132,7 +132,7 @@ public class StackStopActions {
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
             CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                     location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
-            CloudCredential cloudCredential = credentialConverter.convert(stack.getCredentialCrn());
+            CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
             return new StackStartStopContext(flowParameters, stack, instances, cloudContext, cloudCredential);
         }
 

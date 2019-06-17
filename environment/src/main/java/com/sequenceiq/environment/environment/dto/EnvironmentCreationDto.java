@@ -22,18 +22,18 @@ public class EnvironmentCreationDto {
 
     private final NetworkDto network;
 
-    private boolean freeIpaCreation = true;
-
     private final CredentialAwareEnvRequest credential;
 
     private final Set<String> regions;
 
     private final Set<String> proxyNames;
 
+    private final boolean createFreeIpa;
+
     //CHECKSTYLE:OFF
     public EnvironmentCreationDto(String name, String description, String cloudPlatform, String accountId,
             LocationDto location, NetworkDto network, CredentialAwareEnvRequest credential,
-            Set<String> regions, Set<String> proxyNames, boolean freeIpaCreation) {
+            Set<String> regions, Set<String> proxyNames, boolean createFreeIpa) {
         //CHECKSTYLE:ON
         this.name = name;
         this.description = description;
@@ -42,7 +42,7 @@ public class EnvironmentCreationDto {
         this.location = location;
         this.network = network;
         this.credential = credential;
-        this.freeIpaCreation = freeIpaCreation;
+        this.createFreeIpa = createFreeIpa;
         if (CollectionUtils.isEmpty(regions)) {
             this.regions = new HashSet<>();
         } else {
@@ -83,10 +83,6 @@ public class EnvironmentCreationDto {
         return proxyNames;
     }
 
-    public boolean isFreeIpaCreation() {
-        return freeIpaCreation;
-    }
-
     public String getAccountId() {
         return accountId;
     }
@@ -95,7 +91,11 @@ public class EnvironmentCreationDto {
         return credential;
     }
 
-    public static final class EnvironmentCreationDtoBuilder {
+    public boolean isCreateFreeIpa() {
+        return createFreeIpa;
+    }
+
+    public static final class Builder {
         private String name;
 
         private String description;
@@ -103,8 +103,6 @@ public class EnvironmentCreationDto {
         private String cloudPlatform;
 
         private String accountId;
-
-        private boolean freeIpaCreation = true;
 
         private LocationDto location;
 
@@ -116,66 +114,67 @@ public class EnvironmentCreationDto {
 
         private Set<String> proxyNames;
 
-        private EnvironmentCreationDtoBuilder() {
+        private boolean createFreeIpa = true;
+
+        private Builder() {
         }
 
-        public static EnvironmentCreationDtoBuilder anEnvironmentCreationDto() {
-            return new EnvironmentCreationDtoBuilder();
+        public static Builder anEnvironmentCreationDto() {
+            return new Builder();
         }
 
-        public EnvironmentCreationDtoBuilder withName(String name) {
+        public Builder withName(String name) {
             this.name = name;
             return this;
         }
 
-        public EnvironmentCreationDtoBuilder withDescription(String description) {
+        public Builder withDescription(String description) {
             this.description = description;
             return this;
         }
 
-        public EnvironmentCreationDtoBuilder withCloudPlatform(String cloudPlatform) {
+        public Builder withCloudPlatform(String cloudPlatform) {
             this.cloudPlatform = cloudPlatform;
             return this;
         }
 
-        public EnvironmentCreationDtoBuilder withAccountId(String accountId) {
+        public Builder withAccountId(String accountId) {
             this.accountId = accountId;
             return this;
         }
 
-        public EnvironmentCreationDtoBuilder withLocation(LocationDto location) {
+        public Builder withLocation(LocationDto location) {
             this.location = location;
             return this;
         }
 
-        public EnvironmentCreationDtoBuilder withNetwork(NetworkDto network) {
+        public Builder withNetwork(NetworkDto network) {
             this.network = network;
             return this;
         }
 
-        public EnvironmentCreationDtoBuilder withCredential(CredentialAwareEnvRequest credential) {
+        public Builder withCredential(CredentialAwareEnvRequest credential) {
             this.credential = credential;
             return this;
         }
 
-        public EnvironmentCreationDtoBuilder withFreeIpaCreation(boolean freeIpaCreation) {
-            this.freeIpaCreation = freeIpaCreation;
-            return this;
-        }
-
-        public EnvironmentCreationDtoBuilder withRegions(Set<String> regions) {
+        public Builder withRegions(Set<String> regions) {
             this.regions = regions;
             return this;
         }
 
-        public EnvironmentCreationDtoBuilder withProxyNames(Set<String> proxyNames) {
+        public Builder withProxyNames(Set<String> proxyNames) {
             this.proxyNames = proxyNames;
             return this;
         }
 
+        public Builder withCreateFreeIpa(boolean createFreeIpa) {
+            this.createFreeIpa = createFreeIpa;
+            return this;
+        }
+
         public EnvironmentCreationDto build() {
-            return new EnvironmentCreationDto(name, description, cloudPlatform, accountId, location, network,
-                    credential, regions, proxyNames, freeIpaCreation);
+            return new EnvironmentCreationDto(name, description, cloudPlatform, accountId, location, network, credential, regions, proxyNames, createFreeIpa);
         }
     }
 }

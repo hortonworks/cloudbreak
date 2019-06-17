@@ -168,7 +168,7 @@ public class TestUtil {
         stack.setCreator(user);
         stack.setWorkspace(workspace);
         stack.setStackStatus(new StackStatus(stack, stackStatus, "statusReason", DetailedStackStatus.UNKNOWN));
-        stack.setCredentialCrn("aCredentialCrn");
+        stack.setEnvironmentCrn("envCredentialCrn");
         stack.setName("simplestack");
         stack.setId(1L);
         stack.setInstanceGroups(generateGcpInstanceGroups(3));

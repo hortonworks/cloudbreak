@@ -18,10 +18,12 @@ import org.springframework.stereotype.Service;
 
 import com.gs.collections.impl.tuple.AbstractImmutableEntry;
 import com.gs.collections.impl.tuple.ImmutableEntry;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes.Volume;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
+import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -29,8 +31,10 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 
 @Service
@@ -46,6 +50,12 @@ public class StackUtil {
 
     @Inject
     private ResourceAttributeUtil resourceAttributeUtil;
+
+    @Inject
+    private CredentialToCloudCredentialConverter credentialConverter;
+
+    @Inject
+    private CredentialClientService credentialClientService;
 
     public Set<Node> collectNodes(Stack stack) {
         Set<Node> agents = new HashSet<>();
@@ -168,5 +178,10 @@ public class StackUtil {
             uptime = uptime.plusMillis(now - cluster.getUpSince());
         }
         return uptime.toMillis();
+    }
+
+    public CloudCredential getCloudCredential(Stack stack) {
+        Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
+        return credentialConverter.convert(credential);
     }
 }

@@ -30,10 +30,10 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageRequest;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -57,6 +57,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.core.Flow;
@@ -84,7 +85,10 @@ public class StackImageUpdateActionsTest {
     private StackCreationService stackCreationService;
 
     @Mock
-    private CredentialToCloudCredentialConverter credentialConverter;
+    private StackUtil stackUtil;
+
+    @Mock
+    private CloudCredential cloudCredential;
 
     @Mock
     private StackToCloudStackConverter cloudStackConverter;
@@ -192,6 +196,7 @@ public class StackImageUpdateActionsTest {
         stack.setAvailabilityZone("az");
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
         when(stackService.getById(anyLong())).thenReturn(stack);
+        when(stackUtil.getCloudCredential(stack)).thenReturn(cloudCredential);
 
         variables.clear();
     }
