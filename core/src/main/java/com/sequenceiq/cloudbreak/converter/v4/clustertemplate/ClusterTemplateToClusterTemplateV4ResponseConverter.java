@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v4.clustertemplate;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -32,13 +34,19 @@ public class ClusterTemplateToClusterTemplateV4ResponseConverter extends Abstrac
         clusterTemplateV4Response.setDescription(source.getDescription());
         Stack stack = stackTemplateService.getByIdWithLists(source.getStackTemplate().getId()).orElse(null);
         StackV4Request stackV4Request = converterUtil.convert(stack, StackV4Request.class);
-        clusterTemplateV4Response.setDistroXTemplate(stackV4RequestConverter.convert(stackV4Request));
+        clusterTemplateV4Response.setDistroXTemplate(getIfNotNull(stackV4Request, stackV4RequestConverter::convert));
         clusterTemplateV4Response.setCloudPlatform(source.getCloudPlatform());
         clusterTemplateV4Response.setStatus(source.getStatus());
         clusterTemplateV4Response.setId(source.getId());
         clusterTemplateV4Response.setDatalakeRequired(source.getDatalakeRequired());
         clusterTemplateV4Response.setStatus(source.getStatus());
         clusterTemplateV4Response.setType(source.getType());
+        if (source.getStackTemplate() != null) {
+            Stack stackTemplate = source.getStackTemplate();
+            if (stackTemplate.getEnvironmentCrn() != null) {
+                clusterTemplateV4Response.setEnvironmentCrn(stackTemplate.getEnvironmentCrn());
+            }
+        }
         return clusterTemplateV4Response;
     }
 
