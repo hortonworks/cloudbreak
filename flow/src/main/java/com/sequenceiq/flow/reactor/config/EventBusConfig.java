@@ -3,6 +3,8 @@ package com.sequenceiq.flow.reactor.config;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,8 +23,16 @@ import reactor.fn.timer.Timer;
 @Configuration
 public class EventBusConfig {
 
-    @Value("${cb.eventbus.threadpool.core.size:50}")
-    private int eventBusThreadPoolSize;
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventBusConfig.class);
+
+    @Value("${cb.eventbus.threadpool.core.size:100}")
+    private int eventBusThreadPoolCoreSize;
+
+    @Value("${cb.eventbus.threadpool.max.size:150}")
+    private int eventBusThreadPoolMaxSize;
+
+    @Value("${cb.eventbus.threadpool.backlog.size:1000}")
+    private int eventBusThreadPoolBacklogSize;
 
     @Bean
     public Timer timer(Environment env) {
@@ -48,13 +58,13 @@ public class EventBusConfig {
         ClassLoader context = new ClassLoader(Thread.currentThread()
                 .getContextClassLoader()) {
         };
-        MDCCleanerThreadPoolExecutor executorService = new MDCCleanerThreadPoolExecutor(eventBusThreadPoolSize,
-                eventBusThreadPoolSize,
+        MDCCleanerThreadPoolExecutor executorService = new MDCCleanerThreadPoolExecutor(eventBusThreadPoolCoreSize,
+                eventBusThreadPoolMaxSize,
                 0L,
                 TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(eventBusThreadPoolSize),
+                new LinkedBlockingQueue<>(eventBusThreadPoolBacklogSize),
                 new NamedDaemonThreadFactory("reactorDispatcher", context),
-                (r, executor) -> r.run());
-        return new ThreadPoolExecutorDispatcher(eventBusThreadPoolSize, eventBusThreadPoolSize, executorService);
+                (r, executor) -> LOGGER.error("Task has been rejected from 'reactorDispatcher' threadpool. Executor state: " + executor));
+        return new ThreadPoolExecutorDispatcher(eventBusThreadPoolBacklogSize, eventBusThreadPoolCoreSize, executorService);
     }
 }

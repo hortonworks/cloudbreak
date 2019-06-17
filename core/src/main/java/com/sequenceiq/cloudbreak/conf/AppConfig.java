@@ -56,9 +56,7 @@ import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteria;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ExecutorBasedParallelOrchestratorComponentRunner;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorComponentRunner;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
@@ -94,12 +92,6 @@ public class AppConfig implements ResourceLoaderAware {
 
     @Value("${cb.intermediate.threadpool.capacity.size:}")
     private int intermediateQueueCapacity;
-
-    @Value("${cb.container.threadpool.core.size:}")
-    private int containerCorePoolSize;
-
-    @Value("${cb.container.threadpool.capacity.size:}")
-    private int containerteQueueCapacity;
 
     @Value("${cb.client.id}")
     private String clientId;
@@ -205,7 +197,7 @@ public class AppConfig implements ResourceLoaderAware {
     public Map<String, ContainerOrchestrator> containerOrchestrators() {
         Map<String, ContainerOrchestrator> map = new HashMap<>();
         for (ContainerOrchestrator containerOrchestrator : containerOrchestrators) {
-            containerOrchestrator.init(simpleParallelContainerRunnerExecutor(), clusterDeletionBasedExitCriteria());
+            containerOrchestrator.init(clusterDeletionBasedExitCriteria());
             map.put(containerOrchestrator.name(), containerOrchestrator);
         }
         return map;
@@ -215,15 +207,10 @@ public class AppConfig implements ResourceLoaderAware {
     public Map<String, HostOrchestrator> hostOrchestrators() {
         Map<String, HostOrchestrator> map = new HashMap<>();
         for (HostOrchestrator hostOrchestrator : hostOrchestrators) {
-            hostOrchestrator.init(simpleParallelContainerRunnerExecutor(), clusterDeletionBasedExitCriteria());
+            hostOrchestrator.init(clusterDeletionBasedExitCriteria());
             map.put(hostOrchestrator.name(), hostOrchestrator);
         }
         return map;
-    }
-
-    @Bean
-    public ParallelOrchestratorComponentRunner simpleParallelContainerRunnerExecutor() {
-        return new ExecutorBasedParallelOrchestratorComponentRunner(containerBootstrapBuilderExecutor());
     }
 
     @Bean
@@ -252,17 +239,6 @@ public class AppConfig implements ResourceLoaderAware {
         executor.setCorePoolSize(corePoolSize);
         executor.setQueueCapacity(queueCapacity);
         executor.setThreadNamePrefix("resourceBuilderExecutor-");
-        executor.setTaskDecorator(new MDCCleanerTaskDecorator());
-        executor.initialize();
-        return executor;
-    }
-
-    @Bean
-    public AsyncTaskExecutor containerBootstrapBuilderExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(containerCorePoolSize);
-        executor.setQueueCapacity(containerteQueueCapacity);
-        executor.setThreadNamePrefix("containerBootstrapBuilderExecutor-");
         executor.setTaskDecorator(new MDCCleanerTaskDecorator());
         executor.initialize();
         return executor;

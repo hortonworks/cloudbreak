@@ -66,7 +66,7 @@ public class SecretService {
         boolean exists = persistentEngine.isExists(key);
         long duration = System.currentTimeMillis() - start;
         metricService.submit(MetricType.VAULT_READ, duration);
-        LOGGER.debug("Secret read took {} ms", duration);
+        LOGGER.trace("Secret read took {} ms", duration);
         if (exists) {
             throw new InvalidKeyException(format("Key: %s already exists!", key));
         }
@@ -74,7 +74,7 @@ public class SecretService {
         String secret = persistentEngine.put(key, value);
         duration = System.currentTimeMillis() - start;
         metricService.submit(MetricType.VAULT_WRITE, duration);
-        LOGGER.debug("Secret write took {} ms", duration);
+        LOGGER.trace("Secret write took {} ms", duration);
         metricService.incrementMetricCounter(() -> "secret.write." + convertSecretToMetric(secret));
         return secret;
     }
@@ -98,7 +98,7 @@ public class SecretService {
                 .orElse(null);
         long duration = System.currentTimeMillis() - start;
         metricService.submit(MetricType.VAULT_READ, duration);
-        LOGGER.debug("Secret read took {} ms", duration);
+        LOGGER.trace("Secret read took {} ms", duration);
         return "null".equals(response) ? null : response;
     }
 
@@ -137,7 +137,7 @@ public class SecretService {
                 .forEach(e -> e.delete(secret));
         long duration = System.currentTimeMillis() - start;
         metricService.submit(MetricType.VAULT_WRITE, duration);
-        LOGGER.debug("Secret delete took {} ms", duration);
+        LOGGER.trace("Secret delete took {} ms", duration);
     }
 
     /**

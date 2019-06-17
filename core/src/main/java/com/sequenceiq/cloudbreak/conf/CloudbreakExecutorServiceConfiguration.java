@@ -12,13 +12,13 @@ import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerScheduledExecutor;
 @Configuration
 public class CloudbreakExecutorServiceConfiguration {
 
-    @Value("${cb.executorservice.pool.size:40}")
+    @Value("${cb.executorservice.pool.size:20}")
     private int executorServicePoolSize;
 
     @Bean
     ListeningScheduledExecutorService cloudbreakListeningScheduledExecutorService() {
         return MoreExecutors
                 .listeningDecorator(new MDCCleanerScheduledExecutor(executorServicePoolSize,
-                        new ThreadFactoryBuilder().setNameFormat("cloud-api-%d").build()));
+                        new ThreadFactoryBuilder().setNameFormat("cb-%d").build()));
     }
 }

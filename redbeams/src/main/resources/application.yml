@@ -202,7 +202,6 @@ cb:
 
   address.resolving.timeout: 60000
 
-  eventbus.threadpool.core.size: 100
   cloud.api.executorservice.pool.size: 40
 
   platform.default:
