@@ -17,28 +17,20 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
-import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorComponentRunner;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.freeipa.logger.MDCContextFilter;
-import com.sequenceiq.freeipa.runner.ExecutorBasedParallelOrchestratorComponentRunner;
 
 @Configuration
 @EnableRetry
 public class AppConfig {
 
-    @Value("${cb.intermediate.threadpool.core.size:}")
+    @Value("${freeipa.intermediate.threadpool.core.size:}")
     private int intermediateCorePoolSize;
 
-    @Value("${cb.intermediate.threadpool.capacity.size:}")
+    @Value("${freeipa.intermediate.threadpool.capacity.size:}")
     private int intermediateQueueCapacity;
-
-    @Value("${cb.container.threadpool.core.size:}")
-    private int containerCorePoolSize;
-
-    @Value("${cb.container.threadpool.capacity.size:}")
-    private int containerteQueueCapacity;
 
     @Inject
     private List<HostOrchestrator> hostOrchestrators;
@@ -62,26 +54,10 @@ public class AppConfig {
     public Map<String, HostOrchestrator> hostOrchestrators() {
         Map<String, HostOrchestrator> map = new HashMap<>();
         for (HostOrchestrator hostOrchestrator : hostOrchestrators) {
-            hostOrchestrator.init(simpleParallelContainerRunnerExecutor(), new MyExitCriteria());
+            hostOrchestrator.init(new MyExitCriteria());
             map.put(hostOrchestrator.name(), hostOrchestrator);
         }
         return map;
-    }
-
-    @Bean
-    public ParallelOrchestratorComponentRunner simpleParallelContainerRunnerExecutor() {
-        return new ExecutorBasedParallelOrchestratorComponentRunner(containerBootstrapBuilderExecutor());
-    }
-
-    @Bean
-    public AsyncTaskExecutor containerBootstrapBuilderExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(containerCorePoolSize);
-        executor.setQueueCapacity(containerteQueueCapacity);
-        executor.setThreadNamePrefix("containerBootstrapBuilderExecutor-");
-        executor.setTaskDecorator(new MDCCleanerTaskDecorator());
-        executor.initialize();
-        return executor;
     }
 
     @Bean

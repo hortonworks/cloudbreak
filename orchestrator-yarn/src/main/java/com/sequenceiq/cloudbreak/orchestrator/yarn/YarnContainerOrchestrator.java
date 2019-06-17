@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
@@ -96,10 +94,9 @@ public class YarnContainerOrchestrator extends SimpleContainerOrchestrator {
                 OrchestratorBootstrap bootstrap = new YarnAppBootstrap(applicationName, cred.getApiEndpoint());
 
                 Callable<Boolean> runner = runner(bootstrap, getExitCriteria(), exitCriteriaModel);
-                Future<Boolean> appFuture = getParallelOrchestratorComponentRunner().submit(runner);
-                appFuture.get();
+                runner.call();
                 containerInfos.add(detailHandler.getContainerInfo(config, cred, constraint, componentNumber));
-            } catch (CloudbreakOrchestratorException | InterruptedException | ExecutionException e) {
+            } catch (Exception e) {
                 throw new CloudbreakOrchestratorFailedException(e);
             }
         }

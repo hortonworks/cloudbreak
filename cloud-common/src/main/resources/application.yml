@@ -74,13 +74,10 @@ cb:
   publicip:
   etc.config.dir: /etc/cloudbreak
   threadpool:
-    core.size: 40
+    core.size: 100
     capacity.size: 4000
   intermediate.threadpool:
-    core.size: 40
-    capacity.size: 4000
-  container.threadpool:
-    core.size: 40
+    core.size: 100
     capacity.size: 4000
   notification:
     endpoint: http://localhost:3000/notifications
@@ -204,7 +201,6 @@ cb:
 
   address.resolving.timeout: 60000
 
-  eventbus.threadpool.core.size: 100
   cloud.api.executorservice.pool.size: 40
   reactor.executorservice.pool.size: 40
 

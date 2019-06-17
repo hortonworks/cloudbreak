@@ -26,7 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.junit.Before;
@@ -46,7 +45,6 @@ import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrapRunner;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorComponentRunner;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
@@ -62,6 +60,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltUpload;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.MineUpdateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncAllRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
@@ -76,8 +75,6 @@ public class SaltOrchestratorTest {
     private Set<Node> targets;
 
     private ExitCriteria exitCriteria;
-
-    private ParallelOrchestratorComponentRunner parallelOrchestratorComponentRunner;
 
     private SaltConnector saltConnector;
 
@@ -103,8 +100,6 @@ public class SaltOrchestratorTest {
 
         saltConnector = mock(SaltConnector.class);
         whenNew(SaltConnector.class).withAnyArguments().thenReturn(saltConnector);
-        parallelOrchestratorComponentRunner = mock(ParallelOrchestratorComponentRunner.class);
-        when(parallelOrchestratorComponentRunner.submit(any())).thenReturn(CompletableFuture.completedFuture(true));
         when(hostDiscoveryService.determineDomain("test", "test", false)).thenReturn(".example.com");
         exitCriteria = mock(ExitCriteria.class);
         exitCriteriaModel = mock(ExitCriteriaModel.class);
@@ -117,12 +112,10 @@ public class SaltOrchestratorTest {
                 .withArguments(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), isNull(), anyInt(), anyInt(), anyInt())
                 .thenReturn(mock(OrchestratorBootstrapRunner.class));
 
-        saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
+        saltOrchestrator.init(exitCriteria);
         BootstrapParams bootstrapParams = mock(BootstrapParams.class);
 
         saltOrchestrator.bootstrap(Collections.singletonList(gatewayConfig), targets, bootstrapParams, exitCriteriaModel);
-
-        verify(parallelOrchestratorComponentRunner, times(4)).submit(any(OrchestratorBootstrapRunner.class));
 
         verifyNew(OrchestratorBootstrapRunner.class, times(1))
                 .withArguments(any(SaltBootstrap.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt(), anyInt());
@@ -141,7 +134,7 @@ public class SaltOrchestratorTest {
                 .thenReturn(mock(OrchestratorBootstrapRunner.class));
         BootstrapParams bootstrapParams = mock(BootstrapParams.class);
 
-        saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
+        saltOrchestrator.init(exitCriteria);
         saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, targets, null, bootstrapParams, exitCriteriaModel);
 
         verifyNew(OrchestratorBootstrapRunner.class, times(1))
@@ -177,7 +170,13 @@ public class SaltOrchestratorTest {
         SaltJobIdTracker saltJobIdTracker = mock(SaltJobIdTracker.class);
         whenNew(SaltJobIdTracker.class).withAnyArguments().thenReturn(saltJobIdTracker);
 
-        saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
+        MineUpdateRunner mineUpdateRunner = mock(MineUpdateRunner.class);
+        whenNew(MineUpdateRunner.class).withAnyArguments().thenReturn(mineUpdateRunner);
+
+        SaltCommandTracker mineUpdateRunnerSaltCommandTracker = mock(SaltCommandTracker.class);
+        whenNew(SaltCommandTracker.class).withArguments(eq(saltConnector), eq(mineUpdateRunner)).thenReturn(mineUpdateRunnerSaltCommandTracker);
+
+        saltOrchestrator.init(exitCriteria);
 
         PowerMockito.mockStatic(SaltStates.class);
         PowerMockito.when(SaltStates.getGrains(any(), any(), any())).thenReturn(new HashMap<>());
@@ -226,7 +225,7 @@ public class SaltOrchestratorTest {
     @Test
     public void tearDownTest() throws Exception {
         SaltOrchestrator saltOrchestrator = new SaltOrchestrator();
-        saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
+        saltOrchestrator.init(exitCriteria);
 
         Map<String, String> privateIpsByFQDN = new HashMap<>();
         privateIpsByFQDN.put("10-0-0-1.example.com", "10.0.0.1");
@@ -258,7 +257,7 @@ public class SaltOrchestratorTest {
     @Test
     public void tearDownFailTest() throws Exception {
         SaltOrchestrator saltOrchestrator = new SaltOrchestrator();
-        saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
+        saltOrchestrator.init(exitCriteria);
 
         Map<String, String> privateIpsByFQDN = new HashMap<>();
         privateIpsByFQDN.put("10-0-0-1.example.com", "10.0.0.1");
@@ -280,21 +279,21 @@ public class SaltOrchestratorTest {
     @Test
     public void getMissingNodesTest() {
         SaltOrchestrator saltOrchestrator = new SaltOrchestrator();
-        saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
+        saltOrchestrator.init(exitCriteria);
         assertThat(saltOrchestrator.getMissingNodes(gatewayConfig, targets), hasSize(0));
     }
 
     @Test
     public void getAvailableNodesTest() {
         SaltOrchestrator saltOrchestrator = new SaltOrchestrator();
-        saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
+        saltOrchestrator.init(exitCriteria);
         assertThat(saltOrchestrator.getAvailableNodes(gatewayConfig, targets), hasSize(0));
     }
 
     @Test
     public void isBootstrapApiAvailableTest() {
         SaltOrchestrator saltOrchestrator = new SaltOrchestrator();
-        saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
+        saltOrchestrator.init(exitCriteria);
 
         GenericResponse response = new GenericResponse();
         response.setStatusCode(200);
@@ -307,7 +306,7 @@ public class SaltOrchestratorTest {
     @Test
     public void isBootstrapApiAvailableFailTest() {
         SaltOrchestrator saltOrchestrator = new SaltOrchestrator();
-        saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
+        saltOrchestrator.init(exitCriteria);
 
         GenericResponse response = new GenericResponse();
         response.setStatusCode(404);
