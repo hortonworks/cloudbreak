@@ -1,8 +1,11 @@
 package com.sequenceiq.datalake.controller.mapper;
 
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
@@ -10,6 +13,8 @@ import com.sequenceiq.cloudbreak.exception.NotFoundException;
 @Provider
 @Component
 public class SpringNotFoundExceptionMapper extends BaseExceptionMapper<NotFoundException> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpringNotFoundExceptionMapper.class);
 
     @Override
     Status getResponseStatus() {
@@ -19,6 +24,12 @@ public class SpringNotFoundExceptionMapper extends BaseExceptionMapper<NotFoundE
     @Override
     Class<NotFoundException> getExceptionType() {
         return NotFoundException.class;
+    }
+
+    @Override
+    public Response toResponse(NotFoundException exception) {
+        LOGGER.info("Resource not found: {}", getErrorMessage(exception));
+        return Response.status(getResponseStatus()).entity(getEntity(exception)).build();
     }
 
 }
