@@ -29,6 +29,7 @@ public class EnvironmentDtoConverter {
                 .withDeletionTimestamp(environment.getDeletionTimestamp())
                 .withLocationDto(environmentToLocationDto(environment))
                 .withRegions(environment.getRegions())
+                .withFreeIpaCreation(environment.isCreateFreeIpa())
                 .withId(environment.getId())
                 .withEnvironmentStatus(environment.getStatus());
         if (environment.getNetwork() != null) {
@@ -49,6 +50,7 @@ public class EnvironmentDtoConverter {
         environment.setLongitude(creationDto.getLocation().getLongitude());
         environment.setLocation(creationDto.getLocation().getName());
         environment.setLocationDisplayName(creationDto.getLocation().getDisplayName());
+        environment.setCreateFreeIpa(creationDto.isFreeIpaCreation());
         environment.setStatus(EnvironmentStatus.CREATION_INITIATED);
         return environment;
     }

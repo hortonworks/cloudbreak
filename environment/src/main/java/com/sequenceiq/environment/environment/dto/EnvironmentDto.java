@@ -45,6 +45,8 @@ public class EnvironmentDto implements Payload {
 
     private EnvironmentStatus environmentStatus;
 
+    private boolean freeIpaCreation;
+
     @Override
     public Long getResourceId() {
         return id;
@@ -167,6 +169,14 @@ public class EnvironmentDto implements Payload {
         this.environmentStatus = environmentStatus;
     }
 
+    public boolean isFreeIpaCreation() {
+        return freeIpaCreation;
+    }
+
+    public void setFreeIpaCreation(boolean freeIpaCreation) {
+        this.freeIpaCreation = freeIpaCreation;
+    }
+
     public static final class EnvironmentDtoBuilder {
         private Long id;
 
@@ -195,6 +205,8 @@ public class EnvironmentDto implements Payload {
         private String resourceCrn;
 
         private EnvironmentStatus environmentStatus;
+
+        private boolean freeIpaCreation;
 
         private EnvironmentDtoBuilder() {
         }
@@ -235,6 +247,11 @@ public class EnvironmentDto implements Payload {
 
         public EnvironmentDtoBuilder withRegions(Json regions) {
             this.regions = regions;
+            return this;
+        }
+
+        public EnvironmentDtoBuilder withFreeIpaCreation(boolean freeIpaCreation) {
+            this.freeIpaCreation = freeIpaCreation;
             return this;
         }
 
@@ -289,6 +306,7 @@ public class EnvironmentDto implements Payload {
             environmentDto.setAccountId(accountId);
             environmentDto.setResourceCrn(resourceCrn);
             environmentDto.setEnvironmentStatus(environmentStatus);
+            environmentDto.setFreeIpaCreation(freeIpaCreation);
             return environmentDto;
         }
     }
