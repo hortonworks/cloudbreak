@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 @RunWith(MockitoJUnitRunner.class)
 public class HiveServer2ConfigProviderTest {
 
-    private final HiveServer2RoleConfigConfigProvider underTest = new HiveServer2RoleConfigConfigProvider();
+    private final HiveServer2RoleConfigProvider underTest = new HiveServer2RoleConfigProvider();
 
     @Test
     public void testGetRoleConfigsWithSingleRolesPerHostGroup() {

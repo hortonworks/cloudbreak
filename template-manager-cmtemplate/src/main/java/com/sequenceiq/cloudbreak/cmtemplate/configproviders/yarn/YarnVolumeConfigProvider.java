@@ -4,23 +4,24 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 import static com.sequenceiq.cloudbreak.template.VolumeUtils.buildVolumePathStringZeroVolumeHandled;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.CmHostGroupRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
-public class YarnRoleConfigConfigProvider extends AbstractRoleConfigConfigProvider {
+public class YarnVolumeConfigProvider implements CmHostGroupRoleConfigProvider {
 
     private static final String NODE_LOCAL_DIRS = "yarn_nodemanager_local_dirs";
 
     private static final String NODE_LOG_DIRS = "yarn_nodemanager_log_dirs";
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
+    public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
         switch (roleType) {
             case YarnRoles.NODEMANAGER:
                 return List.of(
@@ -38,7 +39,7 @@ public class YarnRoleConfigConfigProvider extends AbstractRoleConfigConfigProvid
     }
 
     @Override
-    public List<String> getRoleTypes() {
-        return List.of(YarnRoles.NODEMANAGER);
+    public Set<String> getRoleTypes() {
+        return Set.of(YarnRoles.NODEMANAGER);
     }
 }

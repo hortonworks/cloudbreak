@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.mock;
 
 import java.util.List;
 import java.util.Map;
@@ -109,7 +108,6 @@ public class KnoxGatewayConfigProviderTest {
 
     @Test
     public void roleConfigsWithGateway() {
-        HostgroupView any = mock(HostgroupView.class);
         Gateway gateway = new Gateway();
         gateway.setKnoxMasterSecret("admin");
         gateway.setPath("/a/b/c");
@@ -119,21 +117,20 @@ public class KnoxGatewayConfigProviderTest {
                 List.of(
                         config("idbroker_master_secret", gateway.getKnoxMasterSecret())
                 ),
-                underTest.getRoleConfig(KnoxRoles.IDBROKER, any, source)
+                underTest.getRoleConfigs(KnoxRoles.IDBROKER, source)
         );
         assertEquals(
                 List.of(
                         config("gateway_master_secret", gateway.getKnoxMasterSecret()),
                         config("gateway_path", gateway.getPath())
                 ),
-                underTest.getRoleConfig(KnoxRoles.KNOX_GATEWAY, any, source)
+                underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source)
         );
-        assertEquals(List.of(), underTest.getRoleConfig("NAMENODE", any, source));
+        assertEquals(List.of(), underTest.getRoleConfigs("NAMENODE", source));
     }
 
     @Test
     public void roleConfigsWithoutGateway() {
-        HostgroupView any = mock(HostgroupView.class);
         GeneralClusterConfigs gcc = new GeneralClusterConfigs();
         gcc.setPassword("secret");
         TemplatePreparationObject source = Builder.builder().withGeneralClusterConfigs(gcc).build();
@@ -142,15 +139,15 @@ public class KnoxGatewayConfigProviderTest {
                 List.of(
                         config("idbroker_master_secret", gcc.getPassword())
                 ),
-                underTest.getRoleConfig(KnoxRoles.IDBROKER, any, source)
+                underTest.getRoleConfigs(KnoxRoles.IDBROKER, source)
         );
         assertEquals(
                 List.of(
                         config("gateway_master_secret", gcc.getPassword())
                 ),
-                underTest.getRoleConfig(KnoxRoles.KNOX_GATEWAY, any, source)
+                underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source)
         );
-        assertEquals(List.of(), underTest.getRoleConfig("NAMENODE", any, source));
+        assertEquals(List.of(), underTest.getRoleConfigs("NAMENODE", source));
     }
 
     private String getBlueprintText(String path) {

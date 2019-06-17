@@ -9,19 +9,18 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
-public class ZeppelinCloudStorageRoleConfigProvider extends AbstractRoleConfigConfigProvider {
+public class ZeppelinCloudStorageRoleConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String ZEPPELIN_NOTEBOOK_DIR = "zeppelin.notebook.dir";
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView, TemplatePreparationObject templatePreparationObject) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject templatePreparationObject) {
         switch (roleType) {
 
             case ZEPPELIN_SERVER:

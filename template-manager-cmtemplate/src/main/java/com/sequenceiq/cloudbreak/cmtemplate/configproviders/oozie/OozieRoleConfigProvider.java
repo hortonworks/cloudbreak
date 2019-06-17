@@ -11,15 +11,14 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 @Component
-public class OozieRoleConfigProvider extends AbstractRoleConfigConfigProvider {
+public class OozieRoleConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String OOZIE_DATABASE_HOST = "oozie_database_host";
 
@@ -32,7 +31,7 @@ public class OozieRoleConfigProvider extends AbstractRoleConfigConfigProvider {
     private static final String OOZIE_DATABASE_PASSWORD = "oozie_database_password";
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         switch (roleType) {
             case OozieRoles.OOZIE_SERVER:
                 Optional<RDSConfig> rdsConfigOptional = getFirstRDSConfigOptional(source);

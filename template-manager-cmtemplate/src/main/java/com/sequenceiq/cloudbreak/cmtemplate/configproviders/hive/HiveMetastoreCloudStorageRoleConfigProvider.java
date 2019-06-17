@@ -8,13 +8,12 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
-public class HiveMetastoreCloudStorageRoleConfigProvider extends AbstractRoleConfigConfigProvider {
+public class HiveMetastoreCloudStorageRoleConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String HMS_CONFIG_SAFETY_VALVE = "hive_metastore_config_safety_valve";
 
@@ -23,7 +22,7 @@ public class HiveMetastoreCloudStorageRoleConfigProvider extends AbstractRoleCon
     private static final String HMS_METASTORE_EXTERNAL_DIR = "hive.metastore.warehouse.external.dir";
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         switch (roleType) {
             case HiveRoles.HIVEMETASTORE:
                 String cloudStorageProperty = getCloudStorageProperty(source);

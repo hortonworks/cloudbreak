@@ -9,19 +9,17 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 @Component
-public class RangerRoleConfigProvider extends AbstractRoleConfigConfigProvider {
+public class RangerRoleConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         switch (roleType) {
             case RangerRoles.RANGER_ADMIN:
                 RDSConfig rdsConfig = getRDSConfig(source);
@@ -46,11 +44,6 @@ public class RangerRoleConfigProvider extends AbstractRoleConfigConfigProvider {
     @Override
     public List<String> getRoleTypes() {
         return List.of(RangerRoles.RANGER_ADMIN);
-    }
-
-    @Override
-    public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        return cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes());
     }
 
     private String getRangerDbType(RdsView rdsView) {

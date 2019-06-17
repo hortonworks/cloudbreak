@@ -7,16 +7,14 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
-public class HiveServer2RoleConfigConfigProvider extends AbstractRoleConfigConfigProvider {
+public class HiveServer2RoleConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         switch (roleType) {
             case HiveRoles.HIVESERVER2:
                 String uuid = source.getGeneralClusterConfigs().getUuid();
@@ -37,10 +35,5 @@ public class HiveServer2RoleConfigConfigProvider extends AbstractRoleConfigConfi
     @Override
     public List<String> getRoleTypes() {
         return List.of(HiveRoles.HIVESERVER2);
-    }
-
-    @Override
-    public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        return cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes());
     }
 }

@@ -10,14 +10,13 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.common.type.filesystem.FileSystemType;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
-public class ZeppelinS3CloudStorageRoleConfigProvider extends AbstractRoleConfigConfigProvider {
+public class ZeppelinS3CloudStorageRoleConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String ZEPPELIN_NOTEBOOK_STORAGE = "zeppelin.notebook.storage";
 
@@ -32,7 +31,7 @@ public class ZeppelinS3CloudStorageRoleConfigProvider extends AbstractRoleConfig
     private static final Pattern S3A_BUCKET_PATTERN = Pattern.compile(FileSystemType.S3.getProtocol() + "://([\\w.-]+)(?:/(.*))?");
 
     @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfig(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         switch (roleType) {
 
             case ZEPPELIN_SERVER:

@@ -9,13 +9,13 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @Component
-public class CmTemplateComponentConfigProcessor {
+public class CmTemplateComponentConfigProviderProcessor {
 
     @Inject
-    private List<CmTemplateComponentConfigProvider> cmTemplateComponentConfigProviderList;
+    private List<CmTemplateComponentConfigProvider> providers;
 
     public CmTemplateProcessor process(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject template) {
-        for (CmTemplateComponentConfigProvider provider : cmTemplateComponentConfigProviderList) {
+        for (CmTemplateComponentConfigProvider provider : providers) {
             cmTemplateProcessor.extendTemplateWithAdditionalServices(provider.getAdditionalServices(cmTemplateProcessor, template));
             if (provider.isConfigurationNeeded(cmTemplateProcessor, template)) {
                 cmTemplateProcessor.addServiceConfigs(provider.getServiceType(), provider.getRoleTypes(), provider.getServiceConfigs(template));

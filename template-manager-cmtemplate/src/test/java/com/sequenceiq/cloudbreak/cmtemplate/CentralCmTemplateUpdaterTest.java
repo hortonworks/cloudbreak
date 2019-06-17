@@ -53,10 +53,13 @@ public class CentralCmTemplateUpdaterTest {
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Spy
-    private CmTemplateComponentConfigProcessor cmTemplateComponentConfigProcessor;
+    private CmTemplateComponentConfigProviderProcessor cmTemplateComponentConfigProviderProcessor;
 
     @Spy
-    private CmTemplateConfigInjectors cmTemplateConfigInjectors;
+    private CmTemplateConfigInjectorProcessor cmTemplateConfigInjectorProcessor;
+
+    @Spy
+    private CmHostGroupRoleConfigProviderProcessor cmHostGroupRoleConfigProviderProcessor;
 
     @Mock
     private TemplatePreparationObject templatePreparationObject;
@@ -84,8 +87,9 @@ public class CentralCmTemplateUpdaterTest {
         when(generalClusterConfigs.getPassword()).thenReturn("Admin123!");
         clouderaManagerRepo = new ClouderaManagerRepo();
         clouderaManagerRepo.setVersion("6.1.0");
-        ReflectionTestUtils.setField(cmTemplateComponentConfigProcessor, "cmTemplateComponentConfigProviderList", cmTemplateComponentConfigProviders);
-        ReflectionTestUtils.setField(cmTemplateConfigInjectors, "injectors", List.of());
+        ReflectionTestUtils.setField(cmTemplateComponentConfigProviderProcessor, "providers", cmTemplateComponentConfigProviders);
+        ReflectionTestUtils.setField(cmTemplateConfigInjectorProcessor, "injectors", List.of());
+        ReflectionTestUtils.setField(cmHostGroupRoleConfigProviderProcessor, "providers", List.of());
     }
 
     private static Set<HostgroupView> toHostgroupViews(Map<String, List<Map<String, String>>> hostgroupMappings) {
@@ -102,21 +106,21 @@ public class CentralCmTemplateUpdaterTest {
     public void getCmTemplate() {
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager.bp"));
         ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null, null);
-        Assert.assertEquals(new CmTemplateProcessor(getBlueprintText("output/clouderamanager.bp")).getTemplate(), generated);
+        assertMatchesBlueprintAtPath("output/clouderamanager.bp", generated);
     }
 
     @Test
     public void danglingVariableReferencesAreRemoved() {
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-variables.bp"));
         ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null, null);
-        Assert.assertEquals(new CmTemplateProcessor(getBlueprintText("output/clouderamanager-variables.bp")).getTemplate(), generated);
+        assertMatchesBlueprintAtPath("output/clouderamanager-variables.bp", generated);
     }
 
     @Test
     public void configsAreInjected() {
         List<ApiClusterTemplateConfig> serviceConfigs = List.of(config("service_config_name", "service_config_value"));
         List<ApiClusterTemplateConfig> roleConfigs = List.of(config("role_config_name", "role_config_value"));
-        ReflectionTestUtils.setField(cmTemplateConfigInjectors, "injectors", List.of(new CmTemplateConfigInjector() {
+        ReflectionTestUtils.setField(cmTemplateConfigInjectorProcessor, "injectors", List.of(new CmTemplateConfigInjector() {
             @Override
             public List<ApiClusterTemplateConfig> getServiceConfigs(ApiClusterTemplateService service, TemplatePreparationObject source) {
                 return serviceConfigs;
@@ -130,21 +134,21 @@ public class CentralCmTemplateUpdaterTest {
         }));
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/namenode-ha.bp"));
         ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null, null);
-        Assert.assertEquals(new CmTemplateProcessor(getBlueprintText("output/namenode-ha-injected.bp")).getTemplate(), generated);
+        assertMatchesBlueprintAtPath("output/namenode-ha-injected.bp", generated);
     }
 
     @Test
     public void getCmTemplateNoMetastore() {
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-nometastore.bp"));
         ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null, null);
-        Assert.assertEquals(new CmTemplateProcessor(getBlueprintText("output/clouderamanager-nometastore.bp")).getTemplate(), generated);
+        assertMatchesBlueprintAtPath("output/clouderamanager-nometastore.bp", generated);
     }
 
     @Test
     public void getCmTemplateNoMetastoreWithTemplateParams() {
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-fixparam.bp"));
         ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null, null);
-        Assert.assertEquals(new CmTemplateProcessor(getBlueprintText("output/clouderamanager-fixparam.bp")).getTemplate(), generated);
+        assertMatchesBlueprintAtPath("output/clouderamanager-fixparam.bp", generated);
     }
 
     @Test
@@ -153,6 +157,13 @@ public class CentralCmTemplateUpdaterTest {
         String generated = generator.getBlueprintText(templatePreparationObject);
         Assert.assertEquals(new CmTemplateProcessor(getBlueprintText("output/clouderamanager-without-hosts.bp")).getTemplate().toString(),
                 new CmTemplateProcessor(generated).getTemplate().toString());
+    }
+
+    private void assertMatchesBlueprintAtPath(String path, ApiClusterTemplate generated) {
+        Assert.assertEquals(
+                String.valueOf(new CmTemplateProcessor(getBlueprintText(path)).getTemplate()),
+                String.valueOf(generated)
+        );
     }
 
     private String getBlueprintText(String path) {
