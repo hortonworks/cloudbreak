@@ -80,6 +80,14 @@ func NewSDXClient(address string, apiKeyID, privateKey string) *Sdx {
 	return &Sdx{Sdx: sdxclient.New(transport, strfmt.Default)}
 }
 
+func NewSDXActorCrnHTTPClient(address string, actorCrn string) *Sdx {
+	u.CheckServerAddress(address)
+	var transport *utils.Transport
+	baseAPIPath := "/dl/api"
+	transport = apikeyauth.GetActorCrnAuthTransport(address, baseAPIPath, actorCrn)
+	return &Sdx{Sdx: sdxclient.New(transport, strfmt.Default)}
+}
+
 // NewDataplaneHTTPClientFromContext : Initialize FreeIpa client.
 func NewFreeIpaClientFromContext(c *cli.Context) *FreeIpa {
 	return NewFreeIpaClient(c.String(fl.FlServerOptional.Name), c.String(fl.FlApiKeyIDOptional.Name), c.String(fl.FlPrivateKeyOptional.Name))
@@ -93,6 +101,14 @@ func NewFreeIpaClient(address string, apiKeyID, privateKey string) *FreeIpa {
 	return &FreeIpa{FreeIpa: freeipaclient.New(transport, strfmt.Default)}
 }
 
+func NewFreeIpaActorCrnHTTPClient(address string, actorCrn string) *FreeIpa {
+	u.CheckServerAddress(address)
+	var transport *utils.Transport
+	baseAPIPath := "/freeipa/api"
+	transport = apikeyauth.GetActorCrnAuthTransport(address, baseAPIPath, actorCrn)
+	return &FreeIpa{FreeIpa: freeipaclient.New(transport, strfmt.Default)}
+}
+
 // NewDataplaneHTTPClientFromContext : Initialize Environment client.
 func NewEnvironmentClientFromContext(c *cli.Context) *Environment {
 	return NewEnvironmentClient(c.String(fl.FlServerOptional.Name), c.String(fl.FlApiKeyIDOptional.Name), c.String(fl.FlPrivateKeyOptional.Name))
@@ -103,5 +119,13 @@ func NewEnvironmentClient(address string, apiKeyID, privateKey string) *Environm
 	var transport *utils.Transport
 	const baseAPIPath string = "/environmentservice/api"
 	transport = apikeyauth.GetAPIKeyAuthTransport(address, baseAPIPath, apiKeyID, privateKey)
+	return &Environment{Environment: environmentclient.New(transport, strfmt.Default)}
+}
+
+func NewEnvironmentActorCrnHTTPClient(address string, actorCrn string) *Environment {
+	u.CheckServerAddress(address)
+	var transport *utils.Transport
+	const baseAPIPath string = "/environmentservice/api"
+	transport = apikeyauth.GetActorCrnAuthTransport(address, baseAPIPath, actorCrn)
 	return &Environment{Environment: environmentclient.New(transport, strfmt.Default)}
 }
