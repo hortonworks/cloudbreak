@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspa
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +14,6 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -31,7 +32,7 @@ public class DefaultClusterTemplateCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultClusterTemplateCache.class);
 
-    private final Map<String, DefaultClusterTemplateV4Request> defaultClusterTemplates = new HashMap<>();
+    private final Map<String, String> defaultClusterTemplates = new HashMap<>();
 
     @Value("#{'${cb.clustertemplate.defaults:}'.split(',')}")
     private List<String> clusterTemplates;
@@ -93,22 +94,30 @@ public class DefaultClusterTemplateCache {
         if (defaultClusterTemplates.get(clusterTemplateRequest.getName()) != null) {
             LOGGER.warn("Default cluster template exists and it will be override: {}", clusterTemplateRequest.getName());
         }
-        defaultClusterTemplates.put(clusterTemplateRequest.getName(), clusterTemplateRequest);
+        defaultClusterTemplates.put(clusterTemplateRequest.getName(), Base64.getEncoder().encodeToString(templateAsString.getBytes()));
     }
 
-    public Map<String, DefaultClusterTemplateV4Request> defaultClusterTemplateRequests() {
-        Map<String, DefaultClusterTemplateV4Request> ret = new HashMap<>();
-        defaultClusterTemplates.forEach((key, value) -> ret.put(key, SerializationUtils.clone(value)));
-        return ret;
+    public Map<String, String> defaultClusterTemplateRequests() {
+        return defaultClusterTemplates;
     }
 
     public Map<String, ClusterTemplate> defaultClusterTemplates() {
         Map<String, ClusterTemplate> defaultTemplates = new HashMap<>();
         defaultClusterTemplateRequests().forEach((key, value) -> {
-            ClusterTemplate clusterTemplate = converterUtil.convert(value, ClusterTemplate.class);
+            String defaultTemplateJson = new String(Base64.getDecoder().decode(value));
+            DefaultClusterTemplateV4Request defaultClusterTemplate = getDefaultClusterTemplate(defaultTemplateJson);
+            ClusterTemplate clusterTemplate = converterUtil.convert(defaultClusterTemplate, ClusterTemplate.class);
             defaultTemplates.put(key, clusterTemplate);
         });
         return defaultTemplates;
+    }
+
+    private DefaultClusterTemplateV4Request getDefaultClusterTemplate(String defaultTemplateJson) {
+        try {
+            return JsonUtil.readValue(defaultTemplateJson, DefaultClusterTemplateV4Request.class);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Default cluster template could not be added, causes: " + e.getMessage(), e);
+        }
     }
 
     protected void setClusterTemplates(List<String> clusterTemplates) {
@@ -117,5 +126,9 @@ public class DefaultClusterTemplateCache {
 
     protected void setDefaultTemplateDir(String defaultTemplateDir) {
         this.defaultTemplateDir = defaultTemplateDir;
+    }
+
+    public String getByName(String name) {
+        return defaultClusterTemplates.get(name);
     }
 }

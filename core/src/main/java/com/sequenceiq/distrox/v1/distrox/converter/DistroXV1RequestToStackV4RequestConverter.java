@@ -85,6 +85,35 @@ public class DistroXV1RequestToStackV4RequestConverter {
         return request;
     }
 
+    public StackV4Request convertAsTemplate(DistroXV1Request source) {
+        StackV4Request request = new StackV4Request();
+        DetailedEnvironmentResponse environment = null;
+        if (source.getEnvironmentName() != null) {
+            environment = environmentClientService.getByName(source.getEnvironmentName());
+            if (environment.getEnvironmentStatus() != EnvironmentStatus.AVAILABLE) {
+                throw new BadRequestException(String.format("Environment state is %s instead of AVAILABLE", environment.getEnvironmentStatus()));
+            }
+            request.setCloudPlatform(getCloudPlatform(environment));
+            request.setEnvironmentCrn(environment.getCrn());
+        }
+        request.setName(source.getName());
+        request.setType(StackType.WORKLOAD);
+        request.setTelemetry(getIfNotNull(source.getTelemetry(), telemetryConverter::convert));
+        request.setAuthentication(getIfNotNull(source.getAuthentication(), authenticationConverter::convert));
+        request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
+        request.setCluster(getIfNotNull(source.getCluster(), clusterConverter::convert));
+        request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), instanceGroupConverter::convertTo));
+        if (environment != null) {
+            request.setNetwork(getNetwork(source.getNetwork(), environment));
+        }
+        request.setAws(getIfNotNull(source.getAws(), stackParameterConverter::convert));
+        request.setAzure(getIfNotNull(source.getAzure(), stackParameterConverter::convert));
+        request.setInputs(source.getInputs());
+        request.setTags(getIfNotNull(source.getTags(), this::getTags));
+        request.setSharedService(getIfNotNull(source.getSdx(), this::getSharedService));
+        return request;
+    }
+
     private NetworkV4Request getNetwork(NetworkV1Request networkRequest, DetailedEnvironmentResponse environment) {
         NetworkV4Request network = getIfNotNull(networkRequest, networkConverter::convert);
         if (network == null) {
@@ -126,7 +155,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
     public DistroXV1Request convert(StackV4Request source) {
         DistroXV1Request request = new DistroXV1Request();
         request.setName(source.getName());
-        request.setEnvironmentName(environmentClientService.getByCrn(source.getEnvironmentCrn()).getName());
+        request.setEnvironmentName(getIfNotNull(source.getEnvironmentCrn(), crn -> environmentClientService.getByCrn(crn).getName()));
         request.setAuthentication(getIfNotNull(source.getAuthentication(), authenticationConverter::convert));
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source.getCluster(), clusterConverter::convert));
