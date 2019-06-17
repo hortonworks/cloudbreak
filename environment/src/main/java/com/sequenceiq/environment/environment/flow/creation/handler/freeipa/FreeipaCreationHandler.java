@@ -7,12 +7,14 @@ import static com.sequenceiq.environment.environment.flow.creation.event.EnvCrea
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.environment.CloudPlatform;
-import com.sequenceiq.environment.configuration.SupportedPlatfroms;
+import com.sequenceiq.environment.configuration.SupportedPlatforms;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -33,32 +35,40 @@ import reactor.bus.Event;
 @Component
 public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentDto> {
 
-    private String dummySshKey = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kc"
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeipaCreationHandler.class);
+
+    private static final String DUMMY_SSH_KEY = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kc"
             + "UEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpj"
             + "T7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh"
             + "centos";
+
+    private static final String FREEIPA_ADMIN_PASSWORD = "Admin123!";
+
+    private static final String FREEIPA_DOMAIN = "cdp.site";
+
+    private static final String FREEIPA_HOSTNAME = "ipaserver";
 
     private final EnvironmentService environmentService;
 
     private final FreeIpaV1Endpoint freeIpaV1Endpoint;
 
-    private final SupportedPlatfroms supportedPlatfroms;
+    private final SupportedPlatforms supportedPlatforms;
 
     private final Map<CloudPlatform, FreeIpaNetworkProvider> freeIpaNetworkProviderMapByCloudPlatform;
 
     private final PollingService<FreeIpaPollerObject> freeIpaPollingService;
 
-    protected FreeipaCreationHandler(
+    public FreeipaCreationHandler(
             EventSender eventSender,
             EnvironmentService environmentService,
             FreeIpaV1Endpoint freeIpaV1Endpoint,
-            SupportedPlatfroms supportedPlatfroms,
+            SupportedPlatforms supportedPlatforms,
             Map<CloudPlatform, FreeIpaNetworkProvider> freeIpaNetworkProviderMapByCloudPlatform,
             PollingService<FreeIpaPollerObject> freeIpaPollingService) {
         super(eventSender);
         this.environmentService = environmentService;
         this.freeIpaV1Endpoint = freeIpaV1Endpoint;
-        this.supportedPlatfroms = supportedPlatfroms;
+        this.supportedPlatforms = supportedPlatforms;
         this.freeIpaNetworkProviderMapByCloudPlatform = freeIpaNetworkProviderMapByCloudPlatform;
         this.freeIpaPollingService = freeIpaPollingService;
     }
@@ -66,52 +76,81 @@ public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     @Override
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
-        Optional<Environment> environmentOptional = environmentService.findById(environmentDto.getId());
-
+        Optional<Environment> environmentOptional = environmentService.findEnvironmentById(environmentDto.getId());
         try {
             if (environmentOptional.isPresent() && environmentOptional.get().isCreateFreeIpa()) {
                 Environment environment = environmentOptional.get();
-                if (supportedPlatfroms.supportedPlatformForFreeIpa(environment.getCloudPlatform())) {
-
-                    updateStatus(environment);
-
-                    PlacementRequest placementRequest = createPlacementRequest(environment);
-
-                    CreateFreeIpaRequest createFreeIpaRequest = new CreateFreeIpaRequest();
-                    createFreeIpaRequest.setEnvironmentCrn(environment.getResourceCrn());
-                    createFreeIpaRequest.setName(environment.getName() + "-freeipa");
-                    createFreeIpaRequest.setFreeIpa(createFreeIpaServerRequest());
-                    createFreeIpaRequest.setPlacement(placementRequest);
-                    createFreeIpaRequest.setAuthentication(createStackAuthenticationRequest());
-
-                    FreeIpaNetworkProvider freeIpaNetworkProvider = freeIpaNetworkProviderMapByCloudPlatform
-                            .get(CloudPlatform.valueOf(environment.getCloudPlatform()));
-                    if (freeIpaNetworkProvider != null) {
-                        createFreeIpaRequest.setNetwork(
-                                freeIpaNetworkProvider.provider(environment));
-                        placementRequest.setAvailabilityZone(
-                                freeIpaNetworkProvider.availabilityZone(createFreeIpaRequest.getNetwork(), environment));
-                    }
-
+                if (supportedPlatforms.supportedPlatformForFreeIpa(environment.getCloudPlatform())) {
+                    environment.setStatus(EnvironmentStatus.FREEIPA_CREATION_IN_PROGRESS);
+                    environmentService.save(environment);
+                    CreateFreeIpaRequest createFreeIpaRequest = createFreeIpaRequest(environmentDto);
                     freeIpaV1Endpoint.create(createFreeIpaRequest);
-
-                    PollingResult result = freeIpaPollingService.pollWithTimeoutSingleFailure(
-                            new FreeIpaCreationRetrievalTask(),
-                            new FreeIpaPollerObject(environment.getResourceCrn(), freeIpaV1Endpoint),
-                            FreeIpaCreationRetrievalTask.FREEIPA_RETRYING_INTERVAL,
-                            FreeIpaCreationRetrievalTask.FREEIPA_RETRYING_COUNT);
-                    if (result == SUCCESS) {
-                        eventSender().sendEvent(getNextStepObject(environmentDto), environmentDtoEvent.getHeaders());
-                    } else {
-                        throw new FreeIpaOperationFailedException("Failed to prepare FreeIpa!");
-                    }
+                    awaitFreeIpaCreation(environmentDtoEvent, environmentDto);
                 } else {
                     eventSender().sendEvent(getNextStepObject(environmentDto), environmentDtoEvent.getHeaders());
                 }
+            } else {
+                eventSender().sendEvent(getNextStepObject(environmentDto), environmentDtoEvent.getHeaders());
             }
         } catch (Exception ex) {
             EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(environmentDto.getId(), environmentDto.getName(), ex);
             eventSender().sendEvent(failureEvent, environmentDtoEvent.getHeaders());
+        }
+    }
+
+    private CreateFreeIpaRequest createFreeIpaRequest(EnvironmentDto environment) {
+        CreateFreeIpaRequest createFreeIpaRequest = initFreeIpaRequest(environment);
+        createFreeIpaRequest.setEnvironmentCrn(environment.getResourceCrn());
+        setFreeIpaServer(createFreeIpaRequest);
+        setPlacementAndNetwork(environment, createFreeIpaRequest);
+        setAuthentication(createFreeIpaRequest);
+        return createFreeIpaRequest;
+    }
+
+    private CreateFreeIpaRequest initFreeIpaRequest(EnvironmentDto environment) {
+        CreateFreeIpaRequest createFreeIpaRequest = new CreateFreeIpaRequest();
+        createFreeIpaRequest.setEnvironmentCrn(environment.getResourceCrn());
+        createFreeIpaRequest.setName(environment.getName() + "-freeipa");
+        return createFreeIpaRequest;
+    }
+
+    private void setFreeIpaServer(CreateFreeIpaRequest createFreeIpaRequest) {
+        FreeIpaServerRequest freeIpaServerRequest = new FreeIpaServerRequest();
+        freeIpaServerRequest.setAdminPassword(FREEIPA_ADMIN_PASSWORD);
+        freeIpaServerRequest.setDomain(FREEIPA_DOMAIN);
+        freeIpaServerRequest.setHostname(FREEIPA_HOSTNAME);
+        createFreeIpaRequest.setFreeIpa(freeIpaServerRequest);
+    }
+
+    private void setPlacementAndNetwork(EnvironmentDto environment, CreateFreeIpaRequest createFreeIpaRequest) {
+        FreeIpaNetworkProvider freeIpaNetworkProvider = freeIpaNetworkProviderMapByCloudPlatform
+                .get(CloudPlatform.valueOf(environment.getCloudPlatform()));
+        PlacementRequest placementRequest = new PlacementRequest();
+        placementRequest.setRegion(environment.getRegionSet().iterator().next().getName());
+        createFreeIpaRequest.setPlacement(placementRequest);
+        createFreeIpaRequest.setNetwork(
+                freeIpaNetworkProvider.provider(environment));
+        placementRequest.setAvailabilityZone(
+                freeIpaNetworkProvider.availabilityZone(createFreeIpaRequest.getNetwork(), environment));
+    }
+
+    private void setAuthentication(CreateFreeIpaRequest createFreeIpaRequest) {
+        StackAuthenticationRequest stackAuthenticationRequest = new StackAuthenticationRequest();
+        stackAuthenticationRequest.setLoginUserName("cloudbreak");
+        stackAuthenticationRequest.setPublicKey(DUMMY_SSH_KEY);
+        createFreeIpaRequest.setAuthentication(stackAuthenticationRequest);
+    }
+
+    private void awaitFreeIpaCreation(Event<EnvironmentDto> environmentDtoEvent, EnvironmentDto environment) {
+        PollingResult result = freeIpaPollingService.pollWithTimeoutSingleFailure(
+                new FreeIpaCreationRetrievalTask(),
+                new FreeIpaPollerObject(environment.getResourceCrn(), freeIpaV1Endpoint),
+                FreeIpaCreationRetrievalTask.FREEIPA_RETRYING_INTERVAL,
+                FreeIpaCreationRetrievalTask.FREEIPA_RETRYING_COUNT);
+        if (result == SUCCESS) {
+            eventSender().sendEvent(getNextStepObject(environment), environmentDtoEvent.getHeaders());
+        } else {
+            throw new FreeIpaOperationFailedException("Failed to prepare FreeIpa!");
         }
     }
 
@@ -122,35 +161,8 @@ public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentD
                 .build();
     }
 
-    private void updateStatus(Environment environment) {
-        environment.setStatus(EnvironmentStatus.FREEIPA_CREATION_IN_PROGRESS);
-        environmentService.save(environment);
-    }
-
-    private FreeIpaServerRequest createFreeIpaServerRequest() {
-        FreeIpaServerRequest request = new FreeIpaServerRequest();
-        request.setAdminPassword("Admin123!");
-        request.setDomain("cdp.site");
-        request.setHostname("ipaserver");
-        return request;
-    }
-
-    private PlacementRequest createPlacementRequest(Environment env) {
-        PlacementRequest request = new PlacementRequest();
-        request.setRegion(env.getRegionSet().iterator().next().getName());
-        return request;
-    }
-
-    private StackAuthenticationRequest createStackAuthenticationRequest() {
-        StackAuthenticationRequest request = new StackAuthenticationRequest();
-        request.setLoginUserName("cloudbreak");
-        request.setPublicKey(dummySshKey);
-        return request;
-    }
-
     @Override
     public String selector() {
         return CREATE_FREEIPA_EVENT.selector();
     }
-
 }

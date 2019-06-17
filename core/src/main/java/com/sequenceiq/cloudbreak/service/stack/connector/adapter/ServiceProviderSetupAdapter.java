@@ -16,15 +16,13 @@ import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
-import com.sequenceiq.cloudbreak.dto.credential.Credential;
-import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
-import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
 
@@ -40,23 +38,19 @@ public class ServiceProviderSetupAdapter {
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
     @Inject
-    private CredentialToCloudCredentialConverter credentialConverter;
-
-    @Inject
     private ImageService imageService;
 
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
 
     @Inject
-    private CredentialClientService credentialClientService;
+    private StackUtil stackUtil;
 
     public ImageStatusResult checkImage(Stack stack) throws Exception {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                 location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
-        Credential credential = credentialClientService.getByCrn(stack.getCredentialCrn());
-        CloudCredential cloudCredential = credentialConverter.convert(credential);
+        CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
         Image image = imageService.getImage(stack.getId());
         CheckImageRequest<CheckImageResult> checkImageRequest =
                 new CheckImageRequest<>(cloudContext, cloudCredential, cloudStackConverter.convert(stack), image);

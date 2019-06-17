@@ -27,15 +27,6 @@ public class EnvironmentResourceService {
         this.networkService = networkService;
     }
 
-    public BaseNetwork createAndSetNetwork(Environment environment, NetworkDto networkDto, String accountId) {
-        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
-        BaseNetwork network = networkService.createNetworkIfPossible(environment, networkDto, cloudPlatform, accountId);
-        if (network != null) {
-            environment.setNetwork(network);
-        }
-        return network;
-    }
-
     public Credential getCredentialFromRequest(CredentialAwareEnvRequest request, String accountId, String creator) {
         Credential credential;
         if (StringUtils.isNotEmpty(request.getCredentialName())) {
@@ -49,5 +40,21 @@ public class EnvironmentResourceService {
             throw new BadRequestException("No credential has been specified in request for environment creation.");
         }
         return credential;
+    }
+
+    BaseNetwork createAndSetNetwork(Environment environment, NetworkDto networkDto, String accountId) {
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
+        BaseNetwork network = networkService.createNetworkIfPossible(environment, networkDto, cloudPlatform, accountId);
+        if (network != null) {
+            environment.setNetwork(network);
+        }
+        return network;
+    }
+
+    private void validatePlatform(Environment environment, String requestedPlatform) {
+        if (!environment.getCloudPlatform().equals(requestedPlatform)) {
+            throw new BadRequestException(String.format("The requested credential's cloud platform [%s] "
+                    + "does not match with the environments cloud platform [%s].", requestedPlatform, environment.getCloudPlatform()));
+        }
     }
 }

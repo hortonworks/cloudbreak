@@ -20,8 +20,6 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.common.event.Payload;
-import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesRequest;
@@ -30,21 +28,21 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
+import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
@@ -144,10 +142,7 @@ public class StackStartActions {
         private InstanceMetaDataService instanceMetaDataService;
 
         @Inject
-        private CredentialToCloudCredentialConverter credentialConverter;
-
-        @Inject
-        private CredentialClientService credentialClientService;
+        private StackUtil stackUtil;
 
         protected AbstractStackStartAction(Class<P> payloadClass) {
             super(payloadClass);
@@ -163,8 +158,7 @@ public class StackStartActions {
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
             CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                     location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
-            Credential credential = credentialClientService.getByCrn(stack.getCredentialCrn());
-            CloudCredential cloudCredential = credentialConverter.convert(credential);
+            CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
             return new StackStartStopContext(flowParameters, stack, instances, cloudContext, cloudCredential);
         }
 

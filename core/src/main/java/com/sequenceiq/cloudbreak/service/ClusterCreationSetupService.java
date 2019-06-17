@@ -24,14 +24,11 @@ import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.dto.KerberosConfig;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.environment.ClusterCreationEnvironmentValidator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.controller.validation.mpack.ManagementPackValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConfigValidator;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Constraint;
@@ -40,15 +37,18 @@ import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.util.Benchmark.MultiCheckedSupplier;
+import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
@@ -67,9 +67,6 @@ public class ClusterCreationSetupService {
 
     @Inject
     private FileSystemConfigService fileSystemConfigService;
-
-    @Inject
-    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
     @Inject
     private ConverterUtil converterUtil;
@@ -98,6 +95,9 @@ public class ClusterCreationSetupService {
     @Inject
     private KerberosConfigService kerberosConfigService;
 
+    @Inject
+    private StackUtil stackUtil;
+
     public void validate(ClusterV4Request request, Stack stack, User user, Workspace workspace, DetailedEnvironmentResponse environment) {
         validate(request, null, stack, user, workspace, environment);
     }
@@ -108,7 +108,7 @@ public class ClusterCreationSetupService {
         MDCBuilder.buildUserMdcContext(user.getUserId(), user.getUserName());
         CloudCredential credential = cloudCredential;
         if (credential == null) {
-            credential = credentialToCloudCredentialConverter.convert(stack.getCredentialCrn());
+            credential = stackUtil.getCloudCredential(stack);
         }
         fileSystemValidator.validateCloudStorage(stack.cloudPlatform(), credential, request.getCloudStorage(),
                 stack.getCreator().getUserId(), stack.getWorkspace().getId());

@@ -58,12 +58,14 @@ public class EnvironmentModificationService {
     }
 
     public EnvironmentDto editByName(String environmentName, EnvironmentEditDto editDto) {
-        Environment env = environmentService.getByNameForAccountId(environmentName, editDto.getAccountId());
+        Environment env = environmentRepository.findByNameAndAccountId(environmentName, editDto.getAccountId())
+                .orElseThrow(() -> new NotFoundException(String.format("No environment found with name '%s'", environmentName)));
         return edit(editDto, env);
     }
 
     public EnvironmentDto editByCrn(String crn, EnvironmentEditDto editDto) {
-        Environment env = environmentService.getByCrnForAccountId(crn, editDto.getAccountId());
+        Environment env = environmentRepository.findByResourceCrnAndAccountId(crn, editDto.getAccountId())
+                .orElseThrow(() -> new NotFoundException(String.format("No environment found with crn '%s'", crn)));
         return edit(editDto, env);
     }
 

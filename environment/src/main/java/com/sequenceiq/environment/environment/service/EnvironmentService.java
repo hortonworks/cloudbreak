@@ -3,10 +3,13 @@ package com.sequenceiq.environment.environment.service;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.BadRequestException;
 
@@ -19,11 +22,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
-import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.Region;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
@@ -43,14 +45,22 @@ public class EnvironmentService {
 
     private final PlatformParameterService platformParameterService;
 
+    private final EnvironmentDtoConverter environmentDtoConverter;
+
     private final EnvironmentResourceDeletionService environmentResourceDeletionService;
 
-    public EnvironmentService(EnvironmentValidatorService validatorService, EnvironmentRepository environmentRepository, ConversionService conversionService,
-            PlatformParameterService platformParameterService, EnvironmentResourceDeletionService environmentResourceDeletionService) {
+    public EnvironmentService(
+            EnvironmentValidatorService validatorService,
+            EnvironmentRepository environmentRepository,
+            ConversionService conversionService,
+            PlatformParameterService platformParameterService,
+            EnvironmentDtoConverter environmentDtoConverter,
+            EnvironmentResourceDeletionService environmentResourceDeletionService) {
         this.validatorService = validatorService;
         this.environmentRepository = environmentRepository;
         this.conversionService = conversionService;
         this.platformParameterService = platformParameterService;
+        this.environmentDtoConverter = environmentDtoConverter;
         this.environmentResourceDeletionService = environmentResourceDeletionService;
     }
 
@@ -58,40 +68,45 @@ public class EnvironmentService {
         return environmentRepository.save(environment);
     }
 
-    public DetailedEnvironmentResponse getByName(String environmentName, String accountId) {
-        Environment environment = getByNameForAccountId(environmentName, accountId);
-        return conversionService.convert(environment, DetailedEnvironmentResponse.class);
+    public EnvironmentDto save(EnvironmentDto environmentDto) {
+        Environment environment = environmentDtoConverter.dtoToEnvironment(environmentDto);
+        return environmentDtoConverter.environmentToDto(environmentRepository.save(environment));
     }
 
-    public DetailedEnvironmentResponse getByCrn(String crn, String accountId) {
-        Environment environment = getByCrnForAccountId(crn, accountId);
-        return conversionService.convert(environment, DetailedEnvironmentResponse.class);
+    public EnvironmentDto getByNameAndAccountId(String environmentName, String accountId) {
+        Optional<Environment> environment = environmentRepository.findByNameAndAccountId(environmentName, accountId);
+        MDCBuilder.buildMdcContext(environment.orElseThrow(()
+                -> new NotFoundException(String.format("No environment found with name '%s'", environmentName))));
+        return environmentDtoConverter.environmentToDto(environment.get());
     }
 
-    public Environment getByNameForAccountId(String name, String accountId) {
-        Optional<Environment> object = environmentRepository.findByNameAndAccountId(name, accountId);
-        MDCBuilder.buildMdcContext(object.orElseThrow(() -> new NotFoundException(String.format("No environment found with name '%s'", name))));
-        return object.get();
+    public EnvironmentDto getByCrnAndAccountId(String crn, String accountId) {
+        Optional<Environment> environment = environmentRepository.findByResourceCrnAndAccountId(crn, accountId);
+        MDCBuilder.buildMdcContext(environment.orElseThrow(() -> new NotFoundException(String.format("No environment found with resource CRN '%s'", crn))));
+        return environmentDtoConverter.environmentToDto(environment.get());
     }
 
-    public Environment getByCrnForAccountId(String crn, String accountId) {
-        Optional<Environment> object = environmentRepository.findByResourceCrnAndAccountId(crn, accountId);
-        MDCBuilder.buildMdcContext(object.orElseThrow(() -> new NotFoundException(String.format("No environment found with resource CRN '%s'", crn))));
-        return object.get();
+    public List<EnvironmentDto> listByAccountId(String accountId) {
+        Set<Environment> environments = environmentRepository.findByAccountId(accountId);
+        return environments.stream().map(environmentDtoConverter::environmentToDto).collect(Collectors.toList());
     }
 
-    public SimpleEnvironmentResponse deleteByName(String environmentName, String accountId) {
-        Environment environment = getByNameForAccountId(environmentName, accountId);
-        LOGGER.debug(String.format("Starting to archive environment [name: %s]", environment.getName()));
-        delete(environment);
-        return conversionService.convert(environment, SimpleEnvironmentResponse.class);
+    public EnvironmentDto deleteByNameAndAccountId(String environmentName, String accountId) {
+        Optional<Environment> environment = environmentRepository.findByNameAndAccountId(environmentName, accountId);
+        MDCBuilder.buildMdcContext(environment.orElseThrow(()
+                -> new NotFoundException(String.format("No environment found with name '%s'", environmentName))));
+        LOGGER.debug(String.format("Deleting environment [name: %s]", environment.get().getName()));
+        delete(environment.get());
+        return environmentDtoConverter.environmentToDto(environment.get());
     }
 
-    public SimpleEnvironmentResponse deleteByCrn(String crn, String accountId) {
-        Environment environment = getByCrnForAccountId(crn, accountId);
-        LOGGER.debug(String.format("Starting to archive environment [name: %s]", environment.getName()));
-        delete(environment);
-        return conversionService.convert(environment, SimpleEnvironmentResponse.class);
+    public EnvironmentDto deleteByCrnAndAccountId(String crn, String accountId) {
+        Optional<Environment> environment = environmentRepository.findByResourceCrnAndAccountId(crn, accountId);
+        MDCBuilder.buildMdcContext(environment.orElseThrow(()
+                -> new NotFoundException(String.format("No environment found with crn '%s'", crn))));
+        LOGGER.debug(String.format("Deleting  environment [name: %s]", environment.get().getName()));
+        delete(environment.get());
+        return environmentDtoConverter.environmentToDto(environment.get());
     }
 
     public Environment delete(Environment environment) {
@@ -102,26 +117,26 @@ public class EnvironmentService {
         return environment;
     }
 
-    public SimpleEnvironmentResponses deleteMultipleByNames(Set<String> environmentNames, String accountId) {
-        Set<SimpleEnvironmentResponse> responses = new HashSet<>();
-        for (String environmentName : environmentNames) {
-            Environment environment = getByNameForAccountId(environmentName, accountId);
+    public List<EnvironmentDto> deleteMultipleByNames(Set<String> environmentNames, String accountId) {
+        List<EnvironmentDto> environmentDtos = new ArrayList<>();
+        Set<Environment> environments = environmentRepository.findByNameInAndAccountId(environmentNames, accountId);
+        for (Environment environment : environments) {
             LOGGER.debug(String.format("Starting to archive environment [name: %s]", environment.getName()));
             delete(environment);
-            responses.add(conversionService.convert(environment, SimpleEnvironmentResponse.class));
+            environmentDtos.add(environmentDtoConverter.environmentToDto(environment));
         }
-        return new SimpleEnvironmentResponses(responses);
+        return environmentDtos;
     }
 
-    public SimpleEnvironmentResponses deleteMultipleByCrns(Set<String> crns, String accountId) {
-        Set<SimpleEnvironmentResponse> responses = new HashSet<>();
-        for (String crn : crns) {
-            Environment environment = getByCrnForAccountId(crn, accountId);
+    public List<EnvironmentDto> deleteMultipleByCrns(Set<String> crns, String accountId) {
+        List<EnvironmentDto> environmentDtos = new ArrayList<>();
+        Set<Environment> environments = environmentRepository.findByResourceCrnInAndAccountId(crns, accountId);
+        for (Environment environment : environments) {
             LOGGER.debug(String.format("Starting to archive environment [CRN: %s]", environment.getName()));
             delete(environment);
-            responses.add(conversionService.convert(environment, SimpleEnvironmentResponse.class));
+            environmentDtos.add(environmentDtoConverter.environmentToDto(environment));
         }
-        return new SimpleEnvironmentResponses(responses);
+        return environmentDtos;
     }
 
     public void setRegions(Environment environment, Set<String> requestedRegions, CloudRegions cloudRegions) {
@@ -139,11 +154,15 @@ public class EnvironmentService {
         environment.setRegions(regionSet);
     }
 
-    public Optional<Environment> findById(Long id) {
+    public Optional<EnvironmentDto> findById(Long id) {
+        return environmentRepository.findById(id).map(environmentDtoConverter::environmentToDto);
+    }
+
+    public Optional<Environment> findEnvironmentById(Long id) {
         return environmentRepository.findById(id);
     }
 
-    public void setLocation(Environment environment, LocationDto requestedLocation, CloudRegions cloudRegions) {
+    void setLocation(Environment environment, LocationDto requestedLocation, CloudRegions cloudRegions) {
         if (requestedLocation != null) {
             Coordinate coordinate = cloudRegions.getCoordinates().get(region(requestedLocation.getName()));
             if (coordinate != null) {

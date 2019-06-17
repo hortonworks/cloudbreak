@@ -19,16 +19,14 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.GetInstancesStateResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
-import com.sequenceiq.cloudbreak.dto.credential.Credential;
-import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
-import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
+import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
 
@@ -46,17 +44,13 @@ public class ServiceProviderMetadataAdapter {
     private InstanceMetaDataToCloudInstanceConverter metadataConverter;
 
     @Inject
-    private CredentialToCloudCredentialConverter credentialConverter;
-
-    @Inject
-    private CredentialClientService credentialClientService;
+    private StackUtil stackUtil;
 
     public InstanceSyncState getState(Stack stack, InstanceGroup instanceGroup, String instanceId) {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
                 location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
-        Credential credential = credentialClientService.getByCrn(stack.getCredentialCrn());
-        CloudCredential cloudCredential = credentialConverter.convert(credential);
+        CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
         InstanceGroup ig = stack.getInstanceGroupByInstanceGroupName(instanceGroup.getGroupName());
         CloudInstance instance = null;
         for (InstanceMetaData metaData : ig.getAllInstanceMetaData()) {

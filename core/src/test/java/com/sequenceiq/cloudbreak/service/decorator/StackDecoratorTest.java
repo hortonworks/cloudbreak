@@ -163,7 +163,6 @@ public class StackDecoratorTest {
         String credentialName = "credentialName";
         MockitoAnnotations.initMocks(this);
         subject = new Stack();
-        subject.setCredentialCrn("aCredentialCRN");
         subject.setEnvironmentCrn("envCrn");
         subject.setInstanceGroups(createInstanceGroups(GATEWAY));
         when(cloudParameterCache.getPlatformParameters()).thenReturn(platformParametersMap);

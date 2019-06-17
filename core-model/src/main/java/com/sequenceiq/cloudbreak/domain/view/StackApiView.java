@@ -34,8 +34,6 @@ public class StackApiView extends CompactView {
     @Column(columnDefinition = "TEXT")
     private String platformVariant;
 
-    private String credentialCrn;
-
     @OneToOne
     private StackStatusView stackStatus;
 
@@ -84,14 +82,6 @@ public class StackApiView extends CompactView {
 
     public void setPlatformVariant(String platformVariant) {
         this.platformVariant = platformVariant;
-    }
-
-    public String getCredentialCrn() {
-        return credentialCrn;
-    }
-
-    public void setCredentialCrn(String credentialCrn) {
-        this.credentialCrn = credentialCrn;
     }
 
     public StackStatusView getStackStatus() {

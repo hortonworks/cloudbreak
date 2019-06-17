@@ -18,17 +18,20 @@ public abstract class EnvironmentBaseResponse {
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
 
-    @ApiModelProperty(EnvironmentModelDescription.REGIONS)
-    private CompactRegionResponse regions;
+    @ApiModelProperty(EnvironmentModelDescription.CLOUD_PLATFORM)
+    private String cloudPlatform;
+
+    @ApiModelProperty(ModelDescriptions.CREATOR)
+    private String creator;
 
     @ApiModelProperty(EnvironmentModelDescription.CREATE_FREEIPA)
     private Boolean createFreeIpa = Boolean.TRUE;
 
-    @ApiModelProperty(EnvironmentModelDescription.CLOUD_PLATFORM)
-    private String cloudPlatform;
-
     @ApiModelProperty(EnvironmentModelDescription.CREDENTIAL_RESPONSE)
     private CredentialResponse credential;
+
+    @ApiModelProperty(EnvironmentModelDescription.REGIONS)
+    private CompactRegionResponse regions;
 
     @ApiModelProperty(EnvironmentModelDescription.LOCATION)
     private LocationResponse location;
@@ -38,9 +41,6 @@ public abstract class EnvironmentBaseResponse {
 
     @ApiModelProperty(EnvironmentModelDescription.STATUS)
     private EnvironmentStatus environmentStatus;
-
-    @ApiModelProperty(ModelDescriptions.CREATOR)
-    private String creator;
 
     public String getCrn() {
         return crn;
