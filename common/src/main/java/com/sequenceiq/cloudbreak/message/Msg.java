@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.message;
 
 public enum Msg {
     STACK_INFRASTRUCTURE_BOOTSTRAP("stack.infrastructure.bootstrap"),
+    STACK_INFRASTRUCTURE_CLUSTER_PROXY("stack.infrastructure.cluster.proxy.registration"),
     STACK_INFRASTRUCTURE_METADATA_SETUP("stack.infrastructure.metadata.setup"),
     STACK_INFRASTRUCTURE_DISK_MOUNT("stack.infrastructure.disk.mount"),
     STACK_INFRASTRUCTURE_STARTING("stack.infrastructure.starting"),

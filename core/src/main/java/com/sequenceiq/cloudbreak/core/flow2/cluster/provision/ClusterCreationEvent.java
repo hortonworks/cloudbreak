@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.provision;
 
-import com.sequenceiq.flow.core.FlowEvent;
-import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterFailed;
@@ -10,6 +8,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.ldap.LdapSSOConfigurationFail
 import com.sequenceiq.cloudbreak.reactor.api.event.ldap.LdapSSOConfigurationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyRegistrationFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyRegistrationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.MountDisksFailed;
@@ -18,12 +18,16 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServ
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesSuccess;
+import com.sequenceiq.flow.core.FlowEvent;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 
 public enum ClusterCreationEvent implements FlowEvent {
     CLUSTER_CREATION_EVENT("CLUSTER_PROVISION_TRIGGER_EVENT"),
     CLUSTER_INSTALL_EVENT("CLUSTER_INSTALL_TRIGGER_EVENT"),
     BOOTSTRAP_MACHINES_FINISHED_EVENT(EventSelectorUtil.selector(BootstrapMachinesSuccess.class)),
     BOOTSTRAP_MACHINES_FAILED_EVENT(EventSelectorUtil.selector(BootstrapMachinesFailed.class)),
+    CLUSTER_PROXY_REGISTRATION_SUCCEEDED_EVENT(EventSelectorUtil.selector(ClusterProxyRegistrationSuccess.class)),
+    CLUSTER_PROXY_REGISTRATION_FAILED_EVENT(EventSelectorUtil.selector(ClusterProxyRegistrationFailed.class)),
     HOST_METADATASETUP_FINISHED_EVENT(EventSelectorUtil.selector(HostMetadataSetupSuccess.class)),
     HOST_METADATASETUP_FAILED_EVENT(EventSelectorUtil.selector(HostMetadataSetupFailed.class)),
     MOUNT_DISKS_FINISHED_EVENT(EventSelectorUtil.selector(MountDisksSuccess.class)),

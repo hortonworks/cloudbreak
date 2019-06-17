@@ -603,3 +603,9 @@ serviceDescriptorDefinitionMap:
     serviceName: YARN
     blueprintParamKeys:
       - yarn.resourcemanager.webapp.address
+
+clusterProxy:
+  url: http://localhost:10080/cluster-proxy
+  enabled: false
+  registerConfigPath: /rpc/registerConfig
+  updateConfigPath: /rpc/updateConfig

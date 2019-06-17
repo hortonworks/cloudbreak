@@ -81,7 +81,7 @@ public class ServiceEndpointCollector {
                     String variant = cluster.getVariant();
                     ExposedService exposedService = isNotEmpty(variant) && variant.equals(ClusterApi.CLOUDERA_MANAGER)
                             ? ExposedService.CLOUDERA_MANAGER : ExposedService.AMBARI;
-                    // Knox cannot proxy Cloudbreak Manager yet
+                    // Knox cannot proxy Cloudera Manager yet
                     if (!ExposedService.CLOUDERA_MANAGER.equals(exposedService)) {
                         Optional<GatewayTopology> gatewayTopology = getGatewayTopologyForService(gateway, exposedService);
                         Optional<String> managerUrl = gatewayTopology.map(t -> getExposedServiceUrl(managerIp, gateway, t.getTopologyName(), exposedService));

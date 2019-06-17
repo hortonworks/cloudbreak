@@ -1,0 +1,56 @@
+package com.sequenceiq.cloudbreak.reactor.handler.orchestration;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy.ClusterProxyService;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyRegistrationFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyRegistrationRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyRegistrationSuccess;
+import com.sequenceiq.flow.event.EventSelectorUtil;
+import com.sequenceiq.flow.reactor.api.handler.EventHandler;
+
+import reactor.bus.Event;
+import reactor.bus.EventBus;
+
+@Component
+public class ClusterProxyRegistrationHandler implements EventHandler<ClusterProxyRegistrationRequest> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterProxyService.class);
+
+    @Value("${clusterProxy.enabled:false}")
+    private boolean clusterProxyIntegrationEnabled;
+
+    @Inject
+    private EventBus eventBus;
+
+    @Inject
+    private ClusterProxyService clusterProxyService;
+
+    @Override
+    public String selector() {
+        return EventSelectorUtil.selector(ClusterProxyRegistrationRequest.class);
+    }
+
+    @Override
+    public void accept(Event<ClusterProxyRegistrationRequest> event) {
+        ClusterProxyRegistrationRequest request = event.getData();
+        Selectable response;
+        try {
+            if (clusterProxyIntegrationEnabled) {
+                clusterProxyService.registerProxyConfiguration(request.getResourceId());
+                response = new ClusterProxyRegistrationSuccess(request.getResourceId());
+            } else {
+                response = new ClusterProxyRegistrationSuccess(request.getResourceId());
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error occurred when registering cluster proxy config", e);
+            response = new ClusterProxyRegistrationFailed(request.getResourceId(), e);
+        }
+        eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
+    }
+}

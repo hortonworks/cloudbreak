@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.secret.vault;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class VaultSecret {
 
     private String enginePath;
@@ -8,7 +11,10 @@ public class VaultSecret {
 
     private String path;
 
-    public VaultSecret(String enginePath, String engineClass, String path) {
+    @JsonCreator
+    public VaultSecret(@JsonProperty("enginePath") String enginePath,
+            @JsonProperty("engineClass") String engineClass,
+            @JsonProperty("path") String path) {
         this.enginePath = enginePath;
         this.engineClass = engineClass;
         this.path = path;
