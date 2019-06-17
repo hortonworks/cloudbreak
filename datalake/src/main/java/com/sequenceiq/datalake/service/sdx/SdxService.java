@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,8 +19,6 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
@@ -26,6 +26,7 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.client.EnvironmentServiceClient;
+import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 
 @Service
 public class SdxService {
@@ -46,7 +47,7 @@ public class SdxService {
         if (sdxClusters.isPresent()) {
             return sdxClusters.get();
         } else {
-            throw new NotFoundException("Sdx cluster not found by ID");
+            throw notFound("SDX cluster", id).get();
         }
     }
 
@@ -56,7 +57,7 @@ public class SdxService {
         if (sdxCluster.isPresent()) {
             return sdxCluster.get();
         } else {
-            throw new NotFoundException("Sdx cluster not found");
+            throw notFound("SDX cluster", name).get();
         }
     }
 
@@ -132,8 +133,7 @@ public class SdxService {
             sdxReactorFlowManager.triggerSdxDeletion(sdxCluster.getId());
             LOGGER.info("sdx delete triggered: {}", sdxCluster.getClusterName());
         }, () -> {
-            LOGGER.info("Can not find sdx cluster");
-            throw new BadRequestException("Can not find sdx cluster");
+            throw notFound("SDX cluster", name).get();
         });
     }
 

@@ -177,7 +177,8 @@ public class SdxServiceTest {
 
     @Test
     void deleteSdxNotFound() {
-        Assertions.assertThrows(BadRequestException.class, () -> sdxService.deleteSdx(CRN, "test-sdx-cluster"), "Can not find sdx cluster");
+        Assertions.assertThrows(com.sequenceiq.cloudbreak.exception.NotFoundException.class,
+                () -> sdxService.deleteSdx(CRN, "test-sdx-cluster"));
         verify(sdxClusterRepository, times(1))
                 .findByAccountIdAndClusterNameAndDeletedIsNull(eq("hortonworks"), eq("test-sdx-cluster"));
     }

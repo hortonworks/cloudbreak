@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static com.sequenceiq.datalake.flow.create.handler.StackCreationHandler.DURATION_IN_MINUTES;
 import static com.sequenceiq.datalake.flow.create.handler.StackCreationHandler.SLEEP_TIME_IN_SEC;
@@ -80,11 +81,11 @@ public class ProvisionerService {
             } catch (NotFoundException e) {
                 LOGGER.info("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());
             } catch (ClientErrorException e) {
-                LOGGER.info("Can not delete stack from cloudbreak: {}", sdxCluster.getClusterName(), e);
-                throw new RuntimeException("Can not delete stack, client error happened");
+                LOGGER.info("Can not delete stack from cloudbreak: {}", sdxCluster.getClusterName());
+                throw new RuntimeException("Can not delete stack, client error happened", e);
             }
         }, () -> {
-            throw new BadRequestException("Can not find SDX cluster by ID: " + id);
+            throw notFound("SDX cluster", id).get();
         });
     }
 
@@ -112,7 +113,7 @@ public class ProvisionerService {
             sdxCluster.setDeleted(clock.getCurrentTimeMillis());
             sdxClusterRepository.save(sdxCluster);
         }, () -> {
-            throw new BadRequestException("Can not find SDX cluster by ID: " + id);
+            throw notFound("SDX cluster", id).get();
         });
     }
 
@@ -138,7 +139,7 @@ public class ProvisionerService {
                 throw new RuntimeException("Can not write stackrequest to json", e);
             }
         }, () -> {
-            throw new BadRequestException("Can not find SDX cluster by ID: " + id);
+            throw notFound("SDX cluster", id).get();
         });
     }
 
@@ -169,7 +170,7 @@ public class ProvisionerService {
             sdxCluster.setStatus(SdxClusterStatus.RUNNING);
             sdxClusterRepository.save(sdxCluster);
         }, () -> {
-            throw new BadRequestException("Can not find SDX cluster by ID: " + id);
+            throw notFound("SDX cluster", id).get();
         });
     }
 
@@ -196,7 +197,7 @@ public class ProvisionerService {
             sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
             sdxClusterRepository.save(sdxCluster);
         }, () -> {
-            throw new BadRequestException("Can not find environment for ID: " + sdxId);
+            throw notFound("SDX cluster", sdxId).get();
         });
     }
 
