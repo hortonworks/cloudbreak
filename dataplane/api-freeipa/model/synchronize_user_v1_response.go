@@ -11,9 +11,9 @@ import (
 	"github.com/go-openapi/swag"
 )
 
-// SetPasswordV1Response set password v1 response
-// swagger:model SetPasswordV1Response
-type SetPasswordV1Response struct {
+// SynchronizeUserV1Response synchronize user v1 response
+// swagger:model SynchronizeUserV1Response
+type SynchronizeUserV1Response struct {
 
 	// environment names where operation failed
 	Failure map[string]string `json:"failure,omitempty"`
@@ -22,13 +22,13 @@ type SetPasswordV1Response struct {
 	Success []string `json:"success"`
 }
 
-// Validate validates this set password v1 response
-func (m *SetPasswordV1Response) Validate(formats strfmt.Registry) error {
+// Validate validates this synchronize user v1 response
+func (m *SynchronizeUserV1Response) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (m *SetPasswordV1Response) MarshalBinary() ([]byte, error) {
+func (m *SynchronizeUserV1Response) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -36,8 +36,8 @@ func (m *SetPasswordV1Response) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *SetPasswordV1Response) UnmarshalBinary(b []byte) error {
-	var res SetPasswordV1Response
+func (m *SynchronizeUserV1Response) UnmarshalBinary(b []byte) error {
+	var res SynchronizeUserV1Response
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

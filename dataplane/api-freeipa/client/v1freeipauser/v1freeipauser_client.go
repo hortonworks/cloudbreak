@@ -55,32 +55,32 @@ func (a *Client) CreateUsersV1(params *CreateUsersV1Params) (*CreateUsersV1OK, e
 }
 
 /*
-GetSyncUsersStatusV1 gets the status of synchronization operation
+GetSynchronizationStatusV1 gets the status of synchronization operation
 
 User synchronization and management operations
 */
-func (a *Client) GetSyncUsersStatusV1(params *GetSyncUsersStatusV1Params) (*GetSyncUsersStatusV1OK, error) {
+func (a *Client) GetSynchronizationStatusV1(params *GetSynchronizationStatusV1Params) (*GetSynchronizationStatusV1OK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetSyncUsersStatusV1Params()
+		params = NewGetSynchronizationStatusV1Params()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getSyncUsersStatusV1",
+		ID:                 "getSynchronizationStatusV1",
 		Method:             "GET",
 		PathPattern:        "/v1/freeipa/user/sync",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetSyncUsersStatusV1Reader{formats: a.formats},
+		Reader:             &GetSynchronizationStatusV1Reader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetSyncUsersStatusV1OK), nil
+	return result.(*GetSynchronizationStatusV1OK), nil
 
 }
 
@@ -115,32 +115,62 @@ func (a *Client) SetPasswordV1(params *SetPasswordV1Params) (*SetPasswordV1OK, e
 }
 
 /*
-SynchronizeUsersV1 synchronizes groups and users to the free IP a servers
+SynchronizeAllUsersV1 synchronizes groups and users to the free IP a servers
 
 User synchronization and management operations
 */
-func (a *Client) SynchronizeUsersV1(params *SynchronizeUsersV1Params) (*SynchronizeUsersV1OK, error) {
+func (a *Client) SynchronizeAllUsersV1(params *SynchronizeAllUsersV1Params) (*SynchronizeAllUsersV1OK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewSynchronizeUsersV1Params()
+		params = NewSynchronizeAllUsersV1Params()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "synchronizeUsersV1",
+		ID:                 "synchronizeAllUsersV1",
 		Method:             "POST",
-		PathPattern:        "/v1/freeipa/user/sync",
+		PathPattern:        "/v1/freeipa/user/syncAll",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &SynchronizeUsersV1Reader{formats: a.formats},
+		Reader:             &SynchronizeAllUsersV1Reader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*SynchronizeUsersV1OK), nil
+	return result.(*SynchronizeAllUsersV1OK), nil
+
+}
+
+/*
+SynchronizeUserV1 synchronizes a user to the free IP a servers
+
+User synchronization and management operations
+*/
+func (a *Client) SynchronizeUserV1(params *SynchronizeUserV1Params) (*SynchronizeUserV1OK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewSynchronizeUserV1Params()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "synchronizeUserV1",
+		Method:             "POST",
+		PathPattern:        "/v1/freeipa/user/sync",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &SynchronizeUserV1Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*SynchronizeUserV1OK), nil
 
 }
 

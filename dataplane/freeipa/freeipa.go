@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/hortonworks/cb-cli/dataplane/api-freeipa/client/v1freeipa"
+	"github.com/hortonworks/cb-cli/dataplane/api-freeipa/client/v1freeipauser"
 	freeIpaModel "github.com/hortonworks/cb-cli/dataplane/api-freeipa/model"
 	"github.com/hortonworks/cb-cli/dataplane/env"
 	fl "github.com/hortonworks/cb-cli/dataplane/flags"
@@ -297,4 +298,54 @@ func assembleFreeIpaRequest(c *cli.Context) *freeIpaModel.CreateFreeIpaV1Request
 		req.EnvironmentCrn = &crn
 	}
 	return &req
+}
+
+func SynchronizeAllUsers(c *cli.Context) {
+	defer commonutils.TimeTrack(time.Now(), "sync users to FreeIpa")
+
+	users := c.StringSlice(fl.FlIpaUsersSlice.Name)
+	environments := c.StringSlice(fl.FlIpaEnvironmentsSlice.Name)
+	SynchronizeAllUsersV1Request := freeIpaModel.SynchronizeAllUsersV1Request{
+		Users:        users,
+		Environments: environments,
+	}
+
+	freeIpaClient := ClientFreeIpa(*oauth.NewFreeIpaClientFromContext(c)).FreeIpa
+	resp, err := freeIpaClient.V1freeipauser.SynchronizeAllUsersV1(v1freeipauser.NewSynchronizeAllUsersV1Params().WithBody(&SynchronizeAllUsersV1Request))
+	if err != nil {
+		commonutils.LogErrorAndExit(err)
+	}
+	synchronizeUsersResponse := resp.Payload
+	log.Infof("[synchronizeAllUsers] User sync submitted with status: %s", *synchronizeUsersResponse.Status)
+}
+
+func SynchronizeCurrentUser(c *cli.Context) {
+	defer commonutils.TimeTrack(time.Now(), "set user password in FreeIpa")
+
+	var req freeIpaModel.SynchronizeUserV1Request
+
+	freeIpaClient := ClientFreeIpa(*oauth.NewFreeIpaClientFromContext(c)).FreeIpa
+	resp, err := freeIpaClient.V1freeipauser.SynchronizeUserV1(v1freeipauser.NewSynchronizeUserV1Params().WithBody(&req))
+	if err != nil {
+		commonutils.LogErrorAndExit(err)
+	}
+	synchronizeUserResponse := resp.Payload
+	log.Infof("[synchronizeUser] Sync completed: %s", *synchronizeUserResponse)
+}
+
+func SetPassword(c *cli.Context) {
+	defer commonutils.TimeTrack(time.Now(), "set user password in FreeIpa")
+
+	password := c.String(fl.FlIpaUserPassword.Name)
+	SetPasswordV1Request := freeIpaModel.SetPasswordV1Request{
+		Password: password,
+	}
+
+	freeIpaClient := ClientFreeIpa(*oauth.NewFreeIpaClientFromContext(c)).FreeIpa
+	resp, err := freeIpaClient.V1freeipauser.SetPasswordV1(v1freeipauser.NewSetPasswordV1Params().WithBody(&SetPasswordV1Request))
+	if err != nil {
+		commonutils.LogErrorAndExit(err)
+	}
+	setPasswordResponse := resp.Payload
+	log.Infof("[setPassword] Set Password completed: %s", *setPasswordResponse)
 }

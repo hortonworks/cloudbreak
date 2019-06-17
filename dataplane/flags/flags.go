@@ -1217,6 +1217,27 @@ var (
 			Usage: "writes the values into the profile",
 		},
 	}
+	FlIpaUsersSlice = StringSliceFlag{
+		RequiredFlag: OPTIONAL,
+		StringSliceFlag: cli.StringSliceFlag{
+			Name:  "user",
+			Usage: "name of users to sync (provide option once for each name)",
+		},
+	}
+	FlIpaEnvironmentsSlice = StringSliceFlag{
+		RequiredFlag: OPTIONAL,
+		StringSliceFlag: cli.StringSliceFlag{
+			Name:  "environment",
+			Usage: "name of environments to sync (provide option once for each name)",
+		},
+	}
+	FlIpaUserPassword = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ipa-user-password",
+			Usage: "password for user in the ipa server",
+		},
+	}
 )
 
 type RequiredFlag struct {

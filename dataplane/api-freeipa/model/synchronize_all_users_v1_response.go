@@ -15,9 +15,9 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// SynchronizeUsersV1Response synchronize users v1 response
-// swagger:model SynchronizeUsersV1Response
-type SynchronizeUsersV1Response struct {
+// SynchronizeAllUsersV1Response synchronize all users v1 response
+// swagger:model SynchronizeAllUsersV1Response
+type SynchronizeAllUsersV1Response struct {
 
 	// User synchronization operation end time
 	EndTime string `json:"endTime,omitempty"`
@@ -35,8 +35,8 @@ type SynchronizeUsersV1Response struct {
 	Status *string `json:"status"`
 }
 
-// Validate validates this synchronize users v1 response
-func (m *SynchronizeUsersV1Response) Validate(formats strfmt.Registry) error {
+// Validate validates this synchronize all users v1 response
+func (m *SynchronizeAllUsersV1Response) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateID(formats); err != nil {
@@ -53,7 +53,7 @@ func (m *SynchronizeUsersV1Response) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *SynchronizeUsersV1Response) validateID(formats strfmt.Registry) error {
+func (m *SynchronizeAllUsersV1Response) validateID(formats strfmt.Registry) error {
 
 	if err := validate.Required("id", "body", m.ID); err != nil {
 		return err
@@ -62,7 +62,7 @@ func (m *SynchronizeUsersV1Response) validateID(formats strfmt.Registry) error {
 	return nil
 }
 
-var synchronizeUsersV1ResponseTypeStatusPropEnum []interface{}
+var synchronizeAllUsersV1ResponseTypeStatusPropEnum []interface{}
 
 func init() {
 	var res []string
@@ -70,31 +70,31 @@ func init() {
 		panic(err)
 	}
 	for _, v := range res {
-		synchronizeUsersV1ResponseTypeStatusPropEnum = append(synchronizeUsersV1ResponseTypeStatusPropEnum, v)
+		synchronizeAllUsersV1ResponseTypeStatusPropEnum = append(synchronizeAllUsersV1ResponseTypeStatusPropEnum, v)
 	}
 }
 
 const (
 
-	// SynchronizeUsersV1ResponseStatusRUNNING captures enum value "RUNNING"
-	SynchronizeUsersV1ResponseStatusRUNNING string = "RUNNING"
+	// SynchronizeAllUsersV1ResponseStatusRUNNING captures enum value "RUNNING"
+	SynchronizeAllUsersV1ResponseStatusRUNNING string = "RUNNING"
 
-	// SynchronizeUsersV1ResponseStatusCOMPLETED captures enum value "COMPLETED"
-	SynchronizeUsersV1ResponseStatusCOMPLETED string = "COMPLETED"
+	// SynchronizeAllUsersV1ResponseStatusCOMPLETED captures enum value "COMPLETED"
+	SynchronizeAllUsersV1ResponseStatusCOMPLETED string = "COMPLETED"
 
-	// SynchronizeUsersV1ResponseStatusFAILED captures enum value "FAILED"
-	SynchronizeUsersV1ResponseStatusFAILED string = "FAILED"
+	// SynchronizeAllUsersV1ResponseStatusFAILED captures enum value "FAILED"
+	SynchronizeAllUsersV1ResponseStatusFAILED string = "FAILED"
 )
 
 // prop value enum
-func (m *SynchronizeUsersV1Response) validateStatusEnum(path, location string, value string) error {
-	if err := validate.Enum(path, location, value, synchronizeUsersV1ResponseTypeStatusPropEnum); err != nil {
+func (m *SynchronizeAllUsersV1Response) validateStatusEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, synchronizeAllUsersV1ResponseTypeStatusPropEnum); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m *SynchronizeUsersV1Response) validateStatus(formats strfmt.Registry) error {
+func (m *SynchronizeAllUsersV1Response) validateStatus(formats strfmt.Registry) error {
 
 	if err := validate.Required("status", "body", m.Status); err != nil {
 		return err
@@ -109,7 +109,7 @@ func (m *SynchronizeUsersV1Response) validateStatus(formats strfmt.Registry) err
 }
 
 // MarshalBinary interface implementation
-func (m *SynchronizeUsersV1Response) MarshalBinary() ([]byte, error) {
+func (m *SynchronizeAllUsersV1Response) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -117,8 +117,8 @@ func (m *SynchronizeUsersV1Response) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *SynchronizeUsersV1Response) UnmarshalBinary(b []byte) error {
-	var res SynchronizeUsersV1Response
+func (m *SynchronizeAllUsersV1Response) UnmarshalBinary(b []byte) error {
+	var res SynchronizeAllUsersV1Response
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

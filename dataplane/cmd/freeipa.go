@@ -54,6 +54,51 @@ func init() {
 					}
 				},
 			},
+			{
+				Name:  "user",
+				Usage: "manage users on FreeIpa cluster",
+				Subcommands: []cli.Command{
+					{
+						Name:        "syncall",
+						Usage:       "syncs all users to FreeIpa clusters",
+						Description: `syncs all users to FreeIpa clusters`,
+						Before:      cf.CheckConfigAndCommandFlagsWithoutWorkspace,
+						Flags:       fl.NewFlagBuilder().AddFlags(fl.FlIpaUsersSlice, fl.FlIpaEnvironmentsSlice).AddAuthenticationFlags().Build(),
+						Action:      freeipa.SynchronizeAllUsers,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlIpaUsersSlice, fl.FlIpaEnvironmentsSlice).AddAuthenticationFlags().Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+					{
+						Name:        "sync",
+						Usage:       "syncs current user to FreeIpa clusters",
+						Description: `syncs current user to FreeIpa clusters`,
+						Before:      cf.CheckConfigAndCommandFlagsWithoutWorkspace,
+						Flags:       fl.NewFlagBuilder().AddAuthenticationFlags().Build(),
+						Action:      freeipa.SynchronizeCurrentUser,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddAuthenticationFlags().Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+					{
+						Name:        "passwd",
+						Usage:       "sets password in FreeIpa clusters",
+						Description: `sets password in FreeIpa clusters`,
+						Before:      cf.CheckConfigAndCommandFlagsWithoutWorkspace,
+						Flags:       fl.NewFlagBuilder().AddFlags(fl.FlIpaUserPassword).AddAuthenticationFlags().Build(),
+						Action:      freeipa.SetPassword,
+						BashComplete: func(c *cli.Context) {
+							for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlIpaUserPassword).AddAuthenticationFlags().Build() {
+								fl.PrintFlagCompletion(f)
+							}
+						},
+					},
+				},
+			},
 		},
 	})
 }

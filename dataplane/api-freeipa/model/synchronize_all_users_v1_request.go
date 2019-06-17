@@ -13,9 +13,9 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// SynchronizeUsersV1Request synchronize users v1 request
-// swagger:model SynchronizeUsersV1Request
-type SynchronizeUsersV1Request struct {
+// SynchronizeAllUsersV1Request synchronize all users v1 request
+// swagger:model SynchronizeAllUsersV1Request
+type SynchronizeAllUsersV1Request struct {
 
 	// Optional environments to sync
 	// Unique: true
@@ -26,8 +26,8 @@ type SynchronizeUsersV1Request struct {
 	Users []string `json:"users"`
 }
 
-// Validate validates this synchronize users v1 request
-func (m *SynchronizeUsersV1Request) Validate(formats strfmt.Registry) error {
+// Validate validates this synchronize all users v1 request
+func (m *SynchronizeAllUsersV1Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateEnvironments(formats); err != nil {
@@ -44,7 +44,7 @@ func (m *SynchronizeUsersV1Request) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *SynchronizeUsersV1Request) validateEnvironments(formats strfmt.Registry) error {
+func (m *SynchronizeAllUsersV1Request) validateEnvironments(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Environments) { // not required
 		return nil
@@ -57,7 +57,7 @@ func (m *SynchronizeUsersV1Request) validateEnvironments(formats strfmt.Registry
 	return nil
 }
 
-func (m *SynchronizeUsersV1Request) validateUsers(formats strfmt.Registry) error {
+func (m *SynchronizeAllUsersV1Request) validateUsers(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Users) { // not required
 		return nil
@@ -71,7 +71,7 @@ func (m *SynchronizeUsersV1Request) validateUsers(formats strfmt.Registry) error
 }
 
 // MarshalBinary interface implementation
-func (m *SynchronizeUsersV1Request) MarshalBinary() ([]byte, error) {
+func (m *SynchronizeAllUsersV1Request) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -79,8 +79,8 @@ func (m *SynchronizeUsersV1Request) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *SynchronizeUsersV1Request) UnmarshalBinary(b []byte) error {
-	var res SynchronizeUsersV1Request
+func (m *SynchronizeAllUsersV1Request) UnmarshalBinary(b []byte) error {
+	var res SynchronizeAllUsersV1Request
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}
