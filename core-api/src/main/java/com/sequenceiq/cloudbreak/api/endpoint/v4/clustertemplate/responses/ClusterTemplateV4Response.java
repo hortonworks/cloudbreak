@@ -26,6 +26,8 @@ public class ClusterTemplateV4Response extends ClusterTemplateV4Base {
             allowableValues = "NONE,OPTIONAL,REQUIRED")
     private DatalakeRequired datalakeRequired = DatalakeRequired.OPTIONAL;
 
+    private String environmentCrn;
+
     public ResourceStatus getStatus() {
         return status;
     }
@@ -48,5 +50,13 @@ public class ClusterTemplateV4Response extends ClusterTemplateV4Base {
 
     public void setDatalakeRequired(DatalakeRequired datalakeRequired) {
         this.datalakeRequired = datalakeRequired;
+    }
+
+    public String getEnvironmentCrn() {
+        return environmentCrn;
+    }
+
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 }
