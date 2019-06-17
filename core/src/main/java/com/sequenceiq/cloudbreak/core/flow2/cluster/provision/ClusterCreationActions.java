@@ -25,6 +25,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.ldap.LdapSSOConfigurationRequ
 import com.sequenceiq.cloudbreak.reactor.api.event.ldap.LdapSSOConfigurationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyRegistrationRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyRegistrationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.MountDisksRequest;
@@ -40,11 +42,27 @@ public class ClusterCreationActions {
     @Inject
     private ClusterCreationService clusterCreationService;
 
-    @Bean(name = "BOOTSTRAPPING_MACHINES_STATE")
-    public Action<?, ?> bootstrappingMachinesAction() {
+    @Bean(name = "CLUSTER_PROXY_REGISTRATION_STATE")
+    public Action<?, ?> clusterProxyRegistrationAction() {
         return new AbstractStackCreationAction<>(StackEvent.class) {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+                clusterCreationService.registeringToClusterProxy(context.getStack());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new ClusterProxyRegistrationRequest(context.getStack().getId());
+            }
+        };
+    }
+
+    @Bean(name = "BOOTSTRAPPING_MACHINES_STATE")
+    public Action<?, ?> bootstrappingMachinesAction() {
+        return new AbstractStackCreationAction<>(ClusterProxyRegistrationSuccess.class) {
+            @Override
+            protected void doExecute(StackContext context, ClusterProxyRegistrationSuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.bootstrappingMachines(context.getStack());
                 sendEvent(context);
             }
