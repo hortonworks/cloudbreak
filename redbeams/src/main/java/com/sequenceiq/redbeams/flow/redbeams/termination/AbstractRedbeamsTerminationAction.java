@@ -1,4 +1,4 @@
-package com.sequenceiq.redbeams.flow.redbeams.provision;
+package com.sequenceiq.redbeams.flow.redbeams.termination;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.flow.core.AbstractAction;
@@ -13,9 +13,9 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.statemachine.StateContext;
 
-public abstract class AbstractRedbeamsProvisionAction<P extends Payload>
-        extends AbstractAction<RedbeamsProvisionState, RedbeamsProvisionEvent, RedbeamsContext, P> {
-    protected AbstractRedbeamsProvisionAction(Class<P> payloadClass) {
+public abstract class AbstractRedbeamsTerminationAction<P extends Payload>
+        extends AbstractAction<RedbeamsTerminationState, RedbeamsTerminationEvent, RedbeamsContext, P> {
+    protected AbstractRedbeamsTerminationAction(Class<P> payloadClass) {
         super(payloadClass);
     }
 
@@ -31,7 +31,7 @@ public abstract class AbstractRedbeamsProvisionAction<P extends Payload>
 
     @Override
     protected RedbeamsContext createFlowContext(FlowParameters flowParameters,
-        StateContext<RedbeamsProvisionState, RedbeamsProvisionEvent> stateContext, P payload) {
+                                                StateContext<RedbeamsTerminationState, RedbeamsTerminationEvent> stateContext, P payload) {
         // Get the cloud context and the cloud credentials
         return new RedbeamsContext(flowParameters, null, null);
     }

@@ -20,10 +20,12 @@ import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.CreateDatabase
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.TerminateDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTerminationOutcomeV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
-import com.sequenceiq.redbeams.api.model.describe.DatabaseServerAllocationOutcomeV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerAllocationOutcomeV4Response;
 import com.sequenceiq.redbeams.doc.ControllerDescriptions;
 import com.sequenceiq.redbeams.doc.Notes;
 import com.sequenceiq.redbeams.doc.OperationDescriptions.DatabaseServerOpDescription;
@@ -54,11 +56,18 @@ public interface DatabaseServerV4Endpoint {
     DatabaseServerV4Response get(@NotNull @QueryParam("environmentId") String environmentId, @PathParam("name") String name);
 
     @POST
-    @Path("create")
+    @Path("external")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.CREATE, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
             nickname = "createDatabaseServer")
     DatabaseServerAllocationOutcomeV4Response create(@Valid AllocateDatabaseServerV4Request request);
+
+    @DELETE
+    @Path("external")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DatabaseServerOpDescription.TERMINATE, produces = MediaType.APPLICATION_JSON, notes = Notes.DATABASE_SERVER_NOTES,
+            nickname = "terminateDatabaseServer")
+    DatabaseServerTerminationOutcomeV4Response terminate(@Valid TerminateDatabaseServerV4Request request);
 
     @POST
     @Path("register")

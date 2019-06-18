@@ -1,8 +1,7 @@
-package com.sequenceiq.redbeams.api.model.describe;
+package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 
@@ -14,7 +13,7 @@ import javax.validation.constraints.NotNull;
 @ApiModel("DatabaseServerAllocationOutcomeV4Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class DatabaseServerAllocationOutcomeV4Response {
+public class DatabaseServerTerminationOutcomeV4Response {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_ID, required = true)
     private String environmentId;

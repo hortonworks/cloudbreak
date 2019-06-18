@@ -5,7 +5,7 @@ import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerSuccess;
-import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsEvent;
+import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 
 import javax.inject.Inject;
 
@@ -17,9 +17,9 @@ import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class AllocateDatabaseHandler implements EventHandler<AllocateDatabaseServerRequest> {
+public class AllocateDatabaseServerHandler implements EventHandler<AllocateDatabaseServerRequest> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AllocateDatabaseHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AllocateDatabaseServerHandler.class);
 
     @Inject
     private EventBus eventBus;
@@ -34,8 +34,8 @@ public class AllocateDatabaseHandler implements EventHandler<AllocateDatabaseSer
         RedbeamsEvent request = event.getData();
         Selectable response = new AllocateDatabaseServerSuccess(request.getResourceId());
 
-        // TODO: Actually allocate databases
-        LOGGER.info("A database would be allocated here.");
+        // TODO: Actually allocate database servers
+        LOGGER.info("A database server would be allocated here.");
 
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }
