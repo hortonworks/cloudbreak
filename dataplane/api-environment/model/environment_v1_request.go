@@ -20,6 +20,9 @@ type EnvironmentV1Request struct {
 	// Cloud platform of the environment.
 	CloudPlatform string `json:"cloudPlatform,omitempty"`
 
+	// Create freeipa in environment
+	CreateFreeIpa bool `json:"createFreeIpa,omitempty"`
+
 	// Name of the credential of the environment. If the name is given, the detailed credential is ignored in the request.
 	CredentialName string `json:"credentialName,omitempty"`
 

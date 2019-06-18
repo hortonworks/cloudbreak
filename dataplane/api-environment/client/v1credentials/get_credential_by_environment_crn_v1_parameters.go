@@ -62,8 +62,8 @@ for the get credential by environment crn v1 operation typically these are writt
 */
 type GetCredentialByEnvironmentCrnV1Params struct {
 
-	/*Crn*/
-	Crn string
+	/*EnvironmentCrn*/
+	EnvironmentCrn string
 
 	timeout    time.Duration
 	Context    context.Context
@@ -103,15 +103,15 @@ func (o *GetCredentialByEnvironmentCrnV1Params) SetHTTPClient(client *http.Clien
 	o.HTTPClient = client
 }
 
-// WithCrn adds the crn to the get credential by environment crn v1 params
-func (o *GetCredentialByEnvironmentCrnV1Params) WithCrn(crn string) *GetCredentialByEnvironmentCrnV1Params {
-	o.SetCrn(crn)
+// WithEnvironmentCrn adds the environmentCrn to the get credential by environment crn v1 params
+func (o *GetCredentialByEnvironmentCrnV1Params) WithEnvironmentCrn(environmentCrn string) *GetCredentialByEnvironmentCrnV1Params {
+	o.SetEnvironmentCrn(environmentCrn)
 	return o
 }
 
-// SetCrn adds the crn to the get credential by environment crn v1 params
-func (o *GetCredentialByEnvironmentCrnV1Params) SetCrn(crn string) {
-	o.Crn = crn
+// SetEnvironmentCrn adds the environmentCrn to the get credential by environment crn v1 params
+func (o *GetCredentialByEnvironmentCrnV1Params) SetEnvironmentCrn(environmentCrn string) {
+	o.EnvironmentCrn = environmentCrn
 }
 
 // WriteToRequest writes these params to a swagger request
@@ -122,8 +122,8 @@ func (o *GetCredentialByEnvironmentCrnV1Params) WriteToRequest(r runtime.ClientR
 	}
 	var res []error
 
-	// path param crn
-	if err := r.SetPathParam("crn", o.Crn); err != nil {
+	// path param environmentCrn
+	if err := r.SetPathParam("environmentCrn", o.EnvironmentCrn); err != nil {
 		return err
 	}
 

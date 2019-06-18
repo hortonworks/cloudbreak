@@ -248,7 +248,7 @@ func (a *Client) GetCredentialByEnvironmentCrnV1(params *GetCredentialByEnvironm
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getCredentialByEnvironmentCrnV1",
 		Method:             "GET",
-		PathPattern:        "/v1/credentials/env/{crn}",
+		PathPattern:        "/v1/credentials/environment/crn/{environmentCrn}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},

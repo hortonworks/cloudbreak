@@ -51,7 +51,7 @@ type GetCredentialByEnvironmentCrnV1OK struct {
 }
 
 func (o *GetCredentialByEnvironmentCrnV1OK) Error() string {
-	return fmt.Sprintf("[GET /v1/credentials/env/{crn}][%d] getCredentialByEnvironmentCrnV1OK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /v1/credentials/environment/crn/{environmentCrn}][%d] getCredentialByEnvironmentCrnV1OK  %+v", 200, o.Payload)
 }
 
 func (o *GetCredentialByEnvironmentCrnV1OK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

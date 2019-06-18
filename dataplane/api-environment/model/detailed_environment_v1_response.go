@@ -22,6 +22,9 @@ type DetailedEnvironmentV1Response struct {
 	// Cloud platform of the environment.
 	CloudPlatform string `json:"cloudPlatform,omitempty"`
 
+	// Create freeipa in environment
+	CreateFreeIpa bool `json:"createFreeIpa,omitempty"`
+
 	// crn of the creator
 	Creator string `json:"creator,omitempty"`
 
