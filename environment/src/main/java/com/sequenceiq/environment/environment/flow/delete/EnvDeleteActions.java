@@ -85,7 +85,7 @@ public class EnvDeleteActions {
             @Override
             protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) {
                 environmentService
-                        .findById(payload.getResourceId())
+                        .findEnvironmentById(payload.getResourceId())
                         .ifPresent(env -> {
                             env.setName(generateArchiveName(env.getName()));
                             env.setDeletionTimestamp(new Date().getTime());
@@ -106,7 +106,7 @@ public class EnvDeleteActions {
             protected void doExecute(CommonContext context, EnvDeleteFailedEvent payload, Map<Object, Object> variables) {
                 LOGGER.warn("Failed to delete environment", payload.getException());
                 environmentService
-                        .findById(payload.getResourceId())
+                        .findEnvironmentById(payload.getResourceId())
                         .ifPresent(environment -> {
                             environment.setStatus(EnvironmentStatus.CORRUPTED);
                             environmentService.save(environment);
