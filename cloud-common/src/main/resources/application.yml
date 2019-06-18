@@ -252,7 +252,7 @@ cb:
         version: 7.x.0
         repo:
           redhat7:
-            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1158264/cm7/7.x.0/redhat7/yum/
+            baseurl: http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1181268/cm7/7.x.0/redhat7/yum/
 
 
   cdh:
