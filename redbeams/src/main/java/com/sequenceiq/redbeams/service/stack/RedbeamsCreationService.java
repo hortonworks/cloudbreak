@@ -1,10 +1,10 @@
 package com.sequenceiq.redbeams.service.stack;
 
-import com.sequenceiq.redbeams.api.model.describe.DatabaseServerAllocationOutcomeV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerAllocationOutcomeV4Response;
 import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsProvisionEvent;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerRequest;
-import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsEvent;
+import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.service.crn.CrnService;
 

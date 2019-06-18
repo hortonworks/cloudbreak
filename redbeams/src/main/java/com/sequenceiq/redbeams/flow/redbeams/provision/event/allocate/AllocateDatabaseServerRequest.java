@@ -1,6 +1,6 @@
 package com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate;
 
-import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsEvent;
+import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 
 /**
  * A request for allocating a database server.

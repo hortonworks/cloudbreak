@@ -1,4 +1,4 @@
-package com.sequenceiq.redbeams.flow.redbeams.provision;
+package com.sequenceiq.redbeams.flow.redbeams.common;
 
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.Selectable;

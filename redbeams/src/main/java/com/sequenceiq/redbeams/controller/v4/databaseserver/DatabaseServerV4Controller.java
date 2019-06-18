@@ -15,14 +15,18 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4En
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.TerminateDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTerminationOutcomeV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
-import com.sequenceiq.redbeams.api.model.describe.DatabaseServerAllocationOutcomeV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerAllocationOutcomeV4Response;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerRequest;
+import com.sequenceiq.redbeams.flow.redbeams.termination.event.terminate.TerminateDatabaseServerRequest;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
+import com.sequenceiq.redbeams.service.stack.RedbeamsTerminationService;
 
 @Component
 @Transactional(TxType.NEVER)
@@ -32,6 +36,9 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Inject
     private RedbeamsCreationService redbeamsCreationService;
+
+    @Inject
+    private RedbeamsTerminationService redbeamsTerminationService;
 
     @Inject
     private DatabaseServerConfigService databaseServerConfigService;
@@ -55,6 +62,12 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     public DatabaseServerAllocationOutcomeV4Response create(AllocateDatabaseServerV4Request request) {
         // Dummy launch database call
         return redbeamsCreationService.launchDatabase(new AllocateDatabaseServerRequest(0L), "");
+    }
+
+    @Override
+    public DatabaseServerTerminationOutcomeV4Response terminate(TerminateDatabaseServerV4Request request) {
+        // Dummy launch database call
+        return redbeamsTerminationService.terminateDatabaseServer(new TerminateDatabaseServerRequest(0L), "");
     }
 
     @Override
