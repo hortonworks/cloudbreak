@@ -3,17 +3,21 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
+import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -41,15 +45,21 @@ public class ClusterProxyService {
         this.restTemplate = restTemplate;
     }
 
-    public ConfigRegistrationResponse registerProxyConfiguration(Long stackId) {
+    public ConfigRegistrationResponse registerProxyConfiguration(Long stackId) throws JsonProcessingException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         ConfigRegistrationRequest proxyConfigRequest = createProxyConfigRequest(stack);
         LOGGER.debug("Cluster Proxy config request: {}", proxyConfigRequest);
         ResponseEntity<ConfigRegistrationResponse> response = restTemplate.postForEntity(clusterProxyUrl + registerConfigPath,
-                JsonUtil.writeValueAsStringSilent(proxyConfigRequest), ConfigRegistrationResponse.class);
+                requestEntity(proxyConfigRequest), ConfigRegistrationResponse.class);
 
         LOGGER.debug("Cluster Proxy config response: {}", response);
         return response.getBody();
+    }
+
+    private HttpEntity<String> requestEntity(ConfigRegistrationRequest proxyConfigRequest) throws JsonProcessingException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new HttpEntity<>(JsonUtil.writeValueAsString(proxyConfigRequest), headers);
     }
 
     private ConfigRegistrationRequest createProxyConfigRequest(Stack stack) {
@@ -74,11 +84,10 @@ public class ClusterProxyService {
     }
 
     private String vaultPath(String vaultSecretJsonString) {
-        Optional<VaultSecret> vaultSecretOpt = JsonUtil.readValueOpt(vaultSecretJsonString, VaultSecret.class);
-        if (vaultSecretOpt.isEmpty()) {
-            throw new VaultConfigException(String.format("Could not parse vault secret string '%s'", vaultSecretJsonString));
+        try {
+            return JsonUtil.readValue(vaultSecretJsonString, VaultSecret.class).getPath();
+        } catch (IOException e) {
+            throw new VaultConfigException(String.format("Could not parse vault secret string '%s'", vaultSecretJsonString), e);
         }
-        return vaultSecretOpt.get().getPath();
     }
-
 }

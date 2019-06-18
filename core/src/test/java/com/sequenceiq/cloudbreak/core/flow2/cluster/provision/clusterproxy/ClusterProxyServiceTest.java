@@ -1,15 +1,18 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy;
 
+import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.ExpectedCount.never;
 import static org.springframework.test.web.client.ExpectedCount.once;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.After;
@@ -26,6 +29,7 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
@@ -65,12 +69,13 @@ public class ClusterProxyServiceTest {
     }
 
     @Test
-    public void shouldRegisterProxyConfigurationWithClusterProxy() throws URISyntaxException {
+    public void shouldRegisterProxyConfigurationWithClusterProxy() throws URISyntaxException, JsonProcessingException {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStack());
         ConfigRegistrationResponse response = new ConfigRegistrationResponse();
         response.setId("123");
         response.setKey("X509PublicKey");
         mockServer.expect(once(), MockRestRequestMatchers.requestTo(new URI(CLUSTER_PROXY_URL + REGISTER_CONFIG_PATH)))
+                .andExpect(content().json(configRegistrationRequest()))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withStatus(HttpStatus.OK)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -79,6 +84,14 @@ public class ClusterProxyServiceTest {
         ConfigRegistrationResponse registrationResponse = service.registerProxyConfiguration(STACK_ID);
         assertEquals("123", registrationResponse.getId());
         assertEquals("X509PublicKey", registrationResponse.getKey());
+    }
+
+    private String configRegistrationRequest() {
+        ClusterServiceCredential credential1 = new ClusterServiceCredential("cbuser", "/cb/test-data/secret/cbpassword");
+        ClusterServiceCredential credential2 = new ClusterServiceCredential("dpuser", "/cb/test-data/secret/dppassword");
+        ClusterServiceConfig service = new ClusterServiceConfig("cloudera-manager",
+                List.of("https://10.10.10.10:8443"), asList(credential1, credential2));
+        return JsonUtil.writeValueAsStringSilent(new ConfigRegistrationRequest("1000", List.of(service)));
     }
 
     @Test
