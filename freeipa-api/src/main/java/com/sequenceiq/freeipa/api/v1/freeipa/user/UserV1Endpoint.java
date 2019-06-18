@@ -40,10 +40,10 @@ public interface UserV1Endpoint {
     SynchronizeAllUsersResponse synchronizeAllUsers(SynchronizeAllUsersRequest request);
 
     @GET
-    @Path("sync")
+    @Path("syncAll")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UserOperationDescriptions.SYNC_STATUS, notes = UserNotes.USER_NOTES, produces = ContentType.JSON,
-            nickname = "getSynchronizationStatusV1")
+            nickname = "getSynchronizeAllUsersStatusV1")
     SynchronizeAllUsersResponse getSynchronizationStatus(@QueryParam("id") String syncId);
 
     @POST
