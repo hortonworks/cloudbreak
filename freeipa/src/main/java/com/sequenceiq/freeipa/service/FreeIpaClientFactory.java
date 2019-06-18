@@ -4,8 +4,12 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.ccm.endpoint.DirectServiceEndpointFinder;
+import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceEndpointFinder;
+import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceEndpointLookupException;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
@@ -31,6 +35,9 @@ public class FreeIpaClientFactory {
     @Inject
     private TlsSecurityService tlsSecurityService;
 
+    @Autowired(required = false)
+    private ServiceEndpointFinder serviceEndpointFinder = new DirectServiceEndpointFinder();
+
     public FreeIpaClient getFreeIpaClientForStackId(Long stackId) throws Exception {
         LOGGER.debug("Retrieving stack for stack id {}", stackId);
 
@@ -43,11 +50,17 @@ public class FreeIpaClientFactory {
         LOGGER.debug("Creating FreeIpaClient for stack {}", stack.getId());
 
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+        GatewayConfig gatewayEndpointConfig;
+        try {
+            gatewayEndpointConfig = primaryGatewayConfig.getGatewayConfig(serviceEndpointFinder);
+        } catch (ServiceEndpointLookupException | InterruptedException e) {
+            throw new RuntimeException("Cannot determine service endpoint for gateway: " + primaryGatewayConfig, e);
+        }
         HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(
-                stack.getId(), primaryGatewayConfig.getPublicAddress());
+                stack.getId(), gatewayEndpointConfig.getConnectionAddress());
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
 
         return new FreeIpaClientBuilder("admin", freeIpa.getAdminPassword(), freeIpa.getDomain().toUpperCase(),
-                httpClientConfig, stack.getGatewayport().toString()).build();
+                httpClientConfig, gatewayEndpointConfig.getGatewayPort().toString()).build();
     }
 }
