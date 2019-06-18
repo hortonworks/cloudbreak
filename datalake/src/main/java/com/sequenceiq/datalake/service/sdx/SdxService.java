@@ -62,7 +62,7 @@ public class SdxService {
             return cloudbreakClient.withCrn(userCrn).stackV4Endpoint().get(0L, name, entries);
         } catch (javax.ws.rs.NotFoundException e) {
             LOGGER.info("Sdx cluster not found on CB side", e);
-            throw new NotFoundException("Sdx cluster not found on CB side");
+            throw notFound("SDX cluster", name).get();
         }
     }
 
