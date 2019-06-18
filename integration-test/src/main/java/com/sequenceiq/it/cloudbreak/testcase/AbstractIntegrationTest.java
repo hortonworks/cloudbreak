@@ -30,9 +30,11 @@ import org.testng.annotations.DataProvider;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.actor.Actor;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
+import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
@@ -47,6 +49,7 @@ import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription.TestCaseDescriptionBuilder;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
+import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.DatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
@@ -79,6 +82,9 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     @Inject
     private LongStringGeneratorUtil longStringGeneratorUtil;
+
+    @Inject
+    private CredentialTestClient credentialTestClient;
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
@@ -128,6 +134,7 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
+        createDefaultCredential(testContext);
         createDefaultEnvironment(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
@@ -209,7 +216,14 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     protected void createDefaultEnvironment(TestContext testContext) {
         testContext.given(EnvironmentTestDto.class)
-                .when(environmentTestClient.createV4());
+                .when(environmentTestClient.create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .when(environmentTestClient.describe());
+    }
+
+    protected void createDefaultCredential(TestContext testContext) {
+        testContext.given(CredentialTestDto.class)
+                .when(credentialTestClient.create());
     }
 
     protected void createDefaultImageCatalog(TestContext testContext) {

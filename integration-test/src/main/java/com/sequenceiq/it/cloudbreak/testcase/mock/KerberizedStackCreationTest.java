@@ -33,6 +33,7 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
     @Inject
     private StackTestClient stackTestClient;
 
+    // TODO: Update to new kerberos endpoints
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "an ActiveDirectory based kerberos config without realm and domain",
@@ -60,6 +61,7 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
                 .validate();
     }
 
+    // TODO: Update to new kerberos endpoints
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "an ActiveDirectory based kerberos config without realm and with domain",
@@ -88,6 +90,7 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
                 .validate();
     }
 
+    // TODO: Update to new Kerberos endpoints
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a FreeIPA based kerberos config with realm and without domain",
@@ -113,6 +116,7 @@ public class KerberizedStackCreationTest extends AbstractIntegrationTest {
                 .validate();
     }
 
+    // TODO: Update to new kerberos endpoints
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a FreeIPA based kerberos config with realm and domain",

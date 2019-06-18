@@ -125,7 +125,7 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
         if (env == null) {
             throw new IllegalArgumentException("Env is null with given key: " + environmentKey);
         }
-        return withEnvironmentCrn(environmentKey);
+        return withEnvironmentCrn(env.getResponse().getCrn());
     }
 
     public StackTestDtoBase<T> withName(String name) {

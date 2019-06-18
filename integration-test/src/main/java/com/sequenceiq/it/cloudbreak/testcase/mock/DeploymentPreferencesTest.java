@@ -24,7 +24,7 @@ public class DeploymentPreferencesTest extends AbstractIntegrationTest {
         createDefaultUser((TestContext) data[0]);
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running cloudbreak with MOCK deployment prefernces",
             when = "calling the get deployment preferences endpoint",

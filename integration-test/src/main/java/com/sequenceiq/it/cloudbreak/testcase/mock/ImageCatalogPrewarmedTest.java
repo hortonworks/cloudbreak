@@ -32,11 +32,7 @@ public class ImageCatalogPrewarmedTest extends AbstractIntegrationTest {
     @Inject
     private EnvironmentTestClient environmentTestClient;
 
-    @Override
-    protected void setupTest(TestContext testContext) {
-        createDefaultUser(testContext);
-    }
-
+    // TODO: Update endpoint to support CM
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "get prewarmed image if stack info is presented",
@@ -46,7 +42,6 @@ public class ImageCatalogPrewarmedTest extends AbstractIntegrationTest {
         initializeDefaultBlueprints(testContext);
 
         String imgCatalogName = resourcePropertyProvider().getName();
-        String environmentName = resourcePropertyProvider().getName();
         String stackName = resourcePropertyProvider().getName();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
@@ -56,8 +51,6 @@ public class ImageCatalogPrewarmedTest extends AbstractIntegrationTest {
                 .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getPreWarmedImageCatalogUrl())
                 .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
                 .when(imageCatalogTestClient.setAsDefault(), key(imgCatalogName))
-                .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.createV4(), key(environmentName))
                 .given(StackTestDto.class)
                 .withCatalog(ImageCatalogTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)

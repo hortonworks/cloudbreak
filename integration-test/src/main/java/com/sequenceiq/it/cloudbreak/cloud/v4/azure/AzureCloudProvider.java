@@ -7,12 +7,15 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AppBasedRequest;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialRequestParameters;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
+import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 
 @Component
@@ -20,6 +23,20 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Inject
     private AzureProperties azureProperties;
+
+    @Override
+    public CredentialTestDto credential(CredentialTestDto credential) {
+        AzureCredentialRequestParameters parameters = new AzureCredentialRequestParameters();
+        parameters.setSubscriptionId(azureProperties.getCredential().getSubscriptionId());
+        parameters.setTenantId(azureProperties.getCredential().getTenantId());
+        AppBasedRequest appBased = new AppBasedRequest();
+        appBased.setAccessKey(azureProperties.getCredential().getAppId());
+        appBased.setSecretKey(azureProperties.getCredential().getAppPassword());
+        parameters.setAppBased(appBased);
+        return credential.withAzureParameters(parameters)
+                .withCloudPlatform(CloudPlatform.AZURE.name())
+                .withDescription(commonCloudProperties().getDefaultCredentialDescription());
+    }
 
     @Override
     public StackTestDtoBase stack(StackTestDtoBase stack) {

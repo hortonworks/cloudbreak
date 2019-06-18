@@ -5,12 +5,12 @@ import java.util.Collection;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.ClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
-import com.sequenceiq.it.cloudbreak.dto.DeletableTestDto;
-import com.sequenceiq.it.cloudbreak.dto.stack.StackTemplateTestDto;
+import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.util.ClusterTemplateUtil;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.DeletableTestDto;
+import com.sequenceiq.it.cloudbreak.util.ClusterTemplateUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 
 @Prototype
@@ -27,33 +27,18 @@ public class ClusterTemplateTestDto extends DeletableTestDto<ClusterTemplateV4Re
 
     public ClusterTemplateTestDto valid() {
         return withName(resourceProperyProvider().getName())
-                .withStackTemplate(getTestContext().init(StackTemplateTestDto.class));
+                .withDistroXTemplate(getTestContext().init(DistroXTestDto.class).getRequest());
+    }
+
+    private ClusterTemplateTestDto withDistroXTemplate(DistroXV1Request distroXV1Request) {
+        getRequest().setDistroXTemplate(distroXV1Request);
+        return this;
     }
 
     public ClusterTemplateTestDto withName(String name) {
         getRequest().setName(name);
         setName(name);
         return this;
-    }
-
-    public ClusterTemplateTestDto withoutStackTemplate() {
-//        getRequest().setStackTemplate(null);
-        return this;
-    }
-
-    public ClusterTemplateTestDto withStackTemplate(StackTemplateTestDto stackTemplate) {
-//        getRequest().setStackTemplate(stackTemplate.getRequest());
-        return this;
-    }
-
-    public ClusterTemplateTestDto withStackTemplate(String key) {
-//        StackTemplateTestDto stackTemplate = getTestContext().get(key);
-//        getRequest().setStackTemplate(stackTemplate.getRequest());
-        return this;
-    }
-
-    public ClusterTemplateTestDto withStackTemplate(Class<StackTemplateTestDto> key) {
-        return withStackTemplate(key.getSimpleName());
     }
 
     public ClusterTemplateTestDto withDescription(String description) {

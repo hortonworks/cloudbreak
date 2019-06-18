@@ -49,6 +49,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         initializeDefaultBlueprints(testContext);
     }
 
+    // TODO: Update to SDX endpoint
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "Create datalake cluster and then delete",
@@ -61,7 +62,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         testContext.given(EnvironmentTestDto.class)
                 .withRegions(VALID_REGION)
                 .withLocation(VALID_LOCATION)
-                .when(environmentTestClient.createV4())
+                .when(environmentTestClient.create())
                 .given(ClusterTestDto.class).valid()
                 .withRdsConfigNames(rdsList)
                 .given("placement", PlacementSettingsTestDto.class)
@@ -77,10 +78,11 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .given(EnvironmentTestDto.class)
                 .withName(testContext.get(EnvironmentTestDto.class).getName())
 
-                .when(environmentTestClient.getV4())
+                .when(environmentTestClient.describe())
                 .validate();
     }
 
+    // TODO: Update to new SDX endpoint
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "Create datalake cluster and then delete resources",
@@ -94,7 +96,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         testContext.given(EnvironmentTestDto.class)
                 .withRegions(VALID_REGION)
                 .withLocation(VALID_LOCATION)
-                .when(environmentTestClient.createV4())
+                .when(environmentTestClient.create())
                 .given(ClusterTestDto.class).valid()
                 .withRdsConfigNames(rdsList)
                 .given("placement", PlacementSettingsTestDto.class)
@@ -104,10 +106,12 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .when(stackTestClient.createV4())
                 .deleteGiven(LdapTestDto.class, ldapTestClient.deleteV4(), RunningParameter.key(forbiddenKey))
                 .deleteGiven(DatabaseTestDto.class, databaseTestClient.deleteV4(), RunningParameter.key(forbiddenKey))
-                .deleteGiven(EnvironmentTestDto.class, environmentTestClient.deleteV4(), RunningParameter.key(forbiddenKey))
+                .given(EnvironmentTestDto.class)
+                .deleteGiven(EnvironmentTestDto.class, environmentTestClient.delete(), RunningParameter.key(forbiddenKey))
                 .validate();
     }
 
+    // TODO: Update to SDX endpoints
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "Create two datalake cluster in one environment",
@@ -118,12 +122,13 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         String rangerdb = resourcePropertyProvider().getName();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentTestDto.class)
-                .when(environmentTestClient.createV4())
+                .when(environmentTestClient.create())
                 .validate();
         createDatalake(testContext, rdsList);
         createDatalake(testContext, rdsList);
     }
 
+    // TODO: Update to SDX endpoints
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "Create datalake cluster and workload",
@@ -135,7 +140,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
         String rangerdb = resourcePropertyProvider().getName();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentTestDto.class)
-                .when(environmentTestClient.createV4())
+                .when(environmentTestClient.create())
                 .given("placement", PlacementSettingsTestDto.class)
                 .given(StackTestDto.class)
                 .withName(dlName)

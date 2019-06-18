@@ -18,7 +18,7 @@ public class ShowStackCliRequestTest extends AbstractIntegrationTest {
     @Inject
     private StackTestClient stackTestClient;
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(given = "stack", when = "cluster exist", then = "we should return with the cli json")
     public void testGetBlueprintWhenClusterIsAliveThenShouldReturnWithBlueprint(MockedTestContext testContext) {
         String clusterName = resourcePropertyProvider().getName();

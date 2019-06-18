@@ -100,7 +100,7 @@ public class ClouderaManagerUpscaleTest extends AbstractClouderaManagerTest {
         parcelStageResponses.push("ACTIVATING");
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "a stack with upscale",
             when = "upscale to 15",

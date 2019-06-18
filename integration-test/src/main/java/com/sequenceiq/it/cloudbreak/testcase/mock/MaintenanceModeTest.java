@@ -23,6 +23,7 @@ public class MaintenanceModeTest extends AbstractIntegrationTest {
     @Inject
     private StackTestClient stackTestClient;
 
+    // TODO: Implement update cluster for CM components
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "a valid cluster request",
@@ -43,11 +44,9 @@ public class MaintenanceModeTest extends AbstractIntegrationTest {
                 .await(CLUSTER_MAINTENANCE_MODE)
 
                 .given(StackRepositoryTestDto.class)
-                .withOsType("RHEL")
-                .withUtilsBaseURL("http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.7.5.0")
-                .withUtilsRepoId("HDP-2.7.5")
-                .withEnableGplRepo(true)
-                .withStackBaseURL("http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.7.5.0")
+                .withBaseURL("http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.7.5.0")
+                .withVersion("HDP-2.7.5")
+                .withGpgKeyUrl("http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.7.5.0")
                 .withRepositoryVersion("2.7.5")
                 .when(new UpdateStackDataAction())
 
