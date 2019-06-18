@@ -18,7 +18,7 @@ public class AwsEnvironmentNetworkValidator implements EnvironmentNetworkValidat
         if (networkDto != null) {
             if (networkDto.getAws() != null) {
                 if (StringUtils.isEmpty(networkDto.getAws().getVpcId())) {
-                    resultBuilder.error(missingParamErrorMessage("VPC identifier(vpcId)'", getCloudPlatform().name()));
+                    resultBuilder.error(missingParamErrorMessage("VPC identifier(vpcId)", getCloudPlatform().name()));
                 }
             } else {
                 resultBuilder.error(missingParamsErrorMsg(AWS));
