@@ -151,6 +151,7 @@ public class AuditTest extends AbstractIntegrationTest {
     public void createValidClusterTemplateThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
         String clusterTemplateName = resourcePropertyProvider().getName();
         testContext
+                .given(EnvironmentTestDto.class)
                 .given("stackTemplate", StackTemplateTestDto.class)
                 .withEnvironment(EnvironmentTestDto.class)
                 .given(ClusterTemplateTestDto.class)
