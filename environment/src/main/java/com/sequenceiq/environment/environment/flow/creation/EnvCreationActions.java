@@ -41,9 +41,9 @@ public class EnvCreationActions {
         return new AbstractVpcCreateAction<>(EnvCreationEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
-                environmentService.findById(payload.getResourceId()).ifPresentOrElse(environmentDto -> {
+                environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
                     LOGGER.info("NETWORK_CREATION_STARTED_STATE");
-                    sendEvent(context, CREATE_NETWORK_EVENT.selector(), environmentDto);
+                    sendEvent(context, CREATE_NETWORK_EVENT.selector(), environmentService.getEnvironmentDto(environment));
                 }, () -> {
                     EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(payload.getResourceId(), null, null);
                     LOGGER.warn("Failed to create network for environment! No environment found with id '{}'.", payload.getResourceId());
@@ -58,9 +58,9 @@ public class EnvCreationActions {
         return new AbstractVpcCreateAction<>(EnvCreationEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
-                environmentService.findById(payload.getResourceId()).ifPresentOrElse(environmentDto -> {
+                environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
                     LOGGER.info("FREEIPA_CREATION_STARTED_STATE");
-                    sendEvent(context, CREATE_FREEIPA_EVENT.selector(), environmentDto);
+                    sendEvent(context, CREATE_FREEIPA_EVENT.selector(), environmentService.getEnvironmentDto(environment));
                 }, () -> {
                     EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(payload.getResourceId(), null, null);
                     LOGGER.warn("Failed to create freeipa for environment! No environment found with id '{}'.", payload.getResourceId());
@@ -94,7 +94,7 @@ public class EnvCreationActions {
             protected void doExecute(CommonContext context, EnvCreationFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.warn("Failed to create environment", payload.getException());
                 environmentService
-                        .findById(payload.getResourceId())
+                        .findEnvironmentById(payload.getResourceId())
                         .ifPresent(environment -> {
                             environment.setStatus(EnvironmentStatus.CORRUPTED);
                             environmentService.save(environment);

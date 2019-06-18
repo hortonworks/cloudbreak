@@ -68,9 +68,8 @@ public class EnvironmentService {
         return environmentRepository.save(environment);
     }
 
-    public EnvironmentDto save(EnvironmentDto environmentDto) {
-        Environment environment = environmentDtoConverter.dtoToEnvironment(environmentDto);
-        return environmentDtoConverter.environmentToDto(environmentRepository.save(environment));
+    public EnvironmentDto getEnvironmentDto(Environment environment) {
+        return environmentDtoConverter.environmentToDto(environment);
     }
 
     public EnvironmentDto getByNameAndAccountId(String environmentName, String accountId) {
@@ -152,10 +151,6 @@ public class EnvironmentService {
             }
         }
         environment.setRegions(regionSet);
-    }
-
-    public Optional<EnvironmentDto> findById(Long id) {
-        return environmentRepository.findById(id).map(environmentDtoConverter::environmentToDto);
     }
 
     public Optional<Environment> findEnvironmentById(Long id) {

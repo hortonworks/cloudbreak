@@ -34,13 +34,13 @@ public class NetworkDeleteHandler extends EventSenderAwareHandler<EnvironmentDto
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            environmentService.findById(environmentDto.getId()).ifPresent(environment -> {
+            environmentService.findEnvironmentById(environmentDto.getId()).ifPresent(environment -> {
                 environment.setStatus(EnvironmentStatus.NETWORK_DELETE_IN_PROGRESS);
                 environment.setNetwork(null);
                 environmentService.save(environment);
             });
 
-            environmentService.findById(environmentDto.getId()).ifPresent(environment -> deleteNetworkIfExists(environment.getId()));
+            environmentService.findEnvironmentById(environmentDto.getId()).ifPresent(environment -> deleteNetworkIfExists(environment.getId()));
 
             EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.EnvDeleteEventBuilder.anEnvDeleteEvent()
                     .withResourceId(environmentDto.getResourceId())

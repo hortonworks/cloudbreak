@@ -30,7 +30,7 @@ public class RdbmsDeleteHandler extends EventSenderAwareHandler<EnvironmentDto> 
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
             // TODO: delete rdbms
-            environmentService.findById(environmentDto.getId()).ifPresent(environment -> {
+            environmentService.findEnvironmentById(environmentDto.getId()).ifPresent(environment -> {
                 environment.setStatus(EnvironmentStatus.RDBMS_DELETE_IN_PROGRESS);
                 environmentService.save(environment);
             });
