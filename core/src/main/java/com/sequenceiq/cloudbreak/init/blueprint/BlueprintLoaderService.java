@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.init.blueprint;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -98,7 +99,8 @@ public class BlueprintLoaderService {
             Blueprint defaultBlueprint = defaultBlueprints.get(blueprintInDatabase.getName());
             if (isActiveDefaultBlueprint(blueprintInDatabase) && isBlueprintInTheDefaultCache(defaultBlueprint)
                     && (defaultBlueprintNotSameAsNewTexts(blueprintInDatabase, defaultBlueprint.getBlueprintText())
-                    || defaultBlueprintContainsNewDescription(blueprintInDatabase, defaultBlueprint))) {
+                    || defaultBlueprintContainsNewDescription(blueprintInDatabase, defaultBlueprint)
+                    || isBlueprintInDBSameNameButUserManaged(blueprintInDatabase, defaultBlueprint))) {
                 LOGGER.debug("Default blueprint '{}' needs to modify for the '{}' workspace because the validation text changed.",
                         blueprintInDatabase.getName(), workspace.getId());
                 resultList.add(prepareBlueprint(blueprintInDatabase, defaultBlueprint, workspace));
@@ -106,6 +108,10 @@ public class BlueprintLoaderService {
         }
         LOGGER.debug("Finished to Update default blueprints which are contains text modifications.");
         return resultList;
+    }
+
+    private boolean isBlueprintInDBSameNameButUserManaged(Blueprint blueprintInDatabase, Blueprint defaultBlueprint) {
+        return blueprintInDatabase.getName().equals(defaultBlueprint.getName()) && blueprintInDatabase.getStatus() == USER_MANAGED;
     }
 
     private Blueprint prepareBlueprint(Blueprint blueprintFromDatabase, Blueprint newBlueprint,
@@ -139,7 +145,7 @@ public class BlueprintLoaderService {
     }
 
     private boolean isActiveDefaultBlueprint(Blueprint bp) {
-        return DEFAULT.equals(bp.getStatus());
+        return DEFAULT.equals(bp.getStatus()) || USER_MANAGED.equals(bp.getStatus());
     }
 
     private boolean defaultBlueprintNotSameAsNewTexts(Blueprint blueprintFromDatabase, String blueprintsText) {

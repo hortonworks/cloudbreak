@@ -183,8 +183,8 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     private Set<Blueprint> updateDefaultBlueprintCollection(Workspace workspace) {
-        Set<Blueprint> blueprintsInDatabase =
-                blueprintRepository.findAllByWorkspaceIdAndStatusIn(workspace.getId(), Set.of(ResourceStatus.DEFAULT, ResourceStatus.DEFAULT_DELETED));
+        Set<Blueprint> blueprintsInDatabase = blueprintRepository.findAllByWorkspaceIdAndStatusIn(workspace.getId(),
+                Set.of(ResourceStatus.DEFAULT, ResourceStatus.DEFAULT_DELETED, ResourceStatus.USER_MANAGED));
         if (!blueprintLoaderService.isAddingDefaultBlueprintsNecessaryForTheUser(blueprintsInDatabase)) {
             return blueprintsInDatabase.stream().filter(bp -> ResourceStatus.DEFAULT.equals(bp.getStatus())).collect(Collectors.toSet());
         }
