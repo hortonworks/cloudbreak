@@ -1,1 +1,2 @@
 cb.image.catalog.url: https://cloudbreak-imagecatalog.s3.amazonaws.com/v2-prod-cb-image-catalog.json
+clusterProxy.url: https://dataplane-dps-cluster-proxy.dataplane.svc.cluster.local/cluster-proxy
