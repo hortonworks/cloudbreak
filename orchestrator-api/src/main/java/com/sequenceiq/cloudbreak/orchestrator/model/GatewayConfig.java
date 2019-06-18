@@ -100,6 +100,10 @@ public class GatewayConfig {
         return hostname;
     }
 
+    public Integer getGatewayPort() {
+        return gatewayPort;
+    }
+
     public String getGatewayUrl() {
         return String.format("https://%s:%d", connectionAddress, gatewayPort);
     }
