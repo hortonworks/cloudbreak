@@ -51,7 +51,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 @RunWith(MockitoJUnitRunner.class)
 public class BlueprintServiceTest {
 
-    private static final String MISSING_CRN_OR_NAME_EXCEPTION_MESSAGE = "No name or crn provided, hence unable to obtain blueprint!";
+    private static final String INVALID_DTO_MESSAGE = "One and only one value of the crn and name should be filled!";
 
     private static final String NULL_DTO_EXCEPTION_MESSAGE = "BlueprintAccessDto should not be null";
 
@@ -106,7 +106,7 @@ public class BlueprintServiceTest {
     @Test
     public void testDeleteByWorkspaceWhenNeitherCrnOrNameProvidedThenBadRequestExceptionComes() {
         exceptionRule.expect(BadRequestException.class);
-        exceptionRule.expectMessage(MISSING_CRN_OR_NAME_EXCEPTION_MESSAGE);
+        exceptionRule.expectMessage(INVALID_DTO_MESSAGE);
 
         underTest.deleteByWorkspace(aBlueprintAccessDtoBuilder().build(), blueprint.getWorkspace().getId());
 
@@ -147,7 +147,7 @@ public class BlueprintServiceTest {
     @Test
     public void testGetByWorkspaceWhenNeitherCrnOrNameProvidedThenBadRequestExceptionComes() {
         exceptionRule.expect(BadRequestException.class);
-        exceptionRule.expectMessage(MISSING_CRN_OR_NAME_EXCEPTION_MESSAGE);
+        exceptionRule.expectMessage(INVALID_DTO_MESSAGE);
 
         underTest.getByWorkspace(aBlueprintAccessDtoBuilder().build(), blueprint.getWorkspace().getId());
 

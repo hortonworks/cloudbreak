@@ -1,13 +1,17 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.dto.RecipeAccessDto.RecipeAccessDtoBuilder.aRecipeAccessDtoBuilder;
+
 import java.util.Set;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
@@ -32,6 +36,9 @@ public class RecipesV4Controller extends NotificationController implements Recip
     @Inject
     private ConverterUtil converterUtil;
 
+    @Inject
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
+
     @Override
     public RecipeViewV4Responses list(Long workspaceId) {
         Set<RecipeView> allViewByWorkspaceId = recipeService.findAllViewByWorkspaceId(workspaceId);
@@ -39,21 +46,37 @@ public class RecipesV4Controller extends NotificationController implements Recip
     }
 
     @Override
-    public RecipeV4Response get(Long workspaceId, String name) {
-        Recipe recipe = recipeService.getByNameForWorkspaceId(name, workspaceId);
+    public RecipeV4Response getByName(Long workspaceId, String name) {
+        Recipe recipe = recipeService.get(aRecipeAccessDtoBuilder().withName(name).build(), workspaceId);
+        return converterUtil.convert(recipe, RecipeV4Response.class);
+    }
+
+    @Override
+    public RecipeV4Response getByCrn(Long workspaceId, @NotNull String crn) {
+        Recipe recipe = recipeService.get(aRecipeAccessDtoBuilder().withCrn(crn).build(), workspaceId);
         return converterUtil.convert(recipe, RecipeV4Response.class);
     }
 
     @Override
     public RecipeV4Response post(Long workspaceId, RecipeV4Request request) {
-        Recipe recipe = recipeService.createForLoggedInUser(converterUtil.convert(request, Recipe.class), workspaceId);
+        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String creator = threadBasedUserCrnProvider.getUserCrn();
+        Recipe recipeToSave = converterUtil.convert(request, Recipe.class);
+        Recipe recipe = recipeService.createForLoggedInUser(recipeToSave, workspaceId, accountId, creator);
         notify(ResourceEvent.RECIPE_CREATED);
         return converterUtil.convert(recipe, RecipeV4Response.class);
     }
 
     @Override
-    public RecipeV4Response delete(Long workspaceId, String name) {
-        Recipe deleted = recipeService.deleteByNameFromWorkspace(name, workspaceId);
+    public RecipeV4Response deleteByName(Long workspaceId, String name) {
+        Recipe deleted = recipeService.delete(aRecipeAccessDtoBuilder().withName(name).build(), workspaceId);
+        notify(ResourceEvent.RECIPE_DELETED);
+        return converterUtil.convert(deleted, RecipeV4Response.class);
+    }
+
+    @Override
+    public RecipeV4Response deleteByCrn(Long workspaceId, @NotNull String crn) {
+        Recipe deleted = recipeService.delete(aRecipeAccessDtoBuilder().withCrn(crn).build(), workspaceId);
         notify(ResourceEvent.RECIPE_DELETED);
         return converterUtil.convert(deleted, RecipeV4Response.class);
     }

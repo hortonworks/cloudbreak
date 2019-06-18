@@ -563,7 +563,7 @@ public class ImageCatalogServiceTest {
     public void testDeleteByWorkspaceWhenNeitherCrnOrNameProvidedThenBadRequestExceptionComes() {
         ImageCatalog catalog = getImageCatalog();
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage("No name or crn provided, hence unable to obtain image catalog!");
+        thrown.expectMessage("One and only one value of the crn and name should be filled!");
 
         underTest.delete(aImageCatalogAccessDtoBuilder().build(), catalog.getWorkspace().getId());
 
@@ -606,7 +606,7 @@ public class ImageCatalogServiceTest {
     @Test
     public void testGetByWorkspaceWhenNeitherCrnOrNameProvidedThenBadRequestExceptionComes() {
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage("No name or crn provided, hence unable to obtain image catalog!");
+        thrown.expectMessage("One and only one value of the crn and name should be filled!");
 
         underTest.get(aImageCatalogAccessDtoBuilder().build(), 1L);
 

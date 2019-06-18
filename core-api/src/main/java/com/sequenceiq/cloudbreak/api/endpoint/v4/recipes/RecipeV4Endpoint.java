@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.recipes;
 import java.util.Set;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -37,11 +38,18 @@ public interface RecipeV4Endpoint {
     RecipeViewV4Responses list(@PathParam("workspaceId") Long workspaceId);
 
     @GET
-    @Path("{name}")
+    @Path("name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = RecipeOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
             nickname = "getRecipeInWorkspace")
-    RecipeV4Response get(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+    RecipeV4Response getByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") @NotNull String name);
+
+    @GET
+    @Path("crn/{crn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = RecipeOpDescription.GET_BY_CRN_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
+            nickname = "getRecipeByCrnInWorkspace")
+    RecipeV4Response getByCrn(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") @NotNull String crn);
 
     @POST
     @Path("")
@@ -51,11 +59,18 @@ public interface RecipeV4Endpoint {
     RecipeV4Response post(@PathParam("workspaceId") Long workspaceId, @Valid RecipeV4Request request);
 
     @DELETE
-    @Path("{name}")
+    @Path("name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = RecipeOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
             nickname = "deleteRecipeInWorkspace")
-    RecipeV4Response delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+    RecipeV4Response deleteByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") @NotNull String name);
+
+    @DELETE
+    @Path("crn/{crn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = RecipeOpDescription.DELETE_BY_CRN_IN_WORKSPACE, produces = ContentType.JSON, notes = Notes.RECIPE_NOTES,
+            nickname = "deleteRecipeByCrnInWorkspace")
+    RecipeV4Response deleteByCrn(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") @NotNull String crn);
 
     @DELETE
     @Path("")

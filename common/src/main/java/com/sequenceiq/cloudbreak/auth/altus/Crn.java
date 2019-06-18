@@ -245,6 +245,7 @@ public class Crn {
         LDAP("ldap"),
         IMAGE_CATALOG("imageCatalog"),
         KERBEROS("kerberos"),
+        RECIPE("recipe"),
         FREEIPA("freeipa");
 
         private static final ImmutableMap<String, ResourceType> FROM_STRING;

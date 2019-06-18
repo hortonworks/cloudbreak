@@ -31,7 +31,7 @@ public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Res
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
         LOGGER.info("Cleaning up resource with name: {}", getName());
         try {
-            cloudbreakClient.getCloudbreakClient().recipeV4Endpoint().delete(cloudbreakClient.getWorkspaceId(), getName());
+            cloudbreakClient.getCloudbreakClient().recipeV4Endpoint().deleteByName(cloudbreakClient.getWorkspaceId(), getName());
         } catch (WebApplicationException ignore) {
             LOGGER.info("Something happend.");
         }
@@ -86,7 +86,7 @@ public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Res
     @Override
     public void delete(TestContext testContext, RecipeViewV4Response entity, CloudbreakClient client) {
         try {
-            client.getCloudbreakClient().recipeV4Endpoint().delete(client.getWorkspaceId(), entity.getName());
+            client.getCloudbreakClient().recipeV4Endpoint().deleteByName(client.getWorkspaceId(), entity.getName());
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), ResponseUtil.getErrorMessage(e), e);
         }
