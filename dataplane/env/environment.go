@@ -220,8 +220,6 @@ func DescribeEnvironment(c *cli.Context) {
 		utils.LogErrorAndExit(err)
 	}
 	env := resp.Payload
-	fmt.Printf("%+v\n", env)
-	fmt.Printf("%+v\n", env.Regions.DisplayNames)
 	if output.Format != "table" && output.Format != "yaml" {
 		output.Write(append(EnvironmentHeader, "Network"), convertResponseToJsonOutput(env))
 	} else {
