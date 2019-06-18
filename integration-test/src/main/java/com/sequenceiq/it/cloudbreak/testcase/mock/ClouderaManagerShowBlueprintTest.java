@@ -35,7 +35,7 @@ public class ClouderaManagerShowBlueprintTest extends AbstractClouderaManagerTes
         return blueprintTestClient;
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running cloudbreak with a not alive cluster",
             when = "the generated blueprint is requested",
@@ -61,7 +61,7 @@ public class ClouderaManagerShowBlueprintTest extends AbstractClouderaManagerTes
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running cloudbreak with an alive cluster",
             when = "the generated blueprint is requested",

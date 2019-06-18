@@ -7,12 +7,15 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.OpenStackNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.OpenStackStackV4Parameters;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.openstack.KeystoneV2Parameters;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.openstack.OpenstackParameters;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
+import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 
 @Component
@@ -80,6 +83,19 @@ public class OpenStackCloudProvider extends AbstractCloudProvider {
     @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.OPENSTACK;
+    }
+
+    @Override
+    public CredentialTestDto credential(CredentialTestDto credential) {
+        OpenstackParameters parameters = new OpenstackParameters();
+        parameters.setEndpoint(openStackProperties.getCredential().getEndpoint());
+        parameters.setUserName(openStackProperties.getCredential().getUserName());
+        parameters.setPassword(openStackProperties.getCredential().getPassword());
+        KeystoneV2Parameters keystoneV2Parameters = new KeystoneV2Parameters();
+        keystoneV2Parameters.setTenantName(openStackProperties.getCredential().getTenant());
+        parameters.setKeystoneV2(keystoneV2Parameters);
+        return credential.withCloudPlatform(getCloudPlatform().name())
+                .withOpenstackParameters(parameters);
     }
 
     @Override

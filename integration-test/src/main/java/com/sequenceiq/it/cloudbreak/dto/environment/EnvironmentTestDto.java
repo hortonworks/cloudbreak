@@ -1,25 +1,36 @@
 package com.sequenceiq.it.cloudbreak.dto.environment;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
+import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.DeletableTestDto;
+import com.sequenceiq.it.cloudbreak.dto.DeletableEnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 
 @Prototype
-public class EnvironmentTestDto extends DeletableTestDto<EnvironmentRequest, DetailedEnvironmentResponse, EnvironmentTestDto, SimpleEnvironmentResponse> {
+public class EnvironmentTestDto
+        extends DeletableEnvironmentTestDto<EnvironmentRequest, DetailedEnvironmentResponse, EnvironmentTestDto, SimpleEnvironmentResponse> {
 
     public static final String ENVIRONMENT = "ENVIRONMENT";
+
+    @Inject
+    private EnvironmentTestClient environmentTestClient;
 
     private Collection<SimpleEnvironmentResponse> response;
 
@@ -46,8 +57,14 @@ public class EnvironmentTestDto extends DeletableTestDto<EnvironmentRequest, Det
     public EnvironmentTestDto valid() {
         return getCloudProvider()
                 .environment(withName(resourceProperyProvider().getName())
-                        .withDescription(resourceProperyProvider().getDescription("environment")));
-//                .withCredential(getTestContext().get(CredentialTestDto.class).getName()));
+                        .withCreateFreeIpa(Boolean.FALSE)
+                        .withDescription(resourceProperyProvider().getDescription("environment")))
+                        .withCredentialName(getTestContext().get(CredentialTestDto.class).getName());
+    }
+
+    private EnvironmentTestDto withCreateFreeIpa(Boolean create) {
+        getRequest().setCreateFreeIpa(create);
+        return this;
     }
 
     public EnvironmentTestDto withName(String name) {
@@ -108,8 +125,7 @@ public class EnvironmentTestDto extends DeletableTestDto<EnvironmentRequest, Det
 
     @Override
     public List<SimpleEnvironmentResponse> getAll(CloudbreakClient client) {
-        //EnvironmentEndpoint environmentV4Endpoint = client.e().environmentV4Endpoint();
-        return new ArrayList<>();
+        return new ArrayList<>(when(environmentTestClient.list()).getResponseSimpleEnvSet());
     }
 
     @Override
@@ -119,11 +135,15 @@ public class EnvironmentTestDto extends DeletableTestDto<EnvironmentRequest, Det
 
     @Override
     public void delete(TestContext testContext, SimpleEnvironmentResponse entity, CloudbreakClient client) {
-//        try {
-//            client.getCloudbreakClient().environmentV4Endpoint().delete(client.getWorkspaceId(), entity.getName());
-//        } catch (Exception e) {
-//            LOGGER.warn("Something went wrong on {} ({}) purge. {}", entity.getName(), entity.getClass().getSimpleName(), ResponseUtil.getErrorMessage(e), e);
-//        }
+        when(environmentTestClient.delete());
+    }
+
+    public EnvironmentTestDto await(EnvironmentStatus status) {
+        return await(status, emptyRunningParameter());
+    }
+
+    public EnvironmentTestDto await(EnvironmentStatus status, RunningParameter runningParameter) {
+        return getTestContext().await(this, status, runningParameter);
     }
 
     @Override

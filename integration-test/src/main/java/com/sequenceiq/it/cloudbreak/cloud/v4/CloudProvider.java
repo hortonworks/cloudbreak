@@ -9,6 +9,7 @@ import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
+import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
@@ -38,6 +39,8 @@ public interface CloudProvider {
     String getSubnetCIDR();
 
     CloudPlatform getCloudPlatform();
+
+    CredentialTestDto credential(CredentialTestDto credential);
 
     EnvironmentTestDto environment(EnvironmentTestDto environment);
 

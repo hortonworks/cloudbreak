@@ -33,7 +33,7 @@ public class AmbariTestDto extends AbstractCloudbreakTestDto<AmbariV4Request, Re
     }
 
     public AmbariTestDto withStackRepository(StackRepositoryTestDto ambariStackDetails) {
-        getRequest().setStackRepository(ambariStackDetails.getRequest());
+//        getRequest().setStackRepository(ambariStackDetails.getRequest());
         return this;
     }
 

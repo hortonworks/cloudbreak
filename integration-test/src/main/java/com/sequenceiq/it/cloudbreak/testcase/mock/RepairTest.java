@@ -189,7 +189,7 @@ public class RepairTest extends AbstractIntegrationTest {
 
     private void createEnvWithResources(MockedTestContext testContext) {
         testContext.given(EnvironmentTestDto.class)
-                .when(environmentTestClient.createV4());
+                .when(environmentTestClient.create());
     }
 
     private ClusterTestDto getCluster(MockedTestContext testContext, String kerberosConfigName, String ambariRdsName) {

@@ -40,7 +40,7 @@ public class KubernetesTest extends AbstractIntegrationTest {
         ((TestContext) data[0]).cleanupTestContext();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "a valid kubernetes config request",
             when = "calling create kubernetes config",
@@ -56,7 +56,7 @@ public class KubernetesTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "a created kubernetes config",
             when = "calling delete that specific kubernetes config",
@@ -80,7 +80,7 @@ public class KubernetesTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "a created kubernetes config",
             when = "calling create that kubernetes config again",
@@ -98,7 +98,7 @@ public class KubernetesTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = INVALID_ATTRIBUTE_PROVIDER, enabled = false)
+    @Test(dataProvider = INVALID_ATTRIBUTE_PROVIDER)
     public void testCreatKubernetesWithInvalidAttribute(
             TestContext testContext,
             String kubernetesName,

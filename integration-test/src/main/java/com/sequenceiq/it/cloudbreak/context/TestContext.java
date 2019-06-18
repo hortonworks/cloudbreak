@@ -22,9 +22,11 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.CloudbreakTest;
+import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.FreeIPAClient;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
@@ -33,6 +35,7 @@ import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
@@ -210,8 +213,9 @@ public abstract class TestContext implements ApplicationContextAware {
         if (clients.get(acting.getToken()) == null) {
             CloudbreakClient cloudbreakClient = CloudbreakClient.createProxyCloudbreakClient(testParameter, acting);
             FreeIPAClient freeIPAClient = FreeIPAClient.createProxyFreeIPAClient(testParameter, acting);
+            EnvironmentClient environmentClient = EnvironmentClient.createProxyEnvironmentClient(testParameter, acting);
             Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(CloudbreakClient.class, cloudbreakClient,
-                    FreeIPAClient.class, freeIPAClient);
+                    FreeIPAClient.class, freeIPAClient, EnvironmentClient.class, environmentClient);
             clients.put(acting.getToken(), clientMap);
             cloudbreakClient.setWorkspaceId(0L);
         }
@@ -480,6 +484,42 @@ public abstract class TestContext implements ApplicationContextAware {
             String environmentCrn = awaitEntity.getRequest().getEnvironmentCrn();
             statuses.putAll(waitUtilSingleStatus.waitAndCheckStatuses(freeIPAClient, environmentCrn, desiredStatuses, pollingInterval));
             if (!desiredStatuses.equals(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED)) {
+                awaitEntity.refresh(this, null);
+            }
+        } catch (Exception e) {
+            if (runningParameter.isLogError()) {
+                LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}", entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName());
+            }
+            exceptionMap.put("await " + entity + " for desired statuses " + desiredStatuses, e);
+        }
+        return entity;
+    }
+
+    public EnvironmentTestDto await(EnvironmentTestDto entity, EnvironmentStatus desiredStatuses,
+            RunningParameter runningParameter) {
+        return await(entity, desiredStatuses, runningParameter, -1);
+    }
+
+    public EnvironmentTestDto await(EnvironmentTestDto entity, EnvironmentStatus desiredStatuses,
+            RunningParameter runningParameter, long pollingInterval) {
+        checkShutdown();
+
+        if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
+            LOGGER.info("Should be skipped beacause of previous error. await [{}]", desiredStatuses);
+            return entity;
+        }
+        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
+        EnvironmentTestDto awaitEntity = get(key);
+        LOGGER.info("await {} for {}", key, desiredStatuses);
+        try {
+            if (awaitEntity == null) {
+                throw new RuntimeException("Key provided but no result in resource map, key=" + key);
+            }
+
+            EnvironmentClient environmentClient = getMicroserviceClient(EnvironmentClient.class, getWho(runningParameter));
+            String environmentName = awaitEntity.getResponse().getName();
+            statuses.putAll(waitUtilSingleStatus.waitAndCheckStatuses(environmentClient, environmentName, desiredStatuses, pollingInterval));
+            if (!desiredStatuses.equals(EnvironmentStatus.ARCHIVED)) {
                 awaitEntity.refresh(this, null);
             }
         } catch (Exception e) {

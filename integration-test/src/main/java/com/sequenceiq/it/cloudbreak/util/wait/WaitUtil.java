@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.util.wait;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
+import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.CORRUPTED;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,8 +20,12 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
+import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.FreeIPAClient;
 import com.sequenceiq.it.cloudbreak.util.WaitResult;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
@@ -145,6 +150,44 @@ public class WaitUtil {
         return waitResult;
     }
 
+    private WaitResult waitForStatuses(EnvironmentClient environmentClient, String name,
+            EnvironmentStatus desiredStatus) {
+        WaitResult waitResult = WaitResult.SUCCESSFUL;
+        EnvironmentStatus currentStatus = EnvironmentStatus.CREATION_INITIATED;
+
+        int retryCount = 0;
+        while (currentStatus != desiredStatus && !checkFailedStatuses(currentStatus) && retryCount < MAX_RETRY) {
+            LOGGER.info("Waiting for status(es) {}, stack id: {}, current status(es) {} ...", desiredStatus, name, currentStatus);
+
+            sleep();
+            EnvironmentEndpoint environmentEndpoint = environmentClient.getEnvironmentClient().environmentV1Endpoint();
+            try {
+                Optional<EnvironmentStatus> statusResult = Optional.ofNullable(environmentEndpoint.getByName(name).getEnvironmentStatus());
+                EnvironmentStatus currStatus = EnvironmentStatus.ARCHIVED;
+                if (statusResult.isPresent()) {
+                    currStatus = statusResult.get();
+                }
+                currentStatus = currStatus;
+            } catch (NotFoundException notFoundException) {
+                LOGGER.info("Stack not found: {}", name);
+                currentStatus = EnvironmentStatus.ARCHIVED;
+                break;
+            }
+            retryCount++;
+        }
+
+        if (currentStatus.name().contains("FAILED") && EnvironmentStatus.ARCHIVED != desiredStatus && EnvironmentStatus.ARCHIVED == currentStatus) {
+            waitResult = WaitResult.FAILED;
+            LOGGER.info("Desired status(es) are {} for {} but status(es) are {}", desiredStatus, name, currentStatus);
+        } else if (retryCount == MAX_RETRY) {
+            waitResult = WaitResult.TIMEOUT;
+            LOGGER.info("Timeout: Desired tatus(es) are {} for {} but status(es) are {}", desiredStatus, name, currentStatus);
+        } else {
+            LOGGER.info("{} are in desired status(es) {}", name, currentStatus);
+        }
+        return waitResult;
+    }
+
     private void sleep() {
         try {
             Thread.sleep(pollingInterval);
@@ -163,6 +206,10 @@ public class WaitUtil {
 
     private boolean checkFailedStatuses(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status currentStatus) {
         return currentStatus.name().contains("FAILED") || currentStatus == com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED;
+    }
+
+    private boolean checkFailedStatuses(EnvironmentStatus currentStatus) {
+        return CORRUPTED.equals(currentStatus) || currentStatus == EnvironmentStatus.ARCHIVED;
     }
 
     private boolean hasNoExpectedFailure(Status currentStatuses, Status desiredStatuses) {
@@ -199,6 +246,27 @@ public class WaitUtil {
                     .describe(name);
             if (freeIpaResponse != null) {
                     errors = Map.of("status", freeIpaResponse.getStatus().name());
+            }
+        }
+        return errors;
+    }
+
+    public Map<String, String> waitAndCheckStatuses(EnvironmentClient environmentClient, String name,
+            EnvironmentStatus desiredStatus, long pollingInterval) {
+        Map<String, String> errors = new HashMap<>();
+        WaitResult waitResult = WaitResult.SUCCESSFUL;
+        for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
+            waitResult = waitForStatuses(environmentClient, name, desiredStatus);
+        }
+        if (waitResult == WaitResult.FAILED) {
+            StringBuilder builder = new StringBuilder("The stack has failed: ").append(System.lineSeparator());
+            throw new RuntimeException(builder.toString());
+        } else if (waitResult == WaitResult.TIMEOUT) {
+            throw new RuntimeException("Timeout happened");
+        } else if (EnvironmentStatus.ARCHIVED != desiredStatus) {
+            DetailedEnvironmentResponse environmentResponse = environmentClient.getEnvironmentClient().environmentV1Endpoint().getByName(name);
+            if (environmentResponse != null) {
+                    errors = Map.of("status", environmentResponse.getEnvironmentStatus().name());
             }
         }
         return errors;

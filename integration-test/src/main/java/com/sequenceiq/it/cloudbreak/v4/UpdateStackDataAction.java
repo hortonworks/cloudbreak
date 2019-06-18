@@ -21,7 +21,8 @@ public class UpdateStackDataAction implements Action<StackRepositoryTestDto, Clo
     @Override
     public StackRepositoryTestDto action(TestContext testContext, StackRepositoryTestDto testDto, CloudbreakClient client) throws Exception {
         StackTestDto stackTestDto = testContext.get(StackTestDto.class);
-        request.setStackRepository(testDto.getRequest());
+        // TODO: Set CM cluster component data
+//        request.setStackRepository(testDto.getRequest());
 
         logJSON(" Enable Maintenance Mode post request:\n", request);
 

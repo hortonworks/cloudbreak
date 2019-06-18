@@ -48,6 +48,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
         createDefaultEnvironment(testContext);
     }
 
+    // TODO: Update when redbeams service is ready
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "there is a prepared database",
@@ -70,6 +71,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
                 .validate();
     }
 
+    // TODO: Update when redbeams service is ready
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "there is a prepared database",
@@ -88,6 +90,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
                 .validate();
     }
 
+    // TODO: Update when redbeams service is ready
     @Test(dataProvider = DB_TYPE_PROVIDER, enabled = false)
     public void testCreateDatabaseWithTypeAndTestConnection(
             TestContext testContext,
@@ -158,6 +161,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
     }
     */
 
+    // TODO: Update when redbeams service is ready
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(
             given = "there is a running cloudbreak",

@@ -21,7 +21,7 @@ public class ClouderaManagerStackCreationTest extends AbstractClouderaManagerTes
     @Inject
     private StackTestClient stackTestClient;
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running cloudbreak",
             when = "a cluster with Cloudera Manager is created",

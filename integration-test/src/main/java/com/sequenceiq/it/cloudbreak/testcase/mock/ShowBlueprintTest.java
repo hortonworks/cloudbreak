@@ -19,7 +19,7 @@ public class ShowBlueprintTest extends AbstractIntegrationTest {
     @Inject
     private StackTestClient stackTestClient;
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(given = "stack", when = "cluster does not exist ", then = "we should return with the future blueprint")
     public void testGetBlueprintWhenClusterIsNotAliveThenShouldReturnWithBlueprint(MockedTestContext testContext) {
         String clusterName = resourcePropertyProvider().getName();
@@ -32,7 +32,7 @@ public class ShowBlueprintTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(given = "stack", when = "cluster exist ", then = "we should return with the generated blueprint")
     public void testGetBlueprintWhenClusterIsAliveThenShouldReturnWithBlueprint(MockedTestContext testContext) {
         String clusterName = resourcePropertyProvider().getName();

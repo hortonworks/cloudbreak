@@ -7,12 +7,16 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.GcpStackV4Parameters;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.GcpCredentialParameters;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.JsonParameters;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.P12Parameters;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
+import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 
 @Component
@@ -82,6 +86,26 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.GCP;
+    }
+
+    @Override
+    public CredentialTestDto credential(CredentialTestDto credential) {
+        GcpCredentialParameters parameters = new GcpCredentialParameters();
+        String credentialType = gcpProperties.getCredential().getType();
+        if (JSON_CREDENTIAL_TYPE.equalsIgnoreCase(credentialType)) {
+            JsonParameters jsonParameters = new JsonParameters();
+            jsonParameters.setCredentialJson(gcpProperties.getCredential().getJson());
+            parameters.setJson(jsonParameters);
+        } else {
+            P12Parameters p12Parameters = new P12Parameters();
+            p12Parameters.setProjectId(gcpProperties.getCredential().getProjectId());
+            p12Parameters.setServiceAccountId(gcpProperties.getCredential().getServiceAccountId());
+            p12Parameters.setServiceAccountPrivateKey(gcpProperties.getCredential().getP12());
+            parameters.setP12(p12Parameters);
+        }
+        return credential.withGcpParameters(parameters)
+                .withCloudPlatform(CloudPlatform.GCP.name())
+                .withDescription(commonCloudProperties().getDefaultCredentialDescription());
     }
 
     @Override

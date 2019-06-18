@@ -10,7 +10,6 @@ import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
@@ -23,18 +22,13 @@ public class ClouderaManagerSetupTest extends AbstractIntegrationTest {
     @Inject
     private EnvironmentTestClient environmentTestClient;
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "a working environment",
             when = "a stack is created",
             then = "ClouderaManager user endpoints should be invoked with the proper requests")
     public void verifyCallsAgainstCmUserCreation(TestContext testContext) {
-        String envName = resourcePropertyProvider().getName();
-
         testContext
-                .given(EnvironmentTestDto.class)
-                .withName(envName)
-                .when(environmentTestClient.createV4())
                 .given(StackTestDto.class)
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
