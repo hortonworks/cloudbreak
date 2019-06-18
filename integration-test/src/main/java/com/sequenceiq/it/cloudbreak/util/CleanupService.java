@@ -105,7 +105,7 @@ public class CleanupService {
                 .filter(recipe -> recipe.getId().equals(recipeId))
                 .findFirst();
         if (response.isPresent()) {
-            cloudbreakClient.recipeV4Endpoint().delete(workspaceId, response.get().getName());
+            cloudbreakClient.recipeV4Endpoint().deleteByName(workspaceId, response.get().getName());
         }
     }
 

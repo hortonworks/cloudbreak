@@ -3,5 +3,7 @@
   "description" : "my first recipe",
   "recipeType": "PRE_CLUSTER_MANAGER_START",
   "content": "base64",
-  "uri": "https://some.url"
+  "uri": "https://some.url",
+  "creator": "someone",
+  "crn": "someCrn"
 }

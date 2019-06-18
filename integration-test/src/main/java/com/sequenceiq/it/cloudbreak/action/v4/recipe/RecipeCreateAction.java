@@ -24,7 +24,6 @@ public class RecipeCreateAction implements Action<RecipeTestDto, CloudbreakClien
                         .recipeV4Endpoint()
                         .post(cloudbreakClient.getWorkspaceId(), testDto.getRequest()));
         Log.logJSON(LOGGER, format(" Recipe created  successfully:%n"), testDto.getResponse());
-        Log.log(LOGGER, String.format(" ID: %s", testDto.getResponse().getId()));
 
         return testDto;
     }

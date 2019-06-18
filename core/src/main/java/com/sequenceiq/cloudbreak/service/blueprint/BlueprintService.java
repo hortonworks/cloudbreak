@@ -70,7 +70,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     private static final String SHARED_SERVICES_READY = "shared_services_ready";
 
-    private static final String MISSING_CRN_OR_NAME_EXCEPTION_MESSAGE = "No name or crn provided, hence unable to obtain blueprint!";
+    private static final String INVALID_DTO_MESSAGE = "One and only one value of the crn and name should be filled!";
 
     @Inject
     private BlueprintRepository blueprintRepository;
@@ -361,7 +361,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     private void validateDto(BlueprintAccessDto dto) {
         throwIfNull(dto, () -> new IllegalArgumentException("BlueprintAccessDto should not be null"));
         if (dto.isNotValid()) {
-            throw new BadRequestException(MISSING_CRN_OR_NAME_EXCEPTION_MESSAGE);
+            throw new BadRequestException(INVALID_DTO_MESSAGE);
         }
     }
 

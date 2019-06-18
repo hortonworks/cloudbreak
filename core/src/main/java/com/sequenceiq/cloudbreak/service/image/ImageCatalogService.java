@@ -606,7 +606,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     private void validateDto(ImageCatalogAccessDto dto) {
         throwIfNull(dto, () -> new IllegalArgumentException("ImageCatalogAccessDto should not be null"));
         if (dto.isNotValid()) {
-            throw new BadRequestException("No name or crn provided, hence unable to obtain image catalog!");
+            throw new BadRequestException("One and only one value of the crn and name should be filled!");
         }
     }
 

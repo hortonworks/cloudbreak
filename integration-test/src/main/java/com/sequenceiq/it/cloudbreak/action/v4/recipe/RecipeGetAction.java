@@ -15,7 +15,7 @@ public class RecipeGetAction implements Action<RecipeTestDto, CloudbreakClient> 
     @Override
     public RecipeTestDto action(TestContext testContext, RecipeTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
         testDto.setResponse(
-                cloudbreakClient.getCloudbreakClient().recipeV4Endpoint().get(cloudbreakClient.getWorkspaceId(), testDto.getName())
+                cloudbreakClient.getCloudbreakClient().recipeV4Endpoint().getByName(cloudbreakClient.getWorkspaceId(), testDto.getName())
         );
         return testDto;
     }

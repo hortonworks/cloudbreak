@@ -529,6 +529,8 @@ public class TestUtil {
             workspace.setId(1L);
             workspace.setName("Top Secret FBI");
             recipe.setWorkspace(workspace);
+            recipe.setCreator("someCreator");
+            recipe.setCrn("someCrn");
             recipes.add(recipe);
         }
         return recipes;
