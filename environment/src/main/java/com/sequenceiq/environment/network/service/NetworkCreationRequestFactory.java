@@ -31,6 +31,7 @@ public class NetworkCreationRequestFactory {
                 .withVariant(environment.getCloudPlatform())
                 .withRegion(Region.region(environment.getLocation().getName()))
                 .withNetworkCidr(networkDto.getNetworkCidr())
+                .withId(networkDto.getId())
                 .withSubnetCidrs(getSubNetCidrs(networkDto.getNetworkCidr()));
         getNoPublicIp(networkDto).ifPresent(builder::withNoPublicIp);
         getNoFirewallRules(networkDto).ifPresent(builder::withNoFirewallRules);

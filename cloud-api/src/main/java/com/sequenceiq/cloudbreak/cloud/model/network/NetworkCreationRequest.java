@@ -23,6 +23,8 @@ public class NetworkCreationRequest {
 
     private final boolean noFirewallRules;
 
+    private final Long id;
+
     private NetworkCreationRequest(Builder builder) {
         this.envName = builder.envName;
         this.cloudCredential = builder.cloudCredential;
@@ -32,6 +34,7 @@ public class NetworkCreationRequest {
         this.subnetCidrs = builder.subnetCidrs;
         this.noPublicIp = builder.noPublicIp;
         this.noFirewallRules = builder.noFirewallRules;
+        this.id = builder.id;
     }
 
     public String getEnvName() {
@@ -66,6 +69,10 @@ public class NetworkCreationRequest {
         return noFirewallRules;
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public static class Builder {
         private String envName;
 
@@ -82,6 +89,8 @@ public class NetworkCreationRequest {
         private boolean noPublicIp;
 
         private boolean noFirewallRules;
+
+        private Long id;
 
         public Builder withEnvName(String envName) {
             this.envName = envName;
@@ -120,6 +129,11 @@ public class NetworkCreationRequest {
 
         public Builder withNoFirewallRules(boolean noFirewallRules) {
             this.noFirewallRules = noFirewallRules;
+            return this;
+        }
+
+        public Builder withId(Long id) {
+            this.id = id;
             return this;
         }
 
