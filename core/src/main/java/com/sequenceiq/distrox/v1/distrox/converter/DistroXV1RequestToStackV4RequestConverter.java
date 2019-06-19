@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -17,7 +16,6 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
-import com.sequenceiq.distrox.api.v1.distrox.model.sharedservice.SdxV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.tags.TagsV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -55,6 +53,9 @@ public class DistroXV1RequestToStackV4RequestConverter {
     @Inject
     private WorkspaceService workspaceService;
 
+    @Inject
+    private SdxConverter sdxConverter;
+
     public StackV4Request convert(DistroXV1Request source) {
         DetailedEnvironmentResponse environment = environmentClientService.getByName(source.getEnvironmentName());
         if (environment.getEnvironmentStatus() != EnvironmentStatus.AVAILABLE) {
@@ -75,7 +76,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setAzure(getIfNotNull(source.getAzure(), stackParameterConverter::convert));
         request.setInputs(source.getInputs());
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
-        request.setSharedService(getIfNotNull(source.getSdx(), this::getSharedService));
+        request.setSharedService(sdxConverter.getSharedService(source.getSdx(), environment.getCrn()));
         request.setCustomDomain(null);
         request.setGatewayPort(null);
         request.setGcp(null);
@@ -110,7 +111,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setAzure(getIfNotNull(source.getAzure(), stackParameterConverter::convert));
         request.setInputs(source.getInputs());
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
-        request.setSharedService(getIfNotNull(source.getSdx(), this::getSharedService));
+        request.setSharedService(getIfNotNull(source.getSdx(), sdxConverter::getSharedService));
         return request;
     }
 
@@ -165,7 +166,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setAzure(getIfNotNull(source.getAzure(), stackParameterConverter::convert));
         request.setInputs(source.getInputs());
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
-        request.setSdx(getIfNotNull(source.getSharedService(), this::getSdx));
+        request.setSdx(getIfNotNull(source.getSharedService(), sdxConverter::getSdx));
         return request;
     }
 
@@ -187,17 +188,5 @@ public class DistroXV1RequestToStackV4RequestConverter {
         response.setUserDefined(source.getUserDefined());
         response.setDefaults(source.getDefaults());
         return response;
-    }
-
-    private SharedServiceV4Request getSharedService(SdxV1Request sdx) {
-        SharedServiceV4Request sharedServiceV4Request = new SharedServiceV4Request();
-        sharedServiceV4Request.setDatalakeName(sdx.getName());
-        return sharedServiceV4Request;
-    }
-
-    private SdxV1Request getSdx(SharedServiceV4Request sharedServiceV4Request) {
-        SdxV1Request sdx = new SdxV1Request();
-        sdx.setName(sharedServiceV4Request.getDatalakeName());
-        return sdx;
     }
 }

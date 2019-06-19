@@ -347,6 +347,10 @@ public class StackService {
         }
     }
 
+    public List<Stack> getByEnvironmentCrnAndStackType(String environmentCrn, StackType stackType) {
+        return stackRepository.findByEnvironmentCrnAndStackType(environmentCrn, stackType);
+    }
+
     public StackV4Response getByNameInWorkspaceWithEntries(String name, Long workspaceId, Set<String> entries, User user, StackType stackType) {
         try {
             return transactionService.required(() -> {
