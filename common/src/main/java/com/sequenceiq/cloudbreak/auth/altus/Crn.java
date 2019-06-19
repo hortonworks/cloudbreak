@@ -243,6 +243,7 @@ public class Crn {
         CREDENTIAL("credential"),
         NETWORK("network"),
         LDAP("ldap"),
+        IMAGE_CATALOG("imageCatalog"),
         KERBEROS("kerberos"),
         FREEIPA("freeipa");
 

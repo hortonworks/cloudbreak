@@ -110,7 +110,7 @@ public class CleanupService {
     }
 
     public void deleteImageCatalog(CloudbreakEndpoint cloudbreakClient, String name, Long workspaceId) {
-        cloudbreakClient.imageCatalogV4Endpoint().delete(workspaceId, name);
+        cloudbreakClient.imageCatalogV4Endpoint().deleteByName(workspaceId, name);
     }
 
     public void deleteRdsConfigs(Long workspaceId, CloudbreakEndpoint cloudbreakClient, Long databaseId) {

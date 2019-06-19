@@ -28,13 +28,14 @@ public class ImageCatalogToImageCatalogV4ResponseConverter extends AbstractConve
     @Override
     public ImageCatalogV4Response convert(ImageCatalog source) {
         ImageCatalogV4Response imageCatalogResponse = new ImageCatalogV4Response();
-        imageCatalogResponse.setId(source.getId());
         imageCatalogResponse.setUrl(source.getImageCatalogUrl());
 
         String imageCatalogName = source.getName();
         imageCatalogResponse.setUsedAsDefault(isDefault(imageCatalogName));
         imageCatalogResponse.setName(imageCatalogName);
         imageCatalogResponse.setDescription(source.getDescription());
+        imageCatalogResponse.setCreator(source.getCreator());
+        imageCatalogResponse.setCrn(source.getCrn());
 
         return imageCatalogResponse;
     }
@@ -45,4 +46,5 @@ public class ImageCatalogToImageCatalogV4ResponseConverter extends AbstractConve
         String defaultImageCatalogName = imageCatalogService.getDefaultImageCatalogName(user);
         return imageCatalogName.equals(defaultImageCatalogName) || (defaultImageCatalogName == null && imageCatalogService.isEnvDefault(imageCatalogName));
     }
+
 }

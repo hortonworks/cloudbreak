@@ -30,6 +30,17 @@ public class ImageCatalogV4Base {
     @ApiModelProperty(value = ImageCatalogDescription.IMAGE_CATALOG_URL, required = true)
     private String url;
 
+    @ApiModelProperty(ModelDescriptions.CREATOR)
+    private String creator;
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
+    }
+
     public String getName() {
         return name;
     }

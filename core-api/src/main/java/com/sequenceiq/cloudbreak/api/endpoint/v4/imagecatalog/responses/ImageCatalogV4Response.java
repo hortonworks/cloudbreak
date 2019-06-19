@@ -17,9 +17,6 @@ import io.swagger.annotations.ApiModelProperty;
 @NotNull
 public class ImageCatalogV4Response extends ImageCatalogV4Base {
 
-    @ApiModelProperty(value = ModelDescriptions.ID, required = true)
-    private Long id;
-
     @ApiModelProperty(value = ImageCatalogDescription.DEFAULT, required = true)
     private boolean usedAsDefault;
 
@@ -29,12 +26,15 @@ public class ImageCatalogV4Response extends ImageCatalogV4Base {
     @ApiModelProperty(ModelDescriptions.WORKSPACE_OF_THE_RESOURCE)
     private WorkspaceResourceV4Response workspace;
 
-    public Long getId() {
-        return id;
+    @ApiModelProperty(ModelDescriptions.CRN)
+    private String crn;
+
+    public String getCrn() {
+        return crn;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setCrn(String crn) {
+        this.crn = crn;
     }
 
     public boolean isUsedAsDefault() {
@@ -60,4 +60,5 @@ public class ImageCatalogV4Response extends ImageCatalogV4Base {
     public void setWorkspace(WorkspaceResourceV4Response workspace) {
         this.workspace = workspace;
     }
+
 }

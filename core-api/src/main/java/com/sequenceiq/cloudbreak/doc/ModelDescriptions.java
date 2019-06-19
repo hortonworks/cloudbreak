@@ -4,7 +4,6 @@ public class ModelDescriptions {
 
     public static final String ID = "id of the resource";
     public static final String NAME = "name of the resource";
-    public static final String CRN = "cnr of the resource";
     public static final String DESCRIPTION = "description of the resource";
     public static final String PUBLIC_IN_ACCOUNT = "resource is visible in account";
     public static final String ATTRIBUTES = "provider specific attributes of the credential";
@@ -16,6 +15,8 @@ public class ModelDescriptions {
     public static final String CREATED = "creation time of the resource in long";
     public static final String AMBARI_SERVER = "ambari server address";
     public static final String WORKSPACE_OF_THE_RESOURCE = "workspace of the resource";
+    public static final String CREATOR = "the creator of the resource";
+    public static final String CRN = "the unique crn of the resource";
     public static final String USER_ID = "User ID in the new authorization model";
     public static final String WORKSPACE_ID = "Workspace ID of the resource";
     public static final String PREINSTALLED = "Denotes that the image is prewarmed or base image.";

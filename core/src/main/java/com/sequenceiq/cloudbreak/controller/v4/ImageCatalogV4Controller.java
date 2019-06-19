@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.dto.ImageCatalogAccessDto.ImageCatalogAccessDtoBuilder.aImageCatalogAccessDtoBuilder;
+
 import java.util.Collections;
 import java.util.Set;
 
@@ -9,7 +11,6 @@ import javax.transaction.Transactional.TxType;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.UpdateImageCatalogV4Request;
@@ -17,10 +18,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCat
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -33,6 +36,9 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @Inject
     private ConverterUtil converterUtil;
 
+    @Inject
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
+
     @Override
     public ImageCatalogV4Responses list(Long workspaceId) {
         Set<ImageCatalog> allByWorkspaceId = imageCatalogService.findAllByWorkspaceId(workspaceId);
@@ -40,8 +46,9 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     }
 
     @Override
-    public ImageCatalogV4Response get(Long workspaceId, String name, Boolean withImages) {
-        ImageCatalogV4Response imageCatalogResponse = converterUtil.convert(imageCatalogService.get(workspaceId, name), ImageCatalogV4Response.class);
+    public ImageCatalogV4Response getByName(Long workspaceId, String name, Boolean withImages) {
+        ImageCatalog catalog = imageCatalogService.get(aImageCatalogAccessDtoBuilder().withName(name).build(), workspaceId);
+        ImageCatalogV4Response imageCatalogResponse = converterUtil.convert(catalog, ImageCatalogV4Response.class);
         Images images = imageCatalogService.propagateImagesIfRequested(workspaceId, name, withImages);
         if (images != null) {
             imageCatalogResponse.setImages(converterUtil.convert(images, ImagesV4Response.class));
@@ -50,15 +57,36 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     }
 
     @Override
+    public ImageCatalogV4Response getByCrn(Long workspaceId, String crn, Boolean withImages) {
+        ImageCatalog catalog = imageCatalogService.get(aImageCatalogAccessDtoBuilder().withCrn(crn).build(), workspaceId);
+        ImageCatalogV4Response imageCatalogResponse = converterUtil.convert(catalog, ImageCatalogV4Response.class);
+        Images images = imageCatalogService.propagateImagesIfRequested(workspaceId, catalog.getName(), withImages);
+        if (images != null) {
+            imageCatalogResponse.setImages(converterUtil.convert(images, ImagesV4Response.class));
+        }
+        return imageCatalogResponse;
+    }
+
+    @Override
     public ImageCatalogV4Response create(Long workspaceId, ImageCatalogV4Request request) {
-        ImageCatalog imageCatalog = imageCatalogService.createForLoggedInUser(converterUtil.convert(request, ImageCatalog.class), workspaceId);
+        String accountId = threadBasedUserCrnProvider.getAccountId();
+        String creator = threadBasedUserCrnProvider.getUserCrn();
+        ImageCatalog catalogToSave = converterUtil.convert(request, ImageCatalog.class);
+        ImageCatalog imageCatalog = imageCatalogService.createForLoggedInUser(catalogToSave, workspaceId, accountId, creator);
         notify(ResourceEvent.IMAGE_CATALOG_CREATED);
         return converterUtil.convert(imageCatalog, ImageCatalogV4Response.class);
     }
 
     @Override
-    public ImageCatalogV4Response delete(Long workspaceId, String name) {
-        ImageCatalog deleted = imageCatalogService.delete(workspaceId, name);
+    public ImageCatalogV4Response deleteByName(Long workspaceId, String name) {
+        ImageCatalog deleted = imageCatalogService.delete(aImageCatalogAccessDtoBuilder().withName(name).build(), workspaceId);
+        notify(ResourceEvent.IMAGE_CATALOG_DELETED);
+        return converterUtil.convert(deleted, ImageCatalogV4Response.class);
+    }
+
+    @Override
+    public ImageCatalogV4Response deleteByCrn(Long workspaceId, String crn) {
+        ImageCatalog deleted = imageCatalogService.delete(aImageCatalogAccessDtoBuilder().withCrn(crn).build(), workspaceId);
         notify(ResourceEvent.IMAGE_CATALOG_DELETED);
         return converterUtil.convert(deleted, ImageCatalogV4Response.class);
     }

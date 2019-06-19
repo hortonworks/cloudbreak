@@ -70,7 +70,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     private static final String SHARED_SERVICES_READY = "shared_services_ready";
 
-    private static final String MISSING_CRN_OR_NAME_EXCEPTION_MESSAGE = "No name or crn provieded, hence unable to obtain blueprint!";
+    private static final String MISSING_CRN_OR_NAME_EXCEPTION_MESSAGE = "No name or crn provided, hence unable to obtain blueprint!";
 
     @Inject
     private BlueprintRepository blueprintRepository;
@@ -112,28 +112,18 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     public Blueprint deleteByWorkspace(BlueprintAccessDto blueprintAccessDto, Long workspaceId) {
-        throwIfNull(blueprintAccessDto, () -> new IllegalArgumentException("BlueprintAccessDto should not be null"));
-        if (isNotEmpty(blueprintAccessDto.getName())) {
-            return super.deleteByNameFromWorkspace(blueprintAccessDto.getName(), workspaceId);
-        } else if (isNotEmpty(blueprintAccessDto.getCrn())) {
-            Blueprint bp = blueprintRepository.findByCrnAndWorkspaceId(blueprintAccessDto.getCrn(), workspaceId)
-                    .orElseThrow(() -> NotFoundException.notFound("blueprint", blueprintAccessDto.getCrn()).get());
-            return delete(bp);
-        }
-        throw new BadRequestException(MISSING_CRN_OR_NAME_EXCEPTION_MESSAGE);
+        validateDto(blueprintAccessDto);
+        return isNotEmpty(blueprintAccessDto.getName())
+                ? super.deleteByNameFromWorkspace(blueprintAccessDto.getName(), workspaceId)
+                : delete(blueprintRepository.findByCrnAndWorkspaceId(blueprintAccessDto.getCrn(), workspaceId)
+                .orElseThrow(() -> NotFoundException.notFound("blueprint", blueprintAccessDto.getCrn()).get()));
     }
 
     public Blueprint getByWorkspace(@NotNull BlueprintAccessDto blueprintAccessDto, Long workspaceId) {
-        throwIfNull(blueprintAccessDto, () -> new IllegalArgumentException("BlueprintAccessDto should not be null"));
-        if (isNotEmpty(blueprintAccessDto.getName())) {
-            return super.getByNameForWorkspaceId(blueprintAccessDto.getName(), workspaceId);
-        } else if (isNotEmpty(blueprintAccessDto.getCrn())) {
-            Blueprint bp = blueprintRepository.findByCrnAndWorkspaceId(blueprintAccessDto.getCrn(), workspaceId)
-                    .orElseThrow(() -> NotFoundException.notFound("blueprint", blueprintAccessDto.getCrn()).get());
-            MDCBuilder.buildMdcContext(bp);
-            return bp;
-        }
-        throw new BadRequestException(MISSING_CRN_OR_NAME_EXCEPTION_MESSAGE);
+        validateDto(blueprintAccessDto);
+        return isNotEmpty(blueprintAccessDto.getName())
+                ? super.getByNameForWorkspaceId(blueprintAccessDto.getName(), workspaceId)
+                : getByCrnAndWorkspaceIdAndAddToMdc(blueprintAccessDto.getCrn(), workspaceId);
     }
 
     public void decorateWithCrn(Blueprint bp, String accountId, String creator) {
@@ -366,6 +356,20 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         }
 
         return result;
+    }
+
+    private void validateDto(BlueprintAccessDto dto) {
+        throwIfNull(dto, () -> new IllegalArgumentException("BlueprintAccessDto should not be null"));
+        if (dto.isNotValid()) {
+            throw new BadRequestException(MISSING_CRN_OR_NAME_EXCEPTION_MESSAGE);
+        }
+    }
+
+    private Blueprint getByCrnAndWorkspaceIdAndAddToMdc(String crn, Long workspaceId) {
+        Blueprint bp = blueprintRepository.findByCrnAndWorkspaceId(crn, workspaceId)
+                .orElseThrow(() -> NotFoundException.notFound("blueprint", crn).get());
+        MDCBuilder.buildMdcContext(bp);
+        return bp;
     }
 
     private String createCRN(String accountId) {

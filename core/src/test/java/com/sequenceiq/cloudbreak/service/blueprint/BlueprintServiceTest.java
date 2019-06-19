@@ -51,7 +51,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 @RunWith(MockitoJUnitRunner.class)
 public class BlueprintServiceTest {
 
-    private static final String MISSING_CRN_OR_NAME_EXCEPTION_MESSAGE = "No name or crn provieded, hence unable to obtain blueprint!";
+    private static final String MISSING_CRN_OR_NAME_EXCEPTION_MESSAGE = "No name or crn provided, hence unable to obtain blueprint!";
 
     private static final String NULL_DTO_EXCEPTION_MESSAGE = "BlueprintAccessDto should not be null";
 

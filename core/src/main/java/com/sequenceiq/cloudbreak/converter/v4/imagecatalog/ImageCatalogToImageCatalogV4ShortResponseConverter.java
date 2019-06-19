@@ -28,7 +28,8 @@ public class ImageCatalogToImageCatalogV4ShortResponseConverter extends Abstract
     @Override
     public ImageCatalogV4ShortResponse convert(ImageCatalog source) {
         ImageCatalogV4ShortResponse imageCatalogResponse = new ImageCatalogV4ShortResponse();
-        imageCatalogResponse.setId(source.getId());
+        imageCatalogResponse.setCreator(source.getCreator());
+        imageCatalogResponse.setCrn(source.getCrn());
         imageCatalogResponse.setUrl(source.getImageCatalogUrl());
 
         String imageCatalogName = source.getName();
@@ -45,4 +46,5 @@ public class ImageCatalogToImageCatalogV4ShortResponseConverter extends Abstract
         String defaultImageCatalogName = imageCatalogService.getDefaultImageCatalogName(user);
         return imageCatalogName.equals(defaultImageCatalogName) || (defaultImageCatalogName == null && imageCatalogService.isEnvDefault(imageCatalogName));
     }
+
 }

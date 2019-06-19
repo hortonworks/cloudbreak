@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.dto.ImageCatalogAccessDto.ImageCatalogAccessDtoBuilder.aImageCatalogAccessDtoBuilder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -9,6 +10,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -47,6 +49,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateService;
@@ -69,16 +72,6 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 @RunWith(MockitoJUnitRunner.class)
 public class ImageCatalogServiceTest {
 
-    public static final String USER_ID = "userId";
-
-    public static final String USERNAME = "username";
-
-    public static final String EMAIL = "email@hwx.com";
-
-    public static final String TENANT = "tenant";
-
-    private static final String GIVEN_CB_VERSION = "2.8.0";
-
     private static final String DEFAULT_CATALOG_URL = "http://localhost/imagecatalog-url";
 
     private static final String CUSTOM_IMAGE_CATALOG_URL = "http://localhost/custom-imagecatalog-url";
@@ -90,20 +83,6 @@ public class ImageCatalogServiceTest {
     private static final String DEV_CATALOG_FILE = "com/sequenceiq/cloudbreak/service/image/cb-dev-image-catalog.json";
 
     private static final String RC_CATALOG_FILE = "com/sequenceiq/cloudbreak/service/image/cb-rc-image-catalog.json";
-
-    private static final String PROVIDER_AWS = "AWS";
-
-    private static final String STACK_NAME = "stackName";
-
-    private static final String IMAGE_CATALOG_NAME = "anyImageCatalog";
-
-    private static final String IMAGE_HDP_ID = "hdp-1";
-
-    private static final String IMAGE_BASE_ID = "base-2";
-
-    private static final String IMAGE_HDF_ID = "hdf-3";
-
-    private static final long STACK_ID = 1L;
 
     private static final long ORG_ID = 100L;
 
@@ -545,6 +524,104 @@ public class ImageCatalogServiceTest {
         verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString());
     }
 
+    @Test
+    public void testDeleteByWorkspaceWhenDtoNameFilledThenDeleteCalled() {
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(mock(CloudbreakUser.class));
+        when(userService.getOrCreate(any(CloudbreakUser.class))).thenReturn(user);
+        when(userProfileService.getOrCreate(user)).thenReturn(mock(UserProfile.class));
+
+        ImageCatalog catalog = getImageCatalog();
+        when(imageCatalogRepository.findByNameAndWorkspaceId(catalog.getName(), catalog.getWorkspace().getId())).thenReturn(Optional.of(catalog));
+
+        ImageCatalog result = underTest.delete(aImageCatalogAccessDtoBuilder().withName(catalog.getName()).build(), catalog.getWorkspace().getId());
+
+        assertEquals(catalog, result);
+        verify(imageCatalogRepository, times(2)).findByNameAndWorkspaceId(anyString(), anyLong());
+        verify(imageCatalogRepository, times(1)).save(any(ImageCatalog.class));
+        verify(imageCatalogRepository, times(1)).save(catalog);
+    }
+
+    @Test
+    public void testDeleteByWorkspaceWhenDtoCrnFilledThenDeleteCalled() {
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(mock(CloudbreakUser.class));
+        when(userService.getOrCreate(any(CloudbreakUser.class))).thenReturn(user);
+        when(userProfileService.getOrCreate(user)).thenReturn(mock(UserProfile.class));
+
+        ImageCatalog catalog = getImageCatalog();
+        when(imageCatalogRepository.findByCrnAndArchivedFalse(catalog.getCrn())).thenReturn(Optional.of(catalog));
+        when(imageCatalogRepository.findByNameAndWorkspaceId(catalog.getName(), catalog.getWorkspace().getId())).thenReturn(Optional.of(catalog));
+
+        ImageCatalog result = underTest.delete(aImageCatalogAccessDtoBuilder().withCrn(catalog.getCrn()).build(), catalog.getWorkspace().getId());
+
+        assertEquals(catalog, result);
+        verify(imageCatalogRepository, times(1)).findByCrnAndArchivedFalse(anyString());
+        verify(imageCatalogRepository, times(1)).save(any(ImageCatalog.class));
+        verify(imageCatalogRepository, times(1)).save(catalog);
+    }
+
+    @Test
+    public void testDeleteByWorkspaceWhenNeitherCrnOrNameProvidedThenBadRequestExceptionComes() {
+        ImageCatalog catalog = getImageCatalog();
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("No name or crn provided, hence unable to obtain image catalog!");
+
+        underTest.delete(aImageCatalogAccessDtoBuilder().build(), catalog.getWorkspace().getId());
+
+        verify(imageCatalogRepository, times(0)).findByCrnAndArchivedFalse(anyString());
+        verify(imageCatalogRepository, times(0)).delete(any());
+    }
+
+    @Test
+    public void  testDeleteByWorkspaceIfDtoIsNullThenIllegalArgumentExceptionComes() {
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage("ImageCatalogAccessDto should not be null");
+
+        underTest.delete(null, 1L);
+    }
+
+    @Test
+    public void testGetByWorkspaceWhenDtoNameFilledThenProperGetCalled() {
+        ImageCatalog catalog = getImageCatalog();
+        when(imageCatalogRepository.findByNameAndWorkspaceId(catalog.getName(), catalog.getWorkspace().getId())).thenReturn(Optional.of(catalog));
+
+        ImageCatalog result = underTest.get(aImageCatalogAccessDtoBuilder().withName(catalog.getName()).build(), catalog.getWorkspace().getId());
+
+        assertEquals(catalog, result);
+        verify(imageCatalogRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
+        verify(imageCatalogRepository, times(1)).findByNameAndWorkspaceId(catalog.getName(), catalog.getWorkspace().getId());
+    }
+
+    @Test
+    public void testGetByWorkspaceWhenDtoCrnFilledThenProperGetCalled() {
+        ImageCatalog catalog = getImageCatalog();
+        when(imageCatalogRepository.findByCrnAndArchivedFalse(catalog.getCrn())).thenReturn(Optional.of(catalog));
+
+        ImageCatalog result = underTest.get(aImageCatalogAccessDtoBuilder().withCrn(catalog.getCrn()).build(), catalog.getWorkspace().getId());
+
+        assertEquals(catalog, result);
+        verify(imageCatalogRepository, times(1)).findByCrnAndArchivedFalse(anyString());
+        verify(imageCatalogRepository, times(1)).findByCrnAndArchivedFalse(catalog.getCrn());
+    }
+
+    @Test
+    public void testGetByWorkspaceWhenNeitherCrnOrNameProvidedThenBadRequestExceptionComes() {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("No name or crn provided, hence unable to obtain image catalog!");
+
+        underTest.get(aImageCatalogAccessDtoBuilder().build(), 1L);
+
+        verify(imageCatalogRepository, times(0)).findByCrnAndArchivedFalse(anyString());
+        verify(imageCatalogRepository, times(0)).save(any());
+    }
+
+    @Test
+    public void  testGetByWorkspaceIfDtoIsNullThenIllegalArgumentExceptionComes() {
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage("ImageCatalogAccessDto should not be null");
+
+        underTest.get(null, 1L);
+    }
+
     private void setupImageCatalogProvider(String catalogUrl, String catalogFile) throws IOException, CloudbreakImageCatalogException {
         String catalogJson = FileReaderUtils.readFileFromClasspath(catalogFile);
         CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
@@ -560,6 +637,11 @@ public class ImageCatalogServiceTest {
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setImageCatalogUrl(CUSTOM_IMAGE_CATALOG_URL);
         imageCatalog.setName("default");
+        Workspace ws = new Workspace();
+        ws.setId(ORG_ID);
+        imageCatalog.setWorkspace(ws);
+        imageCatalog.setCreator("someone");
+        imageCatalog.setCrn("someCrn");
         return imageCatalog;
     }
 
