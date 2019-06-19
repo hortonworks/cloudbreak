@@ -85,7 +85,9 @@ public class StackOperation {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
         Workspace workspace = workspaceService.get(workspaceId, user);
-        return stackCommonService.createInWorkspace(request, user, workspace);
+        StackV4Response stackV4Response = stackCommonService.createInWorkspace(request, user, workspace);
+        environmentServiceDecorator.prepareEnvironmentAndCredentialName(stackV4Response);
+        return stackV4Response;
     }
 
     public StackV4Response get(Long workspaceId, String name, Set<String> entries, StackType stackType) {
