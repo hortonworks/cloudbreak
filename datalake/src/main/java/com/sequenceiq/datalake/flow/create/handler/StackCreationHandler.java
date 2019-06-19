@@ -12,27 +12,20 @@ import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.datalake.flow.create.event.StackCreationFailedEvent;
+import com.sequenceiq.datalake.flow.create.event.SdxCreateFailedEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationWaitRequest;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.ProvisionerService;
-import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
-public class StackCreationHandler implements EventHandler<StackCreationWaitRequest> {
+public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCreationWaitRequest> {
 
     public static final int SLEEP_TIME_IN_SEC = 10;
 
     public static final int DURATION_IN_MINUTES = 60;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackCreationHandler.class);
-
-    @Inject
-    private EventBus eventBus;
 
     @Inject
     private ProvisionerService provisionerService;
@@ -43,8 +36,13 @@ public class StackCreationHandler implements EventHandler<StackCreationWaitReque
     }
 
     @Override
-    public void accept(Event<StackCreationWaitRequest> event) {
-        StackCreationWaitRequest stackCreationWaitRequest = event.getData();
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
+        return new SdxCreateFailedEvent(resourceId, e);
+    }
+
+    @Override
+    protected void doAccept(HandlerEvent handlerEvent) {
+        StackCreationWaitRequest stackCreationWaitRequest = handlerEvent.getData();
         Long sdxId = stackCreationWaitRequest.getResourceId();
         Selectable response;
         try {
@@ -54,14 +52,17 @@ public class StackCreationHandler implements EventHandler<StackCreationWaitReque
             response = new StackCreationSuccessEvent(sdxId);
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Polling exited before timeout. Cause: ", userBreakException);
-            response = new StackCreationFailedEvent(sdxId, userBreakException);
+            response = new SdxCreateFailedEvent(sdxId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.info("Poller stopped for stack: {}", sdxId);
-            response = new StackCreationFailedEvent(sdxId, pollerStoppedException);
+            LOGGER.info("Poller stopped for stack: {}", sdxId, pollerStoppedException);
+            response = new SdxCreateFailedEvent(sdxId, pollerStoppedException);
         } catch (PollerException exception) {
-            LOGGER.info("Polling failed for stack: {}", sdxId);
-            response = new StackCreationFailedEvent(sdxId, exception);
+            LOGGER.info("Polling failed for stack: {}", sdxId, exception);
+            response = new SdxCreateFailedEvent(sdxId, exception);
+        } catch (Exception anotherException) {
+            LOGGER.error("Something wrong happened in stack creation wait phase", anotherException);
+            response = new SdxCreateFailedEvent(sdxId, anotherException);
         }
-        eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
+        sendEvent(response, handlerEvent);
     }
 }

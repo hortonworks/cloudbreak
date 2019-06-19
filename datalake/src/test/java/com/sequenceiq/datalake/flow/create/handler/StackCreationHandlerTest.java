@@ -21,7 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
-import com.sequenceiq.datalake.flow.create.event.StackCreationFailedEvent;
+import com.sequenceiq.datalake.flow.create.event.SdxCreateFailedEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationWaitRequest;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
@@ -79,10 +79,10 @@ class StackCreationHandlerTest {
         verify(eventBus, times(1)).notify(eventSelector.capture(), sentEvent.capture());
         String eventNotified = eventSelector.getValue();
         Event event = sentEvent.getValue();
-        Assertions.assertEquals("StackCreationFailedEvent", eventNotified);
-        Assertions.assertEquals(StackCreationFailedEvent.class, event.getData().getClass());
-        Assertions.assertEquals(stackId, ((StackCreationFailedEvent) event.getData()).getResourceId());
-        Assertions.assertEquals(UserBreakException.class, ((StackCreationFailedEvent) event.getData()).getException().getClass());
+        Assertions.assertEquals("SdxCreateFailedEvent", eventNotified);
+        Assertions.assertEquals(SdxCreateFailedEvent.class, event.getData().getClass());
+        Assertions.assertEquals(stackId, ((SdxCreateFailedEvent) event.getData()).getResourceId());
+        Assertions.assertEquals(UserBreakException.class, ((SdxCreateFailedEvent) event.getData()).getException().getClass());
     }
 
     @Test
@@ -98,10 +98,10 @@ class StackCreationHandlerTest {
         verify(eventBus, times(1)).notify(eventSelector.capture(), sentEvent.capture());
         String eventNotified = eventSelector.getValue();
         Event event = sentEvent.getValue();
-        Assertions.assertEquals("StackCreationFailedEvent", eventNotified);
-        Assertions.assertEquals(StackCreationFailedEvent.class, event.getData().getClass());
-        Assertions.assertEquals(stackId, ((StackCreationFailedEvent) event.getData()).getResourceId());
-        Assertions.assertEquals(PollerStoppedException.class, ((StackCreationFailedEvent) event.getData()).getException().getClass());
+        Assertions.assertEquals("SdxCreateFailedEvent", eventNotified);
+        Assertions.assertEquals(SdxCreateFailedEvent.class, event.getData().getClass());
+        Assertions.assertEquals(stackId, ((SdxCreateFailedEvent) event.getData()).getResourceId());
+        Assertions.assertEquals(PollerStoppedException.class, ((SdxCreateFailedEvent) event.getData()).getException().getClass());
     }
 
     @Test
@@ -117,9 +117,9 @@ class StackCreationHandlerTest {
         verify(eventBus, times(1)).notify(eventSelector.capture(), sentEvent.capture());
         String eventNotified = eventSelector.getValue();
         Event event = sentEvent.getValue();
-        Assertions.assertEquals("StackCreationFailedEvent", eventNotified);
-        Assertions.assertEquals(StackCreationFailedEvent.class, event.getData().getClass());
-        Assertions.assertEquals(stackId, ((StackCreationFailedEvent) event.getData()).getResourceId());
-        Assertions.assertEquals(PollerException.class, ((StackCreationFailedEvent) event.getData()).getException().getClass());
+        Assertions.assertEquals("SdxCreateFailedEvent", eventNotified);
+        Assertions.assertEquals(SdxCreateFailedEvent.class, event.getData().getClass());
+        Assertions.assertEquals(stackId, ((SdxCreateFailedEvent) event.getData()).getResourceId());
+        Assertions.assertEquals(PollerException.class, ((SdxCreateFailedEvent) event.getData()).getException().getClass());
     }
 }

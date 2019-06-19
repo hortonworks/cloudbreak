@@ -2,13 +2,10 @@ package com.sequenceiq.datalake.service.sdx;
 
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
-import static com.sequenceiq.datalake.flow.create.handler.StackCreationHandler.DURATION_IN_MINUTES;
-import static com.sequenceiq.datalake.flow.create.handler.StackCreationHandler.SLEEP_TIME_IN_SEC;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.ws.rs.ClientErrorException;
@@ -46,7 +43,6 @@ import com.sequenceiq.datalake.entity.SdxClusterStatus;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
-import com.sequenceiq.environment.client.EnvironmentServiceClient;
 
 @Service
 public class ProvisionerService {
@@ -62,10 +58,10 @@ public class ProvisionerService {
     private CloudbreakUserCrnClient cloudbreakClient;
 
     @Inject
-    private EnvironmentServiceClient environmentServiceClient;
+    private SdxClusterRepository sdxClusterRepository;
 
     @Inject
-    private SdxClusterRepository sdxClusterRepository;
+    private EnvironmentService environmentService;
 
     @Inject
     private Clock clock;
@@ -93,6 +89,7 @@ public class ProvisionerService {
     public void waitCloudbreakClusterDeletion(Long id, PollingConfig pollingConfig) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
             Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
+                    .stopIfException(false)
                     .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                     .run(() -> {
                         LOGGER.info("Deletion polling cloudbreak for stack status: '{}' in '{}' env", sdxCluster.getClusterName(), sdxCluster.getEnvName());
@@ -118,9 +115,9 @@ public class ProvisionerService {
         });
     }
 
-    public void startStackProvisioning(Long id) {
+    public void startStackProvisioning(Long id, DetailedEnvironmentResponse environment) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
-            StackV4Request stackV4Request = setupStackRequestForCloudbreak(sdxCluster);
+            StackV4Request stackV4Request = setupStackRequestForCloudbreak(sdxCluster, environment);
 
             LOGGER.info("Call cloudbreak with stackrequest");
             try {
@@ -147,9 +144,10 @@ public class ProvisionerService {
     public void waitCloudbreakClusterCreation(Long id, PollingConfig pollingConfig) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
             Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
+                    .stopIfException(false)
                     .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                     .run(() -> {
-                        LOGGER.info("Creation polling cloudbreak for stack status: '{}' in '{}' env", sdxCluster.getClusterName(), sdxCluster.getEnvName());
+                        LOGGER.info("Polling cloudbreak for stack status: '{}' in '{}' env", sdxCluster.getClusterName(), sdxCluster.getEnvName());
                         StackV4Response stackV4Response = cloudbreakClient.withCrn(sdxCluster.getInitiatorUserCrn())
                                 .stackV4Endpoint()
                                 .get(0L, sdxCluster.getClusterName(), Collections.emptySet());
@@ -175,35 +173,7 @@ public class ProvisionerService {
         });
     }
 
-    public void waitEnvironmentCreation(Long sdxId, PollingConfig pollingConfig) {
-        sdxClusterRepository.findById(sdxId).ifPresentOrElse(sdxCluster -> {
-            Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-                    .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
-                    .run(() -> {
-                        LOGGER.info("Creation polling environment for environment status: '{}' in '{}' env",
-                                sdxCluster.getClusterName(), sdxCluster.getEnvName());
-                        DetailedEnvironmentResponse environment = getDetailedEnvironmentResponse(
-                                sdxCluster.getInitiatorUserCrn(), sdxCluster.getEnvCrn());
-                        LOGGER.info("Response from environment: {}", JsonUtil.writeValueAsString(environment));
-                        if (environment.getEnvironmentStatus().isAvailable()) {
-                            return AttemptResults.finishWith(environment);
-                        } else {
-                            if (environment.getEnvironmentStatus().isFailed()) {
-                                return AttemptResults.breakFor("Environment creation failed " + sdxCluster.getEnvName());
-                            } else {
-                                return AttemptResults.justContinue();
-                            }
-                        }
-                    });
-            sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
-            sdxClusterRepository.save(sdxCluster);
-        }, () -> {
-            throw notFound("SDX cluster", sdxId).get();
-        });
-    }
-
-    private StackV4Request setupStackRequestForCloudbreak(SdxCluster sdxCluster) {
-
+    private StackV4Request setupStackRequestForCloudbreak(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
         String clusterTemplateJson;
         if (sdxCluster.getStackRequest() == null) {
             clusterTemplateJson = FileReaderUtils.readFileFromClasspathQuietly("sdx/" + "cluster-template.json");
@@ -221,7 +191,6 @@ public class ProvisionerService {
             }
             stackRequest.setTags(tags);
             stackRequest.setEnvironmentCrn(sdxCluster.getEnvCrn());
-            DetailedEnvironmentResponse environment = getEnvironment(sdxCluster.getId(), sdxCluster.getInitiatorUserCrn(), sdxCluster.getEnvCrn());
 
             if (!CloudPlatform.YARN.name().equals(environment.getCloudPlatform()) && !environment.getNetwork().getSubnetMetas().isEmpty()) {
                 setupPlacement(environment, stackRequest);
@@ -295,18 +264,5 @@ public class ProvisionerService {
         if (cluster != null && cluster.getPassword() == null) {
             cluster.setPassword(PasswordUtil.generatePassword());
         }
-    }
-
-    private DetailedEnvironmentResponse getEnvironment(Long sdxId, String userCrn, String environmentCrn) {
-        PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
-        waitEnvironmentCreation(sdxId, pollingConfig);
-        return getDetailedEnvironmentResponse(userCrn, environmentCrn);
-    }
-
-    private DetailedEnvironmentResponse getDetailedEnvironmentResponse(String userCrn, String environmentCrn) {
-        return environmentServiceClient
-                .withCrn(userCrn)
-                .environmentV1Endpoint()
-                .getByCrn(environmentCrn);
     }
 }

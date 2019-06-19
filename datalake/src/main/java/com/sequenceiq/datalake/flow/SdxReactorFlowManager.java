@@ -1,6 +1,6 @@
 package com.sequenceiq.datalake.flow;
 
-import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.SDX_CREATE_EVENT;
+import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.ENV_WAIT_EVENT;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_EVENT;
 
 import java.util.concurrent.TimeUnit;
@@ -12,9 +12,9 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
-import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -34,7 +34,7 @@ public class SdxReactorFlowManager {
     private SdxService sdxService;
 
     public void triggerSdxCreation(Long sdxId) {
-        String selector = SDX_CREATE_EVENT.event();
+        String selector = ENV_WAIT_EVENT.event();
         notify(selector, new SdxEvent(selector, sdxId));
     }
 
