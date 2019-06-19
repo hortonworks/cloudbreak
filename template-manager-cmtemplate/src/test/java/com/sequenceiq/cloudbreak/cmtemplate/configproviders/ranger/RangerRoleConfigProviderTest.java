@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger;
 
 import static com.sequenceiq.cloudbreak.TestUtil.rdsConfig;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
 import java.util.Collections;
@@ -83,7 +84,7 @@ public class RangerRoleConfigProviderTest {
 
     }
 
-    @Test(expected = CloudbreakServiceException.class)
+    @Test
     public void testGetEmptyRoleConfigs() {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
@@ -95,15 +96,10 @@ public class RangerRoleConfigProviderTest {
         String inputJson = getBlueprintText("input/clouderamanager-db-config.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
-        try {
-            underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
-        } catch (CloudbreakServiceException cse) {
-            assertEquals("Ranger database has not been provided for RANGER_ADMIN component", cse.getMessage());
-            throw cse;
-        }
+        assertFalse(underTest.isConfigurationNeeded(cmTemplateProcessor, preparationObject));
     }
 
-    @Test(expected = CloudbreakServiceException.class)
+    @Test(expected = IllegalStateException.class)
     public void testRoleConfigsForMultipleDb() {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);

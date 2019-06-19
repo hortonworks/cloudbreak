@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
+import static com.sequenceiq.cloudbreak.TestUtil.rdsConfig;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -29,6 +30,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ambari.AmbariV4Request;
@@ -244,10 +246,9 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     public void testConvertWhenClusterHasSomeRdsConfigNamesThenTheSameAmountOfRdsConfigShouldBeStored() {
         Set<String> rdsConfigNames = createRdsConfigNames();
         when(cluster.getDatabases()).thenReturn(rdsConfigNames);
-        long id = 0;
+        int i = 0;
         for (String rdsConfigName : rdsConfigNames) {
-            RDSConfig rdsConfig = new RDSConfig();
-            rdsConfig.setId(id++);
+            RDSConfig rdsConfig = rdsConfig(DatabaseType.values()[i++]);
             when(rdsConfigService.getByNameForWorkspace(rdsConfigName, workspace)).thenReturn(rdsConfig);
         }
         TemplatePreparationObject result = underTest.convert(source);

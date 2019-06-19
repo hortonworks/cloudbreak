@@ -136,7 +136,7 @@
       "serviceConfigs": [
         {
           "name": "hive_metastore_database_host",
-          "value": "cluster.test.com"
+          "value": "10.1.1.1"
         },
         {
           "name": "hive_metastore_database_name",
@@ -144,7 +144,7 @@
         },
         {
           "name": "hive_metastore_database_password",
-          "value": "password"
+          "value": "iamsoosecure"
         },
         {
           "name": "hive_metastore_database_port",
@@ -156,7 +156,7 @@
         },
         {
           "name": "hive_metastore_database_user",
-          "value": "user"
+          "value": "heyitsme"
         }
       ],
       "roleConfigGroups": [

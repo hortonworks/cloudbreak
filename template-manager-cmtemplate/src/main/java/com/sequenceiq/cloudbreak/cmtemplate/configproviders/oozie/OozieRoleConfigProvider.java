@@ -3,22 +3,17 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.oozie;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 @Component
-public class OozieRoleConfigProvider extends AbstractRoleConfigProvider {
+public class OozieRoleConfigProvider extends AbstractRdsRoleConfigProvider {
 
     private static final String OOZIE_DATABASE_HOST = "oozie_database_host";
 
@@ -34,9 +29,7 @@ public class OozieRoleConfigProvider extends AbstractRoleConfigProvider {
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         switch (roleType) {
             case OozieRoles.OOZIE_SERVER:
-                Optional<RDSConfig> rdsConfigOptional = getFirstRDSConfigOptional(source);
-                Preconditions.checkArgument(rdsConfigOptional.isPresent());
-                RdsView oozieRdsView = new RdsView(rdsConfigOptional.get());
+                RdsView oozieRdsView = getRdsView(source);
                 return List.of(
                         config(OOZIE_DATABASE_HOST, oozieRdsView.getHost()),
                         config(OOZIE_DATABASE_NAME, oozieRdsView.getDatabaseName()),
@@ -60,11 +53,7 @@ public class OozieRoleConfigProvider extends AbstractRoleConfigProvider {
     }
 
     @Override
-    public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        return getFirstRDSConfigOptional(source).isPresent() && cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes());
-    }
-
-    private Optional<RDSConfig> getFirstRDSConfigOptional(TemplatePreparationObject source) {
-        return ConfigUtils.getFirstRDSConfigOptional(source, DatabaseType.OOZIE);
+    protected DatabaseType dbType() {
+        return DatabaseType.OOZIE;
     }
 }

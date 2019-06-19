@@ -643,7 +643,7 @@ public class TestUtil {
     public static RDSConfig rdsConfig(DatabaseType databaseType, DatabaseVendor databaseVendor) {
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setId(generateUniqueId());
-        rdsConfig.setName(databaseType.name());
+        rdsConfig.setName(databaseType.name() + rdsConfig.getId());
         rdsConfig.setConnectionPassword("iamsoosecure");
         rdsConfig.setConnectionUserName("heyitsme");
         if (databaseVendor == DatabaseVendor.ORACLE12 || databaseVendor == DatabaseVendor.ORACLE11) {
@@ -666,16 +666,7 @@ public class TestUtil {
     }
 
     public static RDSConfig rdsConfig(DatabaseType databaseType) {
-        RDSConfig rdsConfig = new RDSConfig();
-        rdsConfig.setId(generateUniqueId());
-        rdsConfig.setName(databaseType.name());
-        rdsConfig.setConnectionPassword("iamsoosecure");
-        rdsConfig.setConnectionUserName("heyitsme");
-        rdsConfig.setConnectionURL("jdbc:postgresql://10.1.1.1:5432/" + databaseType.name().toLowerCase());
-        rdsConfig.setType(databaseType.name());
-        rdsConfig.setConnectionDriver("org.postgresql.Driver");
-        rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES);
-        return rdsConfig;
+        return rdsConfig(databaseType, DatabaseVendor.POSTGRES);
     }
 
     private static void setGatewayTopology(Gateway gateway) {
