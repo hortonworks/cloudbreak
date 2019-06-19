@@ -120,7 +120,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
 
         Stack stack = new Stack();
-
+        stack.setEnvironmentCrn(source.getEnvironmentCrn());
         DetailedEnvironmentResponse environment = null;
         if (isTemplate(source)) {
             if (source.getEnvironmentCrn() != null) {
@@ -140,7 +140,6 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
             stack.setParameters(parameter);
         }
         setTimeToLive(source, stack);
-        stack.setEnvironmentCrn(source.getEnvironmentCrn());
         stack.setWorkspace(workspace);
         stack.setDisplayName(source.getName());
         stack.setDatalakeResourceId(getDatalakeResourceId(source, workspace));
