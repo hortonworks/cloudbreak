@@ -10,12 +10,12 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name", "crn"}))
 public class ImageCatalog implements ProvisionEntity, WorkspaceAwareResource {
 
     @Id
@@ -37,6 +37,27 @@ public class ImageCatalog implements ProvisionEntity, WorkspaceAwareResource {
 
     @ManyToOne
     private Workspace workspace;
+
+    @Column(nullable = false)
+    private String crn;
+
+    private String creator;
+
+    public String getCrn() {
+        return crn;
+    }
+
+    public void setCrn(String crn) {
+        this.crn = crn;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
+    }
 
     public Long getId() {
         return id;

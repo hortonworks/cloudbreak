@@ -25,7 +25,7 @@ public class ImageCatalogCreateIfNotExistsAction implements Action<ImageCatalogT
             LOGGER.info("Cannot create Imagecatalog, fetch existed one: {}", testDto.getRequest().getName());
             testDto.setResponse(
                     client.getCloudbreakClient().imageCatalogV4Endpoint()
-                            .get(client.getWorkspaceId(), testDto.getRequest().getName(), Boolean.FALSE));
+                            .getByName(client.getWorkspaceId(), testDto.getRequest().getName(), Boolean.FALSE));
         }
         if (testDto.getResponse() == null) {
             throw new IllegalStateException("ImageCatalog could not be created.");

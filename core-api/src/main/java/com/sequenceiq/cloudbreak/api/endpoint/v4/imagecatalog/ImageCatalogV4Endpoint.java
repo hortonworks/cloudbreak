@@ -42,11 +42,19 @@ public interface ImageCatalogV4Endpoint {
     ImageCatalogV4Responses list(@PathParam("workspaceId") Long workspaceId);
 
     @GET
-    @Path("{name}")
+    @Path("name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ImageCatalogOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = IMAGE_CATALOG_NOTES,
             nickname = "getImageCatalogInWorkspace")
-    ImageCatalogV4Response get(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+    ImageCatalogV4Response getByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @QueryParam("withImages") @DefaultValue("false") Boolean withImages);
+
+    @GET
+    @Path("crn/{crn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ImageCatalogOpDescription.GET_BY_CRN_IN_WORKSPACE, produces = ContentType.JSON, notes = IMAGE_CATALOG_NOTES,
+            nickname = "getImageCatalogByCrnInWorkspace")
+    ImageCatalogV4Response getByCrn(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn,
             @QueryParam("withImages") @DefaultValue("false") Boolean withImages);
 
     @POST
@@ -57,11 +65,18 @@ public interface ImageCatalogV4Endpoint {
     ImageCatalogV4Response create(@PathParam("workspaceId") Long workspaceId, @Valid ImageCatalogV4Request request);
 
     @DELETE
-    @Path("{name}")
+    @Path("name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ImageCatalogOpDescription.DELETE_BY_NAME_IN_WORKSPACE, produces = ContentType.JSON, notes = IMAGE_CATALOG_NOTES,
             nickname = "deleteImageCatalogInWorkspace")
-    ImageCatalogV4Response delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+    ImageCatalogV4Response deleteByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+
+    @DELETE
+    @Path("crn/{crn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ImageCatalogOpDescription.DELETE_BY_CRN_IN_WORKSPACE, produces = ContentType.JSON, notes = IMAGE_CATALOG_NOTES,
+            nickname = "deleteImageCatalogByCrnInWorkspace")
+    ImageCatalogV4Response deleteByCrn(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn);
 
     @DELETE
     @Path("")

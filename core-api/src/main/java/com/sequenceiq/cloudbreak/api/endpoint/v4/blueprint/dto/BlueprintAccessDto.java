@@ -2,23 +2,12 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.dto;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class BlueprintAccessDto {
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.GeneralAccessDto;
 
-    private final String name;
+public class BlueprintAccessDto extends GeneralAccessDto {
 
-    private final String crn;
-
-    public BlueprintAccessDto(String name, String crn) {
-        this.name = name;
-        this.crn = crn;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getCrn() {
-        return crn;
+    private BlueprintAccessDto(String name, String crn) {
+        super(name, crn);
     }
 
     public static class BlueprintAccessDtoBuilder {

@@ -14,14 +14,15 @@ import io.swagger.annotations.ApiModelProperty;
 public class UpdateImageCatalogV4Request extends ImageCatalogV4Base {
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ID, required = true)
-    private Long id;
+    @ApiModelProperty(ModelDescriptions.CRN)
+    private String crn;
 
-    public Long getId() {
-        return id;
+    public String getCrn() {
+        return crn;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setCrn(String crn) {
+        this.crn = crn;
     }
+
 }

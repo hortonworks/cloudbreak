@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.Optional;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -21,5 +22,8 @@ public interface ImageCatalogRepository extends WorkspaceResourceRepository<Imag
 
     @CheckPermissionsByReturnValue
     Set<ImageCatalog> findAllByWorkspaceIdAndArchived(Long workspaceId, boolean archived);
+
+    @CheckPermissionsByReturnValue
+    Optional<ImageCatalog> findByCrnAndArchivedFalse(String resourceCrn);
 
 }

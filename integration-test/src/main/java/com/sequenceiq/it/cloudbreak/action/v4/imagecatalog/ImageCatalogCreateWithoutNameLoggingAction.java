@@ -23,7 +23,6 @@ public class ImageCatalogCreateWithoutNameLoggingAction implements Action<ImageC
                         .imageCatalogV4Endpoint()
                         .create(client.getWorkspaceId(), testDto.getRequest()));
         Log.logJSON(LOGGER, format(" Image catalog created  successfully:%n"), testDto.getResponse());
-        Log.log(LOGGER, format(" ID: %s", testDto.getResponse().getId()));
 
         return testDto;
     }

@@ -4,8 +4,10 @@ import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.service.image.StatedImage.statedImage;
 import static com.sequenceiq.cloudbreak.service.image.StatedImages.statedImages;
 import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
+import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -15,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,33 +35,35 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.ImmutableSet;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.dto.ImageCatalogAccessDto;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
-import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 
 @Component
 public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<ImageCatalog> {
 
     public static final String UNDEFINED = "";
 
-    public static final String CLOUDBREAK_DEFAULT_CATALOG_NAME = "cloudbreak-default";
+    static final String CLOUDBREAK_DEFAULT_CATALOG_NAME = "cloudbreak-default";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogService.class);
 
@@ -96,6 +101,12 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return imageCatalogs;
     }
 
+    public ImageCatalog delete(ImageCatalogAccessDto imageCatalogAccessDto, Long workspaceId) {
+        validateDto(imageCatalogAccessDto);
+        ImageCatalog catalog = get(imageCatalogAccessDto, workspaceId);
+        return delete(workspaceId, catalog.getName());
+    }
+
     @Override
     public Set<ImageCatalog> findAllByWorkspace(Workspace workspace) {
         Set<ImageCatalog> imageCatalogs = repository().findAllByWorkspace(workspace);
@@ -103,13 +114,30 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return imageCatalogs;
     }
 
+    public ImageCatalog createForLoggedInUser(ImageCatalog imageCatalog, Long workspaceId, String accountId, String creator) {
+        imageCatalog.setCrn(createCRN(accountId));
+        imageCatalog.setCreator(creator);
+        return super.createForLoggedInUser(imageCatalog, workspaceId);
+    }
+
+    public ImageCatalog get(ImageCatalogAccessDto imageCatalogAccessDto, Long workspaceId) {
+        validateDto(imageCatalogAccessDto);
+        return isNotEmpty(imageCatalogAccessDto.getName())
+                ? get(workspaceId, imageCatalogAccessDto.getName())
+                : findByResourceCrn(imageCatalogAccessDto.getCrn());
+    }
+
+    public ImageCatalog findByResourceCrn(String resourceCrn) {
+        return imageCatalogRepository.findByCrnAndArchivedFalse(resourceCrn).orElseThrow(NotFoundException.notFound("ImageCatalog", resourceCrn));
+    }
+
     public Images getImagesByCatalogName(Long workspaceId, String catalogName, String stackName, String platform) throws CloudbreakImageCatalogException {
-        if (StringUtils.isNotEmpty(platform) && StringUtils.isNotEmpty(stackName)) {
+        if (isNotEmpty(platform) && isNotEmpty(stackName)) {
             throw new BadRequestException("Platform or stackName cannot be filled in the same request.");
         }
-        if (StringUtils.isNotEmpty(platform)) {
+        if (isNotEmpty(platform)) {
             return getImages(workspaceId, catalogName, platform).getImages();
-        } else if (StringUtils.isNotEmpty(stackName)) {
+        } else if (isNotEmpty(stackName)) {
             return stackImageFilterService.getApplicableImages(workspaceId, catalogName, stackName);
         } else {
             throw new BadRequestException("Either platform or stackName should be filled in request.");
@@ -118,13 +146,13 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     public Images getImagesFromDefault(Long workspaceId, String stackName, String platform, Set<String> operatingSystems)
             throws CloudbreakImageCatalogException {
-        if (StringUtils.isNotEmpty(platform) && StringUtils.isNotEmpty(stackName)) {
+        if (isNotEmpty(platform) && isNotEmpty(stackName)) {
             throw new BadRequestException("Platform or stackName cannot be filled in the same request.");
         }
-        if (StringUtils.isNotEmpty(platform)) {
+        if (isNotEmpty(platform)) {
             User user = getLoggedInUser();
             return getStatedImagesFilteredByOperatingSystems(platform, operatingSystems, user).getImages();
-        } else if (StringUtils.isNotEmpty(stackName)) {
+        } else if (isNotEmpty(stackName)) {
             return stackImageFilterService.getApplicableImages(workspaceId, stackName);
         } else {
             throw new BadRequestException("Either platform or stackName should be filled in request.");
@@ -308,7 +336,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         }
     }
 
-    public ImageCatalog getCloudbreakDefaultImageCatalog() {
+    private ImageCatalog getCloudbreakDefaultImageCatalog() {
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setName(CLOUDBREAK_DEFAULT_CATALOG_NAME);
         imageCatalog.setImageCatalogUrl(defaultCatalogUrl);
@@ -575,7 +603,25 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         }
     }
 
+    private void validateDto(ImageCatalogAccessDto dto) {
+        throwIfNull(dto, () -> new IllegalArgumentException("ImageCatalogAccessDto should not be null"));
+        if (dto.isNotValid()) {
+            throw new BadRequestException("No name or crn provided, hence unable to obtain image catalog!");
+        }
+    }
+
+    private String createCRN(String accountId) {
+        return Crn.builder()
+                .setService(Crn.Service.CLOUDBREAK)
+                .setAccountId(accountId)
+                .setResourceType(Crn.ResourceType.IMAGE_CATALOG)
+                .setResource(UUID.randomUUID().toString())
+                .build()
+                .toString();
+    }
+
     private static class PrefixMatchImages {
+
         private final Set<String> vMImageUUIDs;
 
         private final Set<String> defaultVMImageUUIDs;
@@ -587,5 +633,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             this.defaultVMImageUUIDs = defaultVMImageUUIDs;
             this.supportedVersions = supportedVersions;
         }
+
     }
+
 }
