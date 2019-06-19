@@ -11,7 +11,6 @@ public enum Status {
     UPDATE_FAILED,
     CREATE_FAILED,
     ENABLE_SECURITY_FAILED,
-    PRE_DELETE_IN_PROGRESS,
     DELETE_IN_PROGRESS,
     DELETE_FAILED,
     DELETE_COMPLETED,
@@ -27,20 +26,24 @@ public enum Status {
 
     public boolean isRemovableStatus() {
         return Arrays.asList(AVAILABLE, UPDATE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED,
-                DELETE_COMPLETED, STOPPED, START_FAILED, STOP_FAILED).contains(valueOf(name()));
+                DELETE_COMPLETED, STOPPED, START_FAILED, STOP_FAILED).contains(this);
     }
 
     public boolean isFailed() {
         return Arrays.asList(UPDATE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED, START_FAILED, STOP_FAILED)
-                .contains(valueOf(name()));
+                .contains(this);
     }
 
     public boolean isAvailable() {
-        return Arrays.asList(AVAILABLE, MAINTENANCE_MODE_ENABLED).contains(valueOf(name()));
+        return Arrays.asList(AVAILABLE, MAINTENANCE_MODE_ENABLED).contains(this);
     }
 
-    public boolean isSuccesfullyDeleted() {
-        return DELETE_COMPLETED.equals(valueOf(name()));
+    public boolean isSuccessfullyDeleted() {
+        return DELETE_COMPLETED.equals(this);
+    }
+
+    public boolean isDeletionInProgress() {
+        return DELETE_IN_PROGRESS.equals(this);
     }
 
     public boolean isStopPhaseActive() {
