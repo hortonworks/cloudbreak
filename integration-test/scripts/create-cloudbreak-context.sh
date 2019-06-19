@@ -9,4 +9,5 @@ cp docker-compose_template.yml docker-compose.yml
 echo -e "\n" >> integcb/Profile
 echo "export VAULT_AUTO_UNSEAL=true" >> integcb/Profile
 echo "export VAULT_DB_SCHEMA=inet_vault_$(date +%s)" >> integcb/Profile
+echo "export CB_UI_MAX_WAIT=600" >> integcb/Profile
 cd $INTEGCB_LOCATION
