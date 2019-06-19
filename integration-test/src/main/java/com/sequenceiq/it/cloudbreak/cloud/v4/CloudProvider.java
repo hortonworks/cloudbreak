@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4;
 
+import java.util.Map;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.StackV4ParameterBase;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
@@ -10,8 +12,10 @@ import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 
 public interface CloudProvider {
@@ -36,13 +40,23 @@ public interface CloudProvider {
 
     ClusterTestDto cluster(ClusterTestDto cluster);
 
+    SdxTestDto sdx(SdxTestDto sdx);
+
     String getSubnetCIDR();
+
+    String getAccessCIDR();
+
+    Map<String, String> getTags();
+
+    String getClusterShape();
 
     CloudPlatform getCloudPlatform();
 
     CredentialTestDto credential(CredentialTestDto credential);
 
     EnvironmentTestDto environment(EnvironmentTestDto environment);
+
+    EnvironmentNetworkTestDto environmentNetwork(EnvironmentNetworkTestDto environmentNetwork);
 
     PlacementSettingsTestDto placement(PlacementSettingsTestDto placement);
 

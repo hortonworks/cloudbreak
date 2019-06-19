@@ -1,6 +1,8 @@
 package com.sequenceiq.it.cloudbreak.dto.environment;
 
+import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ARCHIVED;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,10 +10,10 @@ import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
 
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -113,16 +115,17 @@ public class EnvironmentTestDto
         return this;
     }
 
-    @Override
-    public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.info("Cleaning up resource with name: {}", getName());
-        try {
-            SimpleEnvironmentResponse entity = new SimpleEnvironmentResponse();
-            entity.setName(getName());
-            delete(context, entity, cloudbreakClient);
-        } catch (WebApplicationException ignore) {
-            LOGGER.info("Something happend.");
+    public EnvironmentTestDto withNetwork(EnvironmentNetworkRequest network) {
+        getRequest().setNetwork(network);
+        return this;
+    }
+
+    public EnvironmentTestDto withNetwork() {
+        EnvironmentNetworkTestDto environmentNetwork = getCloudProvider().environmentNetwork(given(EnvironmentNetworkTestDto.class));
+        if (environmentNetwork == null) {
+            throw new IllegalArgumentException("Environment Network does not exist!");
         }
+        return withNetwork(environmentNetwork.getRequest());
     }
 
     public Collection<SimpleEnvironmentResponse> getResponseSimpleEnvSet() {
@@ -152,8 +155,28 @@ public class EnvironmentTestDto
     }
 
     @Override
+    public EnvironmentTestDto refresh(TestContext context, CloudbreakClient client) {
+        LOGGER.info("Refresh resource with name: {}", getName());
+        return when(environmentTestClient.describe(), key("refresh-environment-" + getName()));
+    }
+
+    @Override
+    public void cleanUp(TestContext context, CloudbreakClient client) {
+        LOGGER.info("Cleaning up resource with name: {}", getName());
+        when(environmentTestClient.delete(), key("delete-environment-" + getName()));
+        await(ARCHIVED);
+    }
+
+    @Override
+    public boolean deletable(SimpleEnvironmentResponse entity) {
+        return getName().startsWith(resourceProperyProvider().prefix());
+    }
+
+    @Override
     public void delete(TestContext testContext, SimpleEnvironmentResponse entity, CloudbreakClient client) {
+        LOGGER.info("Delete resource with name: {}", getName());
         when(environmentTestClient.delete());
+        await(ARCHIVED);
     }
 
     public EnvironmentTestDto await(EnvironmentStatus status) {

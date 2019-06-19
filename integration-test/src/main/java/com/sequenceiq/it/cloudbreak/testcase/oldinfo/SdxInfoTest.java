@@ -10,7 +10,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.CloudbreakTest;
-import com.sequenceiq.it.cloudbreak.SDXTest;
+import com.sequenceiq.it.cloudbreak.SdxTest;
 import com.sequenceiq.it.cloudbreak.mock.CBVersion;
 
 public class SdxInfoTest extends CloudbreakTest {
@@ -19,7 +19,7 @@ public class SdxInfoTest extends CloudbreakTest {
 
     @Test
     private void testInfo() {
-        String infoUrl = getItContext().getContextParam(SDXTest.SDX_SERVER_ROOT);
+        String infoUrl = getItContext().getContextParam(SdxTest.SDX_SERVER_ROOT);
         Client client = ClientBuilder.newBuilder().build();
         WebTarget target = client.target(infoUrl).path("info");
         CBVersion cbVersion = target.request().get().readEntity(CBVersion.class);

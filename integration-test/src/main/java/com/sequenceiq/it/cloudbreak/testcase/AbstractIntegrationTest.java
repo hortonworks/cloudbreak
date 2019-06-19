@@ -277,6 +277,14 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
         return validRds;
     }
 
+    protected void createEnvironmentWithNetwork(TestContext testContext) {
+        testContext.given(EnvironmentTestDto.class)
+                .withNetwork()
+                .when(environmentTestClient.create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .when(environmentTestClient.describe());
+    }
+
     protected void createDefaultUser(TestContext testContext) {
         testContext.as();
     }

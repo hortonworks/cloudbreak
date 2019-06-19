@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4;
 
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,6 +14,12 @@ public class CommonCloudProperties {
     private String sshPublicKey;
 
     private String subnetCidr;
+
+    private String accessCidr;
+
+    private Map<String, String> tags;
+
+    private String clusterShape;
 
     private String imageCatalogName;
 
@@ -45,6 +53,30 @@ public class CommonCloudProperties {
 
     public void setSubnetCidr(String subnetCidr) {
         this.subnetCidr = subnetCidr;
+    }
+
+    public String getAccessCidr() {
+        return accessCidr;
+    }
+
+    public void setAccessCidr(String accessCidr) {
+        this.accessCidr = accessCidr;
+    }
+
+    public Map<String, String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Map<String, String> tags) {
+        this.tags = tags;
+    }
+
+    public String getClusterShape() {
+        return clusterShape;
+    }
+
+    public void setClusterShape(String clusterShape) {
+        this.clusterShape = clusterShape;
     }
 
     public String getImageCatalogName() {

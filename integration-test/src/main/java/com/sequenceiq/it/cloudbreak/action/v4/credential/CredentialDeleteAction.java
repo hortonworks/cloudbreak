@@ -20,7 +20,7 @@ public class CredentialDeleteAction implements Action<CredentialTestDto, Environ
         testDto.setResponse(
                 environmentClient.getEnvironmentClient()
                         .credentialV1Endpoint()
-                        .deleteByResourceCrn(testDto.getResponse().getCrn()));
+                        .deleteByName(testDto.getName()));
         Log.logJSON(LOGGER, " Credential deleted successfully:\n", testDto.getResponse());
         return testDto;
     }

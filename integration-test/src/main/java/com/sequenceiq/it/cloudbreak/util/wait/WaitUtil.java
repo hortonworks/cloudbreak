@@ -3,6 +3,8 @@ package com.sequenceiq.it.cloudbreak.util.wait;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
+import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETED;
+import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.REQUESTED;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +29,11 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIp
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.FreeIPAClient;
+import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.util.WaitResult;
+import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
+import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 @Component
 public class WaitUtil {
@@ -187,6 +193,44 @@ public class WaitUtil {
         return waitResult;
     }
 
+    private WaitResult waitForStatuses(SdxClient sdxClient, String name,
+            SdxClusterStatusResponse desiredStatus) {
+        WaitResult waitResult = WaitResult.SUCCESSFUL;
+        SdxClusterStatusResponse currentStatus = REQUESTED;
+
+        int retryCount = 0;
+        while (currentStatus != desiredStatus && !checkFailedStatuses(currentStatus) && retryCount < MAX_RETRY) {
+            LOGGER.info("Waiting for status(es) {}, stack id: {}, current status(es) {} ...", desiredStatus, name, currentStatus);
+
+            sleep();
+            SdxEndpoint sdxEndpoint = sdxClient.getSdxClient().sdxEndpoint();
+            try {
+                Optional<SdxClusterStatusResponse> statusResult = Optional.ofNullable(sdxEndpoint.get(name).getStatus());
+                SdxClusterStatusResponse currStatus = DELETED;
+                if (statusResult.isPresent()) {
+                    currStatus = statusResult.get();
+                }
+                currentStatus = currStatus;
+            } catch (NotFoundException notFoundException) {
+                LOGGER.info("SDX not found: {}", name);
+                currentStatus = SdxClusterStatusResponse.DELETED;
+                break;
+            }
+            retryCount++;
+        }
+
+        if (currentStatus.name().contains("FAILED") || (DELETED != desiredStatus && DELETED == currentStatus)) {
+            waitResult = WaitResult.FAILED;
+            LOGGER.info("Desired status(es) are {} for {} but status(es) are {}", desiredStatus, name, currentStatus);
+        } else if (retryCount == MAX_RETRY) {
+            waitResult = WaitResult.TIMEOUT;
+            LOGGER.info("Timeout: Desired tatus(es) are {} for {} but status(es) are {}", desiredStatus, name, currentStatus);
+        } else {
+            LOGGER.info("{} are in desired status(es) {}", name, currentStatus);
+        }
+        return waitResult;
+    }
+
     private void sleep() {
         try {
             Thread.sleep(pollingInterval);
@@ -201,6 +245,10 @@ public class WaitUtil {
 
     private boolean checkFailedStatuses(Status currentStatus) {
         return currentStatus.name().contains("FAILED") || currentStatus == DELETE_COMPLETED;
+    }
+
+    private boolean checkFailedStatuses(SdxClusterStatusResponse currentStatus) {
+        return currentStatus.name().contains("FAILED") || currentStatus == DELETED;
     }
 
     private boolean checkFailedStatuses(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status currentStatus) {
@@ -268,6 +316,27 @@ public class WaitUtil {
                     errors = Map.of("status", environmentResponse.getEnvironmentStatus().name());
             }
         }
+        return errors;
+    }
+
+    public Map<String, String> waitAndCheckStatuses(SdxClient sdxClient, String name,
+            SdxClusterStatusResponse desiredStatus, long pollingInterval) {
+        Map<String, String> errors = new HashMap<>();
+        WaitResult waitResult = WaitResult.SUCCESSFUL;
+        for (int retryBecauseOfWrongStatusHandlingInCB = 0; retryBecauseOfWrongStatusHandlingInCB < 3; retryBecauseOfWrongStatusHandlingInCB++) {
+            waitResult = waitForStatuses(sdxClient, name, desiredStatus);
+        }
+        if (waitResult == WaitResult.FAILED) {
+            StringBuilder builder = new StringBuilder("The stack has failed: ").append(System.lineSeparator());
+            throw new RuntimeException(builder.toString());
+        } else if (waitResult == WaitResult.TIMEOUT) {
+            throw new RuntimeException("Timeout happened");
+        } else if (SdxClusterStatusResponse.DELETED != desiredStatus) {
+            SdxClusterResponse sdxResponse = sdxClient.getSdxClient().sdxEndpoint().get(name);
+        if (sdxResponse != null) {
+            errors = Map.of("status", sdxResponse.getStatus().name());
+        }
+    }
         return errors;
     }
 }
