@@ -18,6 +18,7 @@ import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
@@ -117,6 +118,11 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
         String sshPublicKey = commonCloudProperties().getSshPublicKey();
         return stackAuthenticationEntity.withPublicKey(sshPublicKey);
+    }
+
+    @Override
+    public EnvironmentNetworkTestDto environmentNetwork(EnvironmentNetworkTestDto environmentNetwork) {
+        return environmentNetwork.withNetworkCIDR(getSubnetCIDR());
     }
 
     @Override

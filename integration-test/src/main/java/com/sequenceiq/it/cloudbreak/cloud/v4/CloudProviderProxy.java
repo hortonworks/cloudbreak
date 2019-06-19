@@ -19,8 +19,10 @@ import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 
 @Component
@@ -86,6 +88,11 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public SdxTestDto sdx(SdxTestDto sdx) {
+        return delegate.sdx(sdx);
+    }
+
+    @Override
     public VolumeV4TestDto attachedVolume(VolumeV4TestDto volume) {
         return delegate.attachedVolume(volume);
     }
@@ -101,6 +108,21 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public String getAccessCIDR() {
+        return delegate.getAccessCIDR();
+    }
+
+    @Override
+    public Map<String, String> getTags() {
+        return delegate.getTags();
+    }
+
+    @Override
+    public String getClusterShape() {
+        return delegate.getClusterShape();
+    }
+
+    @Override
     public CloudPlatform getCloudPlatform() {
         return delegate.getCloudPlatform();
     }
@@ -113,6 +135,11 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public EnvironmentTestDto environment(EnvironmentTestDto environment) {
         return delegate.environment(environment);
+    }
+
+    @Override
+    public EnvironmentNetworkTestDto environmentNetwork(EnvironmentNetworkTestDto environmentNetwork) {
+        return delegate.environmentNetwork(environmentNetwork);
     }
 
     @Override

@@ -1,5 +1,8 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4.aws;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -10,6 +13,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.KeyBasedParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.RoleBasedParameters;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
@@ -17,6 +21,7 @@ import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 
 @Component
@@ -120,6 +125,25 @@ public class AwsCloudProvider extends AbstractCloudProvider {
         String publicKeyId = awsProperties.getPublicKeyId();
         stackAuthenticationEntity.withPublicKeyId(publicKeyId);
         return stackAuthenticationEntity;
+    }
+
+    @Override
+    public EnvironmentNetworkTestDto environmentNetwork(EnvironmentNetworkTestDto environmentNetwork) {
+        return environmentNetwork.withNetworkCIDR(getSubnetCIDR())
+                .withSubnetIDs(getSubnetIDs())
+                .withAws(environmentNetworkParameters());
+    }
+
+    public Set<String> getSubnetIDs() {
+        Set<String> subnetIDAsSet = new HashSet<String>();
+        subnetIDAsSet.add(getSubnetId());
+        return subnetIDAsSet;
+    }
+
+    private EnvironmentNetworkAwsParams environmentNetworkParameters() {
+        EnvironmentNetworkAwsParams environmentNetworkAwsParams = new EnvironmentNetworkAwsParams();
+        environmentNetworkAwsParams.setVpcId(getVpcId());
+        return environmentNetworkAwsParams;
     }
 
     @Override

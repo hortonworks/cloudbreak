@@ -1,7 +1,9 @@
 package com.sequenceiq.it.cloudbreak;
 
-public class SDXTest extends GherkinTest {
+public class SdxTest extends GherkinTest {
 
     public static final String SDX_SERVER_ROOT = "SDX_SERVER_ROOT";
+
+    public static final String USER_CRN = "USER_CRN";
 }
 

@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4.azure;
 
+import java.util.Set;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,6 +22,8 @@ public class AzureProperties {
     private final Instance instance = new Instance();
 
     private final Cloudstorage cloudstorage = new Cloudstorage();
+
+    private final Network network = new Network();
 
     public String getAvailabilityZone() {
         return availabilityZone;
@@ -63,6 +67,10 @@ public class AzureProperties {
 
     public Cloudstorage getCloudstorage() {
         return cloudstorage;
+    }
+
+    public Network getNetwork() {
+        return network;
     }
 
     public static class Credential {
@@ -178,6 +186,58 @@ public class AzureProperties {
 
         public void setLocationName(String locationName) {
             this.locationName = locationName;
+        }
+    }
+
+    public static class Network {
+        private String networkId;
+
+        private String resourceGroupName;
+
+        private Boolean noFirewallRules;
+
+        private Boolean noPublicIp;
+
+        private Set<String> subnetIds;
+
+        public Set<String> getSubnetIds() {
+            return subnetIds;
+        }
+
+        public void setSubnetIds(Set<String> subnetIds) {
+            this.subnetIds = subnetIds;
+        }
+
+        public String getNetworkId() {
+            return networkId;
+        }
+
+        public void setNetworkId(String networkId) {
+            this.networkId = networkId;
+        }
+
+        public String getResourceGroupName() {
+            return resourceGroupName;
+        }
+
+        public void setResourceGroupName(String resourceGroupName) {
+            this.resourceGroupName = resourceGroupName;
+        }
+
+        public Boolean getNoFirewallRules() {
+            return noFirewallRules;
+        }
+
+        public void setNoFirewallRules(Boolean noFirewallRules) {
+            this.noFirewallRules = noFirewallRules;
+        }
+
+        public Boolean getNoPublicIp() {
+            return noPublicIp;
+        }
+
+        public void setNoPublicIp(Boolean noPublicIp) {
+            this.noPublicIp = noPublicIp;
         }
     }
 }

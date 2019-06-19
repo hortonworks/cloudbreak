@@ -29,6 +29,7 @@ import com.sequenceiq.it.cloudbreak.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.FreeIPAClient;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
+import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.actor.Actor;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
@@ -37,6 +38,7 @@ import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIPATestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Capture;
@@ -46,6 +48,7 @@ import com.sequenceiq.it.cloudbreak.mock.DefaultModel;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.it.cloudbreak.util.wait.WaitUtil;
 import com.sequenceiq.it.cloudbreak.util.wait.WaitUtilForMultipleStatuses;
+import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public abstract class TestContext implements ApplicationContextAware {
 
@@ -214,8 +217,9 @@ public abstract class TestContext implements ApplicationContextAware {
             CloudbreakClient cloudbreakClient = CloudbreakClient.createProxyCloudbreakClient(testParameter, acting);
             FreeIPAClient freeIPAClient = FreeIPAClient.createProxyFreeIPAClient(testParameter, acting);
             EnvironmentClient environmentClient = EnvironmentClient.createProxyEnvironmentClient(testParameter, acting);
+            SdxClient sdxClient = SdxClient.createProxySdxClient(testParameter, acting);
             Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(CloudbreakClient.class, cloudbreakClient,
-                    FreeIPAClient.class, freeIPAClient, EnvironmentClient.class, environmentClient);
+                    FreeIPAClient.class, freeIPAClient, EnvironmentClient.class, environmentClient, SdxClient.class, sdxClient);
             clients.put(acting.getToken(), clientMap);
             cloudbreakClient.setWorkspaceId(0L);
         }
@@ -521,6 +525,42 @@ public abstract class TestContext implements ApplicationContextAware {
             statuses.putAll(waitUtilSingleStatus.waitAndCheckStatuses(environmentClient, environmentName, desiredStatuses, pollingInterval));
             if (!desiredStatuses.equals(EnvironmentStatus.ARCHIVED)) {
                 awaitEntity.refresh(this, null);
+            }
+        } catch (Exception e) {
+            if (runningParameter.isLogError()) {
+                LOGGER.error("await [{}] is failed for statuses {}: {}, name: {}", entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName());
+            }
+            exceptionMap.put("await " + entity + " for desired statuses " + desiredStatuses, e);
+        }
+        return entity;
+    }
+
+    public SdxTestDto await(SdxTestDto entity, SdxClusterStatusResponse desiredStatuses,
+            RunningParameter runningParameter) {
+        return await(entity, desiredStatuses, runningParameter, -1);
+    }
+
+    public SdxTestDto await(SdxTestDto entity, SdxClusterStatusResponse desiredStatuses,
+            RunningParameter runningParameter, long pollingInterval) {
+        checkShutdown();
+
+        if (!exceptionMap.isEmpty() && runningParameter.isSkipOnFail()) {
+            LOGGER.info("Should be skipped beacause of previous error. await [{}]", desiredStatuses);
+            return entity;
+        }
+        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
+        SdxTestDto awaitEntity = get(key);
+        LOGGER.info("await {} for {}", key, desiredStatuses);
+        try {
+            if (awaitEntity == null) {
+                throw new RuntimeException("Key provided but no result in resource map, key=" + key);
+            }
+
+            SdxClient sdxClient = getMicroserviceClient(SdxClient.class, getWho(runningParameter));
+            String sdxName = entity.getName();
+            statuses.putAll(waitUtilSingleStatus.waitAndCheckStatuses(sdxClient, sdxName, desiredStatuses, pollingInterval));
+            if (!desiredStatuses.equals(SdxClusterStatusResponse.DELETED)) {
+                awaitEntity.refresh(this, (SdxClient) null);
             }
         } catch (Exception e) {
             if (runningParameter.isLogError()) {

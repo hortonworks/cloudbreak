@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4.azure;
 
+import java.util.Set;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -9,6 +11,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.Azu
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AppBasedRequest;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialRequestParameters;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
@@ -16,6 +19,7 @@ import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 
 @Component
@@ -103,6 +107,41 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     public StackAuthenticationTestDto stackAuthentication(StackAuthenticationTestDto stackAuthenticationEntity) {
         String sshPublicKey = commonCloudProperties().getSshPublicKey();
         return stackAuthenticationEntity.withPublicKey(sshPublicKey);
+    }
+
+    @Override
+    public EnvironmentNetworkTestDto environmentNetwork(EnvironmentNetworkTestDto environmentNetwork) {
+        return environmentNetwork.withNetworkCIDR(getSubnetCIDR())
+                .withSubnetIDs(getSubnetIDs())
+                .withAzure(environmentNetworkParameters());    }
+
+    private EnvironmentNetworkAzureParams environmentNetworkParameters() {
+        EnvironmentNetworkAzureParams environmentNetworkAzureParams = new EnvironmentNetworkAzureParams();
+        environmentNetworkAzureParams.setNetworkId(getNetworkId());
+        environmentNetworkAzureParams.setNoFirewallRules(getNoFirewallRules());
+        environmentNetworkAzureParams.setNoPublicIp(getNoPublicIp());
+        environmentNetworkAzureParams.setResourceGroupName(getResourceGroupName());
+        return environmentNetworkAzureParams;
+    }
+
+    public String getNetworkId() {
+        return azureProperties.getNetwork().getNetworkId();
+    }
+
+    public Set<String> getSubnetIDs() {
+        return azureProperties.getNetwork().getSubnetIds();
+    }
+
+    public Boolean getNoFirewallRules() {
+        return azureProperties.getNetwork().getNoFirewallRules();
+    }
+
+    public Boolean getNoPublicIp() {
+        return azureProperties.getNetwork().getNoPublicIp();
+    }
+
+    public String getResourceGroupName() {
+        return azureProperties.getNetwork().getResourceGroupName();
     }
 
     @Override
