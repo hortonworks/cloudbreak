@@ -58,17 +58,17 @@ public class ServiceEndpointConfig {
     }
 
     @Bean
-    public String identityServerUrl()  throws ServiceAddressResolvingException {
+    public String identityServerUrl() throws ServiceAddressResolvingException {
         return serviceAddressResolver().resolveUrl(identityServiceUrl, "http", identityServiceId);
     }
 
     @Bean
-    public String environmentServerUrl()  throws ServiceAddressResolvingException {
+    public String environmentServerUrl() throws ServiceAddressResolvingException {
         return serviceAddressResolver().resolveUrl(environmentServiceUrl + environmentContextPath, "http", environmentServiceId);
     }
 
     @Bean
-    public String freeIpaServerUrl()  throws ServiceAddressResolvingException {
+    public String freeIpaServerUrl() throws ServiceAddressResolvingException {
         return serviceAddressResolver().resolveUrl(freeipaServiceUrl + freeipaContextPath, "http", freeipaServiceId);
     }
 }
