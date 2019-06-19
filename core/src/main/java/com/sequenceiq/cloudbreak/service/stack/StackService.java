@@ -10,6 +10,7 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import com.cedarsoftware.util.io.JsonReader;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
@@ -51,6 +53,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
+import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationState;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -99,6 +102,8 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.resource.ResourceAction;
 import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.flow.domain.FlowLog;
 
 @Service
 public class StackService {
@@ -199,6 +204,9 @@ public class StackService {
 
     @Inject
     private StackUpdater stackUpdater;
+
+    @Inject
+    private FlowLogService flowLogService;
 
     @Value("${cb.nginx.port}")
     private Integer nginxPort;
@@ -824,7 +832,19 @@ public class StackService {
         checkStackHasNoAttachedClusters(stack);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Stack delete requested.");
-        if (!stack.isDeleteCompleted()) {
+        if (stack.isDeleteInProgress() && forced) {
+            List<FlowLog> flowLogs = flowLogService.findAllByStackIdOrderByCreatedDesc(stack.getId());
+            Optional<FlowLog> flowLog = flowLogs.stream()
+                    .filter(fl -> StackTerminationState.PRE_TERMINATION_STATE.name().equalsIgnoreCase(fl.getCurrentState()))
+                    .findFirst();
+            flowLog.ifPresent(fl -> {
+                Map<Object, Object> variables = (Map<Object, Object>) JsonReader.jsonToJava(fl.getVariables());
+                boolean runningFlowForced = variables.get("FORCEDTERMINATION") != null && Boolean.valueOf(variables.get("FORCEDTERMINATION").toString());
+                if (!runningFlowForced) {
+                    flowManager.triggerTermination(stack.getId(), true, deleteDependencies);
+                }
+            });
+        } else if (!stack.isDeleteCompleted() && !stack.isDeleteInProgress()) {
             flowManager.triggerTermination(stack.getId(), forced, deleteDependencies);
         } else {
             LOGGER.debug("Stack is already deleted.");
