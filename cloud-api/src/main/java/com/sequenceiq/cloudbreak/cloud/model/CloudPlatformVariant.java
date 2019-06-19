@@ -8,6 +8,10 @@ public class CloudPlatformVariant {
 
     private final Variant variant;
 
+    public CloudPlatformVariant(String platform, String variant) {
+        this(Platform.platform(platform), Variant.variant(variant));
+    }
+
     public CloudPlatformVariant(Platform platform, Variant variant) {
         this.platform = platform;
         this.variant = variant == null ? Variant.EMPTY : variant;

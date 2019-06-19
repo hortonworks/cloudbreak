@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.redbeams.domain.Credential;
+import com.sequenceiq.redbeams.dto.Credential;
 
 @Component
 public class CredentialToCloudCredentialConverter implements Converter<Credential, CloudCredential> {
@@ -21,15 +21,8 @@ public class CredentialToCloudCredentialConverter implements Converter<Credentia
         if (credential == null) {
             return null;
         }
-        Map<String, Object> fields;
-        if (credential.getId() == null) {
-            fields = isEmpty(credential.getAttributes()) ? new HashMap<>() : new Json(credential.getAttributes()).getMap();
-        } else {
-            fields = new Json(credential.getAttributes()).getMap();
-        }
-        fields.put(CREDENTIAL_ID, credential.getId());
-        //TODO replace credential id with crn
-        return new CloudCredential(credential.getId().toString(), credential.getName(), fields);
+        Map<String, Object> fields = isEmpty(credential.getAttributes()) ? new HashMap<>() : new Json(credential.getAttributes()).getMap();
+        return new CloudCredential(credential.getCrn(), credential.getName(), fields);
     }
 
 }

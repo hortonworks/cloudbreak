@@ -84,6 +84,7 @@ dependencies {
   implementation project(':flow')
   implementation project(':cloud-reactor')
   implementation project(':cloud-reactor-api')
+  implementation project(':environment-api')
 
   compile project(':cloud-common')
   compile project(':secret-engine')

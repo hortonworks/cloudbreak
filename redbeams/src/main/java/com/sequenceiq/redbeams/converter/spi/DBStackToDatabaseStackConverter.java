@@ -31,8 +31,7 @@ public class DBStackToDatabaseStackConverter {
     public DatabaseStack convert(DBStack dbStack) {
         Network network = buildNetwork(dbStack);
         DatabaseServer databaseServer = buildDatabaseServer(dbStack);
-        // FIXME need to retrieve template
-        return new DatabaseStack(network, databaseServer, getUserDefinedTags(dbStack), null);
+        return new DatabaseStack(network, databaseServer, getUserDefinedTags(dbStack), dbStack.getTemplate());
     }
 
     private Network buildNetwork(DBStack dbStack) {
@@ -83,7 +82,7 @@ public class DBStackToDatabaseStackConverter {
     private Map<String, String> getUserDefinedTags(DBStack dbStack) {
         Map<String, String> result = Maps.newHashMap();
         try {
-            if (dbStack.getTags() != null) {
+            if (dbStack.getTags() != null && dbStack.getTags().getValue() != null) {
                 StackTags stackTag = dbStack.getTags().get(StackTags.class);
                 Map<String, String> userDefined = stackTag.getUserDefinedTags();
                 Map<String, String> defaultTags = stackTag.getDefaultTags();

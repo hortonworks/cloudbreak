@@ -8,14 +8,14 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.service.secret.service.SecretAspectService;
+import com.sequenceiq.redbeams.service.security.RecursiveSecretAspectService;
 
 @Component
 @Aspect
 public class SecretAspects {
 
     @Inject
-    private SecretAspectService secretAspectService;
+    private RecursiveSecretAspectService secretAspectService;
 
     @Pointcut("execution(public * com.sequenceiq.redbeams.repository..*.save(..)) ")
     public void onRepositorySave() {

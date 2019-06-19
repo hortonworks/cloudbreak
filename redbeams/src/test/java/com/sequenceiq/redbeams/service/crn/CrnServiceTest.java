@@ -42,6 +42,16 @@ public class CrnServiceTest {
     }
 
     @Test
+    public void testGetCurrentAccountId() {
+        assertEquals(TEST_ACCOUNT_ID, crnService.getCurrentAccountId());
+    }
+
+    @Test
+    public void testGetCurrentUserId() {
+        assertEquals(TEST_USER_ID, crnService.getCurrentUserId());
+    }
+
+    @Test
     public void testCreateCrnDatabaseConfig() {
         DatabaseConfig resource = new DatabaseConfig();
         Crn crn = crnService.createCrn(resource);

@@ -9,6 +9,7 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.CreateDatabaseV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
@@ -16,13 +17,14 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateD
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.TerminateDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerAllocationOutcomeV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTerminationOutcomeV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerAllocationOutcomeV4Response;
+import com.sequenceiq.redbeams.converter.stack.AllocateDatabaseServerV4RequestToDBStackConverter;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
-import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerRequest;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.redbeams.termination.event.terminate.TerminateDatabaseServerRequest;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
@@ -44,6 +46,12 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     private DatabaseServerConfigService databaseServerConfigService;
 
     @Inject
+    private AllocateDatabaseServerV4RequestToDBStackConverter dbStackConverter;
+
+    @Inject
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
+
+    @Inject
     private ConverterUtil converterUtil;
 
     @Override
@@ -60,8 +68,11 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Override
     public DatabaseServerAllocationOutcomeV4Response create(AllocateDatabaseServerV4Request request) {
-        // Dummy launch database call
-        return redbeamsCreationService.launchDatabase(new AllocateDatabaseServerRequest(0L), "");
+        DBStack dbStack = dbStackConverter.convert(request, threadBasedUserCrnProvider.getUserCrn());
+        DatabaseServerConfig server = redbeamsCreationService.launchDatabase(dbStack);
+        // FIXME the converter for this doesn't exist yet, and probably needs to convert something
+        // more than just a DatabaseServerConfig
+        return converterUtil.convert(server, DatabaseServerAllocationOutcomeV4Response.class);
     }
 
     @Override

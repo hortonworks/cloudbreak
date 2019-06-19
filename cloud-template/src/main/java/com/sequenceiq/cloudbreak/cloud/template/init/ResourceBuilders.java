@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -23,14 +23,14 @@ import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 @Component
 public class ResourceBuilders {
 
-    @Inject
-    private List<NetworkResourceBuilder> network;
+    @Autowired(required = false)
+    private List<NetworkResourceBuilder> network = new ArrayList<>();
 
-    @Inject
-    private List<ComputeResourceBuilder> compute;
+    @Autowired(required = false)
+    private List<ComputeResourceBuilder> compute = new ArrayList<>();
 
-    @Inject
-    private List<GroupResourceBuilder> group;
+    @Autowired(required = false)
+    private List<GroupResourceBuilder> group = new ArrayList<>();
 
     private final Map<Platform, List<NetworkResourceBuilder<ResourceBuilderContext>>> networkChain = new HashMap<>();
 
