@@ -14,6 +14,10 @@ public class HdfsRoles {
 
     public static final String BALANCER = "BALANCER";
 
+    public static final String GATEWAY = "GATEWAY";
+
+    public static final String FAILOVERCONTROLLER = "FAILOVERCONTROLLER";
+
     private HdfsRoles() { }
 
 }

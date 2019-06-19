@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cmtemplate.configproviders.oozie;
+package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 
@@ -15,37 +15,34 @@ import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @Component
-public class OozieKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
+public class HbaseKnoxRoleConfigProvider extends AbstractRoleConfigProvider {
 
-    private static final String OOZIE_SERVICE_PROXY_USER_SERVICE_PROXYUSER_KNOX_GROUPS = "oozie.service.ProxyUserService.proxyuser.knox.groups";
+    private static final String CONFIG_SAFETY_VALVE = "hbase_restserver_config_safety_valve";
 
-    private static final String OOZIE_SERVICE_PROXY_USER_SERVICE_PROXYUSER_KNOX_HOSTS = "oozie.service.ProxyUserService.proxyuser.knox.hosts";
-
-    private static final String OOZIE_CONFIG_SAFETY_VALVE = "oozie_config_safety_valve";
+    private static final String SUPPORT_PROXYUSER = "hbase.rest.support.proxyuser";
 
     @Override
     public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         return List.of(
-                config(OOZIE_CONFIG_SAFETY_VALVE,
-                        ConfigUtils.getSafetyValveProperty(OOZIE_SERVICE_PROXY_USER_SERVICE_PROXYUSER_KNOX_GROUPS, "*")
-                                + ConfigUtils.getSafetyValveProperty(OOZIE_SERVICE_PROXY_USER_SERVICE_PROXYUSER_KNOX_HOSTS, "*")));
+                config(CONFIG_SAFETY_VALVE,
+                        ConfigUtils.getSafetyValveProperty(SUPPORT_PROXYUSER, "true")));
     }
 
     @Override
     public String getServiceType() {
-        return OozieRoles.OOZIE;
+        return "HBASE";
     }
 
     @Override
     public List<String> getRoleTypes() {
-        return List.of(OozieRoles.OOZIE_SERVER);
+        return List.of(HbaseRoles.HBASERESTSERVER);
     }
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return Objects.nonNull(source.getGatewayView())
                 && Objects.nonNull(source.getGatewayView().getExposedServices())
-                && source.getGatewayView().getExposedServices().getValue().contains(ExposedService.OOZIE_UI.getKnoxService());
+                && source.getGatewayView().getExposedServices().getValue().contains(ExposedService.HBASE.getKnoxService());
     }
 
 }

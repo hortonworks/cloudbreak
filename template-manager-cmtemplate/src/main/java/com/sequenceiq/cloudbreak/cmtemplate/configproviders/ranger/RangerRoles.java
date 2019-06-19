@@ -6,6 +6,8 @@ public class RangerRoles {
 
     public static final String RANGER = "RANGER";
 
+    public static final String RANGER_USERSYNC = "RANGER_USERSYNC";
+
     private RangerRoles() { }
 
 }

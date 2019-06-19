@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn;
+package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 
@@ -15,37 +15,37 @@ import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @Component
-public class YarnConfigProvider implements CmTemplateComponentConfigProvider {
+public class HdfsConfigProvider implements CmTemplateComponentConfigProvider {
 
-    private static final String HADOOP_PROXYUSER_KNOX_GROUPS = "hadoop.proxyuser.knox.groups";
+    private static final String HADOOP_HTTP_FILTER_INITIALIZERS = "hadoop.http.filter.initializers";
 
-    private static final String HADOOP_PROXYUSER_KNOX_HOSTS = "hadoop.proxyuser.knox.hosts";
+    private static final String CORE_SITE_SAFETY_VALVE = "core_site_safety_valve";
 
-    private static final String YARN_CORE_SITE_SAFETY_VALVE = "yarn_core_site_safety_valve";
+    private static final String VALUE = "org.apache.hadoop.security.HttpCrossOriginFilterInitializer,"
+            + "org.apache.hadoop.security.authentication.server.ProxyUserAuthenticationFilterInitializer";
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
         return List.of(
-                config(YARN_CORE_SITE_SAFETY_VALVE,
-                        ConfigUtils.getSafetyValveProperty(HADOOP_PROXYUSER_KNOX_GROUPS, "*")
-                                + ConfigUtils.getSafetyValveProperty(HADOOP_PROXYUSER_KNOX_HOSTS, "*")));
+                config(CORE_SITE_SAFETY_VALVE,
+                        ConfigUtils.getSafetyValveProperty(HADOOP_HTTP_FILTER_INITIALIZERS, VALUE)));
     }
 
     @Override
     public String getServiceType() {
-        return YarnRoles.YARN;
+        return HdfsRoles.HDFS;
     }
 
     @Override
     public List<String> getRoleTypes() {
-        return List.of(YarnRoles.YARN);
+        return List.of(HdfsRoles.NAMENODE, HdfsRoles.DATANODE, HdfsRoles.SECONDARYNAMENODE, HdfsRoles.JOURNALNODE);
     }
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return Objects.nonNull(source.getGatewayView())
                 && Objects.nonNull(source.getGatewayView().getExposedServices())
-                && source.getGatewayView().getExposedServices().getValue().contains(ExposedService.RESOURCEMANAGER_WEB.getKnoxService());
+                && source.getGatewayView().getExposedServices().getValue().contains(ExposedService.NAMENODE.getKnoxService());
     }
 
 }
