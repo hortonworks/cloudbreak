@@ -16,6 +16,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -36,32 +37,28 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.authorization.PermissionCheckingUtils;
-import com.sequenceiq.cloudbreak.workspace.resource.ResourceAction;
-import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
+import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationState;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.saltsecurityconf.SaltSecurityConfigService;
@@ -69,6 +66,13 @@ import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.workspace.resource.ResourceAction;
+import com.sequenceiq.cloudbreak.workspace.resource.WorkspaceResource;
+import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.flow.domain.FlowLog;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackServiceTest {
@@ -180,6 +184,9 @@ public class StackServiceTest {
 
     @Mock
     private ConverterUtil converterUtil;
+
+    @Mock
+    private FlowLogService flowLogService;
 
     @Before
     public void setup() {
@@ -760,6 +767,89 @@ public class StackServiceTest {
                 .checkPermissionByWorkspaceIdForUser(anyLong(), any(WorkspaceResource.class), any(ResourceAction.class), any(User.class));
         verify(permissionCheckingUtils, times(1))
                 .checkPermissionByWorkspaceIdForUser(WORKSPACE_ID, WorkspaceResource.STACK, ResourceAction.WRITE, user);
+    }
+
+    @Test
+    public void testDeleteWithoutForceWithDeleteInProgress() {
+        Stack stack = mock(Stack.class);
+        when(datalakeResourcesService.findByDatalakeStackId(anyLong())).thenReturn(Optional.empty());
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
+        when(stack.isDeleteInProgress()).thenReturn(Boolean.TRUE);
+        when(stack.isDeleteCompleted()).thenReturn(Boolean.FALSE);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stack.getWorkspace()).thenReturn(workspace);
+
+        underTest.delete(STACK_NAME, WORKSPACE_ID, false, true, user);
+
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void testDeleteWithForceWithDeleteInProgressNotForced() {
+        Stack stack = mock(Stack.class);
+        when(datalakeResourcesService.findByDatalakeStackId(anyLong())).thenReturn(Optional.empty());
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
+        when(stack.isDeleteInProgress()).thenReturn(Boolean.TRUE);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stack.getWorkspace()).thenReturn(workspace);
+        FlowLog flowLog = new FlowLog();
+        flowLog.setVariables("{\"FORCEDTERMINATION\":false}");
+        flowLog.setCurrentState(StackTerminationState.PRE_TERMINATION_STATE.name());
+        when(flowLogService.findAllByStackIdOrderByCreatedDesc(STACK_ID)).thenReturn(Collections.singletonList(flowLog));
+
+        underTest.delete(STACK_NAME, WORKSPACE_ID, true, true, user);
+
+        verify(flowManager, times(1)).triggerTermination(anyLong(), eq(true), anyBoolean());
+    }
+
+    @Test
+    public void testDeleteWithForceWithDeleteInProgressForced() {
+        Stack stack = mock(Stack.class);
+        when(datalakeResourcesService.findByDatalakeStackId(anyLong())).thenReturn(Optional.empty());
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
+        when(stack.isDeleteInProgress()).thenReturn(Boolean.TRUE);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stack.getWorkspace()).thenReturn(workspace);
+        FlowLog flowLog = new FlowLog();
+        flowLog.setVariables("{\"FORCEDTERMINATION\":true}");
+        flowLog.setCurrentState(StackTerminationState.PRE_TERMINATION_STATE.name());
+        when(flowLogService.findAllByStackIdOrderByCreatedDesc(STACK_ID)).thenReturn(Collections.singletonList(flowLog));
+
+        underTest.delete(STACK_NAME, WORKSPACE_ID, true, true, user);
+
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void testDeleteWithForceWithDeleteCompleted() {
+        Stack stack = mock(Stack.class);
+        when(datalakeResourcesService.findByDatalakeStackId(anyLong())).thenReturn(Optional.empty());
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
+        when(stack.isDeleteInProgress()).thenReturn(Boolean.FALSE);
+        when(stack.isDeleteCompleted()).thenReturn(Boolean.TRUE);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stack.getWorkspace()).thenReturn(workspace);
+
+        underTest.delete(STACK_NAME, WORKSPACE_ID, true, true, user);
+
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(flowLogService, times(0)).findAllByStackIdOrderByCreatedDesc(STACK_ID);
+    }
+
+    @Test
+    public void testDeleteWithoutForceWithDeleteCompleted() {
+        Stack stack = mock(Stack.class);
+        when(datalakeResourcesService.findByDatalakeStackId(anyLong())).thenReturn(Optional.empty());
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.ofNullable(stack));
+        when(stack.isDeleteInProgress()).thenReturn(Boolean.FALSE);
+        when(stack.isDeleteCompleted()).thenReturn(Boolean.TRUE);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stack.getWorkspace()).thenReturn(workspace);
+
+        underTest.delete(STACK_NAME, WORKSPACE_ID, false, true, user);
+
+        verify(flowManager, times(0)).triggerTermination(anyLong(), anyBoolean(), anyBoolean());
+        verify(flowLogService, times(0)).findAllByStackIdOrderByCreatedDesc(STACK_ID);
     }
 
     @Test
