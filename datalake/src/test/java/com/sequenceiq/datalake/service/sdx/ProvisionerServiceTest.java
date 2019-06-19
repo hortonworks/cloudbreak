@@ -112,10 +112,9 @@ class ProvisionerServiceTest {
         when(cbEndpointMock.stackV4Endpoint()).thenReturn(stackEndpointMock);
         when(cloudbreakClient.withCrn(anyString())).thenReturn(cbEndpointMock);
         when(sdxClusterRepository.findById(id)).thenReturn(Optional.of(sdxCluster));
-        mockEnvironmentCall();
-        provisionerService.startStackProvisioning(id);
+        provisionerService.startStackProvisioning(id, getEnvironmentResponse());
         final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
-        verify(sdxClusterRepository, times(2)).save(captor.capture());
+        verify(sdxClusterRepository, times(1)).save(captor.capture());
         SdxCluster postedSdxCluster = captor.getValue();
         Assertions.assertEquals(SdxClusterStatus.REQUESTED_FROM_CLOUDBREAK, postedSdxCluster.getStatus());
         Assertions.assertEquals(stackIdFromCB, postedSdxCluster.getStackId());
@@ -127,7 +126,7 @@ class ProvisionerServiceTest {
 
         when(sdxClusterRepository.findById(id)).thenReturn(Optional.empty());
         Assertions.assertThrows(com.sequenceiq.cloudbreak.exception.NotFoundException.class,
-                () -> provisionerService.startStackProvisioning(id));
+                () -> provisionerService.startStackProvisioning(id, getEnvironmentResponse()));
     }
 
     @Test
@@ -425,7 +424,7 @@ class ProvisionerServiceTest {
         Assertions.assertEquals(SdxClusterStatus.DELETED, postedSdxCluster.getStatus());
     }
 
-    private void mockEnvironmentCall() {
+    private DetailedEnvironmentResponse getEnvironmentResponse() {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setName("env");
         detailedEnvironmentResponse.setEnvironmentStatus(EnvironmentStatus.AVAILABLE);
@@ -457,8 +456,6 @@ class ProvisionerServiceTest {
         Map<String, CloudSubnet> cloudSubnetMap = Map.of("subnet",  cloudSubnet);
         network.setSubnetMetas(cloudSubnetMap);
         detailedEnvironmentResponse.setNetwork(network);
-        when(environmentServiceClient.withCrn(anyString())).thenReturn(environmentServiceEndpoints);
-        when(environmentServiceEndpoints.environmentV1Endpoint()).thenReturn(environmentEndpoint);
-        when(environmentEndpoint.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
+        return detailedEnvironmentResponse;
     }
 }

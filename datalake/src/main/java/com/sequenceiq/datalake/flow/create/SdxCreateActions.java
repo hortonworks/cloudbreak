@@ -18,7 +18,9 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
-import com.sequenceiq.datalake.flow.create.event.StackCreationFailedEvent;
+import com.sequenceiq.datalake.flow.create.event.EnvWaitRequest;
+import com.sequenceiq.datalake.flow.create.event.EnvWaitSuccessEvent;
+import com.sequenceiq.datalake.flow.create.event.SdxCreateFailedEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationWaitRequest;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
@@ -37,10 +39,9 @@ public class SdxCreateActions {
     @Inject
     private SdxService sdxService;
 
-    @Bean(name = "SDX_CREATION_START_STATE")
-    public Action<?, ?> sdxCreation() {
+    @Bean(name = "SDX_CREATION_WAIT_ENV_STATE")
+    public Action<?, ?> envWaitInProgress() {
         return new AbstractSdxAction<>(SdxEvent.class) {
-
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext, SdxEvent payload) {
                 return new SdxContext(flowParameters, payload.getResourceId());
@@ -48,13 +49,40 @@ public class SdxCreateActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
-                provisionerService.startStackProvisioning(payload.getResourceId());
-                sendEvent(context, SDX_STACK_CREATION_IN_PROGRESS_EVENT.event(), payload);
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(SdxContext context) {
+                return new EnvWaitRequest(context.getSdxId());
             }
 
             @Override
             protected Object getFailurePayload(SdxEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return new StackCreationFailedEvent(payload.getResourceId(), ex);
+                return new SdxCreateFailedEvent(payload.getResourceId(), ex);
+            }
+        };
+    }
+
+    @Bean(name = "SDX_CREATION_START_STATE")
+    public Action<?, ?> sdxCreation() {
+        return new AbstractSdxAction<>(EnvWaitSuccessEvent.class) {
+
+            @Override
+            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    EnvWaitSuccessEvent payload) {
+                return new SdxContext(flowParameters, payload.getResourceId());
+            }
+
+            @Override
+            protected void doExecute(SdxContext context, EnvWaitSuccessEvent payload, Map<Object, Object> variables) throws Exception {
+                provisionerService.startStackProvisioning(payload.getResourceId(), payload.getDetailedEnvironmentResponse());
+                sendEvent(context, SDX_STACK_CREATION_IN_PROGRESS_EVENT.event(), payload);
+            }
+
+            @Override
+            protected Object getFailurePayload(EnvWaitSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+                return new SdxCreateFailedEvent(payload.getResourceId(), ex);
             }
         };
     }
@@ -80,7 +108,7 @@ public class SdxCreateActions {
 
             @Override
             protected Object getFailurePayload(SdxEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return new StackCreationFailedEvent(payload.getResourceId(), ex);
+                return new SdxCreateFailedEvent(payload.getResourceId(), ex);
             }
         };
     }
@@ -108,21 +136,21 @@ public class SdxCreateActions {
 
     @Bean(name = "SDX_CREATION_FAILED_STATE")
     public Action<?, ?> failedAction() {
-        return new AbstractSdxAction<>(StackCreationFailedEvent.class) {
+        return new AbstractSdxAction<>(SdxCreateFailedEvent.class) {
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
-                    StackCreationFailedEvent payload) {
+                    SdxCreateFailedEvent payload) {
                 return new SdxContext(flowParameters, payload.getResourceId());
             }
 
             @Override
-            protected void doExecute(SdxContext context, StackCreationFailedEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(SdxContext context, SdxCreateFailedEvent payload, Map<Object, Object> variables) throws Exception {
                 sdxService.updateSdxStatus(payload.getResourceId(), SdxClusterStatus.PROVISIONING_FAILED);
                 sendEvent(context, SDX_CREATE_FAILED_HANDLED_EVENT.event(), payload);
             }
 
             @Override
-            protected Object getFailurePayload(StackCreationFailedEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(SdxCreateFailedEvent payload, Optional<SdxContext> flowContext, Exception ex) {
                 return null;
             }
         };
