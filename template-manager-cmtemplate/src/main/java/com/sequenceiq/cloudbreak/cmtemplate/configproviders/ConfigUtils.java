@@ -48,10 +48,8 @@ public class ConfigUtils {
         return new ApiClusterTemplateVariable().name(name).value(value);
     }
 
-    public static Optional<RDSConfig> getFirstRDSConfigOptional(TemplatePreparationObject source, DatabaseType databaseType) {
-        return source.getRdsConfigs().stream()
-                .filter(rds -> databaseType.name().equalsIgnoreCase(rds.getType()))
-                .findFirst();
+    public static RDSConfig getRdsConfigOfType(DatabaseType databaseType, TemplatePreparationObject source) {
+        return source.getRdsConfig(databaseType);
     }
 
     public static Optional<StorageLocationView> getStorageLocationForServiceProperty(TemplatePreparationObject source, String serviceProperty) {

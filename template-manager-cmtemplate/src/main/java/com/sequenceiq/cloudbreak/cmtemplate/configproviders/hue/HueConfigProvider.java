@@ -2,21 +2,19 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 @Component
-public class HueConfigProvider implements CmTemplateComponentConfigProvider {
+public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
 
     private static final String HUE_DATABASE_HOST = "hue-hue_database_host";
 
@@ -31,7 +29,7 @@ public class HueConfigProvider implements CmTemplateComponentConfigProvider {
     private static final String HUE_DATABASE_PASSWORD = "hue-hue_database_password";
 
     @Override
-    public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
+    public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> result = new ArrayList<>();
         result.add(new ApiClusterTemplateConfig().name("database_host").variable(HUE_DATABASE_HOST));
         result.add(new ApiClusterTemplateConfig().name("database_port").variable(HUE_DATABASE_PORT));
@@ -45,7 +43,7 @@ public class HueConfigProvider implements CmTemplateComponentConfigProvider {
     @Override
     public List<ApiClusterTemplateVariable> getServiceConfigVariables(TemplatePreparationObject source) {
         List<ApiClusterTemplateVariable> result = new ArrayList<>();
-        RdsView hueRdsView = new RdsView(getFirstRDSConfigOptional(source).get());
+        RdsView hueRdsView = getRdsView(source);
         result.add(new ApiClusterTemplateVariable().name(HUE_DATABASE_HOST).value(hueRdsView.getHost()));
         result.add(new ApiClusterTemplateVariable().name(HUE_DATABASE_PORT).value(hueRdsView.getPort()));
         result.add(new ApiClusterTemplateVariable().name(HUE_DATABASE_NAME).value(hueRdsView.getDatabaseName()));
@@ -66,11 +64,12 @@ public class HueConfigProvider implements CmTemplateComponentConfigProvider {
     }
 
     @Override
-    public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        return getFirstRDSConfigOptional(source).isPresent() && cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes());
+    protected DatabaseType dbType() {
+        return DatabaseType.HUE;
     }
 
-    private Optional<RDSConfig> getFirstRDSConfigOptional(TemplatePreparationObject source) {
-        return source.getRdsConfigs().stream().filter(rds -> DatabaseType.HUE.name().equalsIgnoreCase(rds.getType())).findFirst();
+    @Override
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+        return List.of();
     }
 }

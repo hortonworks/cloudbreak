@@ -25,7 +25,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreConfigProvider;
@@ -70,9 +70,6 @@ public class CentralCmTemplateUpdaterTest {
     @Mock
     private GeneralClusterConfigs generalClusterConfigs;
 
-    @Mock
-    private RDSConfig rdsConfig;
-
     private ClouderaManagerRepo clouderaManagerRepo;
 
     @Before
@@ -82,7 +79,9 @@ public class CentralCmTemplateUpdaterTest {
         when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
         when(templatePreparationObject.getHostgroupViews()).thenReturn(toHostgroupViews(getHostgroupMappings()));
         when(templatePreparationObject.getGeneralClusterConfigs()).thenReturn(generalClusterConfigs);
-        when(templatePreparationObject.getRdsConfigs()).thenReturn(getRdsConfigs());
+        RDSConfig rdsConfig = TestUtil.rdsConfig(DatabaseType.HIVE);
+        when(templatePreparationObject.getRdsConfigs()).thenReturn(Set.of(rdsConfig));
+        when(templatePreparationObject.getRdsConfig(DatabaseType.HIVE)).thenReturn(rdsConfig);
         when(generalClusterConfigs.getClusterName()).thenReturn("testcluster");
         when(generalClusterConfigs.getPassword()).thenReturn("Admin123!");
         clouderaManagerRepo = new ClouderaManagerRepo();
@@ -183,13 +182,4 @@ public class CentralCmTemplateUpdaterTest {
         return result;
     }
 
-    private Set<RDSConfig> getRdsConfigs() {
-        RDSConfig config = new RDSConfig();
-        config.setConnectionURL("jdbc:postgresql://cluster.test.com:5432/hive");
-        config.setDatabaseEngine(DatabaseVendor.POSTGRES);
-        config.setType(DatabaseType.HIVE.name());
-        config.setConnectionUserName("user");
-        config.setConnectionPassword("password");
-        return Set.of(config);
-    }
 }

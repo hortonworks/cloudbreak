@@ -8,25 +8,20 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 @Component
-public class HiveMetastoreConfigProvider extends AbstractRoleConfigProvider {
+public class HiveMetastoreConfigProvider extends AbstractRdsRoleConfigProvider {
 
     @Override
-    public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
-        Optional<RDSConfig> rdsConfigOptional = getFirstRDSConfigOptional(templatePreparationObject);
-        Preconditions.checkArgument(rdsConfigOptional.isPresent());
-        RdsView hiveView = new RdsView(rdsConfigOptional.get());
+    public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
+        RdsView hiveView = getRdsView(source);
 
         List<ApiClusterTemplateConfig> configs = Lists.newArrayList(
                 config("hive_metastore_database_host", hiveView.getHost()),
@@ -37,7 +32,7 @@ public class HiveMetastoreConfigProvider extends AbstractRoleConfigProvider {
                 config("hive_metastore_database_user", hiveView.getConnectionUserName())
         );
 
-        Optional<KerberosConfig> kerberosConfigOpt = templatePreparationObject.getKerberosConfig();
+        Optional<KerberosConfig> kerberosConfigOpt = source.getKerberosConfig();
         if (kerberosConfigOpt.isPresent()) {
             String realm = Optional.ofNullable(kerberosConfigOpt.get().getRealm()).orElse("").toUpperCase();
             String safetyValveValue = "<property><name>hive.server2.authentication.kerberos.principal</name><value>hive/_HOST@" + realm
@@ -59,8 +54,8 @@ public class HiveMetastoreConfigProvider extends AbstractRoleConfigProvider {
     }
 
     @Override
-    public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        return getFirstRDSConfigOptional(source).isPresent() && cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes());
+    protected DatabaseType dbType() {
+        return DatabaseType.HIVE;
     }
 
     @Override
@@ -68,10 +63,6 @@ public class HiveMetastoreConfigProvider extends AbstractRoleConfigProvider {
         return List.of(
                 config("metastore_canary_health_enabled", Boolean.FALSE.toString())
         );
-    }
-
-    private Optional<RDSConfig> getFirstRDSConfigOptional(TemplatePreparationObject source) {
-        return ConfigUtils.getFirstRDSConfigOptional(source, DatabaseType.HIVE);
     }
 
 }
