@@ -23,7 +23,8 @@ public class RedbeamsProvisionActions {
 
             @Override
             protected Selectable createRequest(RedbeamsContext context) {
-                return new AllocateDatabaseServerRequest(0L);
+                return new AllocateDatabaseServerRequest(context.getCloudContext(), context.getCloudCredential(),
+                        context.getDatabaseStack());
             }
         };
     }

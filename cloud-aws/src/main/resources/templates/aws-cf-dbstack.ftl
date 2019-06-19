@@ -117,7 +117,7 @@
         }
   },
   "Outputs" : {
-      "CreatedDBInstance": { "Ref": "DBInstance" },
-      "CreatedDBSubnetGroup": { "Ref": "DBSubnetGroup" }
+      "CreatedDBInstance": { "Value": { "Ref": "DBInstance" } },
+      "CreatedDBSubnetGroup": { "Value": { "Ref": "DBSubnetGroup" } }
   }
 }

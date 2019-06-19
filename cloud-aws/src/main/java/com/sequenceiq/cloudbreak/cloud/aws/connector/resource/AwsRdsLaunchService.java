@@ -81,10 +81,11 @@ public class AwsRdsLaunchService {
             cfRetryClient.describeStacks(new DescribeStacksRequest().withStackName(cFStackName));
             LOGGER.debug("Stack already exists: {}", cFStackName);
         } catch (AmazonServiceException ignored) {
-            boolean existingVPC = awsNetworkView.isExistingVPC();
+            // boolean existingVPC = awsNetworkView.isExistingVPC();
             // all subnets desired for DB subnet group are in the stack
             boolean existingSubnet = awsNetworkView.isExistingSubnet();
-            if (!existingVPC || !existingSubnet) {
+            // if (!existingVPC || !existingSubnet) {
+            if (!existingSubnet) {
                 throw new CloudConnectorException("Can only create RDS instance with existing subnets");
             }
             CloudResource cloudFormationStack = new Builder().type(ResourceType.CLOUDFORMATION_STACK).name(cFStackName).build();

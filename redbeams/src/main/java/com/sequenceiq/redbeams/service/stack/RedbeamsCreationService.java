@@ -1,15 +1,17 @@
 package com.sequenceiq.redbeams.service.stack;
 
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerAllocationOutcomeV4Response;
-import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConverter;
-import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsProvisionEvent;
-import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerRequest;
+// import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
+import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.exception.RedbeamsException;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
+import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsProvisionEvent;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
-import com.sequenceiq.redbeams.service.crn.CrnService;
-
-import java.security.SecureRandom;
-import java.util.Random;
+// import com.sequenceiq.redbeams.service.crn.CrnService;
 
 import javax.inject.Inject;
 
@@ -23,20 +25,48 @@ public class RedbeamsCreationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(RedbeamsCreationService.class);
 
     @Inject
-    private CredentialToCloudCredentialConverter credentialConverter;
+    private CloudPlatformConnectors cloudPlatformConnectors;
+
+    @Inject
+    private DBStackService dbStackService;
 
     @Inject
     private RedbeamsFlowManager flowManager;
 
-    @Inject
-    private CrnService crnService;
+    // @Inject
+    // private CrnService crnService;
 
-    private final Random random = new SecureRandom();
+    // FIXME need more than just a config
+    public DatabaseServerConfig launchDatabase(DBStack dbStack) {
+        // FIXME log the stack?
 
-    public DatabaseServerAllocationOutcomeV4Response launchDatabase(AllocateDatabaseServerRequest request, String accountId) {
-        // Replace resourceId with something non-random
+        // String accountId = crnService.getCurrentAccountId();
+        // checkIfAlreadyExistsInEnvironment(request, accountId);
+        // String userId = crnService.getCurrentUserId();
+        // crnService doesn't really use dbStack, for now
+        // dbStack.setResourceCrn(crnService.createCrn(dbStack, Crn.ResourceType.DATABASE_SERVER));
+
+        // possible future change is to use a flow here (GetPlatformTemplateRequest, modified for database server)
+        // for now, just get it synchronously / within this thread, it ought to be quick
+        CloudPlatformVariant platformVariant = new CloudPlatformVariant(dbStack.getCloudPlatform(), dbStack.getPlatformVariant());
+        try {
+            CloudConnector<Object> connector = cloudPlatformConnectors.get(platformVariant);
+            if (connector == null) {
+                throw new RedbeamsException("Failed to find cloud connector for platform variant " + platformVariant);
+            }
+            String template = connector.resources().getDBStackTemplate();
+            if (template == null) {
+                throw new RedbeamsException("No database stack template is available for platform variant " + platformVariant);
+            }
+            dbStack.setTemplate(template);
+        } catch (TemplatingDoesNotSupportedException e) {
+            throw new RedbeamsException("Failed to retrieve database stack template for cloud platform", e);
+        }
+
+        dbStackService.save(dbStack);
+
         flowManager.notify(RedbeamsProvisionEvent.REDBEAMS_PROVISION_EVENT.selector(),
-                new RedbeamsEvent(RedbeamsProvisionEvent.REDBEAMS_PROVISION_EVENT.selector(), random.nextLong()));
-        return new DatabaseServerAllocationOutcomeV4Response();
+                new RedbeamsEvent(RedbeamsProvisionEvent.REDBEAMS_PROVISION_EVENT.selector(), dbStack.getId()));
+        return new DatabaseServerConfig();
     }
 }

@@ -44,6 +44,9 @@ redbeams:
   threadpool:
     core.size: 40
     capacity.size: 4000
+  environment:
+    url: http://localhost:8088
+    contextPath: /environmentservice
   intermediate.threadpool:
     core.size: 40
     capacity.size: 4000
@@ -51,6 +54,11 @@ redbeams:
     core.size: 40
     capacity.size: 4000
   etc.config.dir: /etc/cloudbreak
+
+spring:
+  freemarker:
+    template-loader-path: file:/etc/redbeams,classpath:/
+    prefer-file-system-access: false
 
 rest:
   debug: false
@@ -85,6 +93,7 @@ cb:
     GCP: 50
   enabled.linux.types: redhat6,redhat7,centos6,centos7,amazonlinux,amazonlinux2
   publicip:
+  etc.config.dir: /etc/redbeams
 
   host.discovery.custom.hostname.enabled: false
 

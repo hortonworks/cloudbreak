@@ -33,7 +33,7 @@ public abstract class AbstractRedbeamsTerminationAction<P extends Payload>
     protected RedbeamsContext createFlowContext(FlowParameters flowParameters,
                                                 StateContext<RedbeamsTerminationState, RedbeamsTerminationEvent> stateContext, P payload) {
         // Get the cloud context and the cloud credentials
-        return new RedbeamsContext(flowParameters, null, null);
+        return new RedbeamsContext(flowParameters, null, null, null);
     }
 
     @Override

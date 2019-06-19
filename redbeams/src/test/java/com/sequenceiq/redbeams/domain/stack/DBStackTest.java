@@ -3,6 +3,7 @@ package com.sequenceiq.redbeams.domain.stack;
 import static org.junit.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.json.Json;
 
 import java.util.Map;
@@ -41,6 +42,12 @@ public class DBStackTest {
         dbStack.setDescription("mine not yours");
         assertEquals("mine not yours", dbStack.getDescription());
 
+        dbStack.setRegion("us-east-1");
+        assertEquals("us-east-1", dbStack.getRegion());
+
+        dbStack.setAvailabilityZone("us-east-1b");
+        assertEquals("us-east-1b", dbStack.getAvailabilityZone());
+
         dbStack.setNetwork(NETWORK);
         assertEquals(NETWORK, dbStack.getNetwork());
 
@@ -53,8 +60,21 @@ public class DBStackTest {
         dbStack.setParameters(PARAMETERS);
         assertEquals(PARAMETERS, dbStack.getParameters());
 
+        dbStack.setCloudPlatform("AWS");
+        assertEquals("AWS", dbStack.getCloudPlatform());
+
+        dbStack.setPlatformVariant("GovCloud");
+        assertEquals("GovCloud", dbStack.getPlatformVariant());
+
         dbStack.setEnvironmentId("myenv");
         assertEquals("myenv", dbStack.getEnvironmentId());
+
+        dbStack.setTemplate("template");
+        assertEquals("template", dbStack.getTemplate());
+
+        Crn ownerCrn = Crn.safeFromString("crn:altus:iam:us-west-1:cloudera:user:bob@cloudera.com");
+        dbStack.setOwnerCrn(ownerCrn);
+        assertEquals(ownerCrn, dbStack.getOwnerCrn());
     }
 
 }

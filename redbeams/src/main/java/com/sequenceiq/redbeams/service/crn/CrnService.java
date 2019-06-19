@@ -27,6 +27,15 @@ public class CrnService {
         return crn.getAccountId();
     }
 
+    public String getCurrentUserId() {
+        String userCrn = threadBasedUserCrnProvider.getUserCrn();
+        if (userCrn == null) {
+            throw new CrnParseException("Current user CRN is not set");
+        }
+        Crn crn = Crn.safeFromString(userCrn);
+        return crn.getResource();
+    }
+
     public Crn createCrn(DatabaseConfig resource) {
         return createCrn(resource, Crn.ResourceType.DATABASE);
     }

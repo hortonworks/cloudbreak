@@ -1,18 +1,25 @@
 package com.sequenceiq.redbeams.controller.v4.databaseserver;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.base.DatabaseServerV4Identifiers;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerAllocationOutcomeV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
+import com.sequenceiq.redbeams.converter.stack.AllocateDatabaseServerV4RequestToDBStackConverter;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
+import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -29,7 +36,16 @@ public class DatabaseServerV4ControllerTest {
     private DatabaseServerV4Controller underTest;
 
     @Mock
+    private RedbeamsCreationService creationService;
+
+    @Mock
     private DatabaseServerConfigService service;
+
+    @Mock
+    private AllocateDatabaseServerV4RequestToDBStackConverter dbStackConverter;
+
+    @Mock
+    private ThreadBasedUserCrnProvider threadBasedUserCrnProvider;
 
     @Mock
     private ConverterUtil converterUtil;
@@ -43,6 +59,12 @@ public class DatabaseServerV4ControllerTest {
     private DatabaseServerV4Response response;
 
     private DatabaseServerV4Response response2;
+
+    private AllocateDatabaseServerV4Request allocateRequest;
+
+    private DatabaseServerAllocationOutcomeV4Response allocateResponse;
+
+    private DBStack dbStack;
 
     @Before
     public void setUp() {
@@ -68,6 +90,12 @@ public class DatabaseServerV4ControllerTest {
         response2 = new DatabaseServerV4Response();
         response2.setId(2L);
         response2.setName("myotherserver");
+
+        allocateRequest = new AllocateDatabaseServerV4Request();
+
+        allocateResponse = new DatabaseServerAllocationOutcomeV4Response();
+
+        dbStack = new DBStack();
     }
 
     @Test
@@ -91,6 +119,21 @@ public class DatabaseServerV4ControllerTest {
         DatabaseServerV4Response response = underTest.get("myenv", "myserver");
 
         assertEquals(1L, response.getId().longValue());
+    }
+
+    @Test
+    public void testCreate() {
+        String userCrn = "userCrn";
+        when(threadBasedUserCrnProvider.getUserCrn()).thenReturn(userCrn);
+        when(dbStackConverter.convert(allocateRequest, userCrn)).thenReturn(dbStack);
+        when(creationService.launchDatabase(dbStack)).thenReturn(server);
+        when(converterUtil.convert(server, DatabaseServerAllocationOutcomeV4Response.class))
+            .thenReturn(allocateResponse);
+
+        DatabaseServerAllocationOutcomeV4Response response = underTest.create(allocateRequest);
+
+        assertEquals(allocateResponse, response);
+        verify(creationService).launchDatabase(dbStack);
     }
 
     @Test

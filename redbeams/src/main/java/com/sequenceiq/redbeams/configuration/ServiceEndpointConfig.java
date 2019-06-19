@@ -36,6 +36,12 @@ public class ServiceEndpointConfig {
     @Value("${redbeams.cloudbreak.serviceid:}")
     private String cloudbreakServiceId;
 
+    @Value("${redbeams.environment.url}")
+    private String environmentServiceUrl;
+
+    @Value("${redbeams.environment.contextPath}")
+    private String environmentRootContextPath;
+
     @Bean
     public ServiceAddressResolver serviceAddressResolver() {
         return new RetryingServiceAddressResolver(new DNSServiceAddressResolver(), resolvingTimeout);
@@ -51,5 +57,11 @@ public class ServiceEndpointConfig {
     @DependsOn("serviceAddressResolver")
     public String cloudbreakUrl(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
         return serviceAddressResolver.resolveUrl(cloudbreakUrl, "http", cloudbreakServiceId);
+    }
+
+    @Bean
+    @DependsOn("serviceAddressResolver")
+    public String environmentServiceUrl(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
+        return serviceAddressResolver.resolveUrl(environmentServiceUrl + environmentRootContextPath, "", null);
     }
 }

@@ -71,6 +71,7 @@ public class DBStackToDatabaseStackConverterTest {
         dbStack.setDatabaseServer(server);
 
         dbStack.setTags(new Json(STACK_TAGS));
+        dbStack.setTemplate("template");
 
         DatabaseStack convertedStack = underTest.convert(dbStack);
 
@@ -87,8 +88,7 @@ public class DBStackToDatabaseStackConverterTest {
         // FIXME test instanceStatus
         assertEquals(1, convertedStack.getDatabaseServer().getParameters().size());
         assertEquals("that", convertedStack.getDatabaseServer().getParameters().get("this"));
-
-        // FIXME test template
+        assertEquals("template", convertedStack.getTemplate());
 
         Map<String, String> tags = convertedStack.getTags();
         assertEquals(3, tags.size());
@@ -103,12 +103,13 @@ public class DBStackToDatabaseStackConverterTest {
         dbStack.setDatabaseServer(null);
         dbStack.setTags(null);
         dbStack.setParameters(null);
+        dbStack.setTemplate(null);
 
         DatabaseStack convertedStack = underTest.convert(dbStack);
 
         assertNull(convertedStack.getNetwork());
         assertNull(convertedStack.getDatabaseServer());
-        // FIXME test template
+        assertNull(convertedStack.getTemplate());
         assertEquals(0, convertedStack.getTags().size());
     }
 
