@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.cloudbreak.util.ValidationResult.ValidationResultBuilder;
@@ -21,7 +22,7 @@ public class EnvironmentCreationValidator {
     private final Map<CloudPlatform, EnvironmentNetworkValidator> environmentNetworkValidatorsByCloudPlatform;
 
     public EnvironmentCreationValidator(EnvironmentRegionValidator environmentRegionValidator,
-            Map<CloudPlatform, EnvironmentNetworkValidator> environmentNetworkValidatorsByCloudPlatform) {
+                                        Map<CloudPlatform, EnvironmentNetworkValidator> environmentNetworkValidatorsByCloudPlatform) {
         this.environmentRegionValidator = environmentRegionValidator;
         this.environmentNetworkValidatorsByCloudPlatform = environmentNetworkValidatorsByCloudPlatform;
     }
@@ -37,7 +38,7 @@ public class EnvironmentCreationValidator {
 
     private void validateNetwork(EnvironmentCreationDto request, String cloudPlatform, ValidationResultBuilder resultBuilder) {
         NetworkDto networkDto = request.getNetwork();
-        if (networkDto != null) {
+        if (networkDto != null && Strings.isNullOrEmpty(networkDto.getNetworkCidr())) {
             EnvironmentNetworkValidator environmentNetworkValidator = environmentNetworkValidatorsByCloudPlatform.get(CloudPlatform.valueOf(cloudPlatform));
             if (environmentNetworkValidator != null) {
                 environmentNetworkValidator.validate(networkDto, resultBuilder);

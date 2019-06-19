@@ -85,6 +85,7 @@ public class AzureNetworkTemplateBuilderTest {
                 .withSubnetCidrs(createSubnetCidrs())
                 .withNoPublicIp(false)
                 .withNoFirewallRules(false)
+                .withId(1L)
                 .build();
     }
 

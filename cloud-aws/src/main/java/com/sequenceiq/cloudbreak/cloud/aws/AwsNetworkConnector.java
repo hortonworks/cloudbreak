@@ -67,13 +67,13 @@ public class AwsNetworkConnector implements NetworkConnector {
     public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest networkRequest) {
         AwsCredentialView credentialView = new AwsCredentialView(networkRequest.getCloudCredential());
         AmazonCloudFormationRetryClient cloudFormationRetryClient = getCloudFormationRetryClient(credentialView, networkRequest);
-        List<CreatedSubnet> createdSubnetList = getCloudSubnets(networkRequest.getCloudCredential(), new ArrayList<>(networkRequest.getSubnetCidrs()));
+        List<CreatedSubnet> createdSubnetList = getCloudSubNets(networkRequest);
         String cloudFormationTemplate = createTemplate(networkRequest, createdSubnetList);
-        String envName = networkRequest.getEnvName();
+        String cfName = getCfName(networkRequest);
 
-        cloudFormationRetryClient.createStack(createStackRequest(envName, cloudFormationTemplate));
+        cloudFormationRetryClient.createStack(createStackRequest(cfName, cloudFormationTemplate));
 
-        LOGGER.debug("CloudFormation stack creation request sent with stack name: '{}' ", envName);
+        LOGGER.debug("CloudFormation stack creation request sent with stack name: '{}' ", cfName);
         PollTask<Boolean> pollTask = createPollTask(credentialView, networkRequest);
         try {
             awsBackoffSyncPollingScheduler.schedule(pollTask);
@@ -81,10 +81,14 @@ public class AwsNetworkConnector implements NetworkConnector {
             throw new CloudConnectorException(e.getMessage(), e);
         }
 
-        Map<String, String> output = cfStackUtil.getOutputs(envName, cloudFormationRetryClient);
+        Map<String, String> output = cfStackUtil.getOutputs(cfName, cloudFormationRetryClient);
         String vpcId = getCreatedVpc(output);
         Set<CreatedSubnet> subnets = getCreatedSubnets(output, createdSubnetList);
         return new CreatedCloudNetwork(vpcId, subnets);
+    }
+
+    private String getCfName(NetworkCreationRequest networkRequest) {
+        return networkRequest.getEnvName() + "-" + networkRequest.getId();
     }
 
     private AmazonCloudFormationRetryClient getCloudFormationRetryClient(AwsCredentialView credentialView, NetworkCreationRequest networkRequest) {
@@ -105,7 +109,7 @@ public class AwsNetworkConnector implements NetworkConnector {
 
     private PollTask<Boolean> createPollTask(AwsCredentialView credentialView, NetworkCreationRequest networkRequest) {
         AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, networkRequest.getRegion().value());
-        return awsPollTaskFactory.newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkRequest.getEnvName());
+        return awsPollTaskFactory.newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, getCfName(networkRequest));
     }
 
     private String getCreatedVpc(Map<String, String> output) {
@@ -136,8 +140,9 @@ public class AwsNetworkConnector implements NetworkConnector {
         return subnets;
     }
 
-    private List<CreatedSubnet> getCloudSubnets(CloudCredential cloudCredential, List<String> subnetCidrs) {
-        return awsCloudSubnetProvider.provide(awsClient.createAccess(cloudCredential), subnetCidrs);
+    private List<CreatedSubnet> getCloudSubNets(NetworkCreationRequest networkRequest) {
+        return awsCloudSubnetProvider.provide(awsClient.createAccess(new AwsCredentialView(networkRequest.getCloudCredential()),
+                networkRequest.getRegion().value()), new ArrayList<>(networkRequest.getSubnetCidrs()));
     }
 
     @Override

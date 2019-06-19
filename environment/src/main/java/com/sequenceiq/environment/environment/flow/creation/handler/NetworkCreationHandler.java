@@ -27,6 +27,7 @@ import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.network.EnvironmentNetworkCreationService;
 import com.sequenceiq.environment.network.NetworkService;
+import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
@@ -75,9 +76,10 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
             environment.ifPresent(env -> {
                 EnvironmentDto envDto = populateEnvironmentDto(env);
                 env.setStatus(EnvironmentStatus.NETWORK_CREATION_IN_PROGRESS);
-                networkService.save(hasExistingNetwork(env)
+                BaseNetwork baseNetwork = networkService.save(hasExistingNetwork(env)
                         ? networkService.decorateNetworkWithSubnetMeta(env.getNetwork().getId(), getSubnetMetadata(envDto))
                         : environmentNetworkCreationService.createNetwork(envDto, env.getNetwork()));
+                env.setNetwork(baseNetwork);
                 environmentService.save(env);
             });
 
