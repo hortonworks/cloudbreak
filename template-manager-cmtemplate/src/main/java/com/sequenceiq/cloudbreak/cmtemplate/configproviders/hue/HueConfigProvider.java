@@ -62,7 +62,7 @@ public class HueConfigProvider implements CmTemplateComponentConfigProvider {
 
     @Override
     public List<String> getRoleTypes() {
-        return List.of("HUE_SERVER", "HUE_LOAD_BALANCER");
+        return List.of(HueRoles.HUE_SERVER, HueRoles.HUE_LOAD_BALANCER);
     }
 
     @Override

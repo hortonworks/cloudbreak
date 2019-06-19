@@ -8,6 +8,10 @@ public class HiveRoles {
 
     public static final String HIVESERVER2 = "HIVESERVER2";
 
+    public static final String WEBHCAT = "WEBHCAT";
+
+    public static final String GATEWAY = "GATEWAY";
+
     private HiveRoles() { }
 
 }
