@@ -3,6 +3,8 @@ package com.sequenceiq.environment.environment.flow.delete.handler.freeipa;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +25,7 @@ public class FreeIpaDeleteRetrievalTask extends SimpleStatusCheckerTask<FreeIpaP
     public boolean checkStatus(FreeIpaPollerObject freeIpaPollerObject) {
         String environmentCrn = freeIpaPollerObject.getEnvironmentCrn();
         try {
+            LOGGER.info("Checking the state of FreeIpa termination progress for environment: '{}'", environmentCrn);
             if (getIfNotNull(freeIpaPollerObject.getFreeIpaV1Endpoint().describe(environmentCrn), response -> !response.getStatus().isSuccesfullyDeleted())) {
                 return false;
             }
@@ -50,11 +53,11 @@ public class FreeIpaDeleteRetrievalTask extends SimpleStatusCheckerTask<FreeIpaP
         try {
             String environmentCrn = freeIpaPollerObject.getEnvironmentCrn();
             return freeIpaPollerObject.getFreeIpaV1Endpoint().describe(environmentCrn).getStatus().isFailed();
-        } catch (NotFoundException ex) {
-            LOGGER.info("FreeIPA does not exists", ex);
-            return false;
+        } catch (WebApplicationException | ProcessingException clientException) {
+            LOGGER.info("Failed to describe FreeIpa cluster due to API client exception: {}", clientException.getMessage());
         } catch (Exception e) {
             return true;
         }
+        return false;
     }
 }

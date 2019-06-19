@@ -1,10 +1,15 @@
 package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
 
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.polling.SimpleStatusCheckerTask;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 public class FreeIpaCreationRetrievalTask extends SimpleStatusCheckerTask<FreeIpaPollerObject> {
 
@@ -18,6 +23,7 @@ public class FreeIpaCreationRetrievalTask extends SimpleStatusCheckerTask<FreeIp
     public boolean checkStatus(FreeIpaPollerObject freeIpaPollerObject) {
         String environmentCrn = freeIpaPollerObject.getEnvironmentCrn();
         try {
+            LOGGER.info("Checking the state of FreeIpa creation progress for environment: '{}'", environmentCrn);
             if (freeIpaPollerObject.getFreeIpaV1Endpoint().describe(environmentCrn).getStatus().isAvailable()) {
                 return true;
             }
@@ -42,14 +48,26 @@ public class FreeIpaCreationRetrievalTask extends SimpleStatusCheckerTask<FreeIp
     public boolean exitPolling(FreeIpaPollerObject freeIpaPollerObject) {
         try {
             String environmentCrn = freeIpaPollerObject.getEnvironmentCrn();
-            if (freeIpaPollerObject.getFreeIpaV1Endpoint().describe(environmentCrn).getStatus().isFailed()) {
-                LOGGER.debug("Stack is getting terminated, polling is cancelled.");
+            DescribeFreeIpaResponse freeIpaResponse = freeIpaPollerObject
+                    .getFreeIpaV1Endpoint()
+                    .describe(environmentCrn);
+            Status freeIpaResponseStatus = freeIpaResponse.getStatus();
+
+            if (freeIpaResponseStatus.isDeletionInProgress() || freeIpaResponseStatus.isSuccesfullyDeleted()) {
+                LOGGER.info("FreeIpa '{}' '{}' is getting terminated (status:'{}'), polling is cancelled.", freeIpaResponse.getName(),
+                        freeIpaResponse.getCrn(), freeIpaResponse.getStatus());
+                return true;
+            } else if (freeIpaResponseStatus.isFailed()) {
+                LOGGER.info("FreeIpa '{}' '{}' is in failed state (status:'{}'), polling is cancelled.", freeIpaResponse.getName(),
+                        freeIpaResponse.getCrn(), freeIpaResponse.getStatus());
                 return true;
             }
-            return false;
+        } catch (WebApplicationException | ProcessingException clientException) {
+            LOGGER.info("Failed to describe FreeIpa cluster due to API client exception: {}", clientException.getMessage());
         } catch (Exception ex) {
-            LOGGER.info("Error occurred when check status checker exit criteria: ", ex);
+            LOGGER.info("Error occurred during the polling of FreeIpa creation, interrupt polling: ", ex);
             return true;
         }
+        return false;
     }
 }

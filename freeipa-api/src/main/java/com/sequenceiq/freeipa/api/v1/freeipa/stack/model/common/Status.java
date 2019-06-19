@@ -11,7 +11,6 @@ public enum Status {
     UPDATE_FAILED,
     CREATE_FAILED,
     ENABLE_SECURITY_FAILED,
-    PRE_DELETE_IN_PROGRESS,
     DELETE_IN_PROGRESS,
     DELETE_FAILED,
     DELETE_COMPLETED,
@@ -42,6 +41,8 @@ public enum Status {
     public boolean isSuccesfullyDeleted() {
         return DELETE_COMPLETED.equals(valueOf(name()));
     }
+
+    public boolean isDeletionInProgress() { return DELETE_IN_PROGRESS.equals(valueOf(name()));}
 
     public boolean isStopPhaseActive() {
         return name().contains("STOP");
