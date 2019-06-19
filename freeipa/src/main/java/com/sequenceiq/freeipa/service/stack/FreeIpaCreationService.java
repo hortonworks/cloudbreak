@@ -8,8 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
@@ -77,13 +75,6 @@ public class FreeIpaCreationService {
     private CrnService crnService;
 
     public DescribeFreeIpaResponse launchFreeIpa(CreateFreeIpaRequest request, String accountId) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            String requestJson = mapper.writeValueAsString(request);
-            LOGGER.debug("create called with: {}", requestJson);
-        } catch (JsonProcessingException e) {
-            LOGGER.debug("failed to serialize the CreateFreeIpaRequest json", e);
-        }
         checkIfAlreadyExistsInEnvironment(request, accountId);
         String userId = crnService.getCurrentUserId();
         Credential credential = credentialService.getCredentialByEnvCrn(request.getEnvironmentCrn());
