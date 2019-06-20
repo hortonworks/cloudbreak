@@ -107,6 +107,30 @@ func DescribeFreeIpa(c *cli.Context) {
 	output.Write(header, &freeIpaOut)
 }
 
+func ListFreeIpa(c *cli.Context) {
+	defer commonutils.TimeTrack(time.Now(), "list FreeIpa clusters")
+	freeIpaClient := ClientFreeIpa(*oauth.NewFreeIpaClientFromContext(c)).FreeIpa
+	resp, err := freeIpaClient.V1freeipa.ListFreeIpaClustersByAccountV1(v1freeipa.NewListFreeIpaClustersByAccountV1Params())
+	if err != nil {
+		commonutils.LogErrorAndExit(err)
+	}
+	log.Infof("[listFreeIpa] FreeIpa clusters list requested.")
+	output := commonutils.Output{Format: c.String(fl.FlOutputOptional.Name)}
+
+	var tableRows []commonutils.Row
+
+	for _, response := range resp.Payload {
+		row := &freeIpaDetails{
+			Name:           *response.Name,
+			CRN:            *response.Crn,
+			EnvironmentCrn: *response.EnvironmentCrn,
+			Status:         response.Status,
+		}
+		tableRows = append(tableRows, row)
+	}
+	output.WriteList(listHeader, tableRows)
+}
+
 func (f *freeIpaOutDescibe) DataAsStringArray() []string {
 	return append(f.freeIpa.DataAsStringArray(), f.CRN)
 }

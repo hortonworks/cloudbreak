@@ -144,6 +144,36 @@ func (a *Client) GetFreeIpaRootCertificateByEnvironmentV1(params *GetFreeIpaRoot
 
 }
 
+/*
+ListFreeIpaClustersByAccountV1 lists all free IP a stacks by account
+
+FreeIPA is an integrated Identity and Authentication solution that can be used for any of CM, CDP services.
+*/
+func (a *Client) ListFreeIpaClustersByAccountV1(params *ListFreeIpaClustersByAccountV1Params) (*ListFreeIpaClustersByAccountV1OK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewListFreeIpaClustersByAccountV1Params()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "listFreeIpaClustersByAccountV1",
+		Method:             "GET",
+		PathPattern:        "/v1/freeipa/list",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &ListFreeIpaClustersByAccountV1Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*ListFreeIpaClustersByAccountV1OK), nil
+
+}
+
 // SetTransport changes the transport on the client
 func (a *Client) SetTransport(transport runtime.ClientTransport) {
 	a.transport = transport
