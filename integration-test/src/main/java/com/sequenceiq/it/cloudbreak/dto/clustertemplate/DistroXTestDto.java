@@ -98,7 +98,7 @@ public class DistroXTestDto extends DeletableTestDto<DistroXV1Request, ClusterTe
 
     @Override
     public Collection<ClusterTemplateV4Response> getAll(CloudbreakClient client) {
-        return null;
+        return List.of();
     }
 
     @Override

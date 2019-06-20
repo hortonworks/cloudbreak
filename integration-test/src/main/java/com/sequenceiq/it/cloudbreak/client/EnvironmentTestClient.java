@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
+import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentChangeCredentialAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteByNameAction;
@@ -32,5 +33,9 @@ public class EnvironmentTestClient {
 
     public Action<EnvironmentTestDto, EnvironmentClient> deleteByName() {
         return new EnvironmentDeleteByNameAction();
+    }
+
+    public Action<EnvironmentTestDto, EnvironmentClient> changeCredential() {
+        return new EnvironmentChangeCredentialAction();
     }
 }

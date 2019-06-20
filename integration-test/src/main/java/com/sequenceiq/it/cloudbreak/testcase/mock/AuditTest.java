@@ -17,6 +17,7 @@ import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.client.KubernetesTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.client.MpackTestClient;
+import com.sequenceiq.it.cloudbreak.client.ProxyTestClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -75,6 +76,9 @@ public class AuditTest extends AbstractIntegrationTest {
 
     @Inject
     private StackTestClient stackTestClient;
+
+    @Inject
+    private ProxyTestClient proxyTestClient;
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
@@ -279,6 +283,26 @@ public class AuditTest extends AbstractIntegrationTest {
                 .then(AuditTestAssertion.listContainsAtLeast(1), key(mpackName))
                 .validate();
     }
+
+//    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+//    @Description(
+//            given = "there is a running cloudbreak",
+//            when = "a Proxy is created",
+//            then = "and audit record must be available in the database")
+//    public void createValidProxyThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
+//        String proxyName = resourcePropertyProvider().getName();
+//        testContext
+//                .given(ProxyTestDto.class)
+//                .withName(proxyName)
+//                .when(proxyTestClient.create(), key(proxyName))
+//                .select(p -> p.getResponse().getName(), key(proxyName))
+//                .given(AuditTestDto.class)
+//                .withResourceIdByKey(proxyName)
+//                .withResourceType("proxies")
+//                .when(auditTestClient.listV4(), key(proxyName))
+//                .then(AuditTestAssertion.listContainsAtLeast(1), key(proxyName))
+//                .validate();
+//    }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(

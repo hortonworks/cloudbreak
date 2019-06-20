@@ -10,6 +10,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -35,6 +36,8 @@ public class EnvironmentTestDto
     private Collection<SimpleEnvironmentResponse> response;
 
     private SimpleEnvironmentResponse simpleResponse;
+
+    private EnvironmentChangeCredentialRequest enviornmentChangeCredentialRequest;
 
     public EnvironmentTestDto(TestContext testContext) {
         super(new EnvironmentRequest(), testContext);
@@ -149,5 +152,19 @@ public class EnvironmentTestDto
     @Override
     public int order() {
         return 600;
+    }
+
+    public EnvironmentChangeCredentialRequest getEnviornmentChangeCredentialRequest() {
+        return enviornmentChangeCredentialRequest;
+    }
+
+    public void setEnviornmentChangeCredentialRequest(EnvironmentChangeCredentialRequest enviornmentChangeCredentialRequest) {
+        this.enviornmentChangeCredentialRequest = enviornmentChangeCredentialRequest;
+    }
+
+    public EnvironmentTestDto withChangeCredentialName(String name) {
+        enviornmentChangeCredentialRequest = new EnvironmentChangeCredentialRequest();
+        enviornmentChangeCredentialRequest.setCredentialName(name);
+        return this;
     }
 }

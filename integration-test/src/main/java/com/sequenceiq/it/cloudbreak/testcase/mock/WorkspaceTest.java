@@ -13,6 +13,7 @@ import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
+import com.sequenceiq.it.cloudbreak.client.ProxyTestClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
@@ -22,6 +23,7 @@ import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
+import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
@@ -51,6 +53,9 @@ public class WorkspaceTest extends AbstractIntegrationTest {
 
     @Inject
     private ImageCatalogTestClient imageCatalogTestClient;
+
+    @Inject
+    private ProxyTestClient proxyTestClient;
 
     @Inject
     private StackTestClient stackTestClient;
@@ -115,6 +120,16 @@ public class WorkspaceTest extends AbstractIntegrationTest {
                 .when(imageCatalogTestClient.createV4())
                 .when(imageCatalogTestClient.getV4(Boolean.FALSE), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN)
                         .withLogError(false))
+                .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
+    public void testCreateAProxyConfigAndGetOtherUser(TestContext testContext) {
+        testContext
+                .given(ProxyTestDto.class)
+                .when(proxyTestClient.create())
+                .when(proxyTestClient.get(), RunningParameter.key(FORBIDDEN_KEY).withWho(CloudbreakTest.SECONDARY_REFRESH_TOKEN).withLogError(false))
                 .expect(NotFoundException.class, RunningParameter.key(FORBIDDEN_KEY))
                 .validate();
     }

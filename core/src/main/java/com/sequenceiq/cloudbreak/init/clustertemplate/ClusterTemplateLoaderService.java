@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -110,10 +111,9 @@ public class ClusterTemplateLoaderService {
             Collection<ClusterTemplate> defaultTemplatesInDb) {
         Collection<ClusterTemplate> outdatedTemplates = new HashSet<>();
         for (ClusterTemplate template : defaultTemplatesInDb) {
-            String defaultTemplateBase64 = defaultTemplates.get(template.getName());
-            if (isTemplatesContentDifferent(template, defaultTemplateBase64)) {
-                outdatedTemplates.add(template);
-            }
+            Optional.ofNullable(defaultTemplates.get(template.getName()))
+                    .filter(defaultTmplBase64 -> isTemplatesContentDifferent(template, defaultTmplBase64))
+                    .ifPresent(defaultTmplBase64 -> outdatedTemplates.add(template));
         }
         return outdatedTemplates;
     }

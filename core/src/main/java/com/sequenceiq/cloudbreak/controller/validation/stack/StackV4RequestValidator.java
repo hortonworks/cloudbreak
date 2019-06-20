@@ -12,6 +12,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -127,6 +128,10 @@ public class StackV4RequestValidator implements Validator<StackV4Request> {
     }
 
     private void validateEncryptionKey(StackV4Request stackRequest, ValidationResultBuilder validationBuilder) {
+        if (StringUtils.isEmpty(stackRequest.getEnvironmentCrn())) {
+            validationBuilder.error("Environment CRN cannot be null or empty.");
+            return;
+        }
         DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stackRequest.getEnvironmentCrn());
         stackRequest.getInstanceGroups().stream()
                 .filter(request -> isEncryptionTypeSetUp(request.getTemplate()))
