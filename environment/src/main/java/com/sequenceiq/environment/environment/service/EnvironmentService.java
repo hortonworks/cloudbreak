@@ -15,7 +15,6 @@ import javax.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
@@ -27,6 +26,7 @@ import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.LocationDto;
+import com.sequenceiq.environment.environment.flow.ReactorFlowManager;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
@@ -41,27 +41,27 @@ public class EnvironmentService {
 
     private final EnvironmentRepository environmentRepository;
 
-    private final ConversionService conversionService;
-
     private final PlatformParameterService platformParameterService;
 
     private final EnvironmentDtoConverter environmentDtoConverter;
 
     private final EnvironmentResourceDeletionService environmentResourceDeletionService;
 
+    private final ReactorFlowManager reactorFlowManager;
+
     public EnvironmentService(
             EnvironmentValidatorService validatorService,
             EnvironmentRepository environmentRepository,
-            ConversionService conversionService,
             PlatformParameterService platformParameterService,
             EnvironmentDtoConverter environmentDtoConverter,
-            EnvironmentResourceDeletionService environmentResourceDeletionService) {
+            EnvironmentResourceDeletionService environmentResourceDeletionService,
+            ReactorFlowManager reactorFlowManager) {
         this.validatorService = validatorService;
         this.environmentRepository = environmentRepository;
-        this.conversionService = conversionService;
         this.platformParameterService = platformParameterService;
         this.environmentDtoConverter = environmentDtoConverter;
         this.environmentResourceDeletionService = environmentResourceDeletionService;
+        this.reactorFlowManager = reactorFlowManager;
     }
 
     public Environment save(Environment environment) {
@@ -90,49 +90,49 @@ public class EnvironmentService {
         return environments.stream().map(environmentDtoConverter::environmentToDto).collect(Collectors.toList());
     }
 
-    public EnvironmentDto deleteByNameAndAccountId(String environmentName, String accountId) {
+    public EnvironmentDto deleteByNameAndAccountId(String environmentName, String accountId, String actualUserCrn) {
         Optional<Environment> environment = environmentRepository.findByNameAndAccountId(environmentName, accountId);
         MDCBuilder.buildMdcContext(environment.orElseThrow(()
                 -> new NotFoundException(String.format("No environment found with name '%s'", environmentName))));
         LOGGER.debug(String.format("Deleting environment [name: %s]", environment.get().getName()));
-        delete(environment.get());
+        delete(environment.get(), actualUserCrn);
         return environmentDtoConverter.environmentToDto(environment.get());
     }
 
-    public EnvironmentDto deleteByCrnAndAccountId(String crn, String accountId) {
+    public EnvironmentDto deleteByCrnAndAccountId(String crn, String accountId, String actualUserCrn) {
         Optional<Environment> environment = environmentRepository.findByResourceCrnAndAccountId(crn, accountId);
         MDCBuilder.buildMdcContext(environment.orElseThrow(()
                 -> new NotFoundException(String.format("No environment found with crn '%s'", crn))));
         LOGGER.debug(String.format("Deleting  environment [name: %s]", environment.get().getName()));
-        delete(environment.get());
+        delete(environment.get(), actualUserCrn);
         return environmentDtoConverter.environmentToDto(environment.get());
     }
 
-    public Environment delete(Environment environment) {
+    public Environment delete(Environment environment, String userCrn) {
         checkForDeletePermit(environment);
         MDCBuilder.buildMdcContext(environment);
         LOGGER.debug("Deleting environment with name: {}", environment.getName());
-        environmentResourceDeletionService.triggerDeleteFlow(environment);
+        reactorFlowManager.triggerDeleteFlow(environment, userCrn);
         return environment;
     }
 
-    public List<EnvironmentDto> deleteMultipleByNames(Set<String> environmentNames, String accountId) {
+    public List<EnvironmentDto> deleteMultipleByNames(Set<String> environmentNames, String accountId, String actualUserCrn) {
         List<EnvironmentDto> environmentDtos = new ArrayList<>();
         Set<Environment> environments = environmentRepository.findByNameInAndAccountId(environmentNames, accountId);
         for (Environment environment : environments) {
             LOGGER.debug(String.format("Starting to archive environment [name: %s]", environment.getName()));
-            delete(environment);
+            delete(environment, actualUserCrn);
             environmentDtos.add(environmentDtoConverter.environmentToDto(environment));
         }
         return environmentDtos;
     }
 
-    public List<EnvironmentDto> deleteMultipleByCrns(Set<String> crns, String accountId) {
+    public List<EnvironmentDto> deleteMultipleByCrns(Set<String> crns, String accountId, String actualUserCrn) {
         List<EnvironmentDto> environmentDtos = new ArrayList<>();
         Set<Environment> environments = environmentRepository.findByResourceCrnInAndAccountId(crns, accountId);
         for (Environment environment : environments) {
             LOGGER.debug(String.format("Starting to archive environment [CRN: %s]", environment.getName()));
-            delete(environment);
+            delete(environment, actualUserCrn);
             environmentDtos.add(environmentDtoConverter.environmentToDto(environment));
         }
         return environmentDtos;

@@ -1,8 +1,5 @@
 package com.sequenceiq.environment.environment.service;
 
-import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_NETWORK_CREATION_EVENT;
-
-import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
@@ -10,23 +7,18 @@ import javax.ws.rs.BadRequestException;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.environment.dto.AuthenticationDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
-import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
+import com.sequenceiq.environment.environment.flow.ReactorFlowManager;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
-import com.sequenceiq.flow.core.FlowConstants;
-import com.sequenceiq.flow.reactor.api.event.EventSender;
-
-import reactor.bus.Event;
+import com.sequenceiq.environment.environment.dto.AuthenticationDtoConverter;
 
 @Service
 public class EnvironmentCreationService {
@@ -37,11 +29,9 @@ public class EnvironmentCreationService {
 
     private final EnvironmentResourceService environmentResourceService;
 
-    private final EventSender eventSender;
-
     private final EnvironmentDtoConverter environmentDtoConverter;
 
-    private final ThreadBasedUserCrnProvider authenticatedUserService;
+    private final ReactorFlowManager reactorFlowManager;
 
     private final AuthenticationDtoConverter authenticationDtoConverter;
 
@@ -49,32 +39,15 @@ public class EnvironmentCreationService {
             EnvironmentService environmentService,
             EnvironmentValidatorService validatorService,
             EnvironmentResourceService environmentResourceService,
-            EventSender eventSender,
             EnvironmentDtoConverter environmentDtoConverter,
-            ThreadBasedUserCrnProvider authenticatedUserService,
+            ReactorFlowManager reactorFlowManager,
             AuthenticationDtoConverter authenticationDtoConverter) {
         this.environmentService = environmentService;
         this.validatorService = validatorService;
         this.environmentResourceService = environmentResourceService;
-        this.eventSender = eventSender;
         this.environmentDtoConverter = environmentDtoConverter;
-        this.authenticatedUserService = authenticatedUserService;
+        this.reactorFlowManager = reactorFlowManager;
         this.authenticationDtoConverter = authenticationDtoConverter;
-    }
-
-    // TODO: trigger creation properly
-    public void triggerCreationFlow(long envId, String envName, String accountId) {
-        EnvCreationEvent envCreationEvent = EnvCreationEvent.EnvCreationEventBuilder.anEnvCreationEvent()
-                .withSelector(START_NETWORK_CREATION_EVENT.selector())
-                .withResourceId(envId)
-                .withResourceName(envName)
-                .build();
-        String userCrn = authenticatedUserService.getUserCrn();
-        if (userCrn == null) {
-            userCrn = environmentService.getByNameAndAccountId(envName, accountId).getCreator();
-        }
-        Map<String, Object> flowTriggerUsercrn = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
-        eventSender.sendEvent(envCreationEvent, new Event.Headers(flowTriggerUsercrn));
     }
 
     public EnvironmentDto create(EnvironmentCreationDto creationDto, String accountId, String creator) {
@@ -90,6 +63,7 @@ public class EnvironmentCreationService {
             environmentResourceService.createAndSetNetwork(environment, creationDto.getNetwork(), accountId);
             environmentService.save(environment);
         }
+        reactorFlowManager.triggerCreationFlow(environment.getId(), environment.getName(), accountId, creator);
         return environmentDtoConverter.environmentToDto(environment);
     }
 

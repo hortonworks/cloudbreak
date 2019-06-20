@@ -63,7 +63,6 @@ public class EnvironmentController implements EnvironmentEndpoint {
         String accountId = threadBasedUserCrnProvider.getAccountId();
         String creator = threadBasedUserCrnProvider.getUserCrn();
         EnvironmentDto envDto = environmentCreationService.create(environmentCreationDto, accountId, creator);
-        environmentCreationService.triggerCreationFlow(envDto.getId(), envDto.getName(), accountId);
         return environmentApiConverter.dtoToDetailedResponse(envDto);
     }
 
@@ -84,21 +83,24 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @Override
     public SimpleEnvironmentResponse deleteByName(String environmentName) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
-        EnvironmentDto environmentDto = environmentService.deleteByNameAndAccountId(environmentName, accountId);
+        String actualUserCrn = threadBasedUserCrnProvider.getUserCrn();
+        EnvironmentDto environmentDto = environmentService.deleteByNameAndAccountId(environmentName, accountId, actualUserCrn);
         return environmentApiConverter.dtoToSimpleResponse(environmentDto);
     }
 
     @Override
     public SimpleEnvironmentResponse deleteByCrn(String crn) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
-        EnvironmentDto environmentDto = environmentService.deleteByCrnAndAccountId(crn, accountId);
+        String actualUserCrn = threadBasedUserCrnProvider.getUserCrn();
+        EnvironmentDto environmentDto = environmentService.deleteByCrnAndAccountId(crn, accountId, actualUserCrn);
         return environmentApiConverter.dtoToSimpleResponse(environmentDto);
     }
 
     @Override
     public SimpleEnvironmentResponses deleteMultipleByNames(Set<String> environmentNames) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
-        List<EnvironmentDto> environmentDtos = environmentService.deleteMultipleByNames(environmentNames, accountId);
+        String actualUserCrn = threadBasedUserCrnProvider.getUserCrn();
+        List<EnvironmentDto> environmentDtos = environmentService.deleteMultipleByNames(environmentNames, accountId, actualUserCrn);
         Set<SimpleEnvironmentResponse> responses = environmentDtos.stream()
                 .map(environmentApiConverter::dtoToSimpleResponse).collect(Collectors.toSet());
         return new SimpleEnvironmentResponses(responses);
@@ -107,7 +109,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @Override
     public SimpleEnvironmentResponses deleteMultipleByCrns(Set<String> crns) {
         String accountId = threadBasedUserCrnProvider.getAccountId();
-        List<EnvironmentDto> environmentDtos = environmentService.deleteMultipleByCrns(crns, accountId);
+        String actualUserCrn = threadBasedUserCrnProvider.getUserCrn();
+        List<EnvironmentDto> environmentDtos = environmentService.deleteMultipleByCrns(crns, accountId, actualUserCrn);
         Set<SimpleEnvironmentResponse> responses = environmentDtos.stream()
                 .map(environmentApiConverter::dtoToSimpleResponse).collect(Collectors.toSet());
         return new SimpleEnvironmentResponses(responses);
