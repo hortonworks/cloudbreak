@@ -132,7 +132,7 @@ public class AwsNetworkConnectorTest {
         when(awsClient.createCloudFormationRetryClient(any(AwsCredentialView.class), eq(REGION.value()))).thenReturn(cloudFormationRetryClient);
         when(awsNetworkCfTemplateProvider.provide(networkCidr, createdSubnetList)).thenReturn(CF_TEMPLATE);
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()))).thenReturn(cfClient);
-        when(awsPollTaskFactory.newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, NETWORK_ID))
+        when(awsPollTaskFactory.newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkCreationRequest))
                 .thenReturn(pollTask);
         when(cfStackUtil.getOutputs(NETWORK_ID, cloudFormationRetryClient)).thenReturn(output);
 
@@ -141,7 +141,7 @@ public class AwsNetworkConnectorTest {
         verify(awsClient).createCloudFormationRetryClient(any(AwsCredentialView.class), eq(REGION.value()));
         verify(awsNetworkCfTemplateProvider).provide(networkCidr, createdSubnetList);
         verify(awsClient).createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()));
-        verify(awsPollTaskFactory).newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, NETWORK_ID);
+        verify(awsPollTaskFactory).newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, networkCreationRequest);
         verify(cfStackUtil).getOutputs(NETWORK_ID, cloudFormationRetryClient);
         assertEquals(VPC_ID, actual.getNetworkId());
         assertEquals(NUMBER_OF_SUBNETS, actual.getSubnets().size());

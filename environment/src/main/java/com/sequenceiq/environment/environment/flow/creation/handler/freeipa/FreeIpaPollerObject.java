@@ -4,11 +4,14 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 
 public class FreeIpaPollerObject {
 
+    private final Long environmentId;
+
     private final String environmentCrn;
 
     private final FreeIpaV1Endpoint freeIpaV1Endpoint;
 
-    public FreeIpaPollerObject(String environmentCrn, FreeIpaV1Endpoint freeIpaV1Endpoint) {
+    public FreeIpaPollerObject(Long environmentId, String environmentCrn, FreeIpaV1Endpoint freeIpaV1Endpoint) {
+        this.environmentId = environmentId;
         this.environmentCrn = environmentCrn;
         this.freeIpaV1Endpoint = freeIpaV1Endpoint;
     }
@@ -19,5 +22,9 @@ public class FreeIpaPollerObject {
 
     public FreeIpaV1Endpoint getFreeIpaV1Endpoint() {
         return freeIpaV1Endpoint;
+    }
+
+    public Long getEnvironmentId() {
+        return environmentId;
     }
 }

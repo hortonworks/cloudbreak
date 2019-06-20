@@ -1,7 +1,5 @@
 package com.sequenceiq.environment.environment.domain;
 
-import static com.sequenceiq.environment.environment.EnvironmentStatus.ARCHIVED;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,14 +21,13 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Where;
 
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
-import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
-import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
+import com.sequenceiq.environment.store.EnvironmentStatusUpdater;
 
 @Entity
 @Table
@@ -255,14 +252,10 @@ public class Environment implements AuthResource {
     }
 
     public void setStatus(EnvironmentStatus status) {
-        if (id != null) {
-            if (ARCHIVED.equals(status)) {
-                EnvironmentInMemoryStateStore.put(id, PollGroup.CANCELLED);
-            } else {
-                EnvironmentInMemoryStateStore.put(id, PollGroup.POLLABLE);
-            }
-        }
         this.status = status;
+        if (id != null) {
+            EnvironmentStatusUpdater.update(id, status);
+        }
     }
 
     public String getCreator() {

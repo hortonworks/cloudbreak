@@ -3,8 +3,10 @@ package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.polling.SimpleStatusCheckerTask;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
+import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 public class FreeIpaCreationRetrievalTask extends SimpleStatusCheckerTask<FreeIpaPollerObject> {
@@ -59,6 +61,12 @@ public class FreeIpaCreationRetrievalTask extends SimpleStatusCheckerTask<FreeIp
 
     @Override
     public boolean exitPolling(FreeIpaPollerObject freeIpaPollerObject) {
+        PollGroup environmentPollGroup = EnvironmentInMemoryStateStore.get(freeIpaPollerObject.getEnvironmentId());
+        if (environmentPollGroup == null || environmentPollGroup.isCancelled()) {
+            LOGGER.info("Cancelling the polling of environment's '{}' FreeIpa cluster creation, because a delete operation has already been "
+                    + "started on the environment", freeIpaPollerObject.getEnvironmentCrn());
+            return true;
+        }
         return false;
     }
 }

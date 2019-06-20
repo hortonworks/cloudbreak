@@ -29,6 +29,7 @@ public class NetworkCreationRequestFactory {
         NetworkDto networkDto = environment.getNetwork();
         NetworkCreationRequest.Builder builder = new NetworkCreationRequest.Builder()
                 .withStackName(getStackName(environment))
+                .withEnvId(environment.getId())
                 .withEnvName(environment.getName())
                 .withCloudCredential(getCredential(environment))
                 .withVariant(environment.getCloudPlatform())

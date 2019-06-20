@@ -15,6 +15,7 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 
 @Component
@@ -23,8 +24,8 @@ public class AwsPollTaskFactory {
     private ApplicationContext applicationContext;
 
     public PollTask<Boolean> newAwsCreateNetworkStatusCheckerTask(AmazonCloudFormationClient cfClient, StackStatus successStatus, StackStatus errorStatus,
-            List<StackStatus> stackErrorStatuses, String cloudFormationStackName) {
-        return createPollTask(AwsCreateNetworkStatusCheckerTask.NAME, cfClient, successStatus, errorStatus, stackErrorStatuses, cloudFormationStackName);
+            List<StackStatus> stackErrorStatuses, NetworkCreationRequest networkCreationRequest) {
+        return createPollTask(AwsCreateNetworkStatusCheckerTask.NAME, cfClient, successStatus, errorStatus, stackErrorStatuses, networkCreationRequest);
     }
 
     public PollTask<Boolean> newAwsCreateStackStatusCheckerTask(AuthenticatedContext authenticatedContext, AmazonCloudFormationClient cfClient,

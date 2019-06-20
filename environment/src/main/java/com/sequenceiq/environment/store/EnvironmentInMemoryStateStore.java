@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.cloud.store.InMemoryResourceStateStore;
 
 public final class EnvironmentInMemoryStateStore {
 
-    private static final String ENV_RESOUERCE_TYPE = "Environment";
+    private static final String ENV_RESOUERCE_TYPE = "environment";
 
     private EnvironmentInMemoryStateStore() {
     }
