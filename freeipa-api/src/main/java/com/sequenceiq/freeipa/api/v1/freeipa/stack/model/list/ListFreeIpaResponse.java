@@ -11,7 +11,7 @@ import com.sequenceiq.service.api.doc.ModelDescriptions;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel("DescribeFreeIpaV1Response")
+@ApiModel("ListFreeIpaV1Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ListFreeIpaResponse {
