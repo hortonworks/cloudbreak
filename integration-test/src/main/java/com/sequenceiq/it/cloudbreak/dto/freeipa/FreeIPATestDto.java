@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.S
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
-import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
@@ -26,7 +25,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.Securit
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityRuleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.StackAuthenticationRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.credential.CredentialRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
@@ -39,7 +37,6 @@ import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
-import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 
 @Prototype
@@ -55,12 +52,11 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
     @Override
     public FreeIPATestDto valid() {
         return withName(resourceProperyProvider().getName())
-                .withEnvironmentKey(EnvironmentTestDto.class.getSimpleName())
+                .withEnvironment(getTestContext().given(EnvironmentTestDto.class))
                 .withPlacement(getTestContext().given(PlacementSettingsTestDto.class))
                 .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(getTestContext()))
                 .withNetwork(getTestContext().given(NetworkV4TestDto.class))
                 .withAuthentication(getCloudProvider().stackAuthentication(given(StackAuthenticationTestDto.class)))
-                .withCredential(getTestContext().given(CredentialTestDto.class))
                 .withFreeIPA("ipatest.local", "ipaserver", "admin1234");
     }
 
@@ -163,23 +159,8 @@ public class FreeIPATestDto extends AbstractFreeIPATestDto<CreateFreeIpaRequest,
         return this;
     }
 
-    private FreeIPATestDto withEnvironmentKey(String environmentKey) {
-        EnvironmentTestDto env = getTestContext().get(environmentKey);
-        if (env == null) {
-            throw new IllegalArgumentException("Env is null with given key: " + environmentKey);
-        }
-        getRequest().setEnvironmentCrn(env.getName());
-        return this;
-    }
-
-    private FreeIPATestDto withCredential(CredentialTestDto credentialTestDto) {
-        CredentialRequest credential = new CredentialRequest();
-        credential.setName(credentialTestDto.getResponse().getName());
-        credential.setCloudPlatform(getCloudProvider().getCloudPlatform().name());
-        SecretResponse secret = new SecretResponse();
-        secret.setEnginePath(credentialTestDto.getResponse().getAttributes().getEnginePath());
-        secret.setSecretPath(credentialTestDto.getResponse().getAttributes().getSecretPath());
-        credential.setSecret(secret);
+    private FreeIPATestDto withEnvironment(EnvironmentTestDto environment) {
+        getRequest().setEnvironmentCrn(environment.getResponse().getCrn());
         return this;
     }
 
