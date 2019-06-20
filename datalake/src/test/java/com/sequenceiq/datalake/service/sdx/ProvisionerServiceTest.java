@@ -103,6 +103,7 @@ class ProvisionerServiceTest {
         sdxCluster.setAccountId("hortonworks");
         sdxCluster.setTags(Json.silent(new HashMap<>()));
         sdxCluster.setEnvCrn("");
+        sdxCluster.setStackRequestToCloudbreak("{}");
 
         CloudbreakUserCrnClient.CloudbreakEndpoint cbEndpointMock = mock(CloudbreakUserCrnClient.CloudbreakEndpoint.class);
         StackV4Endpoint stackEndpointMock = mock(StackV4Endpoint.class);

@@ -60,6 +60,9 @@ public class SdxServiceTest {
     @Mock
     private EnvironmentEndpoint environmentEndpoint;
 
+    @Mock
+    private StackRequestManifester stackRequestManifester;
+
     @InjectMocks
     private SdxService sdxService;
 
@@ -106,7 +109,6 @@ public class SdxServiceTest {
         tags.put("mytag", "tagecske");
         sdxClusterRequest.setTags(tags);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Collections.singletonList(new SdxCluster()));
-        mockEnvironmentCall(sdxClusterRequest);
         Assertions.assertThrows(BadRequestException.class,
                 () -> sdxService.createSdx(CRN, "test-sdx-cluster", sdxClusterRequest, null), "SDX cluster exists for environment name");
     }
