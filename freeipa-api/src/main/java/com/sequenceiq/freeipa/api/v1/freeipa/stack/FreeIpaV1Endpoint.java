@@ -43,7 +43,7 @@ public interface FreeIpaV1Endpoint {
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FreeIpaOperationDescriptions.LIST_BY_ACCOUNT, produces = ContentType.JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
-            nickname = "getFreeIpaByAccountV1")
+            nickname = "listFreeIpaClustersByAccountV1")
     List<ListFreeIpaResponse> list();
 
     @GET
