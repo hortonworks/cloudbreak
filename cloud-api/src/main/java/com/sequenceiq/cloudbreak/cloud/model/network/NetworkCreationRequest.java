@@ -7,6 +7,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 
 public class NetworkCreationRequest {
 
+    private final Long envId;
+
     private final String envName;
 
     private final CloudCredential cloudCredential;
@@ -26,6 +28,7 @@ public class NetworkCreationRequest {
     private final String stackName;
 
     private NetworkCreationRequest(Builder builder) {
+        this.envId = builder.envId;
         this.envName = builder.envName;
         this.cloudCredential = builder.cloudCredential;
         this.variant = builder.variant;
@@ -73,7 +76,13 @@ public class NetworkCreationRequest {
         return stackName;
     }
 
+    public Long getEnvId() {
+        return envId;
+    }
+
     public static class Builder {
+        private Long envId;
+
         private String envName;
 
         private CloudCredential cloudCredential;
@@ -91,6 +100,11 @@ public class NetworkCreationRequest {
         private boolean noFirewallRules;
 
         private String stackName;
+
+        public Builder withEnvId(Long envId) {
+            this.envId = envId;
+            return this;
+        }
 
         public Builder withEnvName(String envName) {
             this.envName = envName;

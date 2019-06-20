@@ -196,7 +196,7 @@ public class EnvironmentView extends CompactView implements AuthResource {
         return status;
     }
 
-    public void setStatus(EnvironmentStatus status) {
+    void setStatus(EnvironmentStatus status) {
         this.status = status;
     }
 }

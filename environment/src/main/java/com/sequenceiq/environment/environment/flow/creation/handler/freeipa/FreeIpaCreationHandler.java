@@ -195,7 +195,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     private void awaitFreeIpaCreation(Event<EnvironmentDto> environmentDtoEvent, EnvironmentDto environment) {
         Pair<PollingResult, Exception> pollWithTimeout = freeIpaPollingService.pollWithTimeout(
                 new FreeIpaCreationRetrievalTask(),
-                new FreeIpaPollerObject(environment.getResourceCrn(), freeIpaV1Endpoint),
+                new FreeIpaPollerObject(environment.getId(), environment.getResourceCrn(), freeIpaV1Endpoint),
                 FreeIpaCreationRetrievalTask.FREEIPA_RETRYING_INTERVAL,
                 FreeIpaCreationRetrievalTask.FREEIPA_RETRYING_COUNT,
                 FreeIpaCreationRetrievalTask.FREEIPA_FAILURE_COUNT);
