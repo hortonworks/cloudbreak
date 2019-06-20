@@ -48,7 +48,7 @@ public class HueConfigProviderTest {
     @Test
     public void getServiceConfigs() {
         TemplatePreparationObject tpo = new Builder().build();
-        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
         Map<String, String> paramToVariable =
                 result.stream().collect(Collectors.toMap(ApiClusterTemplateConfig::getName, ApiClusterTemplateConfig::getVariable));
         assertThat(paramToVariable).containsOnly(
