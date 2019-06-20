@@ -8,19 +8,24 @@ public class CloudSubnet {
 
     private String availabilityZone;
 
+    private String cidr;
+
     public CloudSubnet() {
     }
 
     public CloudSubnet(String id, String name) {
-        this.id = id;
-        this.name = name;
-        this.availabilityZone = null;
+        this(id, name, null);
     }
 
     public CloudSubnet(String id, String name, String availabilityZone) {
+        this(id, name, availabilityZone, null);
+    }
+
+    public CloudSubnet(String id, String name, String availabilityZone, String cidr) {
         this.id = id;
         this.name = name;
         this.availabilityZone = availabilityZone;
+        this.cidr = cidr;
     }
 
     public String getId() {
@@ -45,5 +50,23 @@ public class CloudSubnet {
 
     public void setAvailabilityZone(String availabilityZone) {
         this.availabilityZone = availabilityZone;
+    }
+
+    public String getCidr() {
+        return cidr;
+    }
+
+    public void setCidr(String cidr) {
+        this.cidr = cidr;
+    }
+
+    @Override
+    public String toString() {
+        return "CloudSubnet{"
+                + "id='" + id + '\''
+                + ", name='" + name + '\''
+                + ", availabilityZone='" + availabilityZone + '\''
+                + ", cidr='" + cidr + '\''
+                + '}';
     }
 }

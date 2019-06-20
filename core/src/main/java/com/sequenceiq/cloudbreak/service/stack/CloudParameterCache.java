@@ -11,6 +11,7 @@ import com.google.common.base.Suppliers;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 
 @Component
 public class CloudParameterCache {

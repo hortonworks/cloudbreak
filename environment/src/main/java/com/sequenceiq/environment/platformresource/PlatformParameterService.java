@@ -21,7 +21,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
+import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.environment.credential.service.CredentialService;
+import com.sequenceiq.environment.credential.v1.converter.CredentialToExtendedCloudCredentialConverter;
 
 @Service
 public class PlatformParameterService {
@@ -31,6 +33,9 @@ public class PlatformParameterService {
 
     @Inject
     private CredentialService credentialService;
+
+    @Inject
+    private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
 
     public PlatformResourceRequest getPlatformResourceRequest(
             String accountId,
@@ -65,12 +70,12 @@ public class PlatformParameterService {
 
     public CloudVmTypes getVmTypesByCredential(PlatformResourceRequest request) {
         checkFieldIsNotEmpty(request.getRegion(), "region");
-        return cloudParameterService.getVmTypesV2(request.getCredential(), request.getRegion(),
+        return cloudParameterService.getVmTypesV2(extendedCloudCredentialConverter.convert(request.getCredential()), request.getRegion(),
                 request.getPlatformVariant(), request.getFilters());
     }
 
     public CloudRegions getRegionsByCredential(PlatformResourceRequest request) {
-        return cloudParameterService.getRegionsV2(request.getCredential(), request.getRegion(),
+        return cloudParameterService.getRegionsV2(extendedCloudCredentialConverter.convert(request.getCredential()), request.getRegion(),
                 request.getPlatformVariant(), request.getFilters());
     }
 
@@ -79,37 +84,37 @@ public class PlatformParameterService {
     }
 
     public CloudNetworks getCloudNetworks(PlatformResourceRequest request) {
-        return cloudParameterService.getCloudNetworks(request.getCredential(), request.getRegion(),
+        return cloudParameterService.getCloudNetworks(extendedCloudCredentialConverter.convert(request.getCredential()), request.getRegion(),
                 request.getPlatformVariant(), request.getFilters());
     }
 
     public CloudIpPools getIpPoolsCredentialId(PlatformResourceRequest request) {
-        return cloudParameterService.getPublicIpPools(request.getCredential(), request.getRegion(),
+        return cloudParameterService.getPublicIpPools(extendedCloudCredentialConverter.convert(request.getCredential()), request.getRegion(),
                 request.getPlatformVariant(), request.getFilters());
     }
 
     public CloudGateWays getGatewaysCredentialId(PlatformResourceRequest request) {
-        return cloudParameterService.getGateways(request.getCredential(), request.getRegion(),
+        return cloudParameterService.getGateways(extendedCloudCredentialConverter.convert(request.getCredential()), request.getRegion(),
                 request.getPlatformVariant(), request.getFilters());
     }
 
     public CloudEncryptionKeys getEncryptionKeys(PlatformResourceRequest request) {
-        return cloudParameterService.getCloudEncryptionKeys(request.getCredential(), request.getRegion(),
+        return cloudParameterService.getCloudEncryptionKeys(extendedCloudCredentialConverter.convert(request.getCredential()), request.getRegion(),
                 request.getPlatformVariant(), request.getFilters());
     }
 
     public CloudSecurityGroups getSecurityGroups(PlatformResourceRequest request) {
-        return cloudParameterService.getSecurityGroups(request.getCredential(), request.getRegion(),
+        return cloudParameterService.getSecurityGroups(extendedCloudCredentialConverter.convert(request.getCredential()), request.getRegion(),
                 request.getPlatformVariant(), request.getFilters());
     }
 
     public CloudSshKeys getCloudSshKeys(PlatformResourceRequest request) {
-        return cloudParameterService.getCloudSshKeys(request.getCredential(), request.getRegion(),
+        return cloudParameterService.getCloudSshKeys(extendedCloudCredentialConverter.convert(request.getCredential()), request.getRegion(),
                 request.getPlatformVariant(), request.getFilters());
     }
 
     public CloudAccessConfigs getAccessConfigs(PlatformResourceRequest request) {
-        return cloudParameterService.getCloudAccessConfigs(request.getCredential(), request.getRegion(),
+        return cloudParameterService.getCloudAccessConfigs(extendedCloudCredentialConverter.convert(request.getCredential()), request.getRegion(),
                 request.getPlatformVariant(), request.getFilters());
     }
 

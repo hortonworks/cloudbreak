@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientBuilder;
+import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -39,7 +40,7 @@ public class FreeIpaClientFactory {
         return getFreeIpaClientForStack(stack);
     }
 
-    public FreeIpaClient getFreeIpaClientForStack(Stack stack) throws Exception {
+    public FreeIpaClient getFreeIpaClientForStack(Stack stack) throws FreeIpaClientException {
         LOGGER.debug("Creating FreeIpaClient for stack {}", stack.getId());
 
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
@@ -47,7 +48,12 @@ public class FreeIpaClientFactory {
                 stack.getId(), primaryGatewayConfig.getPublicAddress());
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
 
-        return new FreeIpaClientBuilder("admin", freeIpa.getAdminPassword(), freeIpa.getDomain().toUpperCase(),
-                httpClientConfig, stack.getGatewayport().toString()).build();
+        try {
+            return new FreeIpaClientBuilder("admin", freeIpa.getAdminPassword(), freeIpa.getDomain().toUpperCase(),
+                    httpClientConfig, stack.getGatewayport().toString()).build();
+        } catch (Exception e) {
+            LOGGER.error("Couldn't build FreeIPA client", e);
+            throw new FreeIpaClientException("Couldn't build FreeIPA client", e);
+        }
     }
 }

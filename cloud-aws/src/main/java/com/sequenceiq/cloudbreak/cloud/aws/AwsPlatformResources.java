@@ -103,10 +103,10 @@ import com.sequenceiq.cloudbreak.cloud.model.ZoneVmSpecifications;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceSecurityGroupFilterView;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceSshKeyFilterView;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceVpcFilterView;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @Service
 public class AwsPlatformResources implements PlatformResources {
@@ -274,7 +274,8 @@ public class AwsPlatformResources implements PlatformResources {
 
             for (Subnet subnet : awsSubnets) {
                 Optional<String> subnetName = getName(subnet.getTags());
-                subnets.add(new CloudSubnet(subnet.getSubnetId(), subnetName.orElse(subnet.getSubnetId()), subnet.getAvailabilityZone()));
+                subnets.add(
+                        new CloudSubnet(subnet.getSubnetId(), subnetName.orElse(subnet.getSubnetId()), subnet.getAvailabilityZone(), subnet.getCidrBlock()));
             }
 
             Optional<String> name = getName(vpc.getTags());

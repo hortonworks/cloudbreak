@@ -53,8 +53,8 @@ import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecifications;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
-import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 
 @Service
 public class AzurePlatformResources implements PlatformResources {
@@ -117,7 +117,7 @@ public class AzurePlatformResources implements PlatformResources {
             if (regionMatch(actualRegion, region)) {
                 Set<CloudSubnet> subnets = new HashSet<>();
                 for (Entry<String, Subnet> subnet : network.subnets().entrySet()) {
-                    subnets.add(new CloudSubnet(subnet.getKey(), subnet.getKey()));
+                    subnets.add(new CloudSubnet(subnet.getKey(), subnet.getKey(), null, subnet.getValue().addressPrefix()));
                 }
                 Map<String, Object> properties = new HashMap<>();
                 properties.put("addressSpaces", network.addressSpaces());

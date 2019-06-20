@@ -30,15 +30,18 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.Envi
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.cloud.model.SpecialParameters;
+import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
+import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
@@ -50,7 +53,6 @@ import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConver
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
-import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.SharedServiceValidator;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -158,6 +160,9 @@ public class StackDecoratorTest {
     @Mock
     private CredentialConverter credentialConverter;
 
+    @Mock
+    private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
+
     @Before
     public void setUp() {
         String credentialName = "credentialName";
@@ -192,6 +197,8 @@ public class StackDecoratorTest {
         when(credentialClientService.getByCrn(anyString())).thenReturn(credential);
         when(credentialClientService.getByName(anyString())).thenReturn(credential);
         when(credentialConverter.convert(credentialResponse)).thenReturn(credential);
+        ExtendedCloudCredential extendedCloudCredential = mock(ExtendedCloudCredential.class);
+        when(extendedCloudCredentialConverter.convert(credential)).thenReturn(extendedCloudCredential);
     }
 
     @Test

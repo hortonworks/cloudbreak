@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.sequenceiq.freeipa.client.model.Ca;
 import com.sequenceiq.freeipa.client.model.Config;
+import com.sequenceiq.freeipa.client.model.DnsZone;
+import com.sequenceiq.freeipa.client.model.DnsZoneList;
 import com.sequenceiq.freeipa.client.model.Group;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.client.model.User;
@@ -23,7 +25,7 @@ public class FreeIpaClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaClient.class);
 
-    private static final String DEFAULT_API_VERSION = "2.213";
+    private static final String DEFAULT_API_VERSION = "2.230";
 
     private JsonRpcHttpClient jsonRpcHttpClient;
 
@@ -204,6 +206,38 @@ public class FreeIpaClient {
                 "permission", List.of(permission)
         );
         invoke("privilege_add_permission", flags, params, Object.class);
+    }
+
+    public Set<DnsZoneList> findAllDnsZone() throws FreeIpaClientException {
+        List<String> flags = List.of();
+        Map<String, Object> params = Map.of(
+                "sizelimit", 0,
+                "pkey_only", true,
+                "raw", true
+        );
+        ParameterizedType type = TypeUtils
+                .parameterize(Set.class, DnsZoneList.class);
+        return (Set<DnsZoneList>) invoke("dnszone_find", flags, params, type).getResult();
+    }
+
+    /**
+     * Adds new reverse DNS zone for CIDR
+     *
+     * @param cidr Subnet formatted as 192.168.1.0/24
+     * @return DnsZone created
+     */
+    public DnsZone addReverseDnsZone(String cidr) throws FreeIpaClientException {
+        List<String> flags = List.of();
+        Map<String, Object> params = Map.of(
+                "name_from_ip", cidr,
+                "raw", true);
+        return (DnsZone) invoke("dnszone_add", flags, params, DnsZone.class).getResult();
+    }
+
+    public RPCResponse<Object> deleteDnsZone(String... dnsZoneNames) throws FreeIpaClientException {
+        List<String> flags = List.of(dnsZoneNames);
+        Map<String, Object> params = Map.of();
+        return invoke("dnszone_del", flags, params, Object.class);
     }
 
     public <T> RPCResponse<T> invoke(String method, List<String> flags, Map<String, Object> params, Type resultType) throws FreeIpaClientException {

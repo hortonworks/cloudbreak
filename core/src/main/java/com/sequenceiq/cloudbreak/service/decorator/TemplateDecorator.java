@@ -17,11 +17,12 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.controller.validation.LocationService;
+import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
-import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 
 @Component
@@ -38,10 +39,13 @@ public class TemplateDecorator {
     @Inject
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
 
+    @Inject
+    private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
+
     public Template decorate(Credential credential, Template template, String region, String availabilityZone, String variant) {
         setRootVolumeSize(template);
         PlatformDisks platformDisks = cloudParameterService.getDiskTypes();
-        CloudVmTypes vmTypesV2 = cloudParameterService.getVmTypesV2(credential, region, variant, new HashMap<>());
+        CloudVmTypes vmTypesV2 = cloudParameterService.getVmTypesV2(extendedCloudCredentialConverter.convert(credential), region, variant, new HashMap<>());
         String locationString = locationService.location(region, availabilityZone);
         VolumeParameterConfig config;
         for (VolumeTemplate volumeTemplate : template.getVolumeTemplates()) {

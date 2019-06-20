@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.client.deserializer;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.ObjectCodec;
@@ -24,8 +23,8 @@ public class ListFlatteningDeserializer<T> extends JsonDeserializer<T> implement
 
         ObjectMapper mapper = (ObjectMapper) p.getCodec();
 
-        for (Iterator<JsonNode> jsonNodeIterator = node.iterator(); jsonNodeIterator.hasNext();) {
-            JsonNode next = jsonNodeIterator.next();
+        if (node.iterator().hasNext()) {
+            JsonNode next = node.iterator().next();
             return mapper.convertValue(next, targetClass);
         }
         return null;
