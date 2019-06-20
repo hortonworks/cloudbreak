@@ -60,6 +60,7 @@ func DescribeFreeIpa(c *cli.Context) {
 	output := commonutils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	iparesp := resp.Payload
 	freeIpaOut := freeIpaOutDescibe{
+		*iparesp.Crn,
 		&freeIpa{
 			EnvironmentCrn: *iparesp.EnvironmentCrn,
 			Name:           *iparesp.Name,
@@ -83,7 +84,6 @@ func DescribeFreeIpa(c *cli.Context) {
 				Hostname: *iparesp.FreeIpa.Hostname,
 			},
 		},
-		*iparesp.Crn,
 	}
 	if iparesp.Network.Aws != nil {
 		freeIpaOut.Network = &network{
@@ -132,7 +132,7 @@ func ListFreeIpa(c *cli.Context) {
 }
 
 func (f *freeIpaOutDescibe) DataAsStringArray() []string {
-	return append(f.freeIpa.DataAsStringArray(), f.CRN)
+	return append(f.freeIpa.DataAsStringArray(), f.Crn)
 }
 
 func (f *freeIpa) DataAsStringArray() []string {
@@ -163,11 +163,6 @@ func (it *instanceTemplate) DataAsString() string {
 	var template string
 	template += fmt.Sprintf("  InstanceType: %s\n", it.InstanceType)
 	template += fmt.Sprint("  Volumes:\n")
-	for _, vol := range it.AttachedVolumes {
-		template += fmt.Sprintf("    Count: %s\n", vol.Count)
-		template += fmt.Sprintf("    VolumeType: %s\n", vol.VolumeType)
-		template += fmt.Sprintf("    Size: %s\n\n", vol.Size)
-	}
 	return template
 }
 
@@ -187,13 +182,11 @@ func (sg *securityGroup) DataAsString() string {
 func (m *metadata) DataAsString() string {
 	var md string
 	md += fmt.Sprintf("  DiscoveryFQDN: %s\n", m.DiscoveryFQDN)
-	md += fmt.Sprintf("  InstanceGroup: %s\n", m.InstanceGroup)
 	md += fmt.Sprintf("  InstanceID: %s\n", m.InstanceID)
 	md += fmt.Sprintf("  InstanceStatus: %s\n", m.InstanceStatus)
 	md += fmt.Sprintf("  InstanceType: %s\n", m.InstanceType)
 	md += fmt.Sprintf("  PrivateIP: %s\n", m.PrivateIP)
 	md += fmt.Sprintf("  PublicIP: %s\n", m.PublicIP)
-	md += fmt.Sprintf("  SSHPort: %s\n", m.SSHPort)
 	md += fmt.Sprintf("  State: %s\n", m.State)
 	return md
 }
@@ -249,32 +242,32 @@ func (f *freeIpaServer) DataAsString() string {
 func convertInstanceGroupModel(igmodels []*freeIpaModel.InstanceGroupV1Response) []instanceGroup {
 	var instanceGroups []instanceGroup
 	for _, ig := range igmodels {
+		var mdArray = make([]metadata, 0)
+		for _, md := range ig.MetaData {
+			mdArray = append(mdArray, metadata{
+				DiscoveryFQDN:  md.DiscoveryFQDN,
+				InstanceID:     md.InstanceID,
+				InstanceStatus: md.InstanceStatus,
+				InstanceType:   md.InstanceType,
+				PrivateIP:      md.PrivateIP,
+				PublicIP:       md.PublicIP,
+				State:          md.State,
+			})
+		}
 		instanceGroups = append(instanceGroups, instanceGroup{
+			Name:      *ig.Name,
+			NodeCount: fmt.Sprint(*ig.NodeCount),
 			InstanceTemplate: &instanceTemplate{
-				InstanceType:    ig.InstanceTemplate.InstanceType,
-				AttachedVolumes: convertAttachedVolumesModel(ig.InstanceTemplate.AttachedVolumes),
+				InstanceType: ig.InstanceTemplate.InstanceType,
 			},
 			SecurityGroup: &securityGroup{
 				SecurityGroupIDs: ig.SecurityGroup.SecurityGroupIds,
 				SecurityRules:    converSecurityRulesModel(ig.SecurityGroup.SecurityRules),
 			},
-			Name:      *ig.Name,
-			NodeCount: fmt.Sprint(*ig.NodeCount),
+			MetaData: mdArray,
 		})
 	}
 	return instanceGroups
-}
-
-func convertAttachedVolumesModel(volmodels []*freeIpaModel.VolumeV1Response) []volume {
-	var volumes []volume
-	for _, vol := range volmodels {
-		volumes = append(volumes, volume{
-			Count:      fmt.Sprint(vol.Count),
-			VolumeType: vol.Type,
-			Size:       fmt.Sprint(*vol.Size),
-		})
-	}
-	return volumes
 }
 
 func converSecurityRulesModel(rulemodel []*freeIpaModel.SecurityRuleV1Response) []securityRule {

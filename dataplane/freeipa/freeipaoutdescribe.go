@@ -1,10 +1,10 @@
 package freeipa
 
-var header = []string{"FreeIPA", "ID"}
+var header = []string{"FreeIPA", "CRN"}
 
 type freeIpaOutDescibe struct {
+	Crn string `json:"Crn" yaml:"Crn"`
 	*freeIpa
-	CRN string `json:"CRN" yaml:"CRN"`
 }
 
 type freeIpa struct {
@@ -32,19 +32,16 @@ type instanceGroup struct {
 }
 
 type instanceTemplate struct {
-	InstanceType    string   `json:"InstanceType" yaml:"InstanceType"`
-	AttachedVolumes []volume `json:"AttachedVolumes" yaml:"AttachedVolumes"`
+	InstanceType string `json:"InstanceType" yaml:"InstanceType"`
 }
 
 type metadata struct {
 	DiscoveryFQDN  string `json:"DiscoveryFQDN,omitempty" yaml:"DiscoveryFQDN,omitempty"`
-	InstanceGroup  string `json:"InstanceGroup,omitempty" yaml:"InstanceGroup,omitempty"`
 	InstanceID     string `json:"InstanceID,omitempty" yaml:"InstanceID,omitempty"`
 	InstanceStatus string `json:"InstanceStatus,omitempty" yaml:"InstanceStatus,omitempty"`
 	InstanceType   string `json:"InstanceType,omitempty" yaml:"InstanceType,omitempty"`
 	PrivateIP      string `json:"PrivateIP,omitempty" yaml:"PrivateIP,omitempty"`
 	PublicIP       string `json:"PublicIP,omitempty" yaml:"PublicIP,omitempty"`
-	SSHPort        string `json:"SSHPort,omitempty" yaml:"SSHPort,omitempty"`
 	State          string `json:"State,omitempty" yaml:"State,omitempty"`
 }
 
