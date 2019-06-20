@@ -27,7 +27,7 @@ public class AwsFreeIPATests extends AbstractE2ETest {
             given = "there is a running cloudbreak",
             when = "a valid stack create request is sent AND the stack is stopped AND the stack is started",
             then = "the stack should be available AND deletable")
-    public void testCreateStopAndStartCluster(TestContext testContext) {
+    public void testCreateFreeIPA(TestContext testContext) {
         String freeIpa = resourcePropertyProvider().getName();
 
         testContext
