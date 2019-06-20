@@ -118,13 +118,21 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
                 .map(VolumeSetAttributes.Volume::getId)
                 .collect(Collectors.toList());
 
+        if (volumeIds.isEmpty()) {
+            return collectCloudResourceStatuses(volumeResources, ResourceStatus.CREATED);
+        }
+
         DescribeVolumesRequest describeVolumesRequest = new DescribeVolumesRequest(volumeIds);
         DescribeVolumesResult result = client.describeVolumes(describeVolumesRequest);
         ResourceStatus volumeSetStatus = result.getVolumes().stream()
                 .map(com.amazonaws.services.ec2.model.Volume::getState)
                 .allMatch("in-use"::equals) ? ResourceStatus.CREATED : ResourceStatus.IN_PROGRESS;
+        return collectCloudResourceStatuses(volumeResources, volumeSetStatus);
+    }
+
+    private List<CloudResourceStatus> collectCloudResourceStatuses(List<CloudResource> volumeResources, ResourceStatus status) {
         return volumeResources.stream()
-                .map(resource -> new CloudResourceStatus(resource, volumeSetStatus))
+                .map(resource -> new CloudResourceStatus(resource, status))
                 .collect(Collectors.toList());
     }
 
