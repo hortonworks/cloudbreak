@@ -326,6 +326,10 @@ public class ClusterHostServiceRunner {
             sssdConnfig.put("domain", kerberosConfig.getDomain());
             sssdConnfig.put("password", kerberosConfig.getPassword());
             sssdConnfig.put("server", kerberosConfig.getUrl());
+            Map<String, List<String>> serviceLocations = getServiceLocations(cluster, blueprintService.isAmbariBlueprint(cluster.getBlueprint()));
+            // enumeration has performance impacts so it's only enabled if Ranger is installed on the cluster
+            // otherwise the usersync does not work with nss
+            sssdConnfig.put("enumerate", !CollectionUtils.isEmpty(serviceLocations.get("RANGER_ADMIN")));
             servicePillar.put("sssd-ipa", new SaltPillarProperties("/sssd/ipa.sls", singletonMap("sssd-ipa", sssdConnfig)));
         }
     }
@@ -458,17 +462,21 @@ public class ClusterHostServiceRunner {
         gateway.put("kerberos", kerberosConfig != null);
 
         boolean ambariBlueprint = blueprintService.isAmbariBlueprint(cluster.getBlueprint());
-        List<String> serviceNames = ambariBlueprint ? ExposedService.getAllServiceNameForAmbari() : ExposedService.getAllServiceNameForCM();
-        Map<String, List<String>> serviceLocation = componentLocator.getComponentLocation(cluster, serviceNames);
-        List<String> rangerLocations = serviceLocation.get(ExposedService.RANGER.getCmServiceName());
+        Map<String, List<String>> serviceLocations = getServiceLocations(cluster, ambariBlueprint);
+        List<String> rangerLocations = serviceLocations.get(ExposedService.RANGER.getCmServiceName());
         if (!CollectionUtils.isEmpty(rangerLocations)) {
-            serviceLocation.put(ExposedService.RANGER.getCmServiceName(), getSingleRangerFqdn(gatewayConfig.getHostname(), rangerLocations));
+            serviceLocations.put(ExposedService.RANGER.getCmServiceName(), getSingleRangerFqdn(gatewayConfig.getHostname(), rangerLocations));
         }
         if (!ambariBlueprint) {
-            serviceLocation.put(ExposedService.CLOUDERA_MANAGER.getCmServiceName(), asList(gatewayConfig.getHostname()));
+            serviceLocations.put(ExposedService.CLOUDERA_MANAGER.getCmServiceName(), asList(gatewayConfig.getHostname()));
         }
-        gateway.put("location", serviceLocation);
+        gateway.put("location", serviceLocations);
         servicePillar.put("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
+    }
+
+    private Map<String, List<String>> getServiceLocations(Cluster cluster, boolean ambariBlueprint) {
+        List<String> serviceNames = ambariBlueprint ? ExposedService.getAllServiceNameForAmbari() : ExposedService.getAllServiceNameForCM();
+        return componentLocator.getComponentLocation(cluster, serviceNames);
     }
 
     private List<String> getSingleRangerFqdn(String primaryGatewayFqdn, List<String> rangerLocations) {
