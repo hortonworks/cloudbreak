@@ -63,4 +63,5 @@ public class ConfigUtils {
     public static String getSafetyValveProperty(String key, String value) {
         return String.format(CM_SAFETY_VALVE_PROPERTY_FORMAT, key, value);
     }
+
 }

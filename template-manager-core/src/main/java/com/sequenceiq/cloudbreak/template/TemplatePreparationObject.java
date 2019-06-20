@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -65,6 +66,13 @@ public class TemplatePreparationObject {
         sharedServiceConfigs = builder.sharedServiceConfigs;
         customInputs = builder.customInputs;
         fixInputs = builder.fixInputs;
+    }
+
+    public Stream<HostgroupView> getHostGroupsWithComponent(String component) {
+        Set<String> groups = getBlueprintView().getProcessor()
+                .getHostGroupsWithComponent(component);
+        return getHostgroupViews().stream()
+                .filter(hostGroup -> groups.contains(hostGroup.getName()));
     }
 
     public Set<RDSConfig> getRdsConfigs() {

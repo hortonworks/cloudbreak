@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.template.views.RdsView;
 public class HiveMetastoreConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
-    public List<ApiClusterTemplateConfig> getServiceConfigs(TemplatePreparationObject templatePreparationObject) {
+    public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
         Optional<RDSConfig> rdsConfigOptional = getFirstRDSConfigOptional(templatePreparationObject);
         Preconditions.checkArgument(rdsConfigOptional.isPresent());
         RdsView hiveView = new RdsView(rdsConfigOptional.get());

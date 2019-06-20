@@ -425,4 +425,14 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         }
         return configs;
     }
+
+    public Optional<ApiClusterTemplateConfig> getRoleConfig(String serviceType, String roleType, String configName) {
+        return getServiceByType(serviceType).flatMap(
+                service -> Optional.ofNullable(service.getRoleConfigGroups()).orElseGet(List::of).stream()
+                        .filter(rcg -> Objects.equals(roleType, rcg.getRoleType()))
+                        .flatMap(rcg -> Optional.ofNullable(rcg.getConfigs()).orElseGet(List::of).stream())
+                        .filter(config -> configName.equals(config.getName()))
+                        .findAny()
+        );
+    }
 }

@@ -20,7 +20,7 @@ public class YarnConfigProvider implements CmTemplateComponentConfigProvider {
             + "</value></property><property><name>hadoop.proxyuser.knox.hosts</name><value>*</value></property>";
 
     @Override
-    public List<ApiClusterTemplateConfig> getServiceConfigs(TemplatePreparationObject templatePreparationObject) {
+    public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
         return List.of(
                 config("yarn_core_site_safety_valve",
                         KNOX_PROXY_USER_SETTINGS));

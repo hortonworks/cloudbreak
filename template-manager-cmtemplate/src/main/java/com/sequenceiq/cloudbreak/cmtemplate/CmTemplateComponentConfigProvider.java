@@ -23,7 +23,7 @@ public interface CmTemplateComponentConfigProvider {
         return false;
     }
 
-    default List<ApiClusterTemplateConfig> getServiceConfigs(TemplatePreparationObject source) {
+    default List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         return List.of();
     }
 

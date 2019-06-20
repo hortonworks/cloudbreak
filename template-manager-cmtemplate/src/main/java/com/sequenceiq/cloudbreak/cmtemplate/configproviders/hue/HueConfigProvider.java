@@ -31,7 +31,7 @@ public class HueConfigProvider implements CmTemplateComponentConfigProvider {
     private static final String HUE_DATABASE_PASSWORD = "hue-hue_database_password";
 
     @Override
-    public List<ApiClusterTemplateConfig> getServiceConfigs(TemplatePreparationObject templatePreparationObject) {
+    public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
         List<ApiClusterTemplateConfig> result = new ArrayList<>();
         result.add(new ApiClusterTemplateConfig().name("database_host").variable(HUE_DATABASE_HOST));
         result.add(new ApiClusterTemplateConfig().name("database_port").variable(HUE_DATABASE_PORT));
