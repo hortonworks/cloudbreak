@@ -26,13 +26,14 @@ public interface ServiceEndpointRequest<T extends ServiceEndpoint> {
      *
      * @param targetInstanceId the target instance ID
      * @param hostEndpoint     the optional host endpoint
+     * @param port             the optional port
      * @param serviceFamily    the service family
      * @param <T>              the type of endpoint
      * @return a default service endpoint request for the specified target service
      */
     @Nonnull
     static <T extends ServiceEndpoint> ServiceEndpointRequest<T> createDefaultServiceEndpointRequest(
-            @Nonnull String targetInstanceId, @Nullable HostEndpoint hostEndpoint, @Nonnull ServiceFamily<T> serviceFamily) {
+            @Nonnull String targetInstanceId, @Nullable HostEndpoint hostEndpoint, @Nullable Integer port, @Nonnull ServiceFamily<T> serviceFamily) {
 
         return new ServiceEndpointRequest<T>() {
 
@@ -56,6 +57,11 @@ public interface ServiceEndpointRequest<T extends ServiceEndpoint> {
             @Override
             public ServiceFamily<T> getServiceFamily() {
                 return serviceFamily;
+            }
+
+            @Override
+            public Optional<Integer> getPort() {
+                return Optional.ofNullable(port);
             }
 
             @Override
@@ -83,6 +89,15 @@ public interface ServiceEndpointRequest<T extends ServiceEndpoint> {
      * @return the service family
      */
     ServiceFamily<T> getServiceFamily();
+
+    /**
+     * Returns the optional port.
+     *
+     * @return the optional port
+     */
+    default Optional<Integer> getPort() {
+        return Optional.empty();
+    }
 
     /**
      * An optional datetime after which the lookup attempt should fail.

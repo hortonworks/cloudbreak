@@ -100,6 +100,10 @@ public class GatewayConfig {
         return hostname;
     }
 
+    public Integer getGatewayPort() {
+        return gatewayPort;
+    }
+
     public String getGatewayUrl() {
         return String.format("https://%s:%d", connectionAddress, gatewayPort);
     }
@@ -172,7 +176,7 @@ public class GatewayConfig {
      * @throws ServiceEndpointLookupException if an exception occurs looking up the endpoint
      * @throws InterruptedException           if the lookup is interrupted
      */
-    private HttpsServiceEndpoint getServiceEndpoint(ServiceEndpointFinder serviceEndpointFinder)
+    private ServiceEndpoint getServiceEndpoint(ServiceEndpointFinder serviceEndpointFinder)
             throws ServiceEndpointLookupException, InterruptedException {
         ServiceEndpointRequest<HttpsServiceEndpoint> serviceEndpointRequest =
                 createServiceEndpointRequest();
@@ -186,7 +190,7 @@ public class GatewayConfig {
      */
     private ServiceEndpointRequest<HttpsServiceEndpoint> createServiceEndpointRequest() {
         return ServiceEndpointRequest.createDefaultServiceEndpointRequest(
-                instanceId, new HostEndpoint(connectionAddress), ServiceFamilies.GATEWAY);
+                instanceId, new HostEndpoint(connectionAddress), gatewayPort, ServiceFamilies.GATEWAY);
     }
 
     public String toString() {

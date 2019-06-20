@@ -20,7 +20,8 @@ public class DirectServiceEndpointFinder implements ServiceEndpointFinder {
         }
 
         ServiceFamily<T> serviceFamily = serviceEndpointRequest.getServiceFamily();
+        int port = serviceEndpointRequest.getPort().orElse(serviceFamily.getDefaultPort());
 
-        return serviceFamily.getServiceEndpoint(hostEndpoint.get(), serviceFamily.getDefaultPort());
+        return serviceFamily.getServiceEndpoint(hostEndpoint.get(), port);
     }
 }
