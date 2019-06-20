@@ -10,13 +10,17 @@ import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 public class ProxyConfigToProxyRequestConverter
         extends AbstractConversionServiceAwareConverter<ProxyConfig, ProxyRequest> {
 
+    public static final String FAKE_PASSWORD = "fake-password";
+
+    public static final String FAKE_USERNAME = "fake-username";
+
     @Override
     public ProxyRequest convert(ProxyConfig source) {
         ProxyRequest request = new ProxyRequest();
         request.setName(source.getName());
         request.setDescription(source.getDescription());
-        request.setPassword("fake-password");
-        request.setUserName("fake-username");
+        request.setPassword(FAKE_PASSWORD);
+        request.setUserName(FAKE_USERNAME);
         request.setHost(source.getServerHost());
         request.setPort(source.getServerPort());
         request.setProtocol(source.getProtocol());
