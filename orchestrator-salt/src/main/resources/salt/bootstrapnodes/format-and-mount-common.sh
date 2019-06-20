@@ -96,5 +96,9 @@ not_elastic_block_store() {
 }
 
 lsblk_command() {
-    lsblk -I 8 -dn
+    if [[ -z $(lsblk -I 8 -dn) ]]; then
+        lsblk -dn
+    else
+        lsblk -I 8 -dn
+    fi
 }
