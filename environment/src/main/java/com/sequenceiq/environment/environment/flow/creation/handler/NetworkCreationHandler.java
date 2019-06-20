@@ -25,6 +25,7 @@ import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEve
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.exception.EnvironmentServiceException;
 import com.sequenceiq.environment.network.EnvironmentNetworkCreationService;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
@@ -77,12 +78,11 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
                 EnvironmentDto envDto = populateEnvironmentDto(env);
                 env.setStatus(EnvironmentStatus.NETWORK_CREATION_IN_PROGRESS);
                 BaseNetwork baseNetwork = networkService.save(hasExistingNetwork(env)
-                        ? networkService.decorateNetworkWithSubnetMeta(env.getNetwork().getId(), getSubnetMetadata(envDto))
+                        ? decorateWithSubnetMeta(env.getNetwork().getId(), envDto)
                         : environmentNetworkCreationService.createNetwork(envDto, env.getNetwork()));
                 env.setNetwork(baseNetwork);
                 environmentService.save(env);
             });
-
             EnvCreationEvent envCreationEvent = EnvCreationEvent.EnvCreationEventBuilder.anEnvCreationEvent()
                     .withResourceId(environmentDto.getResourceId())
                     .withSelector(START_FREEIPA_CREATION_EVENT.selector())
@@ -92,6 +92,15 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
             EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(environmentDto.getId(), environmentDto.getName(), e);
             eventSender().sendEvent(failureEvent, environmentDtoEvent.getHeaders());
         }
+    }
+
+    private BaseNetwork decorateWithSubnetMeta(Long networkId, EnvironmentDto envDto) {
+        Map<String, CloudSubnet> subnetMetadata = getSubnetMetadata(envDto);
+        if (subnetMetadata.isEmpty()) {
+            throw new EnvironmentServiceException(String.format("Subnets of the environment (%s) are not found in vpc (%s). ",
+                    String.join(",", envDto.getNetwork().getSubnetIds()), getVpcId(envDto).orElse("")));
+        }
+        return networkService.decorateNetworkWithSubnetMeta(networkId, subnetMetadata);
     }
 
     private EnvironmentDto populateEnvironmentDto(Environment environment) {
@@ -115,10 +124,13 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
         prr.setCredential(environmentDto.getCredential());
         prr.setCloudPlatform(environmentDto.getCloudPlatform());
         prr.setRegion(regionName);
+        getVpcId(environmentDto)
+                .ifPresent(vpcId -> prr.setFilters(Map.of("vpcId", vpcId)));
+
         CloudNetworks cnsr = platformParameterService.getCloudNetworks(prr);
         Set<CloudNetwork> cns = cnsr.getCloudNetworkResponses().get(regionName);
         return cns.stream()
-                .filter(n -> n.getId().equals(getVpcId(environmentDto)))
+                .filter(n -> n.getId().equals(getVpcId(environmentDto).orElse(null)))
                 .findFirst()
                 .map(CloudNetwork::getSubnetsMeta)
                 .stream()
@@ -127,11 +139,10 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
                 .collect(Collectors.toMap(CloudSubnet::getId, Function.identity()));
     }
 
-    private String getVpcId(EnvironmentDto environmentDto) {
+    private Optional<String> getVpcId(EnvironmentDto environmentDto) {
         return Optional.ofNullable(environmentDto.getNetwork())
                 .map(NetworkDto::getAws)
-                .map(AwsParams::getVpcId)
-                .orElse(null);
+                .map(AwsParams::getVpcId);
     }
 
     @Override
