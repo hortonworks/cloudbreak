@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.sequenceiq.freeipa.client.model.Ca;
+import com.sequenceiq.freeipa.client.model.Config;
 import com.sequenceiq.freeipa.client.model.Group;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.client.model.User;
@@ -185,6 +186,16 @@ public class FreeIpaClient {
                 "type", "user"
         );
         invoke("permission_add", flags, params, Object.class);
+    }
+
+    public int getUsernameLength() throws FreeIpaClientException {
+        Config config = (Config) invoke("config_show", List.of(), Map.of(), Config.class).getResult();
+        return config.getIpamaxusernamelength();
+    }
+
+    public void setUsernameLength(int length) throws FreeIpaClientException {
+        Map<String, Object> params = Map.of("ipamaxusernamelength", length);
+        invoke("config_mod", List.of(), params, Object.class);
     }
 
     public void addPermissionToPrivilege(String privilege, String permission) throws FreeIpaClientException {
