@@ -16,6 +16,11 @@ public class InfoTests extends AbstractIntegrationTest {
     @Inject
     private CloudbreakInfoTestClient cloudbreakInfoTestClient;
 
+    @Override
+    protected void setupTest(TestContext testContext) {
+        createDefaultUser(testContext);
+    }
+
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running cloudbreak",
