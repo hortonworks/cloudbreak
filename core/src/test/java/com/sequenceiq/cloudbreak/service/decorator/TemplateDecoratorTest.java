@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -24,17 +25,19 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.controller.validation.LocationService;
+import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
-import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -64,12 +67,22 @@ public class TemplateDecoratorTest {
     @Mock
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
 
+    @Mock
+    private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
+
     private Credential cloudCredential;
+
+    private ExtendedCloudCredential extendedCloudCredential;
+
+    @Before
+    public void init() {
+        cloudCredential = mock(Credential.class);
+        extendedCloudCredential = mock(ExtendedCloudCredential.class);
+        when(extendedCloudCredentialConverter.convert(cloudCredential)).thenReturn(extendedCloudCredential);
+    }
 
     @Test
     public void testDecorator() {
-        cloudCredential = mock(Credential.class);
-
         Template template = new Template();
         template.setInstanceType(VM_TYPE);
         template.setCloudPlatform(PLATFORM_1);
@@ -97,7 +110,7 @@ public class TemplateDecoratorTest {
         cloudVmTypes.setCloudVmResponses(region1);
 
         when(cloudParameterService.getDiskTypes()).thenReturn(platformDisk);
-        when(cloudParameterService.getVmTypesV2(eq(cloudCredential), eq(REGION), eq(VARIANT), anyMap())).thenReturn(cloudVmTypes);
+        when(cloudParameterService.getVmTypesV2(eq(extendedCloudCredential), eq(REGION), eq(VARIANT), anyMap())).thenReturn(cloudVmTypes);
         when(locationService.location(REGION, AVAILABILITY_ZONE)).thenReturn(REGION);
 
         Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT);
@@ -118,9 +131,6 @@ public class TemplateDecoratorTest {
 
     @Test
     public void testDecoratorWhenNoInstanceType() {
-
-        cloudCredential = mock(Credential.class);
-
         Template template = new Template();
         template.setInstanceType("missingVmType");
         template.setCloudPlatform(PLATFORM_1);
@@ -148,7 +158,7 @@ public class TemplateDecoratorTest {
         cloudVmTypes.setCloudVmResponses(region1);
 
         when(cloudParameterService.getDiskTypes()).thenReturn(platformDisk);
-        when(cloudParameterService.getVmTypesV2(eq(cloudCredential), eq(REGION), eq(VARIANT), anyMap())).thenReturn(cloudVmTypes);
+        when(cloudParameterService.getVmTypesV2(eq(extendedCloudCredential), eq(REGION), eq(VARIANT), anyMap())).thenReturn(cloudVmTypes);
         when(locationService.location(REGION, AVAILABILITY_ZONE)).thenReturn(REGION);
 
         Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT);
@@ -181,10 +191,9 @@ public class TemplateDecoratorTest {
     private Template initTemplate() {
         Template template = new Template();
         template.setVolumeTemplates(Sets.newHashSet());
-        cloudCredential = mock(Credential.class);
 
         CloudVmTypes cloudVmTypes = new CloudVmTypes(singletonMap(REGION, emptySet()), emptyMap());
-        when(cloudParameterService.getVmTypesV2(eq(cloudCredential), eq(REGION), eq(VARIANT), anyMap())).thenReturn(cloudVmTypes);
+        when(cloudParameterService.getVmTypesV2(eq(extendedCloudCredential), eq(REGION), eq(VARIANT), anyMap())).thenReturn(cloudVmTypes);
         when(locationService.location(REGION, AVAILABILITY_ZONE)).thenReturn(null);
         return template;
     }

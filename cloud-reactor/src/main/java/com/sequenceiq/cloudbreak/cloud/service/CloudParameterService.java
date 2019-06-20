@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.stack;
+package com.sequenceiq.cloudbreak.cloud.service;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -14,7 +14,6 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetDiskTypesRequest;
@@ -66,12 +65,11 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRegions;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
+import com.sequenceiq.cloudbreak.cloud.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
-import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
-import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.OperationException;
+import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -85,9 +83,6 @@ public class CloudParameterService {
 
     @Inject
     private ErrorHandlerAwareReactorEventFactory eventFactory;
-
-    @Inject
-    private CredentialToExtendedCloudCredentialConverter credentialToExtendedCloudCredentialConverter;
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public PlatformVariants getPlatformVariants() {
@@ -197,10 +192,9 @@ public class CloudParameterService {
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
-    public CloudNetworks getCloudNetworks(Credential credential, String region, String variant, Map<String, String> filters) {
+    public CloudNetworks getCloudNetworks(ExtendedCloudCredential cloudCredential, String region, String variant, Map<String, String> filters) {
         LOGGER.debug("Get platform cloudnetworks");
 
-        ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
         GetPlatformNetworksRequest getPlatformNetworksRequest =
                 new GetPlatformNetworksRequest(cloudCredential, cloudCredential, variant, region, filters);
         eventBus.notify(getPlatformNetworksRequest.selector(), eventFactory.createEvent(getPlatformNetworksRequest));
@@ -219,9 +213,8 @@ public class CloudParameterService {
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
-    public CloudSshKeys getCloudSshKeys(Credential credential, String region, String variant, Map<String, String> filters) {
+    public CloudSshKeys getCloudSshKeys(ExtendedCloudCredential cloudCredential, String region, String variant, Map<String, String> filters) {
         LOGGER.debug("Get platform sshkeys");
-        ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
         GetPlatformSshKeysRequest getPlatformSshKeysRequest =
                 new GetPlatformSshKeysRequest(cloudCredential, cloudCredential, variant, region, filters);
         eventBus.notify(getPlatformSshKeysRequest.selector(), eventFactory.createEvent(getPlatformSshKeysRequest));
@@ -240,10 +233,8 @@ public class CloudParameterService {
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
-    public CloudSecurityGroups getSecurityGroups(Credential credential, String region, String variant, Map<String, String> filters) {
+    public CloudSecurityGroups getSecurityGroups(ExtendedCloudCredential cloudCredential, String region, String variant, Map<String, String> filters) {
         LOGGER.debug("Get platform securitygroups");
-
-        ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
         GetPlatformSecurityGroupsRequest getPlatformSecurityGroupsRequest =
                 new GetPlatformSecurityGroupsRequest(cloudCredential, cloudCredential, variant, region, filters);
         eventBus.notify(getPlatformSecurityGroupsRequest.selector(), eventFactory.createEvent(getPlatformSecurityGroupsRequest));
@@ -287,9 +278,8 @@ public class CloudParameterService {
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
-    public CloudVmTypes getVmTypesV2(Credential credential, String region, String variant, Map<String, String> filters) {
+    public CloudVmTypes getVmTypesV2(ExtendedCloudCredential cloudCredential, String region, String variant, Map<String, String> filters) {
         LOGGER.debug("Get platform vmtypes");
-        ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
         GetPlatformVmTypesRequest getPlatformVmTypesRequest =
                 new GetPlatformVmTypesRequest(cloudCredential, cloudCredential, variant, region, filters);
         eventBus.notify(getPlatformVmTypesRequest.selector(), Event.wrap(getPlatformVmTypesRequest));
@@ -308,9 +298,8 @@ public class CloudParameterService {
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
-    public CloudRegions getRegionsV2(Credential credential, String region, String variant, Map<String, String> filters) {
+    public CloudRegions getRegionsV2(ExtendedCloudCredential cloudCredential, String region, String variant, Map<String, String> filters) {
         LOGGER.debug("Get platform regions");
-        ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
         GetPlatformRegionsRequestV2 getPlatformRegionsRequest =
                 new GetPlatformRegionsRequestV2(cloudCredential, cloudCredential, variant, region, filters);
         eventBus.notify(getPlatformRegionsRequest.selector(), Event.wrap(getPlatformRegionsRequest));
@@ -330,9 +319,8 @@ public class CloudParameterService {
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
-    public CloudGateWays getGateways(Credential credential, String region, String variant, Map<String, String> filters) {
+    public CloudGateWays getGateways(ExtendedCloudCredential cloudCredential, String region, String variant, Map<String, String> filters) {
         LOGGER.debug("Get platform gateways");
-        ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
         GetPlatformCloudGatewaysRequest getPlatformCloudGatewaysRequest =
                 new GetPlatformCloudGatewaysRequest(cloudCredential, cloudCredential, variant, region, filters);
         eventBus.notify(getPlatformCloudGatewaysRequest.selector(), Event.wrap(getPlatformCloudGatewaysRequest));
@@ -351,9 +339,8 @@ public class CloudParameterService {
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
-    public CloudIpPools getPublicIpPools(Credential credential, String region, String variant, Map<String, String> filters) {
+    public CloudIpPools getPublicIpPools(ExtendedCloudCredential cloudCredential, String region, String variant, Map<String, String> filters) {
         LOGGER.debug("Get platform publicIpPools");
-        ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
         GetPlatformCloudIpPoolsRequest getPlatformCloudIpPoolsRequest =
                 new GetPlatformCloudIpPoolsRequest(cloudCredential, cloudCredential, variant, region, filters);
         eventBus.notify(getPlatformCloudIpPoolsRequest.selector(), Event.wrap(getPlatformCloudIpPoolsRequest));
@@ -372,9 +359,8 @@ public class CloudParameterService {
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
-    public CloudAccessConfigs getCloudAccessConfigs(Credential credential, String region, String variant, Map<String, String> filters) {
+    public CloudAccessConfigs getCloudAccessConfigs(ExtendedCloudCredential cloudCredential, String region, String variant, Map<String, String> filters) {
         LOGGER.debug("Get platform accessConfigs");
-        ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
         GetPlatformCloudAccessConfigsRequest getPlatformCloudAccessConfigsRequest =
                 new GetPlatformCloudAccessConfigsRequest(cloudCredential, cloudCredential, variant, region, filters);
         eventBus.notify(getPlatformCloudAccessConfigsRequest.selector(), Event.wrap(getPlatformCloudAccessConfigsRequest));
@@ -393,9 +379,8 @@ public class CloudParameterService {
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
-    public CloudEncryptionKeys getCloudEncryptionKeys(Credential credential, String region, String variant, Map<String, String> filters) {
+    public CloudEncryptionKeys getCloudEncryptionKeys(ExtendedCloudCredential cloudCredential, String region, String variant, Map<String, String> filters) {
         LOGGER.debug("Get platform encryptionKeys");
-        ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
         GetPlatformEncryptionKeysRequest getPlatformEncryptionKeysRequest =
                 new GetPlatformEncryptionKeysRequest(cloudCredential, cloudCredential, variant, region, filters);
         eventBus.notify(getPlatformEncryptionKeysRequest.selector(), Event.wrap(getPlatformEncryptionKeysRequest));
@@ -414,9 +399,9 @@ public class CloudParameterService {
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
-    public Map<String, InstanceGroupParameterResponse> getInstanceGroupParameters(Credential credential, Set<InstanceGroupParameterRequest> instanceGroups) {
+    public Map<String, InstanceGroupParameterResponse> getInstanceGroupParameters(ExtendedCloudCredential cloudCredential,
+            Set<InstanceGroupParameterRequest> instanceGroups) {
         LOGGER.debug("Get platform getInstanceGroupParameters");
-        ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
 
         GetPlatformInstanceGroupParameterRequest getPlatformInstanceGroupParameterRequest =
                 new GetPlatformInstanceGroupParameterRequest(cloudCredential, cloudCredential, instanceGroups, null);

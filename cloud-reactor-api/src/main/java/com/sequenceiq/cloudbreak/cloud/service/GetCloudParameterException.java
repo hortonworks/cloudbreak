@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.stack;
+package com.sequenceiq.cloudbreak.cloud.service;
 
 public class GetCloudParameterException extends RuntimeException {
 

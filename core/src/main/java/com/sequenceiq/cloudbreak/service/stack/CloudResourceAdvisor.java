@@ -33,6 +33,8 @@ import com.sequenceiq.cloudbreak.cloud.model.VmRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
+import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -63,6 +65,9 @@ public class CloudResourceAdvisor {
     @Inject
     private CredentialClientService credentialClientService;
 
+    @Inject
+    private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
+
     public PlatformRecommendation createForBlueprint(Long workspaceId, String blueprintName, String credentialName,
             String region, String platformVariant, String availabilityZone) {
         Credential credential = credentialClientService.getByName(credentialName);
@@ -88,7 +93,8 @@ public class CloudResourceAdvisor {
                 platformDisks.getDiskMappings().get(platform),
                 platformDisks.getDiskDisplayNames().get(platform));
 
-        CloudVmTypes vmTypes = cloudParameterService.getVmTypesV2(credential, region, platformVariant, Maps.newHashMap());
+        CloudVmTypes vmTypes = cloudParameterService.getVmTypesV2(extendedCloudCredentialConverter.convert(credential), region, platformVariant,
+                Maps.newHashMap());
         VmType defaultVmType = getDefaultVmType(availabilityZone, vmTypes);
         if (defaultVmType != null) {
             componentsByHostGroup.keySet().forEach(comp -> vmTypesByHostGroup.put(comp, defaultVmType));

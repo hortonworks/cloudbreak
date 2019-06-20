@@ -134,7 +134,7 @@ public class OpenStackPlatformResources implements PlatformResources {
             if (neutronSubnets != null) {
                 for (Subnet neutronSubnet : neutronSubnets) {
                     if (neutronSubnet != null) {
-                        subnets.add(new CloudSubnet(neutronSubnet.getId(), neutronSubnet.getName()));
+                        subnets.add(new CloudSubnet(neutronSubnet.getId(), neutronSubnet.getName(), null, neutronSubnet.getCidr()));
                     }
                 }
             }
