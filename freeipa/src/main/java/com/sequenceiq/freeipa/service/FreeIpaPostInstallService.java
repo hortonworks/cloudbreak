@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service;
 
+import java.util.Objects;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -16,6 +18,8 @@ public class FreeIpaPostInstallService {
 
     private static final String USER_ADMIN_PRIVILEGE = "User Administrators";
 
+    private static final int MAX_USERNAME_LENGTH = 255;
+
     @Inject
     private FreeIpaClientFactory freeIpaClientFactory;
 
@@ -24,5 +28,9 @@ public class FreeIpaPostInstallService {
         FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStackId(stackId);
         freeIpaClient.addPasswordExpirationPermission(SET_PASSWORD_EXPIRATION_PERMISSION);
         freeIpaClient.addPermissionToPrivilege(USER_ADMIN_PRIVILEGE, SET_PASSWORD_EXPIRATION_PERMISSION);
+        if (!Objects.equals(MAX_USERNAME_LENGTH, freeIpaClient.getUsernameLength())) {
+            LOGGER.debug("Set maximum username length to {}", MAX_USERNAME_LENGTH);
+            freeIpaClient.setUsernameLength(MAX_USERNAME_LENGTH);
+        }
     }
 }
