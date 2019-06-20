@@ -35,6 +35,10 @@ type stackOutDescribe struct {
 	*model.StackV4Response
 }
 
+type stackOutRequest struct {
+	*model.StackV4Request
+}
+
 func (s *stackOut) DataAsStringArray() []string {
 	arr := []string{s.Name, s.CloudPlatform}
 	arr = append(arr, s.EnvironmentCrn)
@@ -46,6 +50,10 @@ func (s *stackOut) DataAsStringArray() []string {
 func (s *stackOutDescribe) DataAsStringArray() []string {
 	stack := convertResponseToStack(s.StackV4Response)
 	return append(stack.DataAsStringArray(), strconv.FormatInt(s.ID, 10))
+}
+
+func (s *stackOutRequest) DataAsStringArray() []string {
+	return []string{}
 }
 
 func CreateStack(c *cli.Context) {
@@ -148,6 +156,20 @@ func convertResponseToStack(s *model.StackV4Response) *stackOut {
 		StackStatus:    s.Status,
 		ClusterStatus:  utils.SafeClusterStatusConvert(s),
 	}
+}
+
+func GetStackRequest(c *cli.Context) {
+	defer commonutils.TimeTrack(time.Now(), "get request for stack")
+
+	workspaceID := c.Int64(fl.FlWorkspaceOptional.Name)
+	cbClient := oauth.NewCloudbreakHTTPClientFromContext(c)
+	output := commonutils.Output{Format: "json"}
+	resp, err := cbClient.Cloudbreak.V4WorkspaceIDStacks.GetStackRequestFromNameV4(v4stack.NewGetStackRequestFromNameV4Params().WithWorkspaceID(workspaceID).WithName(c.String(fl.FlName.Name)))
+	if err != nil {
+		commonutils.LogErrorAndExit(err)
+	}
+	s := resp.Payload
+	output.Write([]string{}, &stackOutRequest{s})
 }
 
 func DescribeStack(c *cli.Context) {

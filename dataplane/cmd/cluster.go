@@ -346,6 +346,18 @@ func init() {
 				},
 			},
 			{
+				Name:   "request",
+				Usage:  "print the request for a cluster",
+				Flags:  fl.NewFlagBuilder().AddFlags(fl.FlName).AddAuthenticationFlags().Build(),
+				Before: cf.CheckConfigAndCommandFlags,
+				Action: stack.GetStackRequest,
+				BashComplete: func(c *cli.Context) {
+					for _, f := range fl.NewFlagBuilder().AddFlags(fl.FlName).AddAuthenticationFlags().Build() {
+						fl.PrintFlagCompletion(f)
+					}
+				},
+			},
+			{
 				Name:   "retry",
 				Usage:  "retries the creation of a cluster",
 				Before: cf.CheckConfigAndCommandFlags,
