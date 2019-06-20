@@ -16,6 +16,8 @@ public class SdxClusterRequest {
     @NotNull
     private String clusterShape;
 
+    private SdxCloudStorageRequest cloudStorage;
+
     private Map<String, String> tags;
 
     public String getEnvironment() {
@@ -48,5 +50,13 @@ public class SdxClusterRequest {
 
     public void setTags(Map<String, String> tags) {
         this.tags = tags;
+    }
+
+    public SdxCloudStorageRequest getCloudStorage() {
+        return cloudStorage;
+    }
+
+    public void setCloudStorage(SdxCloudStorageRequest cloudStorage) {
+        this.cloudStorage = cloudStorage;
     }
 }

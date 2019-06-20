@@ -13,16 +13,15 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClient;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxClusterStatus;
@@ -48,6 +47,12 @@ public class SdxService {
 
     @Inject
     private CloudbreakUserCrnClient cloudbreakClient;
+
+    @Inject
+    private StackRequestManifester stackRequestManifester;
+
+    @Value("${sdx.cluster.definition}")
+    private String clusterDefinition;
 
     public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<SdxClusterStatus> statuses) {
         List<SdxCluster> sdxClusters = sdxClusterRepository.findByIdInAndStatusIn(resourceIds, statuses);
@@ -91,7 +96,9 @@ public class SdxService {
     }
 
     public SdxCluster createSdx(final String userCrn, final String name, final SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request) {
+        validateSdxRequest(name, sdxClusterRequest.getEnvironment(), getAccountIdFromCrn(userCrn));
         SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setInitiatorUserCrn(userCrn);
         sdxCluster.setCrn(createCrn(getAccountIdFromCrn(userCrn)));
         sdxCluster.setClusterName(name);
         sdxCluster.setAccountId(getAccountIdFromCrn(userCrn));
@@ -99,34 +106,14 @@ public class SdxService {
         sdxCluster.setStatus(SdxClusterStatus.REQUESTED);
         sdxCluster.setAccessCidr(sdxClusterRequest.getAccessCidr());
         sdxCluster.setClusterShape(sdxClusterRequest.getClusterShape());
-        try {
-            if (stackV4Request != null) {
-                sdxCluster.setStackRequest(JsonUtil.writeValueAsString(stackV4Request));
-            }
-        } catch (JsonProcessingException e) {
-            LOGGER.info("Can not parse stack request");
-            throw new BadRequestException("Can not parse stack request", e);
-        }
-        try {
-            sdxCluster.setTags(new Json(sdxClusterRequest.getTags()));
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Can not convert tags", e);
-        }
-        sdxCluster.setInitiatorUserCrn(userCrn);
 
         DetailedEnvironmentResponse environment = getEnvironment(userCrn, sdxClusterRequest);
         sdxCluster.setEnvName(environment.getName());
         sdxCluster.setEnvCrn(environment.getCrn());
 
-        sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(sdxCluster.getAccountId(), sdxCluster.getClusterName())
-                .ifPresent(foundSdx -> {
-                    throw new BadRequestException("SDX cluster exists with this name: " + name);
-                });
+        setTagsSafe(sdxClusterRequest, sdxCluster);
 
-        sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(sdxCluster.getAccountId(), sdxCluster.getEnvName()).stream().findFirst()
-                .ifPresent(existedSdx -> {
-                    throw new BadRequestException("SDX cluster exists for environment name: " + existedSdx.getEnvName());
-                });
+        stackRequestManifester.configureStackForSdxCluster(stackV4Request, sdxClusterRequest, sdxCluster,  environment);
 
         sdxCluster = sdxClusterRepository.save(sdxCluster);
 
@@ -134,6 +121,26 @@ public class SdxService {
         sdxReactorFlowManager.triggerSdxCreation(sdxCluster.getId());
 
         return sdxCluster;
+    }
+
+    private void validateSdxRequest(String name, String envName, String accountId) {
+        sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountId, name)
+                .ifPresent(foundSdx -> {
+                    throw new BadRequestException("SDX cluster exists with this name: " + name);
+                });
+
+        sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(accountId, envName).stream().findFirst()
+                .ifPresent(existedSdx -> {
+                    throw new BadRequestException("SDX cluster exists for environment name: " + existedSdx.getEnvName());
+                });
+    }
+
+    private void setTagsSafe(SdxClusterRequest sdxClusterRequest, SdxCluster sdxCluster) {
+        try {
+            sdxCluster.setTags(new Json(sdxClusterRequest.getTags()));
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Can not convert tags", e);
+        }
     }
 
     public List<SdxCluster> listSdx(String userCrn, String envName) {
