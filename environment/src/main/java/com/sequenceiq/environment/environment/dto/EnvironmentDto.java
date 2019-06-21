@@ -45,9 +45,13 @@ public class EnvironmentDto implements Payload {
 
     private EnvironmentStatus status;
 
+    private String statusReason;
+
     private String creator;
 
     private boolean createFreeIpa = true;
+
+    private Long created;
 
     @Override
     public Long getResourceId() {
@@ -187,6 +191,22 @@ public class EnvironmentDto implements Payload {
         this.createFreeIpa = createFreeIpa;
     }
 
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
+    }
+
+    public Long getCreated() {
+        return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -222,7 +242,11 @@ public class EnvironmentDto implements Payload {
 
         private String creator;
 
+        private String statusReason;
+
         private boolean createFreeIpa = true;
+
+        private Long created;
 
         private Builder() {
         }
@@ -307,6 +331,16 @@ public class EnvironmentDto implements Payload {
             return this;
         }
 
+        public Builder withStatusReason(String statusReason) {
+            this.statusReason = statusReason;
+            return this;
+        }
+
+        public Builder withCreated(Long created) {
+            this.created = created;
+            return this;
+        }
+
         public EnvironmentDto build() {
             EnvironmentDto environmentDto = new EnvironmentDto();
             environmentDto.setId(id);
@@ -325,6 +359,8 @@ public class EnvironmentDto implements Payload {
             environmentDto.setStatus(environmentStatus);
             environmentDto.setCreator(creator);
             environmentDto.setCreateFreeIpa(createFreeIpa);
+            environmentDto.setStatusReason(statusReason);
+            environmentDto.setCreated(created);
             return environmentDto;
         }
     }

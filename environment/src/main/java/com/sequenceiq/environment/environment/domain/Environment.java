@@ -90,6 +90,11 @@ public class Environment implements AuthResource {
     @Enumerated(EnumType.STRING)
     private EnvironmentStatus status;
 
+    @Column(length = 1000000, columnDefinition = "TEXT")
+    private String statusReason;
+
+    private Long created;
+
     public Environment() {
         regions = new Json(new HashSet<Region>());
     }
@@ -249,5 +254,21 @@ public class Environment implements AuthResource {
 
     public void setCreateFreeIpa(boolean createFreeIpa) {
         this.createFreeIpa = createFreeIpa;
+    }
+
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
+    }
+
+    public Long getCreated() {
+        return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
     }
 }

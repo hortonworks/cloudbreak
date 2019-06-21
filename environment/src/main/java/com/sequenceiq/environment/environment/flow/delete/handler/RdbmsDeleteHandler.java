@@ -5,7 +5,6 @@ import static com.sequenceiq.environment.environment.flow.delete.event.EnvDelete
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.delete.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.flow.delete.event.EnvDeleteFailedEvent;
@@ -29,12 +28,6 @@ public class RdbmsDeleteHandler extends EventSenderAwareHandler<EnvironmentDto> 
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            // TODO: delete rdbms
-            environmentService.findEnvironmentById(environmentDto.getId()).ifPresent(environment -> {
-                environment.setStatus(EnvironmentStatus.RDBMS_DELETE_IN_PROGRESS);
-                environmentService.save(environment);
-            });
-            sleepForTestPurpose();
             EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.EnvDeleteEventBuilder.anEnvDeleteEvent()
                     .withResourceId(environmentDto.getResourceId())
                     .withSelector(START_NETWORK_DELETE_EVENT.selector())

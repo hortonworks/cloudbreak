@@ -42,6 +42,10 @@ public abstract class EnvironmentBaseResponse {
     @ApiModelProperty(EnvironmentModelDescription.STATUS)
     private EnvironmentStatus environmentStatus;
 
+    private String statusReason;
+
+    private Long created;
+
     public String getCrn() {
         return crn;
     }
@@ -128,5 +132,21 @@ public abstract class EnvironmentBaseResponse {
 
     public void setCreateFreeIpa(Boolean createFreeIpa) {
         this.createFreeIpa = createFreeIpa;
+    }
+
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
+    }
+
+    public Long getCreated() {
+        return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
     }
 }

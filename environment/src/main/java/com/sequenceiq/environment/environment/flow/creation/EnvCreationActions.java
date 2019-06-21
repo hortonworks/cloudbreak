@@ -78,6 +78,7 @@ public class EnvCreationActions {
                 environmentService
                         .findEnvironmentById(payload.getResourceId())
                         .ifPresent(environment -> {
+                            environment.setStatusReason(null);
                             environment.setStatus(EnvironmentStatus.AVAILABLE);
                             environmentService.save(environment);
                         });
@@ -96,7 +97,8 @@ public class EnvCreationActions {
                 environmentService
                         .findEnvironmentById(payload.getResourceId())
                         .ifPresent(environment -> {
-                            environment.setStatus(EnvironmentStatus.CORRUPTED);
+                            environment.setStatusReason(payload.getException().getMessage());
+                            environment.setStatus(EnvironmentStatus.CREATE_FAILED);
                             environmentService.save(environment);
                         });
                 LOGGER.info("ENV_CREATION_FAILED_STATE");

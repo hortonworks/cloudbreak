@@ -5,7 +5,6 @@ import static com.sequenceiq.environment.environment.flow.delete.event.EnvDelete
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.delete.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.flow.delete.event.EnvDeleteFailedEvent;
@@ -35,7 +34,6 @@ public class NetworkDeleteHandler extends EventSenderAwareHandler<EnvironmentDto
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
             environmentService.findEnvironmentById(environmentDto.getId()).ifPresent(environment -> {
-                environment.setStatus(EnvironmentStatus.NETWORK_DELETE_IN_PROGRESS);
                 environment.setNetwork(null);
                 environmentService.save(environment);
             });

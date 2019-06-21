@@ -92,6 +92,7 @@ public class EnvironmentCreationService {
         Environment environment = environmentDtoConverter.creationDtoToEnvironment(creationDto);
         environment.setResourceCrn(createCrn(creationDto.getAccountId()));
         environment.setCreator(creator);
+        environment.setCreated(System.currentTimeMillis());
         Credential credential = environmentResourceService
                 .getCredentialFromRequest(creationDto.getCredential(), creationDto.getAccountId(), creator);
         environment.setCredential(credential);

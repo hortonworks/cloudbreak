@@ -54,6 +54,7 @@ public class EnvironmentApiConverter {
                 .withDescription(request.getDescription())
                 .withCloudPlatform(request.getCloudPlatform())
                 .withCredential(request)
+                .withCreated(System.currentTimeMillis())
                 .withCreateFreeIpa(request.getCreateFreeIpa() == null ? true : request.getCreateFreeIpa())
                 .withLocation(locationRequestToDto(request.getLocation()))
                 .withRegions(request.getRegions());
@@ -102,6 +103,8 @@ public class EnvironmentApiConverter {
                 .withEnvironmentStatus(environmentDto.getStatus().getResponseStatus())
                 .withLocation(locationDtoToResponse(environmentDto.getLocation()))
                 .withCreateFreeIpa(environmentDto.isCreateFreeIpa())
+                .withStatusReason(environmentDto.getStatusReason())
+                .withCreated(environmentDto.getCreated())
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()));
 
         NullUtil.doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
@@ -118,6 +121,8 @@ public class EnvironmentApiConverter {
                 .withEnvironmentStatus(environmentDto.getStatus().getResponseStatus())
                 .withLocation(locationDtoToResponse(environmentDto.getLocation()))
                 .withCreateFreeIpa(environmentDto.isCreateFreeIpa())
+                .withStatusReason(environmentDto.getStatusReason())
+                .withCreated(environmentDto.getCreated())
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()));
 
         NullUtil.doIfNotNull(environmentDto.getNetwork(), network -> builder.withNetwork(networkDtoToResponse(network)));
