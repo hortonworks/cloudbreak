@@ -3,7 +3,6 @@ package com.sequenceiq.it.cloudbreak.util.wait;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
-import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.CORRUPTED;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,10 +24,10 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.FreeIPAClient;
 import com.sequenceiq.it.cloudbreak.util.WaitResult;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 
 @Component
 public class WaitUtil {
@@ -209,7 +208,7 @@ public class WaitUtil {
     }
 
     private boolean checkFailedStatuses(EnvironmentStatus currentStatus) {
-        return CORRUPTED.equals(currentStatus) || currentStatus == EnvironmentStatus.ARCHIVED;
+        return currentStatus.isFailed() || currentStatus == EnvironmentStatus.ARCHIVED;
     }
 
     private boolean hasNoExpectedFailure(Status currentStatuses, Status desiredStatuses) {

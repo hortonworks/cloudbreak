@@ -45,6 +45,12 @@ public class EnvDeleteActions {
         return new AbstractVpcDeleteAction<>(EnvDeleteEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
+                environmentService
+                        .findEnvironmentById(payload.getResourceId())
+                        .ifPresent(environment -> {
+                            environment.setStatus(EnvironmentStatus.NETWORK_DELETE_IN_PROGRESS);
+                            environmentService.save(environment);
+                        });
                 EnvironmentDto envDto = new EnvironmentDto();
                 envDto.setId(payload.getResourceId());
                 LOGGER.info("NETWORK_DELETE_STARTED_STATE");
@@ -58,6 +64,12 @@ public class EnvDeleteActions {
         return new AbstractVpcDeleteAction<>(EnvDeleteEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
+                environmentService
+                        .findEnvironmentById(payload.getResourceId())
+                        .ifPresent(environment -> {
+                            environment.setStatus(EnvironmentStatus.RDBMS_DELETE_IN_PROGRESS);
+                            environmentService.save(environment);
+                        });
                 EnvironmentDto envDto = new EnvironmentDto();
                 envDto.setId(payload.getResourceId());
                 LOGGER.info("RDBMS_DELETE_STARTED_STATE");
@@ -71,6 +83,12 @@ public class EnvDeleteActions {
         return new AbstractVpcDeleteAction<>(EnvDeleteEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
+                environmentService
+                        .findEnvironmentById(payload.getResourceId())
+                        .ifPresent(environment -> {
+                            environment.setStatus(EnvironmentStatus.FREEIPA_DELETE_IN_PROGRESS);
+                            environmentService.save(environment);
+                        });
                 EnvironmentDto envDto = new EnvironmentDto();
                 envDto.setId(payload.getResourceId());
                 LOGGER.info("FREEIPA_DELETE_STARTED_STATE");
@@ -89,6 +107,7 @@ public class EnvDeleteActions {
                         .ifPresent(env -> {
                             env.setName(generateArchiveName(env.getName()));
                             env.setDeletionTimestamp(new Date().getTime());
+                            env.setStatusReason(null);
                             env.setStatus(EnvironmentStatus.ARCHIVED);
                             env.setArchived(true);
                             environmentService.save(env);
@@ -108,7 +127,8 @@ public class EnvDeleteActions {
                 environmentService
                         .findEnvironmentById(payload.getResourceId())
                         .ifPresent(environment -> {
-                            environment.setStatus(EnvironmentStatus.CORRUPTED);
+                            environment.setStatusReason(payload.getException().getMessage());
+                            environment.setStatus(EnvironmentStatus.DELETE_FAILED);
                             environmentService.save(environment);
                         });
                 LOGGER.info("ENV_DELETE_FAILED_STATE");

@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 
 @ApiModel(value = "SimpleEnvironmentV1Response")
 public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
+
     public static Builder builder() {
         return new Builder();
     }
@@ -30,6 +31,10 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
         private EnvironmentNetworkResponse network;
 
         private EnvironmentStatus environmentStatus;
+
+        private String statusReason;
+
+        private Long created;
 
         private Builder() {
         }
@@ -79,8 +84,18 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
-        public SimpleEnvironmentResponse.Builder withCreateFreeIpa(boolean createFreeIpa) {
+        public Builder withCreateFreeIpa(boolean createFreeIpa) {
             this.createFreeIpa = createFreeIpa;
+            return this;
+        }
+
+        public Builder withStatusReason(String statusReason) {
+            this.statusReason = statusReason;
+            return this;
+        }
+
+        public Builder withCreated(Long created) {
+            this.created = created;
             return this;
         }
 
@@ -96,6 +111,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setNetwork(network);
             simpleEnvironmentResponse.setEnvironmentStatus(environmentStatus);
             simpleEnvironmentResponse.setCreateFreeIpa(createFreeIpa);
+            simpleEnvironmentResponse.setStatusReason(statusReason);
+            simpleEnvironmentResponse.setCreated(created);
             return simpleEnvironmentResponse;
         }
     }

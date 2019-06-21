@@ -33,37 +33,14 @@ public class EnvironmentDtoConverter {
                 .withRegions(environment.getRegions())
                 .withEnvironmentStatus(environment.getStatus())
                 .withCreator(environment.getCreator())
-                .withCreateFreeIpa(environment.isCreateFreeIpa());
+                .withCreateFreeIpa(environment.isCreateFreeIpa())
+                .withCreated(environment.getCreated())
+                .withStatusReason(environment.getStatusReason());
         if (environment.getNetwork() != null) {
             builder.withNetwork(environmentNetworkConverterMap.get(CloudPlatform.valueOf(environment.getCloudPlatform()))
                     .convertToDto(environment.getNetwork()));
         }
         return builder.build();
-    }
-
-    public Environment dtoToEnvironment(EnvironmentDto environmentDto) {
-        Environment environment = new Environment();
-        environment.setAccountId(environmentDto.getAccountId());
-        environment.setArchived(environmentDto.isArchived());
-        environment.setCloudPlatform(environmentDto.getCloudPlatform());
-        environment.setCredential(environmentDto.getCredential());
-        environment.setDeletionTimestamp(environmentDto.getDeletionTimestamp());
-        environment.setDescription(environmentDto.getDescription());
-        environment.setId(environmentDto.getId());
-        environment.setLatitude(environmentDto.getLocation().getLatitude());
-        environment.setLocation(environmentDto.getLocation().getName());
-        environment.setLocationDisplayName(environmentDto.getLocation().getDisplayName());
-        environment.setLongitude(environmentDto.getLocation().getLongitude());
-        environment.setName(environmentDto.getName());
-        if (environmentDto.getNetwork() != null) {
-            environment.setNetwork(environmentNetworkConverterMap.get(
-                    CloudPlatform.valueOf(environmentDto.getCloudPlatform())).convert(environmentDto));
-        }
-        environment.setResourceCrn(environmentDto.getResourceCrn());
-        environment.setStatus(environmentDto.getStatus());
-        environment.setCreator(environmentDto.getCreator());
-        environment.setCreateFreeIpa(environmentDto.isCreateFreeIpa());
-        return environment;
     }
 
     public Environment creationDtoToEnvironment(EnvironmentCreationDto creationDto) {

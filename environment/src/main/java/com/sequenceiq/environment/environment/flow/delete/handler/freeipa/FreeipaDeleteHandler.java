@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
-import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.handler.freeipa.FreeIpaPollerObject;
@@ -54,9 +53,6 @@ public class FreeipaDeleteHandler extends EventSenderAwareHandler<EnvironmentDto
         Optional<Environment> env = environmentService.findEnvironmentById(environmentDto.getId());
         try {
             if (env.isPresent() && isFreeIpaExistsForEnvironment(env.get())) {
-                env.get().setStatus(EnvironmentStatus.FREEIPA_DELETE_IN_PROGRESS);
-                environmentService.save(env.get());
-
                 freeIpaV1Endpoint.delete(env.get().getResourceCrn());
 
                 PollingResult result = freeIpaPollingService.pollWithTimeoutSingleFailure(

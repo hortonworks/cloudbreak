@@ -7,20 +7,28 @@ public enum EnvironmentStatus {
 
     CREATION_INITIATED,
     DELETE_INITIATED,
+    UPDATE_INITIATED,
+
     NETWORK_CREATION_IN_PROGRESS,
     NETWORK_DELETE_IN_PROGRESS,
+
     RDBMS_DELETE_IN_PROGRESS,
+
     FREEIPA_CREATION_IN_PROGRESS,
     FREEIPA_DELETE_IN_PROGRESS,
+
     AVAILABLE,
     ARCHIVED,
-    CORRUPTED;
+
+    CREATE_FAILED,
+    DELETE_FAILED,
+    UPDATE_FAILED;
 
     public boolean isAvailable() {
         return equals(AVAILABLE);
     }
 
     public boolean isFailed() {
-        return equals(CORRUPTED);
+        return equals(CREATE_FAILED) || equals(DELETE_FAILED) || equals(UPDATE_FAILED);
     }
 }

@@ -30,10 +30,12 @@ public class EnvironmentCreationDto {
 
     private final boolean createFreeIpa;
 
+    private final Long created;
+
     //CHECKSTYLE:OFF
     public EnvironmentCreationDto(String name, String description, String cloudPlatform, String accountId,
             LocationDto location, NetworkDto network, CredentialAwareEnvRequest credential,
-            Set<String> regions, Set<String> proxyNames, boolean createFreeIpa) {
+            Set<String> regions, Set<String> proxyNames, boolean createFreeIpa, Long created) {
         //CHECKSTYLE:ON
         this.name = name;
         this.description = description;
@@ -43,6 +45,7 @@ public class EnvironmentCreationDto {
         this.network = network;
         this.credential = credential;
         this.createFreeIpa = createFreeIpa;
+        this.created = created;
         if (CollectionUtils.isEmpty(regions)) {
             this.regions = new HashSet<>();
         } else {
@@ -95,6 +98,10 @@ public class EnvironmentCreationDto {
         return createFreeIpa;
     }
 
+    public Long getCreated() {
+        return created;
+    }
+
     public static final class Builder {
         private String name;
 
@@ -115,6 +122,8 @@ public class EnvironmentCreationDto {
         private Set<String> proxyNames;
 
         private boolean createFreeIpa = true;
+
+        private Long created;
 
         private Builder() {
         }
@@ -173,8 +182,15 @@ public class EnvironmentCreationDto {
             return this;
         }
 
+        public Builder withCreated(Long created) {
+            this.created = created;
+            return this;
+        }
+
         public EnvironmentCreationDto build() {
-            return new EnvironmentCreationDto(name, description, cloudPlatform, accountId, location, network, credential, regions, proxyNames, createFreeIpa);
+            return new EnvironmentCreationDto(
+                    name, description, cloudPlatform, accountId, location, network, credential,
+                    regions, proxyNames, createFreeIpa, created);
         }
     }
 }
