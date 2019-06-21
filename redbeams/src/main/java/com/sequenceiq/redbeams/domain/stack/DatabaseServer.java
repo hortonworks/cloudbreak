@@ -31,6 +31,9 @@ public class DatabaseServer implements AccountIdAwareResource {
     @SequenceGenerator(name = "databaseserver_generator", sequenceName = "databaseserver_id_seq", allocationSize = 1)
     private Long id;
 
+    @Column(nullable = false)
+    private String accountId;
+
     private String name;
 
     @Column(length = 1000000, columnDefinition = "TEXT")
@@ -58,6 +61,8 @@ public class DatabaseServer implements AccountIdAwareResource {
     @JoinColumn(name = "securitygroup_id", referencedColumnName = "id")
     private SecurityGroup securityGroup;
 
+    private Integer port;
+
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json attributes;
@@ -68,6 +73,15 @@ public class DatabaseServer implements AccountIdAwareResource {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    @Override
+    public String getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
     }
 
     public String getName() {
@@ -142,16 +156,19 @@ public class DatabaseServer implements AccountIdAwareResource {
         this.securityGroup = securityGroup;
     }
 
+    public Integer getPort() {
+        return port;
+    }
+
+    public void setPort(Integer port) {
+        this.port = port;
+    }
+
     public Json getAttributes() {
         return attributes;
     }
 
     public void setAttributes(Json attributes) {
         this.attributes = attributes;
-    }
-
-    @Override
-    public String getAccountId() {
-        return null;
     }
 }

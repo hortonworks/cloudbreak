@@ -25,6 +25,9 @@ public class DatabaseServerV4Base extends ProviderParametersBase {
     @ApiModelProperty(DatabaseServerModelDescription.ROOT_USER_PASSWORD)
     private String rootUserPassword;
 
+    @ApiModelProperty(DatabaseServerModelDescription.PORT)
+    private Integer port;
+
     @ApiModelProperty(DatabaseServerModelDescription.AWS_PARAMETERS)
     private AwsDatabaseServerV4Parameters aws;
 
@@ -81,6 +84,14 @@ public class DatabaseServerV4Base extends ProviderParametersBase {
 
     public void setRootUserPassword(String rootUserPassword) {
         this.rootUserPassword = rootUserPassword;
+    }
+
+    public Integer getPort() {
+        return port;
+    }
+
+    public void setPort(Integer port) {
+        this.port = port;
     }
 
     @Override

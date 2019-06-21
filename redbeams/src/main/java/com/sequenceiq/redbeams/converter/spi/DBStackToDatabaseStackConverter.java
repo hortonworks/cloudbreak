@@ -68,6 +68,7 @@ public class DBStackToDatabaseStackConverter {
         }
         String username = dbStackDatabaseServer.getRootUserName();
         String password = dbStackDatabaseServer.getRootPassword();
+        Integer port = dbStackDatabaseServer.getPort();
         Long storageSize = dbStackDatabaseServer.getStorageSize();
         Security security = new Security(Collections.emptyList(), dbStackDatabaseServer.getSecurityGroup().getSecurityGroupIds());
         // TODO / FIXME converter caller decides this?
@@ -76,7 +77,7 @@ public class DBStackToDatabaseStackConverter {
         Json attributes = dbStackDatabaseServer.getAttributes();
         Map<String, Object> params = attributes == null ? Collections.emptyMap() : attributes.getMap();
 
-        return new DatabaseServer(serverId, flavor, engine, username, password, storageSize, security, status, params);
+        return new DatabaseServer(serverId, flavor, engine, username, password, port, storageSize, security, status, params);
     }
 
     private Map<String, String> getUserDefinedTags(DBStack dbStack) {

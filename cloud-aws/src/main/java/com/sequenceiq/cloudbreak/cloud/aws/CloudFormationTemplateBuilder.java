@@ -93,6 +93,7 @@ public class CloudFormationTemplateBuilder {
     public String build(RDSModelContext context) {
         Map<String, Object> model = new HashMap<>();
         model.putAll(defaultCostTaggingService.prepareAllTagsForTemplate());
+        model.put("hasPort", context.hasPort);
         try {
             String template = freeMarkerTemplateUtils.processTemplateIntoString(new Template("aws-rds-template", context.template, freemarkerConfiguration),
                                                                                 model);
@@ -218,6 +219,8 @@ public class CloudFormationTemplateBuilder {
 
         private String template;
 
+        private boolean hasPort;
+
         // public RDSModelContext withAuthenticatedContext(AuthenticatedContext ac) {
         //     this.ac = ac;
         //     return this;
@@ -233,5 +236,9 @@ public class CloudFormationTemplateBuilder {
             return this;
         }
 
+        public RDSModelContext withHasPort(boolean hasPort) {
+            this.hasPort = hasPort;
+            return this;
+        }
     }
 }

@@ -70,6 +70,7 @@ public final class ModelDescriptions {
         public static final String STORAGE_SIZE = "Storage size of the database server, in GB";
         public static final String ROOT_USER_NAME = "Root user name of the database server";
         public static final String ROOT_USER_PASSWORD = "Root user password of the database server";
+        public static final String PORT = "Port for the database";
         public static final String AWS_PARAMETERS = "AWS-specific parameters of the specified database server";
         public static final String GCP_PARAMETERS = "GCP-specific parameters of the specified database server";
         public static final String AZURE_PARAMETERS = "Azure-specific parameters of the specified database server";

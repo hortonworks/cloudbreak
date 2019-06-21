@@ -160,9 +160,9 @@ public class CloudFormationTemplateBuilderDBTest {
     }
 
     private DatabaseServer createDefaultDatabaseServer() {
-        return new DatabaseServer("myserver", "db.m3.medium", DatabaseEngine.POSTGRESQL, "root", "cloudera", 50L,
-                createDefaultSecurity(), InstanceStatus.CREATE_REQUESTED,
-                Map.of("engineVersion", "1.2.3"));
+        return new DatabaseServer("myserver", "db.m3.medium", DatabaseEngine.POSTGRESQL,
+            "root", "cloudera", 5432, 50L, createDefaultSecurity(),
+            InstanceStatus.CREATE_REQUESTED, Map.of("engineVersion", "1.2.3"));
     }
 
     private Map<String, String> getDefaultDatabaseStackTags() {

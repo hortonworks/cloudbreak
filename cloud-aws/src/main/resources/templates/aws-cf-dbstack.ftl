@@ -65,6 +65,14 @@
         "MinLength": 8,
         "MaxLength": 30
     },
+    <#if hasPort>
+    "PortParameter": {
+        "Type": "Number",
+        "Description": "Database port",
+        "MinValue": 0,
+        "MaxValue": 65355
+    },
+    </#if>
     "VPCSecurityGroupsParameter": {
         "Type": "List<AWS::EC2::SecurityGroup::Id>",
         "Description": "VPC security groups"
@@ -106,6 +114,9 @@
                 "MasterUserPassword": { "Ref": "MasterUserPasswordParameter" },
                 "MasterUsername": { "Ref": "MasterUsernameParameter" },
                 "MultiAZ": true,
+                <#if hasPort>
+                "Port": { "Ref": "PortParameter" },
+                </#if>
                 "StorageEncrypted": true,
                 "Tags": [
                     { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
@@ -117,6 +128,8 @@
         }
   },
   "Outputs" : {
+      "Hostname": { "Value" : { "Fn::GetAtt" : [ "DBInstance", "Endpoint.Address" ]} },
+      "Port": { "Value" : { "Fn::GetAtt" : [ "DBInstance", "Endpoint.Port" ]} },
       "CreatedDBInstance": { "Value": { "Ref": "DBInstance" } },
       "CreatedDBSubnetGroup": { "Value": { "Ref": "DBSubnetGroup" } }
   }

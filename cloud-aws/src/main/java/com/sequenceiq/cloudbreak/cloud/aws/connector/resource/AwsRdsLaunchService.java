@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResource
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
+import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -41,6 +43,10 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 public class AwsRdsLaunchService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsRdsLaunchService.class);
+
+    private static final String HOSTNAME = "Hostname";
+
+    private static final String PORT = "Port";
 
     private static final String CREATED_DB_INSTANCE = "CreatedDBInstance";
 
@@ -87,7 +93,8 @@ public class AwsRdsLaunchService {
             resourceNotifier.notifyAllocation(cloudFormationStack, ac.getCloudContext());
 
             RDSModelContext rdsModelContext = new RDSModelContext()
-                    .withTemplate(stack.getTemplate());
+                    .withTemplate(stack.getTemplate())
+                    .withHasPort(stack.getDatabaseServer().getPort() != null);
             String cfTemplate = cloudFormationTemplateBuilder.build(rdsModelContext);
             LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
             cfRetryClient.createStack(awsStackRequestHelper.createCreateStackRequest(ac, stack, cFStackName, cfTemplate));
@@ -105,13 +112,27 @@ public class AwsRdsLaunchService {
         }
 
         List<CloudResource> databaseResources = getCreatedOutputs(ac, stack, cFStackName, cfRetryClient, resourceNotifier);
+        // FIXME: For now, just return everything wrapped in a status object
+        return databaseResources.stream()
+                .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
+                .collect(Collectors.toList());
         // FIXME check does nothing?!
-        return awsResourceConnector.check(ac, databaseResources);
+        //return awsResourceConnector.check(ac, databaseResources);
     }
 
     private List<CloudResource> getCreatedOutputs(AuthenticatedContext ac, DatabaseStack stack, String cFStackName, AmazonCloudFormationRetryClient client,
             PersistenceNotifier resourceNotifier) {
         List<CloudResource> resources = new ArrayList<>();
+
+        String hostname = getHostname(cFStackName, client);
+        CloudResource hostnameResource = new Builder().type(ResourceType.RDS_HOSTNAME).name(hostname).build();
+        resourceNotifier.notifyAllocation(hostnameResource, ac.getCloudContext());
+        resources.add(hostnameResource);
+
+        String port = getPort(cFStackName, client);
+        CloudResource portResource = new Builder().type(ResourceType.RDS_PORT).name(port).build();
+        resourceNotifier.notifyAllocation(portResource, ac.getCloudContext());
+        resources.add(portResource);
 
         String dbInstanceId = getCreatedDBInstance(cFStackName, client);
         CloudResource dbInstance = new Builder().type(ResourceType.RDS_INSTANCE).name(dbInstanceId).build();
@@ -123,27 +144,37 @@ public class AwsRdsLaunchService {
         resourceNotifier.notifyAllocation(dbSubnetGroup, ac.getCloudContext());
         resources.add(dbSubnetGroup);
 
+        // The idea here is to record the CloudFormation stack name so that we can later manipulate it.
+        // This may be unnecessary, but for now this is trivial to add.
+        CloudResource cfNameResource = new Builder().type(ResourceType.CLOUDFORMATION_STACK).name(cFStackName).build();
+        resources.add(cfNameResource);
+
         return resources;
     }
 
+    private String getHostname(String cFStackName, AmazonCloudFormationRetryClient client) {
+        return getOutput(cFStackName, HOSTNAME, client, "DB hostname");
+    }
+
+    private String getPort(String cFStackName, AmazonCloudFormationRetryClient client) {
+        return getOutput(cFStackName, PORT, client, "DB port");
+    }
+
     private String getCreatedDBInstance(String cFStackName, AmazonCloudFormationRetryClient client) {
-        Map<String, String> outputs = cfStackUtil.getOutputs(cFStackName, client);
-        if (outputs.containsKey(CREATED_DB_INSTANCE)) {
-            return outputs.get(CREATED_DB_INSTANCE);
-        } else {
-            String outputKeyNotFound = String.format("DB instance could not be found in the Cloudformation stack('%s') output.", cFStackName);
-            throw new CloudConnectorException(outputKeyNotFound);
-        }
+        return getOutput(cFStackName, CREATED_DB_INSTANCE, client, "DB instance");
     }
 
     private String getCreatedDBSubnetGroup(String cFStackName, AmazonCloudFormationRetryClient client) {
+        return getOutput(cFStackName, CREATED_DB_SUBNET_GROUP, client, "DB subnet group");
+    }
+
+    private String getOutput(String cFStackName, String key, AmazonCloudFormationRetryClient client, String friendlyName) {
         Map<String, String> outputs = cfStackUtil.getOutputs(cFStackName, client);
-        if (outputs.containsKey(CREATED_DB_SUBNET_GROUP)) {
-            return outputs.get(CREATED_DB_SUBNET_GROUP);
+        if (outputs.containsKey(key)) {
+            return outputs.get(key);
         } else {
-            String outputKeyNotFound = String.format("DB subnet group could not be found in the Cloudformation stack('%s') output.", cFStackName);
+            String outputKeyNotFound = String.format(friendlyName + " could not be found in the Cloudformation stack('%s') output.", cFStackName);
             throw new CloudConnectorException(outputKeyNotFound);
         }
     }
-
 }

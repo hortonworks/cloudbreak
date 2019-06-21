@@ -5,6 +5,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
 
 public class RedbeamsContext extends CommonContext {
 
@@ -14,12 +15,15 @@ public class RedbeamsContext extends CommonContext {
 
     private final DatabaseStack databaseStack;
 
+    private final DBStack dbStack;
+
     public RedbeamsContext(FlowParameters flowParameters, CloudContext cloudContext, CloudCredential cloudCredential,
-        DatabaseStack databaseStack) {
+        DatabaseStack databaseStack, DBStack dbStack) {
         super(flowParameters);
         this.cloudContext = cloudContext;
         this.cloudCredential = cloudCredential;
         this.databaseStack = databaseStack;
+        this.dbStack = dbStack;
     }
 
     public CloudContext getCloudContext() {
@@ -32,5 +36,9 @@ public class RedbeamsContext extends CommonContext {
 
     public DatabaseStack getDatabaseStack() {
         return databaseStack;
+    }
+
+    public DBStack getDBStack() {
+        return dbStack;
     }
 }

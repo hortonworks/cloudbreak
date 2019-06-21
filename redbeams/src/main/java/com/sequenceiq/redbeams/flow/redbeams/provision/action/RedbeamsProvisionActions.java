@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.flow.redbeams.provision.action;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
@@ -9,6 +11,9 @@ import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDa
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerSuccess;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.RegisterDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.RegisterDatabaseServerSuccess;
+
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,9 +38,16 @@ public class RedbeamsProvisionActions {
     public Action<?, ?> registerDatabase() {
         return new AbstractRedbeamsProvisionAction<>(AllocateDatabaseServerSuccess.class) {
 
+            private List<CloudResource> dbResources;
+
+            @Override
+            protected void prepareExecution(AllocateDatabaseServerSuccess payload, Map<Object, Object> variables) {
+                dbResources = ResourceLists.transform(payload.getResults());
+            }
+
             @Override
             protected Selectable createRequest(RedbeamsContext context) {
-                return new RegisterDatabaseServerRequest(0L);
+                return new RegisterDatabaseServerRequest(context.getCloudContext(), context.getDBStack(), dbResources);
             }
         };
     }
