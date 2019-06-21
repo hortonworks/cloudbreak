@@ -34,6 +34,11 @@ public class EnvironmentModelDescription {
     public static final String CLOUD_PLATFORM = "Cloud platform of the environment.";
     public static final String STATUS = "Status of the environment.";
 
+    public static final String AUTHENTICATION = "SSH key for accessing cluster node instances.";
+    public static final String PUBLIC_KEY = "SSH Public key string.";
+    public static final String PUBLIC_KEY_ID = "Public key ID registered at the cloud provider.";
+    public static final String LOGIN_USER_NAME = "User name created on the nodes for SSH access";
+
     private EnvironmentModelDescription() {
     }
 }

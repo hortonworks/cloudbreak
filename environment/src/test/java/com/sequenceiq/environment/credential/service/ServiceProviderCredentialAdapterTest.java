@@ -1,7 +1,10 @@
 package com.sequenceiq.environment.credential.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -11,11 +14,8 @@ import java.util.Map;
 
 import javax.ws.rs.BadRequestException;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -47,9 +47,6 @@ public class ServiceProviderCredentialAdapterTest {
     private static final String CLOUD_PLATFORM = "AWS";
 
     private static final String CREDENTIAL_OWNER = "theOwnerOfTheCredential";
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     @Mock
     private EventBus eventBus;
@@ -84,7 +81,7 @@ public class ServiceProviderCredentialAdapterTest {
     @Mock
     private InitCodeGrantFlowResponse initCodeGrantFlowResponse;
 
-    @Before
+    @BeforeEach
     public void setUp() throws InterruptedException {
         MockitoAnnotations.initMocks(this);
         when(credential.getId()).thenReturn(CREDENTIAL_ID);
@@ -101,10 +98,9 @@ public class ServiceProviderCredentialAdapterTest {
         doThrow(new InterruptedException("Error while executing initialization of authorization code grant based credential creation:"))
                 .when(initCodeGrantFlowRequest).await();
 
-        thrown.expect(OperationException.class);
-        thrown.expectMessage("Error while executing initialization of authorization code grant based credential creation:");
-
-        underTest.initCodeGrantFlow(credential, ACCOUNT_ID, USER_ID);
+        OperationException operationException = assertThrows(OperationException.class, () -> underTest.initCodeGrantFlow(credential, ACCOUNT_ID, USER_ID));
+        assertThat(operationException.getMessage())
+                .contains("Error while executing initialization of authorization code grant based credential creation:");
     }
 
     @Test
@@ -113,10 +109,9 @@ public class ServiceProviderCredentialAdapterTest {
         when(initCodeGrantFlowResponse.getErrorDetails()).thenReturn(exceptionFromResponse);
         when(initCodeGrantFlowResponse.getStatus()).thenReturn(EventStatus.FAILED);
 
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage(String.format("Authorization code grant based credential creation couldn't be initialized: %s", exceptionFromResponse));
-
-        underTest.initCodeGrantFlow(credential, ACCOUNT_ID, USER_ID);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.initCodeGrantFlow(credential, ACCOUNT_ID, USER_ID));
+        assertThat(badRequestException.getMessage())
+                .contains(String.format("Authorization code grant based credential creation couldn't be initialized: %s", exceptionFromResponse));
     }
 
     @Test
@@ -136,13 +131,12 @@ public class ServiceProviderCredentialAdapterTest {
 
         Credential result = underTest.initCodeGrantFlow(credential, ACCOUNT_ID, USER_ID);
 
-        Assert.assertNotEquals(initialCredentialAttriute, result.getAttributes());
+        assertNotEquals(initialCredentialAttriute, result.getAttributes());
         var attributeMap = new Json(result.getAttributes()).getMap();
         assertTrue(attributeMap.containsKey(initialAttributeKey));
         assertTrue(attributeMap.containsKey(expectedAdditionalAttributeKey));
         assertEquals(expectedAdditionalAttributeValue, attributeMap.get(expectedAdditionalAttributeKey));
         assertEquals(initialAttributeValue, attributeMap.get(initialAttributeKey));
-        Assert.assertEquals(credential, result);
+        assertEquals(credential, result);
     }
-
 }

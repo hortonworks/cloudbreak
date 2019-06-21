@@ -20,7 +20,6 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.Where;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
@@ -90,6 +89,10 @@ public class Environment implements AuthResource {
     @Enumerated(EnumType.STRING)
     private EnvironmentStatus status;
 
+    @JoinColumn(name = "environment_authentication_id")
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private EnvironmentAuthentication authentication;
+
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String statusReason;
 
@@ -154,8 +157,7 @@ public class Environment implements AuthResource {
     }
 
     public Set<Region> getRegionSet() {
-        return JsonUtil.jsonToType(regions.getValue(), new TypeReference<>() {
-        });
+        return JsonUtil.jsonToType(regions.getValue(), new EmptyTypeReference<>());
     }
 
     public String getCloudPlatform() {
@@ -254,6 +256,14 @@ public class Environment implements AuthResource {
 
     public void setCreateFreeIpa(boolean createFreeIpa) {
         this.createFreeIpa = createFreeIpa;
+    }
+
+    public EnvironmentAuthentication getAuthentication() {
+        return authentication;
+    }
+
+    public void setAuthentication(EnvironmentAuthentication authentication) {
+        this.authentication = authentication;
     }
 
     public String getStatusReason() {

@@ -3,6 +3,7 @@ package com.sequenceiq.environment.api.v1.environment.model.request;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Size;
 
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
@@ -26,6 +27,9 @@ public class EnvironmentEditRequest {
 
     @ApiModelProperty(EnvironmentModelDescription.NETWORK)
     private EnvironmentNetworkRequest network;
+
+    @ApiModelProperty(EnvironmentModelDescription.AUTHENTICATION)
+    private @Valid EnvironmentAuthenticationRequest authentication;
 
     public String getDescription() {
         return description;
@@ -57,5 +61,13 @@ public class EnvironmentEditRequest {
 
     public void setNetwork(EnvironmentNetworkRequest network) {
         this.network = network;
+    }
+
+    public EnvironmentAuthenticationRequest getAuthentication() {
+        return authentication;
+    }
+
+    public void setAuthentication(EnvironmentAuthenticationRequest authentication) {
+        this.authentication = authentication;
     }
 }

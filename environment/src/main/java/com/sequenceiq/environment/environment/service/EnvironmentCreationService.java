@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.util.ValidationResult;
 import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.AuthenticationDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
@@ -42,19 +43,23 @@ public class EnvironmentCreationService {
 
     private final ThreadBasedUserCrnProvider authenticatedUserService;
 
+    private final AuthenticationDtoConverter authenticationDtoConverter;
+
     public EnvironmentCreationService(
             EnvironmentService environmentService,
             EnvironmentValidatorService validatorService,
             EnvironmentResourceService environmentResourceService,
             EventSender eventSender,
             EnvironmentDtoConverter environmentDtoConverter,
-            ThreadBasedUserCrnProvider authenticatedUserService) {
+            ThreadBasedUserCrnProvider authenticatedUserService,
+            AuthenticationDtoConverter authenticationDtoConverter) {
         this.environmentService = environmentService;
         this.validatorService = validatorService;
         this.environmentResourceService = environmentResourceService;
         this.eventSender = eventSender;
         this.environmentDtoConverter = environmentDtoConverter;
         this.authenticatedUserService = authenticatedUserService;
+        this.authenticationDtoConverter = authenticationDtoConverter;
     }
 
     // TODO: trigger creation properly
@@ -97,6 +102,7 @@ public class EnvironmentCreationService {
                 .getCredentialFromRequest(creationDto.getCredential(), creationDto.getAccountId(), creator);
         environment.setCredential(credential);
         environment.setCloudPlatform(credential.getCloudPlatform());
+        environment.setAuthentication(authenticationDtoConverter.dtoToAuthentication(creationDto.getAuthentication()));
         return environment;
     }
 

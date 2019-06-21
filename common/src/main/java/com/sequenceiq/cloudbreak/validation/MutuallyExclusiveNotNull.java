@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.annotations;
+package com.sequenceiq.cloudbreak.validation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -11,7 +11,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Payload;
 
-import com.sequenceiq.cloudbreak.api.model.annotations.MutuallyExclusiveNotNull.MutuallyExclusiveNotNullValidator;
+import com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull.MutuallyExclusiveNotNullValidator;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -24,7 +24,6 @@ public @interface MutuallyExclusiveNotNull {
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 
-    @IgnorePojoValidation
     class MutuallyExclusiveNotNullValidator implements ConstraintValidator<MutuallyExclusiveNotNull, Object> {
         private String[] fieldNames;
 

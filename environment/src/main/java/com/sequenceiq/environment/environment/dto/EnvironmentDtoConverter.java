@@ -14,8 +14,12 @@ public class EnvironmentDtoConverter {
 
     private final Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap;
 
-    public EnvironmentDtoConverter(Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap) {
+    private final AuthenticationDtoConverter authenticationDtoConverter;
+
+    public EnvironmentDtoConverter(Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap,
+            AuthenticationDtoConverter authenticationDtoConverter) {
         this.environmentNetworkConverterMap = environmentNetworkConverterMap;
+        this.authenticationDtoConverter = authenticationDtoConverter;
     }
 
     public EnvironmentDto environmentToDto(Environment environment) {
@@ -33,6 +37,8 @@ public class EnvironmentDtoConverter {
                 .withRegions(environment.getRegions())
                 .withEnvironmentStatus(environment.getStatus())
                 .withCreator(environment.getCreator())
+                .withCreateFreeIpa(environment.isCreateFreeIpa())
+                .withAuthentication(authenticationDtoConverter.authenticationToDto(environment.getAuthentication()))
                 .withCreateFreeIpa(environment.isCreateFreeIpa())
                 .withCreated(environment.getCreated())
                 .withStatusReason(environment.getStatusReason());

@@ -1,8 +1,9 @@
 package com.sequenceiq.environment.credential.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -19,10 +20,8 @@ import java.util.Set;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.client.Client;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -39,9 +38,6 @@ public class CredentialDeleteServiceTest {
 
     private static final String ACCOUNT_ID = "1";
 
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
-
     private CredentialDeleteService underTest;
 
     @Mock
@@ -56,7 +52,7 @@ public class CredentialDeleteServiceTest {
     @Mock
     private EnvironmentViewService environmentViewService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         underTest = new CredentialDeleteService(repository, notificationSender, messagesService, environmentViewService, Set.of("AWS", "AZURE", "YARN"));
@@ -92,8 +88,7 @@ public class CredentialDeleteServiceTest {
     @Test
     public void testMultipleIfOneOfTheCredentialsIsNotExistsThenNotFoundExceptionComes() {
         when(repository.findByNameAndAccountId(anyString(), anyString(), any(Set.class))).thenReturn(Optional.empty());
-        thrown.expect(NotFoundException.class);
-        underTest.deleteMultiple(Set.of("someCredNameWhichDoesNotExists"), ACCOUNT_ID);
+        assertThrows(NotFoundException.class, () -> underTest.deleteMultiple(Set.of("someCredNameWhichDoesNotExists"), ACCOUNT_ID));
 
         verify(repository, times(1)).findByNameAndAccountId(anyString(), anyString(), anyCollection());
         verify(environmentViewService, times(0)).findAllByCredentialId(anyLong());
@@ -108,9 +103,7 @@ public class CredentialDeleteServiceTest {
         when(repository.findByNameAndAccountId(eq(name), eq(ACCOUNT_ID), any(Set.class))).thenReturn(Optional.of(cred));
         when(environmentViewService.findAllByCredentialId(cred.getId())).thenReturn(Set.of(new EnvironmentView()));
 
-        thrown.expect(BadRequestException.class);
-
-        underTest.deleteMultiple(Set.of(name), ACCOUNT_ID);
+        assertThrows(BadRequestException.class, () -> underTest.deleteMultiple(Set.of(name), ACCOUNT_ID));
 
         verify(repository, times(1)).findByNameAndAccountId(anyString(), anyString(), anyCollection());
         verify(environmentViewService, times(1)).findAllByCredentialId(anyLong());

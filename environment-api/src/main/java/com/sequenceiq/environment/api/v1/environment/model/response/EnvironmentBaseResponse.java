@@ -42,6 +42,9 @@ public abstract class EnvironmentBaseResponse {
     @ApiModelProperty(EnvironmentModelDescription.STATUS)
     private EnvironmentStatus environmentStatus;
 
+    @ApiModelProperty(EnvironmentModelDescription.AUTHENTICATION)
+    private EnvironmentAuthenticationResponse authentication;
+
     private String statusReason;
 
     private Long created;
@@ -132,6 +135,14 @@ public abstract class EnvironmentBaseResponse {
 
     public void setCreateFreeIpa(Boolean createFreeIpa) {
         this.createFreeIpa = createFreeIpa;
+    }
+
+    public EnvironmentAuthenticationResponse getAuthentication() {
+        return authentication;
+    }
+
+    public void setAuthentication(EnvironmentAuthenticationResponse authentication) {
+        this.authentication = authentication;
     }
 
     public String getStatusReason() {

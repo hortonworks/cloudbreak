@@ -16,7 +16,6 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.Where;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
@@ -77,8 +76,7 @@ public class EnvironmentView extends CompactView implements AuthResource {
     }
 
     public Set<Region> getRegionSet() {
-        return JsonUtil.jsonToType(regions.getValue(), new TypeReference<>() {
-        });
+        return JsonUtil.jsonToType(regions.getValue(), new EmptyTypeReference<>());
     }
 
     public String getCloudPlatform() {

@@ -91,8 +91,8 @@ dependencyManagement {
         dependency group: 'org.postgresql',                     name: 'postgresql',                version: postgreSQLVersion
         dependency group: 'org.mybatis',                        name: 'mybatis-migrations',        version: '3.2.0'
         dependency group: 'org.mockito',                        name: 'mockito-core',              version: mockitoVersion
-        dependency group: 'com.openpojo',                       name: 'openpojo',                  version: '0.8.10'
-        dependency group: 'org.ow2.asm',                        name: 'asm',                       version: '7.0'
+        dependency group: 'com.openpojo',                       name: 'openpojo',                  version: openPojoVersion
+        dependency group: 'org.ow2.asm',                        name: 'asm',                       version: asmVersion
         dependency group: 'com.sequenceiq',                     name: 'consul-api',                version: '1.10'
     }
 }

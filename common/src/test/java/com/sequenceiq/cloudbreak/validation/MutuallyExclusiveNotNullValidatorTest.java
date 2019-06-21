@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.model.annotations;
+package com.sequenceiq.cloudbreak.validation;
 
 import java.util.Set;
 

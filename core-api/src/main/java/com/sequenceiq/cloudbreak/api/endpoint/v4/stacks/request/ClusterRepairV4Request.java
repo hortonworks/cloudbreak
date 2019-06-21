@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
-import com.sequenceiq.cloudbreak.api.model.annotations.MutuallyExclusiveNotNull;
+import com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RepairClusterRequest;
 
 import io.swagger.annotations.ApiModel;

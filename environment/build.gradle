@@ -6,6 +6,7 @@ plugins {
   id "jacoco"
   id 'maven'
   id "org.springframework.boot" version "2.1.2.RELEASE"
+  id 'com.adarshr.test-logger' version '1.7.0'
 }
 
 repositories {
@@ -16,6 +17,13 @@ repositories {
   maven { url "https://cloudbreak-maven.s3.amazonaws.com/releases" }
   maven { url "https://repo.spring.io/release" }
   maven { url "https://plugins.gradle.org/m2/" }
+}
+
+configurations.all {
+    resolutionStrategy {
+        force 'org.ow2.asm:asm:7.1'
+        force 'net.bytebuddy:byte-buddy:1.9.13'
+    }
 }
 
 dependencies {
@@ -83,11 +91,13 @@ dependencies {
   testCompile ('org.springframework.boot:spring-boot-starter-test') {
     exclude group: 'junit'
   }
+  testImplementation group: 'com.openpojo',              name: 'openpojo'
+  testImplementation group: 'org.ow2.asm',               name: 'asm',                            version: asmVersion
 
   testImplementation group: 'org.mockito',               name: 'mockito-core'
   testImplementation group: 'org.mockito',               name: 'mockito-junit-jupiter'
   
-  testRuntime        group: 'org.junit.jupiter',         name: 'junit-jupiter-engine'
+  testRuntime group: 'org.junit.jupiter',         name: 'junit-jupiter-engine'
 
   constraints {
     compile     group: 'org.yaml',                  name: 'snakeyaml',                      version: '1.23'
@@ -110,7 +120,8 @@ dependencies {
     compile     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',   version: springBootVersion
     testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
     testCompile group: 'org.junit.jupiter',         name: 'junit-jupiter-api',              version: junitJupiterVersion
-    testRuntime        group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',           version: junitJupiterVersion
+    testImplementation group: 'com.openpojo',              name: 'openpojo',                       version: openPojoVersion
+    testRuntime group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',           version: junitJupiterVersion
     testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
     testImplementation group: 'org.mockito',               name: 'mockito-junit-jupiter',          version: mockitoVersion
   }
