@@ -60,7 +60,7 @@ cloudera_manager_setup_knox:
       topology_name: {{ topology.name }}
     - mode: 777
 
-{{ gateway.knox_data_root }}/topologies/{{ topology.name }}_ui.xml:
+{{ gateway.knox_data_root }}/topologies/{{ topology.name }}-ui.xml:
   file.managed:
     - source: salt://gateway/config/cm/topology_ui.xml.j2
     - template: jinja
@@ -70,7 +70,7 @@ cloudera_manager_setup_knox:
       topology_name: {{ topology.name }}
     - mode: 777
 
-{{ gateway.knox_data_root }}/topologies/{{ topology.name }}_api.xml:
+{{ gateway.knox_data_root }}/topologies/{{ topology.name }}-api.xml:
   file.managed:
     - source: salt://gateway/config/cm/topology_api.xml.j2
     - template: jinja

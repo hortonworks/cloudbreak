@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <topology>
-    <name>{{ topology_name }}_api</name>
+    <name>{{ topology_name }}-api</name>
     <gateway>
 
         <!-- {{ exposed }} -->
+
+        {% if 'NONE' == salt['pillar.get']('gateway:ssotype') -%}
 
         <provider>
            <role>authentication</role>
@@ -27,6 +29,20 @@
            </param>
         </provider>
 
+        {%- else %}
+
+        <provider>
+           <role>federation</role>
+           <name>SSOCookieProvider</name>
+           <enabled>true</enabled>
+           <param>
+              <name>sso.authentication.provider.url</name>
+              <value>/{{ salt['pillar.get']('gateway:path') }}/sso/api/v1/websso</value>
+           </param>
+        </provider>
+
+        {%- endif %}
+
         <provider>
             <role>identity-assertion</role>
             <name>Default</name>
@@ -37,67 +53,67 @@
             <role>ha</role>
             <name>HaProvider</name>
             <enabled>true</enabled>
-            {% if 'ATLAS-API' in exposed -%}
+            {% if 'ATLAS' in exposed and 'ATLAS_SERVER' in salt['pillar.get']('gateway:location') -%}
             <param>
                 <name>ATLAS-API</name>
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
             </param>
             {%- endif %}
-            {% if 'CM-API' in exposed -%}
+            {% if 'CM-API' in exposed and 'CM-API' in salt['pillar.get']('gateway:location') -%}
             <param>
                 <name>CM-API</name>
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
             </param>
             {%- endif %}
-            {% if 'HIVE' in exposed -%}
+            {% if 'HIVE' in exposed and 'HIVESERVER2' in salt['pillar.get']('gateway:location') -%}
             <param>
                 <name>HIVE</name>
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
             </param>
             {%- endif %}
-            {% if 'LIVYSERVER1' in exposed -%}
+            {% if 'LIVYSERVER1' in exposed and 'LIVY_SERVER' in salt['pillar.get']('gateway:location') -%}
             <param>
                 <name>LIVYSERVER</name>
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
             </param>
             {%- endif %}
-            {% if 'NAMENODE' in exposed -%}
+            {% if 'NAMENODE' in salt['pillar.get']('gateway:location') -%}
             <param>
                 <name>NAMENODE</name>
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
             </param>
             {%- endif %}
-            {% if 'OOZIE' in exposed -%}
+            {% if 'OOZIE' in exposed and 'OOZIE_SERVER' in salt['pillar.get']('gateway:location') -%}
             <param>
                 <name>OOZIE</name>
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
             </param>
             {%- endif %}
-            {% if 'RANGER' in exposed -%}
+            {% if 'RANGER' in exposed and 'RANGER_ADMIN' in salt['pillar.get']('gateway:location') -%}
             <param>
                 <name>RANGER</name>
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
             </param>
             {%- endif %}
-            {% if 'RESOURCEMANAGER' in exposed -%}
+            {% if 'YARNUI' in exposed and 'RESOURCEMANAGER' in salt['pillar.get']('gateway:location') -%}
             <param>
                 <name>RESOURCEMANAGER</name>
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
             </param>
             {%- endif %}
-            {% if 'SOLR' in exposed -%}
+            {% if 'SOLR' in exposed and 'SOLR' in salt['pillar.get']('gateway:location') -%}
             <param>
                 <name>SOLR</name>
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
             </param>
             {%- endif %}
-            {% if 'WEBHBASE' in exposed -%}
+            {% if 'HBASE' in exposed and 'HBASE' in salt['pillar.get']('gateway:location') -%}
             <param>
                 <name>WEBHBASE</name>
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
             </param>
             {%- endif %}
-            {% if 'WEBHDFS' in exposed -%}
+            {% if 'WEBHDFS' in exposed and 'NAMENODE' in salt['pillar.get']('gateway:location')  -%}
             <param>
                 <name>WEBHDFS</name>
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000;maxRetryAttempts=300;retrySleep=1000</value>
