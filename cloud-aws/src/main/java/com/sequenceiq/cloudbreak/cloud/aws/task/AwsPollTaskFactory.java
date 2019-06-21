@@ -34,6 +34,11 @@ public class AwsPollTaskFactory {
                 stackErrorStatuses, cloudFormationStackName);
     }
 
+    public PollTask<Boolean> newAwsTerminateNetworkStatusCheckerTask(AmazonCloudFormationClient cfClient, StackStatus successStatus,
+            StackStatus errorStatus, List<StackStatus> stackErrorStatuses, String cloudFormationStackName) {
+        return createPollTask(AwsTerminateNetworkStatusCheckerTask.NAME, cfClient, successStatus, errorStatus, stackErrorStatuses, cloudFormationStackName);
+    }
+
     public PollTask<Boolean> newAwsTerminateStackStatusCheckerTask(AuthenticatedContext authenticatedContext, AmazonCloudFormationClient cfClient,
             StackStatus successStatus, StackStatus errorStatus, List<StackStatus> stackErrorStatuses, String cloudFormationStackName) {
         return createPollTask(AwsTerminateStackStatusCheckerTask.NAME, authenticatedContext, cfClient, successStatus, errorStatus,

@@ -9,8 +9,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.environment.CloudPlatform;
-import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
@@ -32,6 +30,7 @@ public class AwsEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
     @Override
     public BaseNetwork setProviderSpecificNetwork(BaseNetwork baseNetwork, CreatedCloudNetwork createdCloudNetwork) {
         AwsNetwork awsNetwork = (AwsNetwork) baseNetwork;
+        awsNetwork.setName(createdCloudNetwork.getStackName());
         awsNetwork.setRegistrationType(RegistrationType.CREATE_NEW);
         awsNetwork.setVpcId(createdCloudNetwork.getNetworkId());
         awsNetwork.setSubnetIds(createdCloudNetwork.getSubnets().stream().map(CreatedSubnet::getSubnetId).collect(Collectors.toSet()));
@@ -41,17 +40,10 @@ public class AwsEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
                         subnet -> new CloudSubnet(
                                 subnet.getSubnetId(),
                                 subnet.getSubnetId(),
-                                subnet.getAvailabilityZone()))));
+                                subnet.getAvailabilityZone(),
+                                subnet.getCidr(),
+                                subnet.isPrivateSubnet()))));
         return awsNetwork;
-    }
-
-    @Override
-    EnvironmentNetworkResponse setProviderSpecificFields(EnvironmentNetworkResponse result, BaseNetwork network) {
-        AwsNetwork awsNetwork = (AwsNetwork) network;
-        EnvironmentNetworkAwsParams awsV1Params = new EnvironmentNetworkAwsParams();
-        awsV1Params.setVpcId(awsNetwork.getVpcId());
-        result.setAws(awsV1Params);
-        return result;
     }
 
     @Override

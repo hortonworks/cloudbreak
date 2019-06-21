@@ -23,7 +23,7 @@ public class NetworkCreationRequest {
 
     private final boolean noFirewallRules;
 
-    private final Long id;
+    private final String stackName;
 
     private NetworkCreationRequest(Builder builder) {
         this.envName = builder.envName;
@@ -34,7 +34,7 @@ public class NetworkCreationRequest {
         this.subnetCidrs = builder.subnetCidrs;
         this.noPublicIp = builder.noPublicIp;
         this.noFirewallRules = builder.noFirewallRules;
-        this.id = builder.id;
+        this.stackName = builder.stackName;
     }
 
     public String getEnvName() {
@@ -69,8 +69,8 @@ public class NetworkCreationRequest {
         return noFirewallRules;
     }
 
-    public Long getId() {
-        return id;
+    public String getStackName() {
+        return stackName;
     }
 
     public static class Builder {
@@ -90,7 +90,7 @@ public class NetworkCreationRequest {
 
         private boolean noFirewallRules;
 
-        private Long id;
+        private String stackName;
 
         public Builder withEnvName(String envName) {
             this.envName = envName;
@@ -132,8 +132,8 @@ public class NetworkCreationRequest {
             return this;
         }
 
-        public Builder withId(Long id) {
-            this.id = id;
+        public Builder withStackName(String stackName) {
+            this.stackName = stackName;
             return this;
         }
 

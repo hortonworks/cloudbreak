@@ -1,20 +1,25 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static com.amazonaws.services.cloudformation.model.StackStatus.CREATE_COMPLETE;
+import static com.amazonaws.services.cloudformation.model.StackStatus.CREATE_FAILED;
+import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_COMPLETE;
+import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_FAILED;
+import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConstants.ERROR_STATUSES;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import static com.amazonaws.services.cloudformation.model.StackStatus.CREATE_COMPLETE;
-import static com.amazonaws.services.cloudformation.model.StackStatus.CREATE_FAILED;
-import static com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConstants.ERROR_STATUSES;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -25,24 +30,29 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
+import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.AwsBackoffSyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
-import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
+import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
+import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AwsNetworkConnectorTest {
 
     private static final String ENV_NAME = "testEnv";
+
+    private static final String STACK_NAME = ENV_NAME + "-1";
 
     private static final String VPC_ID = "newVpc";
 
@@ -67,6 +77,8 @@ public class AwsNetworkConnectorTest {
     private static final long ID = 1L;
 
     private static final String NETWORK_ID = String.join("-", ENV_NAME, String.valueOf(ID));
+
+    private static final Region REGION = Region.region("US_WEST_2");
 
     @InjectMocks
     private AwsNetworkConnector underTest;
@@ -105,7 +117,6 @@ public class AwsNetworkConnectorTest {
 
     @Test
     public void testCreateNetworkWithSubnetsShouldCreateTheNetworkAndSubnets() {
-        Region region = Region.region("US_WEST_2");
         String networkCidr = "0.0.0.0/16";
         Set<String> subnetCidrs = Set.of("1.1.1.1/8", "1.1.1.2/8");
         AmazonCloudFormationRetryClient cloudFormationRetryClient = Mockito.mock(AmazonCloudFormationRetryClient.class);
@@ -113,26 +124,79 @@ public class AwsNetworkConnectorTest {
         AmazonEC2Client ec2Client = Mockito.mock(AmazonEC2Client.class);
         PollTask pollTask = Mockito.mock(PollTask.class);
         Map<String, String> output = createOutput();
-        NetworkCreationRequest networkCreationRequest = createNetworkRequest(region, networkCidr, subnetCidrs);
+        NetworkCreationRequest networkCreationRequest = createNetworkRequest(networkCidr, subnetCidrs);
         List<CreatedSubnet> createdSubnetList = createCloudSubnetList();
 
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
         when(awsCloudSubnetProvider.provide(ec2Client, new ArrayList<>(subnetCidrs))).thenReturn(createdSubnetList);
-        when(awsClient.createCloudFormationRetryClient(any(AwsCredentialView.class), eq(region.value()))).thenReturn(cloudFormationRetryClient);
+        when(awsClient.createCloudFormationRetryClient(any(AwsCredentialView.class), eq(REGION.value()))).thenReturn(cloudFormationRetryClient);
         when(awsNetworkCfTemplateProvider.provide(networkCidr, createdSubnetList)).thenReturn(CF_TEMPLATE);
-        when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq(region.value()))).thenReturn(cfClient);
-        when(awsPollTaskFactory.newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, NETWORK_ID)).thenReturn(pollTask);
+        when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()))).thenReturn(cfClient);
+        when(awsPollTaskFactory.newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, NETWORK_ID))
+                .thenReturn(pollTask);
         when(cfStackUtil.getOutputs(NETWORK_ID, cloudFormationRetryClient)).thenReturn(output);
 
         CreatedCloudNetwork actual = underTest.createNetworkWithSubnets(networkCreationRequest);
 
-        verify(awsClient).createCloudFormationRetryClient(any(AwsCredentialView.class), eq(region.value()));
+        verify(awsClient).createCloudFormationRetryClient(any(AwsCredentialView.class), eq(REGION.value()));
         verify(awsNetworkCfTemplateProvider).provide(networkCidr, createdSubnetList);
-        verify(awsClient).createCloudFormationClient(any(AwsCredentialView.class), eq(region.value()));
+        verify(awsClient).createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()));
         verify(awsPollTaskFactory).newAwsCreateNetworkStatusCheckerTask(cfClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES, NETWORK_ID);
         verify(cfStackUtil).getOutputs(NETWORK_ID, cloudFormationRetryClient);
         assertEquals(VPC_ID, actual.getNetworkId());
         assertEquals(NUMBER_OF_SUBNETS, actual.getSubnets().size());
+    }
+
+    @Test
+    public void testDeleteNetworkWithSubNetsShouldDeleteTheStackAndTheResourceGroup() {
+        NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest();
+        AmazonCloudFormationRetryClient cloudFormationRetryClient = Mockito.mock(AmazonCloudFormationRetryClient.class);
+        AmazonCloudFormationClient cfClient = Mockito.mock(AmazonCloudFormationClient.class);
+        PollTask pollTask = Mockito.mock(PollTask.class);
+
+        when(awsClient.createCloudFormationRetryClient(any(AwsCredentialView.class), eq(networkDeletionRequest.getRegion())))
+                .thenReturn(cloudFormationRetryClient);
+        when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()))).thenReturn(cfClient);
+        when(awsPollTaskFactory.newAwsTerminateNetworkStatusCheckerTask(cfClient, DELETE_COMPLETE, DELETE_FAILED, ERROR_STATUSES, NETWORK_ID))
+                .thenReturn(pollTask);
+
+        underTest.deleteNetworkWithSubnets(networkDeletionRequest);
+
+        verify(cloudFormationRetryClient).deleteStack(any(DeleteStackRequest.class));
+        verify(awsClient).createCloudFormationRetryClient(any(AwsCredentialView.class), eq(REGION.value()));
+        verify(awsClient).createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()));
+        verify(awsPollTaskFactory).newAwsTerminateNetworkStatusCheckerTask(cfClient, DELETE_COMPLETE, DELETE_FAILED, ERROR_STATUSES, NETWORK_ID);
+    }
+
+    @Test(expected = CloudConnectorException.class)
+    public void testDeleteNetworkWithSubNetsShouldThrowAnExceptionWhenTheStackDeletionFailed()
+            throws InterruptedException, ExecutionException, TimeoutException {
+        NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest();
+        AmazonCloudFormationRetryClient cloudFormationRetryClient = Mockito.mock(AmazonCloudFormationRetryClient.class);
+        AmazonCloudFormationClient cfClient = Mockito.mock(AmazonCloudFormationClient.class);
+        PollTask pollTask = Mockito.mock(PollTask.class);
+
+        when(awsClient.createCloudFormationRetryClient(any(AwsCredentialView.class), eq(networkDeletionRequest.getRegion())))
+                .thenReturn(cloudFormationRetryClient);
+        when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()))).thenReturn(cfClient);
+        when(awsPollTaskFactory.newAwsTerminateNetworkStatusCheckerTask(cfClient, DELETE_COMPLETE, DELETE_FAILED, ERROR_STATUSES, NETWORK_ID))
+                .thenReturn(pollTask);
+        doThrow(new TimeoutException()).when(awsBackoffSyncPollingScheduler).schedule(pollTask);
+
+        underTest.deleteNetworkWithSubnets(networkDeletionRequest);
+
+        verify(cloudFormationRetryClient).deleteStack(any(DeleteStackRequest.class));
+        verify(awsClient).createCloudFormationRetryClient(any(AwsCredentialView.class), eq(REGION.value()));
+        verify(awsClient).createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()));
+        verify(awsPollTaskFactory).newAwsTerminateNetworkStatusCheckerTask(cfClient, DELETE_COMPLETE, DELETE_FAILED, ERROR_STATUSES, NETWORK_ID);
+    }
+
+    private NetworkDeletionRequest createNetworkDeletionRequest() {
+        return new NetworkDeletionRequest.Builder()
+                .withRegion(REGION.value())
+                .withStackName(NETWORK_ID)
+                .withCloudCredential(new CloudCredential("1", "credential"))
+                .build();
     }
 
     private Map<String, String> createOutput() {
@@ -144,12 +208,12 @@ public class AwsNetworkConnectorTest {
         return output;
     }
 
-    private NetworkCreationRequest createNetworkRequest(Region region, String networkCidr, Set<String> subnetCidrs) {
+    private NetworkCreationRequest createNetworkRequest(String networkCidr, Set<String> subnetCidrs) {
         return new NetworkCreationRequest.Builder()
-                .withId(ID)
+                .withStackName(STACK_NAME)
                 .withEnvName(ENV_NAME)
                 .withCloudCredential(new CloudCredential("1", "credential"))
-                .withRegion(region)
+                .withRegion(REGION)
                 .withNetworkCidr(networkCidr)
                 .withSubnetCidrs(subnetCidrs)
                 .build();

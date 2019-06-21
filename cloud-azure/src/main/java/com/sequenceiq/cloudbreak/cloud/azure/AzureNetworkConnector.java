@@ -21,12 +21,12 @@ import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
-import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
+import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
+import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 
 @Service
 public class AzureNetworkConnector implements NetworkConnector {
@@ -49,15 +49,14 @@ public class AzureNetworkConnector implements NetworkConnector {
     public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest networkRequest) {
         AzureClient azureClient = azureClientService.getClient(networkRequest.getCloudCredential());
         String template = azureNetworkTemplateBuilder.build(networkRequest);
-        String parameters = azureNetworkTemplateBuilder.buildParameters();
         String envName = networkRequest.getEnvName();
-        String stackName = createStackName(envName);
         Deployment templateDeployment;
+        ResourceGroup resourceGroup;
         try {
             Map<String, String> tags = Collections.emptyMap();
             Map<String, String> costFollowerTags = Collections.emptyMap();
-            ResourceGroup resourceGroup = azureClient.createResourceGroup(envName, networkRequest.getRegion().value(), tags, costFollowerTags);
-            templateDeployment = azureClient.createTemplateDeployment(resourceGroup.name(), stackName, template, parameters);
+            resourceGroup = azureClient.createResourceGroup(envName, networkRequest.getRegion().value(), tags, costFollowerTags);
+            templateDeployment = azureClient.createTemplateDeployment(resourceGroup.name(), networkRequest.getStackName(), template, "");
         } catch (CloudException e) {
             LOGGER.info("Provisioning error, cloud exception happened: ", e);
             if (e.body() != null && e.body().details() != null) {
@@ -69,17 +68,33 @@ public class AzureNetworkConnector implements NetworkConnector {
             }
         } catch (Exception e) {
             LOGGER.warn("Provisioning error:", e);
-            throw new CloudConnectorException(String.format("Error in provisioning stack %s: %s", stackName, e.getMessage()));
+            throw new CloudConnectorException(String.format("Error in provisioning stack %s: %s", networkRequest.getStackName(), e.getMessage()));
         }
         Map<String, Map> outputMap = (HashMap) templateDeployment.outputs();
         String networkName = (String) outputMap.get(NETWORK_ID_KEY).get("value");
         Set<CreatedSubnet> subnets = createSubnets(networkRequest.getSubnetCidrs().size(), outputMap, networkRequest.getRegion().value());
-        return new CreatedCloudNetwork(networkName, subnets, createProperties(envName, stackName));
+        return new CreatedCloudNetwork(networkRequest.getStackName(), networkName, subnets,
+                createProperties(resourceGroup.name(), networkRequest.getStackName()));
     }
 
     @Override
-    public CreatedCloudNetwork deleteNetworkWithSubnets(CloudCredential cloudCredential) {
-        return null;
+    public void deleteNetworkWithSubnets(NetworkDeletionRequest networkDeletionRequest) {
+        AzureClient azureClient = azureClientService.getClient(networkDeletionRequest.getCloudCredential());
+        try {
+            azureClient.deleteTemplateDeployment(networkDeletionRequest.getResourceGroup(), networkDeletionRequest.getStackName());
+            azureClient.deleteResourceGroup(networkDeletionRequest.getResourceGroup());
+        } catch (CloudException e) {
+            LOGGER.warn("Deletion error, cloud exception happened: ", e);
+            if (e.body() != null && e.body().details() != null) {
+                String details = e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", "));
+                throw new CloudConnectorException(String.format("Stack deletion failed, status code %s, error message: %s, details: %s",
+                        e.body().code(), e.body().message(), details));
+            } else {
+                throw new CloudConnectorException(String.format("Stack deletion failed: '%s', please go to Azure Portal for detailed message", e));
+            }
+
+        }
+
     }
 
     @Override
@@ -90,10 +105,6 @@ public class AzureNetworkConnector implements NetworkConnector {
     @Override
     public Variant variant() {
         return AzureConstants.VARIANT;
-    }
-
-    private String createStackName(String envName) {
-        return String.join("-", envName, "network", "stack");
     }
 
     private Set<CreatedSubnet> createSubnets(int numberOfSubnets, Map<String, Map> outputMap, String region) {
