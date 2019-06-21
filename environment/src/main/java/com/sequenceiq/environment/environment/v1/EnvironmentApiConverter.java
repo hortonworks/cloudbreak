@@ -9,16 +9,19 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentAuthenticationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
+import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -40,8 +43,7 @@ public class EnvironmentApiConverter {
 
     public EnvironmentApiConverter(ThreadBasedUserCrnProvider threadBasedUserCrnProvider,
             RegionConverter regionConverter,
-            CredentialToCredentialV1ResponseConverter credentialConverter
-    ) {
+            CredentialToCredentialV1ResponseConverter credentialConverter) {
         this.threadBasedUserCrnProvider = threadBasedUserCrnProvider;
         this.regionConverter = regionConverter;
         this.credentialConverter = credentialConverter;
@@ -57,7 +59,8 @@ public class EnvironmentApiConverter {
                 .withCreated(System.currentTimeMillis())
                 .withCreateFreeIpa(request.getCreateFreeIpa() == null ? true : request.getCreateFreeIpa())
                 .withLocation(locationRequestToDto(request.getLocation()))
-                .withRegions(request.getRegions());
+                .withRegions(request.getRegions())
+                .withAuthentication(authenticationRequestToDto(request.getAuthentication()));
 
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
         return builder.build();
@@ -93,6 +96,14 @@ public class EnvironmentApiConverter {
                 .build();
     }
 
+    private AuthenticationDto authenticationRequestToDto(EnvironmentAuthenticationRequest authentication) {
+        return AuthenticationDto.builder()
+                .withLoginUserName(authentication.getLoginUserName())
+                .withPublicKey(authentication.getPublicKey())
+                .withPublicKeyId(authentication.getPublicKeyId())
+                .build();
+    }
+
     public DetailedEnvironmentResponse dtoToDetailedResponse(EnvironmentDto environmentDto) {
         DetailedEnvironmentResponse.Builder builder = DetailedEnvironmentResponse.Builder.aDetailedEnvironmentResponse()
                 .withCrn(environmentDto.getResourceCrn())
@@ -103,6 +114,8 @@ public class EnvironmentApiConverter {
                 .withEnvironmentStatus(environmentDto.getStatus().getResponseStatus())
                 .withLocation(locationDtoToResponse(environmentDto.getLocation()))
                 .withCreateFreeIpa(environmentDto.isCreateFreeIpa())
+                .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()))
+                .withAuthentication(authenticationToResponse(environmentDto.getAuthentication()))
                 .withStatusReason(environmentDto.getStatusReason())
                 .withCreated(environmentDto.getCreated())
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegionSet()));
@@ -162,12 +175,21 @@ public class EnvironmentApiConverter {
                 .withRegions(request.getRegions());
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
         NullUtil.doIfNotNull(request.getLocation(), location -> builder.withLocation(locationRequestToDto(location)));
+        NullUtil.doIfNotNull(request.getAuthentication(), authentication -> builder.withAuthentication(authenticationRequestToDto(authentication)));
         return builder.build();
     }
 
     public EnvironmentChangeCredentialDto convertEnvironmentChangeCredentialDto(EnvironmentChangeCredentialRequest request) {
         return anEnvironmentChangeCredentialDto()
                 .withCredentialName(request.getCredential() != null ? request.getCredential().getName() : request.getCredentialName())
+                .build();
+    }
+
+    public EnvironmentAuthenticationResponse authenticationToResponse(AuthenticationDto authenticationDto) {
+        return EnvironmentAuthenticationResponse.builder()
+                .withLoginUserName(authenticationDto.getLoginUserName())
+                .withPublicKey(authenticationDto.getPublicKey())
+                .withPublicKeyId(authenticationDto.getPublicKeyId())
                 .build();
     }
 }

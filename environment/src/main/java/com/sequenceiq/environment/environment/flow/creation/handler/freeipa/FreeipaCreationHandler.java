@@ -18,6 +18,7 @@ import com.sequenceiq.environment.CloudPlatform;
 import com.sequenceiq.environment.configuration.SupportedPlatforms;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
@@ -37,11 +38,6 @@ import reactor.bus.Event;
 public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeipaCreationHandler.class);
-
-    private static final String DUMMY_SSH_KEY = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kc"
-            + "UEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpj"
-            + "T7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh"
-            + "centos";
 
     private static final String FREEIPA_DOMAIN = "cdp.site";
 
@@ -99,7 +95,7 @@ public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         createFreeIpaRequest.setEnvironmentCrn(environment.getResourceCrn());
         setFreeIpaServer(createFreeIpaRequest);
         setPlacementAndNetwork(environment, createFreeIpaRequest);
-        setAuthentication(createFreeIpaRequest);
+        setAuthentication(environment.getAuthentication(), createFreeIpaRequest);
         return createFreeIpaRequest;
     }
 
@@ -130,10 +126,11 @@ public class FreeipaCreationHandler extends EventSenderAwareHandler<EnvironmentD
                 freeIpaNetworkProvider.availabilityZone(createFreeIpaRequest.getNetwork(), environment));
     }
 
-    private void setAuthentication(CreateFreeIpaRequest createFreeIpaRequest) {
+    private void setAuthentication(AuthenticationDto authentication, CreateFreeIpaRequest createFreeIpaRequest) {
         StackAuthenticationRequest stackAuthenticationRequest = new StackAuthenticationRequest();
-        stackAuthenticationRequest.setLoginUserName("cloudbreak");
-        stackAuthenticationRequest.setPublicKey(DUMMY_SSH_KEY);
+        stackAuthenticationRequest.setLoginUserName(authentication.getLoginUserName());
+        stackAuthenticationRequest.setPublicKey(authentication.getPublicKey());
+        stackAuthenticationRequest.setPublicKeyId(authentication.getPublicKeyId());
         createFreeIpaRequest.setAuthentication(stackAuthenticationRequest);
     }
 

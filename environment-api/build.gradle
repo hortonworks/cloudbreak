@@ -1,9 +1,16 @@
 plugins {
   id 'java'
+  id 'com.adarshr.test-logger' version '1.7.0'
 }
 
 repositories {
   mavenCentral()
+}
+
+configurations.all {
+    resolutionStrategy {
+        force group: 'org.ow2.asm', name: 'asm', version: asmVersion
+    }
 }
 
 dependencies {
@@ -12,14 +19,25 @@ dependencies {
   implementation project(':cloud-api')
   implementation project(':auth-connector')
 
-  implementation group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',          version: "1.5.21"
-  implementation group: 'javax.validation',              name: 'validation-api',                 version: '2.0.1.Final'
-  implementation group: 'org.glassfish.jersey.ext',      name: 'jersey-proxy-client',            version: jerseyCoreVersion
-  implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
-  implementation group: 'javax.activation',              name: 'activation',                     version: "1.1.1"
-  implementation group: 'javax.xml.bind',                name: 'jaxb-api',                       version: "2.3.0"
-  implementation group: 'com.sun.xml.bind',              name: 'jaxb-impl',                      version: "2.3.0"
-  implementation group: 'com.sun.xml.bind',              name: 'jaxb-core',                      version: "2.3.0"
-  implementation group: 'com.sun.xml.ws',                name: 'rt',                             version: "2.3.0"
-  implementation group: 'com.sun.xml.ws',                name: 'jaxws-rt',                       version: "2.3.0"
+  implementation     group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
+  implementation     group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',          version: "1.5.21"
+  implementation     group: 'javax.validation',              name: 'validation-api',                 version: '2.0.1.Final'
+  implementation     group: 'org.glassfish.jersey.ext',      name: 'jersey-proxy-client',            version: jerseyCoreVersion
+  implementation     group: 'org.glassfish.jersey.media',    name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
+  implementation     group: 'javax.activation',              name: 'activation',                     version: "1.1.1"
+  implementation     group: 'javax.xml.bind',                name: 'jaxb-api',                       version: "2.3.0"
+  implementation     group: 'com.sun.xml.bind',              name: 'jaxb-impl',                      version: "2.3.0"
+  implementation     group: 'com.sun.xml.bind',              name: 'jaxb-core',                      version: "2.3.0"
+  implementation     group: 'com.sun.xml.ws',                name: 'rt',                             version: "2.3.0"
+  implementation     group: 'com.sun.xml.ws',                name: 'jaxws-rt',                       version: "2.3.0"
+
+  testImplementation group: 'org.junit.jupiter',             name: 'junit-jupiter-api',              version: junitJupiterVersion
+  testImplementation group: 'com.openpojo',                  name: 'openpojo',                       version: openPojoVersion
+  testImplementation group: 'org.ow2.asm',                   name: 'asm',                            version: asmVersion
+
+  testRuntimeOnly    group: 'org.junit.jupiter',             name: 'junit-jupiter-engine',           version: junitJupiterVersion
+}
+
+test {
+    useJUnitPlatform()
 }

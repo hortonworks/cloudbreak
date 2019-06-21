@@ -30,12 +30,15 @@ public class EnvironmentCreationDto {
 
     private final boolean createFreeIpa;
 
+    private final AuthenticationDto authentication;
+
     private final Long created;
 
     //CHECKSTYLE:OFF
     public EnvironmentCreationDto(String name, String description, String cloudPlatform, String accountId,
             LocationDto location, NetworkDto network, CredentialAwareEnvRequest credential,
-            Set<String> regions, Set<String> proxyNames, boolean createFreeIpa, Long created) {
+            Set<String> regions, Set<String> proxyNames, boolean createFreeIpa, AuthenticationDto authentication,
+            Long created) {
         //CHECKSTYLE:ON
         this.name = name;
         this.description = description;
@@ -56,6 +59,7 @@ public class EnvironmentCreationDto {
         } else {
             this.proxyNames = proxyNames;
         }
+        this.authentication = authentication;
     }
 
     public String getName() {
@@ -98,6 +102,10 @@ public class EnvironmentCreationDto {
         return createFreeIpa;
     }
 
+    public AuthenticationDto getAuthentication() {
+        return authentication;
+    }
+
     public Long getCreated() {
         return created;
     }
@@ -122,6 +130,8 @@ public class EnvironmentCreationDto {
         private Set<String> proxyNames;
 
         private boolean createFreeIpa = true;
+
+        private AuthenticationDto authentication;
 
         private Long created;
 
@@ -182,15 +192,19 @@ public class EnvironmentCreationDto {
             return this;
         }
 
+        public Builder withAuthentication(AuthenticationDto authentication) {
+            this.authentication = authentication;
+            return this;
+        }
+
         public Builder withCreated(Long created) {
             this.created = created;
             return this;
         }
 
         public EnvironmentCreationDto build() {
-            return new EnvironmentCreationDto(
-                    name, description, cloudPlatform, accountId, location, network, credential,
-                    regions, proxyNames, createFreeIpa, created);
+            return new EnvironmentCreationDto(name, description, cloudPlatform, accountId,
+                    location, network, credential, regions, proxyNames, createFreeIpa, authentication, created);
         }
     }
 }

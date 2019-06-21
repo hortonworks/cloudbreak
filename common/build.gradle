@@ -60,6 +60,8 @@ dependencies {
   }
   compile group: 'javax.validation',                      name: 'validation-api',                 version: '2.0.1.Final'
 
-  testCompile group: 'junit',                    name: 'junit',                    version: junitVersion
-  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
+  testCompile group: 'org.hibernate',            name: 'hibernate-validator',            version: hibernateValidatorVersion
+  testCompile group: 'junit',                    name: 'junit',                          version: junitVersion
+  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test',       version: springBootVersion
+  testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: springBootVersion
 }

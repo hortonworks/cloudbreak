@@ -51,7 +51,7 @@ dependencies {
   testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
   testCompile group: 'junit',                     name: 'junit',                          version: junitVersion
   testCompile group: 'org.apache.tomcat.embed',   name: 'tomcat-embed-el',                version: '9.0.8'
-  testCompile group: 'com.openpojo',              name: 'openpojo',                       version: '0.8.10'
+  testCompile group: 'com.openpojo',              name: 'openpojo',                       version: openPojoVersion
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {

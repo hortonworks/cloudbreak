@@ -10,6 +10,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
@@ -29,6 +30,12 @@ public class EnvironmentTestDto
         extends DeletableEnvironmentTestDto<EnvironmentRequest, DetailedEnvironmentResponse, EnvironmentTestDto, SimpleEnvironmentResponse> {
 
     public static final String ENVIRONMENT = "ENVIRONMENT";
+
+    private static final String DUMMY_SSH_KEY = "ssh-rsa "
+            + "AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCBtfDwzIbJot2Fmife6M42mBtiTmAK6x8kc"
+            + "UEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUBhi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvkGZv4sYyRwX7BKBLleQmIVWpofpj"
+            + "T7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU52yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862Ce36F4NZd3MpWMSjMmpDPh"
+            + " centos";
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
@@ -62,7 +69,8 @@ public class EnvironmentTestDto
                 .environment(withName(resourceProperyProvider().getName())
                         .withCreateFreeIpa(Boolean.FALSE)
                         .withDescription(resourceProperyProvider().getDescription("environment")))
-                        .withCredentialName(getTestContext().get(CredentialTestDto.class).getName());
+                        .withCredentialName(getTestContext().get(CredentialTestDto.class).getName())
+                        .withAuthentication(DUMMY_SSH_KEY);
     }
 
     private EnvironmentTestDto withCreateFreeIpa(Boolean create) {
@@ -95,6 +103,13 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto withCredentialName(String credentialName) {
         getRequest().setCredentialName(credentialName);
+        return this;
+    }
+
+    public EnvironmentTestDto withAuthentication(String sshKey) {
+        EnvironmentAuthenticationRequest authentication = new EnvironmentAuthenticationRequest();
+        authentication.setPublicKey(sshKey);
+        getRequest().setAuthentication(authentication);
         return this;
     }
 

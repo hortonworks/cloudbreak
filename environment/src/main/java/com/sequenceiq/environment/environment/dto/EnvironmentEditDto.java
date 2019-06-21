@@ -17,14 +17,17 @@ public class EnvironmentEditDto {
 
     private LocationDto location;
 
-    private NetworkDto network;
+    private final NetworkDto network;
+
+    private final AuthenticationDto authentication;
 
     public EnvironmentEditDto(
-        String description,
-        Set<String> regions,
-        String accountId,
-        LocationDto location,
-        NetworkDto network) {
+            String description,
+            Set<String> regions,
+            String accountId,
+            LocationDto location,
+            NetworkDto network,
+            AuthenticationDto authentication) {
         this.description = description;
         this.accountId = accountId;
         if (CollectionUtils.isEmpty(regions)) {
@@ -34,6 +37,7 @@ public class EnvironmentEditDto {
         }
         this.network = network;
         this.location = location;
+        this.authentication = authentication;
     }
 
     public String getDescription() {
@@ -60,6 +64,10 @@ public class EnvironmentEditDto {
         return network;
     }
 
+    public AuthenticationDto getAuthentication() {
+        return authentication;
+    }
+
     public static final class EnvironmentEditDtoBuilder {
         private String description;
 
@@ -70,6 +78,8 @@ public class EnvironmentEditDto {
         private LocationDto location;
 
         private NetworkDto network;
+
+        private AuthenticationDto authentication;
 
         private EnvironmentEditDtoBuilder() {
         }
@@ -103,9 +113,13 @@ public class EnvironmentEditDto {
             return this;
         }
 
-        public EnvironmentEditDto build() {
-            return new EnvironmentEditDto(description, regions, accountId, location, network);
+        public EnvironmentEditDtoBuilder withAuthentication(AuthenticationDto authentication) {
+            this.authentication = authentication;
+            return this;
         }
 
+        public EnvironmentEditDto build() {
+            return new EnvironmentEditDto(description, regions, accountId, location, network, authentication);
+        }
     }
 }

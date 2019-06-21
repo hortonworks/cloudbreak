@@ -51,6 +51,8 @@ public class EnvironmentDto implements Payload {
 
     private boolean createFreeIpa = true;
 
+    private AuthenticationDto authentication;
+
     private Long created;
 
     @Override
@@ -191,6 +193,14 @@ public class EnvironmentDto implements Payload {
         this.createFreeIpa = createFreeIpa;
     }
 
+    public AuthenticationDto getAuthentication() {
+        return authentication;
+    }
+
+    public void setAuthentication(AuthenticationDto authentication) {
+        this.authentication = authentication;
+    }
+
     public String getStatusReason() {
         return statusReason;
     }
@@ -245,6 +255,8 @@ public class EnvironmentDto implements Payload {
         private String statusReason;
 
         private boolean createFreeIpa = true;
+
+        private AuthenticationDto authentication;
 
         private Long created;
 
@@ -331,6 +343,11 @@ public class EnvironmentDto implements Payload {
             return this;
         }
 
+        public Builder withAuthentication(AuthenticationDto authentication) {
+            this.authentication = authentication;
+            return this;
+        }
+
         public Builder withStatusReason(String statusReason) {
             this.statusReason = statusReason;
             return this;
@@ -359,6 +376,7 @@ public class EnvironmentDto implements Payload {
             environmentDto.setStatus(environmentStatus);
             environmentDto.setCreator(creator);
             environmentDto.setCreateFreeIpa(createFreeIpa);
+            environmentDto.setAuthentication(authentication);
             environmentDto.setStatusReason(statusReason);
             environmentDto.setCreated(created);
             return environmentDto;

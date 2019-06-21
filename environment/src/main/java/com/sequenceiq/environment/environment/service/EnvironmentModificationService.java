@@ -22,6 +22,8 @@ import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.Region;
+import com.sequenceiq.environment.environment.dto.AuthenticationDto;
+import com.sequenceiq.environment.environment.dto.AuthenticationDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
@@ -47,13 +49,17 @@ public class EnvironmentModificationService {
 
     private final NetworkService networkService;
 
+    private final AuthenticationDtoConverter authenticationDtoConverter;
+
     public EnvironmentModificationService(EnvironmentDtoConverter environmentDtoConverter, EnvironmentRepository environmentRepository,
-            EnvironmentService environmentService, CredentialService credentialService, NetworkService networkService) {
+            EnvironmentService environmentService, CredentialService credentialService, NetworkService networkService,
+            AuthenticationDtoConverter authenticationDtoConverter) {
         this.environmentDtoConverter = environmentDtoConverter;
         this.environmentRepository = environmentRepository;
         this.environmentService = environmentService;
         this.credentialService = credentialService;
         this.networkService = networkService;
+        this.authenticationDtoConverter = authenticationDtoConverter;
     }
 
     public EnvironmentDto editByName(String environmentName, EnvironmentEditDto editDto) {
@@ -84,6 +90,7 @@ public class EnvironmentModificationService {
         editDescriptionIfChanged(env, editDto);
         editLocationAndRegionsIfChanged(env, editDto);
         editNetworkIfChanged(env, editDto);
+        editAuthenticationIfChanged(editDto, env);
         Environment saved = environmentRepository.save(env);
         return environmentDtoConverter.environmentToDto(saved);
     }
@@ -180,4 +187,10 @@ public class EnvironmentModificationService {
         environmentService.setLocation(environment, editDto.getLocation(), cloudRegions);
     }
 
+    private void editAuthenticationIfChanged(EnvironmentEditDto editDto, Environment environment) {
+        AuthenticationDto authenticationDto = editDto.getAuthentication();
+        if (authenticationDto != null) {
+            environment.setAuthentication(authenticationDtoConverter.dtoToAuthentication(authenticationDto));
+        }
+    }
 }

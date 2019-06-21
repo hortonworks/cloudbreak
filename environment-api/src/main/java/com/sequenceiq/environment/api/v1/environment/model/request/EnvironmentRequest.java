@@ -3,6 +3,7 @@ package com.sequenceiq.environment.api.v1.environment.model.request;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -44,6 +45,9 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     @ApiModelProperty(EnvironmentModelDescription.CLOUD_PLATFORM)
     private String cloudPlatform;
+
+    @ApiModelProperty(EnvironmentModelDescription.AUTHENTICATION)
+    private @Valid EnvironmentAuthenticationRequest authentication;
 
     public String getName() {
         return name;
@@ -109,5 +113,13 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setCreateFreeIpa(Boolean createFreeIpa) {
         this.createFreeIpa = createFreeIpa;
+    }
+
+    public EnvironmentAuthenticationRequest getAuthentication() {
+        return authentication;
+    }
+
+    public void setAuthentication(EnvironmentAuthenticationRequest authentication) {
+        this.authentication = authentication;
     }
 }
