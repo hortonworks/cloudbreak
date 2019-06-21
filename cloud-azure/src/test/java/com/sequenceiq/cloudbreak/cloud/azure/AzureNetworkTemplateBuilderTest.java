@@ -36,6 +36,8 @@ public class AzureNetworkTemplateBuilderTest {
 
     private static final String ENV_NAME = "testEnv";
 
+    private static final String STACK_NAME = "testEnv-1";
+
     private static final String REGION = "US-WEST";
 
     private static final String NETWORK_CIDR = "1.1.1.1/8";
@@ -57,7 +59,6 @@ public class AzureNetworkTemplateBuilderTest {
         factoryBean.afterPropertiesSet();
         ReflectionTestUtils.setField(underTest, "freemarkerConfiguration", factoryBean.getObject());
         ReflectionTestUtils.setField(underTest, "armTemplatePath", "templates/arm-network.ftl");
-        ReflectionTestUtils.setField(underTest, "armTemplateParametersPath", "templates/parameters.ftl");
     }
 
     @Test
@@ -85,7 +86,7 @@ public class AzureNetworkTemplateBuilderTest {
                 .withSubnetCidrs(createSubnetCidrs())
                 .withNoPublicIp(false)
                 .withNoFirewallRules(false)
-                .withId(1L)
+                .withStackName(STACK_NAME)
                 .build();
     }
 

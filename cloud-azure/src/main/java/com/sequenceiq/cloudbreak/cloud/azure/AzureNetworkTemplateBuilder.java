@@ -29,9 +29,6 @@ public class AzureNetworkTemplateBuilder {
     @Value("${cb.arm.network.template.path:}")
     private String armTemplatePath;
 
-    @Value("${cb.arm.parameter.path:}")
-    private String armTemplateParametersPath;
-
     @Inject
     private Configuration freemarkerConfiguration;
 
@@ -49,14 +46,6 @@ public class AzureNetworkTemplateBuilder {
             return generatedTemplate;
         } catch (IOException | TemplateException e) {
             throw new CloudConnectorException("Failed to process the ARM TemplateBuilder", e);
-        }
-    }
-
-    public String buildParameters() {
-        try {
-            return freeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate(armTemplateParametersPath, "UTF-8"), new HashMap<>());
-        } catch (IOException | TemplateException e) {
-            throw new CloudConnectorException("Failed to process the ARM TemplateParameterBuilder", e);
         }
     }
 

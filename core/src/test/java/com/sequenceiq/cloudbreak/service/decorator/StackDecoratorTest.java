@@ -188,7 +188,7 @@ public class StackDecoratorTest {
         crr.setNames(Sets.newHashSet("region"));
         environmentResponse.setRegions(crr);
         EnvironmentNetworkResponse enr = new EnvironmentNetworkResponse();
-        Map<String, CloudSubnet> subnetmetas = Maps.newHashMap("subnet", new CloudSubnet("id", "name", "availabilityzone"));
+        Map<String, CloudSubnet> subnetmetas = Maps.newHashMap("subnet", new CloudSubnet("id", "name", "availabilityzone", "cidr"));
         enr.setSubnetMetas(subnetmetas);
         environmentResponse.setNetwork(enr);
         when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);

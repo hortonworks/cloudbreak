@@ -7,6 +7,8 @@ import java.util.Set;
 
 public class CreatedCloudNetwork {
 
+    private String stackName;
+
     private String networkId;
 
     private Set<CreatedSubnet> subnets = new HashSet<>();
@@ -16,15 +18,21 @@ public class CreatedCloudNetwork {
     public CreatedCloudNetwork() {
     }
 
-    public CreatedCloudNetwork(String networkId, Set<CreatedSubnet> subnets, Map<String, Object> properties) {
+    public CreatedCloudNetwork(String stackName, String networkId, Set<CreatedSubnet> subnets, Map<String, Object> properties) {
+        this.stackName = stackName;
         this.networkId = networkId;
         this.subnets = subnets;
         this.properties = properties;
     }
 
-    public CreatedCloudNetwork(String networkId, Set<CreatedSubnet> subnets) {
+    public CreatedCloudNetwork(String stackName, String networkId, Set<CreatedSubnet> subnets) {
+        this.stackName = stackName;
         this.networkId = networkId;
         this.subnets = subnets;
+    }
+
+    public String getStackName() {
+        return stackName;
     }
 
     public String getNetworkId() {

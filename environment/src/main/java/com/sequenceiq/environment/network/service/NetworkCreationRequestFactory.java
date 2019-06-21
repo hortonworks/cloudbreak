@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
@@ -26,16 +27,24 @@ public class NetworkCreationRequestFactory {
     public NetworkCreationRequest create(EnvironmentDto environment) {
         NetworkDto networkDto = environment.getNetwork();
         NetworkCreationRequest.Builder builder = new NetworkCreationRequest.Builder()
+                .withStackName(getStackName(environment))
                 .withEnvName(environment.getName())
-                .withCloudCredential(credentialToCloudCredentialConverter.convert(environment.getCredential()))
+                .withCloudCredential(getCredential(environment))
                 .withVariant(environment.getCloudPlatform())
                 .withRegion(Region.region(environment.getLocation().getName()))
                 .withNetworkCidr(networkDto.getNetworkCidr())
-                .withId(networkDto.getId())
                 .withSubnetCidrs(getSubNetCidrs(networkDto.getNetworkCidr()));
         getNoPublicIp(networkDto).ifPresent(builder::withNoPublicIp);
         getNoFirewallRules(networkDto).ifPresent(builder::withNoFirewallRules);
         return builder.build();
+    }
+
+    private CloudCredential getCredential(EnvironmentDto environment) {
+        return credentialToCloudCredentialConverter.convert(environment.getCredential());
+    }
+
+    private String getStackName(EnvironmentDto environment) {
+        return String.join("-", environment.getName(), String.valueOf(environment.getNetwork().getId()));
     }
 
     private Set<String> getSubNetCidrs(String networkCidr) {

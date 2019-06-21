@@ -26,7 +26,7 @@ import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFai
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
-import com.sequenceiq.environment.network.EnvironmentNetworkCreationService;
+import com.sequenceiq.environment.network.EnvironmentNetworkManagementService;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dto.AwsParams;
@@ -49,7 +49,7 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final EnvironmentDtoConverter environmentDtoConverter;
 
-    private final EnvironmentNetworkCreationService environmentNetworkCreationService;
+    private final EnvironmentNetworkManagementService environmentNetworkManagementService;
 
     private final Set<String> enabledPlatforms;
 
@@ -58,14 +58,14 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
             PlatformParameterService platformParameterService,
             NetworkService networkService,
             EnvironmentDtoConverter environmentDtoConverter,
-            EnvironmentNetworkCreationService environmentNetworkCreationService,
+            EnvironmentNetworkManagementService environmentNetworkManagementService,
             @Value("${environment.enabledplatforms}") Set<String> enabledPlatforms) {
         super(eventSender);
         this.environmentService = environmentService;
         this.platformParameterService = platformParameterService;
         this.networkService = networkService;
         this.environmentDtoConverter = environmentDtoConverter;
-        this.environmentNetworkCreationService = environmentNetworkCreationService;
+        this.environmentNetworkManagementService = environmentNetworkManagementService;
         this.enabledPlatforms = enabledPlatforms;
     }
 
@@ -79,10 +79,11 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
                 env.setStatus(EnvironmentStatus.NETWORK_CREATION_IN_PROGRESS);
                 BaseNetwork baseNetwork = networkService.save(hasExistingNetwork(env)
                         ? decorateWithSubnetMeta(env.getNetwork().getId(), envDto)
-                        : environmentNetworkCreationService.createNetwork(envDto, env.getNetwork()));
+                        : environmentNetworkManagementService.createNetwork(envDto, env.getNetwork()));
                 env.setNetwork(baseNetwork);
                 environmentService.save(env);
             });
+
             EnvCreationEvent envCreationEvent = EnvCreationEvent.EnvCreationEventBuilder.anEnvCreationEvent()
                     .withResourceId(environmentDto.getResourceId())
                     .withSelector(START_FREEIPA_CREATION_EVENT.selector())

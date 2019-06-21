@@ -10,15 +10,14 @@ public class CloudSubnet {
 
     private String cidr;
 
+    private boolean privateSubnet;
+
     public CloudSubnet() {
     }
 
     public CloudSubnet(String id, String name) {
-        this(id, name, null);
-    }
-
-    public CloudSubnet(String id, String name, String availabilityZone) {
-        this(id, name, availabilityZone, null);
+        this.id = id;
+        this.name = name;
     }
 
     public CloudSubnet(String id, String name, String availabilityZone, String cidr) {
@@ -26,6 +25,14 @@ public class CloudSubnet {
         this.name = name;
         this.availabilityZone = availabilityZone;
         this.cidr = cidr;
+    }
+
+    public CloudSubnet(String id, String name, String availabilityZone, String cidr, boolean privateSubnet) {
+        this.id = id;
+        this.name = name;
+        this.availabilityZone = availabilityZone;
+        this.cidr = cidr;
+        this.privateSubnet = privateSubnet;
     }
 
     public String getId() {
@@ -58,6 +65,10 @@ public class CloudSubnet {
 
     public void setCidr(String cidr) {
         this.cidr = cidr;
+    }
+
+    public boolean isPrivateSubnet() {
+        return privateSubnet;
     }
 
     @Override
