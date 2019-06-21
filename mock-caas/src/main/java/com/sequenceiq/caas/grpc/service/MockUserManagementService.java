@@ -5,17 +5,24 @@ import static com.cloudera.thunderhead.service.usermanagement.UserManagementProt
 import static com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest;
 import static com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse;
 import static com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
+import static java.util.Collections.newSetFromMap;
+import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.springframework.security.jwt.JwtHelper.decodeAndVerify;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,8 +32,12 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse.Builder;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.sequenceiq.caas.grpc.GrpcActorContext;
 import com.sequenceiq.caas.model.AltusToken;
@@ -51,6 +62,8 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
 
     private String cbLicense;
 
+    private final Map<String, Set<String>> accountUsers = new ConcurrentHashMap<>();
+
     @PostConstruct
     public void setLicense() {
         this.cbLicense = getLicense();
@@ -62,6 +75,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         String[] splittedCrn = userIdOrCrn.split(":");
         String userName = splittedCrn[6];
         String accountId = splittedCrn[4];
+        accountUsers.computeIfAbsent(accountId, key -> newSetFromMap(new ConcurrentHashMap<>())).add(userName);
         responseObserver.onNext(
                 GetUserResponse.newBuilder()
                         .setUser(createUser(accountId, userName))
@@ -70,18 +84,37 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
     }
 
     @Override
-    public void listUsers(UserManagementProto.ListUsersRequest request, StreamObserver<ListUsersResponse> responseObserver) {
+    public void listUsers(ListUsersRequest request, StreamObserver<ListUsersResponse> responseObserver) {
+        Builder userBuilder = ListUsersResponse.newBuilder();
         if (request.getUserIdOrCrnCount() == 0) {
-            responseObserver.onNext(ListUsersResponse.newBuilder().build());
+            if (isNotEmpty(request.getAccountId())) {
+                ofNullable(accountUsers.get(request.getAccountId())).orElse(Set.of()).stream()
+                        .map(userName -> createUser(request.getAccountId(), userName))
+                        .forEach(userBuilder::addUser);
+            }
+            responseObserver.onNext(userBuilder.build());
         } else {
             String userIdOrCrn = request.getUserIdOrCrn(0);
             String[] splittedCrn = userIdOrCrn.split(":");
             String userName = splittedCrn[6];
             String accountId = splittedCrn[4];
             responseObserver.onNext(
-                    ListUsersResponse.newBuilder()
+                    userBuilder
                             .addUser(createUser(accountId, userName))
                             .build());
+        }
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void getRights(GetRightsRequest request, StreamObserver<GetRightsResponse> responseObserver) {
+        String resourceCrn = request.getResourceCrn();
+        if (StringUtils.isEmpty(resourceCrn)) {
+            responseObserver.onNext(GetRightsResponse.newBuilder().build());
+        } else {
+            responseObserver.onNext(
+                    GetRightsResponse.newBuilder()
+                            .addGroupCrn(resourceCrn).build());
         }
         responseObserver.onCompleted();
     }
@@ -90,7 +123,7 @@ public class MockUserManagementService extends UserManagementGrpc.UserManagement
         return User.newBuilder()
                 .setUserId(UUID.nameUUIDFromBytes((accountId + "#" + userName).getBytes()).toString())
                 .setCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
-                .setEmail(userName)
+                .setEmail(userName + "@ums.mock")
                 .build();
     }
 
