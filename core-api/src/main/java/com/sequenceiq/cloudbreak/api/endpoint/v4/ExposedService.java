@@ -17,6 +17,7 @@ public enum ExposedService {
     ALL("Every Service", "ALL", "ALL", "", "", true, null),
 
     CLOUDERA_MANAGER("CM", "CM-API", "CM-API", "CM-API", "/cm-api/", true, null, 7180),
+    CLOUDERA_MANAGER_UI("CM-UI", "CM-UI", "CM-UI", "CM-UI", "/cmf/home", true, null, 7180),
     AMBARI("Ambari", "AMBARI_SERVER", "", "AMBARI", "/ambari/", true, 8080, null),
     WEBHDFS("WebHDFS", "NAMENODE", "NAMENODE", "WEBHDFS", "/webhdfs/v1", false, 50070),
     NAMENODE("Name Node", "NAMENODE", "NAMENODE", "HDFSUI", "/hdfs/", true, 50070, 9870),
@@ -38,7 +39,8 @@ public enum ExposedService {
     LIVY2_SERVER("Livy Server 2", "LIVY2_SERVER", "", "LIVYSERVER", "/livy/v1/sessions/", true, 8999, null),
     LIVY_SERVER("Livy Server", "", "LIVY_SERVER", "LIVYSERVER1", "/livy/v1/", true, null, 8998),
     OOZIE_UI("Oozie Server", "", "OOZIE_SERVER", "OOZIE", "/oozie/", true, null, 11000),
-    HBASE("Hbase", "", "HBASE", "HBASE", "/hbase/", true, null, 16010);
+    SOLR("Solr Server", "", "SOLR_SERVER", "SOLR", "/solr/", true, null, 8983),
+    HBASE("HBase", "", "HBASE", "HBASE", "/hbase/webui/", true, null, 16010);
 
     private final String ambariServiceName;
     private final String cmServiceName;
