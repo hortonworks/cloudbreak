@@ -72,7 +72,7 @@ public abstract class AbstractRedbeamsTerminationAction<P extends Payload>
         Credential credential = credentialService.getCredentialByEnvCrn(dbStack.getEnvironmentId());
         CloudCredential cloudCredential = credentialConverter.convert(credential);
         DatabaseStack databaseStack = databaseStackConverter.convert(dbStack);
-        return new RedbeamsContext(flowParameters, cloudContext, cloudCredential, databaseStack);
+        return new RedbeamsContext(flowParameters, cloudContext, cloudCredential, databaseStack, dbStack);
     }
 
     @Override

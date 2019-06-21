@@ -5,6 +5,7 @@ import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 import javax.inject.Inject;
@@ -120,7 +121,7 @@ public class AwsStackRequestHelper {
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
         AwsRdsInstanceView awsRdsInstanceView = new AwsRdsInstanceView(stack.getDatabaseServer());
         AwsRdsDbSubnetGroupView awsRdsDbSubnetGroupView = new AwsRdsDbSubnetGroupView(stack.getDatabaseServer());
-        Collection<Parameter> parameters = new ArrayList<>(asList(
+        List<Parameter> parameters = new ArrayList<>(asList(
                 new Parameter().withParameterKey("AllocatedStorageParameter").withParameterValue(Objects.toString(awsRdsInstanceView.getAllocatedStorage())),
                 new Parameter().withParameterKey("BackupRetentionPeriodParameter")
                     .withParameterValue(Objects.toString(awsRdsInstanceView.getBackupRetentionPeriod())),
@@ -135,6 +136,13 @@ public class AwsStackRequestHelper {
                 new Parameter().withParameterKey("VPCSecurityGroupsParameter").withParameterValue(String.join(",", awsRdsInstanceView.getVPCSecurityGroups())),
                 new Parameter().withParameterKey("StackOwner").withParameterValue(String.valueOf(ac.getCloudContext().getUserName()))
         ));
+
+        // Add the port if it's been supplied
+        Integer port = stack.getDatabaseServer().getPort();
+        if (port != null) {
+            parameters.add(new Parameter().withParameterKey("PortParameter").withParameterValue(Objects.toString(port)));
+        }
+
         return parameters;
     }
 }

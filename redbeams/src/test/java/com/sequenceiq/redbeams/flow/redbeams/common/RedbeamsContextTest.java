@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.flow.core.FlowParameters;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,13 +27,16 @@ public class RedbeamsContextTest {
     @Mock
     private DatabaseStack databaseStack;
 
+    @Mock
+    private DBStack dbStack;
+
     private RedbeamsContext underTest;
 
     @Before
     public void setUp() throws Exception {
         initMocks(this);
 
-        underTest = new RedbeamsContext(flowParameters, cloudContext, cloudCredential, databaseStack);
+        underTest = new RedbeamsContext(flowParameters, cloudContext, cloudCredential, databaseStack, dbStack);
     }
 
     @Test
@@ -40,6 +44,7 @@ public class RedbeamsContextTest {
         assertEquals(cloudContext, underTest.getCloudContext());
         assertEquals(cloudCredential, underTest.getCloudCredential());
         assertEquals(databaseStack, underTest.getDatabaseStack());
+        assertEquals(dbStack, underTest.getDBStack());
     }
 
 }

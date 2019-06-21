@@ -144,9 +144,10 @@ public class DatabaseServerV4ControllerTest {
         when(converterUtil.convert(server, DatabaseServerAllocationOutcomeV4Response.class))
             .thenReturn(allocateResponse);
 
-        DatabaseServerAllocationOutcomeV4Response response = underTest.create(allocateRequest);
+        underTest.create(allocateRequest);
 
-        assertEquals(allocateResponse, response);
+        // TODO: Restore this check once we introduce provisioning statuses
+        // assertEquals(allocateResponse, response);
         verify(creationService).launchDatabase(dbStack);
     }
 

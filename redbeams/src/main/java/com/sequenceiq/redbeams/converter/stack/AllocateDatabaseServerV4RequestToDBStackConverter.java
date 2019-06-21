@@ -55,6 +55,8 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     private Clock clock;
 
     public DBStack convert(AllocateDatabaseServerV4Request source, String ownerCrnString) {
+        Crn ownerCrn = Crn.safeFromString(ownerCrnString);
+
         DBStack dbStack = new DBStack();
         dbStack.setName(source.getName());
         dbStack.setEnvironmentId(source.getEnvironmentId());
@@ -66,7 +68,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
             dbStack.setNetwork(buildNetwork(source.getNetwork()));
         }
         if (source.getDatabaseServer() != null) {
-            dbStack.setDatabaseServer(buildDatabaseServer(source.getDatabaseServer(), source.getName()));
+            dbStack.setDatabaseServer(buildDatabaseServer(source.getDatabaseServer(), source.getName(), ownerCrn));
         }
 
         Map<String, Object> asMap = providerParameterCalculator.get(source).asMap();
@@ -76,7 +78,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
             dbStack.setParameters(parameter);
         }
 
-        Crn ownerCrn = Crn.safeFromString(ownerCrnString);
         dbStack.setOwnerCrn(ownerCrn);
         dbStack.setTags(getTags(ownerCrn, dbStack.getCloudPlatform()));
 
@@ -118,8 +119,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         return network;
     }
 
-    private DatabaseServer buildDatabaseServer(DatabaseServerV4Request source, String name) {
+    private DatabaseServer buildDatabaseServer(DatabaseServerV4Request source, String name, Crn ownerCrn) {
         DatabaseServer server = new DatabaseServer();
+        server.setAccountId(ownerCrn.getAccountId());
         server.setName(generateDatabaseServerName());
         server.setInstanceType(source.getInstanceType());
         DatabaseVendor databaseVendor = DatabaseVendor.fromValue(source.getDatabaseVendor());
@@ -127,6 +129,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         server.setStorageSize(source.getStorageSize());
         server.setRootUserName(source.getRootUserName());
         server.setRootPassword(source.getRootUserPassword());
+        server.setPort(source.getPort());
         server.setSecurityGroup(buildSecurityGroup(source.getSecurityGroup()));
 
         Map<String, Object> parameters = providerParameterCalculator.get(source).asMap();

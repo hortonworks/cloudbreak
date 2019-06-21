@@ -16,6 +16,8 @@ public class DatabaseServer extends DynamicModel {
 
     private final String rootPassword;
 
+    private final Integer port;
+
     private final long storageSize;
 
     private final Security security;
@@ -23,25 +25,27 @@ public class DatabaseServer extends DynamicModel {
     private final InstanceStatus status;
 
     public DatabaseServer(String serverId, String flavor, DatabaseEngine engine, String rootUserName, String rootPassword,
-            long storageSize, Security security, InstanceStatus status) {
+            Integer port, long storageSize, Security security, InstanceStatus status) {
         this.serverId = serverId;
         this.flavor = flavor;
         this.engine = engine;
         this.rootUserName = rootUserName;
         this.rootPassword = rootPassword;
+        this.port = port;
         this.storageSize = storageSize;
         this.security = security;
         this.status = status;
     }
 
     public DatabaseServer(String serverId, String flavor, DatabaseEngine engine, String rootUserName, String rootPassword,
-            long storageSize, Security security, InstanceStatus status, Map<String, Object> parameters) {
+            Integer port, long storageSize, Security security, InstanceStatus status, Map<String, Object> parameters) {
         super(parameters);
         this.serverId = serverId;
         this.flavor = flavor;
         this.engine = engine;
         this.rootUserName = rootUserName;
         this.rootPassword = rootPassword;
+        this.port = port;
         this.storageSize = storageSize;
         this.security = security;
         this.status = status;
@@ -67,6 +71,10 @@ public class DatabaseServer extends DynamicModel {
         return rootPassword;
     }
 
+    public Integer getPort() {
+        return port;
+    }
+
     public long getStorageSize() {
         return storageSize;
     }
@@ -86,6 +94,7 @@ public class DatabaseServer extends DynamicModel {
                 + ", flavor='" + flavor + '\''
                 + ", engine='" + engine + '\''
                 + ", rootUserName='" + rootUserName + '\''
+                + ", port='" + port + '\''
                 + ", storageSize=" + storageSize
                 + ", security=" + security
                 + ", status=" + status

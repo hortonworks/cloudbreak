@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
@@ -90,6 +92,12 @@ public class CloudResource extends DynamicModel {
 
     public void setInstanceId(String instanceId) {
         this.instanceId = instanceId;
+    }
+
+    public static Optional<CloudResource> getResourceTypeFromList(ResourceType type, List<CloudResource> resources) {
+        return resources.stream()
+                .filter(resource -> resource.type == type)
+                .findFirst();
     }
 
     public static class Builder {

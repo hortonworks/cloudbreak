@@ -15,6 +15,8 @@ public enum ResourceType {
     AWS_VOLUMESET,
     AWS_INSTANCE,
     RDS_INSTANCE,
+    RDS_HOSTNAME,
+    RDS_PORT,
     RDS_DB_SUBNET_GROUP,
 
     // OPENSTACK
