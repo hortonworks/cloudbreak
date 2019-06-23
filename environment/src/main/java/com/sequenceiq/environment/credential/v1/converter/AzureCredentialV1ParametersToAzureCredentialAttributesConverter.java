@@ -28,7 +28,8 @@ class AzureCredentialV1ParametersToAzureCredentialAttributesConverter {
     public AzureCredentialResponseParameters convert(AzureCredentialAttributes source) {
         AzureCredentialResponseParameters response = new AzureCredentialResponseParameters();
         doIfNotNull(source.getRoleBased(), param -> response.setRoleBased(getRoleBased(param)));
-        response.setAccessKey(source.getAccessKey());
+        //TODO gather accesskey from one of the configured credential types
+//                response.setAccessKey();
         response.setSubscriptionId(source.getSubscriptionId());
         response.setTenantId(source.getTenantId());
         return response;
@@ -54,7 +55,7 @@ class AzureCredentialV1ParametersToAzureCredentialAttributesConverter {
     private AppBasedAttributes getAppBased(AppBasedRequest appBased) {
         AppBasedAttributes response = new AppBasedAttributes();
         response.setAccessKey(appBased.getAccessKey());
-        response.setSecretKey(appBased.getAccessKey());
+        response.setSecretKey(appBased.getSecretKey());
         return response;
     }
 }

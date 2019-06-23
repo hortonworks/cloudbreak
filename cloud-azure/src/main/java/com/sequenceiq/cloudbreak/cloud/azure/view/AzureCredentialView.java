@@ -1,13 +1,35 @@
 package com.sequenceiq.cloudbreak.cloud.azure.view;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
 public class AzureCredentialView {
 
+    private static final String APP_BASED = "appBased";
+
+    private static final String ROLE_BASED = "roleBased";
+
     private final CloudCredential cloudCredential;
+
+    private final Map<String, Object> parameters;
+
+    private final Map<String, String> appBasedParameters;
+
+    private final Map<String, String> codeGrantFlowParameters;
 
     public AzureCredentialView(CloudCredential cloudCredential) {
         this.cloudCredential = cloudCredential;
+
+        this.parameters = cloudCredential.getParameters().containsKey("azure")
+                ? (Map<String, Object>) cloudCredential.getParameter("azure", Map.class) : new HashMap<>();
+
+        this.appBasedParameters = parameters.containsKey(APP_BASED)
+                ? (Map<String, String>) parameters.get(APP_BASED) : new HashMap<>();
+
+        this.codeGrantFlowParameters = parameters.containsKey(ROLE_BASED)
+                ? (Map<String, String>) parameters.get(ROLE_BASED) : new HashMap<>();
     }
 
     public String getCredentialCrn() {
@@ -19,19 +41,19 @@ public class AzureCredentialView {
     }
 
     public String getSubscriptionId() {
-        return cloudCredential.getParameter("subscriptionId", String.class);
-    }
-
-    public String getAccessKey() {
-        return cloudCredential.getParameter("accessKey", String.class);
-    }
-
-    public String getSecretKey() {
-        return cloudCredential.getParameter("secretKey", String.class);
+        return (String) parameters.get("subscriptionId");
     }
 
     public String getTenantId() {
-        return cloudCredential.getParameter("tenantId", String.class);
+        return (String) parameters.get("tenantId");
+    }
+
+    public String getAccessKey() {
+        return appBasedParameters.get("accessKey");
+    }
+
+    public String getSecretKey() {
+        return appBasedParameters.get("secretKey");
     }
 
     public String getRoleName() {

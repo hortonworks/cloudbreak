@@ -6,8 +6,6 @@ public class AzureCredentialAttributes {
 
     private String tenantId;
 
-    private String accessKey;
-
     private AppBasedAttributes appBased;
 
     private RoleBasedAttributes roleBased;
@@ -26,14 +24,6 @@ public class AzureCredentialAttributes {
 
     public void setTenantId(String tenantId) {
         this.tenantId = tenantId;
-    }
-
-    public String getAccessKey() {
-        return accessKey;
-    }
-
-    public void setAccessKey(String accessKey) {
-        this.accessKey = accessKey;
     }
 
     public AppBasedAttributes getAppBased() {
