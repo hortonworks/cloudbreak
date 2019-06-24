@@ -17,6 +17,9 @@ import (
 // swagger:model EnvironmentEditV1Request
 type EnvironmentEditV1Request struct {
 
+	// SSH key for accessing cluster node instances.
+	Authentication *EnvironmentAuthenticationV1Request `json:"authentication,omitempty"`
+
 	// description of the resource
 	// Max Length: 1000
 	// Min Length: 0
@@ -37,6 +40,10 @@ type EnvironmentEditV1Request struct {
 func (m *EnvironmentEditV1Request) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateAuthentication(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateDescription(formats); err != nil {
 		res = append(res, err)
 	}
@@ -56,6 +63,24 @@ func (m *EnvironmentEditV1Request) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *EnvironmentEditV1Request) validateAuthentication(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Authentication) { // not required
+		return nil
+	}
+
+	if m.Authentication != nil {
+		if err := m.Authentication.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("authentication")
+			}
+			return err
+		}
+	}
+
 	return nil
 }
 

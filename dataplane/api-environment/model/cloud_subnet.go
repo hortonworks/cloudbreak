@@ -18,6 +18,9 @@ type CloudSubnet struct {
 	// availability zone
 	AvailabilityZone string `json:"availabilityZone,omitempty"`
 
+	// cidr
+	Cidr string `json:"cidr,omitempty"`
+
 	// id
 	ID string `json:"id,omitempty"`
 

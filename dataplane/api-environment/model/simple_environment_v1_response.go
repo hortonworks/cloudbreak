@@ -19,11 +19,17 @@ import (
 // swagger:model SimpleEnvironmentV1Response
 type SimpleEnvironmentV1Response struct {
 
+	// SSH key for accessing cluster node instances.
+	Authentication *EnvironmentAuthenticationV1Response `json:"authentication,omitempty"`
+
 	// Cloud platform of the environment.
 	CloudPlatform string `json:"cloudPlatform,omitempty"`
 
 	// Create freeipa in environment
 	CreateFreeIpa bool `json:"createFreeIpa,omitempty"`
+
+	// created
+	Created int64 `json:"created,omitempty"`
 
 	// crn of the creator
 	Creator string `json:"creator,omitempty"`
@@ -38,7 +44,7 @@ type SimpleEnvironmentV1Response struct {
 	Description string `json:"description,omitempty"`
 
 	// Status of the environment.
-	// Enum: [CREATION_INITIATED DELETE_INITIATED NETWORK_CREATION_IN_PROGRESS NETWORK_DELETE_IN_PROGRESS RDBMS_DELETE_IN_PROGRESS FREEIPA_CREATION_IN_PROGRESS FREEIPA_DELETE_IN_PROGRESS AVAILABLE ARCHIVED CORRUPTED]
+	// Enum: [CREATION_INITIATED DELETE_INITIATED UPDATE_INITIATED NETWORK_CREATION_IN_PROGRESS NETWORK_DELETE_IN_PROGRESS RDBMS_DELETE_IN_PROGRESS FREEIPA_CREATION_IN_PROGRESS FREEIPA_DELETE_IN_PROGRESS AVAILABLE ARCHIVED CREATE_FAILED DELETE_FAILED UPDATE_FAILED]
 	EnvironmentStatus string `json:"environmentStatus,omitempty"`
 
 	// Location of the environment.
@@ -52,11 +58,18 @@ type SimpleEnvironmentV1Response struct {
 
 	// Regions of the environment.
 	Regions *CompactRegionV1Response `json:"regions,omitempty"`
+
+	// status reason
+	StatusReason string `json:"statusReason,omitempty"`
 }
 
 // Validate validates this simple environment v1 response
 func (m *SimpleEnvironmentV1Response) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateAuthentication(formats); err != nil {
+		res = append(res, err)
+	}
 
 	if err := m.validateCredential(formats); err != nil {
 		res = append(res, err)
@@ -84,6 +97,24 @@ func (m *SimpleEnvironmentV1Response) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *SimpleEnvironmentV1Response) validateAuthentication(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Authentication) { // not required
+		return nil
+	}
+
+	if m.Authentication != nil {
+		if err := m.Authentication.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("authentication")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (m *SimpleEnvironmentV1Response) validateCredential(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Credential) { // not required
@@ -106,7 +137,7 @@ var simpleEnvironmentV1ResponseTypeEnvironmentStatusPropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["CREATION_INITIATED","DELETE_INITIATED","NETWORK_CREATION_IN_PROGRESS","NETWORK_DELETE_IN_PROGRESS","RDBMS_DELETE_IN_PROGRESS","FREEIPA_CREATION_IN_PROGRESS","FREEIPA_DELETE_IN_PROGRESS","AVAILABLE","ARCHIVED","CORRUPTED"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["CREATION_INITIATED","DELETE_INITIATED","UPDATE_INITIATED","NETWORK_CREATION_IN_PROGRESS","NETWORK_DELETE_IN_PROGRESS","RDBMS_DELETE_IN_PROGRESS","FREEIPA_CREATION_IN_PROGRESS","FREEIPA_DELETE_IN_PROGRESS","AVAILABLE","ARCHIVED","CREATE_FAILED","DELETE_FAILED","UPDATE_FAILED"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -121,6 +152,9 @@ const (
 
 	// SimpleEnvironmentV1ResponseEnvironmentStatusDELETEINITIATED captures enum value "DELETE_INITIATED"
 	SimpleEnvironmentV1ResponseEnvironmentStatusDELETEINITIATED string = "DELETE_INITIATED"
+
+	// SimpleEnvironmentV1ResponseEnvironmentStatusUPDATEINITIATED captures enum value "UPDATE_INITIATED"
+	SimpleEnvironmentV1ResponseEnvironmentStatusUPDATEINITIATED string = "UPDATE_INITIATED"
 
 	// SimpleEnvironmentV1ResponseEnvironmentStatusNETWORKCREATIONINPROGRESS captures enum value "NETWORK_CREATION_IN_PROGRESS"
 	SimpleEnvironmentV1ResponseEnvironmentStatusNETWORKCREATIONINPROGRESS string = "NETWORK_CREATION_IN_PROGRESS"
@@ -143,8 +177,14 @@ const (
 	// SimpleEnvironmentV1ResponseEnvironmentStatusARCHIVED captures enum value "ARCHIVED"
 	SimpleEnvironmentV1ResponseEnvironmentStatusARCHIVED string = "ARCHIVED"
 
-	// SimpleEnvironmentV1ResponseEnvironmentStatusCORRUPTED captures enum value "CORRUPTED"
-	SimpleEnvironmentV1ResponseEnvironmentStatusCORRUPTED string = "CORRUPTED"
+	// SimpleEnvironmentV1ResponseEnvironmentStatusCREATEFAILED captures enum value "CREATE_FAILED"
+	SimpleEnvironmentV1ResponseEnvironmentStatusCREATEFAILED string = "CREATE_FAILED"
+
+	// SimpleEnvironmentV1ResponseEnvironmentStatusDELETEFAILED captures enum value "DELETE_FAILED"
+	SimpleEnvironmentV1ResponseEnvironmentStatusDELETEFAILED string = "DELETE_FAILED"
+
+	// SimpleEnvironmentV1ResponseEnvironmentStatusUPDATEFAILED captures enum value "UPDATE_FAILED"
+	SimpleEnvironmentV1ResponseEnvironmentStatusUPDATEFAILED string = "UPDATE_FAILED"
 )
 
 // prop value enum
