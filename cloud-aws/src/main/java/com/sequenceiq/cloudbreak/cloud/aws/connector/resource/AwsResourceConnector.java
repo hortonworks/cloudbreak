@@ -103,6 +103,11 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
+    public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
+        throw new UnsupportedOperationException("Database server termination is not supported for " + getClass().getName());
+    }
+
+    @Override
     public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
         return awsUpdateService.update(authenticatedContext, stack, resources);
     }

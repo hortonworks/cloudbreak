@@ -81,6 +81,11 @@ public class MockResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
+    public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
+        return new ArrayList<>();
+    }
+
+    @Override
     public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
         return new ArrayList<>();
     }

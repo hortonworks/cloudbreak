@@ -248,6 +248,11 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     }
 
     @Override
+    public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
+        throw new UnsupportedOperationException("Database server termination is not supported for " + getClass().getName());
+    }
+
+    @Override
     public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
         return new ArrayList<>();
     }
