@@ -22,6 +22,10 @@ type BlueprintV4Response struct {
 	// blueprint, set this or the url field
 	Blueprint string `json:"blueprint,omitempty"`
 
+	// crn
+	// Required: true
+	Crn *string `json:"crn"`
+
 	// description of the resource
 	// Max Length: 1000
 	// Min Length: 0
@@ -29,9 +33,6 @@ type BlueprintV4Response struct {
 
 	// number of host groups
 	HostGroupCount int32 `json:"hostGroupCount,omitempty"`
-
-	// id of the resource
-	ID int64 `json:"id,omitempty"`
 
 	// name of the resource
 	// Required: true
@@ -52,6 +53,10 @@ type BlueprintV4Response struct {
 func (m *BlueprintV4Response) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateCrn(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateDescription(formats); err != nil {
 		res = append(res, err)
 	}
@@ -67,6 +72,15 @@ func (m *BlueprintV4Response) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *BlueprintV4Response) validateCrn(formats strfmt.Registry) error {
+
+	if err := validate.Required("crn", "body", m.Crn); err != nil {
+		return err
+	}
+
 	return nil
 }
 

@@ -35,6 +35,9 @@ type ClusterTemplateV4Response struct {
 	// Required: true
 	DistroXTemplate *DistroXV1Request `json:"distroXTemplate"`
 
+	// environment crn
+	EnvironmentCrn string `json:"environmentCrn,omitempty"`
+
 	// id of the resource
 	ID int64 `json:"id,omitempty"`
 

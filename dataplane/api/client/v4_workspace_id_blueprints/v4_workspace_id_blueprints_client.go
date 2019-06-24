@@ -55,6 +55,36 @@ func (a *Client) CreateBlueprintInWorkspace(params *CreateBlueprintInWorkspacePa
 }
 
 /*
+DeleteBlueprintByCrn deletes blueprint by crn
+
+Cluster definitions are a declarative definition of a Hadoop cluster. With a blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
+*/
+func (a *Client) DeleteBlueprintByCrn(params *DeleteBlueprintByCrnParams) (*DeleteBlueprintByCrnOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteBlueprintByCrnParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "deleteBlueprintByCrn",
+		Method:             "DELETE",
+		PathPattern:        "/v4/{workspaceId}/blueprints/crn/{crn}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteBlueprintByCrnReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DeleteBlueprintByCrnOK), nil
+
+}
+
+/*
 DeleteBlueprintInWorkspace deletes blueprint by name in workspace
 
 Cluster definitions are a declarative definition of a Hadoop cluster. With a blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
@@ -68,7 +98,7 @@ func (a *Client) DeleteBlueprintInWorkspace(params *DeleteBlueprintInWorkspacePa
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "deleteBlueprintInWorkspace",
 		Method:             "DELETE",
-		PathPattern:        "/v4/{workspaceId}/blueprints/{name}",
+		PathPattern:        "/v4/{workspaceId}/blueprints/name/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -115,6 +145,36 @@ func (a *Client) DeleteBlueprintsInWorkspace(params *DeleteBlueprintsInWorkspace
 }
 
 /*
+GetBlueprintByCrn gets blueprint by crn
+
+Cluster definitions are a declarative definition of a Hadoop cluster. With a blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
+*/
+func (a *Client) GetBlueprintByCrn(params *GetBlueprintByCrnParams) (*GetBlueprintByCrnOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetBlueprintByCrnParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getBlueprintByCrn",
+		Method:             "GET",
+		PathPattern:        "/v4/{workspaceId}/blueprints/crn/{crn}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetBlueprintByCrnReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetBlueprintByCrnOK), nil
+
+}
+
+/*
 GetBlueprintCustomParameters returns custom parameters
 */
 func (a *Client) GetBlueprintCustomParameters(params *GetBlueprintCustomParametersParams) (*GetBlueprintCustomParametersOK, error) {
@@ -156,7 +216,7 @@ func (a *Client) GetBlueprintInWorkspace(params *GetBlueprintInWorkspaceParams) 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getBlueprintInWorkspace",
 		Method:             "GET",
-		PathPattern:        "/v4/{workspaceId}/blueprints/{name}",
+		PathPattern:        "/v4/{workspaceId}/blueprints/name/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},

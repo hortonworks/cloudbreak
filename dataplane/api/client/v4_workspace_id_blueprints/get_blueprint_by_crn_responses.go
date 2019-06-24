@@ -16,17 +16,17 @@ import (
 	model "github.com/hortonworks/cb-cli/dataplane/api/model"
 )
 
-// GetBlueprintInWorkspaceReader is a Reader for the GetBlueprintInWorkspace structure.
-type GetBlueprintInWorkspaceReader struct {
+// GetBlueprintByCrnReader is a Reader for the GetBlueprintByCrn structure.
+type GetBlueprintByCrnReader struct {
 	formats strfmt.Registry
 }
 
 // ReadResponse reads a server response into the received o.
-func (o *GetBlueprintInWorkspaceReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
+func (o *GetBlueprintByCrnReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	switch response.Code() {
 
 	case 200:
-		result := NewGetBlueprintInWorkspaceOK()
+		result := NewGetBlueprintByCrnOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -37,24 +37,24 @@ func (o *GetBlueprintInWorkspaceReader) ReadResponse(response runtime.ClientResp
 	}
 }
 
-// NewGetBlueprintInWorkspaceOK creates a GetBlueprintInWorkspaceOK with default headers values
-func NewGetBlueprintInWorkspaceOK() *GetBlueprintInWorkspaceOK {
-	return &GetBlueprintInWorkspaceOK{}
+// NewGetBlueprintByCrnOK creates a GetBlueprintByCrnOK with default headers values
+func NewGetBlueprintByCrnOK() *GetBlueprintByCrnOK {
+	return &GetBlueprintByCrnOK{}
 }
 
-/*GetBlueprintInWorkspaceOK handles this case with default header values.
+/*GetBlueprintByCrnOK handles this case with default header values.
 
 successful operation
 */
-type GetBlueprintInWorkspaceOK struct {
+type GetBlueprintByCrnOK struct {
 	Payload *model.BlueprintV4Response
 }
 
-func (o *GetBlueprintInWorkspaceOK) Error() string {
-	return fmt.Sprintf("[GET /v4/{workspaceId}/blueprints/name/{name}][%d] getBlueprintInWorkspaceOK  %+v", 200, o.Payload)
+func (o *GetBlueprintByCrnOK) Error() string {
+	return fmt.Sprintf("[GET /v4/{workspaceId}/blueprints/crn/{crn}][%d] getBlueprintByCrnOK  %+v", 200, o.Payload)
 }
 
-func (o *GetBlueprintInWorkspaceOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
+func (o *GetBlueprintByCrnOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(model.BlueprintV4Response)
 

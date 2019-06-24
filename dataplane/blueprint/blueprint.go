@@ -1,7 +1,6 @@
 package blueprint
 
 import (
-	"strconv"
 	"time"
 
 	"github.com/hortonworks/cb-cli/dataplane/oauth"
@@ -33,12 +32,12 @@ type blueprintOut struct {
 type blueprintOutJsonDescribe struct {
 	*blueprintOut
 	Content string `json:"BlueprintTextAsBase64" yaml:"BlueprintTextAsBase64"`
-	ID      string `json:"ID" yaml:"ID"`
+	Crn     string `json:"Crn" yaml:"Crn"`
 }
 
 type blueprintOutTableDescribe struct {
 	*blueprintOut
-	ID string `json:"ID" yaml:"ID"`
+	Crn string `json:"Crn" yaml:"Crn"`
 }
 
 func (b *blueprintOut) DataAsStringArray() []string {
@@ -46,11 +45,11 @@ func (b *blueprintOut) DataAsStringArray() []string {
 }
 
 func (b *blueprintOutJsonDescribe) DataAsStringArray() []string {
-	return append(b.blueprintOut.DataAsStringArray(), b.ID)
+	return append(b.blueprintOut.DataAsStringArray(), b.Crn)
 }
 
 func (b *blueprintOutTableDescribe) DataAsStringArray() []string {
-	return append(b.blueprintOut.DataAsStringArray(), b.ID)
+	return append(b.blueprintOut.DataAsStringArray(), b.Crn)
 }
 
 func CreateBlueprintFromUrl(c *cli.Context) {
@@ -98,7 +97,7 @@ func createBlueprintImpl(client blueprintClient, name string, description string
 	}
 	blueprintResp = resp.Payload
 
-	log.Infof("[createBlueprintImpl] blueprint created: %s (id: %d)", *blueprintResp.Name, blueprintResp.ID)
+	log.Infof("[createBlueprintImpl] blueprint created: %s (crn: %d)", *blueprintResp.Name, blueprintResp.Crn)
 	return blueprintResp
 }
 
@@ -109,9 +108,9 @@ func DescribeBlueprint(c *cli.Context) {
 	output := utils.Output{Format: c.String(fl.FlOutputOptional.Name)}
 	bp := FetchBlueprint(c.Int64(fl.FlWorkspaceOptional.Name), c.String(fl.FlName.Name), cbClient.Cloudbreak.V4WorkspaceIDBlueprints)
 	if output.Format != "table" {
-		output.Write(append(blueprintHeader, "Content", "ID"), convertResponseWithContentAndIDToBlueprint(bp))
+		output.Write(append(blueprintHeader, "Content", "CRN"), convertResponseWithContentAndCRNToBlueprint(bp))
 	} else {
-		output.Write(append(blueprintHeader, "ID"), convertResponseWithContentAndIDToBlueprint(bp))
+		output.Write(append(blueprintHeader, "CNR"), convertResponseWithContentAndCRNToBlueprint(bp))
 	}
 }
 
@@ -183,7 +182,7 @@ func convertResponseToBlueprint(bp *model.BlueprintV4ViewResponse) *blueprintOut
 	}
 }
 
-func convertResponseWithContentAndIDToBlueprint(bp *model.BlueprintV4Response) *blueprintOutJsonDescribe {
+func convertResponseWithContentAndCRNToBlueprint(bp *model.BlueprintV4Response) *blueprintOutJsonDescribe {
 	jsonRoot := decodeAndParseToJson(bp.Blueprint)
 	var stackName = "Undefined"
 	var stackVersion = "Undefined"
@@ -207,7 +206,7 @@ func convertResponseWithContentAndIDToBlueprint(bp *model.BlueprintV4Response) *
 			Tags:           bp.Status,
 		},
 		Content: bp.Blueprint,
-		ID:      strconv.FormatInt(bp.ID, 10),
+		Crn:     *bp.Crn,
 	}
 }
 

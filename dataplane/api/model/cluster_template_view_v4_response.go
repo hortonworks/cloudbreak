@@ -58,7 +58,7 @@ type ClusterTemplateViewV4Response struct {
 	Status string `json:"status,omitempty"`
 
 	// type of the cluster template
-	// Enum: [SPARK HIVE DATASCIENCE EDW ETL OTHER]
+	// Enum: [SPARK HIVE EDW ETL DATASCIENCE DATAMART DATAMART_HA DATALAKE DATAENGINEERING DATAENGINEERING_HA OTHER]
 	Type string `json:"type,omitempty"`
 }
 
@@ -229,7 +229,7 @@ var clusterTemplateViewV4ResponseTypeTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["SPARK","HIVE","DATASCIENCE","EDW","ETL","OTHER"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["SPARK","HIVE","EDW","ETL","DATASCIENCE","DATAMART","DATAMART_HA","DATALAKE","DATAENGINEERING","DATAENGINEERING_HA","OTHER"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -245,14 +245,29 @@ const (
 	// ClusterTemplateViewV4ResponseTypeHIVE captures enum value "HIVE"
 	ClusterTemplateViewV4ResponseTypeHIVE string = "HIVE"
 
-	// ClusterTemplateViewV4ResponseTypeDATASCIENCE captures enum value "DATASCIENCE"
-	ClusterTemplateViewV4ResponseTypeDATASCIENCE string = "DATASCIENCE"
-
 	// ClusterTemplateViewV4ResponseTypeEDW captures enum value "EDW"
 	ClusterTemplateViewV4ResponseTypeEDW string = "EDW"
 
 	// ClusterTemplateViewV4ResponseTypeETL captures enum value "ETL"
 	ClusterTemplateViewV4ResponseTypeETL string = "ETL"
+
+	// ClusterTemplateViewV4ResponseTypeDATASCIENCE captures enum value "DATASCIENCE"
+	ClusterTemplateViewV4ResponseTypeDATASCIENCE string = "DATASCIENCE"
+
+	// ClusterTemplateViewV4ResponseTypeDATAMART captures enum value "DATAMART"
+	ClusterTemplateViewV4ResponseTypeDATAMART string = "DATAMART"
+
+	// ClusterTemplateViewV4ResponseTypeDATAMARTHA captures enum value "DATAMART_HA"
+	ClusterTemplateViewV4ResponseTypeDATAMARTHA string = "DATAMART_HA"
+
+	// ClusterTemplateViewV4ResponseTypeDATALAKE captures enum value "DATALAKE"
+	ClusterTemplateViewV4ResponseTypeDATALAKE string = "DATALAKE"
+
+	// ClusterTemplateViewV4ResponseTypeDATAENGINEERING captures enum value "DATAENGINEERING"
+	ClusterTemplateViewV4ResponseTypeDATAENGINEERING string = "DATAENGINEERING"
+
+	// ClusterTemplateViewV4ResponseTypeDATAENGINEERINGHA captures enum value "DATAENGINEERING_HA"
+	ClusterTemplateViewV4ResponseTypeDATAENGINEERINGHA string = "DATAENGINEERING_HA"
 
 	// ClusterTemplateViewV4ResponseTypeOTHER captures enum value "OTHER"
 	ClusterTemplateViewV4ResponseTypeOTHER string = "OTHER"

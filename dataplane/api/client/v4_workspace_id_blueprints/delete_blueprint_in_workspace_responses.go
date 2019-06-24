@@ -51,7 +51,7 @@ type DeleteBlueprintInWorkspaceOK struct {
 }
 
 func (o *DeleteBlueprintInWorkspaceOK) Error() string {
-	return fmt.Sprintf("[DELETE /v4/{workspaceId}/blueprints/{name}][%d] deleteBlueprintInWorkspaceOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[DELETE /v4/{workspaceId}/blueprints/name/{name}][%d] deleteBlueprintInWorkspaceOK  %+v", 200, o.Payload)
 }
 
 func (o *DeleteBlueprintInWorkspaceOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
