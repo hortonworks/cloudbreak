@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service;
 
 import java.util.Objects;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -12,6 +13,7 @@ import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.user.UserService;
+import com.sequenceiq.freeipa.client.model.Permission;
 
 @Service
 public class FreeIpaPostInstallService {
@@ -36,7 +38,10 @@ public class FreeIpaPostInstallService {
         LOGGER.debug("Performing post-install configuration for stack {}", stackId);
         Stack stack = stackService.getStackById(stackId);
         FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
-        freeIpaClient.addPasswordExpirationPermission(SET_PASSWORD_EXPIRATION_PERMISSION);
+        Set<Permission> permission = freeIpaClient.findPermission(SET_PASSWORD_EXPIRATION_PERMISSION);
+        if (permission.isEmpty()) {
+            freeIpaClient.addPasswordExpirationPermission(SET_PASSWORD_EXPIRATION_PERMISSION);
+        }
         freeIpaClient.addPermissionToPrivilege(USER_ADMIN_PRIVILEGE, SET_PASSWORD_EXPIRATION_PERMISSION);
         if (!Objects.equals(MAX_USERNAME_LENGTH, freeIpaClient.getUsernameLength())) {
             LOGGER.debug("Set maximum username length to {}", MAX_USERNAME_LENGTH);
