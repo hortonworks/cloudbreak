@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureCredentialAppCreationCommand.CB_AZ_APP_REDIRECT_URI_PATTERN;
 import static java.lang.String.format;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -34,8 +35,6 @@ import freemarker.template.TemplateNotFoundException;
 public class AzureCredentialAppCreationCommandTest {
 
     private static final String GENERATE_EXCEPTION_MESSAGE_FORMAT = "Failed to process the Azure AD App creation template from path: '%s'";
-
-    private static final String CB_AZ_APP_REDIRECT_URI_PATTERN = "delegatedtoken/v4/%s/credentials/code_grant_flow/authorization/azure";
 
     private static final String APP_CREATION_COMMAND_TEMPLATE_PATH = "somePathForCommandTemplate";
 

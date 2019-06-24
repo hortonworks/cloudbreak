@@ -32,7 +32,7 @@ public class CredentialToExtendedCloudCredentialConverter {
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
-        return new ExtendedCloudCredential(cloudCredential, credential.cloudPlatform(), credential.getDescription(),
-                cloudbreakUser, user.getUserId(), workspaceService.getForCurrentUser().getId());
+        return new ExtendedCloudCredential(cloudCredential, credential.cloudPlatform(), credential.getDescription(), user.getUserCrn(),
+                user.getTenant().getName());
     }
 }

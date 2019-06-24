@@ -54,7 +54,12 @@ public class AzureCredentialConnector implements CredentialConnector {
             client.getStorageAccounts().list();
 
             client.getRefreshToken()
-                    .ifPresent(refreshToken -> cloudCredential.putParameter("refreshToken", refreshToken));
+                    .ifPresent(refreshToken -> {
+                        Map<String, String> codeGrantFlowBased = (Map<String, String>) cloudCredential
+                                .getParameter("azure", Map.class)
+                                .get(AzureCredentialView.CODE_GRANT_FLOW_BASED);
+                        codeGrantFlowBased.put("refreshToken", refreshToken);
+                    });
         } catch (RuntimeException e) {
             LOGGER.warn(e.getMessage(), e);
             return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, e, e.getMessage());

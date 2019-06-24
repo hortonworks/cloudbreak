@@ -67,7 +67,7 @@ public class AzureClientCredentialsTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(credentialView.getCodeGrantFlow()).thenReturn(true);
+        when(credentialView.codeGrantFlow()).thenReturn(true);
         when(credentialView.getTenantId()).thenReturn(TENANT_ID);
         when(credentialView.getAccessKey()).thenReturn(ACCESS_KEY);
         when(credentialView.getSecretKey()).thenReturn(SECRET_KEY);
@@ -79,7 +79,7 @@ public class AzureClientCredentialsTest {
 
     @Test
     public void testGetRefreshTokenWhenCredentialFlowIsNotCodeGrantFlowThenEmptyOptionalReturns() {
-        when(credentialView.getCodeGrantFlow()).thenReturn(false);
+        when(credentialView.codeGrantFlow()).thenReturn(false);
 
         Optional<String> result = new AzureClientCredentials(credentialView, LOG_LEVEL, cbRefreshTokenClientProvider, authenticationContextProvider)
                 .getRefreshToken();
@@ -89,7 +89,7 @@ public class AzureClientCredentialsTest {
         verify(credentialView, times(1)).getTenantId();
         verify(credentialView, times(1)).getAccessKey();
         verify(credentialView, times(1)).getSecretKey();
-        verify(credentialView, times(2)).getCodeGrantFlow();
+        verify(credentialView, times(2)).codeGrantFlow();
         verify(credentialView, times(1)).getSubscriptionId();
         verify(cbRefreshTokenClientProvider, times(0)).getCBRefreshTokenClient(anyString());
     }
@@ -108,7 +108,7 @@ public class AzureClientCredentialsTest {
         verify(credentialView, times(1)).getTenantId();
         verify(credentialView, times(1)).getAccessKey();
         verify(credentialView, times(1)).getSecretKey();
-        verify(credentialView, times(2)).getCodeGrantFlow();
+        verify(credentialView, times(2)).codeGrantFlow();
         verify(credentialView, times(1)).getSubscriptionId();
         verify(cbRefreshTokenClientProvider, times(2)).getCBRefreshTokenClient(anyString());
         verify(cbRefreshTokenClient, times(1)).refreshToken(anyString(), anyString(), anyString(), anyString(), anyString(), anyBoolean());
@@ -131,7 +131,7 @@ public class AzureClientCredentialsTest {
         verify(credentialView, times(1)).getSecretKey();
         verify(credentialView, times(1)).getAppReplyUrl();
         verify(credentialView, times(1)).getRefreshToken();
-        verify(credentialView, times(2)).getCodeGrantFlow();
+        verify(credentialView, times(2)).codeGrantFlow();
         verify(credentialView, times(1)).getSubscriptionId();
         verify(credentialView, times(1)).getAuthorizationCode();
         verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString());
@@ -154,7 +154,7 @@ public class AzureClientCredentialsTest {
         verify(credentialView, times(1)).getSecretKey();
         verify(credentialView, times(1)).getAppReplyUrl();
         verify(credentialView, times(1)).getRefreshToken();
-        verify(credentialView, times(2)).getCodeGrantFlow();
+        verify(credentialView, times(2)).codeGrantFlow();
         verify(credentialView, times(1)).getSubscriptionId();
         verify(credentialView, times(1)).getAuthorizationCode();
         verify(cbRefreshTokenClientProvider, times(1)).getCBRefreshTokenClient(anyString());
@@ -177,7 +177,7 @@ public class AzureClientCredentialsTest {
         verify(credentialView, times(1)).getSecretKey();
         verify(credentialView, times(0)).getAppReplyUrl();
         verify(credentialView, times(1)).getRefreshToken();
-        verify(credentialView, times(1)).getCodeGrantFlow();
+        verify(credentialView, times(1)).codeGrantFlow();
         verify(credentialView, times(2)).getSubscriptionId();
         verify(credentialView, times(0)).getAuthorizationCode();
         verify(cbRefreshTokenClientProvider, times(2)).getCBRefreshTokenClient(anyString());

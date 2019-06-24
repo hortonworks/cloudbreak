@@ -75,7 +75,6 @@ public class CredentialConverter {
                 .appObjectId(roleBased.getAppObjectId())
                 .codeGrantFlow(roleBased.getCodeGrantFlow())
                 .deploymentAddress(roleBased.getDeploymentAddress())
-                .roleName(roleBased.getRoleName())
                 .spDisplayName(roleBased.getSpDisplayName())
                 .build();
     }

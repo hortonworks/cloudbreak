@@ -14,9 +14,6 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class AzureRoleBasedAttributes implements Serializable {
 
-    @ApiModelProperty
-    private final String roleName;
-
     @ApiModelProperty(hidden = true)
     private final String deploymentAddress;
 
@@ -30,15 +27,10 @@ public class AzureRoleBasedAttributes implements Serializable {
     private final String appObjectId;
 
     private AzureRoleBasedAttributes(Builder builder) {
-        roleName = builder.roleName;
         deploymentAddress = builder.deploymentAddress;
         spDisplayName = builder.spDisplayName;
         codeGrantFlow = builder.codeGrantFlow;
         appObjectId = builder.appObjectId;
-    }
-
-    public String getRoleName() {
-        return roleName;
     }
 
     public String getDeploymentAddress() {
@@ -62,8 +54,6 @@ public class AzureRoleBasedAttributes implements Serializable {
     }
 
     public static final class Builder {
-        private String roleName;
-
         private String deploymentAddress;
 
         private String spDisplayName;
@@ -71,11 +61,6 @@ public class AzureRoleBasedAttributes implements Serializable {
         private Boolean codeGrantFlow;
 
         private String appObjectId;
-
-        public Builder roleName(String roleName) {
-            this.roleName = roleName;
-            return this;
-        }
 
         public Builder deploymentAddress(String deploymentAddress) {
             this.deploymentAddress = deploymentAddress;
