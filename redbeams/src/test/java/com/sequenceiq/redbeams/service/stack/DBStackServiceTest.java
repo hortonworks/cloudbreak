@@ -54,6 +54,21 @@ public class DBStackServiceTest {
     }
 
     @Test
+    public void testGetByNameAndEnvironmentId() {
+        when(dbStackRepository.findByNameAndEnvironmentId("mystack", "myenv")).thenReturn(Optional.of(dbStack));
+
+        assertEquals(dbStack, underTest.getByNameAndEnvironmentId("mystack", "myenv"));
+    }
+
+    @Test
+    public void testGetByNameAndEnvironmentIdNotFound() {
+        thrown.expect(NotFoundException.class);
+        when(dbStackRepository.findByNameAndEnvironmentId("mystack", "myenv")).thenReturn(Optional.empty());
+
+        underTest.getByNameAndEnvironmentId("mystack", "myenv");
+    }
+
+    @Test
     public void testSave() {
         when(dbStackRepository.save(dbStack)).thenReturn(dbStack);
 

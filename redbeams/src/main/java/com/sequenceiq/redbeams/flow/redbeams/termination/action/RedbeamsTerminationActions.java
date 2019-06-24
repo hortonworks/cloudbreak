@@ -1,4 +1,4 @@
-package com.sequenceiq.redbeams.flow.redbeams.termination.event.action;
+package com.sequenceiq.redbeams.flow.redbeams.termination.action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
@@ -17,19 +17,22 @@ import org.springframework.statemachine.action.Action;
 @Configuration
 public class RedbeamsTerminationActions {
 
-    @Bean(name = "TERMINATE_DATABASE_STATE")
-    public Action<?, ?> terminateDatabase() {
+    // FIXME should the database be deregistered before it is terminated?
+
+    @Bean(name = "TERMINATE_DATABASE_SERVER_STATE")
+    public Action<?, ?> terminateDatabaseServer() {
         return new AbstractRedbeamsTerminationAction<>(RedbeamsEvent.class) {
 
             @Override
             protected Selectable createRequest(RedbeamsContext context) {
-                return new TerminateDatabaseServerRequest(0L);
+                return new TerminateDatabaseServerRequest(context.getCloudContext(), context.getCloudCredential(),
+                        context.getDatabaseStack());
             }
         };
     }
 
-    @Bean(name = "DEREGISTER_DATABASE_STATE")
-    public Action<?, ?> deregisterDatabase() {
+    @Bean(name = "DEREGISTER_DATABASE_SERVER_STATE")
+    public Action<?, ?> deregisterDatabaseServer() {
         return new AbstractRedbeamsTerminationAction<>(TerminateDatabaseServerSuccess.class) {
 
             @Override
@@ -40,7 +43,7 @@ public class RedbeamsTerminationActions {
     }
 
     @Bean(name = "REDBEAMS_TERMINATION_FINISHED_STATE")
-    public Action<?, ?> provisionFinished() {
+    public Action<?, ?> terminationFinished() {
         return new AbstractRedbeamsTerminationAction<>(DeregisterDatabaseServerSuccess.class) {
             @Override
             protected Selectable createRequest(RedbeamsContext context) {

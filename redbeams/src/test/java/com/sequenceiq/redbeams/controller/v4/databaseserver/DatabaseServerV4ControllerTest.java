@@ -11,7 +11,9 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.base.DatabaseServe
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.TerminateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerAllocationOutcomeV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTerminationOutcomeV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
@@ -20,6 +22,7 @@ import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
+import com.sequenceiq.redbeams.service.stack.RedbeamsTerminationService;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -37,6 +40,9 @@ public class DatabaseServerV4ControllerTest {
 
     @Mock
     private RedbeamsCreationService creationService;
+
+    @Mock
+    private RedbeamsTerminationService terminationService;
 
     @Mock
     private DatabaseServerConfigService service;
@@ -63,6 +69,10 @@ public class DatabaseServerV4ControllerTest {
     private AllocateDatabaseServerV4Request allocateRequest;
 
     private DatabaseServerAllocationOutcomeV4Response allocateResponse;
+
+    private TerminateDatabaseServerV4Request terminateRequest;
+
+    private DatabaseServerTerminationOutcomeV4Response terminateResponse;
 
     private DBStack dbStack;
 
@@ -94,6 +104,10 @@ public class DatabaseServerV4ControllerTest {
         allocateRequest = new AllocateDatabaseServerV4Request();
 
         allocateResponse = new DatabaseServerAllocationOutcomeV4Response();
+
+        terminateRequest = new TerminateDatabaseServerV4Request();
+
+        terminateResponse = new DatabaseServerTerminationOutcomeV4Response();
 
         dbStack = new DBStack();
     }
@@ -134,6 +148,20 @@ public class DatabaseServerV4ControllerTest {
 
         assertEquals(allocateResponse, response);
         verify(creationService).launchDatabase(dbStack);
+    }
+
+    @Test
+    public void testTerminate() {
+        terminateRequest.setName(server.getName());
+        terminateRequest.setEnvironmentId(server.getEnvironmentId());
+        when(terminationService.terminateDatabaseServer(server.getName(), server.getEnvironmentId())).thenReturn(server);
+        when(converterUtil.convert(server, DatabaseServerTerminationOutcomeV4Response.class))
+            .thenReturn(terminateResponse);
+
+        DatabaseServerTerminationOutcomeV4Response response = underTest.terminate(terminateRequest);
+
+        assertEquals(terminateResponse, response);
+        verify(terminationService).terminateDatabaseServer(server.getName(), server.getEnvironmentId());
     }
 
     @Test
